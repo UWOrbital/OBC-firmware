@@ -4,7 +4,7 @@
 
 include .env
 
-CC = "${CC_PATH}"
+CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
 BUILD_DIR = build
 
 ARM_FLAGS :=
