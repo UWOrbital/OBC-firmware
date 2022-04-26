@@ -29,4 +29,7 @@ $(BUILD_DIR)/%.o : %.s
 
 -include $(DEPS)
 
+clean:
+	rm -rf build/*
+
 .PHONY: all clean
