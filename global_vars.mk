@@ -27,5 +27,9 @@ CC_FLAGS += -std=gnu99
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
+INCLUDE_DIRS += -I"adcs/include"
+INCLUDE_DIRS += -I"cdh/include"
+INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"payload/include"
 
 LIB_DIRS := 
