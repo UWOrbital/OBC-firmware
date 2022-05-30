@@ -1,11 +1,20 @@
-#include "gio.h"    // Imports the driver functions to interact with gio pins
+#include "FreeRTOS.h"
+#include "os_portmacro.h"
+#include "os_task.h"
+#include "sys_common.h"
+#include "gio.h"
+
+#include "supervisor.h"
 
 int main(void) {
-    gioInit();      // Initializes the gio Module
-    while (1) {
-        if (!gioGetBit(gioPORTB, 2)) {      // remember hardcoded pull up
-            gioToggleBit(gioPORTB, 1);      // toggles the gio bit that controls the led
-        }
-    }
-    return 0;
+
+    // run hardware initialization code (TODO: refactor all this into one function call)
+    gioInit();
+
+    // initialize important tasks
+    xTaskHandle xSupervisorTaskHandle;
+    xTaskCreate(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL, SUPERVISOR_PRIORITY, &xSupervisorTaskHandle);
+
+    // start task scheduler
+    vTaskStartScheduler();
 }
