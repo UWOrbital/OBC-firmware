@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define NUM_PARAMS 6
 
 #define PARAM_MANAGER_STACK_SIZE   1024
 #define PARAM_MANAGER_NAME         "PARAM_MANAGER"
@@ -136,5 +137,16 @@ int get_param_val(param_names_t param, void * out_p);
  * @return	1 if OK; 0 if error, parmeter doesn't exist, or buffer too small
  */
 int set_param_val(param_names_t param, void * in_p);
+
+
+/**
+ * @brief Parameter table
+ *
+ * All parameters and their associated properties
+ * TODO: Add all parameters
+*/
+param_t PARAM_TABLE [] = {
+	{ALTITUDE, DOUBLE_PARAM, DOUBLE_SIZE, TELEMETRY,},
+}
 
 #endif /* PARAM_MANAGER_H */
