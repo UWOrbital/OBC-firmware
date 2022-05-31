@@ -11,13 +11,6 @@
 static int c = 0;
 SemaphoreHandle_t xSemaphore = NULL;
 
-void send_data(int *x) {
-    if(xSemaphoreTake(xSemaphore, (TickType_t) 10) == pdTRUE) {
-        *x = c;
-        xSemaphoreGive(xSemaphore);
-    }
-}
-
 void update_data() {
     const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
     for(;;) {
@@ -37,9 +30,12 @@ void subsystemA_main() {
 
 void subsystemA_sender(void *Aqueue) {
     QueueHandle_t *queue = (QueueHandle_t *) Aqueue;
-    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
     for(;;) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //portMAX_DELAY should block indefinitely assuming the INCLUDE_vTaskSuspend flag is 1 in the config
+        if(xSemaphoreTake(xSemaphore, (TickType_t) 10) == pdTRUE) {
+            xQueueSend(*queue, (void*) &c, 10);
+            xSemaphoreGive(xSemaphore);
+        }
         console_print("unblocked\n");
     }
 }

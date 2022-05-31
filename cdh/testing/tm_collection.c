@@ -20,11 +20,10 @@ static void collect() {
     const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
 
     int x = 0;
-    for( ; ; ) {
+    for(;;) {
         xTaskNotifyGive(Asender);
-        console_print("Got telemetry\n");
-        send_data(&x);
-        console_print("%d\n", x);
+        xQueueReceive(Aqueue, (void*) &x, 10);
+        console_print("Subsystem A telemetry: %d\n", x);
         vTaskDelay(xDelay);
     }
 }
