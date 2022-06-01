@@ -6,11 +6,6 @@
 
 #define NUM_PARAMS 6
 
-#define PARAM_MANAGER_STACK_SIZE   1024
-#define PARAM_MANAGER_NAME         "PARAM_MANAGER"
-#define PARAM_MANAGER_PRIORITY     1
-#define PARAM_MANAGER_DELAY_TICKS  100
-
 /**
  * @typedef	param_handle_t
  * @brief	Parameter Handle Type
@@ -75,9 +70,9 @@ typedef enum
 */
 typedef enum
 {
-	TELEMETRY	= 1,		/**< Automatic collect this param for telemetry. */
-	PERSISTENT	= 2,		/**< Persist the value in non-volatile memory. */
-	READ_ONLY	= 3	    	/**< Prohibit writing to these variables. */
+	TELEMETRY,		/**< Automatic collect this param for telemetry. */
+	PERSISTENT,		/**< Persist the value in non-volatile memory. */
+	READ_ONLY   	/**< Prohibit writing to these variables. */
 } param_opts_t;
 
 
@@ -90,14 +85,23 @@ typedef enum
 */
 typedef enum
 {
-	ALTITUDE,
-    ORIENT_X,
-    ORIENT_Y,
-    ORIENT_Z,
-    COORD_LAT,
-    COORD_LONG
+	ALTITUDE
+	// The rest of the parameters should be added here
 } param_names_t;
 
+typedef union {
+	uint8_t			u8;
+	int8_t			i8;
+	uint16_t		u16;
+	int16_t			i16;
+	uint32_t		u32;
+	int32_t			i32;
+	uint64_t		u64;
+	int64_t			i64;
+	float			f;
+	double			d;
+	char*			s;
+} param_val_t;
 
 /**
  * @struct	param_t
@@ -115,11 +119,20 @@ typedef struct
 {
 	const param_names_t name;
 	const param_type_t type;				/**< Param Type, from param_type_t. */
-	const uint8_t size;						/**< Size in bytes, from param_size_t, or custom if STRING_PARAM.*/
+	const param_size_t size;						/**< Size in bytes, from param_size_t, or custom if STRING_PARAM.*/
 	uint8_t opts;							/**< Special options, from param_opts_t.*/
-	void* value;							/**< Pointer to param space where value is stored. */
+	param_val_t value;						/**< Pointer to param space where value is stored. */
 } param_t;
 
+/**
+ * @brief Parameter table
+ *
+ * All parameters and their associated properties
+ * TODO: Add all parameters
+*/
+param_t PARAM_TABLE [] = {
+	{.name=ALTITUDE, .type=DOUBLE_PARAM, .size=DOUBLE_SIZE, .opts=TELEMETRY, .value.i8=30},
+};
 
 /**
  * @brief	Get the value of a Parameter
@@ -138,15 +151,5 @@ int get_param_val(param_names_t param, void * out_p);
  */
 int set_param_val(param_names_t param, void * in_p);
 
-
-/**
- * @brief Parameter table
- *
- * All parameters and their associated properties
- * TODO: Add all parameters
-*/
-param_t PARAM_TABLE [] = {
-	{ALTITUDE, DOUBLE_PARAM, DOUBLE_SIZE, TELEMETRY,},
-}
 
 #endif /* PARAM_MANAGER_H */
