@@ -19,7 +19,7 @@
 
 /* This demo uses heap_3.c (the libc provided malloc() and free()). */
 
-extern void start_collection( void );
+extern void status_check_main(void);
 extern void subsystemA_main(void);
 
 void vApplicationMallocFailedHook( void );
@@ -30,7 +30,7 @@ int main( void ) {
     console_init();
     console_print("Starting\n");
     subsystemA_main();
-    start_collection();
+    status_check_main();
     vTaskStartScheduler();
     for(;;) {}
     return 0;
