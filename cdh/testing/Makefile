@@ -12,6 +12,7 @@ FREERTOS_DIR          := $(abspath $(FREERTOS_DIR_REL))
 
 INCLUDE_DIRS          := -I.
 INCLUDE_DIRS          += -I${CURR_DIR}/SubsystemA
+INCLUDE_DIRS          += -I${CURR_DIR}/SubsystemB
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/include
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/utils
@@ -22,6 +23,7 @@ SOURCE_FILES          += ${FREERTOS_DIR}/portable/MemMang/heap_3.c
 SOURCE_FILES          += ${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/utils/wait_for_event.c
 SOURCE_FILES          += ${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/port.c
 SOURCE_FILES          += ${CURR_DIR}/SubsystemA/subsystemA.c
+SOURCE_FILES          += ${CURR_DIR}/SubsystemB/subsystemB.c
 
 CFLAGS                :=    -ggdb3
 LDFLAGS               :=    -ggdb3 -pthread

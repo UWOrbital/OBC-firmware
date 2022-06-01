@@ -21,6 +21,7 @@
 
 extern void status_check_main(void);
 extern void subsystemA_main(void);
+extern void subsystemB_main(void);
 
 void vApplicationMallocFailedHook( void );
 void vApplicationIdleHook( void );
@@ -30,6 +31,7 @@ int main( void ) {
     console_init();
     console_print("Starting\n");
     subsystemA_main();
+    subsystemB_main();
     status_check_main();
     vTaskStartScheduler();
     for(;;) {}
