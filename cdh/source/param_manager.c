@@ -1,45 +1,90 @@
+/**
+ * @file param_manager.c
+ * @author Daniel Gobalakrishnan
+ * @date 2022-06-01
+ */
+
 #include "FreeRTOS.h"
 #include "os_portmacro.h"
-#include "os_task.h"
+#include "os_semphr.h"
 
 #include "param_manager.h"
 #include "sys_common.h"
-#include "gio.h"
 
-param_t *param_list[NUM_PARAMS] = &PARAM_TABLE;
+// Maybe the param table shouldn't be static
+static param_t *param_list[NUM_PARAMS] = &PARAM_TABLE;
+static SemaphoreHandle_t param_mutex_arr[NUM_PARAMS];
 
-param_handle_t get_param(param_names_t param_name)
+uint8_t initialize_mutex_array(void)
+{
+    // TODO: Add any error handling if required
+    for (uint8_t i = 0; i < NUM_PARAMS; i++)
+    {
+        param_mutex_arr[i] = xSemaphoreCreateMutex();
+    }
+    return 1;
+}
+
+param_handle_t get_param_handle(param_names_t param_name)
 {
     return &param_list[param_name];
 }
 
-int get_param_val(param_names_t param_name, param_type_t param_type, void *out_p)
+uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p)
 {
-    param_handle_t param_handle = get_param(param_name);
+    param_handle_t param_handle = get_param_handle(param_name);
     if (param_handle == NULL)
         return 0;
 
     if (param_handle->type != param_type)
         return 0;
 
-    uint16_t param_size = get_param_size(param_type);
-    memcpy(out_p, &(param_handle->value), param_size);
+    param_size_t param_size = get_param_size(param_type);
+    param_val_t param_val = param_handle->val;
+
+    switch (access_type)
+    {
+    case SET_PARAM:
+        memcpy(&param_val, out_p, param_size);
+        break;
+    case GET_PARAM:
+        memcpy(out_p, &param_val, param_size);
+        break;
+    default:
+        return 0;
+    }
+
     return 1;
 }
 
-int set_param_val(param_names_t param_name, param_type_t param_type, void *in_p)
+uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *out_p)
 {
-    param_handle_t param_handle = get_param(param_name);
-    if (param_handle == NULL)
+    if (param_mutex_arr[param_name] == NULL)
         return 0;
 
-    if (param_handle->type != param_type)
-        return 0;
-
-    uint16_t param_size = get_param_size(param_type);
-    memcpy(&(param_handle->value), in_p, param_size);
-    return 1;
+    if (xSemaphoreTake(param_mutex_arr[param_name], portMAX_DELAY) == pdTRUE)
+    {
+        // TODO: Verify what delay we want to use
+        // TODO: Add any error handling if required
+        uint8_t status = access_param_table(GET_PARAM, param_name, param_type, out_p);
+        xSemaphoreGive(param_mutex_arr[param_name]);
+        return status;
+    }
 }
+
+uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p)
+{
+    if (param_mutex_arr[param_name] == NULL)
+        return 0;
+
+    if (xSemaphoreTake(param_mutex_arr[param_name], portMAX_DELAY) == pdTRUE)
+    {
+        // TODO: Verify what delay we want to use
+        // TODO: Add any error handling if required
+        uint8_t status = access_param_table(SET_PARAM, param_name, param_type, in_p);
+        xSemaphoreGive(param_mutex_arr[param_name]);
+        return status;
+    }}
 
 param_size_t get_param_size(param_type_t type)
 {
@@ -65,18 +110,9 @@ param_size_t get_param_size(param_type_t type)
         return FLOAT_SIZE;
     case DOUBLE_PARAM:
         return DOUBLE_SIZE;
-    case STRING_PARAM:
-        // TODO: return the size of the string after deciding the size
-        // return STRING_SIZE;
-        printf("String size not yet decided\n");
-        break;
+    // case STRING_PARAM:
+    //     return STRING_SIZE;
     default:
         return 0;
     }
-}
-
-int main()
-{
-    // FOR TESTING PURPOSES
-    return 0;
 }

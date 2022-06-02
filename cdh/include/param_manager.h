@@ -1,3 +1,9 @@
+/**
+ * @file param_manager.h
+ * @author Daniel Gobalakrishnan
+ * @date 2022-06-01
+ */
+
 #ifndef PARAM_MANAGER_H
 #define PARAM_MANAGER_H
 
@@ -37,6 +43,12 @@ typedef enum
 	STRING_PARAM
 } param_type_t;
 
+
+typedef enum 
+{
+	GET_PARAM,
+	SET_PARAM
+} access_type_t;
 
 /**
  * @enum	param_size_t
@@ -140,7 +152,7 @@ param_t PARAM_TABLE [] = {
  * @param	out_p 				Void pointer to buffer to store param value, should be enough to store value
  * @return	1 if OK; 0 if error, parmeter doesn't exist, or buffer too small
  */
-int get_param_val(param_names_t param, void * out_p);
+uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *out_p);
 
 /**
  * @brief	Set the value of a Parameter
@@ -149,7 +161,7 @@ int get_param_val(param_names_t param, void * out_p);
  * @param	in_p 				Void pointer to memory where value is stored
  * @return	1 if OK; 0 if error, parmeter doesn't exist, or buffer too small
  */
-int set_param_val(param_names_t param, void * in_p);
+uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p);
 
 
 #endif /* PARAM_MANAGER_H */
