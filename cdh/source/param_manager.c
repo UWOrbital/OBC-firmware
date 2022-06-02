@@ -70,6 +70,7 @@ uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *o
         xSemaphoreGive(param_mutex_arr[param_name]);
         return status;
     }
+    // TODO: Deal with the case where mutex is already taken
 }
 
 uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p)
@@ -84,7 +85,9 @@ uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *i
         uint8_t status = access_param_table(SET_PARAM, param_name, param_type, in_p);
         xSemaphoreGive(param_mutex_arr[param_name]);
         return status;
-    }}
+    }
+    // Deal with the case where mutex is already taken
+}
 
 param_size_t get_param_size(param_type_t type)
 {
