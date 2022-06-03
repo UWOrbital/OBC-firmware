@@ -10,18 +10,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define NUM_PARAMS 6
-
-/**
- * @typedef	param_handle_t
- * @brief	Parameter Handle Type
- *
- * Pointer to a parameter struct, i.e: entry in parameters table.
- * Use this type and the API functions for handling parameters.
- * @see set_param_val(), get_param_val(), set_param(), get_param()
-*/
-typedef param_t* param_handle_t;
-
 /**
  * @enum	param_type_t
  * @brief	Parameter Types
@@ -82,9 +70,9 @@ typedef enum
 */
 typedef enum
 {
-	TELEMETRY,		/**< Automatic collect this param for telemetry. */
-	PERSISTENT,		/**< Persist the value in non-volatile memory. */
-	READ_ONLY   	/**< Prohibit writing to these variables. */
+    TELEMETRY	= 0b001,		/**< Automatic collect this param for telemetry. */
+    PERSISTENT	= 0b010,		/**< Persist the value on non volatile memory. */
+    READ_ONLY	= 0b100 		/**< Prohibited to write with param_service functions, only applicable for parameterized variables. */
 } param_opts_t;
 
 
@@ -97,9 +85,22 @@ typedef enum
 */
 typedef enum
 {
-	ALTITUDE
+	ALTITUDE,
+	TEST_PARAM1,
+	TEST_PARAM2,
+	TEST_PARAM3,
+	TEST_PARAM4,
+	TEST_PARAM5,
+	TEST_PARAM6,
+	TEST_PARAM7,
+	TEST_PARAM8,
+	TEST_PARAM9,
+	TEST_PARAM10,
+
 	// The rest of the parameters should be added here
 } param_names_t;
+
+#define NUM_PARAMS 11
 
 typedef union {
 	uint8_t			u8;
@@ -137,14 +138,14 @@ typedef struct
 } param_t;
 
 /**
- * @brief Parameter table
+ * @typedef	param_handle_t
+ * @brief	Parameter Handle Type
  *
- * All parameters and their associated properties
- * TODO: Add all parameters
+ * Pointer to a parameter struct, i.e: entry in parameters table.
+ * Use this type and the API functions for handling parameters.
+ * @see set_param_val(), get_param_val(), set_param(), get_param()
 */
-param_t PARAM_TABLE [] = {
-	{.name=ALTITUDE, .type=DOUBLE_PARAM, .size=DOUBLE_SIZE, .opts=TELEMETRY, .value.i8=30},
-};
+typedef param_t * param_handle_t;
 
 /**
  * @brief	Get the value of a Parameter
@@ -163,5 +164,18 @@ uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *o
  */
 uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p);
 
+param_size_t get_param_size(param_type_t type);
+
+uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p);
+
+param_handle_t get_param_handle(param_names_t param_name);
+
+uint8_t initialize_mutex_array(void);
+
+bool is_read_only(param_names_t param_name);
+
+bool is_telemetry(param_names_t param_name);
+
+bool is_persistent(param_names_t param_name);
 
 #endif /* PARAM_MANAGER_H */

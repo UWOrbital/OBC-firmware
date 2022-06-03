@@ -53,6 +53,7 @@ dkms.conf
 
 # IDE files
 .vscode/
+.idea/
 
 .env
 build/
