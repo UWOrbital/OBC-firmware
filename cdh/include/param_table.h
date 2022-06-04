@@ -21,13 +21,15 @@
  * @endcode
  * @param	variable_name			Name of the variable to parameterize
  */
-// Uncomment if we want to store pointers to values in the param table instead of the values themselves
-//#define parameterize(variable_name)  (void*)&variable_name
+/* TODO: Decide if we want to store values as pointers or not */
+/* #define parameterize(variable_name)  (void*)&variable_name */
 
 /**
  * @brief Parameter table
  *
  * All parameters and their associated properties
+ * @warning    Remember to add any new parameters to the param_names_t enum
+ * @see param_names_t
  * TODO: Add all parameters
 */
 param_t PARAM_TABLE [NUM_PARAMS] = {
@@ -43,6 +45,5 @@ param_t PARAM_TABLE [NUM_PARAMS] = {
         {.name=TEST_PARAM9, .type=FLOAT_PARAM, .size=FLOAT_SIZE, .opts=PERSISTENT, .value.f=0},
         {.name=TEST_PARAM10, .type=DOUBLE_PARAM, .size=DOUBLE_SIZE, .opts=PERSISTENT, .value.d=0}
 };
-
 
 #endif /* PARAM_TABLE_H */

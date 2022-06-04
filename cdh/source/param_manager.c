@@ -12,8 +12,7 @@
 #include "param_table.h"
 #include "string.h"
 
-// Maybe the param table shouldn't be static
-static param_t * param_list = PARAM_TABLE;
+static param_handle_t param_list = PARAM_TABLE;
 static SemaphoreHandle_t param_mutex_arr[NUM_PARAMS];
 
 // TODO: Create task to store params in non-volatile memory. It could even be an interrupt callback function.
@@ -69,16 +68,14 @@ uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *o
     if (param_mutex_arr[param_name] == NULL)
         return 0;
 
-    // We may want to change the delay time instead of using the max delay
+    /* TODO: We may want to change the delay time instead of using the max delay */
     if (xSemaphoreTake(param_mutex_arr[param_name], portMAX_DELAY) == pdTRUE)
     {
-        // TODO: Verify what delay we want to use
-        // TODO: Add any error handling if required
         uint8_t status = access_param_table(GET_PARAM, param_name, param_type, out_p);
         xSemaphoreGive(param_mutex_arr[param_name]);
         return status;
     }
-    // TODO: Deal with the case where mutex is already taken
+    return 0;
 }
 
 uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p)
@@ -89,14 +86,13 @@ uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *i
     if (param_mutex_arr[param_name] == NULL)
         return 0;
 
-    // We may want to change the delay time instead of using the max delay
+    /* TODO: We may want to change the delay time instead of using the max delay */
     if (xSemaphoreTake(param_mutex_arr[param_name], portMAX_DELAY) == pdTRUE) {
-        // TODO: Verify what delay we want to use
-        // TODO: Add any error handling if required
         uint8_t status = access_param_table(SET_PARAM, param_name, param_type, in_p);
         xSemaphoreGive(param_mutex_arr[param_name]);
         return status;
     }
+    return 0;
 }
 
 param_size_t get_param_size(param_type_t type)
