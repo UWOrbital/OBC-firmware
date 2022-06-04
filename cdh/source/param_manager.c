@@ -15,7 +15,7 @@
 static param_handle_t param_list = PARAM_TABLE;
 static SemaphoreHandle_t param_mutex_arr[NUM_PARAMS];
 
-// TODO: Create task to store params in non-volatile memory. It could even be an interrupt callback function.
+// TODO: Deal with parameter options
 
 uint8_t initialize_mutex_array(void)
 {
@@ -27,41 +27,8 @@ uint8_t initialize_mutex_array(void)
     return 1;
 }
 
-param_handle_t get_param_handle(param_names_t param_name)
-{
-    return &param_list[param_name];
-}
-
-uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p)
-{
-    // Maybe we should add a mutex around the param_handle access
-    param_handle_t param_handle = get_param_handle(param_name);
-    if (param_handle == NULL)
-        return 0;
-
-    if (param_handle->type != param_type)
-        return 0;
-
-    param_size_t param_size = get_param_size(param_type);
-    param_val_t param_val = param_handle->value;
-
-    switch (access_type)
-    {
-    case SET_PARAM:
-        memcpy(&param_val, out_p, param_size);
-        break;
-    case GET_PARAM:
-        memcpy(out_p, &param_val, param_size);
-        break;
-    default:
-        return 0;
-    }
-
-    return 1;
-}
-
 uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *out_p)
-{   
+{
     if (param_name < 0 || param_name >= NUM_PARAMS)
         return 0;
 
@@ -95,7 +62,40 @@ uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *i
     return 0;
 }
 
-param_size_t get_param_size(param_type_t type)
+static param_handle_t get_param_handle(param_names_t param_name)
+{
+    return &param_list[param_name];
+}
+
+static uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p)
+{
+    // Maybe we should add a mutex around the param_handle access
+    param_handle_t param_handle = get_param_handle(param_name);
+    if (param_handle == NULL)
+        return 0;
+
+    if (param_handle->type != param_type)
+        return 0;
+
+    param_size_t param_size = get_param_size(param_type);
+    param_val_t param_val = param_handle->value;
+
+    switch (access_type)
+    {
+    case SET_PARAM:
+        memcpy(&param_val, out_p, param_size);
+        break;
+    case GET_PARAM:
+        memcpy(out_p, &param_val, param_size);
+        break;
+    default:
+        return 0;
+    }
+
+    return 1;
+}
+
+static param_size_t get_param_size(param_type_t type)
 {
     switch (type)
     {

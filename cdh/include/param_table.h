@@ -33,7 +33,7 @@
  * TODO: Add all parameters
 */
 param_t PARAM_TABLE [NUM_PARAMS] = {
-        {.name=ALTITUDE, .type=DOUBLE_PARAM, .size=DOUBLE_SIZE, .opts=TELEMETRY, .value.i8=30},
+        {.name=ALTITUDE, .type=INT8_PARAM, .size=DOUBLE_SIZE, .opts=TELEMETRY, .value.i8=30},
         {.name=TEST_PARAM1, .type=UINT8_PARAM, .size=UINT8_SIZE, .opts=PERSISTENT|TELEMETRY, .value.i8=0},
         {.name=TEST_PARAM2, .type=UINT16_PARAM, .size=UINT16_SIZE, .opts=PERSISTENT, .value.i16=0},
         {.name=TEST_PARAM3, .type=UINT32_PARAM, .size=UINT32_SIZE, .opts=PERSISTENT|READ_ONLY, .value.i32=0},

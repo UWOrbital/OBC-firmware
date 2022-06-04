@@ -11,6 +11,15 @@
 #include <stdbool.h>
 
 /**
+ * @define	NUM_PARAMS
+ * @brief	Number of parameters in parameters table
+ * @note	This macro should be updated when new parameters are added.
+ *
+ * Macro for the number of parameters in the table
+*/
+#define NUM_PARAMS 11
+
+/**
  * @enum	param_names_t
  * @brief	Parameter Names
  *
@@ -111,15 +120,6 @@ typedef union {
 } param_val_t;
 
 /**
- * @define	NUM_PARAMS
- * @brief	Number of parameters in parameters table
- * @note	This macro should be updated when new parameters are added.
- *
- * Macro for the number of parameters in the table
-*/
-#define NUM_PARAMS 11
-
-/**
  * @struct	param_t
  * @brief	Parameter struct
  *
@@ -177,18 +177,18 @@ uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *o
  */
 uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p);
 
-param_size_t get_param_size(param_type_t type);
-
-uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p);
-
-param_handle_t get_param_handle(param_names_t param_name);
-
 uint8_t initialize_mutex_array(void);
 
-uint8_t is_read_only(param_names_t param_name);
+static param_size_t get_param_size(param_type_t type);
 
-uint8_t is_telemetry(param_names_t param_name);
+static uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p);
 
-uint8_t is_persistent(param_names_t param_name);
+static param_handle_t get_param_handle(param_names_t param_name);
+
+static uint8_t is_read_only(param_names_t param_name);
+
+static uint8_t is_telemetry(param_names_t param_name);
+
+static uint8_t is_persistent(param_names_t param_name);
 
 #endif /* PARAM_MANAGER_H */
