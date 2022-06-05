@@ -14,11 +14,13 @@ static TaskHandle_t Acollector;
 static TaskHandle_t Asender;
 static QueueHandle_t Aqueue;
 static EventGroupHandle_t *receiving_eventGroup;
+static EventGroupHandle_t *sending_eventGroup;
 
-TaskHandle_t* start_A_collection(EventGroupHandle_t *eventGroup1) {
+TaskHandle_t* start_A_collection(EventGroupHandle_t *eventGroup1, EventGroupHandle_t *eventGroup2) {
     receiving_eventGroup = eventGroup1;
+    sending_eventGroup = eventGroup2;
     Aqueue = xQueueCreate(1, sizeof(int));
-    xTaskCreate(collectA, "tmCollect", 2*configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, &Acollector);
+    xTaskCreate(collectA, "tmCollect", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, &Acollector);
     xTaskCreate(subsystemA_sender, "Asender", configMINIMAL_STACK_SIZE, (void*)&Aqueue, tskIDLE_PRIORITY+2, &Asender);
     return &Acollector;
 }
@@ -31,6 +33,7 @@ static void collectA() {
         xEventGroupWaitBits(*receiving_eventGroup, BIT_0, pdTRUE, pdFALSE, portMAX_DELAY);
         xTaskNotifyGive(Asender);
         xQueueReceive(Aqueue, (void*) &x, 10);
+        xEventGroupSetBits(*sending_eventGroup, BIT_0);
         console_print("Subsystem A telemetry: %d\n", x);
     }
 }
