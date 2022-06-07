@@ -83,7 +83,7 @@ static uint8_t access_param_table(access_type_t access_type, param_names_t param
     switch (access_type)
     {
     case SET_PARAM:
-        memcpy(&param_val, out_p, param_size);
+        memcpy(&(param_handle->value), out_p, param_size);
         break;
     case GET_PARAM:
         memcpy(out_p, &param_val, param_size);
