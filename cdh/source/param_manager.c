@@ -13,6 +13,9 @@
 #include "string.h"
 
 static param_handle_t param_list = PARAM_TABLE;
+// TODO: Research whether using a single mutex to protect the entire table would be more efficient...
+// Need to do more research into it:
+// https://stackoverflow.com/questions/24377671/efficiency-of-array-with-individual-mutexes-protecting-them-or-one-mutex-protect
 static SemaphoreHandle_t param_mutex_arr[NUM_PARAMS];
 
 // TODO: Deal with parameter options
@@ -83,7 +86,7 @@ static uint8_t access_param_table(access_type_t access_type, param_names_t param
     switch (access_type)
     {
     case SET_PARAM:
-        memcpy(&param_val, out_p, param_size);
+        memcpy(&(param_handle->value), out_p, param_size);
         break;
     case GET_PARAM:
         memcpy(out_p, &param_val, param_size);
