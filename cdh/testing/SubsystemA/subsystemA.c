@@ -9,26 +9,23 @@
 #include "console.h"
 #include "param_manager.h"
 
-static int c = 0;
-static SemaphoreHandle_t xSemaphore = NULL;
+static uint8_t x = 0;
 
 void update_data() {
-    set_param_val(ALTITUDE, UINT8_PARAM, &c);
-}
-
-void subsystemA_main() {
-    xSemaphore = xSemaphoreCreateMutex();    
-    xTaskCreate(update_data, "updateData", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
-}
-
-void subsystemA_sender(void *Aqueue) {
-    QueueHandle_t *queue = (QueueHandle_t *) Aqueue;
+    const TickType_t xDelay = 500/portTICK_PERIOD_MS;
+    uint8_t a;
     for(;;) {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY); //portMAX_DELAY should block indefinitely assuming the INCLUDE_vTaskSuspend flag is 1 in the config
-        if(xSemaphoreTake(xSemaphore, (TickType_t) 10) == pdTRUE) {
-            xQueueSend(*queue, (void*) &c, 10);
-            xSemaphoreGive(xSemaphore);
+        vTaskDelay(xDelay);
+        ++x;
+        a = set_param_val(TEST_PARAM1, UINT8_PARAM, &x);
+        if (a == 0) {
+            console_print("Error setting TEST_PARAM1\n");
+        } else {
+            console_print("Set TEST_PARAM %d\n", x);
         }
     }
 }
 
+void subsystemA_main() {
+    xTaskCreate(update_data, "updateData", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
+}

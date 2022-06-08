@@ -5,8 +5,10 @@
  */
 
 #include "FreeRTOS.h"
-#include "os_portmacro.h"
-#include "os_semphr.h"
+//#include "os_portmacro.h"
+//#include "os_semphr.h"
+#include "stack_macros.h"
+#include "semphr.h"
 
 #include "param_manager.h"
 #include "param_table.h"

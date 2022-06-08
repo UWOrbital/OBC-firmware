@@ -14,12 +14,14 @@ INCLUDE_DIRS          := -I.
 INCLUDE_DIRS          += -I../include/
 INCLUDE_DIRS          += -I${CURR_DIR}/SubsystemA
 INCLUDE_DIRS          += -I${CURR_DIR}/SubsystemB
+INCLUDE_DIRS          += -I${CURR_DIR}/StatusCheck
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/include
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/utils
 
 SOURCE_FILES          := $(wildcard *.c)
 SOURCE_FILES          += $(wildcard ${FREERTOS_DIR}/*.c)
+SOURCE_FILES          += $(wildcard ${CURR_DIR}/StatusCheck/*.c)
 SOURCE_FILES          += ${FREERTOS_DIR}/portable/MemMang/heap_3.c
 SOURCE_FILES          += ${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/utils/wait_for_event.c
 SOURCE_FILES          += ${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/port.c

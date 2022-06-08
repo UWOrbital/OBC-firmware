@@ -28,15 +28,22 @@ void vApplicationMallocFailedHook( void );
 void vApplicationIdleHook( void );
 void vApplicationStackOverflowHook( TaskHandle_t pxTask, char * pcTaskName );
 
+void testing() {
+    uint8_t x = 5, a;
+    a = set_param_val(TEST_PARAM1, UINT8_PARAM, (void*)&x);
+    console_print("Testing %d\n", a);
+}
+
 int main( void ) {
     console_init();
     console_print("Starting\n");
     initialize_mutex_array();
-    //subsystemA_main();
+    subsystemA_main();
     //subsystemB_main();
-    //status_check_main();
-    //vTaskStartScheduler();
-    //for(;;) {}
+    status_check_main();
+    //testing();
+    vTaskStartScheduler();
+    for(;;) {}
     return 0;
 }
 
