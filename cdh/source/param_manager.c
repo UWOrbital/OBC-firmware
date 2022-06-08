@@ -13,6 +13,9 @@
 #include "string.h"
 
 static param_handle_t param_list = PARAM_TABLE;
+// TODO: Research whether using a single mutex to protect the entire table would be more efficient...
+// Need to do more research into it:
+// https://stackoverflow.com/questions/24377671/efficiency-of-array-with-individual-mutexes-protecting-them-or-one-mutex-protect
 static SemaphoreHandle_t param_mutex_arr[NUM_PARAMS];
 
 // TODO: Deal with parameter options
