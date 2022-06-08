@@ -9,6 +9,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "param_manager.h"
 #include "console.h"
 
 #ifdef BUILD_DIR
@@ -30,11 +31,12 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char * pcTaskName );
 int main( void ) {
     console_init();
     console_print("Starting\n");
-    subsystemA_main();
-    subsystemB_main();
-    status_check_main();
-    vTaskStartScheduler();
-    for(;;) {}
+    initialize_mutex_array();
+    //subsystemA_main();
+    //subsystemB_main();
+    //status_check_main();
+    //vTaskStartScheduler();
+    //for(;;) {}
     return 0;
 }
 

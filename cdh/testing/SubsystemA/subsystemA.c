@@ -7,20 +7,13 @@
 
 #include "subsystemA.h"
 #include "console.h"
+#include "param_manager.h"
 
 static int c = 0;
 static SemaphoreHandle_t xSemaphore = NULL;
 
 void update_data() {
-    const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
-    for(;;) {
-        console_print("Updating data\n" );
-        if (xSemaphoreTake(xSemaphore, (TickType_t) 10) == pdTRUE) {
-            ++c;    
-            xSemaphoreGive(xSemaphore);
-        }
-        vTaskDelay(xDelay);
-    }
+    set_param_val(ALTITUDE, UINT8_PARAM, &c);
 }
 
 void subsystemA_main() {

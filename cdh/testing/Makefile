@@ -11,6 +11,7 @@ FREERTOS_DIR_REL      := ./FreeRTOSSource
 FREERTOS_DIR          := $(abspath $(FREERTOS_DIR_REL))
 
 INCLUDE_DIRS          := -I.
+INCLUDE_DIRS          += -I../include/
 INCLUDE_DIRS          += -I${CURR_DIR}/SubsystemA
 INCLUDE_DIRS          += -I${CURR_DIR}/SubsystemB
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/include
@@ -24,6 +25,7 @@ SOURCE_FILES          += ${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/utils/wai
 SOURCE_FILES          += ${FREERTOS_DIR}/portable/ThirdParty/GCC/Posix/port.c
 SOURCE_FILES          += ${CURR_DIR}/SubsystemA/subsystemA.c
 SOURCE_FILES          += ${CURR_DIR}/SubsystemB/subsystemB.c
+SOURCE_FILES          += ../source/param_manager.c
 
 CFLAGS                :=    -ggdb3
 LDFLAGS               :=    -ggdb3 -pthread
