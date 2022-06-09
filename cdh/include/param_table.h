@@ -1,38 +1,22 @@
+/**
+ * @file param_manager.c
+ * @author Daniel Gobalakrishnan
+ * @date 2022-06-08
+ */
 #ifndef PARAM_TABLE_H
 #define PARAM_TABLE_H
 
 #include "param_manager.h"
 
 /**
- * @def  parameterize
- * @brief Macro to parameterize a variable into the Parameters Table.
- *
- * Use this macro to create parameters into the Parameters Table using a variable.
- * Variable should be visible in the scope where the Table is declared, this can be
- * done with the "extern" keyword.
- *
- * **Example:**
- * @code
- * uint32_t example_var;	// Variable to parameterize
- * // The Parameter Table
- * param_table_t param_table= {
- *		{.name="example",	.type=UINT32_PARAM,	.size=UINT32_SIZE,	.opts=TELEMETRY	.value=parameterize(example_var),
- * }
- * @endcode
- * @param	variable_name			Name of the variable to parameterize
- */
-/* TODO: Decide if we want to store values as pointers or not */
-/* #define parameterize(variable_name)  (void*)&variable_name */
-
-/**
  * @brief Parameter table
  *
  * All parameters and their associated properties
- * @warning    Remember to add any new parameters to the param_names_t enum
+ * @warning    Remember to add any new parameters to the param_names_t enum and increment
+ * the NUM_PARAMS macro
  * @see param_names_t
- * TODO: Add all parameters
 */
-param_t PARAM_TABLE [NUM_PARAMS] = {
+param_t paramTable [NUM_PARAMS] = {
         {.name=ALTITUDE, .type=INT8_PARAM, .size=DOUBLE_SIZE, .opts=TELEMETRY, .value.i8=30},
         {.name=TEST_PARAM1, .type=UINT8_PARAM, .size=UINT8_SIZE, .opts=PERSISTENT|TELEMETRY, .value.i8=0},
         {.name=TEST_PARAM2, .type=UINT16_PARAM, .size=UINT16_SIZE, .opts=PERSISTENT, .value.i16=0},

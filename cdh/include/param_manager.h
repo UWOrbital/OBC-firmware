@@ -1,7 +1,7 @@
 /**
  * @file param_manager.h
  * @author Daniel Gobalakrishnan
- * @date 2022-06-01
+ * @date 2022-06-08
  */
 
 #ifndef PARAM_MANAGER_H
@@ -13,7 +13,7 @@
 /**
  * @define	NUM_PARAMS
  * @brief	Number of parameters in parameters table
- * @note	This macro should be updated when new parameters are added.
+ * @warning	This macro should be updated when new parameters are added.
  *
  * Macro for the number of parameters in the table
 */
@@ -24,7 +24,6 @@
  * @brief	Parameter Names
  *
  * All parameter names
- * TODO: Add all parameter names
 */
 typedef enum
 {
@@ -68,7 +67,7 @@ typedef enum
  * @brief	Parameter Sizes
  *
  * Macros for assigning the size in Parameters list, note that STRING_PARAM
- * can have any size, is decision from user to assign the size.
+ * can have any size and must be decided by user.
 */
 typedef enum
 {
@@ -82,7 +81,7 @@ typedef enum
     INT64_SIZE		= sizeof(int64_t),
     FLOAT_SIZE		= sizeof(float),
     DOUBLE_SIZE		= sizeof(double)
-    // String Size should be decided by user.
+    /* String Size should be decided by user. */
 } param_size_t;
 
 /**
@@ -124,7 +123,7 @@ typedef union {
  * @brief	Parameter struct
  *
  * Holds the data for a parameter in the list. The Parameter list
- * is composed by a collection of this struct.
+ * is composed of a collection of this struct.
  *
  * Do not handle this struct directly, use instead param_handle_t type
  * and the API defined functions.
@@ -165,7 +164,7 @@ typedef enum
  *
  * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
  */
-uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *out_p);
+uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out);
 
 /**
  * @brief	Set the value of a Parameter
@@ -175,20 +174,57 @@ uint8_t get_param_val(param_names_t param_name, param_type_t param_type, void *o
  *
  * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
  */
-uint8_t set_param_val(param_names_t param_name, param_type_t param_type, void *in_p);
+uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in);
 
-uint8_t initialize_mutex_array(void);
+/**
+ * @brief	Helper function to allow concurrent access to table
+ * @param accessType       Type of access, either GET_PARAM or SET_PARAM
+ * @param paramName        Name of the parameter
+ * @param paramType        Type of the parameter. Used to make sure developer is using the right type.
+ * @param p                Void pointer to buffer to store param value, should be enough to store value
+ *
+ * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
+ */
+static uint8_t access_param_table(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p);
 
+/**
+ * @brief	Get size of the parameter
+ * @param   paramType      Data type of the parameter.
+ *
+ * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
+ */
 static param_size_t get_param_size(param_type_t type);
 
-static uint8_t access_param_table(access_type_t access_type, param_names_t param_name, param_type_t param_type, void *out_p);
+/**
+ * @brief	Get pointer to parameter struct
+ * @param   paramName      Name of the parameter.
+ *
+ * @return	Pointer to parameter struct, NULL if not found
+ */
+static param_handle_t get_param_handle(param_names_t paramName);
 
-static param_handle_t get_param_handle(param_names_t param_name);
+/**
+ * @brief	Check if parameter is read-only
+ * @param   paramHandle    Pointer to the parameter struct
+ *
+ * @return	1 if the parameter is read-only, 0 if not
+ */
+static uint8_t is_read_only(param_handle_t paramHandle);
 
-static uint8_t is_read_only(param_names_t param_name);
+/**
+ * @brief	Check if parameter is for telemetry
+ * @param   paramHandle    Pointer to the parameter struct
+ *
+ * @return	1 if the parameter is for telemetry, 0 if not
+ */
+static uint8_t is_telemetry(param_handle_t paramHandle);
 
-static uint8_t is_telemetry(param_names_t param_name);
-
-static uint8_t is_persistent(param_names_t param_name);
+/**
+ * @brief	Check if parameter should be stored in non-volatile memory
+ * @param   paramHandle    Pointer to the parameter struct
+ *
+ * @return	1 if the parameter should be stored in non-volatile memory, 0 if not
+ */
+static uint8_t is_persistent(param_handle_t paramHandle);
 
 #endif /* PARAM_MANAGER_H */
