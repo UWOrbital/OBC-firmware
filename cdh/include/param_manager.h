@@ -67,8 +67,8 @@ typedef enum
     UINT16_SIZE		= sizeof(uint16_t),
     INT16_SIZE		= sizeof(int16_t),
     UINT32_SIZE		= sizeof(uint32_t),
-    INT32_SIZE		= sizeof(int32_t),
-    UINT64_SIZE		= sizeof(uint64_t),
+    INT32_SIZE      = sizeof(int32_t),
+    UINT64_SIZE     = sizeof(uint64_t),
     INT64_SIZE		= sizeof(int64_t),
     FLOAT_SIZE		= sizeof(float),
     DOUBLE_SIZE		= sizeof(double)
@@ -96,17 +96,17 @@ typedef enum
  * Macros for allowing various value types in parameters
 */
 typedef union {
-    uint8_t			u8;
-    int8_t			i8;
-    uint16_t		u16;
-    int16_t			i16;
-    uint32_t		u32;
-    int32_t			i32;
-    uint64_t		u64;
-    int64_t			i64;
-    float			f;
-    double			d;
-    char*			s;
+    uint8_t     u8;
+    int8_t      i8;
+    uint16_t    u16;
+    int16_t     i16;
+    uint32_t    u32;
+    int32_t     i32;
+    uint64_t    u64;
+    int64_t     i64;
+    float       f;
+    double      d;
+    char*       s;
 } param_val_t;
 
 /**
