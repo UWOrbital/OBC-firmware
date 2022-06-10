@@ -12,11 +12,10 @@
  * @brief Parameter table
  *
  * All parameters and their associated properties
- * @warning    Remember to add any new parameters to the param_names_t enum and increment
- * the NUM_PARAMS macro
- * @see param_names_t
+ * @warning     Remember to add any new parameters to the param_names_t enum
+ * @see         param_names_t
 */
-param_t paramTable [NUM_PARAMS] = {
+param_t paramTable [] = {
         {.name=ALTITUDE, .type=INT8_PARAM, .size=DOUBLE_SIZE, .opts=TELEMETRY, .value.i8=30},
         {.name=TEST_PARAM1, .type=UINT8_PARAM, .size=UINT8_SIZE, .opts=PERSISTENT|TELEMETRY, .value.i8=0},
         {.name=TEST_PARAM2, .type=UINT16_PARAM, .size=UINT16_SIZE, .opts=PERSISTENT, .value.i16=0},

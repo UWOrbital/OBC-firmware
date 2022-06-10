@@ -14,6 +14,7 @@
 
 static param_handle_t paramTableHandler = paramTable;
 static SemaphoreHandle_t paramTableMutex = NULL;
+static const uint16_t paramTableLength = sizeof(paramTable) / sizeof(param_t);
 
 uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out)
 {
@@ -63,7 +64,7 @@ static uint8_t access_param_table(access_type_t accessType, param_names_t paramN
 
 static param_handle_t get_param_handle(param_names_t paramName)
 {
-    if ( paramName < 0 || paramName >= NUM_PARAMS )
+    if ( paramName < 0 || paramName >= paramTableLength )
         return NULL;
 
     return &paramTableHandler[paramName];

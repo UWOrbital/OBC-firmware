@@ -11,15 +11,6 @@
 #include <stdbool.h>
 
 /**
- * @define	NUM_PARAMS
- * @brief	Number of parameters in parameters table
- * @warning	This macro should be updated when new parameters are added.
- *
- * Macro for the number of parameters in the table
-*/
-#define NUM_PARAMS 11
-
-/**
  * @enum	param_names_t
  * @brief	Parameter Names
  *
@@ -100,7 +91,7 @@ typedef enum
 
 /**
  * @union	param_val_t
- * @brief	Parameter value typess
+ * @brief	Parameter value types
  *
  * Macros for allowing various value types in parameters
 */
