@@ -100,3 +100,13 @@ static param_size_t get_param_size(param_type_t type)
         return 0;
     }
 }
+
+static uint8_t is_read_only(param_handle_t paramHandle) {
+    return ( paramHandle->opts & READ_ONLY );
+}
+static uint8_t is_telemetry(param_handle_t paramHandle) {
+    return ( paramHandle->opts & TELEMETRY );
+}
+static uint8_t is_persistent(param_handle_t paramHandle) {
+    return ( paramHandle->opts & PERSISTENT );
+}
