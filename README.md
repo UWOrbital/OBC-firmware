@@ -41,7 +41,7 @@ The following software should be installed:
 * OpenOCD
 * Code Composer Studio
 
-**Instruction on how to install these tools can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)**
+**Instructions on how to install these tools can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)**
 
 ### Getting the Source
 
@@ -52,7 +52,7 @@ git clone git@github.com:UWOrbital/OBC-firmware.git
 
 ### Building
 
-You can build the project using these commands at the top=level of the repo:
+You can build the project using these commands at the top-level of the repo:
 
 ```
 make clean # Delete any previous build files
@@ -66,12 +66,12 @@ More information can be found on [this Notion page.](https://www.notion.so/uworb
 Information about flashing the device and debugging can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)
 
 ## Contributing
-1. Make sure youre added as a member to the UW Orbital organization
+1. Make sure you're added as a member to the UW Orbital organization on GitHub.
 2. Create a feature branch for whatever task you're working on.
-    * Our branch naming scheme is `<subteam>/<developer_name>/<feature_description>`.
-    * Example branch name: `cdh/daniel/implement-random-device-driver`
-    * Another example (Multiple developers for single branch): `cdh/implement-random-device-driver`
-3. Make a PR. Make sure to at least add the CDH leads as reviewers. You may want to add your subteam lead as a reviewer if you're not on CDH.
+    * Our branch naming scheme is `<subteam>/<developer_name>/<feature_description>`. Ignore the `<developer_name>` part if the branch has multiple developers.
+    * Example: `cdh/daniel/implement-random-device-driver`
+    * Another example: `cdh/implement-random-device-driver`
+3. Make a PR. Make sure to at least add the CDH leads as reviewers and ping the CDH pr channel on Discord. You may also want to add your subteam lead(s) as a reviewer if you're not on CDH.
     * Pull requests should include information on, at minimum, the purpose of the PR, new changes made in the PR, tests performed to verify that the code works, and changes that can be made in future iterations of the feature. See [this sample template](https://github.com/UWOrbital/CC1120Driver/blob/main/.github/pull_request_template.md) for more. It’s good practice to have a PR template in a .github folder in every repository you create. GitHub will pull from this template every time a new PR is made.
 5. Make any requested changes and merge your branch onto main once the PR is approved.
 
