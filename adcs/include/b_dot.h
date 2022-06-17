@@ -44,9 +44,8 @@ void Bdot_init(float magneticFieldBody[3], float Kp[3][3], float maxMagneticDipo
  *        It calculates a magnetic dipole opposite to the derivative of the magnetic field.
  * 
  * @param magneticFieldBody magnetic field value expressed in the Body Frame
- * @return magnetic dipole value
  */
-float *Bdot_controller(float magneticFieldBody[3], float magneticDipole);
+void Bdot_controller(float magneticFieldBody[3], float magneticDipole);
 
 /**
  * @brief Scaling of the desired magnetic dipole in case it exceeds the maximum dipole provided by each magnetorquer
