@@ -13,7 +13,7 @@ int main(void) {
 
     // initialize important tasks
     xTaskHandle xSupervisorTaskHandle;
-    xTaskCreate(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL, SUPERVISOR_PRIORITY, &xSupervisorTaskHandle);
+    volatile int out = xTaskCreate(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL, SUPERVISOR_PRIORITY, &xSupervisorTaskHandle);
 
     // start task scheduler
     vTaskStartScheduler();
