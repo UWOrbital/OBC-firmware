@@ -10,11 +10,16 @@ BUILD_DIR             := $(abspath $(BUILD_DIR_REL))
 FREERTOS_DIR_REL      := ../../freertos
 FREERTOS_DIR          := $(abspath $(FREERTOS_DIR_REL))
 
+POSIX_UTIL_DIR_REL    := ../../posix_utils
+POSIX_UTIL_DIR        := $(abspath $(POSIX_UTIL_DIR_REL))
+
 INCLUDE_DIRS          := -I.
 INCLUDE_DIRS          += -I${FREERTOS_DIR}/ports/posix/include
+INCLUDE_DIRS          += -I${POSIX_UTIL_DIR}/include
 
 SOURCE_FILES          := $(wildcard *.c)
 SOURCE_FILES          += $(wildcard ${FREERTOS_DIR}/ports/posix/source/*.c)
+SOURCE_FILES          += $(wildcard ${POSIX_UTIL_DIR}/source/*.c)
 
 CFLAGS                :=    -ggdb3
 LDFLAGS               :=    -ggdb3 -pthread
