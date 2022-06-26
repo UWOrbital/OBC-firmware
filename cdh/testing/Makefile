@@ -7,16 +7,14 @@ CURR_DIR              := $(abspath $(CURR_DIR_REL))
 BUILD_DIR_REL         := ./build
 BUILD_DIR             := $(abspath $(BUILD_DIR_REL))
 
-HAL_DIR_REL           := ../../hal
-HAL_DIR               := $(abspath $(HAL_DIR_REL))
+FREERTOS_DIR_REL      := ../../freertos
+FREERTOS_DIR          := $(abspath $(FREERTOS_DIR_REL))
 
 INCLUDE_DIRS          := -I.
-INCLUDE_DIRS          += -I../include/
-INCLUDE_DIRS          += -I${HAL_DIR}/include/FreeRTOS/Linux
+INCLUDE_DIRS          += -I${FREERTOS_DIR}/ports/posix/include
 
 SOURCE_FILES          := $(wildcard *.c)
-SOURCE_FILES          += $(wildcard ${HAL_DIR}/source/FreeRTOS/Linux/*.c)
-SOURCE_FILES          += ${HAL_DIR}/source/FreeRTOS/Linux/MemMang/heap_3.c
+SOURCE_FILES          += $(wildcard ${FREERTOS_DIR}/ports/posix/source/*.c)
 
 CFLAGS                :=    -ggdb3
 LDFLAGS               :=    -ggdb3 -pthread
