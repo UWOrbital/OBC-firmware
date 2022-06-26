@@ -13,8 +13,16 @@
 #include "string.h"
 
 static param_handle_t paramTableHandler = paramTable;
-static SemaphoreHandle_t paramTableMutex = NULL;
 static const uint16_t paramTableLength = sizeof(paramTable) / sizeof(param_t);
+static SemaphoreHandle_t paramTableMutex = NULL;
+
+uint8_t param_manager_init(void) {
+    if ( paramTableMutex == NULL ) {
+        paramTableMutex = xSemaphoreCreateMutex();
+        return 1;
+    }
+    return 0;
+}
 
 uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out)
 {
@@ -33,15 +41,18 @@ uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in)
 static uint8_t access_param_table(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p)
 {
     param_handle_t paramHandle = get_param_handle(paramName);
-    if ( paramHandle == NULL )
+    if ( paramHandle == NULL ) {
         return 0;
+    }
 
     param_size_t paramSize = get_param_size(paramType);
-    if ( paramHandle->type != paramType || paramSize == 0 )
+    if ( paramHandle->type != paramType || paramSize == 0 ) {
         return 0;
+    }
 
-    if ( paramTableMutex == NULL )
-        paramTableMutex = xSemaphoreCreateMutex();
+    if (paramTableMutex == NULL) {
+        return 0;
+    }
 
     /* TODO: We may want to change the delay time instead of using the max delay */
     if ( xSemaphoreTake(paramTableMutex, portMAX_DELAY) == pdTRUE ) {
@@ -64,8 +75,9 @@ static uint8_t access_param_table(access_type_t accessType, param_names_t paramN
 
 static param_handle_t get_param_handle(param_names_t paramName)
 {
-    if ( paramName < 0 || paramName >= paramTableLength )
+    if ( paramName < 0 || paramName >= paramTableLength ) {
         return NULL;
+    }
 
     return &paramTableHandler[paramName];
 }

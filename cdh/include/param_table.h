@@ -1,5 +1,5 @@
 /**
- * @file param_manager.c
+ * @file param_table.h
  * @author Daniel Gobalakrishnan
  * @date 2022-06-08
  */
@@ -12,7 +12,7 @@
  * @brief Parameter table
  *
  * All parameters and their associated properties
- * @warning     Remember to add any new parameters to the param_names_t enum
+ * @warning     Remember to add any new parameter names to the param_names_t enum
  * @see         param_names_t
 */
 param_t paramTable [] = {

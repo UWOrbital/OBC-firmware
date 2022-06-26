@@ -148,12 +148,19 @@ typedef enum
 } access_type_t;
 
 /**
+ * @brief	Initialize the parameter manager
+ *
+ * @return	1 if OK; 0 if already initialized
+ */
+uint8_t param_manager_init(void);
+
+/**
  * @brief	Get the value of a Parameter
  * @param	param_name          Name of the parameter
  * @param	param_type          Type of the parameter. Used to make sure developer is using the right type.
  * @param	out_p               Void pointer to buffer to store param value, should be enough to store value
  *
- * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
+ * @return	1 if OK; 0 if error or parameter doesn't exist
  */
 uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out);
 
@@ -163,7 +170,7 @@ uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out
  * @param	param_type          Type of the parameter. Used to make sure developer is using the right type.
  * @param	in_p 				Void pointer to memory where value is stored
  *
- * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
+ * @return	1 if OK; 0 if error or parameter doesn't exist
  */
 uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in);
 
@@ -174,15 +181,15 @@ uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in)
  * @param paramType        Type of the parameter. Used to make sure developer is using the right type.
  * @param p                Void pointer to buffer to store param value, should be enough to store value
  *
- * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
+ * @return	1 if OK; 0 if error or parameter doesn't exist
  */
 static uint8_t access_param_table(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p);
 
 /**
- * @brief	Get size of the parameter
+ * @brief	Get size of the parameter type in bytes
  * @param   paramType      Data type of the parameter.
  *
- * @return	1 if OK; 0 if error, parameter doesn't exist, or buffer too small
+ * @return	parameter size if OK; 0 if error
  */
 static param_size_t get_param_size(param_type_t type);
 
