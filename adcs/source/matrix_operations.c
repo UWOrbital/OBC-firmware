@@ -26,7 +26,7 @@ void vector_multiply(float matrix[3][3], float vector[3], float outputVector[3])
     for ( int i = 0; i < 3; i ++ ) {
         float currentSum = 0;
         for ( int j = 0; j < 3; j++ ) {
-            currentSum += vector[j]*matrix[j][i];
+            currentSum += vector[i]*matrix[i][j];
         }
         outputVector[i] = currentSum;
     }
