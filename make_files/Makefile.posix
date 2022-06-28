@@ -1,0 +1,55 @@
+CC                    := gcc
+
+CFLAGS                :=    -ggdb3
+CFLAGS                +=   -O3
+
+LDFLAGS               :=    -ggdb3 -pthread
+LDFLAGS               +=   -O3
+
+INCLUDE_DIRS :=
+INCLUDE_DIRS += -I"freertos/ports/posix/include"
+INCLUDE_DIRS += -I"posix_utils/include"
+INCLUDE_DIRS += -I"adcs/include"
+INCLUDE_DIRS += -I"cdh/include"
+INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"payload/include"
+
+SRC_DIRS :=
+SRC_DIRS += freertos/ports/posix/source
+SRC_DIRS += posix_utils/source
+SRC_DIRS += adcs/source
+SRC_DIRS += cdh/source
+SRC_DIRS += comms/source
+SRC_DIRS += payload/source
+
+CPPFLAGS              :=    $(INCLUDE_DIRS) -DBUILD_DIR=\"$(BUILD_DIR_ABS)\"
+CPPFLAGS              +=    -D_WINDOWS_
+CPPFLAGS              += 	-DTRACE_ON_ENTER=0
+CPPFLAGS              += 	-DprojCOVERAGE_TEST=0
+CPPFLAGS              += 	-DPOSIX_BUILD
+
+SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
+
+OBJS := $(foreach file,$(SRCS),$(BUILD_DIR)/$(basename $(file)).o)
+OBJS +=  $(BUILD_DIR)/main.o
+
+DEPS := $(patsubst %.o,%.d,$(OBJS))
+OBJ_DIRS := $(sort $(foreach obj,$(OBJS),$(dir $(obj))))
+-include $(DEPS)
+
+$(foreach dir,$(OBJ_DIRS), $(shell mkdir -p $(dir)))
+
+.PHONY: all
+all: $(BUILD_DIR)/${BIN}
+
+${BUILD_DIR}/${BIN} : ${OBJS}
+	-mkdir -p ${@D}
+	$(CC) $^ ${LDFLAGS} -o $@
+
+${BUILD_DIR}/%.o : %.c Makefile
+	-mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -c $< -o $@
+
+.PHONY: clean
+clean:
+	-rm -rf $(BUILD_DIR)

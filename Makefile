@@ -1,29 +1,18 @@
-# This is a top level makefile
-# Used for building the final overall firmware with all components
-# Maintained by CDH, only for building overall firmware, should not include individual subcomponent testing code
+export BIN=OBC-firmware
+export BUILD_DIR=build
 
-include global_vars.mk
-include sources.mk
+.PHONY: all
+all: cortex
 
-SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
-SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))
+.PHONY: posix
+posix:		
+	make -f make_files/Makefile.posix
 
-OBJS := $(foreach file,$(SRCS),$(BUILD_DIR)/$(basename $(file)).o)
-DEPS := $(patsubst %.o,%.d,$(OBJS))
-OBJ_DIRS := $(sort $(foreach obj,$(OBJS),$(dir $(obj))))
--include $(DEPS)
+.PHONY: cortex
+cortex:	
+	make -f make_files/Makefile.cortex
 
-OBJS += build/main.o
-
-$(foreach dir,$(OBJ_DIRS), $(shell mkdir -p $(dir)))
-
-all: $(BUILD_DIR)/OBC-firmware.out
-
-$(BUILD_DIR)/OBC-firmware.out: $(OBJS)
-	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
-
-
+.PHONY: clean
 clean:
-	rm -rf build/*
-
-.PHONY: all clean
+	make -f make_files/Makefile.cortex clean
+	make -f make_files/Makefile.posix clean
