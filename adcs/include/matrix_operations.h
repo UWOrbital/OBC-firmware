@@ -1,8 +1,6 @@
 #ifndef MATRIX_OPERATIONS_H
 #define MATRIX_OPERATIONS_H
 
-#include <math.h>
-
 /**
  * @brief Subtracts two vectors
  * 

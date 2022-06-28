@@ -1,7 +1,6 @@
 #include "matrix_operations.h"
 
 #include <math.h>
-#include <stdlib.h>
 
 void vector_subtraction(float vector1[3], float vector2[3], float outputVector[3]){
     for ( int i = 0; i < 3; i ++ ) {

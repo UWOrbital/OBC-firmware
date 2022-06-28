@@ -1,19 +1,27 @@
-#ifndef ADCS_ONBOARD_SOFTWARE_BDOT_H
-#define ADCS_ONBOARD_SOFTWARE_BDOT_H
+#ifndef ADCS_BDOT_H
+#define ADCS_BDOT_H
 
+typedef struct{
+    /**
+     * a 3 by 3 matrix
+     * 
+     */
+    float matrix[3][3];
 
-typedef struct BdotStruct{
+} matrix_t;
+
+typedef struct{
     /**
      * magnetic field value expressed in the Body Frame
      */
     float magneticFieldBody[3];
 
-    float bDotVector[3];
+    float bdotVector[3];
 
     /**
      * proportional positive scalar gain
      */
-    float Kp[3][3];
+    matrix_t Kp;
 
     /**
      * Maximum magnetic dipole of magnetorquers (in Am^2)
@@ -25,9 +33,7 @@ typedef struct BdotStruct{
      */
     float timeStep;
     
-} BdotStruct;
-
-BdotStruct Bdot;
+} bdot_t;
 
 /**
  * Acts as the constructor
@@ -36,16 +42,17 @@ BdotStruct Bdot;
  * @param maxMagneticDipole magnetorquers maximum magnetic dipole (in Am^2)
  * @param timeStep derivation value (in sec)
  */
-void Bdot_init(float magneticFieldBody[3], float Kp[3][3], float maxMagneticDipole[3], float timeStep);
+void bdot_init(float magneticFieldBody[3], float Kp[3][3], float maxMagneticDipole[3], float timeStep);
 
 /**
- * @brief Bdot controller is used in Detumbling mode, during which actuation is performed by the magnetorquers, and
+ * @brief bdot controller is used in Detumbling mode, during which actuation is performed by the magnetorquers, and
  *        utilizes only magnetometer data.
  *        It calculates a magnetic dipole opposite to the derivative of the magnetic field.
  * 
  * @param magneticFieldBody magnetic field value expressed in the Body Frame
+ * @param magneticDipole magnetic dipole array to be outputed (in Am^2)
  */
-void Bdot_controller(float magneticFieldBody[3], float magneticDipole);
+void bdot_controller(float magneticFieldBody[3], float magneticDipole[3]);
 
 /**
  * @brief Scaling of the desired magnetic dipole in case it exceeds the maximum dipole provided by each magnetorquer
@@ -53,107 +60,76 @@ void Bdot_controller(float magneticFieldBody[3], float magneticDipole);
  * @param magneticDipole desired magnetic dipole (in Am^2)
  * @return scaled magnetic dipole (in Am^2)
  */
-float *Bdot_magnetorquer_scaling(float magneticDipole[3]);
+float *bdot_magnetorquer_scaling(float magneticDipole[3]);
 
 /**
  * @brief magnetic field value expressed in the Body Frame getter
  * 
  * @return magnetic field value expressed in the Body Frame
  */
-float *Bdot_get_magnetic_field_body(void){
-    return Bdot.magneticFieldBody;
-}
+float *bdot_get_magnetic_field_body(void);
 
 /**
  * @brief magnetic field value expressed in the Body Frame setter
  * 
  * @param magneticFieldBody magnetic field value expressed in the Body Frame
  */
-void Bdot_set_magnetic_field_body(float magneticFieldBody[3]){
-    for (int i = 0; i < 3; i++){
-        Bdot.magneticFieldBody[i] = magneticFieldBody[i];
-    }
-}
+void bdot_set_magnetic_field_body(float magneticFieldBody[3]);
 
 /**
- * @brief Bdot vector getter
+ * @brief bdot vector getter
  * 
- * @return Bdot vector
+ * @return bdot vector
  */
-float *Bdot_get_Bdot_vector(void){
-    return Bdot.bDotVector;
-}
+float *bdot_get_bdot_vector(void);
 
 /**
- * @brief Bdot vector setter
+ * @brief bdot vector setter
  * 
- * @param bDotVector Bdot vector
+ * @param bdotVector bdot vector
  */
-void Bdot_set_Bdot_vector(float bDotVector[3]){
-    for (int i = 0; i < 3; i++){
-        Bdot.bDotVector[i] = bDotVector[i];
-    }
-}
+void bdot_set_bdot_vector(float bdotVector[3]);
 
 /**
  * @brief proportional positive scalar gain getter
  * 
  * @return proportional positive scalar gain
  */
-float **Bdot_get_kp(void){
-    return Bdot.Kp;
-}
+matrix_t bdot_get_kp(void);
 
 /**
  * @brief proportional positive scalar gain setter
  * 
  * @param Kp proportional positive scalar gain
  */
-void Bdot_set_kp(float Kp[3][3]){
-    for (int i = 0; i < 3;i ++){
-        for (int j = 0; j < 3; j++){
-            Bdot.Kp[i][j] = Kp[i][j];
-        }
-    }
-    
-}
+void bdot_set_kp(float Kp[3][3]);
 
 /**
  * @brief Maximum magnetic dipole of magnetorquers (in Am^2) getter
  * 
  * @return Maximum magnetic dipole of magnetorquers (in Am^2)
  */
-float *Bdot_get_max_magnetic_dipole(void){
-    return Bdot.maxMagneticDipole;
-}
+float *bdot_get_max_magnetic_dipole(void);
 
 /**
  * @brief Maximum magnetic dipole of magnetorquers (in Am^2) setter
  * 
  * @param maxMagneticDipole Maximum magnetic dipole of magnetorquers (in Am^2)
  */
-void Bdot_set_max_magnetic_dipole(float maxMagneticDipole[3]){
-    for (int i = 0; i < 3; i++){
-        Bdot.maxMagneticDipole[i] = maxMagneticDipole[i];
-    }
-}
+void bdot_set_max_magnetic_dipole(float maxMagneticDipole[3]);
 
 /**
  * @brief derivation value getter
  * 
  * @return derivation value
  */
-float Bdot_get_time_step(void){
-    return Bdot.timeStep;
-}
+float bdot_get_time_step(void);
 
 /**
  * @brief derivation value setter
  * 
  * @param timeStep derivation value
  */
-void Bdot_set_time_step(float timeStep){
-    Bdot.timeStep = timeStep;
-}
+void bdot_set_time_step(float timeStep);
 
-#endif //ADCS_ONBOARD_SOFTWARE_BDOT_H
+#endif //ADCS_BDOT_H
