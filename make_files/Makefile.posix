@@ -1,10 +1,14 @@
-CC                    := gcc
+# This file builds for a Posix system
 
-CFLAGS                :=    -ggdb3
-CFLAGS                +=   -O3
+CC := gcc
 
-LDFLAGS               :=    -ggdb3 -pthread
-LDFLAGS               +=   -O3
+# Compiler flags
+CFLAGS := -ggdb3
+CFLAGS += -O3
+
+# Linker flags
+LDFLAGS := -ggdb3 -pthread
+LDFLAGS += -O3
 
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"freertos/ports/posix/include"
@@ -22,6 +26,7 @@ SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
 SRC_DIRS += payload/source
 
+# Preprocessor defines
 CPPFLAGS              :=    $(INCLUDE_DIRS) -DBUILD_DIR=\"$(BUILD_DIR_ABS)\"
 CPPFLAGS              +=    -D_WINDOWS_
 CPPFLAGS              += 	-DTRACE_ON_ENTER=0

@@ -1,3 +1,5 @@
+# This file builds for the RM46L852 
+
 include .env
 
 CC := "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
