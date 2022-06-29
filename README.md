@@ -13,6 +13,7 @@ This repository holds all the code that runs on our CubeSat's onboard computer (
     - [Building](#building)
     - [Flashing and Debugging](#flashing-and-debugging)
   - [Contributing](#contributing)
+    - [Developing for different target systems](#developing-for-different-target-systems)
   - [Style Guide](#style-guide)
     - [Comments](#comments)
       - [Single Line Comments](#single-line-comments)
@@ -66,17 +67,32 @@ git clone git@github.com:UWOrbital/OBC-firmware.git
 
 ### Building
 
-You can build the project using these commands at the top-level of the repo:
+This project can be built for ARM (RM46L852) or Posix systems. 
 
-```
+If you want to build for the RM46, run:
+
+```bash
 make clean # Delete any previous build files
-make # Build the .out file. It should appear in the build directory.
+make rm46
 ```
+
+If you want to test the code on a Posix system, run:
+
+```bash
+make clean # Delete any previous build files
+make posix
+./build/OBC-firmware # Runs the binary
+```
+**Disclaimer:** The firmware built for Posix will not test any RM46 HAL-specific code.
+
 If you get a main() already defined error, go remove the file hal/source/sys_main.c.
 
 More information can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)
 
 ### Flashing and Debugging
+1. Build the binary for the RM46. The binary can the be found at `build/OBC-firmware.out`
+2. Open UniFlash and flash the binary onto the microcontroller
+
 Information about flashing the device and debugging can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)
 
 ## Contributing
@@ -88,6 +104,48 @@ Information about flashing the device and debugging can be found on [this Notion
 3. Make a PR. Make sure to at least add the CDH leads as reviewers and ping the CDH pr channel on Discord. You may also want to add your subteam lead(s) as a reviewer if you're not on CDH.
     * Pull requests should include information on, at minimum, the purpose of the PR, new changes made in the PR, tests performed to verify that the code works, and changes that can be made in future iterations of the feature. See [this sample template](https://github.com/UWOrbital/CC1120Driver/blob/main/.github/pull_request_template.md) for more. It’s good practice to have a PR template in a .github folder in every repository you create. GitHub will pull from this template every time a new PR is made.
 5. Make any requested changes and merge your branch onto main once the PR is approved.
+
+### Developing for different target systems
+In order to keep the system buildable for both RM46 and Posix, alternative logic mus be provided for hardware-specific code.
+```c
+#ifndef POSIX_BUILD 
+<Code that relies on RM46 HAL. This is what will run on the RM46.>
+#else
+<Alternative code for when system is runon a Posix system>
+#endif
+```
+Here are a few examples:
+```c
+#include "FreeRTOS.h"
+#include "os_task.h"
+
+#ifndef POSIX_BUILD
+#include "gio.h"
+#include "sys_common.h"
+#else
+#include "console.h"
+#include "stdint.h"
+#endif
+```
+
+```c
+while (1) {
+   #ifndef POSIX_BUILD
+   gioToggleBit(gioPORTB, 1); // RM46-specific code
+   #else
+   console_print("LED Toggled\n"); // Posix-specific code
+   #endif
+}
+```
+
+```c
+uint16_t temperature;
+#ifndef POSIX_BUILD
+temperature = read_temp_sensor();
+#else
+temperature = 100;
+#endif
+```
 
 **[Back to top](#table-of-contents)**
 
