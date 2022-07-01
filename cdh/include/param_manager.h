@@ -84,9 +84,9 @@ typedef enum
 */
 typedef enum
 {
-    TELEMETRY	= 0b001,		/**< Automatic collect this param for telemetry. */
-    PERSISTENT	= 0b010,		/**< Persist the value on non volatile memory. */
-    READ_ONLY	= 0b100 		/**< Prohibited to write with param_service functions, only applicable for parameterized variables. */
+    TELEMETRY	= 0b001,		/** Collect this param for telemetry. */
+    PERSISTENT	= 0b010,		/** Persist the value on non volatile memory. */
+    READ_ONLY	= 0b100 		/** Prohibited to write with set_param functions. */
 } param_opts_t;
 
 /**
@@ -155,20 +155,48 @@ typedef enum
 uint8_t param_manager_init(void);
 
 /**
+ * @brief	Get the parameter handle for the given parameter name
+ * @param	paramName          Name of the parameter
+ * @param	param              Pointer to the parameter
+ *
+ * @return	1 if OK; 0 if error or parameter doesn't exist
+ */
+uint8_t get_param(param_names_t paramName, param_handle_t param);
+
+/**
+ * @brief	Get the parameter handle for the given parameter index
+ * @param	paramIndex         Index of the parameter
+ * @param	param              Pointer to the parameter
+ *
+ * @return	1 if OK; 0 if error or parameter doesn't exist
+ */
+uint8_t get_param_by_index(uint16_t paramIndex, param_handle_t param);
+
+/**
  * @brief	Get the value of a Parameter
- * @param	param_name          Name of the parameter
- * @param	param_type          Type of the parameter. Used to make sure developer is using the right type.
- * @param	out_p               Void pointer to buffer to store param value, should be enough to store value
+ * @param	paramName          Name of the parameter
+ * @param	paramType          Type of the parameter. Used to make sure developer is using the right type.
+ * @param	out               Void pointer to buffer to store param value, should be enough to store value
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
 uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out);
 
 /**
+ * @brief	Get the value of a parameter by index
+ * @param	paramIndex         Index of the parameter
+ * @param	paramType          Type of the parameter. Used to make sure developer is using the right type.
+ * @param	out                Void pointer to buffer to store param value, should be enough to store value
+ *
+ * @return	1 if OK; 0 if error or parameter doesn't exist
+ */
+uint8_t get_param_val_by_index(uint16_t paramIndex, param_type_t paramType, void *out);
+
+/**
  * @brief	Set the value of a Parameter
- * @param	param_name          Name of the parameter
- * @param	param_type          Type of the parameter. Used to make sure developer is using the right type.
- * @param	in_p 				Void pointer to memory where value is stored
+ * @param	paramName          Name of the parameter
+ * @param	paramType          Type of the parameter. Used to make sure developer is using the right type.
+ * @param	in 				Void pointer to memory where value is stored
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */

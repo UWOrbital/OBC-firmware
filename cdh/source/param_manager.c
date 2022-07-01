@@ -24,10 +24,34 @@ uint8_t param_manager_init(void) {
     return 0;
 }
 
+uint8_t get_param(param_names_t paramName, param_handle_t param) {
+    param_handle_t paramHandle = get_param_handle(paramName);
+    if ( paramHandle == NULL ) {
+        return 0;
+    }
+
+    if ( xSemaphoreTake(paramTableMutex, portMAX_DELAY) == pdTRUE ) {
+        memcpy(param, paramHandle, sizeof(param_t));
+        xSemaphoreGive(paramTableMutex);
+        return 1;
+    }
+
+    return 0;
+}
+
+uint8_t get_param_by_index(uint16_t paramIndex, param_handle_t param) {
+    return get_param((param_names_t)paramIndex, param);
+}
+
 uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out)
 {
     uint8_t status = access_param_table(GET_PARAM, paramName, paramType, out);
     xSemaphoreGive(paramTableMutex);
+    return status;
+}
+
+uint8_t get_param_val_by_index(uint16_t paramIndex, param_type_t paramType, void *out) {
+    uint8_t status = get_param_val((param_names_t)paramIndex, paramType, out);
     return status;
 }
 
