@@ -1,9 +1,9 @@
 /**
- * @file param_manager.c
+ * @file obc_sci_io.c
  * @author Daniel Gobalakrishnan
  * @date 2022-07-01
  */
-#include "obc_sci_comms.h"
+#include "obc_sci_io.h"
 
 #include "FreeRTOS.h"
 #include "os_portmacro.h"
@@ -19,12 +19,12 @@ void sci_mutex_init(void) {
     }
 }
 
-uint8_t sci_send_text(sciBASE_t *sci, uint8_t *text, uint32_t length) {
+uint8_t sci_print_text(uint8_t *text, uint32_t length) {
     if (sciCommMutex != NULL) {
         if (xSemaphoreTake(sciCommMutex, portMAX_DELAY) == pdTRUE) {
             while (length--) {
-                while ((sci->FLR & 0x4) == 4);
-                sciSendByte(sci, *text++);
+                while ((scilinREG->FLR & 0x4) == 4);
+                sciSendByte(scilinREG, *text++);
             }
             xSemaphoreGive(sciCommMutex);
             return 1;
