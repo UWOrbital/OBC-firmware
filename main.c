@@ -6,7 +6,7 @@
 #include "sci.h"
 
 #include "supervisor.h"
-#include "obc_sci_comms.h"
+#include "obc_sci_io.h"
 
 int main(void) {
 
