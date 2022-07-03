@@ -141,6 +141,7 @@
 #define INCLUDE_eTaskGetState               1
 #define INCLUDE_xTaskGetHandle              1
 #define INCLUDE_xTaskGetIdleTaskHandle      1
+#define INCLUDE_xTaskGetCurrentTaskHandle   1
 
 /* USER CODE BEGIN (4) */
 /* USER CODE END */

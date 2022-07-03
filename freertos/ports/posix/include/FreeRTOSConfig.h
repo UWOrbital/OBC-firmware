@@ -59,6 +59,7 @@ void vConfigureTimerForRunTimeStats( void );
 #define INCLUDE_xSemaphoreGetMutexHolder          1
 #define INCLUDE_xTimerPendFunctionCall            1
 #define INCLUDE_xTaskAbortDelay                   1
+#define INCLUDE_xTaskGetCurrentTaskHandle         1
 
 #define configINCLUDE_MESSAGE_BUFFER_AMP_DEMO     0
 #if ( configINCLUDE_MESSAGE_BUFFER_AMP_DEMO == 1 )
