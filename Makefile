@@ -22,8 +22,10 @@ all: $(BUILD_DIR)/OBC-firmware.out
 $(BUILD_DIR)/OBC-firmware.out: $(OBJS)
 	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
 
+bringup: 
+	make -f bringup/Makefile
 
 clean:
 	rm -rf build/*
 
-.PHONY: all clean
+.PHONY: all clean bringup
