@@ -1,10 +1,13 @@
-# This file builds for a Posix system
+# This example Makefile builds for a Posix system
 
 # The compiler is gcc (GNU Compiler Collection)
 CC := gcc
 
+# Name for the output executable file
+BIN := posix_example
+
 # The build directory
-BUILD_DIR := build
+BUILD_DIR := examples/posix_makefile_example/build
 
 # Compiler flags
 CFLAGS := -ggdb3
@@ -15,35 +18,28 @@ LDFLAGS := -ggdb3 -pthread
 LDFLAGS += -O3
 
 # The include directories (the ones with header files)
-INCLUDE_DIRS :=
-INCLUDE_DIRS += -I"freertos/ports/posix/include"
+INCLUDE_DIRS := -I"freertos/ports/posix/include"
 INCLUDE_DIRS += -I"posix_utils/include"
-INCLUDE_DIRS += -I"adcs/include"
-INCLUDE_DIRS += -I"cdh/include"
-INCLUDE_DIRS += -I"comms/include"
-INCLUDE_DIRS += -I"payload/include"
+INCLUDE_DIRS += -I"examples/posix_makefile_example/include"
 
 # The source directories (the ones with source files)
-SRC_DIRS :=
-SRC_DIRS += freertos/ports/posix/source
+SRC_DIRS := freertos/ports/posix/source
 SRC_DIRS += posix_utils/source
-SRC_DIRS += adcs/source
-SRC_DIRS += cdh/source
-SRC_DIRS += comms/source
-SRC_DIRS += payload/source
+SRC_DIRS += examples/posix_makefile_example/source
+SRC_DIRS += examples/posix_makefile_example
 
 # Preprocessor flags
-CPPFLAGS := 
-CPPFLAGS += $(INCLUDE_DIRS) 
+CPPFLAGS := $(INCLUDE_DIRS) 
 CPPFLAGS += -DBUILD_DIR=\"$(BUILD_DIR)\"
 CPPFLAGS += -D_WINDOWS_
 CPPFLAGS += -DTRACE_ON_ENTER=0
 CPPFLAGS += -DprojCOVERAGE_TEST=0
 
+# Get all c files from the source directories
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
+# Create a list of all the object files based on the c files
 OBJS := $(foreach file,$(SRCS),$(BUILD_DIR)/$(basename $(file)).o)
-OBJS +=  $(BUILD_DIR)/main.o
 
 DEPS := $(patsubst %.o,%.d,$(OBJS))
 OBJ_DIRS := $(sort $(foreach obj,$(OBJS),$(dir $(obj))))
