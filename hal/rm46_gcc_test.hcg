@@ -297,7 +297,9 @@
       <HDRSCI>
         <NAME>sci.h</NAME>
       </HDRSCI>
-      <SRCSCI/>
+      <SRCSCI>
+        <NAME>sci.c</NAME>
+      </SRCSCI>
       <HDRLIN_R>
         <NAME>reg_lin.h</NAME>
       </HDRLIN_R>
@@ -376,7 +378,9 @@
       <HDRI2C>
         <NAME>i2c.h</NAME>
       </HDRI2C>
-      <SRCI2C/>
+      <SRCI2C>
+        <NAME>i2c.c</NAME>
+      </SRCI2C>
       <HDR1EMAC>
         <NAME>emac.h</NAME>
       </HDR1EMAC>
@@ -679,7 +683,7 @@
         <PATH>include\sci.h</PATH>
       </HDRSCI>
       <SRCSCI>
-        <PATH/>
+        <PATH>source\sci.c</PATH>
       </SRCSCI>
     </FILENAMES>
   </SCI>
@@ -792,7 +796,7 @@
         <PATH>include\i2c.h</PATH>
       </HDRI2C>
       <SRCI2C>
-        <PATH/>
+        <PATH>source\i2c.c</PATH>
       </SRCI2C>
     </FILENAMES>
   </I2C>
