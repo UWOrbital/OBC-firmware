@@ -1,6 +1,10 @@
 # This file builds for a Posix system
 
+# The compiler is gcc (GNU Compiler Collection)
 CC := gcc
+
+# The build directory
+BUILD_DIR := build
 
 # Compiler flags
 CFLAGS := -ggdb3
@@ -10,6 +14,7 @@ CFLAGS += -O3
 LDFLAGS := -ggdb3 -pthread
 LDFLAGS += -O3
 
+# The include directories (the ones with header files)
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"freertos/ports/posix/include"
 INCLUDE_DIRS += -I"posix_utils/include"
@@ -18,6 +23,7 @@ INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
 INCLUDE_DIRS += -I"payload/include"
 
+# The source directories (the ones with source files)
 SRC_DIRS :=
 SRC_DIRS += freertos/ports/posix/source
 SRC_DIRS += posix_utils/source
@@ -26,12 +32,13 @@ SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
 SRC_DIRS += payload/source
 
-# Preprocessor defines
-CPPFLAGS              :=    $(INCLUDE_DIRS) -DBUILD_DIR=\"$(BUILD_DIR_ABS)\"
-CPPFLAGS              +=    -D_WINDOWS_
-CPPFLAGS              += 	-DTRACE_ON_ENTER=0
-CPPFLAGS              += 	-DprojCOVERAGE_TEST=0
-CPPFLAGS              += 	-DPOSIX_BUILD
+# Preprocessor flags
+CPPFLAGS := 
+CPPFLAGS += $(INCLUDE_DIRS) 
+CPPFLAGS += -DBUILD_DIR=\"$(BUILD_DIR)\"
+CPPFLAGS += -D_WINDOWS_
+CPPFLAGS += -DTRACE_ON_ENTER=0
+CPPFLAGS += -DprojCOVERAGE_TEST=0
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
