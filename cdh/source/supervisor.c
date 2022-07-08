@@ -22,3 +22,4 @@ void vSupervisorTask(void * pvParameters){
         vTaskDelay(SUPERVISOR_DELAY_TICKS);
     }
 }
+
