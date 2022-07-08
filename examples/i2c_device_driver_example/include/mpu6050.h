@@ -132,11 +132,11 @@ void mpu6050_wakeup(void);
 /**
  * @brief Read acceleration data from the MPU6050
  * 
- * @param acc_x 
- * @param acc_y 
- * @param acc_z 
+ * @param accX The acceleration in the x direction
+ * @param accY The acceleration in the y direction
+ * @param accZ The acceleration in the z direction
  * @return 1 if successful, 0 otherwise
  */
-uint8_t mpu6050_read_accel_data(double *acc_x, double *acc_y, double *acc_z);
+uint8_t mpu6050_read_accel_data(double *accX, double *accY, double *accZ);
 
 #endif /* MPU6050_H */
