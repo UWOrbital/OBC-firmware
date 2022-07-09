@@ -24,6 +24,7 @@ void i2c_mutex_init(void) {
 uint8_t i2c_send(uint8_t sAddr, uint16_t size, void *buf) {
     if (i2cMutex != NULL) {
         if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+            // As discussed in PR #11, a critical section might not be required
             taskENTER_CRITICAL();
 
             i2cSetSlaveAdd(i2cREG1, sAddr);
