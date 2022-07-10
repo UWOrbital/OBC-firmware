@@ -3,16 +3,23 @@
 
 #include <math.h>
 
-bdot_t bdot;
+static bdot_t bdot;
 
-void bdot_init(float magneticFieldBody[3], float kp[3][3],
+uint8_t bdot_init(float magneticFieldBody[3], float kp[3][3],
                float maxMagneticDipole[3], float timeStep){
-    bdot_set_magnetic_field_body(magneticFieldBody);
+    uint8_t setMagneticField = bdot_set_magnetic_field_body(magneticFieldBody);
     float empty[3] = {0, 0, 0};
-    bdot_set_bdot_vector(empty);
-    bdot_set_kp(kp);
-    bdot_set_max_magnetic_dipole(maxMagneticDipole);
-    bdot_set_time_step(timeStep);
+    uint8_t setBdotVector = bdot_set_bdot_vector(empty);
+    uint8_t setKp = bdot_set_kp(kp);
+    uint8_t setMaxMagenticDipole = bdot_set_max_magnetic_dipole(maxMagneticDipole);
+    uint8_t setTimeStep = bdot_set_time_step(timeStep);
+
+    if ( !setMagneticField || !setBdotVector || !setKp ||
+        !setMaxMagenticDipole || !setTimeStep ) {
+        return 0;
+    }
+
+    return 1;
 }
 
 void bdot_controller(float magneticFieldBody[3], float magneticDipole[3]){
@@ -41,65 +48,77 @@ void bdot_controller(float magneticFieldBody[3], float magneticDipole[3]){
 
 }
 
-float *bdot_magnetorquer_scaling(float magneticDipole[3]){
+static void bdot_magnetorquer_scaling(float magneticDipole[3]){
     for ( int i = 0; i < 3; i++ ) {
         if ( fabs(magneticDipole[i]) > bdot.maxMagneticDipole[i] ) {
             magneticDipole[i] = copysignf(bdot.maxMagneticDipole[i], magneticDipole[i]);
         }
     }
-    return magneticDipole;
 }
 
 float *bdot_get_magnetic_field_body(void){
     return bdot.magneticFieldBody;
 }
 
-void bdot_set_magnetic_field_body(float magneticFieldBody[3]){
-    for ( int i = 0; i < 3; i++ ){
+uint8_t bdot_set_magnetic_field_body(float magneticFieldBody[3]){
+    for ( int i = 0; i < 3; i++ ) {
         bdot.magneticFieldBody[i] = magneticFieldBody[i];
     }
+    
+    return 1;
 }
 
 float *bdot_get_bdot_vector(void){
     return bdot.bdotVector;
 }
 
-void bdot_set_bdot_vector(float bdotVector[3]){
-    for ( int i = 0; i < 3; i++ ){
+uint8_t bdot_set_bdot_vector(float bdotVector[3]){
+    for ( int i = 0; i < 3; i++ ) {
         bdot.bdotVector[i] = bdotVector[i];
     }
+
+    return 1;
 }
 
 void bdot_get_kp(float output[3][3]){
-    for ( int i = 0; i < 3; i ++ ){
-        for ( int j = 0; j < 3; j++ ){
+    for ( int i = 0; i < 3; i ++ ) {
+        for ( int j = 0; j < 3; j++ ) {
             output[i][j] = bdot.kp[i][j];
         }
     }
 }
 
-void bdot_set_kp(float kp[3][3]){
-    for ( int i = 0; i < 3; i ++ ){
-        for ( int j = 0; j < 3; j++ ){
+uint8_t bdot_set_kp(float kp[3][3]){
+    for ( int i = 0; i < 3; i ++ ) {
+        for ( int j = 0; j < 3; j++ ) {
             bdot.kp[i][j] = kp[i][j];
         }
     }
+
+    return 1;
 }
 
 float *bdot_get_max_magnetic_dipole(void){
     return bdot.maxMagneticDipole;
 }
 
-void bdot_set_max_magnetic_dipole(float maxMagneticDipole[3]){
-    for ( int i = 0; i < 3; i++ ){
+uint8_t bdot_set_max_magnetic_dipole(float maxMagneticDipole[3]){
+    for ( int i = 0; i < 3; i++ ) {
+        if ( maxMagneticDipole[i] < 0 ) {
+            return 0;
+        }
         bdot.maxMagneticDipole[i] = maxMagneticDipole[i];
     }
+
+    return 1;
 }
 
 float bdot_get_time_step(void){
     return bdot.timeStep;
 }
 
-void bdot_set_time_step(float timeStep){
+uint8_t bdot_set_time_step(float timeStep){
     bdot.timeStep = timeStep;
+
+    return 1;
 }

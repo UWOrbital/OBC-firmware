@@ -1,6 +1,8 @@
 #ifndef ADCS_BDOT_H
 #define ADCS_BDOT_H
 
+#include <stdint.h>
+
 typedef struct{
     /**
      * magnetic field value expressed in the Body Frame
@@ -33,7 +35,7 @@ typedef struct{
  * @param maxMagneticDipole magnetorquers maximum magnetic dipole (in Am^2)
  * @param timeStep derivation value (in sec)
  */
-void bdot_init(float magneticFieldBody[3], float kp[3][3], float maxMagneticDipole[3], float timeStep);
+uint8_t bdot_init(float magneticFieldBody[3], float kp[3][3], float maxMagneticDipole[3], float timeStep);
 
 /**
  * @brief bdot controller is used in Detumbling mode, during which actuation is performed by the magnetorquers, and
@@ -51,7 +53,7 @@ void bdot_controller(float magneticFieldBody[3], float magneticDipole[3]);
  * @param magneticDipole desired magnetic dipole (in Am^2)
  * @return scaled magnetic dipole (in Am^2)
  */
-float *bdot_magnetorquer_scaling(float magneticDipole[3]);
+static void bdot_magnetorquer_scaling(float magneticDipole[3]);
 
 /**
  * @brief magnetic field value expressed in the Body Frame getter
@@ -65,7 +67,7 @@ float *bdot_get_magnetic_field_body(void);
  * 
  * @param magneticFieldBody magnetic field value expressed in the Body Frame
  */
-void bdot_set_magnetic_field_body(float magneticFieldBody[3]);
+uint8_t bdot_set_magnetic_field_body(float magneticFieldBody[3]);
 
 /**
  * @brief bdot vector getter
@@ -79,7 +81,7 @@ float *bdot_get_bdot_vector(void);
  * 
  * @param bdotVector bdot vector
  */
-void bdot_set_bdot_vector(float bdotVector[3]);
+uint8_t bdot_set_bdot_vector(float bdotVector[3]);
 
 /**
  * @brief proportional positive scalar gain getter
@@ -93,7 +95,7 @@ void bdot_get_kp(float output[3][3]);
  * 
  * @param kp proportional positive scalar gain
  */
-void bdot_set_kp(float kp[3][3]);
+uint8_t bdot_set_kp(float kp[3][3]);
 
 /**
  * @brief Maximum magnetic dipole of magnetorquers (in Am^2) getter
@@ -107,7 +109,7 @@ float *bdot_get_max_magnetic_dipole(void);
  * 
  * @param maxMagneticDipole Maximum magnetic dipole of magnetorquers (in Am^2)
  */
-void bdot_set_max_magnetic_dipole(float maxMagneticDipole[3]);
+uint8_t bdot_set_max_magnetic_dipole(float maxMagneticDipole[3]);
 
 /**
  * @brief derivation value getter
@@ -121,6 +123,6 @@ float bdot_get_time_step(void);
  * 
  * @param timeStep derivation value
  */
-void bdot_set_time_step(float timeStep);
+uint8_t bdot_set_time_step(float timeStep);
 
 #endif //ADCS_BDOT_H
