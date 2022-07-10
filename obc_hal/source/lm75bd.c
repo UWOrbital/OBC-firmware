@@ -6,17 +6,31 @@
 #include "lm75bd.h"
 #include "obc_i2c_io.h"
 
-uint8_t lm75bd_read_temp(float *temp) {
+uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     uint8_t tempBuff[2];
 
-    if (i2c_read_register(LM75BD_I2C_ADDR, LM75BD_REG_TEMP, tempBuff, 2) == 0) {
+    if (i2c_read_register(devAddr, LM75BD_REG_TEMP, tempBuff, 2) == 0) {
         return 0;
     }
 
-    /* Convert and store the temperature in degrees Celsius */
-    uint8_t tempMSB = (tempBuff[0] >> 7) & 1u;
+    int16_t value = ( (tempBuff[0] << 8) | tempBuff[1] ) >> 5;
 
-    *temp = (int16_t)( ( ( (tempBuff[0] & 0x7Fu) << 8 ) | tempBuff[1] ) >> 5 ) * 0.125f;
+    /* Sign extension */
+    if (value & (1 << 10)) {
+        value |= ~((1 << 10) - 1);
+    }
+    /*
+    value = 1111 1111 1110 0000b -> 111 1111 1111b
+    (1 << 10) - 1 = 100 0000 0000b - 1 = 011 1111 1111b
+    ~(011 1111 1111) = 1111 1100 0000 0000b -> -1024 in signed 2's complement
+    111 1111 1111b | 1111 1100 0000 0000b = 1111 1111 1111 1111 -> -1 in signed 2's complement
+    */
+
+    *temp = (float)value * 0.125;
 
     return 1;
+}
+
+uint8_t writeConfigLM75BD(uint8_t devAddr, lm75bd_config_t *config) {
+    
 }
