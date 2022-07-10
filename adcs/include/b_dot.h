@@ -3,15 +3,6 @@
 
 typedef struct{
     /**
-     * a 3 by 3 matrix
-     * 
-     */
-    float matrix[3][3];
-
-} matrix_t;
-
-typedef struct{
-    /**
      * magnetic field value expressed in the Body Frame
      */
     float magneticFieldBody[3];
@@ -21,7 +12,7 @@ typedef struct{
     /**
      * proportional positive scalar gain
      */
-    matrix_t Kp;
+    float kp[3][3];
 
     /**
      * Maximum magnetic dipole of magnetorquers (in Am^2)
@@ -38,11 +29,11 @@ typedef struct{
 /**
  * Acts as the constructor
  * @param magneticFieldBody magnetic field value expressed in the Body Frame
- * @param Kp proportional positive scalar gain
+ * @param kp proportional positive scalar gain
  * @param maxMagneticDipole magnetorquers maximum magnetic dipole (in Am^2)
  * @param timeStep derivation value (in sec)
  */
-void bdot_init(float magneticFieldBody[3], float Kp[3][3], float maxMagneticDipole[3], float timeStep);
+void bdot_init(float magneticFieldBody[3], float kp[3][3], float maxMagneticDipole[3], float timeStep);
 
 /**
  * @brief bdot controller is used in Detumbling mode, during which actuation is performed by the magnetorquers, and
@@ -93,16 +84,16 @@ void bdot_set_bdot_vector(float bdotVector[3]);
 /**
  * @brief proportional positive scalar gain getter
  * 
- * @return proportional positive scalar gain
+ * @param output an empty 3 by 3 matrix for the kp values to be placed into
  */
-matrix_t bdot_get_kp(void);
+void bdot_get_kp(float output[3][3]);
 
 /**
  * @brief proportional positive scalar gain setter
  * 
- * @param Kp proportional positive scalar gain
+ * @param kp proportional positive scalar gain
  */
-void bdot_set_kp(float Kp[3][3]);
+void bdot_set_kp(float kp[3][3]);
 
 /**
  * @brief Maximum magnetic dipole of magnetorquers (in Am^2) getter
