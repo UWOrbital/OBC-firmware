@@ -67,7 +67,7 @@ float *bdot_get_magnetic_field_body(void);
  * 
  * @param magneticFieldBody magnetic field value expressed in the Body Frame
  */
-uint8_t bdot_set_magnetic_field_body(float magneticFieldBody[3]);
+void bdot_set_magnetic_field_body(float magneticFieldBody[3]);
 
 /**
  * @brief bdot vector getter
@@ -81,7 +81,7 @@ float *bdot_get_bdot_vector(void);
  * 
  * @param bdotVector bdot vector
  */
-uint8_t bdot_set_bdot_vector(float bdotVector[3]);
+void bdot_set_bdot_vector(float bdotVector[3]);
 
 /**
  * @brief proportional positive scalar gain getter
@@ -95,7 +95,7 @@ void bdot_get_kp(float output[3][3]);
  * 
  * @param kp proportional positive scalar gain
  */
-uint8_t bdot_set_kp(float kp[3][3]);
+void bdot_set_kp(float kp[3][3]);
 
 /**
  * @brief Maximum magnetic dipole of magnetorquers (in Am^2) getter
@@ -123,6 +123,6 @@ float bdot_get_time_step(void);
  * 
  * @param timeStep derivation value
  */
-uint8_t bdot_set_time_step(float timeStep);
+void bdot_set_time_step(float timeStep);
 
 #endif //ADCS_BDOT_H
