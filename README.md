@@ -106,10 +106,22 @@ uint8_t add_numbers(uint8_t num1, uint8_t num2);
 
 -   File comments are not required
 
+#### Header Guard
+
+The symbol name should have the form `<PATH>_<FILE>_H_`
+
+For example, if the file is `abc/xyz/foo.h`, then the header guard should be
+```
+#ifndef ABC_XYZ_FOO_H_
+#define ABC_XYZ_FOO_H_
+...
+#endif
+```
+
 ### ****Naming and typing conventions****
 
 -   `variableNames` in camelCase
--   `function_names()` in snake_case
+-   `functionNames()` in camelCase
 -   `ClassNames` in PascalCase (UpperCamelCase)
 -   `CONSTANT_NAMES` in CAPITAL_SNAKE_CASE
 -   `file_names` in snake_case
