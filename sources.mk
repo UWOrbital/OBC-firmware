@@ -7,7 +7,6 @@
 
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += freertos/ports/rm46/source
 SRC_DIRS += adcs/source
 SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
