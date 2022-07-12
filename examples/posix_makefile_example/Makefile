@@ -19,12 +19,10 @@ LDFLAGS += -O3
 
 # The include directories (the ones with header files)
 INCLUDE_DIRS := -I"freertos/ports/posix/include"
-INCLUDE_DIRS += -I"posix_utils/include"
 INCLUDE_DIRS += -I"examples/posix_makefile_example/include"
 
 # The source directories (the ones with source files)
 SRC_DIRS := freertos/ports/posix/source
-SRC_DIRS += posix_utils/source
 SRC_DIRS += examples/posix_makefile_example/source
 SRC_DIRS += examples/posix_makefile_example
 

@@ -4,22 +4,15 @@ This repository holds all the code that runs on our CubeSat's onboard computer (
 
 ## Table of Contents
 
-- [OBC-firmware](#obc-firmware)
-  - [Table of Contents](#table-of-contents)
-  - [About the Project](#about-the-project)
-  - [Getting Started](#getting-started)
-    - [Dependencies](#dependencies)
-    - [Getting the Source](#getting-the-source)
-    - [Building](#building)
-    - [Flashing and Debugging](#flashing-and-debugging)
-  - [Contributing](#contributing)
-  - [Style Guide](#style-guide)
-    - [Comments](#comments)
-      - [Single Line Comments](#single-line-comments)
-      - [Function Comments](#function-comments)
-      - [File Header Comments](#file-header-comments)
-    - [****Naming and typing conventions****](#naming-and-typing-conventions)
-  - [Authors](#authors)
+1. [About the Project](#about-the-project)
+1. [Getting Started](#getting-started)
+    1. [Dependencies](#dependencies)
+    2. [Setup](#getting-the-source)
+    3. [Building](#building)
+    4. [Flashing and Debugging](#flashing-and-debugging)
+1. [Contributing](#contributing)
+1. [Style Guide](#style-guide)
+1. [Authors](#authors)
 
 ## About the Project
 
@@ -65,15 +58,11 @@ You can build the project using these commands at the top-level of the repo:
 make clean # Delete any previous build files
 make # Build the .out file. It should appear in the build directory.
 ```
-
 If you get a main() already defined error, go remove the file hal/source/sys_main.c.
 
 More information can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)
 
 ### Flashing and Debugging
-1. Build the binary for the RM46. The binary can the be found at `build/OBC-firmware.out`
-2. Open UniFlash and flash the binary onto the microcontroller
-
 Information about flashing the device and debugging can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)
 
 ## Contributing

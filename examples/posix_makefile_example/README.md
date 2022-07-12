@@ -1,8 +1,8 @@
 To try this example, run the following from the top-level directory (OBC-firmware):
 
 ```bash
-make -f examples/posix_makefile_example/Makefile # Build the binary
-./examples/posix_makefile_example/build/posix_example # Run the binary
+make -f examples/posix_makefile_example/Makefile # Build
+./examples/posix_makefile_example/build/posix_example # Run
 ```
 
 To remove the build files, run the following:
