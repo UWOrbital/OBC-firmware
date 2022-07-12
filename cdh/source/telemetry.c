@@ -22,8 +22,9 @@
 QueueHandle_t telemetryQueue;
 extern QueueHandle_t supervisorQueue;
 
-TimerHandle_t LED_timer;
+TimerHandle_t ledTimer;
 
+static StaticTimer_t ledTimerBuffer;
 
 void sendMessage(TimerHandle_t xTimer ){
     supervisor_event_t newMsg;
@@ -32,7 +33,7 @@ void sendMessage(TimerHandle_t xTimer ){
 }
 
 void vTelemetryTask(void * pvParameters){
-    LED_timer = xTimerCreate("LED_Timer", pdMS_TO_TICKS(1000), false, (void *) 0, sendMessage);
+    ledTimer = xTimerCreateStatic("ledTimer", pdMS_TO_TICKS(1000), false, (void *) 0, sendMessage, ledTimerBuffer);
     while(1){
         telemetry_event_t queueMsg;
         if(!xQueueReceive(telemetryQueue, (void *) &queueMsg, TELEMETRY_QUEUE_WAIT_PERIOD)){
@@ -44,7 +45,7 @@ void vTelemetryTask(void * pvParameters){
             case TURN_ON_LED_EVENT_ID:
                 //vTaskDelay(queueMsg.data.delayPeriod);
                 gioToggleBit(gioPORTB, 1);
-                xTimerStart(LED_timer, SUPERVISOR_QUEUE_WAIT_PERIOD);
+                xTimerStart(ledTimer, SUPERVISOR_QUEUE_WAIT_PERIOD);
                 break;
             default:
                 ;
