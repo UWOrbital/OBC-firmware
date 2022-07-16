@@ -21,6 +21,15 @@ void i2c_mutex_init(void) {
     }
 }
 
+/*
+sAddr = Address of the device, (I2C Slave address)
+reg =  register addrsess like 0x01 0x02
+*data = array where data will get filled in
+numBytes = size of the array *data (how many bytes you recieve / write)
+
+
+*/
+
 uint8_t i2c_send(uint8_t sAddr, uint16_t size, void *buf) {
     if (i2cMutex != NULL) {
         if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
