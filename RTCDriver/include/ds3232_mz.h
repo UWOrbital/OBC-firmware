@@ -20,9 +20,11 @@
 #define DS3232_MONTH        0x05
 #define DS3232_YEAR         0x06
 
-unit8_t get_rtc_seconds();
-unit8_t get_rtc_minutes();
-unit8_t get_rtc_hour();
-unit8_t get_rtc_date();
-unit8_t get_rtc_year();
-unit8_t get_rtc_time();
+uint8_t get_rtc_seconds(uint8_t* seconds);
+uint8_t get_rtc_minutes();
+uint8_t get_rtc_hour();
+uint8_t get_rtc_date();
+uint8_t get_rtc_year();
+uint8_t get_rtc_time();
+
+#endif /* DS3232_MZH */
