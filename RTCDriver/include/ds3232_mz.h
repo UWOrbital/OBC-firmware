@@ -21,10 +21,10 @@
 #define DS3232_YEAR         0x06
 
 uint8_t get_rtc_seconds(uint8_t* seconds);
-uint8_t get_rtc_minutes();
-uint8_t get_rtc_hour();
-uint8_t get_rtc_date();
-uint8_t get_rtc_year();
-uint8_t get_rtc_time();
+uint8_t get_rtc_minutes(uint8_t* minutes);
+uint8_t get_rtc_hour(uint8_t* hours);  //having a hard time understanfing how data will be sent
+uint8_t get_rtc_date(uint8_t* date);
+uint8_t get_rtc_year(uint8_t* year); 
+uint8_t get_rtc_time(int time[3]);
 
 #endif /* DS3232_MZH */
