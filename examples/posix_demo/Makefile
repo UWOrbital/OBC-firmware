@@ -7,7 +7,7 @@ CC := gcc
 BIN := posix_example
 
 # The build directory
-BUILD_DIR := examples/posix_makefile_example/build
+BUILD_DIR := examples/posix_demo/build
 
 # Compiler flags
 CFLAGS := -ggdb3
@@ -19,12 +19,12 @@ LDFLAGS += -O3
 
 # The include directories (the ones with header files)
 INCLUDE_DIRS := -I"posix/include"
-INCLUDE_DIRS += -I"examples/posix_makefile_example/include"
+INCLUDE_DIRS += -I"examples/posix_demo/include"
 
 # The source directories (the ones with source files)
 SRC_DIRS := posix/source
-SRC_DIRS += examples/posix_makefile_example/source
-SRC_DIRS += examples/posix_makefile_example
+SRC_DIRS += examples/posix_demo/source
+SRC_DIRS += examples/posix_demo
 
 # Preprocessor flags
 CPPFLAGS := $(INCLUDE_DIRS) 
