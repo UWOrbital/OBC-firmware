@@ -1,22 +1,17 @@
-/**
- * @file param_manager.c
- * @author Daniel Gobalakrishnan
- * @date 2022-06-08
- */
 #include "param_manager.h"
 #include "param_table.h"
 
-#include "FreeRTOS.h"
-#include "os_portmacro.h"
-#include "os_semphr.h"
+#include <FreeRTOS.h>
+#include <os_portmacro.h>
+#include <os_semphr.h>
 
-#include "string.h"
+#include <string.h>
 
 static param_handle_t paramTableHandler = paramTable;
 static const uint16_t paramTableLength = sizeof(paramTable) / sizeof(param_t);
 static SemaphoreHandle_t paramTableMutex = NULL;
 
-uint8_t param_manager_init(void) {
+uint8_t initParamManager(void) {
     if ( paramTableMutex == NULL ) {
         paramTableMutex = xSemaphoreCreateMutex();
         return 1;
@@ -24,8 +19,8 @@ uint8_t param_manager_init(void) {
     return 0;
 }
 
-uint8_t get_param(param_names_t paramName, param_handle_t param) {
-    param_handle_t paramHandle = get_param_handle(paramName);
+uint8_t getParam(param_names_t paramName, param_handle_t param) {
+    param_handle_t paramHandle = getParamHandle(paramName);
     if ( paramHandle == NULL ) {
         return 0;
     }
@@ -39,37 +34,37 @@ uint8_t get_param(param_names_t paramName, param_handle_t param) {
     return 0;
 }
 
-uint8_t get_param_by_index(uint16_t paramIndex, param_handle_t param) {
-    return get_param((param_names_t)paramIndex, param);
+uint8_t getParamByIndex(uint16_t paramIndex, param_handle_t param) {
+    return getParam((param_names_t)paramIndex, param);
 }
 
-uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out)
+uint8_t getParamVal(param_names_t paramName, param_type_t paramType, void *out)
 {
-    uint8_t status = access_param_table(GET_PARAM, paramName, paramType, out);
+    uint8_t status = accessParamTable(GET_PARAM, paramName, paramType, out);
     xSemaphoreGive(paramTableMutex);
     return status;
 }
 
-uint8_t get_param_val_by_index(uint16_t paramIndex, param_type_t paramType, void *out) {
-    uint8_t status = get_param_val((param_names_t)paramIndex, paramType, out);
+uint8_t getParamValByIndex(uint16_t paramIndex, param_type_t paramType, void *out) {
+    uint8_t status = getParamVal((param_names_t)paramIndex, paramType, out);
     return status;
 }
 
-uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in)
+uint8_t setParamVal(param_names_t paramName, param_type_t paramType, void *in)
 {
-    uint8_t status = access_param_table(SET_PARAM, paramName, paramType, in);
+    uint8_t status = accessParamTable(SET_PARAM, paramName, paramType, in);
     xSemaphoreGive(paramTableMutex);
     return status;
 }
 
-static uint8_t access_param_table(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p)
+static uint8_t accessParamTable(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p)
 {
-    param_handle_t paramHandle = get_param_handle(paramName);
+    param_handle_t paramHandle = getParamHandle(paramName);
     if ( paramHandle == NULL ) {
         return 0;
     }
 
-    param_size_t paramSize = get_param_size(paramType);
+    param_size_t paramSize = getParamSize(paramType);
     if ( paramHandle->type != paramType || paramSize == 0 ) {
         return 0;
     }
@@ -97,7 +92,7 @@ static uint8_t access_param_table(access_type_t accessType, param_names_t paramN
     return 1;
 }
 
-static param_handle_t get_param_handle(param_names_t paramName)
+static param_handle_t getParamHandle(param_names_t paramName)
 {
     if ( paramName < 0 || paramName >= paramTableLength ) {
         return NULL;
@@ -106,7 +101,7 @@ static param_handle_t get_param_handle(param_names_t paramName)
     return &paramTableHandler[paramName];
 }
 
-static param_size_t get_param_size(param_type_t type)
+static param_size_t getParamSize(param_type_t type)
 {
     switch (type)
     {
@@ -137,12 +132,12 @@ static param_size_t get_param_size(param_type_t type)
     }
 }
 
-static uint8_t is_read_only(param_handle_t paramHandle) {
+static uint8_t isReadOnly(param_handle_t paramHandle) {
     return ( paramHandle->opts & READ_ONLY );
 }
-static uint8_t is_telemetry(param_handle_t paramHandle) {
+static uint8_t isTelemetry(param_handle_t paramHandle) {
     return ( paramHandle->opts & TELEMETRY );
 }
-static uint8_t is_persistent(param_handle_t paramHandle) {
+static uint8_t isPersistent(param_handle_t paramHandle) {
     return ( paramHandle->opts & PERSISTENT );
 }

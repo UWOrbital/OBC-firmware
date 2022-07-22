@@ -1,11 +1,5 @@
-/**
- * @file param_manager.h
- * @author Daniel Gobalakrishnan
- * @date 2022-06-08
- */
-
-#ifndef PARAM_MANAGER_H
-#define PARAM_MANAGER_H
+#ifndef CDH_INCLUDE_PARAM_MANAGER_H_
+#define CDH_INCLUDE_PARAM_MANAGER_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -152,7 +146,7 @@ typedef enum
  *
  * @return	1 if OK; 0 if already initialized
  */
-uint8_t param_manager_init(void);
+uint8_t initParamManager(void);
 
 /**
  * @brief	Get the parameter handle for the given parameter name
@@ -161,7 +155,7 @@ uint8_t param_manager_init(void);
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
-uint8_t get_param(param_names_t paramName, param_handle_t param);
+uint8_t getParam(param_names_t paramName, param_handle_t param);
 
 /**
  * @brief	Get the parameter handle for the given parameter index
@@ -170,7 +164,7 @@ uint8_t get_param(param_names_t paramName, param_handle_t param);
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
-uint8_t get_param_by_index(uint16_t paramIndex, param_handle_t param);
+uint8_t getParamByIndex(uint16_t paramIndex, param_handle_t param);
 
 /**
  * @brief	Get the value of a Parameter
@@ -180,7 +174,7 @@ uint8_t get_param_by_index(uint16_t paramIndex, param_handle_t param);
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
-uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out);
+uint8_t getParamVal(param_names_t paramName, param_type_t paramType, void *out);
 
 /**
  * @brief	Get the value of a parameter by index
@@ -190,7 +184,7 @@ uint8_t get_param_val(param_names_t paramName, param_type_t paramType, void *out
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
-uint8_t get_param_val_by_index(uint16_t paramIndex, param_type_t paramType, void *out);
+uint8_t getParamValByIndex(uint16_t paramIndex, param_type_t paramType, void *out);
 
 /**
  * @brief	Set the value of a Parameter
@@ -200,7 +194,7 @@ uint8_t get_param_val_by_index(uint16_t paramIndex, param_type_t paramType, void
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
-uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in);
+uint8_t setParamVal(param_names_t paramName, param_type_t paramType, void *in);
 
 /**
  * @brief	Helper function to allow concurrent access to table
@@ -211,7 +205,7 @@ uint8_t set_param_val(param_names_t paramName, param_type_t paramType, void *in)
  *
  * @return	1 if OK; 0 if error or parameter doesn't exist
  */
-static uint8_t access_param_table(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p);
+static uint8_t accessParamTable(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p);
 
 /**
  * @brief	Get size of the parameter type in bytes
@@ -219,7 +213,7 @@ static uint8_t access_param_table(access_type_t accessType, param_names_t paramN
  *
  * @return	parameter size if OK; 0 if error
  */
-static param_size_t get_param_size(param_type_t type);
+static param_size_t getParamSize(param_type_t type);
 
 /**
  * @brief	Get pointer to parameter struct
@@ -227,7 +221,7 @@ static param_size_t get_param_size(param_type_t type);
  *
  * @return	Pointer to parameter struct, NULL if not found
  */
-static param_handle_t get_param_handle(param_names_t paramName);
+static param_handle_t getParamHandle(param_names_t paramName);
 
 /**
  * @brief	Check if parameter is read-only
@@ -235,7 +229,7 @@ static param_handle_t get_param_handle(param_names_t paramName);
  *
  * @return	1 if the parameter is read-only, 0 if not
  */
-static uint8_t is_read_only(param_handle_t paramHandle);
+static uint8_t isReadOnly(param_handle_t paramHandle);
 
 /**
  * @brief	Check if parameter is for telemetry
@@ -243,7 +237,7 @@ static uint8_t is_read_only(param_handle_t paramHandle);
  *
  * @return	1 if the parameter is for telemetry, 0 if not
  */
-static uint8_t is_telemetry(param_handle_t paramHandle);
+static uint8_t isTelemetry(param_handle_t paramHandle);
 
 /**
  * @brief	Check if parameter should be stored in non-volatile memory
@@ -251,6 +245,6 @@ static uint8_t is_telemetry(param_handle_t paramHandle);
  *
  * @return	1 if the parameter should be stored in non-volatile memory, 0 if not
  */
-static uint8_t is_persistent(param_handle_t paramHandle);
+static uint8_t isPersistent(param_handle_t paramHandle);
 
-#endif /* PARAM_MANAGER_H */
+#endif /* CDH_INCLUDE_PARAM_MANAGER_H_ */

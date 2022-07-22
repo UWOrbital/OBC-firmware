@@ -1,10 +1,5 @@
-/**
- * @file param_table.h
- * @author Daniel Gobalakrishnan
- * @date 2022-06-08
- */
-#ifndef PARAM_TABLE_H
-#define PARAM_TABLE_H
+#ifndef CDH_INCLUDE_PARAM_TABLE_H_
+#define CDH_INCLUDE_PARAM_TABLE_H_
 
 #include "param_manager.h"
 
@@ -29,4 +24,4 @@ param_t paramTable [] = {
         {.name=TEST_PARAM10, .type=DOUBLE_PARAM, .size=DOUBLE_SIZE, .opts=PERSISTENT, .value.d=0}
 };
 
-#endif /* PARAM_TABLE_H */
+#endif /* CDH_INCLUDE_PARAM_TABLE_H_ */

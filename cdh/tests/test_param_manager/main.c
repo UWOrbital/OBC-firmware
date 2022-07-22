@@ -8,9 +8,9 @@ void dummy_taskA();
 void dummy_taskB();
 
 int main( void ) {
-    console_init();
-    param_manager_init();
-    console_print("Starting\n");
+    initConsole();
+    initParamManager();
+    printConsole("Starting\n");
     xTaskCreate(dummy_taskA, "taskA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
     xTaskCreate(dummy_taskB, "taskB", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
     vTaskStartScheduler();
@@ -22,12 +22,12 @@ void dummy_taskA( void ) {
     const TickType_t xDelay = 200/portTICK_PERIOD_MS;
     int8_t altitude;
     for(;;) {
-        get_param_val(ALTITUDE, INT8_PARAM, &altitude);
+        getParamVal(ALTITUDE, INT8_PARAM, &altitude);
         if (altitude == 30) {
             altitude = 40;
-            set_param_val(ALTITUDE, INT8_PARAM, &altitude);
+            setParamVal(ALTITUDE, INT8_PARAM, &altitude);
         }
-        console_print("Task A: %d\n", altitude);
+        printConsole("Task A: %d\n", altitude);
         vTaskDelay(xDelay);
     }
 }
@@ -36,12 +36,12 @@ void dummy_taskB( void ) {
     const TickType_t xDelay = 200/portTICK_PERIOD_MS;
     int8_t altitude;
     for(;;) {
-        get_param_val(ALTITUDE, INT8_PARAM, &altitude);
+        getParamVal(ALTITUDE, INT8_PARAM, &altitude);
         if (altitude == 40) {
             altitude = 30;
-            set_param_val(ALTITUDE, INT8_PARAM, &altitude);
+            setParamVal(ALTITUDE, INT8_PARAM, &altitude);
         }
-        console_print("Task B: %d\n", altitude);
+        printConsole("Task B: %d\n", altitude);
         vTaskDelay(xDelay);
     }
 }

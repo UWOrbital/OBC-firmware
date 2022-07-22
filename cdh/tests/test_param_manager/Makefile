@@ -7,20 +7,15 @@ CURR_DIR              := $(abspath $(CURR_DIR_REL))
 BUILD_DIR_REL         := ./build
 BUILD_DIR             := $(abspath $(BUILD_DIR_REL))
 
-FREERTOS_DIR_REL      := ../../../freertos
-FREERTOS_DIR          := $(abspath $(FREERTOS_DIR_REL))
-
-POSIX_UTIL_DIR_REL    := ../../../posix_utils
-POSIX_UTIL_DIR        := $(abspath $(POSIX_UTIL_DIR_REL))
+POSIX_DIR_REL         := ../../../posix
+POSIX_DIR             := $(abspath $(POSIX_DIR_REL))
 
 INCLUDE_DIRS          := -I.
-INCLUDE_DIRS          += -I${FREERTOS_DIR}/ports/posix/include
-INCLUDE_DIRS          += -I${POSIX_UTIL_DIR}/include
+INCLUDE_DIRS          += -I$(POSIX_DIR)/include
 INCLUDE_DIRS          += -I../../include
 
 SOURCE_FILES          := $(wildcard *.c)
-SOURCE_FILES          += $(wildcard ${FREERTOS_DIR}/ports/posix/source/*.c)
-SOURCE_FILES          += $(wildcard ${POSIX_UTIL_DIR}/source/*.c)
+SOURCE_FILES          += $(wildcard $(POSIX_DIR)/source/*.c)
 SOURCE_FILES          += ../../source/param_manager.c
 
 CFLAGS                :=    -ggdb3
