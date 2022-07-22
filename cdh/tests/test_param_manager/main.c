@@ -1,24 +1,25 @@
-#include "FreeRTOS.h"
-#include "os_task.h"
-
-#include "console.h"
 #include "param_manager.h"
+#include "console.h"
 
-void dummy_taskA();
-void dummy_taskB();
+#include <FreeRTOS.h>
+#include <os_task.h>
+
+
+void dummyTaskA();
+void dummyTaskB();
 
 int main( void ) {
     initConsole();
     initParamManager();
     printConsole("Starting\n");
-    xTaskCreate(dummy_taskA, "taskA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
-    xTaskCreate(dummy_taskB, "taskB", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
+    xTaskCreate(dummyTaskA, "taskA", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
+    xTaskCreate(dummyTaskB, "taskB", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+2, NULL);
     vTaskStartScheduler();
     for(;;) {}
     return 0;
 }
 
-void dummy_taskA( void ) {
+void dummyTaskA( void ) {
     const TickType_t xDelay = 200/portTICK_PERIOD_MS;
     int8_t altitude;
     for(;;) {
@@ -32,7 +33,7 @@ void dummy_taskA( void ) {
     }
 }
 
-void dummy_taskB( void ) {
+void dummyTaskB( void ) {
     const TickType_t xDelay = 200/portTICK_PERIOD_MS;
     int8_t altitude;
     for(;;) {

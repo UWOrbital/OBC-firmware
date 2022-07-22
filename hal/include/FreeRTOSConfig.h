@@ -124,7 +124,7 @@
 #define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 
 /* Mutexes */
-#define configUSE_MUTEXES               0
+#define configUSE_MUTEXES               1
 #define configUSE_RECURSIVE_MUTEXES     0
 
 /* Semaphores */
