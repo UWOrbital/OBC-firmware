@@ -9,11 +9,13 @@
 
 static param_handle_t paramTableHandler = paramTable;
 static const uint16_t paramTableLength = sizeof(paramTable) / sizeof(param_t);
+
 static SemaphoreHandle_t paramTableMutex = NULL;
+static StaticSemaphore_t paramTableMutexBuffer;
 
 uint8_t initParamManager(void) {
     if ( paramTableMutex == NULL ) {
-        paramTableMutex = xSemaphoreCreateMutex();
+        paramTableMutex = xSemaphoreCreateMutexStatic(&paramTableMutexBuffer);
         return 1;
     }
     return 0;
