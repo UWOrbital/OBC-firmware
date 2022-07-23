@@ -25,6 +25,7 @@ void initSupervisor(void) {
 }
 
 void vSupervisorTask(void * pvParameters) {
+    /* Initialize other tasks */
     initTelemetry();
 
     while(1){
@@ -58,5 +59,8 @@ uint8_t sendToSupervisorQueue(supervisor_event_t *event) {
     if (supervisorQueueHandle == NULL) {
         return 0;
     }
-    return xQueueSend(supervisorQueueHandle, (void *) event, portMAX_DELAY);
+    if ( xQueueSend(supervisorQueueHandle, (void *) event, portMAX_DELAY) == pdTRUE ) {
+        return 1;
+    }
+    return 0;
 }

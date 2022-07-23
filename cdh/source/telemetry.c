@@ -57,5 +57,8 @@ uint8_t sendToTelemetryQueue(telemetry_event_t *event) {
     if (telemetryQueueHandle == NULL) {
         return 0;
     }
-    return xQueueSend(telemetryQueueHandle, (void *) event, portMAX_DELAY);
+    if ( xQueueSend(telemetryQueueHandle, (void *) event, portMAX_DELAY) == pdTRUE ) {
+        return 1;
+    }
+    return 0;
 }

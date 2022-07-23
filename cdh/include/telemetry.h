@@ -3,6 +3,7 @@
 
 #include <sys_common.h>
 
+/* Telemetry task config */
 #define TELEMETRY_STACK_SIZE   1024
 #define TELEMETRY_NAME         "telemetry"
 #define TELEMETRY_PRIORITY     1
@@ -39,12 +40,27 @@ typedef struct {
     telemetry_event_data_t data;
 } telemetry_event_t;
 
+/* Telemetry queue config */
 #define TELEMETRY_QUEUE_LENGTH 10
 #define TELEMETRY_QUEUE_ITEM_SIZE sizeof(telemetry_event_t)
 #define TELEMETRY_QUEUE_WAIT_PERIOD 10/portTICK_PERIOD_MS
 
+/**
+ * @brief	Initialize the telemetry task and associated FreeRTOS constructs (queues, timers, etc.)
+ */
 void initTelemetry(void);
+
+/**
+ * @brief	Telemetry task.
+ * @param	pvParameters	Task parameters.
+ */
 void vTelemetryTask(void * pvParameters);
+
+/**
+ * @brief	Send an event to the telemetry queue.
+ * @param	event	Event to send.
+ * @return	1 if successful, 0 otherwise.
+ */
 uint8_t sendToTelemetryQueue(telemetry_event_t *event);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */

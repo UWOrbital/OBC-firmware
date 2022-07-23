@@ -11,6 +11,7 @@ int main(void) {
     // run hardware initialization code (TODO: refactor all this into one function call)
     gioInit();
 
+    // The supervisor is, initially, the only task running.
     initSupervisor();
 
     // start task scheduler
