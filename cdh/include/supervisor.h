@@ -1,18 +1,9 @@
-/*
- * supervisor.h
- *
- * May 30, 2022
- * kiransuren
- *
- */
+#ifndef CDH_INCLUDE_SUPERVISOR_H_
+#define CDH_INCLUDE_SUPERVISOR_H_
 
+#include <sys_common.h>
 
-#ifndef SUPERVISOR_H
-#define SUPERVISOR_H
-
-#include "hal_stdtypes.h"
-
-#define SUPERVISOR_STACK_SIZE   200
+#define SUPERVISOR_STACK_SIZE   1024
 #define SUPERVISOR_NAME         "supervisor"
 #define SUPERVISOR_PRIORITY     1
 #define SUPERVISOR_DELAY_TICKS  1000/portTICK_PERIOD_MS
@@ -33,9 +24,11 @@ typedef struct {
 } supervisor_event_t;
 
 #define SUPERVISOR_QUEUE_LENGTH 10
-#define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_id_t)
+#define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_t)
 #define SUPERVISOR_QUEUE_WAIT_PERIOD 10/portTICK_PERIOD_MS
 
+void initSupervisor(void);
 void vSupervisorTask(void * pvParameters);
+uint8_t sendToSupervisorQueue(supervisor_event_t *event);
 
-#endif
+#endif /* CDH_INCLUDE_SUPERVISOR_H_ */
