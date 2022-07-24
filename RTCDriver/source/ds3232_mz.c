@@ -39,14 +39,15 @@ uint8_t get_rtc_hour(uint8_t *hours){
 
 } //having a hard time understanfing how data will be sent
 
-uint8_t get_rtc_time(int time[3]) {
+uint8_t get_rtc_time(int *time) {
     uint8_t min, sec, hours;
 
     get_rtc_minutes(&min);
     get_rtc_seconds(&sec);    
-    time[0] = sec;
-    time[1] = min;
-    // time[2] = hours;
+    get_rtc_hour(&hours);
+    *time = sec;
+    *(time + 1) = min;
+    *(time + 2) = hours;
 }
 
 uint8_t get_rtc_date(uint8_t* date) {
