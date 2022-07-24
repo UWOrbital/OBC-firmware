@@ -51,12 +51,6 @@ typedef struct {
 void initSupervisor(void);
 
 /**
- * @brief	Supervisor task.
- * @param	pvParameters	Task parameters.
- */
-void vSupervisorTask(void * pvParameters);
-
-/**
  * @brief	Send an event to the supervisor queue.
  * @param	event	Event to send.
  * @return	1 if successful, 0 otherwise.

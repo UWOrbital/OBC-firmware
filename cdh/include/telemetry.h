@@ -51,12 +51,6 @@ typedef struct {
 void initTelemetry(void);
 
 /**
- * @brief	Telemetry task.
- * @param	pvParameters	Task parameters.
- */
-void vTelemetryTask(void * pvParameters);
-
-/**
  * @brief	Send an event to the telemetry queue.
  * @param	event	Event to send.
  * @return	1 if successful, 0 otherwise.

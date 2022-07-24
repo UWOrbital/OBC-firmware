@@ -10,46 +10,37 @@
 #include <sys_common.h>
 #include <gio.h>
 
-TaskHandle_t telemetryTaskHandle = NULL;
-StaticTask_t telemetryTaskBuffer;
-StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
+static TaskHandle_t telemetryTaskHandle = NULL;
+static StaticTask_t telemetryTaskBuffer;
+static StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
 
-QueueHandle_t telemetryQueueHandle = NULL;
+static QueueHandle_t telemetryQueueHandle = NULL;
 static StaticQueue_t telemetryQueue;
-uint8_t telemetryQueueStack[TELEMETRY_QUEUE_LENGTH*TELEMETRY_QUEUE_ITEM_SIZE];
+static uint8_t telemetryQueueStack[TELEMETRY_QUEUE_LENGTH*TELEMETRY_QUEUE_ITEM_SIZE];
 
-TimerHandle_t ledTimer;
-StaticTimer_t ledTimerBuffer;
+static TimerHandle_t ledTimerHandle = NULL;
+static StaticTimer_t ledTimerBuffer;
 
-void timerCallback(TimerHandle_t xTimer) {
-    supervisor_event_t newMsg;
-    newMsg.eventID = TURN_OFF_LED_EVENT_ID;
-    sendToSupervisorQueue(&newMsg);
-}
+/**
+ * @brief	Telemetry task.
+ * @param	pvParameters	Task parameters.
+ */
+static void vTelemetryTask(void * pvParameters);
+
+/**
+ * @brief Example timer callback function for "Turn on LED" event
+ */
+static void timerCallback(TimerHandle_t xTimer);
 
 void initTelemetry(void) {
-    telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
-    telemetryQueueHandle = xQueueCreateStatic(TELEMETRY_QUEUE_LENGTH, TELEMETRY_QUEUE_ITEM_SIZE, telemetryQueueStack, &telemetryQueue);
-    ledTimer = xTimerCreateStatic("ledTimer", pdMS_TO_TICKS(1000), false, (void *) 0, timerCallback, &ledTimerBuffer);
-}
-
-void vTelemetryTask(void * pvParameters) {
-    while(1){
-        telemetry_event_t queueMsg;
-        if(!xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_WAIT_PERIOD)){
-            queueMsg.eventID = TELEMETRY_NULL_EVENT_ID;
-        }
-
-        switch(queueMsg.eventID)
-        {
-            case TURN_ON_LED_EVENT_ID:
-                vTaskDelay(queueMsg.data.i);
-                gioToggleBit(gioPORTB, 1);
-                xTimerStart(ledTimer, SUPERVISOR_QUEUE_WAIT_PERIOD);
-                break;
-            default:
-                ;
-        }
+    if (telemetryTaskHandle == NULL) {
+        telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
+    }
+    if (telemetryQueueHandle == NULL) {
+        telemetryQueueHandle = xQueueCreateStatic(TELEMETRY_QUEUE_LENGTH, TELEMETRY_QUEUE_ITEM_SIZE, telemetryQueueStack, &telemetryQueue);
+    }
+    if (ledTimerHandle == NULL) {
+        ledTimerHandle = xTimerCreateStatic("ledTimer", pdMS_TO_TICKS(1000), false, (void *) 0, timerCallback, &ledTimerBuffer);
     }
 }
 
@@ -61,4 +52,30 @@ uint8_t sendToTelemetryQueue(telemetry_event_t *event) {
         return 1;
     }
     return 0;
+}
+
+static void vTelemetryTask(void * pvParameters) {
+    while(1){
+        telemetry_event_t queueMsg;
+        if(!xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_WAIT_PERIOD)){
+            queueMsg.eventID = TELEMETRY_NULL_EVENT_ID;
+        }
+
+        switch(queueMsg.eventID)
+        {
+            case TURN_ON_LED_EVENT_ID:
+                vTaskDelay(queueMsg.data.i);
+                gioToggleBit(gioPORTB, 1);
+                xTimerStart(ledTimerHandle, SUPERVISOR_QUEUE_WAIT_PERIOD);
+                break;
+            default:
+                ;
+        }
+    }
+}
+
+static void timerCallback(TimerHandle_t xTimer) {
+    supervisor_event_t newMsg;
+    newMsg.eventID = TURN_OFF_LED_EVENT_ID;
+    sendToSupervisorQueue(&newMsg);
 }
