@@ -13,6 +13,25 @@ static const uint16_t paramTableLength = sizeof(paramTable) / sizeof(param_t);
 static SemaphoreHandle_t paramTableMutex = NULL;
 static StaticSemaphore_t paramTableMutexBuffer;
 
+/**
+ * @brief	Helper function to allow concurrent access to table
+ * @param accessType       Type of access, either GET_PARAM or SET_PARAM
+ * @param paramName        Name of the parameter
+ * @param paramType        Type of the parameter. Used to make sure developer is using the right type.
+ * @param p                Void pointer to buffer to store param value, should be enough to store value
+ *
+ * @return	1 if OK; 0 if error or parameter doesn't exist
+ */
+static uint8_t accessParamTable(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p);
+
+/**
+ * @brief	Get pointer to parameter struct
+ * @param   paramName      Name of the parameter.
+ *
+ * @return	Pointer to parameter struct, NULL if not found
+ */
+static param_handle_t getParamHandle(param_names_t paramName);
+
 uint8_t initParamManager(void) {
     if ( paramTableMutex == NULL ) {
         paramTableMutex = xSemaphoreCreateMutexStatic(&paramTableMutexBuffer);
@@ -103,7 +122,7 @@ static param_handle_t getParamHandle(param_names_t paramName)
     return &paramTableHandler[paramName];
 }
 
-static param_size_t getParamSize(param_type_t type)
+param_size_t getParamSize(param_type_t type)
 {
     switch (type)
     {
@@ -134,12 +153,14 @@ static param_size_t getParamSize(param_type_t type)
     }
 }
 
-static uint8_t isReadOnly(param_handle_t paramHandle) {
-    return ( paramHandle->opts & READ_ONLY );
+uint8_t isReadOnly(uint8_t opts) {
+    return ( opts & READ_ONLY );
 }
-static uint8_t isTelemetry(param_handle_t paramHandle) {
-    return ( paramHandle->opts & TELEMETRY );
+
+uint8_t isTelemetry(uint8_t opts) {
+    return ( opts & TELEMETRY );
 }
-static uint8_t isPersistent(param_handle_t paramHandle) {
-    return ( paramHandle->opts & PERSISTENT );
+
+uint8_t isPersistent(uint8_t opts) {
+    return ( opts & PERSISTENT );
 }

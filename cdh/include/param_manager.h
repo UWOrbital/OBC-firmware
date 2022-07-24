@@ -197,54 +197,18 @@ uint8_t getParamValByIndex(uint16_t paramIndex, param_type_t paramType, void *ou
 uint8_t setParamVal(param_names_t paramName, param_type_t paramType, void *in);
 
 /**
- * @brief	Helper function to allow concurrent access to table
- * @param accessType       Type of access, either GET_PARAM or SET_PARAM
- * @param paramName        Name of the parameter
- * @param paramType        Type of the parameter. Used to make sure developer is using the right type.
- * @param p                Void pointer to buffer to store param value, should be enough to store value
- *
- * @return	1 if OK; 0 if error or parameter doesn't exist
- */
-static uint8_t accessParamTable(access_type_t accessType, param_names_t paramName, param_type_t paramType, void *p);
-
-/**
  * @brief	Get size of the parameter type in bytes
  * @param   paramType      Data type of the parameter.
  *
  * @return	parameter size if OK; 0 if error
  */
-static param_size_t getParamSize(param_type_t type);
+param_size_t getParamSize(param_type_t type);
 
-/**
- * @brief	Get pointer to parameter struct
- * @param   paramName      Name of the parameter.
- *
- * @return	Pointer to parameter struct, NULL if not found
- */
-static param_handle_t getParamHandle(param_names_t paramName);
 
-/**
- * @brief	Check if parameter is read-only
- * @param   paramHandle    Pointer to the parameter struct
- *
- * @return	1 if the parameter is read-only, 0 if not
- */
-static uint8_t isReadOnly(param_handle_t paramHandle);
+uint8_t isReadOnly(uint8_t opts);
 
-/**
- * @brief	Check if parameter is for telemetry
- * @param   paramHandle    Pointer to the parameter struct
- *
- * @return	1 if the parameter is for telemetry, 0 if not
- */
-static uint8_t isTelemetry(param_handle_t paramHandle);
+uint8_t isTelemetry(uint8_t opts);
 
-/**
- * @brief	Check if parameter should be stored in non-volatile memory
- * @param   paramHandle    Pointer to the parameter struct
- *
- * @return	1 if the parameter should be stored in non-volatile memory, 0 if not
- */
-static uint8_t isPersistent(param_handle_t paramHandle);
+uint8_t isPersistent(uint8_t opts);
 
 #endif /* CDH_INCLUDE_PARAM_MANAGER_H_ */
