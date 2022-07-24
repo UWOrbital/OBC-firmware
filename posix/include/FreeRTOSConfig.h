@@ -22,7 +22,7 @@
 #define configUSE_ALTERNATIVE_API                  0
 #define configUSE_QUEUE_SETS                       1
 #define configUSE_TASK_NOTIFICATIONS               1
-#define configSUPPORT_STATIC_ALLOCATION            0
+#define configSUPPORT_STATIC_ALLOCATION            1
 
 #define configUSE_TIMERS                           1
 #define configTIMER_TASK_PRIORITY                  ( configMAX_PRIORITIES - 1 )

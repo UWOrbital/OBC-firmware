@@ -110,7 +110,7 @@
 /* USER CODE BEGIN (1) */
 /* USER CODE END */
 
-#define configSUPPORT_STATIC_ALLOCATION			0
+#define configSUPPORT_STATIC_ALLOCATION			1
 #define configSUPPORT_DYNAMIC_ALLOCATION		1
 
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 1
@@ -124,7 +124,7 @@
 #define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 
 /* Mutexes */
-#define configUSE_MUTEXES               0
+#define configUSE_MUTEXES               1
 #define configUSE_RECURSIVE_MUTEXES     0
 
 /* Semaphores */
