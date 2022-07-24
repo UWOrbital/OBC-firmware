@@ -76,6 +76,81 @@ void sciInit(void)
 /* USER CODE BEGIN (2) */
 /* USER CODE END */
 
+    /** @b initialize @b SCI */
+
+    /** - bring SCI out of reset */
+    sciREG->GCR0 = 0U;
+    sciREG->GCR0 = 1U;
+
+    /** - Disable all interrupts */
+    sciREG->CLEARINT    = 0xFFFFFFFFU;
+    sciREG->CLEARINTLVL = 0xFFFFFFFFU;
+
+    /** - global control 1 */
+    sciREG->GCR1 =  (uint32)((uint32)1U << 25U)  /* enable transmit */
+                  | (uint32)((uint32)1U << 24U)  /* enable receive */
+                  | (uint32)((uint32)1U << 5U)   /* internal clock (device has no clock pin) */
+                  | (uint32)((uint32)(2U-1U) << 4U)  /* number of stop bits */
+                  | (uint32)((uint32)0U << 3U)  /* even parity, otherwise odd */
+                  | (uint32)((uint32)0U << 2U)  /* enable parity */
+                  | (uint32)((uint32)1U << 1U);  /* asynchronous timing mode */
+
+    /** - set baudrate */
+    sciREG->BRS = 357U;  /* baudrate */
+
+    /** - transmission length */
+    sciREG->FORMAT = 8U - 1U;  /* length */
+
+    /** - set SCI pins functional mode */
+    sciREG->PIO0 = (uint32)((uint32)1U << 2U)  /* tx pin */
+                 | (uint32)((uint32)1U << 1U); /* rx pin */
+
+    /** - set SCI pins default output value */
+    sciREG->PIO3 = (uint32)((uint32)0U << 2U)  /* tx pin */
+                 | (uint32)((uint32)0U << 1U); /* rx pin */
+
+    /** - set SCI pins output direction */
+    sciREG->PIO1 = (uint32)((uint32)0U << 2U)  /* tx pin */
+                 | (uint32)((uint32)0U << 1U); /* rx pin */
+
+    /** - set SCI pins open drain enable */
+    sciREG->PIO6 = (uint32)((uint32)0U << 2U)  /* tx pin */
+                 | (uint32)((uint32)0U << 1U); /* rx pin */
+
+    /** - set SCI pins pullup/pulldown enable */
+    sciREG->PIO7 = (uint32)((uint32)0U << 2U)  /* tx pin */
+                 | (uint32)((uint32)0U << 1U); /* rx pin */
+
+    /** - set SCI pins pullup/pulldown select */
+    sciREG->PIO8 = (uint32)((uint32)1U << 2U)  /* tx pin */
+                 | (uint32)((uint32)1U << 1U);  /* rx pin */
+
+    /** - set interrupt level */
+    sciREG->SETINTLVL = (uint32)((uint32)0U << 26U)  /* Framing error */
+                      | (uint32)((uint32)0U << 25U)  /* Overrun error */
+                      | (uint32)((uint32)0U << 24U)  /* Parity error */
+                      | (uint32)((uint32)0U << 9U)  /* Receive */
+                      | (uint32)((uint32)0U << 8U)  /* Transmit */
+                      | (uint32)((uint32)0U << 1U)  /* Wakeup */
+                      | (uint32)((uint32)0U << 0U);  /* Break detect */
+
+    /** - set interrupt enable */
+    sciREG->SETINT = (uint32)((uint32)0U << 26U)  /* Framing error */
+                   | (uint32)((uint32)0U << 25U)  /* Overrun error */
+                   | (uint32)((uint32)0U << 24U)  /* Parity error */
+                   | (uint32)((uint32)0U << 9U)  /* Receive */
+                   | (uint32)((uint32)0U << 1U)  /* Wakeup */
+                   | (uint32)((uint32)0U << 0U);  /* Break detect */
+
+    /** - initialize global transfer variables */
+    g_sciTransfer_t[0U].mode   = (uint32)0U << 8U;
+    g_sciTransfer_t[0U].tx_length = 0U;
+	g_sciTransfer_t[0U].rx_length = 0U;
+
+    /** - Finaly start SCI */
+    sciREG->GCR1 |= 0x80U;
+
+
 
     /** @b initialize @b SCILIN */
 
@@ -616,6 +691,56 @@ void sciExitResetState(sciBASE_t *sci)
 	sci->GCR1 |= 0x00000080U;
 }
 
+/** @fn void sciGetConfigValue(sci_config_reg_t *config_reg, config_value_type_t type)
+*   @brief Get the initial or current values of the SCI configuration registers
+*
+*	@param[in] *config_reg: pointer to the struct to which the initial or current 
+*                           value of the configuration registers need to be stored
+*	@param[in] type: 	whether initial or current value of the configuration registers need to be stored
+*						- InitialValue: initial value of the configuration registers will be stored 
+*                                       in the struct pointed by config_reg
+*						- CurrentValue: initial value of the configuration registers will be stored 
+*                                       in the struct pointed by config_reg
+*
+*   This function will copy the initial or current value (depending on the parameter 'type') 
+*   of the configuration registers to the struct pointed by config_reg
+*
+*/
+/* SourceId : SCI_SourceId_016 */
+/* DesignId : SCI_DesignId_016 */
+/* Requirements : HL_SR247 */
+void sciGetConfigValue(sci_config_reg_t *config_reg, config_value_type_t type)
+{
+	if (type == InitialValue)
+	{
+		config_reg->CONFIG_GCR0      = SCI_GCR0_CONFIGVALUE;
+		config_reg->CONFIG_GCR1      = SCI_GCR1_CONFIGVALUE;
+		config_reg->CONFIG_SETINT    = SCI_SETINT_CONFIGVALUE;
+		config_reg->CONFIG_SETINTLVL = SCI_SETINTLVL_CONFIGVALUE;
+		config_reg->CONFIG_FORMAT    = SCI_FORMAT_CONFIGVALUE;
+		config_reg->CONFIG_BRS       = SCI_BRS_CONFIGVALUE;
+		config_reg->CONFIG_PIO0      = SCI_PIO0_CONFIGVALUE;
+		config_reg->CONFIG_PIO1      = SCI_PIO1_CONFIGVALUE;
+		config_reg->CONFIG_PIO6      = SCI_PIO6_CONFIGVALUE;
+		config_reg->CONFIG_PIO7	     = SCI_PIO7_CONFIGVALUE;
+		config_reg->CONFIG_PIO8      = SCI_PIO8_CONFIGVALUE;	
+	}
+	else
+	{
+	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "LDRA Tool issue" */
+		config_reg->CONFIG_GCR0      = sciREG->GCR0;
+		config_reg->CONFIG_GCR1      = sciREG->GCR1; 
+		config_reg->CONFIG_SETINT    = sciREG->SETINT; 
+		config_reg->CONFIG_SETINTLVL = sciREG->SETINTLVL; 
+		config_reg->CONFIG_FORMAT    = sciREG->FORMAT; 
+		config_reg->CONFIG_BRS       = sciREG->BRS; 
+		config_reg->CONFIG_PIO0      = sciREG->PIO0; 
+		config_reg->CONFIG_PIO1      = sciREG->PIO1; 
+		config_reg->CONFIG_PIO6      = sciREG->PIO6; 
+		config_reg->CONFIG_PIO7	     = sciREG->PIO7;	 
+		config_reg->CONFIG_PIO8      = sciREG->PIO8; 
+	}
+}
 
 /** @fn void scilinGetConfigValue(sci_config_reg_t *config_reg, config_value_type_t type)
 *   @brief Get the initial or current values of the SCILIN ( SCI2) configuration registers
@@ -667,6 +792,7 @@ void scilinGetConfigValue(sci_config_reg_t *config_reg, config_value_type_t type
 		config_reg->CONFIG_PIO8      = scilinREG->PIO8; 
 	}
 }
+
 
 /* USER CODE BEGIN (37) */
 /* USER CODE END */

@@ -11,7 +11,7 @@ static SemaphoreHandle_t sciLinMutex = NULL;
 
 void initSciMutex(void) {
     if (sciMutex == NULL) {
-        sciLinMutex = xSemaphoreCreateMutex();
+        sciMutex = xSemaphoreCreateMutex();
     }
     if (sciLinMutex == NULL) {
         sciLinMutex = xSemaphoreCreateMutex();
