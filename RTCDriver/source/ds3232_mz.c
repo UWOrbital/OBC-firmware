@@ -3,6 +3,8 @@
 #include "obc_i2c_io.h"
 
 #include "stdio.h"
+const uint8_t LOW_BIT_MASK = 15; //00001111
+const uint8_t HIGH_BIT_MASK = 112; // 01110000
 
 uint8_t get_rtc_seconds(uint8_t *seconds) {
     uint8_t data[1];
@@ -10,7 +12,10 @@ uint8_t get_rtc_seconds(uint8_t *seconds) {
         sci_print_text((uint8_t*)"Failed to read seconds data\r\n", 35);
         return 0;
     }
-    *seconds = data[0];
+    uint8_t one_seconds = data[0] & LOW_BIT_MASK;
+    uint8_t ten_seconds = (data[0] & HIGH_BIT_MASK) >> 4;
+
+    *seconds = ten_seconds*10 + one_seconds;
 }
 
 uint8_t get_rtc_minutes(uint8_t *minutes) {
