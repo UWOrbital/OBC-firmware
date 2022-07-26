@@ -7,7 +7,7 @@
 
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += obc_hal/source
+SRC_DIRS += drivers/source
 SRC_DIRS += adcs/source
 SRC_DIRS += cdh/source
 SRC_DIRS += comms/source

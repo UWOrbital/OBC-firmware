@@ -24,13 +24,13 @@ CC_FLAGS += -std=gnu99
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"obc_hal/include"
+INCLUDE_DIRS += -I"drivers/include"
 
 LIBS := 
 	
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += obc_hal/source
+SRC_DIRS += drivers/source
 SRC_DIRS += examples/sci_print_demo
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
