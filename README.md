@@ -143,7 +143,7 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
 -   Hanging indents should be aligned to delimeter:
 
 ```c
-my_function(hasToo,
+myFunction(hasToo,
             many, variables)
 ```
 **[Back to top](#table-of-contents)**
