@@ -1,20 +1,28 @@
-#include "FreeRTOS.h"
-#include "os_portmacro.h"
-#include "os_task.h"
-#include "sys_common.h"
-#include "gio.h"
-
 #include "supervisor.h"
+#include "obc_sci_io.h"
+#include "obc_i2c_io.h"
+
+#include <FreeRTOS.h>
+#include <os_task.h>
+
+#include <sys_common.h>
+#include <gio.h>
+#include <sci.h>
+#include <i2c.h>
 
 int main(void) {
 
-    // run hardware initialization code (TODO: refactor all this into one function call)
+    // Run hardware initialization code (TODO: refactor all this into one function call)
     gioInit();
+    sciInit();
+    i2cInit();
 
-    // initialize important tasks
-    xTaskHandle xSupervisorTaskHandle;
-    xTaskCreate(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL, SUPERVISOR_PRIORITY, &xSupervisorTaskHandle);
+    // Initialize bus mutexes
+    initSciMutex();
+    initI2CMutex();
 
-    // start task scheduler
+    // The supervisor is the only task running initially.
+    initSupervisor();
+
     vTaskStartScheduler();
 }
