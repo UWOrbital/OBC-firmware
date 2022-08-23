@@ -1,5 +1,5 @@
-#ifndef OBC_HAL_INCLUDE_LM75BD_H_
-#define OBC_HAL_INCLUDE_LM75BD_H_
+#ifndef DRIVERS_INCLUDE_LM75BD_H_
+#define DRIVERS_INCLUDE_LM75BD_H_
 
 #include <stdint.h>
 
@@ -58,4 +58,4 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
 
 uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius);
 
-#endif /* OBC_HAL_INCLUDE_LM75BD_H_ */ 
+#endif /* DRIVERS_INCLUDE_LM75BD_H_ */ 
