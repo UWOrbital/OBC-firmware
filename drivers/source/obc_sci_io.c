@@ -52,7 +52,6 @@ uint8_t printTextSci(sciBASE_t *sci, unsigned char *text, uint32_t length) {
 }
 
 static void sciSendBytes(sciBASE_t *sci, unsigned char *bytes, uint32_t length) {
-    /* Note that an unsigned char is the same thing as a uint8_t */
     for (int i = 0; i < length; i++) {
         // sciSendByte waits for the transmit buffer to be empty before sending
         sciSendByte(sci, bytes[i]);
