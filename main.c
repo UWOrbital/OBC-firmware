@@ -8,12 +8,11 @@
 
 int main(void) {
 
-    // run hardware initialization code (TODO: refactor all this into one function call)
+    // Run hardware initialization code (TODO: refactor all this into one function call)
     gioInit();
 
-    // The supervisor is, initially, the only task running.
+    // The supervisor is the only task running initially.
     initSupervisor();
 
-    // start task scheduler
     vTaskStartScheduler();
 }

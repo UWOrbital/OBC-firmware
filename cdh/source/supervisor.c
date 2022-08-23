@@ -29,9 +29,12 @@ static void vSupervisorTask(void * pvParameters);
 static void sendStartupMessages(void);
 
 void initSupervisor(void) {
+    ASSERT( (supervisorTaskStack != NULL) && (&supervisorTaskBuffer != NULL) );
     if (supervisorTaskHandle == NULL) {
         supervisorTaskHandle = xTaskCreateStatic(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL, SUPERVISOR_PRIORITY, supervisorTaskStack, &supervisorTaskBuffer);
     }
+
+    ASSERT( (supervisorQueueStack != NULL) && (&supervisorQueue != NULL) );
     if (supervisorQueueHandle == NULL) {
         supervisorQueueHandle = xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE, supervisorQueueStack, &supervisorQueue);
     }
@@ -41,7 +44,7 @@ uint8_t sendToSupervisorQueue(supervisor_event_t *event) {
     if (supervisorQueueHandle == NULL) {
         return 0;
     }
-    if ( xQueueSend(supervisorQueueHandle, (void *) event, portMAX_DELAY) == pdTRUE ) {
+    if ( xQueueSend(supervisorQueueHandle, (void *) event, portMAX_DELAY) == pdPASS ) {
         return 1;
     }
     return 0;
@@ -68,7 +71,7 @@ static void vSupervisorTask(void * pvParameters) {
         supervisor_event_t inMsg;
         telemetry_event_t outMsgTelemetry;
 
-        if(!xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_WAIT_PERIOD)){
+        if(xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_WAIT_PERIOD) != pdPASS) {
             inMsg.eventID = SUPERVISOR_NULL_EVENT_ID;
         }
 
