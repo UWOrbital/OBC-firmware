@@ -163,6 +163,44 @@ typedef struct i2c_config_reg
 } i2c_config_reg_t;
 
 
+/* Configuration registers initial value for I2C*/
+#define I2C_OAR_CONFIGVALUE         0x00000000U   
+#define I2C_IMR_CONFIGVALUE       (((uint32)0U << 6U) \
+                                 | ((uint32)0U << 5U) \
+                                 | ((uint32)0U << 4U) \
+                                 | ((uint32)0U << 3U) \
+                                 | ((uint32)0U << 2U) \
+                                 | ((uint32)0U << 1U) \
+                                 | ((uint32)0U))
+  
+#define I2C_CLKL_CONFIGVALUE        34U        
+#define I2C_CLKH_CONFIGVALUE        34U        
+#define I2C_CNT_CONFIGVALUE         8U   
+#define I2C_SAR_CONFIGVALUE         0x000003FFU 
+#define I2C_MDR_CONFIGVALUE       ((uint32)0x00000000U \
+                                 | (uint32)((uint32)1U <<11U) \
+                                 | (uint32)((uint32)1U <<10U) \
+                                 | (uint32)((uint32)I2C_TRANSMITTER) \
+                                 | (uint32)((uint32)I2C_7BIT_AMODE) \
+                                 | (uint32)((uint32)0U << 7U) \
+                                 | (uint32)((uint32)0U) \
+                                 | (uint32)((uint32)I2C_8_BIT) \
+								 | (uint32)I2C_RESET_OUT)
+  
+#define I2C_EMDR_CONFIGVALUE        0U
+#define I2C_PSC_CONFIGVALUE         13U
+#define I2C_DMAC_CONFIGVALUE        0x00000000U 
+#define I2C_FUN_CONFIGVALUE         0U  
+#define I2C_DIR_CONFIGVALUE       ((uint32)((uint32)0U << 1U) \
+                                 | (uint32)((uint32)0U))
+#define I2C_ODR_CONFIGVALUE       ((uint32)((uint32)0U << 1U) \
+                                 | (uint32)((uint32)0U))
+#define I2C_PD_CONFIGVALUE        ((uint32)((uint32)0U << 1U) \
+                                 | (uint32)((uint32)0U))
+#define I2C_PSL_CONFIGVALUE       ((uint32)((uint32)1U << 1U) \
+                                 | (uint32)((uint32)1U))         
+ 
+
 /** 
  *  @defgroup I2C I2C
  *  @brief Inter-Integrated Circuit Module.
