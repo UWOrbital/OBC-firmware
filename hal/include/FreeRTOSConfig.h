@@ -110,7 +110,7 @@
 /* USER CODE BEGIN (1) */
 /* USER CODE END */
 
-#define configSUPPORT_STATIC_ALLOCATION			0
+#define configSUPPORT_STATIC_ALLOCATION			1
 #define configSUPPORT_DYNAMIC_ALLOCATION		1
 
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 1
@@ -131,10 +131,10 @@
 #define configUSE_COUNTING_SEMAPHORES   0
 
 /* Timers */
-#define configUSE_TIMERS                0
-#define configTIMER_TASK_PRIORITY		( 0 )
-#define configTIMER_QUEUE_LENGTH		0
-#define configTIMER_TASK_STACK_DEPTH	( 0 )
+#define configUSE_TIMERS                1
+#define configTIMER_TASK_PRIORITY		( 3 )
+#define configTIMER_QUEUE_LENGTH		10
+#define configTIMER_TASK_STACK_DEPTH	( 128 )
 
 /* USER CODE BEGIN (3) */
 /* USER CODE END */
