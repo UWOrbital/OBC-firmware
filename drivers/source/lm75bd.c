@@ -3,16 +3,15 @@
 
 #include <math.h>
 
-uint8_t lm75bdInit(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
-                   uint8_t devOperationMode, float overTempThresholdCelsius, float hysteresisThresholdCelsius)
+uint8_t lm75bdInit(lm75bd_config_t *config)
 {
-    if (writeConfigLM75BD(devAddr, osFaltQueueSize, osPolarity, osOperationMode, devOperationMode) == 0) {
+    if (writeConfigLM75BD(config->devAddr, config->osFaltQueueSize, config->osPolarity, config->osOperationMode, config->devOperationMode) == 0) {
         return 0;
     }
-    if (writeThystLM75BD(devAddr, hysteresisThresholdCelsius) == 0) {
+    if (writeThystLM75BD(config->devAddr, config->hysteresisThresholdCelsius) == 0) {
         return 0;
     }
-    if (writeTosLM75BD(devAddr, overTempThresholdCelsius) == 0) {
+    if (writeTosLM75BD(config->devAddr, config->overTempThresholdCelsius) == 0) {
         return 0;
     }
     return 1;
@@ -62,9 +61,9 @@ uint8_t readConfigLM75BD(uint8_t devAddr, uint8_t *osFaltQueueSize, uint8_t *osP
             return 0;
     }
 
-    *osPolarity = (configBuff[0] & 0b00000100) >> 2;
-    *osOperationMode = (configBuff[0] & 0b00000010) >> 1;
-    *devOperationMode = configBuff[0] & 0b00000001;
+    *osPolarity = (configBuff[0] & 0b100) >> 2;
+    *osOperationMode = (configBuff[0] & 0b010) >> 1;
+    *devOperationMode = configBuff[0] & 0b001;
 
     return 1;
 }
@@ -171,3 +170,10 @@ uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
 
     return 1;
 } 
+
+void osHandlerLM75BD(uint8_t devAddr) {
+    if (devAddr == LM75BD_OBC_I2C_ADDR) {
+        /* Deal with OS interrupt */
+        return;
+    }
+}

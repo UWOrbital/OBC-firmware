@@ -32,6 +32,7 @@
 /**
  * @struct Configuration struct for LM75BD,118 temperature sensor
  *
+ * @param devAddr I2C address of the LM75BD
  * @param osFaltQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
  * @param osPolarity OS output polarity, 0 = active low, 1 = active high
  * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
@@ -39,23 +40,99 @@
  * @param overTempThreshold Overtemperature shutdown threshold, in degrees Celsius
  * @param hysteresisThreshold Hysteresis, in degrees Celsius
  */
-uint8_t lm75bdInit(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
-                   uint8_t devOperationMode, float overTempThresholdCelsius, float hysteresisThresholdCelsius);
+typedef struct {
+    uint8_t devAddr;
+    uint8_t osFaltQueueSize;
+    uint8_t osPolarity;
+    uint8_t osOperationMode;
+    uint8_t devOperationMode;
+    float overTempThresholdCelsius;
+    float hysteresisThresholdCelsius;
+} lm75bd_config_t;
 
+/**
+ * @brief Initialize the LM75BD
+ *
+ * @param config Configuration struct for LM75BD
+ * @return 1 if successful, 0 otherwise
+ */
+uint8_t lm75bdInit(lm75bd_config_t *config);
+
+/**
+ * @brief Read the temperature from the LM75BD
+ *
+ * @param temp Pointer to float to store the temperature in degrees Celsius
+ * @return 1 if successful, 0 otherwise
+ */
 uint8_t readTempLM75BD(uint8_t devAddr, float *temp);
 
+/**
+ * @brief Read the configuration register from the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ * @param osFaltQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
+ * @param osPolarity OS output polarity, 0 = active low, 1 = active high
+ * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
+ * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
+ * @return 1 if successful, 0 otherwise
+ */
 uint8_t readConfigLM75BD(uint8_t devAddr, uint8_t *osFaltQueueSize, uint8_t *osPolarity, uint8_t *osOperationMode, 
                          uint8_t *devOperationMode);
 
+/**
+ * @brief Write to the configuration register from the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ * @param osFaltQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
+ * @param osPolarity OS output polarity, 0 = active low, 1 = active high
+ * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
+ * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
+ * @return 1 if successful, 0 otherwise
+ */
 uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
                           uint8_t devOperationMode);
 
+/**
+ * @brief Get the hysteresis threshold from the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
+ * @return 1 if successful, 0 otherwise
+ */
 uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius);
 
+/**
+ * @brief Set the hysteresis threshold for the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
+ * @return 1 if successful, 0 otherwise
+ */
 uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius);
 
+/**
+ * @brief Get the overtemperature shutdown threshold from the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius
+ * @return 1 if successful, 0 otherwise 
+ */
 uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
 
+/**
+ * @brief Set the overtemperature shutdown threshold for the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius
+ * @return 1 if successful, 0 otherwise
+ */
 uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius);
+
+/**
+ * @brief Handle an OS interrupt from the LM75BD
+ * 
+ * @param devAddr I2C address of the LM75BD
+ */
+void osHandlerLM75BD(uint8_t devAddr);
 
 #endif /* DRIVERS_INCLUDE_LM75BD_H_ */ 
