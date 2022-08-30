@@ -5,6 +5,10 @@
 
 uint8_t lm75bdInit(lm75bd_config_t *config)
 {
+    /* TOS must be greater than THYST */
+    if ( config == NULL || (config->hysteresisThresholdCelsius >= config->overTempThresholdCelsius) ) {
+        return 0;
+    }
     if (writeConfigLM75BD(config->devAddr, config->osFaltQueueSize, config->osPolarity, config->osOperationMode, config->devOperationMode) == 0) {
         return 0;
     }
@@ -20,7 +24,6 @@ uint8_t lm75bdInit(lm75bd_config_t *config)
 uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     uint8_t tempBuff[2];
 
-    /* Get 2 bytes from the LM75BD temperature registers */
     if (i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, 2) == 0) {
         return 0;
     }
@@ -28,8 +31,8 @@ uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     /* Combine the 11 MSB into a 16-bit signed integer */
     int16_t value = ( (int8_t)tempBuff[0] << 3 ) | ( tempBuff[1]  >> 5 );
 
-    /* Convert to to degrees Celsius */
-    *temp = (float)value * 0.125;
+    /* Convert to degrees Celsius */
+    *temp = (float)value * LM75BD_TEMP_RES;
 
     return 1;
 }
@@ -38,10 +41,12 @@ uint8_t readConfigLM75BD(uint8_t devAddr, uint8_t *osFaltQueueSize, uint8_t *osP
                          uint8_t *devOperationMode)
 {
     uint8_t configBuff[1];
+    
     if (i2cReadReg(devAddr, LM75BD_REG_CONF, configBuff, 1) == 0) {
         return 0;
     }
 
+    /* Bit 4 and 5 are OS Fault Queue Data */
     uint8_t osFaltQueueRegData = (configBuff[0] & 0b11000) >> 3;
     switch (osFaltQueueRegData) {
         case 0:
@@ -112,7 +117,8 @@ uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
     /* Combine the 9 MSB into a 16-bit signed integer */
     int16_t value = ( (int8_t)tempBuff[0] << 1 ) | ( tempBuff[1]  >> 7 );
 
-    *hysteresisThresholdCelsius = (float)value * 0.5;
+    /* Convert to degrees Celsius */
+    *hysteresisThresholdCelsius = (float)value * LM75BD_THYST_RES;
 
     return 1;
 }
@@ -120,12 +126,16 @@ uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
 uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
     uint8_t tempBuff[2];
 
-    /* Threshold must be a multiple of 0.5 and less than 127.5 degrees Celsius */
-    if (fmod(hysteresisThresholdCelsius, 0.5) != 0 || fabs(hysteresisThresholdCelsius) > 127.5) {
+    /* Threshold must be a multiple of the resolution and less than 127.5 degrees Celsius */
+    if (fmod(hysteresisThresholdCelsius, LM75BD_THYST_RES) != 0 || fabs(hysteresisThresholdCelsius) > 127.5) {
         return 0;
     }
 
-    // TODO: Convert celsius to 2's complement reg data
+    // Convert celsius to 2's complement reg data
+    int16_t converted = (int16_t)(hysteresisThresholdCelsius / LM75BD_THYST_RES) << 7;
+    tempBuff[0] = converted >> 8;
+    tempBuff[1] = converted & 0xFF;
+
 
     if (i2cWriteReg(devAddr, LM75BD_REG_THYST, tempBuff, 2) == 0) {
         return 0;
@@ -144,7 +154,8 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
     /* Combine the 9 MSB into a 16-bit signed integer */
     int16_t value = ( (int8_t)tempBuff[0] << 1 ) | ( tempBuff[1]  >> 7 );
 
-    *overTempThresholdCelsius = (float)value * 0.5;
+    /* Convert to degrees Celsius */
+    *overTempThresholdCelsius = (float)value * LM75BD_TOS_RES;
 
     return 1;
 }
@@ -152,12 +163,16 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
 uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
     uint8_t tempBuff[2];
 
-    /* Threshold must be a multiple of 0.5 and less than 127.5 degrees Celsius */
-    if (fmod(overTempThresholdCelsius, 0.5) != 0 || fabs(overTempThresholdCelsius) > 127.5) {
+    /* Threshold must be a multiple of the resolution and less than 127.5 degrees Celsius */
+    if (fmod(overTempThresholdCelsius, LM75BD_TOS_RES) != 0 || fabs(overTempThresholdCelsius) > 127.5) {
         return 0;
     }
 
-    // TODO: Convert celsius to 2's complement reg data
+    // Convert celsius to 2's complement reg data
+    int16_t converted = (int16_t)(overTempThresholdCelsius / LM75BD_TOS_RES) << 7;
+    tempBuff[0] = converted >> 8;
+    tempBuff[1] = converted & 0xFF;
+
 
     if (i2cWriteReg(devAddr, LM75BD_REG_TOS, tempBuff, 2) == 0) {
         return 0;
@@ -168,7 +183,14 @@ uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
 
 void osHandlerLM75BD(uint8_t devAddr) {
     if (devAddr == LM75BD_OBC_I2C_ADDR) {
-        /* Deal with OS interrupt */
+        /* 
+            Deal with OS interrupt.
+            In OS comparator mode, the OS output will be deactivated automatically if T < Thys.
+            In OS interrupt mode, the OS output will be deactivated only if we read from a register.
+            Note that we only have to deal with the OS interrupt in OS interrupt mode. 
+         */
+        // TODO: Implement OS interrupt handler 
+
         return;
     }
 }
