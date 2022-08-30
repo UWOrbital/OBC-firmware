@@ -20,16 +20,15 @@ uint8_t lm75bdInit(lm75bd_config_t *config)
 uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     uint8_t tempBuff[2];
 
+    /* Get 2 bytes from the LM75BD temperature registers */
     if (i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, 2) == 0) {
         return 0;
     }
 
-    int16_t value = ( (tempBuff[0] << 8) | tempBuff[1] ) >> 5;
+    /* Combine the 11 MSB into a 16-bit signed integer */
+    int16_t value = ( (int8_t)tempBuff[0] << 3 ) | ( tempBuff[1]  >> 5 );
 
-    if (value & (1 << 10)) {
-        value |= ~((1 << 10) - 1);
-    }
-
+    /* Convert to to degrees Celsius */
     *temp = (float)value * 0.125;
 
     return 1;
@@ -43,7 +42,7 @@ uint8_t readConfigLM75BD(uint8_t devAddr, uint8_t *osFaltQueueSize, uint8_t *osP
         return 0;
     }
 
-    uint8_t osFaltQueueRegData = (configBuff[0] & 0b00011000) >> 3;
+    uint8_t osFaltQueueRegData = (configBuff[0] & 0b11000) >> 3;
     switch (osFaltQueueRegData) {
         case 0:
             *osFaltQueueSize = 1;
@@ -110,11 +109,8 @@ uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
         return 0;
     }
 
-    int16_t value = ( (tempBuff[0] << 8) | tempBuff[1] ) >> 7;
-
-    if (value & (1 << 8)) {
-        value |= ~((1 << 8) - 1);
-    }
+    /* Combine the 9 MSB into a 16-bit signed integer */
+    int16_t value = ( (int8_t)tempBuff[0] << 1 ) | ( tempBuff[1]  >> 7 );
 
     *hysteresisThresholdCelsius = (float)value * 0.5;
 
@@ -124,6 +120,7 @@ uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
 uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
     uint8_t tempBuff[2];
 
+    /* Threshold must be a multiple of 0.5 and less than 127.5 degrees Celsius */
     if (fmod(hysteresisThresholdCelsius, 0.5) != 0 || fabs(hysteresisThresholdCelsius) > 127.5) {
         return 0;
     }
@@ -144,11 +141,8 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
         return 0;
     }
 
-    int16_t value = ( (tempBuff[0] << 8) | tempBuff[1] ) >> 7;
-
-    if (value & (1 << 8)) {
-        value |= ~((1 << 8) - 1);
-    }
+    /* Combine the 9 MSB into a 16-bit signed integer */
+    int16_t value = ( (int8_t)tempBuff[0] << 1 ) | ( tempBuff[1]  >> 7 );
 
     *overTempThresholdCelsius = (float)value * 0.5;
 
@@ -158,6 +152,7 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
 uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
     uint8_t tempBuff[2];
 
+    /* Threshold must be a multiple of 0.5 and less than 127.5 degrees Celsius */
     if (fmod(overTempThresholdCelsius, 0.5) != 0 || fabs(overTempThresholdCelsius) > 127.5) {
         return 0;
     }

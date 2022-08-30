@@ -38,7 +38,7 @@
  * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
  * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
  * @param overTempThreshold Overtemperature shutdown threshold, in degrees Celsius
- * @param hysteresisThreshold Hysteresis, in degrees Celsius
+ * @param hysteresisThreshold Hysteresis threshold, in degrees Celsius
  */
 typedef struct {
     uint8_t devAddr;
