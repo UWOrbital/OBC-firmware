@@ -91,7 +91,7 @@ typedef struct gio_config_reg
 
 #define GIO_INTENASET_CONFIGVALUE ((uint32)((uint32)0U << 0U) \
 							     | (uint32)((uint32)0U << 1U) \
-							     | (uint32)((uint32)0U << 2U) \
+							     | (uint32)((uint32)1U << 2U) \
 							     | (uint32)((uint32)0U << 3U) \
 							     | (uint32)((uint32)0U << 4U) \
 							     | (uint32)((uint32)0U << 5U) \
@@ -108,7 +108,7 @@ typedef struct gio_config_reg
 
 #define GIO_LVLSET_CONFIGVALUE    ((uint32)((uint32)0U << 0U) \
 								 | (uint32)((uint32)0U << 1U) \
-								 | (uint32)((uint32)0U << 2U) \
+								 | (uint32)((uint32)1U << 2U) \
 								 | (uint32)((uint32)0U << 3U) \
 								 | (uint32)((uint32)0U << 4U) \
 								 | (uint32)((uint32)0U << 5U) \
