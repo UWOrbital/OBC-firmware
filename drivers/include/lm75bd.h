@@ -29,13 +29,21 @@
 #define LM75BD_DEFAULT_OS_POL LM75BD_OS_POL_ACTIVE_LOW
 #define LM75BD_DEFAULT_OS_FAULT_QUEUE_SIZE 1 /* OS_F_QUE = 0 */
 
+/* LM75BD Temperature Resolutions */
 #define LM75BD_THYST_RES 0.5 /* Degrees Celsius */
 #define LM75BD_TOS_RES 0.5 /* Degrees Celsius */
 #define LM75BD_TEMP_RES 0.125 /* Degrees Celsius */
 
+/* LM75BD Number of Bits in Right Padding */
 #define LM75BD_THYST_LSB_PADDING 7 /* Number of bits */
 #define LM75BD_TOS_LSB_PADDING 7 /* Number of bits */
 #define LM75BD_TEMP_LSB_PADDING 5 /* Number of bits */
+
+/* Buffer Size of Registers (i.e. Number of Bytes to R/W) */
+#define LM75BD_TEMP_BUFF_SIZE 2
+#define LM75BD_CONF_BUFF_SIZE 1
+#define LM75BD_THYST_BUFF_SIZE 2
+#define LM75BD_TOS_BUFF_SIZE 2
 
 /**
  * @struct Configuration struct for LM75BD,118 temperature sensor

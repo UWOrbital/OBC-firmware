@@ -25,13 +25,13 @@ uint8_t lm75bdInit(lm75bd_config_t *config)
 }
 
 uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
-    uint8_t tempBuff[2];
+    uint8_t tempBuff[LM75BD_TEMP_BUFF_SIZE];
 
     if (temp == NULL) {
         return 0;
     }
 
-    if (i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, 2) == 0) {
+    if (i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, LM75BD_TEMP_BUFF_SIZE) == 0) {
         return 0;
     }
 
@@ -46,13 +46,13 @@ uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
 
 uint8_t readConfigLM75BD(lm75bd_config_t *config)
 {
-    uint8_t configBuff[1];
+    uint8_t configBuff[LM75BD_CONF_BUFF_SIZE];
 
     if (config == NULL) {
         return 0;
     }
 
-    if (i2cReadReg(config->devAddr, LM75BD_REG_CONF, configBuff, 1) == 0) {
+    if (i2cReadReg(config->devAddr, LM75BD_REG_CONF, configBuff, LM75BD_CONF_BUFF_SIZE) == 0) {
         return 0;
     }
 
@@ -85,7 +85,7 @@ uint8_t readConfigLM75BD(lm75bd_config_t *config)
 uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
                           uint8_t devOperationMode)
 {
-    uint8_t configBuff[1] = {0};
+    uint8_t configBuff[LM75BD_CONF_BUFF_SIZE] = {0};
 
     uint8_t osFaltQueueRegData;
     switch (osFaltQueueSize) {
@@ -110,7 +110,7 @@ uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPo
     configBuff[0] |= (osOperationMode << 1);
     configBuff[0] |= devOperationMode;
 
-    if (i2cWriteReg(devAddr, LM75BD_REG_CONF, configBuff, 1) == 0) {
+    if (i2cWriteReg(devAddr, LM75BD_REG_CONF, configBuff, LM75BD_CONF_BUFF_SIZE) == 0) {
         return 0;
     }
 
@@ -118,18 +118,18 @@ uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPo
 }
 
 uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
-    uint8_t tempBuff[2];
+    uint8_t thystBuff[LM75BD_THYST_BUFF_SIZE];
 
     if (hysteresisThresholdCelsius == NULL) {
         return 0;
     }
 
-    if (i2cReadReg(devAddr, LM75BD_REG_THYST, tempBuff, 2) == 0) {
+    if (i2cReadReg(devAddr, LM75BD_REG_THYST, thystBuff, LM75BD_THYST_BUFF_SIZE) == 0) {
         return 0;
     }
 
     /* Combine the 9 MSB into a 16-bit signed integer */
-    int16_t value = ( (int8_t)tempBuff[0] << 1 ) | ( tempBuff[1]  >> 7 );
+    int16_t value = ( (int8_t)thystBuff[0] << 1 ) | ( thystBuff[1]  >> 7 );
 
     /* Convert to degrees Celsius */
     *hysteresisThresholdCelsius = (float)value * LM75BD_THYST_RES;
@@ -138,7 +138,7 @@ uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
 }
 
 uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
-    uint8_t tempBuff[2];
+    uint8_t thystBuff[LM75BD_THYST_BUFF_SIZE] = {0};
 
     /* Threshold must be a multiple of the resolution and less than 127.5 degrees Celsius */
     if (fmod(hysteresisThresholdCelsius, LM75BD_THYST_RES) != 0 || fabs(hysteresisThresholdCelsius) > 127.5) {
@@ -147,11 +147,11 @@ uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
 
     // Convert celsius to 2's complement reg data
     int16_t converted = (int16_t)(hysteresisThresholdCelsius / LM75BD_THYST_RES) << 7;
-    tempBuff[0] = converted >> 8;
-    tempBuff[1] = converted & 0xFF;
+    thystBuff[0] = converted >> 8;
+    thystBuff[1] = converted & 0xFF;
 
 
-    if (i2cWriteReg(devAddr, LM75BD_REG_THYST, tempBuff, 2) == 0) {
+    if (i2cWriteReg(devAddr, LM75BD_REG_THYST, thystBuff, LM75BD_THYST_BUFF_SIZE) == 0) {
         return 0;
     }
 
@@ -159,18 +159,18 @@ uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
 }
 
 uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
-    uint8_t tempBuff[2];
+    uint8_t tosBuff[LM75BD_TOS_BUFF_SIZE];
 
     if (overTempThresholdCelsius == NULL) {
         return 0;
     }
 
-    if (i2cReadReg(devAddr, LM75BD_REG_TOS, tempBuff, 2) == 0) {
+    if (i2cReadReg(devAddr, LM75BD_REG_TOS, tosBuff, LM75BD_TOS_BUFF_SIZE) == 0) {
         return 0;
     }
 
     /* Combine the 9 MSB into a 16-bit signed integer */
-    int16_t value = ( (int8_t)tempBuff[0] << 1 ) | ( tempBuff[1]  >> 7 );
+    int16_t value = ( (int8_t)tosBuff[0] << 1 ) | ( tosBuff[1]  >> 7 );
 
     /* Convert to degrees Celsius */
     *overTempThresholdCelsius = (float)value * LM75BD_TOS_RES;
@@ -179,7 +179,7 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
 }
 
 uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
-    uint8_t tempBuff[2];
+    uint8_t tosBuff[LM75BD_TOS_BUFF_SIZE] = {0};
 
     /* Threshold must be a multiple of the resolution and less than 127.5 degrees Celsius */
     if (fmod(overTempThresholdCelsius, LM75BD_TOS_RES) != 0 || fabs(overTempThresholdCelsius) > 127.5) {
@@ -188,11 +188,11 @@ uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
 
     // Convert celsius to 2's complement reg data
     int16_t converted = (int16_t)(overTempThresholdCelsius / LM75BD_TOS_RES) << 7;
-    tempBuff[0] = converted >> 8;
-    tempBuff[1] = converted & 0xFF;
+    tosBuff[0] = converted >> 8;
+    tosBuff[1] = converted & 0xFF;
 
 
-    if (i2cWriteReg(devAddr, LM75BD_REG_TOS, tempBuff, 2) == 0) {
+    if (i2cWriteReg(devAddr, LM75BD_REG_TOS, tosBuff, LM75BD_TOS_BUFF_SIZE) == 0) {
         return 0;
     }
 
@@ -209,6 +209,5 @@ void osHandlerLM75BD(uint8_t devAddr) {
          */
         // TODO: Implement OS interrupt handler 
 
-        return;
     }
 }
