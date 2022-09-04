@@ -141,7 +141,7 @@ uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
     uint8_t thystBuff[LM75BD_THYST_BUFF_SIZE] = {0};
 
     /* Threshold must be a multiple of the resolution and less than 127.5 degrees Celsius */
-    if (fmod(hysteresisThresholdCelsius, LM75BD_THYST_RES) != 0 || fabs(hysteresisThresholdCelsius) > 127.5) {
+    if (fmod(hysteresisThresholdCelsius, LM75BD_THYST_RES) != 0 || fabs(hysteresisThresholdCelsius) > LM75BD_TEMP_THRESH_MAX) {
         return 0;
     }
 
@@ -182,7 +182,7 @@ uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius) {
     uint8_t tosBuff[LM75BD_TOS_BUFF_SIZE] = {0};
 
     /* Threshold must be a multiple of the resolution and less than 127.5 degrees Celsius */
-    if (fmod(overTempThresholdCelsius, LM75BD_TOS_RES) != 0 || fabs(overTempThresholdCelsius) > 127.5) {
+    if (fmod(overTempThresholdCelsius, LM75BD_TOS_RES) != 0 || fabs(overTempThresholdCelsius) > LM75BD_TEMP_THRESH_MAX) {
         return 0;
     }
 

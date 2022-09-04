@@ -45,6 +45,9 @@
 #define LM75BD_THYST_BUFF_SIZE 2
 #define LM75BD_TOS_BUFF_SIZE 2
 
+/* LM75BD TOS and THYST Limits */
+#define LM75BD_TEMP_THRESH_MAX 127.5 /* Degrees Celsius */
+
 /**
  * @struct Configuration struct for LM75BD,118 temperature sensor
  *
