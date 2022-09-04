@@ -5,8 +5,11 @@
 
 uint8_t lm75bdInit(lm75bd_config_t *config)
 {
+    if (config == NULL) {
+        return 0;
+    }
     /* TOS must be greater than THYST */
-    if ( config == NULL || (config->hysteresisThresholdCelsius >= config->overTempThresholdCelsius) ) {
+    if (config->hysteresisThresholdCelsius >= config->overTempThresholdCelsius) {
         return 0;
     }
     if (writeConfigLM75BD(config->devAddr, config->osFaltQueueSize, config->osPolarity, config->osOperationMode, config->devOperationMode) == 0) {
@@ -24,6 +27,10 @@ uint8_t lm75bdInit(lm75bd_config_t *config)
 uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     uint8_t tempBuff[2];
 
+    if (temp == NULL) {
+        return 0;
+    }
+
     if (i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, 2) == 0) {
         return 0;
     }
@@ -37,12 +44,15 @@ uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     return 1;
 }
 
-uint8_t readConfigLM75BD(uint8_t devAddr, uint8_t *osFaltQueueSize, uint8_t *osPolarity, uint8_t *osOperationMode, 
-                         uint8_t *devOperationMode)
+uint8_t readConfigLM75BD(lm75bd_config_t *config)
 {
     uint8_t configBuff[1];
-    
-    if (i2cReadReg(devAddr, LM75BD_REG_CONF, configBuff, 1) == 0) {
+
+    if (config == NULL) {
+        return 0;
+    }
+
+    if (i2cReadReg(config->devAddr, LM75BD_REG_CONF, configBuff, 1) == 0) {
         return 0;
     }
 
@@ -50,24 +60,24 @@ uint8_t readConfigLM75BD(uint8_t devAddr, uint8_t *osFaltQueueSize, uint8_t *osP
     uint8_t osFaltQueueRegData = (configBuff[0] & 0b11000) >> 3;
     switch (osFaltQueueRegData) {
         case 0:
-            *osFaltQueueSize = 1;
+            config->osFaltQueueSize = 1;
             break;
         case 1:
-            *osFaltQueueSize = 2;
+            config->osFaltQueueSize = 2;
             break;
         case 2:
-            *osFaltQueueSize = 4;
+            config->osFaltQueueSize = 4;
             break;
         case 3:
-            *osFaltQueueSize = 6;
+            config->osFaltQueueSize = 6;
             break;
         default:
             return 0;
     }
 
-    *osPolarity = (configBuff[0] & 0b100) >> 2;
-    *osOperationMode = (configBuff[0] & 0b010) >> 1;
-    *devOperationMode = configBuff[0] & 0b001;
+    config->osPolarity = (configBuff[0] & 0b100) >> 2;
+    config->osOperationMode = (configBuff[0] & 0b010) >> 1;
+    config->devOperationMode = configBuff[0] & 0b001;
 
     return 1;
 }
@@ -110,6 +120,10 @@ uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPo
 uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
     uint8_t tempBuff[2];
 
+    if (hysteresisThresholdCelsius == NULL) {
+        return 0;
+    }
+
     if (i2cReadReg(devAddr, LM75BD_REG_THYST, tempBuff, 2) == 0) {
         return 0;
     }
@@ -146,6 +160,10 @@ uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius) {
 
 uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
     uint8_t tempBuff[2];
+
+    if (overTempThresholdCelsius == NULL) {
+        return 0;
+    }
 
     if (i2cReadReg(devAddr, LM75BD_REG_TOS, tempBuff, 2) == 0) {
         return 0;
