@@ -48,11 +48,17 @@
 /* LM75BD TOS and THYST Limits */
 #define LM75BD_TEMP_THRESH_MAX 127.5 /* Degrees Celsius */
 
+/* LM75BD Config Reg Bit Masks */
+#define LM75BD_OS_FAULT_QUEUE_MASK 0b11000
+#define LM75BD_OS_POL_MASK 0b100
+#define LM75BD_OS_OP_MODE_MASK 0b010
+#define LM75BD_DEV_OP_MODE_MASK 0b001
+
 /**
  * @struct Configuration struct for LM75BD,118 temperature sensor
  *
  * @param devAddr I2C address of the LM75BD
- * @param osFaltQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
+ * @param osFaultQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
  * @param osPolarity OS output polarity, 0 = active low, 1 = active high
  * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
  * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
@@ -61,7 +67,7 @@
  */
 typedef struct {
     uint8_t devAddr;
-    uint8_t osFaltQueueSize;
+    uint8_t osFaultQueueSize;
     uint8_t osPolarity;
     uint8_t osOperationMode;
     uint8_t devOperationMode;
@@ -97,13 +103,13 @@ uint8_t readConfigLM75BD(lm75bd_config_t *config);
  * @brief Write to the configuration register from the LM75BD
  * 
  * @param devAddr I2C address of the LM75BD
- * @param osFaltQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
+ * @param osFaultQueueSize Number of consecutive OS faults until OS output is activated (1, 2, 4, or 6)
  * @param osPolarity OS output polarity, 0 = active low, 1 = active high
  * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
  * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
  * @return 1 if successful, 0 otherwise
  */
-uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaltQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
+uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
                           uint8_t devOperationMode);
 
 /**
