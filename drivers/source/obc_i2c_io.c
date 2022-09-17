@@ -15,6 +15,8 @@ void initI2CMutex(void) {
     if (i2cMutex == NULL) {
         i2cMutex = xSemaphoreCreateMutexStatic(&i2cMutexBuffer);
     }
+
+    configASSERT(i2cMutex);
 }
 
 uint8_t i2cSendTo(uint8_t sAddr, uint16_t size, void *buf) {

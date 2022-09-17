@@ -27,6 +27,9 @@ void initSciMutex(void) {
     if (sciLinMutex == NULL) {
         sciLinMutex = xSemaphoreCreateMutexStatic(&sciLinMutexBuffer);
     }
+
+    configASSERT(sciMutex);
+    configASSERT(sciLinMutex);
 }
 
 uint8_t printTextSci(sciBASE_t *sci, unsigned char *text, uint32_t length) {
