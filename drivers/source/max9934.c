@@ -34,7 +34,19 @@ uint8_t getCurrentSensorAnalogValue(float *analogValue, uint16_t *digitalValue, 
     
     uint16_t adcValue = getCurrentSensorDigitalValue(digitalValue, numConversions);
 
-    *analogValue = (float) (ADC_12_BIT/adcValue * 5.25); 
+    *analogValue = (float) ADC_12_BIT/adcValue * 5.25; 
+
+    return 1;
+}
+
+uint8_t getCurrentValue(float *analogValue, uint16_t *digitalValue, uint32 *numConversions, float *analogCurrentValue) {
+    if ((analogValue == NULL) || (digitalValue == NULL) || (numConversions == NULL) || (analogCurrentValue == NULL)) {
+        return 0;
+    }
+
+    uint8_t adcValue = getCurrentSensorAnalogValue(analogValue, digitalValue, numConversions);
+
+    *analogCurrentValue = (float) MAX9934_GAIN * (*analogValue);
 
     return 1;
 }
