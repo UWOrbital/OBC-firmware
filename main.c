@@ -9,6 +9,7 @@
 #include <gio.h>
 #include <sci.h>
 #include <i2c.h>
+#include <adc.h>
 
 int main(void) {
 
@@ -16,6 +17,7 @@ int main(void) {
     gioInit();
     sciInit();
     i2cInit();
+    adcInit();
 
     // Initialize bus mutexes
     initSciMutex();
