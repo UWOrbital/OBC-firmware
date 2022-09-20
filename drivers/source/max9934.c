@@ -1,6 +1,7 @@
 #include "max9934.h"
 #include "obc_i2c_io.h"
 
+
 uint8_t max9934init(max9934_config_t *config) {
     if (config == NULL) {
         return 0;
@@ -9,8 +10,8 @@ uint8_t max9934init(max9934_config_t *config) {
     return 1;
 }
 
-uint8_t getCurrentSensorDigitalValue(uint16_t *digitalValue, uint32 *numConversions) {
-    if ((digitalValue == NULL) || (numConversions == NULL)) {
+uint8_t max9934ADCDigitalVoltage(uint16_t *digitalVoltage, uint32 *numConversions) {
+    if ((digitalVoltage == NULL) || (numConversions == NULL)) {
         return 0;
     }
     
@@ -22,31 +23,41 @@ uint8_t getCurrentSensorDigitalValue(uint16_t *digitalValue, uint32 *numConversi
 
     *numConversions = adcGetData(MAX9934_ADC_REG, MAX9934_ADC_GROUP, &adc_data);
 
-    *digitalValue = adc_data.value;
+    *digitalVoltage = adc_data.value;
 
     return 1;
 }
 
-uint8_t getCurrentSensorAnalogValue(float *analogValue, uint16_t *digitalValue, uint32 *numConversions) {
-    if ((analogValue == NULL) || (digitalValue == NULL) || (numConversions == NULL)) {
+uint8_t max9934ADCAnalogVoltage(float *analogVoltage, uint16_t *digitalVoltage, uint32 *numConversions) {
+    if ((analogVoltage == NULL) || (digitalVoltage == NULL) || (numConversions == NULL)) {
         return 0;
     }
     
-    uint16_t adcValue = getCurrentSensorDigitalValue(digitalValue, numConversions);
+    if (max9934ADCDigitalVoltage(digitalVoltage, numConversions) == 0) {
+        return 0;
+    }
 
-    *analogValue = (float) ADC_12_BIT/adcValue * 5.25; 
+    *analogVoltage = (float) ADC_12_BIT/(*digitalVoltage) * 5.25; 
 
     return 1;
 }
 
-uint8_t getCurrentValue(float *analogValue, uint16_t *digitalValue, uint32 *numConversions, float *analogCurrentValue) {
-    if ((analogValue == NULL) || (digitalValue == NULL) || (numConversions == NULL) || (analogCurrentValue == NULL)) {
+uint8_t max9934MeasuredCurrent(float *analogVoltage, uint16_t *digitalValue, uint32 *numConversions, float *analogCurrent) {
+    if ((analogVoltage == NULL) || (digitalValue == NULL) || (numConversions == NULL) || (analogCurrent == NULL)) {
         return 0;
     }
 
-    uint8_t adcValue = getCurrentSensorAnalogValue(analogValue, digitalValue, numConversions);
+    if (max9934ADCAnalogVoltage(analogVoltage, digitalValue, numConversions) == 0) {
+        return 0;
+    }
 
-    *analogCurrentValue = (float) MAX9934_GAIN * (*analogValue);
+    /* MAX9934 Circuit Configuration */
+    float rOut = 10.0; 
+    float rSense = 25.0;
+    float gain = 25.0; 
+
+    *analogCurrent = *analogVoltage / (rOut * rSense * gain);
+
 
     return 1;
 }
