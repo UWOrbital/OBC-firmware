@@ -43,9 +43,9 @@ uint8_t getCurrentMAX9934(float *analogCurrent) {
     }
 
     /* MAX9934 Circuit Configuration */
-    float rOut = 10.0; 
-    float rSense = 25.0;
-    float gain = 25.0; 
+    float rOut = 10.0; /* 10 kOhms */
+    float rSense = 25.0; /* 25 kOhms */
+    float gain = 25.0;  /* 25 uA/mV */
 
     float analogVoltage = max9934ADCAnalogVoltage();
 
