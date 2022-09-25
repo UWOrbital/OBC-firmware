@@ -1,31 +1,14 @@
 #include "max9934.h"
 
-uint8_t getCurrentMAX9934(float *analogCurrent) {
-    if (analogCurrent == NULL) {
-        return 0;
-    }
-
-    /* MAX9934 Circuit Configuration */
-    float rOut = 10.0; 
-    float rSense = 25.0;
-    float gain = 25.0; 
-
-    float analogVoltage = max9934ADCAnalogVoltage();
-
-    *analogCurrent = analogVoltage / (rOut * rSense * gain);
-
-    return 1;
-}
-
 static uint16_t max9934ADCDigitalVoltage(void) {
     adcData_t adc_data;
     adcData_t *adc_data_ptr = &adc_data;
 
-    adcStartConversion_selChn(MAX9934_ADC_REG, MAX9934_PIN, 6, MAX9934_ADC_REG);
+    adcStartConversion_selChn(MAX9934_ADC_REG, MAX9934_PIN, 6, MAX9934_ADC_GROUP);
 
-    while(!adcIsConversionComplete(adcREG1, adcGROUP1));
+    while(!adcIsConversionComplete(MAX9934_ADC_REG, MAX9934_ADC_GROUP));
 
-    adcGetSingleData(MAX9934_ADC_REG, MAX9934_ADC_REG, adc_data_ptr);
+    adcGetSingleData(MAX9934_ADC_REG, MAX9934_ADC_GROUP, adc_data_ptr);
 
     return(adc_data_ptr->value);
 }
@@ -54,5 +37,21 @@ static void adcStartConversion_selChn(adcBASE_t *adc, unsigned channel, unsigned
     adc->GxSEL[group] = 1 << channel;
 }
 
+uint8_t getCurrentMAX9934(float *analogCurrent) {
+    if (analogCurrent == NULL) {
+        return 0;
+    }
+
+    /* MAX9934 Circuit Configuration */
+    float rOut = 10.0; 
+    float rSense = 25.0;
+    float gain = 25.0; 
+
+    float analogVoltage = max9934ADCAnalogVoltage();
+
+    *analogCurrent = analogVoltage / (rOut * rSense * gain);
+
+    return 1;
+}
 
  
