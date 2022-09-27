@@ -7,6 +7,7 @@
 #define MAX9934_ADC_GROUP adcGROUP1
 #define MAX9934_PIN 0U
 #define MAX9934_ADC_REG adcREG1
+#define ADC_RESOLUTION 4095U
 
 /**
  * @brief Convert ADC analog voltage measured to current value in uA
@@ -36,6 +37,8 @@ static float max9934ADCAnalogVoltage(void);
 
 /**
  * @brief ADC helper functions for single channel ADC conversion
+ * 
+ * @ref https://git.ti.com/cgit/hercules_examples/hercules_examples/tree/Launchpad/RM/RM46L8/Project_1/demoapp/source/adc_demos.c
  */
 
 static void adcGetSingleData(adcBASE_t *adc, unsigned group, adcData_t *data);
