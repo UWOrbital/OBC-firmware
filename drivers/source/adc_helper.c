@@ -9,7 +9,6 @@ void InitADCMutex(void) {
     if(adcMutex == NULL) {
         adcMutex = xSemaphoreCreateMutex();
     }
-
 }
 
 static void adcStartConversion_selChn(adcBASE_t *adc, unsigned channel, unsigned fifo_size, unsigned group) {
@@ -32,7 +31,7 @@ static void adcGetSingleData(adcBASE_t *adc, unsigned group, adcData_t *data) {
 static uint16_t adcDigitalVoltage(adcBASE_t *adc, unsigned group, unsigned channel) {
     adcData_t adc_data;
     adcData_t *adc_data_ptr = &adc_data;
-
+    
     adcStartConversion_selChn(adc, channel, 6U, group);
 
     while(!adcIsConversionComplete(adc, group));

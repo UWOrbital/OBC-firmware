@@ -19,30 +19,5 @@
 
 uint8_t getCurrentMAX9934(float *analogCurrent);
 
-/**
- * @brief Read ADC digital voltage value
-
- * @return Digital voltage read by ADC from MAX9934
- */
-
-static uint16_t max9934ADCDigitalVoltage(void);
-
-/**
- * @brief Converts ADC digital voltage to equivalant analog voltage from MAX9934
-
- * @return Analog voltage value from MAX9934
- */
-
-static float max9934ADCAnalogVoltage(void);
-
-/**
- * @brief ADC helper functions for single channel ADC conversion
- * 
- * @ref https://git.ti.com/cgit/hercules_examples/hercules_examples/tree/Launchpad/RM/RM46L8/Project_1/demoapp/source/adc_demos.c
- */
-
-static void adcGetSingleData(adcBASE_t *adc, unsigned group, adcData_t *data);
-
-static void adcStartConversion_selChn(adcBASE_t *adc, unsigned channel, unsigned fifo_size, unsigned group);
 
 #endif /* DRIVERS_INCLUDE_MAX9934_H_ */
