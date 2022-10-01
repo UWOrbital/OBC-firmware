@@ -7,7 +7,6 @@
 #define MAX9934_ADC_GROUP adcGROUP1
 #define MAX9934_PIN 0U
 #define MAX9934_ADC_REG adcREG1
-#define ADC_RESOLUTION 4095U
 
 /**
  * @brief Convert ADC analog voltage measured to current value in uA
