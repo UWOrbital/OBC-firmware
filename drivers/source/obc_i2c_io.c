@@ -9,11 +9,14 @@
 #include <sys_common.h>
 
 static SemaphoreHandle_t i2cMutex = NULL;
+static StaticSemaphore_t i2cMutexBuffer;
 
 void initI2CMutex(void) {
     if (i2cMutex == NULL) {
-        i2cMutex = xSemaphoreCreateMutex();
+        i2cMutex = xSemaphoreCreateMutexStatic(&i2cMutexBuffer);
     }
+
+    configASSERT(i2cMutex);
 }
 
 uint8_t i2cSendTo(uint8_t sAddr, uint16_t size, void *buf) {
