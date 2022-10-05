@@ -5,12 +5,13 @@
 #include <adc.h>
 
 #define ADC_RESOLUTION 4095U
+#define FIFOSIZE 6U
 
 /**
  * @brief Initialize the ADC mutex
  */
 
-void InitADCMutex(void);
+void initADCMutex(void);
 
 /**
  * @brief Function to start conversion of a single adc channel
@@ -24,7 +25,7 @@ void InitADCMutex(void);
  * 
  */ 
 
-static void adcStartConversion_selChn(adcBASE_t *adc, unsigned channel, unsigned fifo_size, unsigned group);
+static void adcStartConversion_selChn(adcBASE_t *adc, uint8_t channel, uint8_t fifoSize, uint8_t group);
 
 /**
  * @brief Function to get ADC converted data
@@ -37,7 +38,7 @@ static void adcStartConversion_selChn(adcBASE_t *adc, unsigned channel, unsigned
  * 
  */ 
 
-static void adcGetSingleData(adcBASE_t *adc, unsigned group, adcData_t *data);
+static void adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data);
 
 /**
  * @brief Function to get ADC digital voltage
@@ -51,7 +52,7 @@ static void adcGetSingleData(adcBASE_t *adc, unsigned group, adcData_t *data);
  * @return The digital voltage value from the ADC
  */ 
 
-static uint16_t adcDigitalVoltage(adcBASE_t *adc, unsigned group, unsigned channel);
+static uint16_t adcDigitalVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel);
 
 /**
  * @brief Function to get ADC analog voltage
@@ -65,6 +66,6 @@ static uint16_t adcDigitalVoltage(adcBASE_t *adc, unsigned group, unsigned chann
  * @return The analog voltage value from the ADC
  */ 
 
-float adcAnalogVoltage(adcBASE_t *adc, unsigned group, unsigned channel);
+float adcAnalogVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel);
 
 #endif
