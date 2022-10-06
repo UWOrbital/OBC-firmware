@@ -1,0 +1,25 @@
+name: build
+on: [push, pull_request]
+env:
+  ARM_NONE_EABI_GCC_PATH: none
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install arm-none-eabi-gcc
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '11.2-2022.02'
+        path-env-var: ARM_NONE_EABI_GCC_PATH
+      
+    - name: Make envfile
+      run: |
+        touch .env
+        echo CC_FOLDER_ROOT="${ARM_NONE_EABI_GCC_PATH::-4}" >> .env
+        cat .env
+        
+    - name: Build
+      run: make
