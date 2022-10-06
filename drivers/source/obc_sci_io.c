@@ -3,6 +3,7 @@
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_semphr.h>
+#include <os_task.h>
 
 #include <sci.h>
 
