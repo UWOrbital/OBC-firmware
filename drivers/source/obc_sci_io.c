@@ -3,11 +3,14 @@
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_semphr.h>
+#include <os_task.h>
 
 #include <sci.h>
 
 static SemaphoreHandle_t sciMutex = NULL;
+static StaticSemaphore_t sciMutexBuffer;
 static SemaphoreHandle_t sciLinMutex = NULL;
+static StaticSemaphore_t sciLinMutexBuffer;
 
 /**
  * @brief Iterate through an array of bytes and transmit them via SCI or SCI2.
@@ -20,11 +23,14 @@ static void sciSendBytes(sciBASE_t *sci, unsigned char *bytes, uint32_t length);
 
 void initSciMutex(void) {
     if (sciMutex == NULL) {
-        sciMutex = xSemaphoreCreateMutex();
+        sciMutex = xSemaphoreCreateMutexStatic(&sciMutexBuffer);
     }
     if (sciLinMutex == NULL) {
-        sciLinMutex = xSemaphoreCreateMutex();
+        sciLinMutex = xSemaphoreCreateMutexStatic(&sciLinMutexBuffer);
     }
+
+    configASSERT(sciMutex);
+    configASSERT(sciLinMutex);
 }
 
 uint8_t printTextSci(sciBASE_t *sci, unsigned char *text, uint32_t length) {
