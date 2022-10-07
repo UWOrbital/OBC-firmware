@@ -8,12 +8,6 @@
 #define FIFOSIZE 6U
 
 /**
- * @brief Initialize the ADC mutex
- */
-
-void initADCMutex(void);
-
-/**
  * @brief Function to start conversion of a single adc channel
  * 
  * @param adc Pointer to ADC Module
@@ -23,9 +17,10 @@ void initADCMutex(void);
  * @param fifo_size Size of FIFO queue to store converted values
  * @param group ADC group to be converted
  * 
+ * @return 1 if successful, 0 if not 
  */ 
 
-static void adcStartConversion_selChn(adcBASE_t *adc, uint8_t channel, uint8_t fifoSize, uint8_t group);
+static uint8_t adcStartConversion_selChn(adcBASE_t *adc, uint8_t channel, uint8_t fifoSize, uint8_t group);
 
 /**
  * @brief Function to get ADC converted data
@@ -36,9 +31,10 @@ static void adcStartConversion_selChn(adcBASE_t *adc, uint8_t channel, uint8_t f
  * @param group ADC group to get converted data from
  * @param data Pointer to store ADC converted data
  * 
+ * @return 1 if successful, 0 if not 
  */ 
 
-static void adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data);
+static uint8_t adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data);
 
 /**
  * @brief Function to get ADC digital voltage
@@ -48,11 +44,12 @@ static void adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data);
  *        - adcREG2: ADC2 module pointer
  * @param group ADC group to be converted
  * @param channel ADC channel to be converted
+ * @param adcData Pointer to converted data
  * 
- * @return The digital voltage value from the ADC
+ * @return 1 if successful, 0 if not 
  */ 
 
-static uint16_t adcDigitalVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel);
+static uint8_t adcDigitalVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel, adcData_t *adcData);
 
 /**
  * @brief Function to get ADC analog voltage
@@ -62,10 +59,11 @@ static uint16_t adcDigitalVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel
  *        - adcREG2: ADC2 module pointer
  * @param group ADC group to be converted
  * @param channel ADC channel to be converted
+ * @param adcValue Pointer to converted analog voltage
  * 
- * @return The analog voltage value from the ADC
+ * @return 1 if successful, 0 if not 
  */ 
 
-float adcAnalogVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel);
+uint8_t adcAnalogVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel, float *adcValue);
 
 #endif
