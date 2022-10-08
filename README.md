@@ -18,6 +18,8 @@ This repository holds all the code that runs on our CubeSat's onboard computer (
     * All code for the command and data handling subsystem.
 * `comms/`
     * All code for the communications subsystem.
+* `drivers/`
+    * All device drivers and helper functions for modules (I2C, SCI, ADC, etc.)
 * `examples/`
     * Example programs to help other developers.
 * `hal/`
@@ -146,6 +148,18 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
 myFunction(hasToo,
             many, variables)
 ```
+
+### ****General Rules****
+
+1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)).
+2. All loops must have fixed bounds. This prevents runaway code.
+3. Avoid [heap memory allocation](https://en.wikipedia.org/wiki/Memory_management#DYNAMIC).
+4. Use an average of two [runtime assertions](https://en.wikipedia.org/wiki/Assertion_(software_development)#Assertions_for_run-time_checking) per function.
+5. Restrict the scope of data to the smallest possible.
+6. Check the return value of all non-void functions, or cast to void to indicate the return value is useless.
+7. Limit pointer use to a single [dereference](https://en.wikipedia.org/wiki/Dereference_operator), and do not use [function pointers](https://en.wikipedia.org/wiki/Function_pointer).
+8. Compile with all possible warnings active; all warnings should then be addressed before release of the software.
+
 **[Back to top](#table-of-contents)**
 
 ## Authors
