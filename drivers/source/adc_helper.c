@@ -52,8 +52,9 @@ uint8_t adcAnalogVoltage(adcBASE_t *adc, uint8_t group, uint8_t channel, float *
     }
 
     adcData_t adcData;
-    uint16_t digitalVoltage = adcDigitalVoltage(adc, group, channel, &adcData);
+    adcDigitalVoltage(adc, group, channel, &adcData);
 
     *adcValue = (float) ADC_RESOLUTION/ ((float) (adcData.value)) * 5.00;
 
     return 1;
+}
