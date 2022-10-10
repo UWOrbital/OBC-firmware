@@ -16,6 +16,7 @@ int main(void) {
     gioInit();
     sciInit();
     i2cInit();
+    sciSetBaudrate( scilinREG, 115200 );
 
     // Initialize bus mutexes
     initSciMutex();
