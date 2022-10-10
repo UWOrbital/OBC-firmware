@@ -16,7 +16,7 @@ int main(void) {
     gioInit();
     sciInit();
     i2cInit();
-    sciSetBaudrate( scilinREG, 115200 );
+    sciSetBaudrate( scilinREG, 115200 ); // Changed baud rate from 9600 to 115200
 
     // Initialize bus mutexes
     initSciMutex();
