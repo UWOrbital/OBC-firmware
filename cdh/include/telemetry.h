@@ -29,7 +29,7 @@ typedef union {
     float f;
 } telemetry_event_data_t;
 
-/**
+/** 
  * @struct	telemetry_event_t
  * @brief	Telemetry event struct
  *

@@ -1,6 +1,7 @@
 #include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
+#include "max9934_test.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -24,7 +25,9 @@ int main(void) {
     initI2CMutex();
 
     // The supervisor is the only task running initially.
-    initSupervisor();
+    // initSupervisor();
+    initMAX9934();
+
 
     vTaskStartScheduler();
 }
