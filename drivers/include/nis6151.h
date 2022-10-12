@@ -28,6 +28,7 @@ typedef struct {
  */
 uint8_t nis6151Init(nis6151_config_t *config);
 
-// TODO: write ISR callback function to deal with FLAG events
+
+
 
 #endif /* DRIVERS_INCLUDE_NIS6151 */
