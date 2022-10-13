@@ -9,6 +9,7 @@
 #include <gio.h>
 #include <sci.h>
 #include <i2c.h>
+#include <sys_vim.h>
 
 int main(void) {
 
@@ -16,6 +17,9 @@ int main(void) {
     gioInit();
     sciInit();
     i2cInit();
+
+    // Initialize the VIM
+    vimInit();
 
     // Initialize bus mutexes
     initSciMutex();

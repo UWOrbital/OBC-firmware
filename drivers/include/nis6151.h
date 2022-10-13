@@ -28,6 +28,10 @@ typedef struct {
  */
 uint8_t nis6151Init(nis6151_config_t *config);
 
+/**
+ * @brief Interrupt Service Routine for FLAG event
+ */
+void isrNis6151(void);
 
 
 

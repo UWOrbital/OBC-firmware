@@ -11,3 +11,7 @@ uint8_t nis6151Init(nis6151_config_t *config) {
 
     return 1;
 }
+
+void isrNis6151(void) {
+    // TODO: handle FLAG event
+}
