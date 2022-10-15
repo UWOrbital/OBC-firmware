@@ -8,7 +8,7 @@
 CC := gcc
 
 # Set the ADCS executable name and build directory
-BIN := adcs_demo
+BIN := demo
 BUILD_DIR := adcs/build
 
 # Compiler flags
@@ -18,14 +18,17 @@ CFLAGS += -O3
 # Linker flags
 LDFLAGS := -ggdb3 -pthread
 LDFLAGS += -O3
+LDFLAGS += -lm
 
 # Include directories
 INCLUDE_DIRS := -I"posix/include"
 INCLUDE_DIRS += -I"adcs/include"
+INCLUDE_DIRS += -I"adcs/include/propagator/sgp4"
 
 # Source directories
 SRC_DIRS := posix/source
 SRC_DIRS += adcs/source/propagator
+SRC_DIRS += adcs/source/propagator/sgp4
 SRC_DIRS += adcs/source
 
 # Preprocessor flags

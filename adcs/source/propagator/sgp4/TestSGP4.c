@@ -139,7 +139,7 @@ void runVER(VERIN *verins, int cnt)
     }
 }
 
-int main(void)
+int main_test_sgp4(void)
 {
     int cnt = 0;
     VERIN *verins = NULL;
