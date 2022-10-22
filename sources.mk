@@ -12,3 +12,5 @@ SRC_DIRS += adcs/source
 SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
 SRC_DIRS += payload/source
+SRC_DIRS += fatfs/src
+SRC_DIRS += fatfs/port

@@ -18,7 +18,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -Og
+# CC_FLAGS += -Os // TODO: Figure out why this breaks the SD Card code
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -35,6 +35,8 @@ INCLUDE_DIRS += -I"adcs/include"
 INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
 INCLUDE_DIRS += -I"payload/include"
+INCLUDE_DIRS += -I"fatfs/src"
+INCLUDE_DIRS += -I"fatfs/port"
 
 LIBS := 
 
