@@ -20,21 +20,10 @@
 // 
 //*****************************************************************************
 
-#ifndef __UARTSTDIO_H__
-#define __UARTSTDIO_H__
+#ifndef SD_CMDLINE_DEMO_UARTSTDIO_H_
+#define SD_CMDLINE_DEMO_UARTSTDIO_H_
 
 #include <stdarg.h>
-
-//*****************************************************************************
-//
-// If building with a C++ compiler, make all of the definitions in this header
-// have a C binding.
-//
-//*****************************************************************************
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 extern int UARTgets(unsigned char *pcBuf, unsigned int ui32Len);
 extern unsigned char UARTgetc(void);
@@ -42,13 +31,4 @@ extern int UARTwrite(unsigned char *pcBuf, unsigned int ui32Len);
 extern void UARTprintf(unsigned char *pcString, ...);
 extern void UARTvprintf(unsigned char *pcString, va_list vaArgP);
 
-//*****************************************************************************
-//
-// Mark the end of the C bindings section for C++ compilers.
-//
-//*****************************************************************************
-#ifdef __cplusplus
-}
-#endif
-
-#endif // __UARTSTDIO_H__
+#endif // SD_CMDLINE_DEMO_UARTSTDIO_H_
