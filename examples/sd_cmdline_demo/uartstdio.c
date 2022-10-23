@@ -22,10 +22,11 @@
 
 #include "uartstdio.h"
 
+#include <sci.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
-#include "sci.h"
 
 //*****************************************************************************
 //

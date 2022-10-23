@@ -1,5 +1,27 @@
-#ifndef SDC_CMDLINE_H
-#define SDC_CMDLINE_H
+//*****************************************************************************
+//
+// cmdline.h - Prototypes for command line processing functions.
+//
+// Copyright (c) 2007-2014 Texas Instruments Incorporated.  All rights reserved.
+// Software License Agreement
+// 
+// Texas Instruments (TI) is supplying this software for use solely and
+// exclusively on TI's microcontroller products. The software is owned by
+// TI and/or its suppliers, and is protected under applicable copyright
+// laws. You may not combine this software with "viral" open-source
+// software in order to form a larger program.
+// 
+// THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
+// NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
+// NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
+// CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+// DAMAGES, FOR ANY REASON WHATSOEVER.
+// 
+//*****************************************************************************
+
+#ifndef SD_CMDLINE_DEMO_CMDLINE_H_
+#define SD_CMDLINE_DEMO_CMDLINE_H_
 
 #include "ff.h"
 
@@ -20,6 +42,11 @@
     Defines the size of the buffer that holds the command line.
 */
 #define CMD_BUF_SIZE            64
+
+/*
+    Defines the test file name and path.
+*/
+#define TEST_FILENAME    "sdc_test.txt"
 
 /**
  * @brief A structure that holds a mapping between an FRESULT numerical code, and a
@@ -75,11 +102,11 @@ typedef struct {
  * @return int Returns CMDLINE_BAD_CMD if the command is not found, or the
  * return code from the command handler function.
  */
-int CmdLineProcess(char *pcCmdLine);
+int cmdLineProcess(char *pcCmdLine);
 
 /**
  * @brief SD card test function.
  */
-int SD_Test(void);
+int testCmdLineSDC(void);
 
-#endif // SDC_CMDLINE_H
+#endif // SD_CMDLINE_DEMO_CMDLINE_H_
