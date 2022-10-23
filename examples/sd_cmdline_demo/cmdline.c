@@ -30,8 +30,6 @@
 #include "cmdline.h"
 #include "uartstdio.h"
 
-extern void disk_timerproc(void);
-
 // Holds pointers to command line arguments
 static char *g_ppcArgv[CMDLINE_MAX_ARGS + 1];
 
@@ -149,14 +147,6 @@ const char * stringFromFResult(FRESULT iFResult) {
     }
 
     return "UNKNOWN ERROR CODE";
-}
-
-/**
- * @brief SysTick interrupt handler.
- * @note FatFs requires a timer tick every 10 ms for internal timing purposes.
- */
-void sysTickHandler(void) {
-    disk_timerproc();
 }
 
 /**

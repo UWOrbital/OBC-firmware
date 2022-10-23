@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include <FreeRTOS.h>
+#include <os_task.h>
+
 #include "sys_common.h"
 #include "gio.h"
 #include "spi.h"
@@ -73,7 +76,6 @@ static BYTE spiReceiveByte(void)
 /*---------------------------------------------*/
 
 static volatile DSTATUS stat = STA_NOINIT;    /* Disk status */
-static volatile BYTE timer1, timer2;    /* 100Hz decrement timer */
 static BYTE cardType;            /* b0:MMC, b1:SDC, b2:Block addressing */
 static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
 
@@ -85,11 +87,11 @@ static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
 static bool isCardReady(void) {
     BYTE res;
 
-    timer2 = 50;    /* Wait for ready in timeout of 500ms */
+    TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(500);
     spiReceiveByte();
-    do
+    do {
         res = spiReceiveByte();
-    while ((res != 0xFF) && timer2);
+    } while ((res != 0xFF) && (xTaskGetTickCount() < endTimeTicks));
 
     return (res != 0xFF);
 }
@@ -157,16 +159,19 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
     if (btr % 2 != 0)
         return FALSE;
 
-    timer1 = 100;
+    TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
+
     do {
         token = spiReceiveByte();
-    } while ((token == 0xFF) && timer1);
+    } while ((token == 0xFF) && (xTaskGetTickCount() < endTimeTicks));
+
     if(token != 0xFE) return FALSE; /* If not valid data token, retutn with error */
 
     do {    /* Receive the data block into buffer */
         *buff = spiReceiveByte(); buff++;
         *buff = spiReceiveByte(); buff++;
     } while (btr -= 2);
+    
     spiReceiveByte();   /* Discard CRC */
     spiReceiveByte();
 
@@ -285,33 +290,38 @@ DSTATUS disk_initialize(BYTE drv){
 
     while (sendCMD(CMD0, 0) != 1); // TODO: Add timer to prevent infinite loop
     
-    timer1 = 100;                        /* Initialization timeout of 1000 msec */
     if (sendCMD(CMD8, 0x1AA) == 1) {    /* SDC Ver2+ */
         for (n = 0; n < 4; n++) ocr[n] = spiReceiveByte();
+        
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {    /* The card can work at vdd range of 2.7-3.6V */
+            TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
+            TickType_t currTimeTicks;
             do {
                 if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 1UL << 30) == 0)    break;    /* ACMD41 with HCS bit */
-            } while (timer1);
-            if (timer1 && sendCMD(CMD58, 0) == 0) {    /* Check CCS bit */
+            } while ((currTimeTicks = xTaskGetTickCount()) < endTimeTicks);
+
+            if ((currTimeTicks < endTimeTicks) && !sendCMD(CMD58, 0)) {    /* Check CCS bit */
                 for (n = 0; n < 4; n++) ocr[n] = spiReceiveByte();
                 ty = (ocr[0] & 0x40) ? 6 : 2;
             }
         }
     } else {                            /* SDC Ver1 or MMC */
         ty = (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 0) <= 1) ? 2 : 1;    /* SDC : MMC */
+        TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
+        TickType_t currTimeTicks;
         do {
             if (ty == 2) {
                 if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 0) == 0) break;    /* ACMD41 */
             } else {
                 if (sendCMD(CMD1, 0) == 0) break;                                /* CMD1 */
             }
-        } while (timer1);
-        if (!timer1 || sendCMD(CMD16, 512) != 0)    /* Select R/W block length */
+        } while ((currTimeTicks = xTaskGetTickCount()) < endTimeTicks);
+        if ((currTimeTicks >= endTimeTicks) || sendCMD(CMD16, 512) != 0)    /* Select R/W block length */
             ty = 0;
     }
 
     cardType = ty;
-    DESELECT();            /* CS = H */
+    DESELECT();
     spiReceiveByte();            /* Idle (Release DO) */
 
     if (ty) {            /* Initialization succeded */
@@ -320,7 +330,6 @@ DSTATUS disk_initialize(BYTE drv){
     } else {            /* Initialization failed */
         turnOffSDC();
     }
-
 
     return stat;
 }
@@ -486,27 +495,14 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
 }
 
 /**
- * @brief Timer interrupt procedure.
- * @note This function must be called in period of 10ms.
- */
-void disk_timerproc(void) {
-    BYTE n;
-
-    n = timer1;
-    if (n) timer1 = --n;
-    n = timer2;
-    if (n) timer2 = --n;
-}
-
-/**
  * @brief Get the current time.
  * @return DWORD Current time
  */
 DWORD get_fattime (void) {
-    return    ((2007UL-1980) << 25) // Year = 2007
-            | (6UL << 21)           // Month = June
-            | (5UL << 16)           // Day = 5
-            | (11U << 11)           // Hour = 11
-            | (38U << 5)            // Min = 38
+    return    ((2022UL-1980) << 25) // Year = 2022
+            | (10UL << 21)          // Month = October
+            | (23UL << 16)          // Day = 23
+            | (4U << 11)            // Hour = 4
+            | (31U << 5)            // Min = 31
             | (0U >> 1);            // Sec = 0
 }
