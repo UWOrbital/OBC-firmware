@@ -1,5 +1,6 @@
 #include "uartstdio.h"
 #include "cmdline.h"
+#include "obc_spi_io.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -20,6 +21,8 @@ void vTask1(void *pvParameters) {
 int main(void) {
     sciInit();
     spiInit();
+    
+    spiMutexInit();
 
     xTaskCreateStatic(vTask1, "testCmdLineSDC", 1024, NULL, 1, taskStack, &taskBuffer);
 
