@@ -11,65 +11,7 @@
 
 #include "diskio.h"
 #include "sdc_rm46.h"
-
-/*---------------------------------------------*/
-/* SPI-related R/W functions                   */
-/*---------------------------------------------*/
-
-/**
- * @brief Deselect the SD card's SPI chip select.
- */
-static void DESELECT (void) {
-    SDC_SPI_PORT->DSET = 1 << SDC_SPI_CS;
-}
-
-/**
- * @brief Select the SD card's SPI chip select.
- */
-static void SELECT (void) {
-    SDC_SPI_PORT->DCLR = 1 << SDC_SPI_CS;
-}
-
-/**
- * @brief Read and write a byte to the SD card's SPI interface.
-*/
-static unsigned char spiSendAndReceiveByte(unsigned char outb) {
-    while ((SDC_SPI_REG->FLG & 0x0200) == 0); // Wait until TXINTFLG is set for previous transmission
-    SDC_SPI_REG->DAT1 = outb | 0x100D0000;    // transmit register address
-
-    while ((SDC_SPI_REG->FLG & 0x0100) == 0); // Wait until RXINTFLG is set when new value is received
-    return((unsigned char)SDC_SPI_REG->BUF);  // Return received value
-}
-
-/**
- * @brief Transmit a byte to the SD card's SPI interface.
- * @param dat Byte to transmit.
- */
-static void spiSendByte(BYTE dat) {
-    unsigned int ui32RcvDat;
-
-    while ((SDC_SPI_REG->FLG & 0x0200) == 0); // Wait until TXINTFLG is set for previous transmission
-    SDC_SPI_REG->DAT1 = dat | 0x100D0000;    // transmit register address
-
-    while ((SDC_SPI_REG->FLG & 0x0100) == 0); // Wait until RXINTFLG is set when new value is received
-    ui32RcvDat = SDC_SPI_REG->BUF;  // to get received value
-    ui32RcvDat = ui32RcvDat;        // to avoid compiler warning
-}
-
-/**
- * @brief Receive a byte from the SD card's SPI interface.
- * 
- * @return BYTE Received byte.
- */
-static BYTE spiReceiveByte(void)
-{
-    while ((SDC_SPI_REG->FLG & 0x0200) == 0); // Wait until TXINTFLG is set for previous transmission
-    SDC_SPI_REG->DAT1 = 0xFF | 0x100D0000;    // transmit register address
-
-    while ((SDC_SPI_REG->FLG & 0x0100) == 0); // Wait until RXINTFLG is set when new value is received
-    return((unsigned char)SDC_SPI_REG->BUF);  // Return received value
-}
-
+#include "obc_spi_io.h"
 
 /*---------------------------------------------*/
 /* SD Card Private Functions                   */
@@ -88,9 +30,9 @@ static bool isCardReady(void) {
     BYTE res;
 
     TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(500);
-    spiReceiveByte();
+    spiReceiveByte(SDC_SPI_REG, &res);
     do {
-        res = spiReceiveByte();
+        spiReceiveByte(SDC_SPI_REG, &res);
     } while ((res != 0xFF) && (xTaskGetTickCount() < endTimeTicks));
 
     return (res != 0xFF);
@@ -102,10 +44,10 @@ static bool isCardReady(void) {
  * required after card power up to get it into SPI mode.
  */
 static void sendClockTrain(void) {   
-    DESELECT();   /* CS = H */
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);   /* CS = H */
 
     for(int i = 0 ; i < 10 ; i++) {
-        spiSendAndReceiveByte(0xFF);
+        spiSendByte(SDC_SPI_REG, 0xFF);
     }
 }
 
@@ -162,18 +104,19 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
     TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
 
     do {
-        token = spiReceiveByte();
+        spiReceiveByte(SDC_SPI_REG, &token);
     } while ((token == 0xFF) && (xTaskGetTickCount() < endTimeTicks));
 
     if(token != 0xFE) return FALSE; /* If not valid data token, retutn with error */
 
     do {    /* Receive the data block into buffer */
-        *buff = spiReceiveByte(); buff++;
-        *buff = spiReceiveByte(); buff++;
+        spiReceiveByte(SDC_SPI_REG, buff++);
+        spiReceiveByte(SDC_SPI_REG, buff++);
     } while (btr -= 2);
     
-    spiReceiveByte();   /* Discard CRC */
-    spiReceiveByte();
+    unsigned char crc;
+    spiReceiveByte(SDC_SPI_REG, &crc);   /* Discard CRC */
+    spiReceiveByte(SDC_SPI_REG, &crc);
 
     return TRUE;
 }
@@ -188,15 +131,16 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
 static bool sendDataBlock(const BYTE *buff, BYTE token) {
     if (isCardReady()) return FALSE;
 
-    spiSendByte(token); // Send token
+    spiSendByte(SDC_SPI_REG, token); // Send token
     if (token != 0xFD) { // Is data token
         for (int wc = 0; wc < 512; wc++) { // Send the data block to the MMC
-            spiSendByte(*buff++);
+            spiSendByte(SDC_SPI_REG, *buff++);
         }
-        spiSendByte(0xFF); /* CRC (Dummy) */
-        spiSendByte(0xFF);
+        spiSendByte(SDC_SPI_REG, 0xFF); /* CRC (Dummy) */
+        spiSendByte(SDC_SPI_REG, 0xFF);
         
-        BYTE resp = spiReceiveByte(); /* Reveive data response */
+        BYTE resp;
+        spiReceiveByte(SDC_SPI_REG, &resp); /* Reveive data response */
         if ((resp & 0x1F) != 0x05) /* If not accepted, return with error */
             return FALSE;
     }
@@ -214,24 +158,26 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
     if (isCardReady()) return 0xFF;
 
     /* Send command packet */
-    spiSendByte(cmd);                      /* Command */
-    spiSendByte((BYTE)(arg >> 24));        /* Argument[31..24] */
-    spiSendByte((BYTE)(arg >> 16));        /* Argument[23..16] */
-    spiSendByte((BYTE)(arg >> 8));         /* Argument[15..8] */
-    spiSendByte((BYTE)arg);                /* Argument[7..0] */
+    spiSendByte(SDC_SPI_REG, cmd);                      /* Command */
+    spiSendByte(SDC_SPI_REG, (BYTE)(arg >> 24));        /* Argument[31..24] */
+    spiSendByte(SDC_SPI_REG, (BYTE)(arg >> 16));        /* Argument[23..16] */
+    spiSendByte(SDC_SPI_REG, (BYTE)(arg >> 8));         /* Argument[15..8] */
+    spiSendByte(SDC_SPI_REG, (BYTE)arg);                /* Argument[7..0] */
 
     BYTE crc = 0xFF;
     if (cmd == CMD0) crc = 0x95;            /* CRC for CMD0(0) */
     if (cmd == CMD8) crc = 0x87;            /* CRC for CMD8(0x1AA) */
-    spiSendByte(crc);
+    spiSendByte(SDC_SPI_REG, crc);
 
 
     /* Receive command response */
-    if (cmd == CMD12) spiReceiveByte();        /* Skip a stuff byte when stop reading */
+    unsigned char tmp;
+    if (cmd == CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);        /* Skip a stuff byte when stop reading */
     
-    BYTE res = spiReceiveByte();
+    BYTE res;
+    spiReceiveByte(SDC_SPI_REG, &res);
     for (int attempt = 0; attempt < 9 && (res & 0x80); attempt++) {
-        res = spiReceiveByte();
+        spiReceiveByte(SDC_SPI_REG, &res);
     }
 
     return res;
@@ -246,20 +192,20 @@ static BYTE stopTransmission(void) {
     BYTE n, res, val;
 
     /* Send command packet - the argument for CMD12 is ignored. */
-    spiSendByte(CMD12);
-    spiSendByte(0);
-    spiSendByte(0);
-    spiSendByte(0);
-    spiSendByte(0);
-    spiSendByte(0);
+    spiSendByte(SDC_SPI_REG, CMD12);
+    spiSendByte(SDC_SPI_REG, 0);
+    spiSendByte(SDC_SPI_REG, 0);
+    spiSendByte(SDC_SPI_REG, 0);
+    spiSendByte(SDC_SPI_REG, 0);
+    spiSendByte(SDC_SPI_REG, 0);
 
     /* Data transfer stops 2 bytes after 6-byte CMD12 */
-    spiReceiveByte(); spiReceiveByte();
+    spiReceiveByte(SDC_SPI_REG, &val); spiReceiveByte(SDC_SPI_REG, &val);
 
     /* SDC should now send 2-6 0xFF bytes, the response byte, and then another 0xFF */
     /* Some cards don't send the 2-6 0xFF bytes */
     for(n = 0; n < 8; n++) {
-        val = spiReceiveByte();
+        spiReceiveByte(SDC_SPI_REG, &val);
         if(val != 0xFF)
             res = val;
     }
@@ -285,13 +231,15 @@ DSTATUS disk_initialize(BYTE drv){
 
     turnOnSDC();                            /* Force socket power on */
 
-    SELECT();                /* CS = L */
+    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);                /* CS = L */
     ty = 0;
 
-    while (sendCMD(CMD0, 0) != 1); // TODO: Add timer to prevent infinite loop
+    TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(5000);
+    while ((sendCMD(CMD0, 0) != 1) && (xTaskGetTickCount() < endTimeTicks));
     
+    // Even if CMD0 fails, we'll try to continue.
     if (sendCMD(CMD8, 0x1AA) == 1) {    /* SDC Ver2+ */
-        for (n = 0; n < 4; n++) ocr[n] = spiReceiveByte();
+        for (n = 0; n < 4; n++) spiReceiveByte(SDC_SPI_REG, &ocr[n]);
         
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {    /* The card can work at vdd range of 2.7-3.6V */
             TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
@@ -301,7 +249,7 @@ DSTATUS disk_initialize(BYTE drv){
             } while ((currTimeTicks = xTaskGetTickCount()) < endTimeTicks);
 
             if ((currTimeTicks < endTimeTicks) && !sendCMD(CMD58, 0)) {    /* Check CCS bit */
-                for (n = 0; n < 4; n++) ocr[n] = spiReceiveByte();
+                for (n = 0; n < 4; n++) spiReceiveByte(SDC_SPI_REG, &ocr[n]);
                 ty = (ocr[0] & 0x40) ? 6 : 2;
             }
         }
@@ -321,8 +269,10 @@ DSTATUS disk_initialize(BYTE drv){
     }
 
     cardType = ty;
-    DESELECT();
-    spiReceiveByte();            /* Idle (Release DO) */
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+
+    unsigned char tmp;
+    spiReceiveByte(SDC_SPI_REG, &tmp);            /* Idle (Release DO) */
 
     if (ty) {            /* Initialization succeded */
         stat &= ~STA_NOINIT;        /* Clear STA_NOINIT */
@@ -358,7 +308,7 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
 
     if (!(cardType & 4)) sector *= 512;    /* Convert to byte address if needed */
 
-    SELECT();
+    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
     if (count == 1) {    /* Single block read */
         if ((sendCMD(CMD17, sector) == 0)    /* READ_SINGLE_BLOCK */
             && rcvDataBlock(buff, 512))
@@ -374,8 +324,10 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
         }
     }
 
-    DESELECT();            /* CS = H */
-    spiReceiveByte();            /* Idle (Release DO) */
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);            /* CS = H */
+
+    unsigned char tmp;
+    spiReceiveByte(SDC_SPI_REG, &tmp);            /* Idle (Release DO) */
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -396,7 +348,7 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count) {
 
     if (!(cardType & 4)) sector *= 512;    /* Convert to byte address if needed */
 
-    SELECT();
+    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     if (count == 1) {    /* Single block write */
         if ((sendCMD(CMD24, sector) == 0)    /* WRITE_BLOCK */
@@ -416,8 +368,10 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count) {
                 count = 1;
         }
     }
-    DESELECT();
-    spiReceiveByte();
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+
+    unsigned char tmp;
+    spiReceiveByte(SDC_SPI_REG, &tmp);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -460,7 +414,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
     } else {
         if (stat & STA_NOINIT) return RES_NOTRDY;
         
-        SELECT();
+        assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
         switch (ctrl) {
             case GET_SECTOR_COUNT :    /* Get number of sectors on the disk (DWORD) */
@@ -487,8 +441,10 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
             default:
                 res = RES_PARERR;
         }
-        DESELECT();
-        spiReceiveByte();
+        deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+
+        unsigned char tmp;
+        spiReceiveByte(SDC_SPI_REG, &tmp);
     }
 
     return res;
