@@ -22,9 +22,9 @@ uint8_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
  */
 uint8_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
 
-uint8_t spiSendAndReceiveByte(spiBASE_t *spiReg, unsigned char outb, unsigned char *inb);
+uint8_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, unsigned char outb, unsigned char *inb);
 
-uint8_t spiSendByte(spiBASE_t *spiReg, unsigned char outb);
+uint8_t spiTransmitByte(spiBASE_t *spiReg, unsigned char outb);
 
 unsigned char spiReceiveByte(spiBASE_t *spiReg, unsigned char *inb);
 
