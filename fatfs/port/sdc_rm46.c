@@ -47,7 +47,7 @@ static void sendClockTrain(void) {
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);   /* CS = H */
 
     for(int i = 0 ; i < 10 ; i++) {
-        spiSendByte(SDC_SPI_REG, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, 0xFF);
     }
 }
 
@@ -131,13 +131,13 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
 static bool sendDataBlock(const BYTE *buff, BYTE token) {
     if (isCardReady()) return FALSE;
 
-    spiSendByte(SDC_SPI_REG, token); // Send token
+    spiTransmitByte(SDC_SPI_REG, token); // Send token
     if (token != 0xFD) { // Is data token
         for (int wc = 0; wc < 512; wc++) { // Send the data block to the MMC
-            spiSendByte(SDC_SPI_REG, *buff++);
+            spiTransmitByte(SDC_SPI_REG, *buff++);
         }
-        spiSendByte(SDC_SPI_REG, 0xFF); /* CRC (Dummy) */
-        spiSendByte(SDC_SPI_REG, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, 0xFF); /* CRC (Dummy) */
+        spiTransmitByte(SDC_SPI_REG, 0xFF);
         
         BYTE resp;
         spiReceiveByte(SDC_SPI_REG, &resp); /* Reveive data response */
@@ -158,16 +158,16 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
     if (isCardReady()) return 0xFF;
 
     /* Send command packet */
-    spiSendByte(SDC_SPI_REG, cmd);                      /* Command */
-    spiSendByte(SDC_SPI_REG, (BYTE)(arg >> 24));        /* Argument[31..24] */
-    spiSendByte(SDC_SPI_REG, (BYTE)(arg >> 16));        /* Argument[23..16] */
-    spiSendByte(SDC_SPI_REG, (BYTE)(arg >> 8));         /* Argument[15..8] */
-    spiSendByte(SDC_SPI_REG, (BYTE)arg);                /* Argument[7..0] */
+    spiTransmitByte(SDC_SPI_REG, cmd);                      /* Command */
+    spiTransmitByte(SDC_SPI_REG, (BYTE)(arg >> 24));        /* Argument[31..24] */
+    spiTransmitByte(SDC_SPI_REG, (BYTE)(arg >> 16));        /* Argument[23..16] */
+    spiTransmitByte(SDC_SPI_REG, (BYTE)(arg >> 8));         /* Argument[15..8] */
+    spiTransmitByte(SDC_SPI_REG, (BYTE)arg);                /* Argument[7..0] */
 
     BYTE crc = 0xFF;
     if (cmd == CMD0) crc = 0x95;            /* CRC for CMD0(0) */
     if (cmd == CMD8) crc = 0x87;            /* CRC for CMD8(0x1AA) */
-    spiSendByte(SDC_SPI_REG, crc);
+    spiTransmitByte(SDC_SPI_REG, crc);
 
 
     /* Receive command response */
@@ -192,12 +192,12 @@ static BYTE stopTransmission(void) {
     BYTE n, res, val;
 
     /* Send command packet - the argument for CMD12 is ignored. */
-    spiSendByte(SDC_SPI_REG, CMD12);
-    spiSendByte(SDC_SPI_REG, 0);
-    spiSendByte(SDC_SPI_REG, 0);
-    spiSendByte(SDC_SPI_REG, 0);
-    spiSendByte(SDC_SPI_REG, 0);
-    spiSendByte(SDC_SPI_REG, 0);
+    spiTransmitByte(SDC_SPI_REG, CMD12);
+    spiTransmitByte(SDC_SPI_REG, 0);
+    spiTransmitByte(SDC_SPI_REG, 0);
+    spiTransmitByte(SDC_SPI_REG, 0);
+    spiTransmitByte(SDC_SPI_REG, 0);
+    spiTransmitByte(SDC_SPI_REG, 0);
 
     /* Data transfer stops 2 bytes after 6-byte CMD12 */
     spiReceiveByte(SDC_SPI_REG, &val); spiReceiveByte(SDC_SPI_REG, &val);
