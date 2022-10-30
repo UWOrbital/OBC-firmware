@@ -6,6 +6,7 @@
 #include <os_queue.h>
 #include <os_task.h>
 
+#include <sci.h>
 #include <sys_common.h>
 #include <gio.h>
 

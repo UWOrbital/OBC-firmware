@@ -6,6 +6,7 @@
 #include <os_task.h>
 
 #include <i2c.h>
+#include <sci.h>
 #include <sys_common.h>
 
 static SemaphoreHandle_t i2cMutex = NULL;
