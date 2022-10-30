@@ -55,8 +55,6 @@
 #include "i2c.h"
 #include "sys_dma.h"
 
-#include "nis6151.h"
-
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
@@ -126,7 +124,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             case 0:
                 break;
             case 1:
-                isrNis6151();
+                break;
             case 2:
                 break;
             case 3:

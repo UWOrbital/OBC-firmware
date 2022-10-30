@@ -1,17 +1,18 @@
 #include "nis6151.h"
+#include "obc_sci_io.h"
 
-uint8_t nis6151Init(nis6151_config_t *config) {
-    if(config == NULL) {
-        return 0;
-    }
+#include <string.h>
 
-    /* configure GIOB0 as output and GIOB1 as interupt */
-    gioSetBit(gioPORTB, 0, 1);
-    gioEnableNotification(gioPORTB, 1);
+uint8_t enableNIS6151(void) {
+    /* OBC pin to NIS6151 EN is configured as open-drain -> 0 to set floating */
+    gioSetBit(NIS6151_GIOPORT, NIS6151_EN_BIT, 0);
 
     return 1;
 }
 
-void isrNis6151(void) {
-    // TODO: handle FLAG event
+uint8_t disableNIS6151(void) {
+    /* OBC pin to NIS6151 EN is configured as open-drain -> 1 to pull to ground */
+    gioSetBit(NIS6151_GIOPORT, NIS6151_EN_BIT, 1);
+
+    return 1;
 }

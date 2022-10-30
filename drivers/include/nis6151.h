@@ -5,34 +5,22 @@
 #include <gio.h>
 
 /* NIS6151 GIO pin configuration */
-
-
-/**
- * @struct Configuration struct for NIS6151 eFuse
- * 
- * @param enAddr GIO address of the EN for the NIS6151
- * @param flagAddr GIO address of the FLAG for the NIS6151
- * @param devOperationMode Device operation mode, 0 = normal, 1 = thermal shutdown
-*/
-typedef struct {
-    uint8_t enAddr;
-    uint8_t flagAddr;
-    uint8_t devOperationMode;
-} nis6151_config_t;
+#define NIS6151_GIOPORT gioPORTB
+#define NIS6151_EN_BIT 0U
+#define NIS6151_FLAG_BIT 1U /* Unused for now */
 
 /**
- * @brief Initialize the LM75BD
- *
- * @param config Configuration struct for LM75BD
+ * @brief Enables the NIS6151
+ * @note EN pin has internal pull -> GIOB pin 0 set as open-drain
  * @return 1 if successful, 0 otherwise
  */
-uint8_t nis6151Init(nis6151_config_t *config);
+uint8_t enableNIS6151(void);
 
 /**
- * @brief Interrupt Service Routine for FLAG event
+ * @brief Disables the NIS6151
+ * @note EN pin has internal pull -> GIOB pin 0 set as open-drain
+ * @return 1 if successful, 0 otherwise
  */
-void isrNis6151(void);
-
-
+uint8_t disableNIS6151(void);
 
 #endif /* DRIVERS_INCLUDE_NIS6151 */
