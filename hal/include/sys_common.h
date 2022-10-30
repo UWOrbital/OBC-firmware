@@ -49,6 +49,8 @@
 
 #include "hal_stdtypes.h"
 
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -107,11 +109,22 @@ typedef enum config_value_type
 /* will be for procedure arguments.                                             */
 /********************************************************************************/
 #ifdef DEBUG
-#define ASSERT(expr) {                                      \
-                         if(!(expr))                        \
-                         {                                  \
-                             __error__(__FILE__, __LINE__); \
-                         }                                  \
+#define ASSERT(expr) {                                                          \
+                         if(!(expr))                                            \
+                         {                                                      \
+                             int len = 0;                                       \
+                             len += strlen("ASSERTION FAILED: ") +              \
+                                    strlen(#expr) +                             \
+                                    strlen(", file ") +                         \
+                                    strlen(__FILE__) +                          \
+                                    strlen(", line ") +                         \
+                                    15; /* __LINE__ and \n */                   \
+                             char buf[len];                                     \
+                             snprintf(buf, len,                                 \
+                                    "ASSERTION FAILED: %s, file %s, line %d\n", \
+                                    #expr, __FILE__, __LINE__);                 \
+                             printTextSci(sciREG, (unsigned char *)buf, len);   \
+                         }                                                      \
                      }
 #else
 #define ASSERT(expr)
