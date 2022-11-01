@@ -9,7 +9,6 @@
 
 #include <sys_common.h>
 #include <gio.h>
-#include <sci.h>
 
 static TaskHandle_t telemetryTaskHandle = NULL;
 static StaticTask_t telemetryTaskBuffer;
