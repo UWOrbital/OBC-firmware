@@ -108,22 +108,14 @@ typedef enum config_value_type
 /* The ASSERT macro, which does the actual assertion checking.  Typically, this */
 /* will be for procedure arguments.                                             */
 /********************************************************************************/
+
+void uartAssertFailed(char *file, int line, char *expr);
+
 #ifdef DEBUG
 #define ASSERT(expr) {                                                          \
                          if(!(expr))                                            \
                          {                                                      \
-                             int len = 0;                                       \
-                             len += strlen("ASSERTION FAILED: ") +              \
-                                    strlen(#expr) +                             \
-                                    strlen(", file ") +                         \
-                                    strlen(__FILE__) +                          \
-                                    strlen(", line ") +                         \
-                                    15; /* __LINE__ and \n */                   \
-                             char buf[len];                                     \
-                             snprintf(buf, len,                                 \
-                                    "ASSERTION FAILED: %s, file %s, line %d\n", \
-                                    #expr, __FILE__, __LINE__);                 \
-                             printTextSci(sciREG, (unsigned char *)buf, len);   \
+                             uartAssertFailed(__FILE__, __LINE__, #expr);       \
                          }                                                      \
                      }
 #else
