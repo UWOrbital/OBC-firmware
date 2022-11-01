@@ -63,3 +63,13 @@ static void sciSendBytes(sciBASE_t *sci, unsigned char *bytes, uint32_t length) 
         sciSendByte(sci, bytes[i]);
     }
 }
+
+void uartAssertFailed(char *file, int line, char *expr){
+    if(!(expr)){
+        int len = 50 + strlen(expr) + strlen(file);
+        char buf[len];
+        snprintf(buf, len, "ASSERTION FAILED: %s, file %s, line %d\n",
+                            expr, file, line);
+        printTextSci(scilinREG, (unsigned char *)buf, len);
+    }
+}
