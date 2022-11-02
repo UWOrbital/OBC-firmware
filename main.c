@@ -9,7 +9,6 @@
 #include <gio.h>
 #include <sci.h>
 #include <i2c.h>
-#include <sys_vim.h>
 
 int main(void) {
 
