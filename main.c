@@ -18,9 +18,6 @@ int main(void) {
     sciInit();
     i2cInit();
 
-    // Initialize the VIM
-    vimInit();
-
     // Initialize bus mutexes
     initSciMutex();
     initI2CMutex();
