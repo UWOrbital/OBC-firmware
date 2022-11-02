@@ -1,7 +1,6 @@
 #ifndef DRIVERS_INCLUDE_NIS6151
 #define DRIVERS_INCLUDE_NIS6151
 
-#include <stdio.h>
 #include <gio.h>
 
 /* NIS6151 GIO pin configuration */
