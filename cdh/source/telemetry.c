@@ -59,6 +59,22 @@ uint8_t sendToTelemetryQueue(telemetry_event_t *event) {
     return 0;
 }
 
+uint8_t sendTelemetryToFile(void) {
+    if (telemetryQueueHandle == NULL) {
+        return 0;
+    }
+
+    telemetry_event_t *event;
+
+    if(xQueueReceive(telemetryQueueHandle, (void *) event, portMAX_DELAY) == pdPASS) {
+        // Transmit raw bytes of telemetry data to file
+
+        return 0;
+    }
+
+    return 0;
+}
+
 static void vTelemetryTask(void * pvParameters) {
     while(1){
         telemetry_event_t queueMsg;
