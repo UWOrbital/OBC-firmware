@@ -96,7 +96,7 @@ void sciInit(void)
                   | (uint32)((uint32)1U << 1U);  /* asynchronous timing mode */
 
     /** - set baudrate */
-    sciREG->BRS = 357U;  /* baudrate */
+    sciREG->BRS = 238U;  /* baudrate */
 
     /** - transmission length */
     sciREG->FORMAT = 8U - 1U;  /* length */
@@ -172,7 +172,7 @@ void sciInit(void)
                     | (uint32)((uint32)1U << 1U);  /* asynchronous timing mode */
                     
     /** - set baudrate */
-    scilinREG->BRS = 357U;  /* baudrate */
+    scilinREG->BRS = 39U;  /* baudrate */
 
     /** - transmission length */
     scilinREG->FORMAT = 8U - 1U;  /* length */
@@ -273,7 +273,7 @@ void sciSetFunctional(sciBASE_t *sci, uint32 port)
 /* Requirements : HL_SR232 */
 void sciSetBaudrate(sciBASE_t *sci, uint32 baud)
 {
-    float64 vclk = 110.000 * 1000000.0;
+    float64 vclk = 73.333 * 1000000.0;
     uint32 f = ((sci->GCR1 & 2U) == 2U) ? 16U : 1U;
 	uint32 temp;
 	float64 temp2;
