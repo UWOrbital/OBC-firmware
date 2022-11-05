@@ -10,6 +10,8 @@
 #include <sys_common.h>
 #include <gio.h>
 
+#include <stdio.h>
+
 static TaskHandle_t telemetryTaskHandle = NULL;
 static StaticTask_t telemetryTaskBuffer;
 static StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
@@ -59,38 +61,24 @@ uint8_t sendToTelemetryQueue(telemetry_event_t *event) {
     return 0;
 }
 
-uint8_t sendTelemetryToFile(void) {
-    if (telemetryQueueHandle == NULL) {
+uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
+    if(telFile == NULL) {
         return 0;
     }
-
-    telemetry_event_t *event;
-
-    if(xQueueReceive(telemetryQueueHandle, (void *) event, portMAX_DELAY) == pdPASS) {
-        // Transmit raw bytes of telemetry data to file
-
-        return 0;
-    }
+    fwrite(&queueMsg, sizeof(telemetry_event_t), 1, telFile);
 
     return 0;
 }
 
 static void vTelemetryTask(void * pvParameters) {
+    const char filename[] = "telemetry.dat"; // This will go into a particular directory on OBC sd card
+    FILE *telFile;
+
     while(1){
         telemetry_event_t queueMsg;
         if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_WAIT_PERIOD) != pdPASS){
-            queueMsg.eventID = TELEMETRY_NULL_EVENT_ID;
-        }
-
-        switch(queueMsg.eventID)
-        {
-            case TURN_ON_LED_EVENT_ID:
-                vTaskDelay(queueMsg.data.i);
-                gioToggleBit(gioPORTB, 1);
-                xTimerStart(ledTimerHandle, TELEMETRY_DELAY_TICKS);
-                break;
-            default:
-                ;
+            telFile = fopen(filename, "w");
+            sendTelemetryToFile(telFile, queueMsg);
         }
     }
 }

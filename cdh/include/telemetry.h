@@ -2,6 +2,7 @@
 #define CDH_INCLUDE_TELEMETRY_H_
 
 #include <sys_common.h>
+#include <stdio.h>
 
 /* Telemetry task config */
 #define TELEMETRY_STACK_SIZE   1024
@@ -62,6 +63,6 @@ uint8_t sendToTelemetryQueue(telemetry_event_t *event);
  * 
  * @return	1 if successful, 0 otherwise.
  */
-uint8_t sendTelemetryToFile(void);
+uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */
