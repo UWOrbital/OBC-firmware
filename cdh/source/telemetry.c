@@ -67,7 +67,7 @@ static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
     }
     fwrite(&queueMsg, sizeof(telemetry_event_t), 1, telFile);
 
-    return 0;
+    return 1;
 }
 
 static void vTelemetryTask(void * pvParameters) {
