@@ -6,6 +6,9 @@
 #include <os_task.h>
 
 #include <sci.h>
+#include <stdarg.h>
+
+#define MAX_PRINTF_SIZE 128
 
 static SemaphoreHandle_t sciMutex = NULL;
 static StaticSemaphore_t sciMutexBuffer;
@@ -62,4 +65,16 @@ static void sciSendBytes(sciBASE_t *sci, unsigned char *bytes, uint32_t length) 
         // sciSendByte waits for the transmit buffer to be empty before sending
         sciSendByte(sci, bytes[i]);
     }
+}
+
+uint8_t sciPrintf(sciBASE_t *sci, char *s, ...){
+    va_list args;
+    va_start(args, s);
+
+    char buf[MAX_PRINTF_SIZE];
+    uint8_t n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
+
+    uint8_t good = printTextSci(sci, (unsigned char *)buf, MAX_PRINTF_SIZE);
+    good &= n >= 0 && n < MAX_PRINTF_SIZE;
+    return good;
 }
