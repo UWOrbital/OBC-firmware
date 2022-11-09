@@ -7,8 +7,9 @@
 
 #include <sci.h>
 #include <stdarg.h>
+#include <stdio.h>
 
-#define MAX_PRINTF_SIZE 128
+#define MAX_PRINTF_SIZE 128U
 
 static SemaphoreHandle_t sciMutex = NULL;
 static StaticSemaphore_t sciMutexBuffer;
@@ -67,14 +68,23 @@ static void sciSendBytes(sciBASE_t *sci, unsigned char *bytes, uint32_t length) 
     }
 }
 
-uint8_t sciPrintf(sciBASE_t *sci, char *s, ...){
+uint8_t sciPrintf(sciBASE_t *sci, const char *s, ...){
+    if (sci == NULL || s == NULL){
+        return 0;
+    }
+
     va_list args;
     va_start(args, s);
 
     char buf[MAX_PRINTF_SIZE];
-    uint8_t n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
+    int8_t n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
 
-    uint8_t good = printTextSci(sci, (unsigned char *)buf, MAX_PRINTF_SIZE);
-    good &= n >= 0 && n < MAX_PRINTF_SIZE;
-    return good;
+    // n == MAX_PRINTF_SIZE invalid because null character isn't included in count
+    if (n < 0 || n >= MAX_PRINTF_SIZE){
+        // log an error message here
+        return 0;
+    }
+
+    uint8_t ret = printTextSci(sci, (unsigned char *)buf, MAX_PRINTF_SIZE);
+    return ret;
 }
