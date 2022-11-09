@@ -22,7 +22,7 @@ int main(void) {
         printTextSci(sciREG, (unsigned char *)"Hello from SCI!\r\n", 17);
         
         // Test sciPrintf
-        sciPrintf(scilinREG, "Testing sciPrintf: %d %d %s", 0, 1, "Hello");
+        sciPrintf(scilinREG, "Testing sciPrintf: %d %d %s\r\n", 0, 1, "Hello");
 
         // Toggle the LED.
         gioToggleBit(gioPORTB, 1);
