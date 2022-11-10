@@ -1,5 +1,9 @@
 #include "supervisor.h"
 #include "telemetry.h"
+#include "adcs_manager.h"
+#include "comms_manager.h"
+#include "eps_manager.h"
+#include "payload_manager.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -63,6 +67,10 @@ static void sendStartupMessages(void) {
 static void vSupervisorTask(void * pvParameters) {
     /* Initialize other tasks */
     initTelemetry();
+    initADCSManager();
+    initCommsManager();
+    initEPSManager();
+    initPayloadManager();
 
     /* Send initial messages to system queues */
     sendStartupMessages();    

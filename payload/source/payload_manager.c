@@ -22,7 +22,7 @@ static uint8_t payloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH*PAYLOAD_MANAGER_QU
  */
 static void vPayloadManagerTask(void * pvParameters);
 
-void initPayload(void) {
+void initPayloadManager(void) {
     ASSERT( (payloadTaskStack != NULL) && (&payloadTaskBuffer != NULL) );
     if (payloadTaskHandle == NULL) {
         payloadTaskHandle = xTaskCreateStatic(vPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL, PAYLOAD_MANAGER_PRIORITY, payloadTaskStack, &payloadTaskBuffer);

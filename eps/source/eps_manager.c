@@ -22,7 +22,7 @@ static uint8_t epsQueueStack[EPS_MANAGER_QUEUE_LENGTH*EPS_MANAGER_QUEUE_ITEM_SIZ
  */
 static void vEPSManagerTask(void * pvParameters);
 
-void initEPS(void) {
+void initEPSManager(void) {
     ASSERT( (epsTaskStack != NULL) && (&epsTaskBuffer != NULL) );
     if (epsTaskHandle == NULL) {
         epsTaskHandle = xTaskCreateStatic(vEPSManagerTask, EPS_MANAGER_NAME, EPS_MANAGER_STACK_SIZE, NULL, EPS_MANAGER_PRIORITY, epsTaskStack, &epsTaskBuffer);

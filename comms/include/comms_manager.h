@@ -46,7 +46,7 @@ typedef struct {
 /**
  * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)
  */
-void initComms(void);
+void initCommsManager(void);
 
 /**
  * @brief	Send an event to the Comms Manager queue.

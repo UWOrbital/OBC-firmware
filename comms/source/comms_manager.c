@@ -22,7 +22,7 @@ static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH*COMMS_MANAGER_QUEUE_IT
  */
 static void vCommsManagerTask(void * pvParameters);
 
-void initComms(void) {
+void initCommsManager(void) {
     ASSERT( (commsTaskStack != NULL) && (&commsTaskBuffer != NULL) );
     if (commsTaskHandle == NULL) {
         commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, NULL, COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);

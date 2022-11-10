@@ -46,7 +46,7 @@ typedef struct {
 /**
  * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs (queues, timers, etc.)
  */
-void initPayload(void);
+void initPayloadManager(void);
 
 /**
  * @brief	Send an event to the Payload Manager queue.

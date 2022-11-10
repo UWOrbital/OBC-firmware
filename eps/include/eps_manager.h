@@ -46,7 +46,7 @@ typedef struct {
 /**
  * @brief	Initialize the EPS Manager task and associated FreeRTOS constructs (queues, timers, etc.)
  */
-void initEPS(void);
+void initEPSManager(void);
 
 /**
  * @brief	Send an event to the EPS Manager queue.

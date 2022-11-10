@@ -46,7 +46,7 @@ typedef struct {
 /**
  * @brief	Initialize the adcs task and associated FreeRTOS constructs (queues, timers, etc.)
  */
-void initADCS(void);
+void initADCSManager(void);
 
 /**
  * @brief	Send an event to the ADCS queue.

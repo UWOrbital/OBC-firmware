@@ -22,7 +22,7 @@ static uint8_t adcsQueueStack[ADCS_MANAGER_QUEUE_LENGTH*ADCS_MANAGER_QUEUE_ITEM_
  */
 static void vADCSManagerTask(void * pvParameters);
 
-void initADCS(void) {
+void initADCSManager(void) {
     ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
     if (adcsTaskHandle == NULL) {
         adcsTaskHandle = xTaskCreateStatic(vADCSManagerTask, ADCS_MANAGER_NAME, ADCS_MANAGER_STACK_SIZE, NULL, ADCS_MANAGER_PRIORITY, adcsTaskStack, &adcsTaskBuffer);
