@@ -25,6 +25,9 @@
 #define DS3232_STATUS       0X0F
 #define DS3232_AGING        0X10
 
+#define HOUR_MODE           32
+
+
 typedef struct {
     uint8_t hours;
     uint8_t minutes;
@@ -81,6 +84,20 @@ uint8_t getAgingOffsetRTC(int8_t* agingOffset);
 float getTemperatureRTC(float* temperature);
 
 /*-------SET FUNCTIONS---------*/
+uint8_t setSecondsRTC(uint8_t writeSeconds);
+uint8_t setMinutesRTC(uint8_t writeMinutes);
+uint8_t setHourRTC(uint8_t writeHour);
+uint8_t setDayRTC(uint8_t writeDays);
+uint8_t setDateRTC(uint8_t writeDates);
+uint8_t setMonthRTC(uint8_t writeMonths);
+uint8_t setYearRTC(uint8_t writeYears);
+uint8_t setAlarmTimeRTC();
+uint8_t setAlarmModeRTC();
+uint8_t setControlRTC(control_t *writeControl);
+uint8_t setStatusRTC(status_t *writeStatus);
+uint8_t setAgingOffsetRTC(int8_t agingOffset);
 
+/*-------UTILITY FUNCTIONS---------*/
+uint8_t combineWriteVal(uint8_t inputVal);
 
 #endif /* DS3232_MZH */

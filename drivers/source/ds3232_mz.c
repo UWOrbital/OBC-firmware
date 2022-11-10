@@ -231,8 +231,105 @@ float getTemperatureRTC(float* temperature) {
 }
 
 
+uint8_t setSecondsRTC(uint8_t writeSeconds) {
+    uint8_t writeVal =  combineWriteVal(writeSeconds);
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_SECONDS, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setMinutesRTC(uint8_t writeMinutes) {
+    uint8_t writeVal =  combineWriteVal(writeMinutes);
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_MINUTES, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setHourRTC(uint8_t writeHours) {
+    // DEFAULT setting hour to 24 hour mode
+    uint8_t writeVal = HOUR_MODE | combineWriteVal(writeHours);
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setDayRTC(uint8_t writeDays) {
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DAY, writeDays, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setDateRTC(uint8_t writeDates) {
+    uint8_t writeVal =  combineWriteVal(writeDates);
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setMonthRTC(uint8_t writeMonths) {
+    uint8_t writeVal =  combineWriteVal(writeMonths);
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_MONTH, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setYearRTC(uint8_t writeYears) {
+    uint8_t writeVal =  combineWriteVal(writeYears);
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_YEAR, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setAlarmTimeRTC();
+uint8_t setAlarmModeRTC();
+
+uint8_t setControlRTC(control_t *writeControl) {
+   uint8_t writeVal =  (writeControl->EOSC << 7) |
+                        (writeControl->BBSQW << 6) |
+                        (writeControl->CONV << 5) |
+                        (writeControl->INTCN << 2) |
+                        (writeControl->A2IE << 1) |
+                        (writeControl->A1IE);
+
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_CONTROL, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setStatusRTC(status_t *writeStatus) {
+    uint8_t writeVal = (writeStatus->OSF << 7) |
+                        (writeStatus->BB32KHZ << 6) |
+                        (writeStatus->EN32KHZ << 3) |
+                        (writeStatus->BSY << 2) |
+                        (writeStatus->A2F << 1) |
+                        (writeStatus->A1F);
+
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_STATUS, writeVal, 1)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint8_t setAgingOffsetRTC(int8_t agingOffset) {
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_AGING, agingOffset, 1)) {
+        return 0;
+    }
+    return 1;
+}
 
 
+uint8_t combineWriteVal(uint8_t inputVal) {
+    uint8_t onesdigit = inputVal % 10;
+    uint8_t tensdigit = (inputVal / 10) << 4;
+    uint8_t writeVal = onesdigit | tensdigit;
 
-
-
+    return writeVal;
+}
