@@ -61,7 +61,7 @@ uint8_t sendToTelemetryQueue(telemetry_event_t *event) {
     return 0;
 }
 
-uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
+static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
     if(telFile == NULL) {
         return 0;
     }

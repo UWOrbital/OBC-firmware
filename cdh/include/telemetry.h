@@ -58,11 +58,4 @@ void initTelemetry(void);
  */
 uint8_t sendToTelemetryQueue(telemetry_event_t *event);
 
-/**
- * @brief	Send contents from queue as raw bytes into file
- * 
- * @return	1 if successful, 0 otherwise.
- */
-uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg);
-
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */
