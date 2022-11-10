@@ -34,6 +34,7 @@ INCLUDE_DIRS += -I"drivers/include"
 INCLUDE_DIRS += -I"adcs/include"
 INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
 
 LIBS := 
