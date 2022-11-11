@@ -19,6 +19,16 @@ void initSciMutex(void);
 uint8_t printTextSci(sciBASE_t *sci, unsigned char *text, uint32_t length);
 
 /**
+ * @brief Printf via SCI or SCI2.
+ * 
+ * @param sci The SCI register to use (sciREG or scilinREG)
+ * @param s The format string
+ * @param ... Arguments to use in format string
+ * @return 1 if text was printed, 0 otherwise
+ */
+uint8_t sciPrintf(sciBASE_t *sci, const char *s, ...);
+
+/**
  * @brief Print information for a failed assertion.
  * @param file File of failed assertion.
  * @param line Line of failed assertion.
