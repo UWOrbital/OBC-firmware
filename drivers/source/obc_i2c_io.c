@@ -97,4 +97,4 @@ uint8_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes)
         data_buf[i + 1] = data[i];
     }
     return i2cSendTo(sAddr, numBytes + 1, &data_buf);
-}  
+} 
