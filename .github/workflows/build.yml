@@ -21,5 +21,5 @@ jobs:
         echo CC_FOLDER_ROOT="${ARM_NONE_EABI_GCC_PATH::-4}" >> .env
         cat .env
         
-    - name: Build
-      run: make
+    - name: Build (Release)
+      run: make DEBUG=0

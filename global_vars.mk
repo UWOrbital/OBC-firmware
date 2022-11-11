@@ -27,6 +27,13 @@ CC_FLAGS += -specs="nosys.specs"
 CC_FLAGS += -MMD
 CC_FLAGS += -std=gnu99
 
+CPP_FLAGS :=
+
+DEBUG ?= 1
+ifeq ($(DEBUG), 1)
+	CPP_FLAGS += -DDEBUG
+endif
+
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
@@ -39,7 +46,7 @@ INCLUDE_DIRS += -I"payload/include"
 LIBS := 
 
 $(BUILD_DIR)/%.o : %.c
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CC_FLAGS) $(LIBS) -o $@ $< 
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $< 
 
 $(BUILD_DIR)/%.o : %.s
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CC_FLAGS) $(LIBS) -o $@ $<
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<
