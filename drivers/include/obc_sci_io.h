@@ -28,12 +28,4 @@ uint8_t printTextSci(sciBASE_t *sci, unsigned char *text, uint32_t length);
  */
 uint8_t sciPrintf(sciBASE_t *sci, const char *s, ...);
 
-/**
- * @brief Print information for a failed assertion.
- * @param file File of failed assertion.
- * @param line Line of failed assertion.
- * @param expr Failed expression.
- */
-void uartAssertFailed(char *file, int line, char *expr);
-
 #endif /* DRIVERS_INCLUDE_OBC_SCI_IO_H_ */
