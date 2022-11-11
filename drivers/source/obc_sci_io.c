@@ -92,11 +92,6 @@ uint8_t sciPrintf(sciBASE_t *sci, const char *s, ...){
 }
 
 void uartAssertFailed(char *file, int line, char *expr){
-    if(!(expr)){
-        int len = 50 + strlen(expr) + strlen(file);
-        char buf[len];
-        snprintf(buf, len, "ASSERTION FAILED: %s, file %s, line %d\n",
+    sciPrintf(scilinREG, "ASSERTION FAILED: %s, file %s, line %d\r\n",
                             expr, file, line);
-        printTextSci(scilinREG, (unsigned char *)buf, len);
-    }
 }

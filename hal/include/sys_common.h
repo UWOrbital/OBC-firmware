@@ -109,7 +109,7 @@ typedef enum config_value_type
 /* will be for procedure arguments.                                             */
 /********************************************************************************/
 
-void uartAssertFailed(char *file, int line, char *expr);
+extern void uartAssertFailed(char *file, int line, char *expr);
 
 #ifdef DEBUG
 #define ASSERT(expr) {                                                          \
