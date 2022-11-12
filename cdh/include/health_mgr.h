@@ -1,17 +1,18 @@
 #ifndef CDH_INCLUDE_HEALTH_MGR_H_
 #define CDH_INCLUDE_HEALTH_MGR_H_
 
+#include <sys_common.h>
 
 #define HEALTH_MGR_POLL_TIME 10     //placeholder
 
-typedef struct {
 
-} health_report_t;
+#define HEALTH_STATUS_NORMAL 0
+#define HEALTH_STATUS_BAD1 1
+#define HEALTH_STATUS_BAD2 2
 
-int healthMgrInit(void);
-int healthMgrGenerateReport(health_report_t* report);
-int healthMgrParseReport(health_report_t* report);
 
+void initHealthMgr(void);
+void heathMgrTakeAction(void);
 
 
 
