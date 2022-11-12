@@ -44,8 +44,9 @@ uint8_t readTempLM75BD(uint8_t devAddr, float *temp) {
     return 1;
 }
 
-uint8_t readConfigLM75BD(lm75bd_config_t *config)
-{
+uint8_t readConfigLM75BD(lm75bd_config_t *config) {
+    static uint8_t faultQueueMapping[] = {1, 2, 4, 6}; // Maps the fault queue bits to the falt queue size
+
     uint8_t configBuff[LM75BD_CONF_BUFF_SIZE];
 
     if (config == NULL) {
@@ -57,23 +58,10 @@ uint8_t readConfigLM75BD(lm75bd_config_t *config)
     }
 
     uint8_t osFaltQueueRegData = (configBuff[0] & LM75BD_OS_FAULT_QUEUE_MASK) >> 3;
-    switch (osFaltQueueRegData) {
-        case 0:
-            config->osFaultQueueSize = 1;
-            break;
-        case 1:
-            config->osFaultQueueSize = 2;
-            break;
-        case 2:
-            config->osFaultQueueSize = 4;
-            break;
-        case 3:
-            config->osFaultQueueSize = 6;
-            break;
-        default:
-            return 0;
-    }
-
+    if (osFaltQueueRegData > 3)
+        return 0;
+    
+    config->osFaultQueueSize = faultQueueMapping[osFaltQueueRegData];
     config->osPolarity = (configBuff[0] & LM75BD_OS_POL_MASK) >> 2;
     config->osOperationMode = (configBuff[0] & LM75BD_OS_OP_MODE_MASK) >> 1;
     config->devOperationMode = configBuff[0] & LM75BD_DEV_OP_MODE_MASK;
