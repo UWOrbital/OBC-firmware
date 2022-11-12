@@ -162,7 +162,7 @@ uint8_t getAlarmTimeRTC() {
 
 }
 
-uint8_t getControlRTC(control_t *control) {
+uint8_t getControlRTC(rtc_control_t *control) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_CONTROL, data, 1) == 0) {
         printTextSci(scilinREG, (uint8_t*)"Failed to read control data\r\n", 35);
@@ -179,7 +179,7 @@ uint8_t getControlRTC(control_t *control) {
     control->A1IE = data[0] & 1;
 }
 
-uint8_t getStatusRTC(status_t *status) {
+uint8_t getStatusRTC(rtc_status_t *status) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_STATUS, data, 1) == 0) {
         printTextSci(scilinREG, (uint8_t*)"Failed to read status data\r\n", 35);
@@ -287,10 +287,40 @@ uint8_t setYearRTC(uint8_t writeYears) {
     return 1;
 }
 
-uint8_t setAlarmTimeRTC();
-uint8_t setAlarmModeRTC();
+uint8_t setAlarmRTC(rtc_alarm_time_set_t *alarmTime, rtc_alarm_mode_t *alarmMode,  uint8_t dayOrDate) {
+    uint8_t writeSeconds = combineWriteVal(alarmTime->seconds) | alarmMode-> A1M1;
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, writeSeconds, 1)) {
+        return 0;
+    }
 
-uint8_t setControlRTC(control_t *writeControl) {
+    uint8_t writeMinutes =  combineWriteVal(alarmTime->minutes) | alarmMode-> A1M2;
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_MINUTES, writeMinutes, 1)) {
+        return 0;
+    }
+
+    // DEFAULT setting hour to 24 hour mode
+    uint8_t writeHours = HOUR_MODE | combineWriteVal(alarmTime->hours) | alarmMode-> A1M3;
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, writeHours, 1)) {
+        return 0;
+    }
+
+    if(dayOrDate) {
+        uint8_t writeDay =  combineWriteVal(alarmTime->day) | alarmMode-> A1M4 | DAY_MODE;
+        if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, writeDay, 1)) {
+          return 0;
+        }
+    }
+    else {
+        uint8_t writeDate =  combineWriteVal(alarmTime->date) | alarmMode-> A1M4 | DATE_MODE;
+        if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, writeDate, 1)) {
+          return 0;
+        }
+    }
+}
+
+// uint8_t setAlarmModeRTC();
+
+uint8_t setControlRTC(rtc_control_t *writeControl) {
    uint8_t writeVal =  (writeControl->EOSC << 7) |
                         (writeControl->BBSQW << 6) |
                         (writeControl->CONV << 5) |
@@ -304,7 +334,7 @@ uint8_t setControlRTC(control_t *writeControl) {
     return 1;
 }
 
-uint8_t setStatusRTC(status_t *writeStatus) {
+uint8_t setStatusRTC(rtc_status_t *writeStatus) {
     uint8_t writeVal = (writeStatus->OSF << 7) |
                         (writeStatus->BB32KHZ << 6) |
                         (writeStatus->EN32KHZ << 3) |

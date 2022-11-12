@@ -25,8 +25,15 @@
 #define DS3232_STATUS       0X0F
 #define DS3232_AGING        0X10
 
+#define DS3232_ALARM_1_SECONDS      0x07
+#define DS3232_ALARM_1_MINUTES      0x08
+#define DS3232_ALARM_1_HOURS        0x09
+#define DS3232_ALARM_1_DAY_OR_DATE  0x0A
+
 #define HOUR_MODE           32
 
+#define DAY_MODE            64
+#define DATE_MODE           0
 
 typedef struct {
     uint8_t hours;
@@ -56,7 +63,7 @@ typedef struct {
     uint8_t INTCN;      // Interrupt control
     uint8_t A2IE;       // Alarm 2 interrupt enable
     uint8_t A1IE;       // Alarm 1 interrupt enable
-}control_t;
+}rtc_control_t;
 
 typedef struct {
     uint8_t OSF;     // oscillator stop flag
@@ -65,7 +72,29 @@ typedef struct {
     uint8_t BSY;      // Device busy
     uint8_t A2F;       // Alarm 2 flag
     uint8_t A1F;       // Alarm 1 flag
-}status_t;
+}rtc_status_t;
+
+typedef struct {
+    uint8_t date;   // depends on the mode selected for alarm, could be day or date
+    uint8_t day;    // depends on the mode selected for alarm, could be day or date
+    uint8_t hours;
+    uint8_t minutes;
+    uint8_t seconds;
+}rtc_alarm_time_set_t;
+
+typedef struct {
+    uint8_t A1M1;
+    uint8_t A1M2;
+    uint8_t A1M3;
+    uint8_t A1M4;
+}rtc_alarm_mode_t;
+
+const rtc_alarm_time_set_t ALARM_ONCE_A_SECOND = {128, 128, 128, 128};
+const rtc_alarm_time_set_t SECONDS_MATCH = {128, 128, 128, 0};
+const rtc_alarm_time_set_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
+const rtc_alarm_time_set_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
+const rtc_alarm_time_set_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
+
 
 /*-------GET FUNCTIONS---------*/
 uint8_t getSecondsRTC(uint8_t* seconds);
@@ -78,8 +107,8 @@ uint8_t getYearRTC(uint8_t* year);
 uint8_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime);
 uint8_t getCurrentTimeRTC(rtc_time_t *time);  //pass array of size 3 into this fucntion
 uint8_t getAlarmTimeRTC();
-uint8_t getControlRTC(control_t *control);
-uint8_t getStatusRTC(status_t *status);
+uint8_t getControlRTC(rtc_control_t *control);
+uint8_t getStatusRTC(rtc_status_t *status);
 uint8_t getAgingOffsetRTC(int8_t* agingOffset);
 float getTemperatureRTC(float* temperature);
 
@@ -91,10 +120,10 @@ uint8_t setDayRTC(uint8_t writeDays);
 uint8_t setDateRTC(uint8_t writeDates);
 uint8_t setMonthRTC(uint8_t writeMonths);
 uint8_t setYearRTC(uint8_t writeYears);
-uint8_t setAlarmTimeRTC();
-uint8_t setAlarmModeRTC();
-uint8_t setControlRTC(control_t *writeControl);
-uint8_t setStatusRTC(status_t *writeStatus);
+uint8_t setAlarmRTC(rtc_alarm_time_set_t *alarmTime, rtc_alarm_mode_t *alarmMode, uint8_t dayOrDate);
+// uint8_t setAlarmModeRTC();
+uint8_t setControlRTC(rtc_control_t *writeControl);
+uint8_t setStatusRTC(rtc_status_t *writeStatus);
 uint8_t setAgingOffsetRTC(int8_t agingOffset);
 
 /*-------UTILITY FUNCTIONS---------*/
