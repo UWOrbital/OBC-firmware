@@ -13,13 +13,13 @@
  * @note EN pin has internal pull -> GIOB pin 0 set as open-drain
  * @return 1 if successful, 0 otherwise
  */
-uint8_t enableNIS6151(void);
+void enableNIS6151(void);
 
 /**
  * @brief Disables the NIS6151
  * @note EN pin has internal pull -> GIOB pin 0 set as open-drain
  * @return 1 if successful, 0 otherwise
  */
-uint8_t disableNIS6151(void);
+void disableNIS6151(void);
 
 #endif /* DRIVERS_INCLUDE_NIS6151 */
