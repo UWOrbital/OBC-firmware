@@ -20,6 +20,9 @@ int main(void) {
         // Note: This will send through the SCITX pin on the LaunchPad; you'll need to 
         // connect an external USB-TTY converter to the LaunchPad to see the text.
         printTextSci(sciREG, (unsigned char *)"Hello from SCI!\r\n", 17);
+        
+        // Test sciPrintf
+        sciPrintf(scilinREG, "Testing sciPrintf: %d %d %s\r\n", 0, 1, "Hello");
 
         // Toggle the LED.
         gioToggleBit(gioPORTB, 1);
