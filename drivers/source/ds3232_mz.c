@@ -42,9 +42,13 @@ uint8_t getHourRTC(uint8_t *hours){
         return 0;
     }
 
+    uint8_t one_hours = data[0] & LOW_BIT_MASK;
+    uint8_t ten_hours = (data[0] & 48) >> 4;
+
+    *hours = ten_hours*10 + one_hours;
     return 1;
 
-} //having a hard time understanfing how data will be sent
+} 
 
 uint8_t getDayRTC(uint8_t *days) {
     uint8_t data[1];
@@ -118,6 +122,7 @@ uint8_t getCurrentTimeRTC(rtc_time_t *time) {
     else
         result = 0;
 
+    return result;
     
 }
 
@@ -156,10 +161,40 @@ uint8_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
         result = 1;
     else
         result = 0;
+
+    return result;
 }
 
-uint8_t getAlarmTimeRTC() {
+uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
+    uint8_t seconds[1];
+    if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, seconds, 1) == 0) {
+        return 0;
+    }
+    alarmTime -> seconds = (seconds[0] & LOW_BIT_MASK) | (seconds[0] & HIGH_BIT_MASK);
+    
+    uint8_t minutes[1];
+    if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_MINUTES, minutes, 1) == 0) {
+        return 0;
+    }
+    alarmTime -> minutes = (minutes[0] & LOW_BIT_MASK) | (minutes[0] & HIGH_BIT_MASK);
 
+    uint8_t hours[1];
+    if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_HOURS, hours, 1) == 0) {
+        return 0;
+    }
+    alarmTime -> hours = (hours[0] & LOW_BIT_MASK) | (hours[0] & 48);
+
+    uint8_t dayOrDates[1];
+    if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_DAY_OR_DATE, dayOrDates, 1) == 0) {
+        return 0;
+    }
+    uint8_t dayOrDateVal = (dayOrDates[0] & LOW_BIT_MASK) | (dayOrDates[0] & 48);
+    
+    if((dayOrDates[1] & 64) >> 6)
+        alarmTime -> day = dayOrDateVal;
+    else
+        alarmTime -> date = dayOrDateVal;
+    return 1;
 }
 
 uint8_t getControlRTC(rtc_control_t *control) {
@@ -287,38 +322,44 @@ uint8_t setYearRTC(uint8_t writeYears) {
     return 1;
 }
 
-uint8_t setAlarmRTC(rtc_alarm_time_set_t *alarmTime, rtc_alarm_mode_t *alarmMode,  uint8_t dayOrDate) {
-    uint8_t writeSeconds = combineWriteVal(alarmTime->seconds) | alarmMode-> A1M1;
+
+/*writeSeconds, writeminutes and so on written on the same address as A1m1, a2m2 etc. Thus in my implementation, 
+I have combined seconds value with A1m1, minutes value with a2m2 before writing it to the correct address. Something
+similar with day or date mode*/
+
+uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode,  uint8_t dayOrDate) {
+    uint8_t writeSeconds = combineWriteVal(writeAlarmTime->seconds) | writeAlarmMode-> A1M1;
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, writeSeconds, 1)) {
         return 0;
     }
 
-    uint8_t writeMinutes =  combineWriteVal(alarmTime->minutes) | alarmMode-> A1M2;
+    uint8_t writeMinutes =  combineWriteVal(writeAlarmTime->minutes) | writeAlarmMode-> A1M2;
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_MINUTES, writeMinutes, 1)) {
         return 0;
     }
 
     // DEFAULT setting hour to 24 hour mode
-    uint8_t writeHours = HOUR_MODE | combineWriteVal(alarmTime->hours) | alarmMode-> A1M3;
+    uint8_t writeHours = HOUR_MODE | combineWriteVal(writeAlarmTime->hours) | writeAlarmMode-> A1M3;
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, writeHours, 1)) {
         return 0;
     }
 
+    // if dayOrDate is 1, its in day mode else date mode
     if(dayOrDate) {
-        uint8_t writeDay =  combineWriteVal(alarmTime->day) | alarmMode-> A1M4 | DAY_MODE;
+        uint8_t writeDay =  combineWriteVal(writeAlarmTime->day) | writeAlarmMode-> A1M4 | DAY_MODE;
         if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, writeDay, 1)) {
           return 0;
         }
     }
     else {
-        uint8_t writeDate =  combineWriteVal(alarmTime->date) | alarmMode-> A1M4 | DATE_MODE;
+        uint8_t writeDate =  combineWriteVal(writeAlarmTime->date) | writeAlarmMode-> A1M4 | DATE_MODE;
         if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, writeDate, 1)) {
           return 0;
         }
     }
 }
 
-// uint8_t setAlarmModeRTC();
+// uint8_t setwriteAlarmModeRTC();
 
 uint8_t setControlRTC(rtc_control_t *writeControl) {
    uint8_t writeVal =  (writeControl->EOSC << 7) |
@@ -348,8 +389,8 @@ uint8_t setStatusRTC(rtc_status_t *writeStatus) {
     return 1;
 }
 
-uint8_t setAgingOffsetRTC(int8_t agingOffset) {
-    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_AGING, agingOffset, 1)) {
+uint8_t setAgingOffsetRTC(int8_t writeAgingOffset) {
+    if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_AGING, writeAgingOffset, 1)) {
         return 0;
     }
     return 1;

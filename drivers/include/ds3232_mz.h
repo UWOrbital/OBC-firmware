@@ -80,7 +80,7 @@ typedef struct {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
-}rtc_alarm_time_set_t;
+}rtc_alarm_time_t;
 
 typedef struct {
     uint8_t A1M1;
@@ -89,11 +89,11 @@ typedef struct {
     uint8_t A1M4;
 }rtc_alarm_mode_t;
 
-const rtc_alarm_time_set_t ALARM_ONCE_A_SECOND = {128, 128, 128, 128};
-const rtc_alarm_time_set_t SECONDS_MATCH = {128, 128, 128, 0};
-const rtc_alarm_time_set_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
-const rtc_alarm_time_set_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
-const rtc_alarm_time_set_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
+const rtc_alarm_time_t ALARM_ONCE_A_SECOND = {128, 128, 128, 128};
+const rtc_alarm_time_t SECONDS_MATCH = {128, 128, 128, 0};
+const rtc_alarm_time_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
+const rtc_alarm_time_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
+const rtc_alarm_time_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
 
 
 /*-------GET FUNCTIONS---------*/
@@ -106,7 +106,7 @@ uint8_t getMonthRTC(uint8_t* month);
 uint8_t getYearRTC(uint8_t* year); 
 uint8_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime);
 uint8_t getCurrentTimeRTC(rtc_time_t *time);  //pass array of size 3 into this fucntion
-uint8_t getAlarmTimeRTC();
+uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime);
 uint8_t getControlRTC(rtc_control_t *control);
 uint8_t getStatusRTC(rtc_status_t *status);
 uint8_t getAgingOffsetRTC(int8_t* agingOffset);
@@ -120,11 +120,11 @@ uint8_t setDayRTC(uint8_t writeDays);
 uint8_t setDateRTC(uint8_t writeDates);
 uint8_t setMonthRTC(uint8_t writeMonths);
 uint8_t setYearRTC(uint8_t writeYears);
-uint8_t setAlarmRTC(rtc_alarm_time_set_t *alarmTime, rtc_alarm_mode_t *alarmMode, uint8_t dayOrDate);
+uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode, uint8_t dayOrDate);
 // uint8_t setAlarmModeRTC();
 uint8_t setControlRTC(rtc_control_t *writeControl);
 uint8_t setStatusRTC(rtc_status_t *writeStatus);
-uint8_t setAgingOffsetRTC(int8_t agingOffset);
+uint8_t setAgingOffsetRTC(int8_t writeAgingOffset);
 
 /*-------UTILITY FUNCTIONS---------*/
 uint8_t combineWriteVal(uint8_t inputVal);
