@@ -1,6 +1,8 @@
 #ifndef PAYLOAD_INCLUDE_PAYLOAD_MANAGER_H_
 #define PAYLOAD_INCLUDE_PAYLOAD_MANAGER_H_
 
+#include "obc_errors.h"
+
 #include <sys_common.h>
 
 /* Payload Manager task config */
@@ -41,7 +43,8 @@ typedef struct {
 /* payload queue config */
 #define PAYLOAD_MANAGER_QUEUE_LENGTH 10
 #define PAYLOAD_MANAGER_QUEUE_ITEM_SIZE sizeof(payload_event_t)
-#define PAYLOAD_MANAGER_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs (queues, timers, etc.)
@@ -53,6 +56,6 @@ void initPayloadManager(void);
  * @param	event	Event to send.
  * @return	1 if successful, 0 otherwise.
  */
-uint8_t sendToPayloadQueue(payload_event_t *event);
+obc_error_code_t sendToPayloadQueue(payload_event_t *event);
 
 #endif /* PAYLOAD_INCLUDE_PAYLOAD_MANAGER_H_ */

@@ -34,26 +34,29 @@ void initEPSManager(void) {
     }
 }
 
-uint8_t sendToEPSQueue(eps_event_t *event) {
-    if (epsQueueHandle == NULL || event == NULL) {
-        return 0;
-    }
-    if ( xQueueSend(epsQueueHandle, (void *) event, portMAX_DELAY) == pdPASS ) {
-        return 1;
-    }
-    return 0;
+obc_error_code_t sendToEPSQueue(eps_event_t *event) {
+    ASSERT(epsQueueHandle != NULL);
+
+    if (event == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if ( xQueueSend(epsQueueHandle, (void *) event, EPS_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS )
+        return OBC_ERR_CODE_SUCCESS;
+    
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static void vEPSManagerTask(void * pvParameters) {
+    ASSERT(epsQueueHandle != NULL);
+    
     while(1){
         eps_event_t queueMsg;
-        if(xQueueReceive(epsQueueHandle, &queueMsg, EPS_MANAGER_QUEUE_WAIT_PERIOD) != pdPASS) {
+        if (xQueueReceive(epsQueueHandle, &queueMsg, EPS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             queueMsg.eventID = EPS_MANAGER_NULL_EVENT_ID;
-        }
 
-        switch(queueMsg.eventID) {
-            default:
-                ;
+        switch (queueMsg.eventID) {
+            case EPS_MANAGER_NULL_EVENT_ID:
+                break;
         }
     }
 }

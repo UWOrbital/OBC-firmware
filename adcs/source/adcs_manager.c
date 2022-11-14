@@ -1,4 +1,5 @@
 #include "adcs_manager.h"
+#include "obc_errors.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -34,26 +35,29 @@ void initADCSManager(void) {
     }
 }
 
-uint8_t sendToADCSQueue(adcs_event_t *event) {
-    if (adcsQueueHandle == NULL || event == NULL) {
-        return 0;
-    }
-    if ( xQueueSend(adcsQueueHandle, (void *) event, portMAX_DELAY) == pdPASS ) {
-        return 1;
-    }
-    return 0;
+obc_error_code_t sendToADCSQueue(adcs_event_t *event) {
+    ASSERT(adcsQueueHandle != NULL);
+
+    if (event == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if ( xQueueSend(adcsQueueHandle, (void *) event, ADCS_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS )
+        return OBC_ERR_CODE_SUCCESS;
+
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static void vADCSManagerTask(void * pvParameters) {
+    ASSERT(adcsQueueHandle != NULL);
+
     while(1){
         adcs_event_t queueMsg;
-        if(xQueueReceive(adcsQueueHandle, &queueMsg, ADCS_MANAGER_QUEUE_WAIT_PERIOD) != pdPASS) {
+        if(xQueueReceive(adcsQueueHandle, &queueMsg, ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             queueMsg.eventID = ADCS_MANAGER_NULL_EVENT_ID;
-        }
 
         switch(queueMsg.eventID) {
-            default:
-                ;
+            case ADCS_MANAGER_NULL_EVENT_ID:
+                break;
         }
     }
 }

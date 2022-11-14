@@ -1,4 +1,5 @@
 #include "comms_manager.h"
+#include "obc_errors.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -34,26 +35,29 @@ void initCommsManager(void) {
     }
 }
 
-uint8_t sendToCommsQueue(comms_event_t *event) {
-    if (commsQueueHandle == NULL || event == NULL) {
-        return 0;
-    }
-    if ( xQueueSend(commsQueueHandle, (void *) event, portMAX_DELAY) == pdPASS ) {
-        return 1;
-    }
-    return 0;
+obc_error_code_t sendToCommsQueue(comms_event_t *event) {
+    ASSERT(commsQueueHandle != NULL);
+    
+    if (event == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if ( xQueueSend(commsQueueHandle, (void *) event, COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS )
+        return OBC_ERR_CODE_SUCCESS;
+    
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static void vCommsManagerTask(void * pvParameters) {
+    ASSERT(commsQueueHandle != NULL);
+    
     while(1){
         comms_event_t queueMsg;
-        if(xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_WAIT_PERIOD) != pdPASS) {
+        if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             queueMsg.eventID = COMMS_MANAGER_NULL_EVENT_ID;
-        }
 
-        switch(queueMsg.eventID) {
-            default:
-                ;
+        switch (queueMsg.eventID) {
+            case COMMS_MANAGER_NULL_EVENT_ID:
+                break;
         }
     }
 }

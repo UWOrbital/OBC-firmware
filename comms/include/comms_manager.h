@@ -1,6 +1,8 @@
 #ifndef COMMS_INCLUDE_COMMS_MANAGER_H_
 #define COMMS_INCLUDE_COMMS_MANAGER_H_
 
+#include "obc_errors.h"
+
 #include <sys_common.h>
 
 /* Comms Manager task config */
@@ -38,10 +40,11 @@ typedef struct {
     comms_event_data_t data;
 } comms_event_t;
 
-/* comms queue config */
+/* Comms Manager event queue config */
 #define COMMS_MANAGER_QUEUE_LENGTH 10
 #define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
-#define COMMS_MANAGER_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)
@@ -53,6 +56,6 @@ void initCommsManager(void);
  * @param	event	Event to send.
  * @return	1 if successful, 0 otherwise.
  */
-uint8_t sendToCommsQueue(comms_event_t *event);
+obc_error_code_t sendToCommsQueue(comms_event_t *event);
 
 #endif /* COMMS_INCLUDE_COMMS_MANAGER_H_ */
