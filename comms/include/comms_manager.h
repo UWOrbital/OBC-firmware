@@ -54,7 +54,7 @@ void initCommsManager(void);
 /**
  * @brief	Send an event to the Comms Manager queue.
  * @param	event	Event to send.
- * @return	1 if successful, 0 otherwise.
+ * @return The error code
  */
 obc_error_code_t sendToCommsQueue(comms_event_t *event);
 

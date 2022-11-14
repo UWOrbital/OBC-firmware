@@ -54,7 +54,7 @@ void initPayloadManager(void);
 /**
  * @brief	Send an event to the Payload Manager queue.
  * @param	event	Event to send.
- * @return	1 if successful, 0 otherwise.
+ * @return The error code
  */
 obc_error_code_t sendToPayloadQueue(payload_event_t *event);
 

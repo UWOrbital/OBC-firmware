@@ -55,7 +55,7 @@ void initADCSManager(void);
 /**
  * @brief	Send an event to the ADCS queue.
  * @param	event	Event to send.
- * @return	1 if successful, 0 otherwise.
+ * @return The error code
  */
 obc_error_code_t sendToADCSQueue(adcs_event_t *event);
 

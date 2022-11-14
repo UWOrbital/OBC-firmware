@@ -54,7 +54,7 @@ void initEPSManager(void);
 /**
  * @brief	Send an event to the EPS Manager queue.
  * @param	event	Event to send.
- * @return	1 if successful, 0 otherwise.
+ * @return The error code
  */
 obc_error_code_t sendToEPSQueue(eps_event_t *event);
 
