@@ -41,7 +41,7 @@ typedef struct {
 } adcs_event_t;
 
 /* adcs queue config */
-#define ADCS_MANAGER_QUEUE_LENGTH 10
+#define ADCS_MANAGER_QUEUE_LENGTH 10U
 #define ADCS_MANAGER_QUEUE_ITEM_SIZE sizeof(adcs_event_t)
 #define ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define ADCS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)

@@ -6,9 +6,9 @@
 #include <sys_common.h>
 
 /* Comms Manager task config */
-#define COMMS_MANAGER_STACK_SIZE   1024
+#define COMMS_MANAGER_STACK_SIZE   1024U
 #define COMMS_MANAGER_NAME         "comms_manager"
-#define COMMS_MANAGER_PRIORITY     1
+#define COMMS_MANAGER_PRIORITY     1U
 
 /**
  * @enum	comms_event_id_t
@@ -41,7 +41,7 @@ typedef struct {
 } comms_event_t;
 
 /* Comms Manager event queue config */
-#define COMMS_MANAGER_QUEUE_LENGTH 10
+#define COMMS_MANAGER_QUEUE_LENGTH 10U
 #define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
 #define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
