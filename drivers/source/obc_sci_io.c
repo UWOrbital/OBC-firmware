@@ -90,3 +90,8 @@ uint8_t sciPrintf(sciBASE_t *sci, const char *s, ...){
     uint8_t ret = printTextSci(sci, (unsigned char *)buf, MAX_PRINTF_SIZE);
     return ret;
 }
+
+void uartAssertFailed(char *file, int line, char *expr){
+    sciPrintf(scilinREG, "ASSERTION FAILED: %s, file %s, line %d\r\n",
+                            expr, file, line);
+}
