@@ -60,7 +60,7 @@ uint8_t framTransmitAddress(void* addr) {
     uint8_t byte;
     for(int i=3; i >=0; i--){
         byte = ((uint32_t)addr >> (i*8)) & (0xFF);
-        spiTransmitByte(FRAM_spiREG, &byte);
+        spiTransmitByte(FRAM_spiREG, (unsigned char) byte);
     }
     return 1;
 }
@@ -72,16 +72,22 @@ uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd){
         }
     }
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
+
     framTransmitOpCode(cmd, rCmd);
+    
     if(cmd == READ || cmd == FSTRD){
         framTransmitAddress(addr);
     }
+
     if(cmd == FSTRD){
-        spiTransmitByte(FRAM_spiREG, 0xFF); //Transmit dummy byte
+        //Transmit dummy byte
+        spiTransmitByte(FRAM_spiREG, 0xFF);
     }
+    
     if(cmd == RDID){
         nBytes = 9;
     }
+
     unsigned char receiveBuffer;
     for(int i=0; i<nBytes; i++){
         spiReceiveByte(FRAM_spiREG, &receiveBuffer);

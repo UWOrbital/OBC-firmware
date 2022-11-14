@@ -1,6 +1,7 @@
 #ifndef DRIVERS_INCLUDE_FRAM_H_
 #define DRIVERS_INCLUDE_FRAM_H_
 
+#include <stdlib.h>
 #include <stdint.h>
 
 //FRAM OPCODES
