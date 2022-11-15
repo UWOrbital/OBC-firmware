@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #define MAX_PRINTF_SIZE 128U
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static SemaphoreHandle_t sciMutex = NULL;
 static StaticSemaphore_t sciMutexBuffer;
@@ -40,23 +41,17 @@ uint8_t sciPrintText(unsigned char *text, uint32_t length) {
     /* initSciMutex must be called before printing is allowed */
     ASSERT(sciMutex != NULL && sciLinMutex != NULL);
 
-    if (UART_PRINT_REG == scilinREG) {
-        if (sciLinMutex != NULL) {
-            if (xSemaphoreTake(sciLinMutex, portMAX_DELAY) == pdTRUE) {
-                sciSendBytes(text, length);
-                xSemaphoreGive(sciLinMutex);
-                return 1;
-            }
-        }
-    } else if (UART_PRINT_REG == sciREG) {
-        if (sciMutex != NULL) {
-            if (xSemaphoreTake(sciMutex, portMAX_DELAY) == pdTRUE) {
-                sciSendBytes(text, length);
-                xSemaphoreGive(sciMutex);
-                return 1;
-            }
-        }
+    ASSERT(text != NULL);
+    ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG));
+
+    SemaphoreHandle_t mutex = (UART_PRINT_REG == sciREG) ? sciMutex : sciLinMutex;
+
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+        sciSendBytes(text, length);
+        xSemaphoreGive(mutex);
+        return 1;
     }
+    
     return 0;
 }
 
