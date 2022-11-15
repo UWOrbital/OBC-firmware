@@ -81,10 +81,14 @@ uint8_t sciPrintf(const char *s, ...){
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     uint8_t ret = sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE);
 =======
     uint8_t ret = printTextSci((unsigned char *)buf, MAX_PRINTF_SIZE);
 >>>>>>> 80486c8 (Define better macro name for sciREG and scilinREG)
+=======
+    uint8_t ret = sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE);
+>>>>>>> 2c99988 (Rename printTextSci to sciPrintText)
     return ret;
 }
 
