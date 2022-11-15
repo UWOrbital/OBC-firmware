@@ -36,7 +36,7 @@ void initSciMutex(void) {
     configASSERT(sciLinMutex);
 }
 
-uint8_t printTextSci(unsigned char *text, uint32_t length) {
+uint8_t sciPrintText(unsigned char *text, uint32_t length) {
     /* initSciMutex must be called before printing is allowed */
     ASSERT(sciMutex != NULL && sciLinMutex != NULL);
 
@@ -86,7 +86,7 @@ uint8_t sciPrintf(const char *s, ...){
         return 0;
     }
 
-    uint8_t ret = printTextSci((unsigned char *)buf, MAX_PRINTF_SIZE);
+    uint8_t ret = sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE);
     return ret;
 }
 
