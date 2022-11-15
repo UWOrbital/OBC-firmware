@@ -26,7 +26,7 @@ void initSciMutex(void);
  * @param length The length of the text to send.
  * @return 1 if the text was sent, 0 otherwise.
  */
-uint8_t printTextSci(unsigned char *text, uint32_t length);
+uint8_t sciPrintText(unsigned char *text, uint32_t length);
 
 /**
  * @brief Printf via UART_PRINT_REG.
