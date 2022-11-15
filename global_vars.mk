@@ -28,6 +28,7 @@ CC_FLAGS += -MMD
 CC_FLAGS += -std=gnu99
 
 CPP_FLAGS :=
+CPP_FLAGS += -DOBC_REVISION_1
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
