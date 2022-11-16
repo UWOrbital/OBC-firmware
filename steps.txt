@@ -1,0 +1,4 @@
+docker pull throwtheswitch/madsciencelab
+docker run -it --rm -v <local project path>:/project throwtheswitch/madsciencelab:latest
+
+docker run -it --rm -v C:/Users/Daniel/Desktop/Orbital/OBC-firmware/examples/unit_test_demo:/project throwtheswitch/madsciencelab:latest
