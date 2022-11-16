@@ -9,6 +9,11 @@
 #include <sys_common.h>
 #include <gio.h>
 
+#include "obc_sci_io.h"
+#include <sci.h>
+
+#include <redposix.h>
+
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
 static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
@@ -66,6 +71,28 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Send initial messages to system queues */
     sendStartupMessages();    
+
+    int32_t ret;
+    
+    ret = red_init();
+    sciPrintf(scilinREG, "red_init() returned %d\r\n", ret);
+    if(ret == 0) {
+        ret = red_format("");
+        sciPrintf(scilinREG, "red_format() returned %d\r\n", ret);
+        if(ret == 0) {
+            ret = red_mount("");
+            sciPrintf(scilinREG, "red_mount() returned %d\r\n", ret);
+            if (ret == 0) {
+                int32_t file = red_open("reliance.txt", RED_O_CREAT | RED_O_EXCL | RED_O_RDWR);
+                sciPrintf(scilinREG, "red_open() returned %d\r\n", file);
+                red_write(file, "Hello World!\n", 14);
+                sciPrintf(scilinREG, "red_write() returned %d\r\n", ret);
+                red_write(file, "Hello World!\n", 14);
+                red_close(file);
+                sciPrintf(scilinREG, "red_close() returned %d\r\n", ret);
+            }
+        }
+    }
     
     while(1){
         supervisor_event_t inMsg;
