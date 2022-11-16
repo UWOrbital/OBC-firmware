@@ -156,6 +156,7 @@
 #define INCLUDE_xTaskGetIdleTaskHandle      1
 
 /* USER CODE BEGIN (4) */
+#define INCLUDE_xTaskGetCurrentTaskHandle   1
 /* USER CODE END */
 
 
