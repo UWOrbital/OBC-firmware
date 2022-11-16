@@ -38,18 +38,17 @@ void initSciMutex(void) {
 }
 
 uint8_t sciPrintText(unsigned char *text, uint32_t length) {
-    /* initSciMutex must be called before printing is allowed */
-    ASSERT(sciMutex != NULL && sciLinMutex != NULL);
-
-    ASSERT(text != NULL);
-    ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG));
+    configASSERT(text != NULL);
+    configASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG));
 
     SemaphoreHandle_t mutex = (UART_PRINT_REG == sciREG) ? sciMutex : sciLinMutex;
 
-    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
-        sciSendBytes(text, length);
-        xSemaphoreGive(mutex);
-        return 1;
+    if (mutex != NULL){
+        if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+            sciSendBytes(text, length);
+            xSemaphoreGive(mutex);
+            return 1;
+        }
     }
     
     return 0;
