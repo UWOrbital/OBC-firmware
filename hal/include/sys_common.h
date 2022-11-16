@@ -109,6 +109,19 @@ typedef enum config_value_type
 /* will be for procedure arguments.                                             */
 /********************************************************************************/
 
+#ifdef DEBUG
+#define ASSERT(expr) {                                      \
+                         if(!(expr))                        \
+                         {                                  \
+                             __error__(__FILE__, __LINE__); \
+                         }                                  \
+                     }
+#else
+#define ASSERT(expr)
+#endif
+
+/* USER CODE BEGIN (2) */
+
 /**
  * @brief Print information for a failed assertion.
  * @param file File of failed assertion.
@@ -117,18 +130,18 @@ typedef enum config_value_type
  */
 void uartAssertFailed(char *file, int line, char *expr);
 
+#undef ASSERT
 #ifdef DEBUG
 #define ASSERT(expr) {                                                          \
                          if(!(expr))                                            \
                          {                                                      \
                              uartAssertFailed(__FILE__, __LINE__, #expr);       \
+                             while(1);                                          \
                          }                                                      \
                      }
 #else
 #define ASSERT(expr)
 #endif
-
-/* USER CODE BEGIN (2) */
 /* USER CODE END */
 
 /* USER CODE BEGIN (3) */
