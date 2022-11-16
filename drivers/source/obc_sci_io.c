@@ -1,6 +1,7 @@
 #include "obc_sci_io.h"
 
 #include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
 #include <os_portmacro.h>
 #include <os_semphr.h>
 #include <os_task.h>
