@@ -7,7 +7,7 @@ typedef enum {
     OBC_ERR_CODE_UNKOWN = 1,
     OBC_ERR_CODE_INVALID_ARG = 2,
     OBC_ERR_CODE_QUEUE_FULL = 3,
-
+    OBC_ERR_CODE_MUTEX_TIMEOUT = 4,
     /* Driver Errors 100 - 199*/
 
 
