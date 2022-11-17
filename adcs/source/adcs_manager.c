@@ -17,6 +17,10 @@ static QueueHandle_t adcsQueueHandle = NULL;
 static StaticQueue_t adcsQueue;
 static uint8_t adcsQueueStack[ADCS_MANAGER_QUEUE_LENGTH*ADCS_MANAGER_QUEUE_ITEM_SIZE];
 
+/*Boolean values related to the state of the program*/
+uint16_t isDetumbling = 0;
+uint16_t hasAltitudeError = 0;
+
 /**
  * @brief	ADCS Manager task.
  * @param	pvParameters	Task parameters.
@@ -61,3 +65,85 @@ static void vADCSManagerTask(void * pvParameters) {
         }
     }
 }
+
+/* Code from other branch that needs to added into correct location:*/
+
+void supervisorTask(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+/*Helper functions for supervisor*/
+
+/*Algorithrm functions*/
+
+void kalmanFilter(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+void detumblingControl(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+void reactionWheelControl(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+void altitudeTracking(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+void orbitalDetermination(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+void momentumDumping(void *pvParameter)
+{
+    while (1)
+    {
+        
+    }
+}
+
+int initSupervisorTask(void)
+{
+    /* Initialize the functions*/
+    /*xTaskCreate(func, name, size, parameters, priorite, handler)*/
+    xTaskCreate(supervisorTask, "Supervisor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(kalmanFilter, "Kalman Filter", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(reactionWheelControl, "Reaction Wheel Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(altitudeTracking, "Altitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(orbitalDetermination, "Orbital Determination", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(momentumDumping, "Momentum Dumping", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    
+    /*Start scheduler*/
+    vTaskStartScheduler();
+
+    while (1) {};
+    return 0;
+}
+

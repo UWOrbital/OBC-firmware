@@ -10,6 +10,10 @@
 #define ADCS_MANAGER_NAME         "adcs_manager"
 #define ADCS_MANAGER_PRIORITY     1U
 
+/* ADCS Function configs*/
+#define DEFAULT_STACK_SIZE  256U
+#define DEFAULT_PRIORITY    1U 
+
 /**
  * @enum	adcs_event_id_t
  * @brief	adcs event ID enum.
