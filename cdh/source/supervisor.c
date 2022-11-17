@@ -96,12 +96,24 @@ static void vSupervisorTask(void * pvParameters) {
             ret = red_mount("");
             sciPrintf(scilinREG, "red_mount() returned %d\r\n", ret);
             if (ret == 0) {
-                int32_t file = red_open("reliance.txt", RED_O_CREAT | RED_O_EXCL | RED_O_RDWR);
-                sciPrintf(scilinREG, "red_open() returned %d\r\n", file);
-                red_write(file, "Hello World!\n", 14);
+                int32_t file = red_open("/reliance.txt", RED_O_CREAT | RED_O_EXCL | RED_O_RDWR);
+                sciPrintf(scilinREG, "red_open() opened %d\r\n", file);
+
+                unsigned char buf_wr[] = "Hello World!\r\n";
+                ret = red_write(file, buf_wr, sizeof(buf_wr));
                 sciPrintf(scilinREG, "red_write() returned %d\r\n", ret);
-                red_write(file, "Hello World!\n", 14);
-                red_close(file);
+                // red_write(file, "Hello World!\n", 14);
+                unsigned char buf[20];
+                ret = red(file, buf, 15);
+                sciPrintf(scilinREG, "red_read() returned %d\r\n", ret);
+
+                printTextSci(scilinREG, buf, 14);
+                sciPrintf(scilinREG, "\r\n", NULL);
+
+                RED_STAT stat;
+                red_stat("/reliance.txt", );
+                
+                ret = red_close(file);
                 sciPrintf(scilinREG, "red_close() returned %d\r\n", ret);
             }
         }

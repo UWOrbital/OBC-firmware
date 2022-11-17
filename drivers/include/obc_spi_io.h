@@ -10,7 +10,7 @@
 // technically only 4 SPI ports available on the RM46.
 #define NUM_SPI_PORTS 5
 
-void spiMutexInit(void);
+void initSpiMutex(void);
 
 /**
  * @brief Deselect the SD card's SPI chip select.

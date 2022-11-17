@@ -9,6 +9,7 @@
 #include <gio.h>
 #include <sci.h>
 #include <i2c.h>
+#include <spi.h>
 
 int main(void) {
 
@@ -16,11 +17,13 @@ int main(void) {
     gioInit();
     sciInit();
     i2cInit();
+    spiInit();
 
     // Initialize bus mutexes
     initSciMutex();
     initI2CMutex();
-
+    initSpiMutex();
+    
     // The supervisor is the only task running initially.
     initSupervisor();
 

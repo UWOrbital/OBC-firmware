@@ -13,7 +13,7 @@ static int8_t spiRegToIndex(spiBASE_t *spiReg);
 static SemaphoreHandle_t spiMutexes[NUM_SPI_PORTS];
 static StaticSemaphore_t spiMutexBuffers[NUM_SPI_PORTS];
 
-void spiMutexInit(void) {
+void initSpiMutex(void) {
     for (int i = 0; i < NUM_SPI_PORTS; i++) {
         spiMutexes[i] = xSemaphoreCreateMutexStatic(&spiMutexBuffers[i]);
         configASSERT(spiMutexes[i]);
