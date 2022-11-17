@@ -72,15 +72,6 @@ static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
     return 1;
 }
 
-static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
-    if(telFile == NULL) {
-        return 0;
-    }
-    fwrite(&queueMsg, sizeof(telemetry_event_t), 1, telFile);
-
-    return 1;
-}
-
 static void vTelemetryTask(void * pvParameters) {
     const char filename[] = "telemetry.dat"; // This will go into a particular directory on OBC sd card
     FILE *telFile;
@@ -88,7 +79,7 @@ static void vTelemetryTask(void * pvParameters) {
 
     while(1){
         telemetry_event_t queueMsg;
-        if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_WAIT_PERIOD) != pdPASS){
+        if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_RX_WAIT_PERIOD) != pdPASS){
             sendTelemetryToFile(telFile, queueMsg);
         }
     }
