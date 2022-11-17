@@ -53,6 +53,10 @@
 extern "C" {
 #endif
 /* USER CODE BEGIN (0) */
+#include <FreeRTOS.h>
+#include <os_task.h>
+
+#include <string.h>
 /* USER CODE END */
 
 /************************************************************/
@@ -118,6 +122,28 @@ typedef enum config_value_type
 #endif
 
 /* USER CODE BEGIN (2) */
+
+/**
+ * @brief Print information for a failed assertion.
+ * @param file File of failed assertion.
+ * @param line Line of failed assertion.
+ * @param expr Failed expression.
+ */
+void uartAssertFailed(char *file, int line, char *expr);
+
+#undef ASSERT
+#ifdef DEBUG
+#define ASSERT(expr) {                                                          \
+                         if(!(expr))                                            \
+                         {                                                      \
+                             uartAssertFailed(__FILE__, __LINE__, #expr);       \
+                             taskDISABLE_INTERRUPTS();                          \
+                             while(1);                                          \
+                         }                                                      \
+                     }
+#else
+#define ASSERT(expr)
+#endif
 /* USER CODE END */
 
 /* USER CODE BEGIN (3) */
