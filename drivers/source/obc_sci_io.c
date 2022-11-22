@@ -89,3 +89,41 @@ void uartAssertFailed(char *file, int line, char *expr){
     sciPrintf("ASSERTION FAILED: %s, file %s, line %d\r\n",
                             expr, file, line);
 }
+
+uint8_t sciReadByte() {
+    return(sciReceiveByte(UART_READ_REG));
+}
+
+uint8_t sciRead(unsigned char *text, uint32_t length) {
+    configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
+    SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+
+    uint32_t actualLength = 0;
+    int8_t cChar;
+
+    if (mutex != NULL){
+        if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+            while(1) {
+                cChar = sciReadByte();
+                if(cChar == '\b') {
+                    if(actualLength > 0) {
+                        text[actualLength - 1] = '\0';
+                        actualLength--; 
+                    }
+                    continue;
+                }
+                if((cChar == '\r') || (cChar == '\n') || (cChar == 0x1b)) {
+                    break;
+                }
+                text[actualLength] = cChar; 
+                actualLength++;
+                if(actualLength == length){
+                    break;
+                }
+            }
+            xSemaphoreGive(mutex);
+            return 1;
+        }
+    }
+    return 0;
+}

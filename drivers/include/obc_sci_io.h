@@ -5,9 +5,11 @@
 #include <stdint.h>
 
 #ifdef RM46_LAUNCHPAD
-	#define UART_PRINT_REG scilinREG 
+	#define UART_PRINT_REG scilinREG
+	#define UART_READ_REG scilinREG 
 #elif OBC_REVISION_1
 	#define UART_PRINT_REG sciREG 
+	#define UART_READ_REG sciREG
 #elif OBC_REVISION_2
 	#error Serial port not yet chosen for OBC_REVISION_2
 #else
@@ -36,5 +38,21 @@ uint8_t sciPrintText(unsigned char *text, uint32_t length);
  * @return 1 if text was printed, 0 otherwise
  */
 uint8_t sciPrintf(const char *s, ...);
+
+/**
+ * @brief Poll sci interface via UART_READ_REG.
+ * 
+ * @return The character that is polled
+ */
+uint8_t sciReadByte();
+
+/**
+ * @brief Poll sci interface via UART_READ_REG.
+ * 
+ * @param text The text that stores the characters read
+ * @param length The number of bytes to read
+ * @return 1 if text was read, 0 otherwise
+ */
+uint8_t sciRead(unsigned char *text, uint32_t length);
 
 #endif /* DRIVERS_INCLUDE_OBC_SCI_IO_H_ */
