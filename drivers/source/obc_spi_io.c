@@ -23,10 +23,20 @@ static int8_t spiPortToIndex(gioPORT_t *spiPort);
  */
 static int8_t spiRegToIndex(spiBASE_t *spiReg);
 
+/**
+ * @brief Check if a SPI CS pin is valid.
+ * 
+ * @param spiPort The SPI port to use.
+ * @param csNum The chip select pin to use.
+ * @return true if the CS pin is valid; false otherwise.
+ */
+static bool isValidCSNum(gioPORT_t *spiPort, uint8_t csNum);
+
 static SemaphoreHandle_t spiMutexes[NUM_SPI_PORTS];
 static StaticSemaphore_t spiMutexBuffers[NUM_SPI_PORTS];
+static const uint8_t numCSPins[NUM_SPI_PORTS] = { 6, 0, 6, 1, 4 }; // Number of chip select pins for each SPI port
 
-void initSpiMutex(void) {
+void initSPIMutex(void) {
     for (int i = 0; i < NUM_SPI_PORTS; i++) {
         spiMutexes[i] = xSemaphoreCreateMutexStatic(&spiMutexBuffers[i]);
         configASSERT(spiMutexes[i]);
@@ -37,7 +47,8 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPort == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    // TODO: Check valid CS number
+    if (!isValidCSNum(spiPort, csNum))
+        return OBC_ERR_CODE_INVALID_ARG;
     
     int8_t spiPortIndex = spiPortToIndex(spiPort);
     if (spiPortIndex < 0)
@@ -45,7 +56,7 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
 
     if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
         spiPort->DSET = (1 << csNum);
-        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken
+        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
         return OBC_ERR_CODE_SUCCESS;
     }
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
@@ -55,7 +66,8 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPort == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    // TODO: Check valid CS number
+    if (!isValidCSNum(spiPort, csNum))
+        return OBC_ERR_CODE_INVALID_ARG;
 
     int8_t spiPortIndex = spiPortToIndex(spiPort);
     if (spiPortIndex < 0)
@@ -63,13 +75,13 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     
     if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
         spiPort->DCLR = (1 << csNum);
-        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken
+        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
         return OBC_ERR_CODE_SUCCESS;
     }
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, unsigned char outb, unsigned char *inb) {
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb) {
     if (spiReg == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
     
@@ -86,7 +98,7 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, unsigned char outb
         uint16_t spiWordIn;
         
         spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn); // TODO: Check return value
-        *inb = (unsigned char)spiWordIn;
+        *inb = (uint8_t)spiWordIn;
         
         xSemaphoreGive(spiMutexes[spiRegIndex]); // Can only fail if the mutex wasn't taken
         return OBC_ERR_CODE_SUCCESS;
@@ -94,12 +106,12 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, unsigned char outb
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, unsigned char outb) {
-    unsigned char inb;
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb) {
+    uint8_t inb;
     return spiTransmitAndReceiveByte(spiReg, outb, &inb);
 }
 
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, unsigned char *inb) {
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb) {
     return spiTransmitAndReceiveByte(spiReg, 0xFF, inb);
 }
 
@@ -129,4 +141,19 @@ static int8_t spiRegToIndex(spiBASE_t *spiReg) {
     if (spiReg == spiREG5)
         return 4;
     return -1;
+}
+
+static bool isValidCSNum(gioPORT_t *spiPort, uint8_t csNum) {
+    if (spiPort == NULL)
+        return false;
+
+    int8_t spiPortIndex = spiPortToIndex(spiPort);
+    if (spiPortIndex < 0)
+        return false;
+
+    // Each SPI port's CS pins are numbered from 0 to numCSPins[spiPortIndex] - 1
+    if (csNum < numCSPins[spiPortIndex])
+        return true;
+    
+    return false;
 }
