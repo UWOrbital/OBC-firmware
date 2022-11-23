@@ -10,13 +10,12 @@
 #include <sci.h>
 #include <i2c.h>
 
+#include <setup.h>
+
 int main(void) {
 
-    // Run hardware initialization code (TODO: refactor all this into one function call)
-    gioInit();
-    sciInit();
-    i2cInit();
-    sciSetBaudrate( scilinREG, 115200 ); // Changed baud rate from 9600 to 115200
+    //initialize gioInit, sciInit, i2cInit, and baud rates. 
+    funcSetUp();
 
     // Initialize bus mutexes
     initSciMutex();
