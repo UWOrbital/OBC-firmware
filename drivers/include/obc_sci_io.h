@@ -44,7 +44,7 @@ uint8_t sciPrintf(const char *s, ...);
  * 
  * @return The character that is polled
  */
-uint8_t sciReadByte();
+uint8_t sciReadByte(void);
 
 /**
  * @brief Poll sci interface via UART_READ_REG.
