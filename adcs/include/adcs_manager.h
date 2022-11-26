@@ -63,4 +63,45 @@ void initADCSManager(void);
  */
 obc_error_code_t sendToADCSQueue(adcs_event_t *event);
 
+/**
+ * @brief Kalman Filter code and controls the state of the ADCS code
+ * @param pvParameter Task parameters.
+ */
+void kalmanFilter(void * pvParameter);
+
+/**
+ * @brief Runs Detumbling Control Law Algorithrm
+ * @param pvParameter Task parameters.
+ */
+void detumblingControl(void * pvParameter);
+
+/**
+ * @brief Runs Reaction Wheel Control Law Algorithrm
+ * @param pvParameter Task parameters.
+ */
+void reactionWheelControl(void * pvParameter);
+
+/**
+ * @brief Runs Altitude Tracking Algorithrm (Might need to include the Solar Panel and/or Ground Target Tracking Code here or in seperate function(s))
+ * @param pvParameter Task parameters.
+ */
+void altitudeTracking(void * pvParameter);
+
+/**
+ * @brief Runs Orbital Determination Algorithrm 
+ * @param pvParameter Task parameters.
+ */
+void orbitalDetermination(void * pvParameter);
+
+/**
+ * @brief Runs Momuntum Dumping Algorithrm
+ * @param pvParameter Task parameters.
+ */
+void momentumDumping(void * pvParameter);
+
+/**
+ * @brief Initializes the ADCS supervisor task code (Need to add to where this gets run)
+ */
+int initSupervisorTask(void);
+
 #endif /* ADCS_INCLUDE_ADCS_MANAGER_H_ */
