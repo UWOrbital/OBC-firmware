@@ -91,7 +91,18 @@ void uartAssertFailed(char *file, int line, char *expr){
 }
 
 uint8_t sciReadByte(void) {
-    return(sciReceiveByte(UART_READ_REG));
+    configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
+    SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+
+    uint8_t RecievedByte;
+
+    if (mutex != NULL){
+        if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+            RecievedByte = sciReceiveByte(UART_READ_REG);
+            xSemaphoreGive(mutex);
+            return RecievedByte;
+        }
+    }
 }
 
 uint8_t sciRead(unsigned char *text, uint32_t length) {
@@ -106,7 +117,7 @@ uint8_t sciRead(unsigned char *text, uint32_t length) {
     if (mutex != NULL){
         if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
             while(1) {
-                cChar = sciReadByte();
+                cChar = sciRecieveyte(UART_READ_REG);
                 if(cChar == '\b') {
                     if(actualLength > 0) {
                         text[actualLength - 1] = '\0';
