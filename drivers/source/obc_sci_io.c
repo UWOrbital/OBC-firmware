@@ -117,7 +117,7 @@ uint8_t sciRead(unsigned char *text, uint32_t length) {
     if (mutex != NULL){
         if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
             while(1) {
-                cChar = sciRecieveyte(UART_READ_REG);
+                cChar = sciReceiveByte(UART_READ_REG);
                 if(cChar == '\b') {
                     if(actualLength > 0) {
                         text[actualLength - 1] = '\0';
