@@ -11,6 +11,7 @@
 #include <gio.h>
 
 #include <stdio.h>
+#include <stdbool.h>
 
 static TaskHandle_t telemetryTaskHandle = NULL;
 static StaticTask_t telemetryTaskBuffer;
@@ -73,11 +74,44 @@ static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
 }
 
 static void vTelemetryTask(void * pvParameters) {
-    const char filename[] = "telemetry.dat"; // This will go into a particular directory on OBC sd card
-    FILE *telFile;
-    telFile = fopen(filename, "w");
+    char fileName[14] = "telemetry"; // This will go into a particular directory on OBC sd card
+    char fileNumber = '0'; // Will increment this everytime a new file needs to be created. 
+    char fileType[4] = ".dat"; // Will be a .dat file for now
+
+    strcat(fileName, &fileNumber);
+    strcat(fileName, fileType);
+
+    char command[] = "";
+
+    bool fileOpen = false;
+    FILE *telFile; // not sure if a new file object needs to be created whenever a new file is requested. 
+    telFile = fopen(fileName, "w"); 
 
     while(1){
+        if(strcmp(command, "new file") == 1) { // if a new file is requested
+            strcpy(fileName, "telemetry"); // reset file name before apending file number and type
+
+            if(fileOpen) {
+                fclose(telFile); // close the previously opened file
+                fileOpen = false;
+            }
+
+            if(fileNumber == '9') { // if file number reaches 10 reset to 0
+                fileNumber = '0';
+            }
+            else {
+                fileNumber++; // increment file number by one
+            }
+
+            strcat(fileName, &fileNumber);
+            strcat(fileName, fileType);
+
+            if(!fileOpen) {
+                telFile = fopen(fileName, "w"); 
+                fileOpen = true;
+            }
+        }
+ 
         telemetry_event_t queueMsg;
         if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_RX_WAIT_PERIOD) != pdPASS){
             sendTelemetryToFile(telFile, queueMsg);
