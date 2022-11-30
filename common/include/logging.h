@@ -67,8 +67,8 @@ void logSetOutputLocation(log_output_location_t newOutputLocation);
  * @param s						Message to log
  * @param ...					Additional arguments for the message
  * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
- * 								OBC_ERR_CODE_LOG_TOO_LONG		if logged message is too long
- * 								OBC_ERR_CODE_PRINTF_FAILED		if any snprintf/vsnprintf fails
+ * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
  * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  * 								
