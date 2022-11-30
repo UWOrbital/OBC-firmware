@@ -1,5 +1,5 @@
-#ifndef CDH_INCLUDE_LOGGING_H_
-#define CDH_INCLUDE_LOGGING_H_
+#ifndef COMMON_INCLUDE_LOGGING_H_
+#define COMMON_INCLUDE_LOGGING_H_
 
 #include <sys_common.h>
 

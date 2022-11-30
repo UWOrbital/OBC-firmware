@@ -51,7 +51,7 @@ uint8_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, 
 	if (ret < 0)
 		return 0;
 
-	// Logged message
+	// Message
 	va_list args;
 	va_start(args, s);
 	char msgbuf[MAX_MSG_SIZE];
@@ -60,6 +60,7 @@ uint8_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, 
 	if (ret < 0)
 		return 0 ;
 
+	// Prepare entire output
 	char buf[MAX_MSG_SIZE + 128];
 #ifdef LOG_TIMESTAMPS
 	ret = snprintf(buf, sizeof(buf), "%s %s - %s\r\n", timebuf, infobuf, msgbuf);
