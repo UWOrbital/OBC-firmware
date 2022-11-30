@@ -1,7 +1,7 @@
 #ifndef COMMON_INCLUDE_LOGGING_H_
 #define COMMON_INCLUDE_LOGGING_H_
 
-#include <sys_common.h>
+#include "obc_errors.h"
 
 /**
  * @enum log_output_location_t
@@ -58,13 +58,18 @@ void logSetOutputLocation(log_output_location_t newOutputLocation);
 /**
  * @brief Log a message
  * 
- * @param msgLevel	Level of the message
- * @param file		File of message
- * @param line		Line of message
- * @param s			Message to log
- * @param ...		Additional arguments for the message
- * @return uint8_t	1 if message was logged successfully, 0 otherwise
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param s						Message to log
+ * @param ...					Additional arguments for the message
+ * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_ERR_CODE_LOG_TOO_LONG		if logged message is too long
+ * 								OBC_ERR_CODE_PRINTF_FAILED		if any snprintf/vsnprintf fails
+ * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
+ * 								OBC_ERR_CODE_UNKNOWN 			otherwise
+ * 								
  */
-uint8_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, ...);
+obc_error_code_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, ...);
 
 #endif
