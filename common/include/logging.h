@@ -3,6 +3,8 @@
 
 #include "obc_errors.h"
 
+#include <stdint.h>
+
 /**
  * @enum log_output_location_t
  * @brief Log output location enum.
@@ -31,8 +33,9 @@ typedef enum {
 	LOG_FATAL,
 	LOG_OFF
 } log_level_t;
-
+#ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL LOG_WARN
+#endif
 
 #define LOG_TRACE(s, ...)  logLog(LOG_TRACE, __FILE__, __LINE__, s, ...)
 #define LOG_DEBUG(s, ...)  logLog(LOG_DEBUG, __FILE__, __LINE__, s, ...)
@@ -70,6 +73,6 @@ void logSetOutputLocation(log_output_location_t newOutputLocation);
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  * 								
  */
-obc_error_code_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, ...);
+obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, const char *s, ...);
 
 #endif
