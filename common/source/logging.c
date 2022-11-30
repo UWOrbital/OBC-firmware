@@ -67,7 +67,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 		return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
 	if (outputLocation == LOG_TO_UART){
-		uint8 retSci = sciPrintText((unsigned char *)buf, sizeof(buf));
+		uint8_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf));
 		if (retSci)
 			return OBC_ERR_CODE_SUCCESS;
 	}
