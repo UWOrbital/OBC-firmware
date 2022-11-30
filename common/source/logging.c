@@ -68,7 +68,7 @@ uint8_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, 
 	ret = snprintf(buf, sizeof(buf), "%s - %s\r\n", infobuf, msgbuf);
 #endif
 	if (ret < 0)
-		return;
+		return 0;
 
 	if (outputLocation == LOG_TO_UART){
 		ret = sciPrintText((unsigned char *)buf, sizeof(buf));
@@ -78,4 +78,5 @@ uint8_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, 
 		// implement when SD card driver is written
 	}
 
+	return 0;
 }
