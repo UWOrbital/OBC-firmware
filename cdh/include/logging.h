@@ -10,11 +10,11 @@
  * Enum containing all locations to output logs to.
  */
 typedef enum {
-    LOG_TO_SDCARD,
-    LOG_TO_UART
+	LOG_TO_SDCARD,
+	LOG_TO_UART
 } log_output_location_t;
 
-#define LOG_OUTPUT_LOCATION LOG_TO_UART
+#define LOG_DEFAULT_OUTPUT_LOCATION LOG_TO_UART
 
 /**
  * @enum log_level_t
@@ -23,13 +23,13 @@ typedef enum {
  * Enum containing all log levels.
  */
 typedef enum {
-    LOG_TRACE,
-    LOG_DEBUG,
-    LOG_INFO,
-    LOG_WARN,
-    LOG_ERROR,
-    LOG_FATAL,
-    LOG_OFF
+	LOG_TRACE,
+	LOG_DEBUG,
+	LOG_INFO,
+	LOG_WARN,
+	LOG_ERROR,
+	LOG_FATAL,
+	LOG_OFF
 } log_level_t;
 
 #define LOG_DEFAULT_LEVEL LOG_WARN
@@ -44,19 +44,27 @@ typedef enum {
 /**
  * @brief Set the logging level
  * 
- * @param 
+ * @param newLogLevel The new logging level
  */
 void logSetLevel(log_level_t newLogLevel);
 
 /**
+ * @brief Set the output location
+ * 
+ * @param newOutputLocation The new output location
+ */
+void logSetOutputLocation(log_output_location_t newOutputLocation);
+
+/**
  * @brief Log a message
  * 
- * @param msgLevel  Level of the message
- * @param file      File of message
- * @param line      Line of message
- * @param s         Message to log
- * @param ...       Additional arguments for the message
+ * @param msgLevel	Level of the message
+ * @param file		File of message
+ * @param line		Line of message
+ * @param s			Message to log
+ * @param ...		Additional arguments for the message
+ * @return uint8_t	1 if message was logged successfully, 0 otherwise
  */
-void logLog(log_level_t msgLevel, const char *file, int line, const char *s, ...);
+uint8_t logLog(log_level_t msgLevel, const char *file, int line, const char *s, ...);
 
 #endif
