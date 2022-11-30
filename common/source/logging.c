@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 #define MAX_MSG_SIZE 128U
+#define MAX_FNAME_LINENUM_SIZE 128U
+#define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
 static const char *LEVEL_STRINGS[] = {
 	"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
@@ -38,11 +40,11 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, int line, const 
 	uint8_t ret = 0;
 
 	// File & line number
-	char infobuf[64];
+	char infobuf[MAX_FNAME_LINENUM_SIZE];
 	ret = snprintf(infobuf, sizeof(infobuf), "%-5s -> %s:%d", LEVEL_STRINGS[msgLevel], file, line);
 	if (ret < 0)
 		return OBC_ERR_CODE_PRINTF_FAILED;
-	if (ret >= 64)
+	if (ret >= MAX_FNAME_LINENUM_SIZE)
 		return OBC_ERR_CODE_LOG_TOO_LONG;
 
 	// Message
@@ -57,11 +59,11 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, int line, const 
 		return OBC_ERR_CODE_LOG_TOO_LONG;
 
 	// Prepare entire output
-	char buf[MAX_MSG_SIZE + 128];
+	char buf[MAX_LOG_SIZE];
 	ret = snprintf(buf, sizeof(buf), "%s - %s\r\n", infobuf, msgbuf);
 	if (ret < 0)
 		return OBC_ERR_CODE_PRINTF_FAILED;
-	if (ret >= MAX_MSG_SIZE + 128)
+	if (ret >= MAX_LOG_SIZE)
 		return OBC_ERR_CODE_LOG_TOO_LONG;
 
 	if (outputLocation == LOG_TO_UART){
