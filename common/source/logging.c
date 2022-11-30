@@ -2,7 +2,6 @@
 #include "obc_errors.h"
 #include "obc_sci_io.h"
 
-#include <sci.h>
 #include <stdarg.h>
 #include <stdio.h>
 
