@@ -49,8 +49,6 @@
 
 #include "hal_stdtypes.h"
 
-#include <string.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -108,21 +106,12 @@ typedef enum config_value_type
 /* The ASSERT macro, which does the actual assertion checking.  Typically, this */
 /* will be for procedure arguments.                                             */
 /********************************************************************************/
-
-/**
- * @brief Print information for a failed assertion.
- * @param file File of failed assertion.
- * @param line Line of failed assertion.
- * @param expr Failed expression.
- */
-void uartAssertFailed(char *file, int line, char *expr);
-
 #ifdef DEBUG
-#define ASSERT(expr) {                                                          \
-                         if(!(expr))                                            \
-                         {                                                      \
-                             uartAssertFailed(__FILE__, __LINE__, #expr);       \
-                         }                                                      \
+#define ASSERT(expr) {                                      \
+                         if(!(expr))                        \
+                         {                                  \
+                             __error__(__FILE__, __LINE__); \
+                         }                                  \
                      }
 #else
 #define ASSERT(expr)
