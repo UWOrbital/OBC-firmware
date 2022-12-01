@@ -42,7 +42,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 
 	// File & line number
 	char infobuf[MAX_FNAME_LINENUM_SIZE];
-	ret = snprintf(infobuf, sizeof(infobuf), "%-5s -> %s:%d", LEVEL_STRINGS[msgLevel], file, line);
+	ret = snprintf(infobuf, sizeof(infobuf), "%-5s -> %s:%lu", LEVEL_STRINGS[msgLevel], file, line);
 	if (ret < 0)
 		return OBC_ERR_CODE_INVALID_ARG;
 	if (ret >= MAX_FNAME_LINENUM_SIZE)

@@ -1,3 +1,4 @@
+#include "logging.h"
 #include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
@@ -16,6 +17,9 @@ int main(void) {
     gioInit();
     sciInit();
     i2cInit();
+
+    // Initialize logger
+    initLogger();
 
     // Initialize bus mutexes
     initSciMutex();

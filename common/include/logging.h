@@ -16,7 +16,9 @@ typedef enum {
 	LOG_TO_UART
 } log_output_location_t;
 
+#ifndef LOG_DEFAULT_OUTPUT_LOCATION
 #define LOG_DEFAULT_OUTPUT_LOCATION LOG_TO_UART
+#endif
 
 /**
  * @enum log_level_t
@@ -37,12 +39,17 @@ typedef enum {
 #define LOG_DEFAULT_LEVEL LOG_WARN
 #endif
 
-#define LOG_TRACE(s, ...)  logLog(LOG_TRACE, __FILE__, __LINE__, s, ...)
-#define LOG_DEBUG(s, ...)  logLog(LOG_DEBUG, __FILE__, __LINE__, s, ...)
-#define LOG_INFO(s, ...)   logLog(LOG_INFO, __FILE__, __LINE__, s, ...)
-#define LOG_WARN(s, ...)   logLog(LOG_WARN, __FILE__, __LINE__, s, ...)
-#define LOG_ERROR(s, ...)  logLog(LOG_ERROR, __FILE__, __LINE__, s, ...)
-#define LOG_FATAL(s, ...)  logLog(LOG_FATAL, __FILE__, __LINE__, s, ...)
+#define LOG_TRACE(...)  logLog(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...)  logLog(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...)   logLog(LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...)   logLog(LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...)  logLog(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_FATAL(...)  logLog(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+
+/**
+ * @brief Initialize the logger
+ */
+void initLogger(void);
 
 /**
  * @brief Set the logging level
