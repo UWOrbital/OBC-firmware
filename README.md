@@ -62,7 +62,7 @@ You can build the project using these commands at the top-level of the repo:
 
 ```sh
 make clean # Delete any previous build files
-make # Build the executable for the development version of the firmware. The .out file should appear in the build directory.
+make # Build the executable for the dev version of the firmware. The .out file should appear in the build directory.
 ```
 If you get a main() already defined error, remove the `hal/source/sys_main.c` file by running `make clean`.
 
