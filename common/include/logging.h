@@ -4,6 +4,7 @@
 #include "obc_errors.h"
 
 #include <stdint.h>
+#include <stdarg.h>
 
 /**
  * @enum log_output_location_t
