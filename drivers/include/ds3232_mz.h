@@ -2,6 +2,7 @@
 #define DRIVERS_INCLUDE_DS3232_MZH
 
 #include "stdint.h"
+#include "gio.h"
 
 //TODO
 // Implement get_rtc_hour, get_rtc_minutes, get_rtc_seconds, get_rtc_date, get_rtc_year, get_rtc_time, and get_rtc_date
@@ -95,6 +96,8 @@ const rtc_alarm_time_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
 const rtc_alarm_time_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
 const rtc_alarm_time_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
 
+/*-------RESET RTC---------*/
+void resetRTC();
 
 /*-------GET FUNCTIONS---------*/
 uint8_t getSecondsRTC(uint8_t* seconds);

@@ -7,6 +7,15 @@ const uint8_t LOW_BIT_MASK = 15; //00001111
 const uint8_t HIGH_BIT_MASK = 112; // 01110000
 
 
+void resetRTC() {
+   /*GIO pin output in the rm46 is the input for the RST pin the RTC. Setting GIOApin1 to 0
+   means that the open drain circuit in the RTC will be high impedence (no current flows). So
+   nothing will happen. Setting it high will pull the open draain circuit to ground making it 0
+   which resets the RTC.*/ 
+    gioSetBit(gioPORTA, 1, 1);  //setting pin 1 in gpio port A to 1 to reset it
+    gioSetBit(gioPORTA, 1, 0);  //setting it back to default state
+}
+
 uint8_t getSecondsRTC(uint8_t *seconds) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_SECONDS, data, 1) == 0) {
