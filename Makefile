@@ -25,5 +25,6 @@ $(BUILD_DIR)/OBC-firmware.out: $(OBJS)
 
 clean:
 	rm -rf build/*
+	rm -f hal/source/sys_main.c
 
 .PHONY: all clean

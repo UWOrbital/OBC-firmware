@@ -49,29 +49,31 @@ void initTelemetry(void) {
     }
 }
 
-uint8_t sendToTelemetryQueue(telemetry_event_t *event) {
-    if (telemetryQueueHandle == NULL || event == NULL) {
-        return 0;
-    }
-    if ( xQueueSend(telemetryQueueHandle, (void *) event, portMAX_DELAY) == pdPASS ) {
-        return 1;
-    }
-    return 0;
+obc_error_code_t sendToTelemetryQueue(telemetry_event_t *event) {
+    ASSERT(telemetryQueueHandle != NULL);
+
+    if (event == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    if (xQueueSend(telemetryQueueHandle, (void *) event, TELEMETRY_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+        return OBC_ERR_CODE_SUCCESS;
+    
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static void vTelemetryTask(void * pvParameters) {
-    while(1){
+    while (1) {
         telemetry_event_t queueMsg;
-        if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_WAIT_PERIOD) != pdPASS){
+        if (xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             queueMsg.eventID = TELEMETRY_NULL_EVENT_ID;
-        }
 
-        switch(queueMsg.eventID)
-        {
+        switch (queueMsg.eventID) {
             case TURN_ON_LED_EVENT_ID:
                 vTaskDelay(queueMsg.data.i);
                 gioToggleBit(gioPORTB, 1);
                 xTimerStart(ledTimerHandle, TELEMETRY_DELAY_TICKS);
+                break;
+            case TELEMETRY_NULL_EVENT_ID:
                 break;
             default:
                 ;

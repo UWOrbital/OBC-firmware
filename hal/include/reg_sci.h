@@ -72,7 +72,7 @@ typedef volatile struct sciBase
 {
     uint32 GCR0;          /**< 0x0000 Global Control Register 0 */
     uint32 GCR1;          /**< 0x0004 Global Control Register 1 */
-    uint32 GCR2;         /**< 0x0008 Global Control Register 2. Note: Applicable only to LIN – SCI Compatibility Mode,Reserved for standalone SCI*/
+    uint32 GCR2;         /**< 0x0008 Global Control Register 2. Note: Applicable only to LIN ï¿½ SCI Compatibility Mode,Reserved for standalone SCI*/
     uint32 SETINT;       /**< 0x000C Set Interrupt Enable Register */
     uint32 CLEARINT;      /**< 0x0010 Clear Interrupt Enable Register */
     uint32 SETINTLVL;    /**< 0x0014 Set Interrupt Level Register */

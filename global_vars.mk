@@ -29,6 +29,9 @@ CC_FLAGS += -std=gnu99
 
 CPP_FLAGS :=
 
+BOARD_TYPE ?= RM46_LAUNCHPAD
+CPP_FLAGS += -D$(BOARD_TYPE)
+
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
 	CPP_FLAGS += -DDEBUG
@@ -38,9 +41,11 @@ INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"drivers/include"
+INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"adcs/include"
 INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
 
 LIBS := 

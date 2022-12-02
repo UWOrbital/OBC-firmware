@@ -19,7 +19,7 @@ void resetRTC() {
 uint8_t getSecondsRTC(uint8_t *seconds) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_SECONDS, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read seconds data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read seconds data\r\n", 35);
         return 0;
     }
     uint8_t oneSeconds = data[0] & LOW_BIT_MASK;
@@ -33,7 +33,7 @@ uint8_t getSecondsRTC(uint8_t *seconds) {
 uint8_t getMinutesRTC(uint8_t *minutes) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_MINUTES, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read minutes data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read minutes data\r\n", 35);
         return 0;
     }
     uint8_t one_minutes = data[0] & LOW_BIT_MASK;
@@ -47,7 +47,7 @@ uint8_t getMinutesRTC(uint8_t *minutes) {
 uint8_t getHourRTC(uint8_t *hours){
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_HOURS, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read hours data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read hours data\r\n", 35);
         return 0;
     }
 
@@ -62,7 +62,7 @@ uint8_t getHourRTC(uint8_t *hours){
 uint8_t getDayRTC(uint8_t *days) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_DAY, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read days data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read days data\r\n", 35);
         return 0;
     }
     *days = data[0];
@@ -73,7 +73,7 @@ uint8_t getDayRTC(uint8_t *days) {
 uint8_t getDateRTC(uint8_t* date) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_DATE, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read date data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read date data\r\n", 35);
         return 0;
     }
     uint8_t ones_date = data[0] & LOW_BIT_MASK;
@@ -86,7 +86,7 @@ uint8_t getDateRTC(uint8_t* date) {
 uint8_t getMonthRTC(uint8_t *month) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_MONTH, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read month data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read month data\r\n", 35);
         return 0;
     }
     uint8_t ones_month = data[0] & LOW_BIT_MASK;
@@ -99,7 +99,7 @@ uint8_t getMonthRTC(uint8_t *month) {
 uint8_t getYearRTC(uint8_t* year) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_YEAR, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read years data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read years data\r\n", 35);
         return 0;
     }
     uint8_t ones_year = data[0] & LOW_BIT_MASK;
@@ -209,7 +209,7 @@ uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
 uint8_t getControlRTC(rtc_control_t *control) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_CONTROL, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read control data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read control data\r\n", 35);
         return 0;
     }
 
@@ -226,7 +226,7 @@ uint8_t getControlRTC(rtc_control_t *control) {
 uint8_t getStatusRTC(rtc_status_t *status) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_STATUS, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read status data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read status data\r\n", 35);
         return 0;
     }
 
@@ -242,7 +242,7 @@ uint8_t getStatusRTC(rtc_status_t *status) {
 uint8_t getAgingOffsetRTC(int8_t* agingOffset) {
     uint8_t data[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_AGING, data, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read aging offset data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read aging offset data\r\n", 35);
         return 0;
     }
     agingOffset = data[0];
@@ -253,13 +253,13 @@ uint8_t getAgingOffsetRTC(int8_t* agingOffset) {
 float getTemperatureRTC(float* temperature) {
     int8_t dataMSB[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_TEMP_MSB, dataMSB, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read temperature MSB data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read temperature MSB data\r\n", 35);
         return 0;
     }
 
     int8_t dataLSB[1];
     if(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_TEMP_LSB, dataLSB, 1) == 0) {
-        printTextSci(scilinREG, (uint8_t*)"Failed to read temperature LSB data\r\n", 35);
+        sciPrintText( (uint8_t*)"Failed to read temperature LSB data\r\n", 35);
         return 0;
     }
     

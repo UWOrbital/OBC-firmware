@@ -53,6 +53,10 @@
 extern "C" {
 #endif
 /* USER CODE BEGIN (0) */
+#include <FreeRTOS.h>
+#include <os_task.h>
+
+#include <string.h>
 /* USER CODE END */
 
 /************************************************************/
@@ -116,8 +120,6 @@ typedef enum config_value_type
 #else
 #define ASSERT(expr)
 #endif
-
-/* USER CODE BEGIN (2) */
 /* USER CODE END */
 
 /* USER CODE BEGIN (3) */
