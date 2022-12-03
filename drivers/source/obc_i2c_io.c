@@ -26,28 +26,28 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, void *buf) {
     if (buf == NULL || size < 1)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+    if (xSemaphoreTake(i2cMutex, I2C_MUTEX_TIMEOUT) == pdTRUE) {
         // As discussed in PR #11, a critical section might not be required
         taskENTER_CRITICAL();
 
-        i2cSetSlaveAdd(i2cREG1, sAddr);
-        i2cSetDirection(i2cREG1, I2C_TRANSMITTER);
-        i2cSetCount(i2cREG1, size);
-        i2cSetMode(i2cREG1, I2C_MASTER);
-        i2cSetStop(i2cREG1);
-        i2cSetStart(i2cREG1);
-        i2cSend(i2cREG1, size, buf);
+        i2cSetSlaveAdd(I2C_REG, sAddr);
+        i2cSetDirection(I2C_REG, I2C_TRANSMITTER);
+        i2cSetCount(I2C_REG, size);
+        i2cSetMode(I2C_REG, I2C_MASTER);
+        i2cSetStop(I2C_REG);
+        i2cSetStart(I2C_REG);
+        i2cSend(I2C_REG, size, buf);
 
         taskEXIT_CRITICAL();
 
         /* Wait for bus to not be busy */
-        while(i2cIsBusBusy(i2cREG1));
+        while(i2cIsBusBusy(I2C_REG));
 
         /* Wait until Stop is detected */
-        while(!i2cIsStopDetected(i2cREG1));
+        while(!i2cIsStopDetected(I2C_REG));
 
         /* Clear the Stop condition */
-        i2cClearSCD(i2cREG1);
+        i2cClearSCD(I2C_REG);
 
         xSemaphoreGive(i2cMutex); // Won't fail because the mutex is taken correctly
         return OBC_ERR_CODE_SUCCESS;
@@ -62,24 +62,24 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, void *buf) {
     if (buf == NULL || size < 1)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(i2cMutex, portMAX_DELAY) == pdTRUE) {
+    if (xSemaphoreTake(i2cMutex, I2C_MUTEX_TIMEOUT) == pdTRUE) {
         taskENTER_CRITICAL();
 
-        i2cSetSlaveAdd(i2cREG1, sAddr);
-        i2cSetDirection(i2cREG1, I2C_RECEIVER);
-        i2cSetCount(i2cREG1, size);
-        i2cSetMode(i2cREG1, I2C_MASTER);
-        i2cSetStop(i2cREG1);
-        i2cSetStart(i2cREG1);
-        i2cReceive(i2cREG1, size, buf);
+        i2cSetSlaveAdd(I2C_REG, sAddr);
+        i2cSetDirection(I2C_REG, I2C_RECEIVER);
+        i2cSetCount(I2C_REG, size);
+        i2cSetMode(I2C_REG, I2C_MASTER);
+        i2cSetStop(I2C_REG);
+        i2cSetStart(I2C_REG);
+        i2cReceive(I2C_REG, size, buf);
 
         taskEXIT_CRITICAL();
 
-        while(i2cIsBusBusy(i2cREG1));
-        while(!i2cIsStopDetected(i2cREG1));
+        while(i2cIsBusBusy(I2C_REG));
+        while(!i2cIsStopDetected(I2C_REG));
 
         /* Clear the Stop condition */
-        i2cClearSCD(i2cREG1);
+        i2cClearSCD(I2C_REG);
 
         xSemaphoreGive(i2cMutex);
         return OBC_ERR_CODE_SUCCESS;
