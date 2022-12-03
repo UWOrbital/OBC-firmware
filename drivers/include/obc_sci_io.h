@@ -1,6 +1,8 @@
 #ifndef DRIVERS_INCLUDE_OBC_SCI_IO_H_
 #define DRIVERS_INCLUDE_OBC_SCI_IO_H_
 
+#include "obc_errors.h"
+
 #include <sci.h>
 #include <stdint.h>
 
@@ -24,17 +26,17 @@ void initSciMutex(void);
  * 
  * @param text The text to send.
  * @param length The length of the text to send.
- * @return 1 if the text was sent, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-uint8_t sciPrintText(unsigned char *text, uint32_t length);
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length);
 
 /**
  * @brief Printf via UART_PRINT_REG.
  * 
  * @param s The format string
  * @param ... Arguments to use in format string
- * @return 1 if text was printed, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-uint8_t sciPrintf(const char *s, ...);
+obc_error_code_t sciPrintf(const char *s, ...);
 
 #endif /* DRIVERS_INCLUDE_OBC_SCI_IO_H_ */
