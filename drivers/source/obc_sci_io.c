@@ -95,55 +95,52 @@ obc_error_code_t sciReadByte(unsigned char *character) {
     configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
 
-    if(character == NULL) {
+    if(character == NULL || mutex == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    if (mutex != NULL){
-        if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
-            character[0] = sciReceiveByte(UART_READ_REG);
-            xSemaphoreGive(mutex);
-            return OBC_ERR_CODE_SUCCESS;
-        }
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+        *character = sciReceiveByte(UART_READ_REG);
+        xSemaphoreGive(mutex);
+        return OBC_ERR_CODE_SUCCESS;
     }
 
-    return OBC_ERR_CODE_UNKOWN;
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
 obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
 
-    if(text == NULL || length < 1) {
+    if(text == NULL || length < 1 || mutex == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
     uint32_t actualLength = 0;
     unsigned char cChar;
 
-    if (mutex != NULL){
-        if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
-            while(1) {
-                cChar = sciReceiveByte(UART_READ_REG);
-                if(cChar == '\b') {
-                    if(actualLength > 0) {
-                        text[actualLength - 1] = '\0';
-                        actualLength--; 
-                    }
-                    continue;
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+        while(1) {
+            cChar = sciReceiveByte(UART_READ_REG);
+            if(cChar == '\b') {
+                if(actualLength > 0) {
+                    text[actualLength - 1] = '\0';
+                    actualLength--; 
                 }
-                if((cChar == '\r') || (cChar == '\n') || (cChar == 0x1b)) {
-                    break;
-                }
-                text[actualLength] = cChar; 
-                actualLength++;
-                if(actualLength == length){
-                    break;
-                }
+                continue;
             }
-            xSemaphoreGive(mutex);
-            return OBC_ERR_CODE_SUCCESS;
+            if((cChar == '\r') || (cChar == '\n') || (cChar == 0x1b)) {
+                break;
+            }
+            text[actualLength] = cChar; 
+            actualLength++;
+            if(actualLength == length){
+                break;
+            }
         }
+        xSemaphoreGive(mutex);
+        return OBC_ERR_CODE_SUCCESS;
     }
-    return OBC_ERR_CODE_UNKOWN;
+
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
