@@ -1,4 +1,5 @@
 #include "obc_sci_io.h"
+#include "obc_errors.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -90,26 +91,32 @@ void uartAssertFailed(char *file, int line, char *expr){
                             expr, file, line);
 }
 
-uint8_t sciReadByte(void) {
+obc_error_code_t sciReadByte(unsigned char *character) {
     configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
 
-    uint8_t RecievedByte;
+    if(character == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
 
     if (mutex != NULL){
         if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
-            RecievedByte = sciReceiveByte(UART_READ_REG);
+            character[0] = sciReceiveByte(UART_READ_REG);
             xSemaphoreGive(mutex);
-            return RecievedByte;
+            return OBC_ERR_CODE_SUCCESS;
         }
     }
+
+    return OBC_ERR_CODE_UNKOWN;
 }
 
-uint8_t sciRead(unsigned char *text, uint32_t length) {
+obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
 
-    configASSERT((text != NULL) && (strlen(text) == 0));
+    if(text == NULL || length < 1) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
 
     uint32_t actualLength = 0;
     unsigned char cChar;
@@ -135,8 +142,8 @@ uint8_t sciRead(unsigned char *text, uint32_t length) {
                 }
             }
             xSemaphoreGive(mutex);
-            return 1;
+            return OBC_ERR_CODE_SUCCESS;
         }
     }
-    return 0;
+    return OBC_ERR_CODE_UNKOWN;
 }

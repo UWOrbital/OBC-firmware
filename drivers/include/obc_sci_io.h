@@ -3,6 +3,7 @@
 
 #include <sci.h>
 #include <stdint.h>
+#include "obc_errors.h"
 
 #ifdef RM46_LAUNCHPAD
 	#define UART_PRINT_REG scilinREG
@@ -42,17 +43,18 @@ uint8_t sciPrintf(const char *s, ...);
 /**
  * @brief Poll sci interface via UART_READ_REG.
  * 
- * @return The character that is polled
+ * @param character The character that is read
+ * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
  */
-uint8_t sciReadByte(void);
+obc_error_code_t sciReadByte(unsigned char *character);
 
 /**
  * @brief Poll sci interface via UART_READ_REG.
  * 
  * @param text The text that stores the characters read
  * @param length The number of bytes to read
- * @return 1 if text was read, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
  */
-uint8_t sciRead(unsigned char *text, uint32_t length);
+obc_error_code_t sciRead(unsigned char *text, uint32_t length);
 
 #endif /* DRIVERS_INCLUDE_OBC_SCI_IO_H_ */
