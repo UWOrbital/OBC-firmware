@@ -100,7 +100,7 @@ obc_error_code_t sciReadByte(unsigned char *character) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE) {
         *character = sciReceiveByte(UART_READ_REG);
         xSemaphoreGive(mutex);
         return OBC_ERR_CODE_SUCCESS;
@@ -114,32 +114,35 @@ obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
     configASSERT(mutex != NULL);
 
-    if(text == NULL || length < 1) {
+    if (text == NULL || length < 1)
         return OBC_ERR_CODE_INVALID_ARG;
-    }
 
     uint32_t actualLength = 0;
     unsigned char cChar;
 
-    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE) {
         while(1) {
             cChar = sciReceiveByte(UART_READ_REG);
-            if(cChar == '\b') {
+
+            if (cChar == '\b') {
                 if(actualLength > 0) {
                     text[actualLength - 1] = '\0';
                     actualLength--; 
                 }
                 continue;
             }
-            if((cChar == '\r') || (cChar == '\n') || (cChar == 0x1b)) {
+
+            if ((cChar == '\r') || (cChar == '\n') || (cChar == 0x1b))
                 break;
-            }
+            
             text[actualLength] = cChar; 
             actualLength++;
-            if(actualLength == length){
+
+            if (actualLength == (length - 1))
                 break;
-            }
+            
         }
+        text[actualLength] = '\0';
         xSemaphoreGive(mutex);
         return OBC_ERR_CODE_SUCCESS;
     }

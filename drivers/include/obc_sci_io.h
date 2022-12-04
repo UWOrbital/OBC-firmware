@@ -41,7 +41,7 @@ uint8_t sciPrintText(unsigned char *text, uint32_t length);
 uint8_t sciPrintf(const char *s, ...);
 
 /**
- * @brief Poll sci interface via UART_READ_REG.
+ * @brief Read a byte from UART_READ_REG by polling.
  * 
  * @param character The character that is read
  * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
@@ -49,11 +49,14 @@ uint8_t sciPrintf(const char *s, ...);
 obc_error_code_t sciReadByte(unsigned char *character);
 
 /**
- * @brief Poll sci interface via UART_READ_REG.
+ * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.
  * 
  * @param text The text that stores the characters read
  * @param length The number of bytes to read
  * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
+ * 
+ * @note Bytes will be read until a newline character or (length - 1) characters are received.
+ * A null terminator will be added to the end of the string.
  */
 obc_error_code_t sciRead(unsigned char *text, uint32_t length);
 
