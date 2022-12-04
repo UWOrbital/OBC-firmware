@@ -37,9 +37,9 @@ typedef enum writeCmd{
     WRITE           //Write memory data
 }writeCmd;
 
-uint8_t framTransmitOpCode(int cmd, cmdType cmdType);
-uint8_t framTransmitAddress(void* addr);
+static uint8_t framTransmitOpCode(int cmd, cmdType cmdType);
+static uint8_t framTransmitAddress(void* addr);
 uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd);
-uint8_t framWrite(uint8_t *addr, uint8_t data, writeCmd cmd);
+uint8_t framWrite(uint8_t *addr, uint8_t *data, size_t nBytes, writeCmd cmd);
 uint8_t framSleep();
 #endif

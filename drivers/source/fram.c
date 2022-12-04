@@ -10,7 +10,7 @@
 #define FRAM_spiPORT    spiPORT3
 #define FRAM_CS         1
 
-uint8_t framTransmitOpCode(int cmd, cmdType cmdType){
+static uint8_t framTransmitOpCode(int cmd, cmdType cmdType){
     if(cmdType == rCmd) {
         switch (cmd) {
             case READ:
@@ -39,7 +39,7 @@ uint8_t framTransmitOpCode(int cmd, cmdType cmdType){
                 return spiTransmitByte(FRAM_spiREG, OP_WRITE_RESET);
                 break;
             case WRSR:
-                return spiTransmitByte(FRAM_spiREG, OP_READ_STAT_REG);
+                return spiTransmitByte(FRAM_spiREG, OP_WRITE_STAT_REG);
                 break;
             case WRITE:
                 return spiTransmitByte(FRAM_spiREG, OP_WRITE);
@@ -56,9 +56,10 @@ uint8_t framTransmitOpCode(int cmd, cmdType cmdType){
     return 0;
 }
 
-uint8_t framTransmitAddress(void* addr) {
+static uint8_t framTransmitAddress(void* addr) {
     uint8_t byte;
-    for(int i=3; i >=0; i--){
+    
+    for(int i=2; i >=0; i--){
         byte = ((uint32_t)addr >> (i*8)) & (0xFF);
         spiTransmitByte(FRAM_spiREG, (unsigned char) byte);
     }
@@ -71,11 +72,16 @@ uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd){
             return 0;
         }
     }
+    
+    unsigned char receiveBuffer;
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
 
     framTransmitOpCode(cmd, rCmd);
     
     if(cmd == READ || cmd == FSTRD){
+        if(addr == NULL){
+            return 0;
+        }
         framTransmitAddress(addr);
     }
 
@@ -88,7 +94,7 @@ uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd){
         nBytes = 9;
     }
 
-    unsigned char receiveBuffer;
+    
     for(int i=0; i<nBytes; i++){
         spiReceiveByte(FRAM_spiREG, &receiveBuffer);
         buffer[i] = receiveBuffer;
@@ -97,7 +103,25 @@ uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd){
     return 1;
 }
 
-uint8_t framWrite(uint8_t *addr, uint8_t data, writeCmd cmd){
+uint8_t framWrite(uint8_t *addr, uint8_t *data, size_t nBytes, writeCmd cmd){
+    
+    assertChipSelect(FRAM_spiPORT, FRAM_CS);
+    framTransmitOpCode(WREN, wCmd);
+    deassertChipSelect(FRAM_spiPORT, FRAM_CS);
+
+    assertChipSelect(FRAM_spiPORT, FRAM_CS);
+    framTransmitOpCode(cmd, wCmd);
+    if(cmd == WRSR){
+        nBytes = 1;
+    } else if(cmd == WRITE){
+        framTransmitAddress(addr);
+    }
+    
+    for(int i=0; i<nBytes; i++){
+        spiTransmitByte(FRAM_spiREG, data[i]);
+    }
+
+    deassertChipSelect(FRAM_spiPORT, FRAM_CS);
     return 1;
 }
 
