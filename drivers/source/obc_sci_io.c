@@ -94,8 +94,9 @@ void uartAssertFailed(char *file, int line, char *expr){
 obc_error_code_t sciReadByte(unsigned char *character) {
     configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+    configASSERT(mutex != NULL);
 
-    if(character == NULL || mutex == NULL) {
+    if(character == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
@@ -111,8 +112,9 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+    configASSERT(mutex != NULL);
 
-    if(text == NULL || length < 1 || mutex == NULL) {
+    if(text == NULL || length < 1) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
