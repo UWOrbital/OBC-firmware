@@ -1,8 +1,8 @@
 include .env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
-BUILD_DIR = examples/sd_cmdline_demo/build
-BIN = sd_demo.out
+BUILD_DIR = examples/sd_reliance_edge_demo/build
+BIN = sd_reliance_edge_demo.out
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -24,18 +24,31 @@ INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"drivers/include"
-INCLUDE_DIRS += -I"examples/sd_cmdline_demo"
-INCLUDE_DIRS += -I"fatfs/src"
-INCLUDE_DIRS += -I"fatfs/port"
+INCLUDE_DIRS += -I"examples/sd_reliance_edge_demo"
+
+# Reliance Edge File System
+INCLUDE_DIRS += -I"reliance-edge/fatfs_port"
+INCLUDE_DIRS += -I"reliance-edge/include"
+INCLUDE_DIRS += -I"reliance-edge/core/include"
+INCLUDE_DIRS += -I"reliance-edge/os/freertos/include"
+INCLUDE_DIRS += -I"reliance-edge/projects/freertos_rm46/host"
 
 LIBS := 
 	
 SRC_DIRS :=
 SRC_DIRS += hal/source
 SRC_DIRS += drivers/source
-SRC_DIRS += examples/sd_cmdline_demo
-SRC_DIRS += fatfs/src
-SRC_DIRS += fatfs/port
+SRC_DIRS += examples/sd_reliance_edge_demo
+
+# Reliance Edge File System
+SRC_DIRS += reliance-edge/fatfs_port
+SRC_DIRS += reliance-edge/bdev
+SRC_DIRS += reliance-edge/core/driver
+SRC_DIRS += reliance-edge/fse
+SRC_DIRS += reliance-edge/os/freertos/services
+SRC_DIRS += reliance-edge/posix
+SRC_DIRS += reliance-edge/util
+SRC_DIRS += reliance-edge/projects/freertos_rm46/host
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))

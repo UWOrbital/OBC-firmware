@@ -14,19 +14,13 @@ SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
 SRC_DIRS += eps/source
 SRC_DIRS += payload/source
-# SRC_DIRS += fatfs/src
-SRC_DIRS += fatfs/port
 
+# Reliance Edge File System
+SRC_DIRS += reliance-edge/fatfs_port
 SRC_DIRS += reliance-edge/bdev
 SRC_DIRS += reliance-edge/core/driver
 SRC_DIRS += reliance-edge/fse
 SRC_DIRS += reliance-edge/os/freertos/services
 SRC_DIRS += reliance-edge/posix
 SRC_DIRS += reliance-edge/util
-# SRC_DIRS += reliance-edge/util/bitmap.c
-# SRC_DIRS += reliance-edge/util/crc.c
-# SRC_DIRS += reliance-edge/util/memory.c
-# SRC_DIRS += reliance-edge/util/namelen.c
-# SRC_DIRS += reliance-edge/util/sign.c
-# SRC_DIRS += reliance-edge/util/string.c
-SRC_DIRS += reliance-edge/projects/newproj/host
+SRC_DIRS += reliance-edge/projects/freertos_rm46/host

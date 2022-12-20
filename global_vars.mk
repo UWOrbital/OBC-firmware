@@ -47,12 +47,13 @@ INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
 INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
-# INCLUDE_DIRS += -I"fatfs/src"
-INCLUDE_DIRS += -I"fatfs/port"
+
+# Reliance Edge File System
+INCLUDE_DIRS += -I"reliance-edge/fatfs_port"
 INCLUDE_DIRS += -I"reliance-edge/include"
 INCLUDE_DIRS += -I"reliance-edge/core/include"
 INCLUDE_DIRS += -I"reliance-edge/os/freertos/include"
-INCLUDE_DIRS += -I"reliance-edge/projects/newproj/host"
+INCLUDE_DIRS += -I"reliance-edge/projects/freertos_rm46/host"
 
 
 LIBS := 
