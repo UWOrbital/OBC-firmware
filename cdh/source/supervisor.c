@@ -14,9 +14,6 @@
 #include <sys_common.h>
 #include <gio.h>
 
-#include "obc_sci_io.h"
-#include <sci.h>
-
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
 static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
@@ -82,8 +79,8 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Send initial messages to system queues */
     sendStartupMessages();    
-
-    while(1){
+    
+    while(1) {
         supervisor_event_t inMsg;
         telemetry_event_t outMsgTelemetry;
 
