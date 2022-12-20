@@ -22,7 +22,7 @@ int main(void) {
     sciInit();
     spiInit();
     
-    spiMutexInit();
+    initSpiMutex();
 
     xTaskCreateStatic(vTask1, "testCmdLineSDC", 1024, NULL, 1, taskStack, &taskBuffer);
 

@@ -1,6 +1,7 @@
 #include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
+#include "obc_spi_io.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
