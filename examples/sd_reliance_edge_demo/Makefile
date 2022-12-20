@@ -33,11 +33,11 @@ INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"examples/sd_reliance_edge_demo"
 
 # Reliance Edge File System
-INCLUDE_DIRS += -I"reliance-edge/fatfs_port"
-INCLUDE_DIRS += -I"reliance-edge/include"
-INCLUDE_DIRS += -I"reliance-edge/core/include"
-INCLUDE_DIRS += -I"reliance-edge/os/freertos/include"
-INCLUDE_DIRS += -I"reliance-edge/projects/freertos_rm46/host"
+INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
+INCLUDE_DIRS += -I"reliance_edge/include"
+INCLUDE_DIRS += -I"reliance_edge/core/include"
+INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
+INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
 
 LIBS := 
 	
@@ -47,14 +47,14 @@ SRC_DIRS += drivers/source
 SRC_DIRS += examples/sd_reliance_edge_demo
 
 # Reliance Edge File System
-SRC_DIRS += reliance-edge/fatfs_port
-SRC_DIRS += reliance-edge/bdev
-SRC_DIRS += reliance-edge/core/driver
-SRC_DIRS += reliance-edge/fse
-SRC_DIRS += reliance-edge/os/freertos/services
-SRC_DIRS += reliance-edge/posix
-SRC_DIRS += reliance-edge/util
-SRC_DIRS += reliance-edge/projects/freertos_rm46/host
+SRC_DIRS += reliance_edge/fatfs_port
+SRC_DIRS += reliance_edge/bdev
+SRC_DIRS += reliance_edge/core/driver
+SRC_DIRS += reliance_edge/fse
+SRC_DIRS += reliance_edge/os/freertos/services
+SRC_DIRS += reliance_edge/posix
+SRC_DIRS += reliance_edge/util
+SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))

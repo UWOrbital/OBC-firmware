@@ -16,11 +16,11 @@ SRC_DIRS += eps/source
 SRC_DIRS += payload/source
 
 # Reliance Edge File System
-SRC_DIRS += reliance-edge/fatfs_port
-SRC_DIRS += reliance-edge/bdev
-SRC_DIRS += reliance-edge/core/driver
-SRC_DIRS += reliance-edge/fse
-SRC_DIRS += reliance-edge/os/freertos/services
-SRC_DIRS += reliance-edge/posix
-SRC_DIRS += reliance-edge/util
-SRC_DIRS += reliance-edge/projects/freertos_rm46/host
+SRC_DIRS += reliance_edge/fatfs_port
+SRC_DIRS += reliance_edge/bdev
+SRC_DIRS += reliance_edge/core/driver
+SRC_DIRS += reliance_edge/fse
+SRC_DIRS += reliance_edge/os/freertos/services
+SRC_DIRS += reliance_edge/posix
+SRC_DIRS += reliance_edge/util
+SRC_DIRS += reliance_edge/projects/freertos_rm46/host
