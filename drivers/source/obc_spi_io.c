@@ -7,11 +7,34 @@
 #include <gio.h>
 #include <spi.h>
 
+/**
+ * @brief Get index of spiPort in spiMutexes and spiMutexBuffers
+ * 
+ * @param spiPort The SPI port to use.
+ * @return int8_t The index of the SPI port in spiMutexes and spiMtexBuffers; -1 if not found.
+ */
 static int8_t spiPortToIndex(gioPORT_t *spiPort);
+
+/**
+ * @brief Get index of spiReg in spiMutexes and spiMutexBuffers
+ * 
+ * @param spiReg The SPI register to use. 
+ * @return int8_t The index of the SPI register in spiMutexes and spiMtexBuffers; -1 if not found.
+ */
 static int8_t spiRegToIndex(spiBASE_t *spiReg);
+
+/**
+ * @brief Check if a SPI CS pin is valid.
+ * 
+ * @param spiPort The SPI port to use.
+ * @param csNum The chip select pin to use.
+ * @return true if the CS pin is valid; false otherwise.
+ */
+static bool isValidCSNum(gioPORT_t *spiPort, uint8_t csNum);
 
 static SemaphoreHandle_t spiMutexes[NUM_SPI_PORTS];
 static StaticSemaphore_t spiMutexBuffers[NUM_SPI_PORTS];
+static const uint8_t numCSPins[NUM_SPI_PORTS] = { 6, 0, 6, 1, 4 }; // Number of chip select pins for each SPI port
 
 void initSpiMutex(void) {
     for (int i = 0; i < NUM_SPI_PORTS; i++) {
@@ -20,115 +43,75 @@ void initSpiMutex(void) {
     }
 }
 
-/**
- * @brief Deselect the SD card's SPI chip select.
- */
-uint8_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
+obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPort == NULL)
-        return 0;
+        return OBC_ERR_CODE_INVALID_ARG;
 
-    // TODO: Check valid CS number
-    
+    if (!isValidCSNum(spiPort, csNum))
+        return OBC_ERR_CODE_INVALID_ARG;
+
     int8_t spiPortIndex = spiPortToIndex(spiPort);
     if (spiPortIndex < 0)
-        return 0;
+        return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
         spiPort->DSET = (1 << csNum);
-        xSemaphoreGive(spiMutexes[spiPortIndex]);
+        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+        return OBC_ERR_CODE_SUCCESS;
     }
-    return 1;
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-/**
- * @brief Select the SD card's SPI chip select.
- */
-uint8_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
+obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPort == NULL)
-        return 0;
+        return OBC_ERR_CODE_INVALID_ARG;
 
-    // TODO: Check valid CS number
+    if (!isValidCSNum(spiPort, csNum))
+        return OBC_ERR_CODE_INVALID_ARG;
 
     int8_t spiPortIndex = spiPortToIndex(spiPort);
     if (spiPortIndex < 0)
-        return 0;
-    
+        return OBC_ERR_CODE_INVALID_ARG;
+
     if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
         spiPort->DCLR = (1 << csNum);
-        xSemaphoreGive(spiMutexes[spiPortIndex]);
+        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+        return OBC_ERR_CODE_SUCCESS;
     }
-    return 1;
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-/**
- * @brief Read and write a byte to the SD card's SPI interface.
-*/
-uint8_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, unsigned char outb, unsigned char *inb) {
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb) {
     if (spiReg == NULL)
-        return 0;
-    
+        return OBC_ERR_CODE_INVALID_ARG;
+
     if (inb == NULL)
-        return 0;
+        return OBC_ERR_CODE_INVALID_ARG;
 
     int8_t spiRegIndex = spiRegToIndex(spiReg);
     if (spiRegIndex < 0)
-        return 0;
-    
-    if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {
-        // while ((spiReg->FLG & 0x0200) == 0); // Wait until TXINTFLG is set for previous transmission
-        // spiReg->DAT1 = outb | 0x100D0000;    // transmit register address
+        return OBC_ERR_CODE_INVALID_ARG;
 
-        // while ((spiReg->FLG & 0x0100) == 0); // Wait until RXINTFLG is set when new value is received
-        // *inb = (unsigned char)spiReg->BUF;                 // read received value
-        
+    if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
         spiDAT1_t spiData = {0};
         uint16_t spiWordOut = (uint16_t)outb;
         uint16_t spiWordIn;
-        spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn);
-        *inb = (unsigned char)spiWordIn;
-        
-        xSemaphoreGive(spiMutexes[spiRegIndex]);
-        return 1;
+
+        spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn); // TODO: Check return value
+        *inb = (uint8_t)spiWordIn;
+
+        xSemaphoreGive(spiMutexes[spiRegIndex]); // Can only fail if the mutex wasn't taken
+        return OBC_ERR_CODE_SUCCESS;
     }
-    return 0;
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-/**
- * @brief Transmit a byte to the SD card's SPI interface.
- * @param dat Byte to transmit.
- */
-uint8_t spiTransmitByte(spiBASE_t *spiReg, unsigned char outb) {
-    if (spiReg == NULL)
-        return 0;
-
-    int8_t spiRegIndex = spiRegToIndex(spiReg);
-    if (spiRegIndex < 0)
-        return 0;
-    
-    // while ((spiReg->FLG & 0x0200U) == 0); // Wait until TXINTFLG is set for previous transmission
-    // spiReg->DAT1 = (uint32_t)outb;    // transmit register address
-
-    // while ((spiReg->FLG & 0x0100U) == 0); // Wait until RXINTFLG is set when new value is received
-    // unsigned int ui32RcvDat;
-    // ui32RcvDat = spiReg->BUF;  // to get received value
-    // ui32RcvDat = ui32RcvDat;        // to avoid compiler warning
-    
-    unsigned char inb;
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb) {
+    uint8_t inb;
     return spiTransmitAndReceiveByte(spiReg, outb, &inb);
 }
 
-/**
- * @brief Receive a byte from the SD card's SPI interface.
- * 
- * @return BYTE Received byte.
- */
-unsigned char spiReceiveByte(spiBASE_t *spiReg, unsigned char *inb) {
-    if (spiReg == NULL)
-        return 0;
-    
-    if (inb == NULL)
-        return 0;
-
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb) {
     return spiTransmitAndReceiveByte(spiReg, 0xFF, inb);
 }
 
@@ -158,4 +141,19 @@ static int8_t spiRegToIndex(spiBASE_t *spiReg) {
     if (spiReg == spiREG5)
         return 4;
     return -1;
+}
+
+static bool isValidCSNum(gioPORT_t *spiPort, uint8_t csNum) {
+    if (spiPort == NULL)
+        return false;
+
+    int8_t spiPortIndex = spiPortToIndex(spiPort);
+    if (spiPortIndex < 0)
+        return false;
+
+    // Each SPI port's CS pins are numbered from 0 to numCSPins[spiPortIndex] - 1
+    if (csNum < numCSPins[spiPortIndex])
+        return true;
+
+    return false;
 }

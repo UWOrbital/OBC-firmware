@@ -29,6 +29,7 @@ INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"drivers/include"
+INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"examples/sd_reliance_edge_demo"
 
 # Reliance Edge File System
