@@ -38,7 +38,7 @@ void vTask1(void *pvParameters) {
 
     sciPrintf("Reliance Edge initialized and mounted\r\n");
 
-    int32_t file = red_open(fname, RED_O_RDWR | RED_O_CREAT);
+    int32_t file = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
     if (file < 0) {
         sciPrintf("red_open() returned %d\r\n", file);
         while (1);
@@ -59,12 +59,30 @@ void vTask1(void *pvParameters) {
     }
     sciPrintf("Successfully closed %s\r\n", fname);
 
-    file = red_open(fname, RED_O_RDWR);
+    // Open the file again, this time in append mode
+    file = red_open(fname, RED_O_RDWR | RED_O_APPEND);
     if (file < 0) {
         sciPrintf("red_open() returned %d\r\n", file);
         while (1);
     }
     sciPrintf("Successfully opened %s\r\n", fname);
+    
+    // Append some text to the file
+    ret = red_write(file, "TESTING 3...2...1\r\n", strlen("TESTING 3...2...1\r\n"));
+    if (ret < 0) {
+        sciPrintf("red_write() returned %d\r\n", ret);
+        while (1);
+    }
+    sciPrintf("Successfully wrote to %s\r\n", fname);
+
+    // Since we want to read the file from the beginning, we need to seek to the beginning
+    // Alternatively, just use red_pread() instead of red_read()
+    ret = red_lseek(file, 0, RED_SEEK_SET);
+    if (ret < 0) {
+        sciPrintf("red_lseek() returned %d\r\n", ret);
+        while (1);
+    }
+    sciPrintf("Successfully seeked to beginning of %s\r\n", fname);
 
     unsigned char readBuf[100] = {0};
     ret = red_read(file, readBuf, 100);
@@ -74,7 +92,7 @@ void vTask1(void *pvParameters) {
     }
     sciPrintf("Successfully read from %s\r\n", fname);
 
-    sciPrintf("Text read from %s: ", fname);
+    sciPrintf("Text read from %s: \r\n", fname);
     sciPrintText(readBuf, ret);
 
     ret = red_close(file);
@@ -88,7 +106,7 @@ void vTask1(void *pvParameters) {
     if (ret < 0) {
         sciPrintf("red_unlink() returned %d\r\n", ret);
     } else {
-        sciPrintf("Successfully unlinked %s\r\n", fname);
+        sciPrintf("Successfully deleted %s\r\n", fname);
     }
     
     while(1);
