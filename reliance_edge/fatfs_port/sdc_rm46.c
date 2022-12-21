@@ -1,13 +1,12 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include <assert.h>
 
 #include <FreeRTOS.h>
 #include <os_task.h>
 
-#include "sys_common.h"
-#include "gio.h"
-#include "spi.h"
+#include <sys_common.h>
+#include <gio.h>
+#include <spi.h>
 
 #include "diskio.h"
 #include "sdc_rm46.h"
@@ -28,14 +27,13 @@ static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
  */
 static bool isCardReady(void) {
     BYTE res;
+    uint8_t maxTries = 100;
 
-    TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(500);
-    spiReceiveByte(SDC_SPI_REG, &res);
     do {
         spiReceiveByte(SDC_SPI_REG, &res);
-    } while ((res != 0xFF) && (xTaskGetTickCount() < endTimeTicks));
+    } while ((res != 0xFF) && maxTries--);
 
-    return (res != 0xFF);
+    return res == 0xFF;
 }
 
 
@@ -46,7 +44,7 @@ static bool isCardReady(void) {
 static void sendClockTrain(void) {   
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);   /* CS = H */
 
-    for(int i = 0 ; i < 10 ; i++) {
+    for (int i = 0; i < 10; i++) {
         spiTransmitByte(SDC_SPI_REG, 0xFF);
     }
 }
@@ -59,16 +57,6 @@ static void sendClockTrain(void) {
 static void turnOnSDC(void) {
     sendClockTrain();
     powerFlag = POWER_ON;
-}
-
-/**
- * @brief Set the max speed for the SD card's SPI interface.
- */
-static void maximizeSpeed(void) {
-    // todo jc 20151004 - check if this is portable between hercules controllers/clock speeds
-      SDC_SPI_REG->FMT0 &= 0xFFFF00FF;  // mask out baudrate prescaler
-                                        // Max. 5 MBit used for Data Transfer.
-      SDC_SPI_REG->FMT0 |= 5 << 8;      // baudrate prescale 10MHz / (1+1) = 5MBit
 }
 
 /**
@@ -98,30 +86,33 @@ static sdc_power_t checkPower(void) {
 static bool rcvDataBlock(BYTE *buff, UINT btr) {
     BYTE token;
 
-    if (btr % 2 != 0)
+    if (btr % 2 != 0) // Must be an even number
         return FALSE;
 
-    TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
-
+    uint8_t maxTries = 100;
     do {
         spiReceiveByte(SDC_SPI_REG, &token);
-    } while ((token == 0xFF) && (xTaskGetTickCount() < endTimeTicks));
+    } while ((token == 0xFF) && maxTries--);
 
-    if(token != 0xFE) return FALSE; /* If not valid data token, retutn with error */
+    /* If not valid data token, return with error */
+    if(token != 0xFE) return FALSE;
 
-    do {    /* Receive the data block into buffer */
+    /* Receive the data block into buffer */
+    do {    
         spiReceiveByte(SDC_SPI_REG, buff++);
         spiReceiveByte(SDC_SPI_REG, buff++);
     } while (btr -= 2);
     
+    /* Discard CRC */
     unsigned char crc;
-    spiReceiveByte(SDC_SPI_REG, &crc);   /* Discard CRC */
+    spiReceiveByte(SDC_SPI_REG, &crc); 
     spiReceiveByte(SDC_SPI_REG, &crc);
 
     return TRUE;
 }
 
 #if _READONLY == 0
+
 /**
  * @brief Send a data packet to the SD card.
  * @param buff 512 byte buffer containing the data to send.
@@ -129,11 +120,11 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
  * @return bool True if the packet was sent successfully, false otherwise.
  */
 static bool sendDataBlock(const BYTE *buff, BYTE token) {
-    if (isCardReady()) return FALSE;
+    if (!isCardReady()) return FALSE;
 
     spiTransmitByte(SDC_SPI_REG, token); // Send token
     if (token != 0xFD) { // Is data token
-        for (int wc = 0; wc < 512; wc++) { // Send the data block to the MMC
+        for (int wc = 0; wc < 512; wc++) { // Send the data block
             spiTransmitByte(SDC_SPI_REG, *buff++);
         }
         spiTransmitByte(SDC_SPI_REG, 0xFF); /* CRC (Dummy) */
@@ -146,6 +137,7 @@ static bool sendDataBlock(const BYTE *buff, BYTE token) {
     }
     return TRUE;
 }
+
 #endif /* _READONLY */
 
 /**
@@ -155,7 +147,7 @@ static bool sendDataBlock(const BYTE *buff, BYTE token) {
  * @return BYTE Response byte.
  */
 static BYTE sendCMD(BYTE cmd, DWORD arg) {
-    if (isCardReady()) return 0xFF;
+    if (!isCardReady()) return 0xFF;
 
     /* Send command packet */
     spiTransmitByte(SDC_SPI_REG, cmd);                      /* Command */
@@ -169,11 +161,11 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
     if (cmd == CMD8) crc = 0x87;            /* CRC for CMD8(0x1AA) */
     spiTransmitByte(SDC_SPI_REG, crc);
 
-
-    /* Receive command response */
+    /* Skip a byte after "stop reading" is sent */
     unsigned char tmp;
-    if (cmd == CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);        /* Skip a stuff byte when stop reading */
+    if (cmd == CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);
     
+    /* Receive command response */
     BYTE res;
     spiReceiveByte(SDC_SPI_REG, &res);
     for (int attempt = 0; attempt < 9 && (res & 0x80); attempt++) {
@@ -234,38 +226,41 @@ DSTATUS disk_initialize(BYTE drv){
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);                /* CS = L */
     ty = 0;
 
-    TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(5000);
-    while ((sendCMD(CMD0, 0) != 1) && (xTaskGetTickCount() < endTimeTicks));
+    uint8_t maxTries = 100;
+    while ((sendCMD(CMD0, 0) != 1) && maxTries--);
     
     // Even if CMD0 fails, we'll try to continue.
     if (sendCMD(CMD8, 0x1AA) == 1) {    /* SDC Ver2+ */
         for (n = 0; n < 4; n++) spiReceiveByte(SDC_SPI_REG, &ocr[n]);
         
-        if (ocr[2] == 0x01 && ocr[3] == 0xAA) {    /* The card can work at vdd range of 2.7-3.6V */
-            TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
-            TickType_t currTimeTicks;
-            do {
-                if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 1UL << 30) == 0)    break;    /* ACMD41 with HCS bit */
-            } while ((currTimeTicks = xTaskGetTickCount()) < endTimeTicks);
-
-            if ((currTimeTicks < endTimeTicks) && !sendCMD(CMD58, 0)) {    /* Check CCS bit */
-                for (n = 0; n < 4; n++) spiReceiveByte(SDC_SPI_REG, &ocr[n]);
-                ty = (ocr[0] & 0x40) ? 6 : 2;
+        if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
+            /* The card can work at vdd range of 2.7-3.6V */
+            maxTries = 100;
+            for (int i = 0; i < maxTries; i++) {
+                if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 1UL << 30) == 0) {
+                    /* ACMD41 with HCS bit */
+                    if (sendCMD(CMD58, 0) == 0) {    /* Check CCS bit */
+                        for (n = 0; n < 4; n++) spiReceiveByte(SDC_SPI_REG, &ocr[n]);
+                        ty = (ocr[0] & 0x40) ? 6 : 2;
+                    }
+                }
             }
         }
-    } else {                            /* SDC Ver1 or MMC */
+    } else {                            
+        /* SDC Ver1 or MMC */
         ty = (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 0) <= 1) ? 2 : 1;    /* SDC : MMC */
-        TickType_t endTimeTicks = xTaskGetTickCount() + pdMS_TO_TICKS(1000);
-        TickType_t currTimeTicks;
-        do {
+        maxTries = 100;
+        for (int i = 0; i < maxTries; i++) {
             if (ty == 2) {
                 if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 0) == 0) break;    /* ACMD41 */
             } else {
                 if (sendCMD(CMD1, 0) == 0) break;                                /* CMD1 */
             }
-        } while ((currTimeTicks = xTaskGetTickCount()) < endTimeTicks);
-        if ((currTimeTicks >= endTimeTicks) || sendCMD(CMD16, 512) != 0)    /* Select R/W block length */
-            ty = 0;
+
+            if ((i == maxTries - 1) || sendCMD(CMD16, 512) != 0) {   /* Select R/W block length */    
+                ty = 0;
+            }
+        }
     }
 
     cardType = ty;
@@ -276,7 +271,6 @@ DSTATUS disk_initialize(BYTE drv){
 
     if (ty) {            /* Initialization succeded */
         stat &= ~STA_NOINIT;        /* Clear STA_NOINIT */
-        maximizeSpeed();
     } else {            /* Initialization failed */
         turnOffSDC();
     }
@@ -309,12 +303,14 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
     if (!(cardType & 4)) sector *= 512;    /* Convert to byte address if needed */
 
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
-    if (count == 1) {    /* Single block read */
+    if (count == 1) {    
+        /* Single block read */
         if ((sendCMD(CMD17, sector) == 0)    /* READ_SINGLE_BLOCK */
             && rcvDataBlock(buff, 512))
             count = 0;
     }
-    else {                /* Multiple block read */
+    else {                
+        /* Multiple block read */
         if (sendCMD(CMD18, sector) == 0) {    /* READ_MULTIPLE_BLOCK */
             do {
                 if (!rcvDataBlock(buff, 512)) break;
@@ -435,7 +431,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
                 res = RES_OK;
                 break;
             case CTRL_SYNC :    /* Make sure that data has been written */
-                if (!isCardReady())
+                if (isCardReady())
                     res = RES_OK;
                 break;
             default:
@@ -454,7 +450,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
  * @brief Get the current time.
  * @return DWORD Current time
  */
-DWORD get_fattime (void) {
+DWORD get_fattime(void) {
     return    ((2022UL-1980) << 25) // Year = 2022
             | (10UL << 21)          // Month = October
             | (23UL << 16)          // Day = 23

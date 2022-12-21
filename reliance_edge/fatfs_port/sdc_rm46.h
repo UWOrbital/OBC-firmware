@@ -1,10 +1,15 @@
 #ifndef SDC_RM46_H_
 #define SDC_RM46_H_
 
+#include <sys_common.h>
+
 /* SD Card SPI Config */
 #define SDC_SPI_PORT         spiPORT3
 #define SDC_SPI_REG          spiREG3
 #define SDC_SPI_CS           1
+
+#define CHECK_READY_WAIT pdMS_TO_TICKS(500)
+#define RCV_DATA_WAIT pdMS_TO_TICKS(500)
 
 /* Definitions for MMC/SDC command */
 #define CMD0    (0x40+0)    /* GO_IDLE_STATE */
