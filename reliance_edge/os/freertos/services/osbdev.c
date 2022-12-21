@@ -32,7 +32,6 @@
 #include <redvolume.h>
 #include <redbdev.h>
 
-
 /*------------------------------------------------------------------------------
     Porting Note:
 
@@ -41,109 +40,7 @@
     can serve as examples of how to implement this service.
 ------------------------------------------------------------------------------*/
 
-/** @brief A custom implementation, initially stubbed out.
-
-    This the default setting: it is initially stubbed out (does nothing) and
-    produces an error when compiled so that it is obvious that this file needs
-    to be modified.  You can edit this code to provide your own implementation
-    of the block device.  Alternatively, you can delete all of the Disk*()
-    functions and put the custom code directly into the RedOsBDev*() functions.
-*/
-#define BDEV_CUSTOM         (0U)
-
-/** @brief Tuxera FlashFX Tera driver implementation.
-
-    This implementation uses Tuxera's FlashFX Tera driver to use raw flash
-    storage with Reliance Edge.
-
-    This option is only available in commercial releases of Reliance Edge.
-*/
-#define BDEV_FLASHFX        (1U)
-
-/** @brief The FatFs example implementation.
-
-    This implementation is designed to reuse an existing block device driver
-    that was written for FatFs.  If you have such a driver, it can be linked
-    in and used immediately.  The FatFs `diskio.h` header must be in the include
-    directory path.
-*/
-#define BDEV_FATFS          (3U)
-
-/** @brief The Atmel Studio Framework SD/MMC driver example implementation.
-
-    This implementation uses a modified version of the open source SD/MMC driver
-    included in the Atmel Studio Framework (ASF) and will work as-is for many
-    varieties of Atmel hardware.  This example assumes relatively minor
-    modifications to the ASF SD/MMC driver to make it support multi-sector read
-    and write requests, which greatly improves performance.  The modified driver
-    is distributed with the Reliance Edge commercial kit and is included in
-    FreeRTOS Atmel projects that come with the commercial kit (such as in
-    projects/freertos/atmel/sam4e-ek/src/ASF).
-
-    This example can easily be modified to work with an unmodified version of
-    the ASF SD/MMC driver.  Simply replace sd_mmc_mem_2_ram_multi() and
-    sd_mmc_ram_2_mem_multi() with sd_mmc_mem_2_ram() and sd_mmc_ram_2_mem()
-    respectively, and add a for loop to loop over each sector in the request.
-    However, as described in the manual, there are considerable performance
-    advantages to issuing real multi-sector requests, so using the modified
-    driver is recommended.
-*/
-#define BDEV_ATMEL_SDMMC    (4U)
-
-/** @brief The ST Microelectronics STM32 SDIO driver example implementation.
-
-    This implementation accesses the microSD card through the BSP utilities
-    provided as part of the STM32Cube package, used with the STM32 HAL drivers.
-    The STM3240G-EVAL and STM32F746NG-Discovery boards are currently supported.
-*/
-#define BDEV_STM32_SDIO     (5U)
-
-/** @brief The RAM disk example implementation.
-
-    This implementation uses a RAM disk.  It will allow you to compile and test
-    Reliance Edge even if your storage driver is not yet ready.  On typical
-    target hardware, the amount of spare RAM will be limited so generally only
-    very small disks will be available.
-*/
-#define BDEV_RAM_DISK       (6U)
-
-/** @brief Pick which example implementation is compiled.
-
-    Must be one of:
-    - #BDEV_CUSTOM
-    - #BDEV_FLASHFX
-    - #BDEV_FATFS
-    - #BDEV_ATMEL_SDMMC
-    - #BDEV_STM32_SDIO
-    - #BDEV_RAM_DISK
-*/
-#ifndef BDEV_EXAMPLE_IMPLEMENTATION
-#define BDEV_EXAMPLE_IMPLEMENTATION BDEV_FATFS
-#endif
-
-
-/*  The DiskOpen(), DiskClose(), DiskRead(), DiskWrite(), DiskFlush(), and
-    DiskDiscard() functions used below are defined in these header files:
-*/
-#if BDEV_EXAMPLE_IMPLEMENTATION == BDEV_CUSTOM
-  #include "osbdev_custom.h"
-#elif BDEV_EXAMPLE_IMPLEMENTATION == BDEV_FLASHFX
-  #if RED_KIT == RED_KIT_GPL
-    #error "FlashFX block device only supported in commercial versions of Reliance Edge."
-  #endif
-  #include "osbdev_flashfx.h"
-#elif BDEV_EXAMPLE_IMPLEMENTATION == BDEV_FATFS
-  #include "osbdev_fatfs.h"
-#elif BDEV_EXAMPLE_IMPLEMENTATION == BDEV_ATMEL_SDMMC
-  #include "osbdev_asfsdmmc.h"
-#elif BDEV_EXAMPLE_IMPLEMENTATION == BDEV_STM32_SDIO
-  #include "osbdev_stm32sdio.h"
-#elif BDEV_EXAMPLE_IMPLEMENTATION == BDEV_RAM_DISK
-  #include "osbdev_ramdisk.h"
-#else
-  #error "Invalid BDEV_EXAMPLE_IMPLEMENTATION value"
-#endif /* BDEV_EXAMPLE_IMPLEMENTATION == ... */
-
+#include "osbdev_fatfs.h"
 
 /** @brief Configure a block device.
 
