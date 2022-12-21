@@ -27,8 +27,8 @@ static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
  */
 static bool isCardReady(void) {
     BYTE res;
-    uint8_t maxTries = 100;
 
+    uint8_t maxTries = 100;
     do {
         spiReceiveByte(SDC_SPI_REG, &res);
     } while ((res != 0xFF) && maxTries--);
@@ -42,7 +42,7 @@ static bool isCardReady(void) {
  * required after card power up to get it into SPI mode.
  */
 static void sendClockTrain(void) {   
-    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);   /* CS = H */
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     for (int i = 0; i < 10; i++) {
         spiTransmitByte(SDC_SPI_REG, 0xFF);
@@ -84,11 +84,10 @@ static sdc_power_t checkPower(void) {
  * @return bool True if the packet was received successfully, false otherwise.
  */
 static bool rcvDataBlock(BYTE *buff, UINT btr) {
-    BYTE token;
-
     if (btr % 2 != 0) // Must be an even number
         return FALSE;
 
+    BYTE token;
     uint8_t maxTries = 100;
     do {
         spiReceiveByte(SDC_SPI_REG, &token);
@@ -123,18 +122,22 @@ static bool sendDataBlock(const BYTE *buff, BYTE token) {
     if (!isCardReady()) return FALSE;
 
     spiTransmitByte(SDC_SPI_REG, token); // Send token
-    if (token != 0xFD) { // Is data token
-        for (int wc = 0; wc < 512; wc++) { // Send the data block
+    if (token != 0xFD) { 
+        // Is data token
+        for (int wc = 0; wc < 512; wc++) { 
+            // Send the data block
             spiTransmitByte(SDC_SPI_REG, *buff++);
         }
-        spiTransmitByte(SDC_SPI_REG, 0xFF); /* CRC (Dummy) */
+        
+        // Send dummy CRC
+        spiTransmitByte(SDC_SPI_REG, 0xFF);
         spiTransmitByte(SDC_SPI_REG, 0xFF);
         
         BYTE resp;
-        spiReceiveByte(SDC_SPI_REG, &resp); /* Reveive data response */
-        if ((resp & 0x1F) != 0x05) /* If not accepted, return with error */
-            return FALSE;
+        spiReceiveByte(SDC_SPI_REG, &resp); /* Receive data response */
+        if ((resp & 0x1F) != 0x05) return FALSE;
     }
+
     return TRUE;
 }
 
@@ -161,16 +164,16 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
     if (cmd == CMD8) crc = 0x87;            /* CRC for CMD8(0x1AA) */
     spiTransmitByte(SDC_SPI_REG, crc);
 
-    /* Skip a byte after "stop reading" is sent */
+    /* Skip a byte after "stop reading" cmd is sent */
     unsigned char tmp;
     if (cmd == CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);
     
     /* Receive command response */
     BYTE res;
-    spiReceiveByte(SDC_SPI_REG, &res);
-    for (int attempt = 0; attempt < 9 && (res & 0x80); attempt++) {
+    uint8_t maxTries = 10;
+    do {
         spiReceiveByte(SDC_SPI_REG, &res);
-    }
+    } while (res & 0x80 && maxTries--);
 
     return res;
 }
@@ -221,9 +224,9 @@ DSTATUS disk_initialize(BYTE drv){
     if (drv) return STA_NOINIT;            /* Supports only single drive */
     if (stat & STA_NODISK) return stat;    /* No card in the socket */
 
-    turnOnSDC();                            /* Force socket power on */
+    turnOnSDC();
 
-    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);                /* CS = L */
+    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
     ty = 0;
 
     uint8_t maxTries = 100;
@@ -320,7 +323,7 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
         }
     }
 
-    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);            /* CS = H */
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     unsigned char tmp;
     spiReceiveByte(SDC_SPI_REG, &tmp);            /* Idle (Release DO) */
