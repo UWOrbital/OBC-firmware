@@ -1,5 +1,6 @@
 #include "telemetry.h"
 #include "supervisor.h"
+#include "comms_manager.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -76,7 +77,7 @@ static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
 static void vTelemetryTask(void * pvParameters) {
     char fileName[14] = "telemetry"; // This will go into a particular directory on OBC sd card
     char fileNumber = '0'; // Will increment this everytime a new file needs to be created. 
-    char fileType[4] = ".dat"; // Will be a .dat file for now
+    char fileType[4] = ".tlm"; // Will be a .dat file for now
 
     strcat(fileName, &fileNumber);
     strcat(fileName, fileType);
@@ -114,8 +115,26 @@ static void vTelemetryTask(void * pvParameters) {
  
         telemetry_event_t queueMsg;
         if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_RX_WAIT_PERIOD) != pdPASS){
-            sendTelemetryToFile(telFile, queueMsg);
+            switch (queueMsg.eventID)
+            {
+                /* If telemetry file name is requested by comms */
+                case SEND_FILE_NUMBER_TO_COMMS_ID:
+                    comms_event_t event;
+                    event.eventID = TELEMETRY_FILE_NUMBER_ID;
+                    int number;
+                    sscanf(&fileNumber, "%d", &number);
+                    event.data.i = number;
+                    
+                    sendToCommsQueue(&event);
+                    break;
+                /* Any other case will be telemetry to store in the file */
+                default:
+                    sendTelemetryToFile(telFile, queueMsg);
+                    break;
+                }
         }
+
+
     }
 }
 

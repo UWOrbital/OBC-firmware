@@ -1,4 +1,5 @@
 #include "supervisor.h"
+#include "telemetry.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 
@@ -23,6 +24,7 @@ int main(void) {
 
     // The supervisor is the only task running initially.
     initSupervisor();
+    initTelemetry();
 
     vTaskStartScheduler();
 }

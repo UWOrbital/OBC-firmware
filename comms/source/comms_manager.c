@@ -58,6 +58,8 @@ static void vCommsManagerTask(void * pvParameters) {
         switch (queueMsg.eventID) {
             case COMMS_MANAGER_NULL_EVENT_ID:
                 break;
+            case TELEMETRY_FILE_NUMBER_ID:
+                break;
         }
     }
 }
