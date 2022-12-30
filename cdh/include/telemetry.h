@@ -20,7 +20,7 @@
 */
 typedef enum {
     TELEMETRY_NULL_EVENT_ID,
-    SEND_FILE_NUMBER_TO_COMMS_ID,
+    SEND_FILE_NUMBER_TO_COMMS_EVENT_ID,
     TURN_ON_LED_EVENT_ID,
 } telemetry_event_id_t;
 

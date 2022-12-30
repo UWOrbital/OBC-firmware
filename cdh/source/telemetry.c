@@ -82,14 +82,14 @@ static void vTelemetryTask(void * pvParameters) {
     strcat(fileName, &fileNumber);
     strcat(fileName, fileType);
 
-    char command[] = "";
+    bool newFile = false;
 
-    bool fileOpen = false;
     FILE *telFile; // not sure if a new file object needs to be created whenever a new file is requested. 
     telFile = fopen(fileName, "w"); 
+    bool fileOpen = true;
 
     while(1){
-        if(strcmp(command, "new file") == 1) { // if a new file is requested
+        if(newFile) { // if a new file is requested
             strcpy(fileName, "telemetry"); // reset file name before apending file number and type
 
             if(fileOpen) {
@@ -118,7 +118,7 @@ static void vTelemetryTask(void * pvParameters) {
             switch (queueMsg.eventID)
             {
                 /* If telemetry file name is requested by comms */
-                case SEND_FILE_NUMBER_TO_COMMS_ID:
+                case SEND_FILE_NUMBER_TO_COMMS_EVENT_ID:
                     comms_event_t event;
                     event.eventID = TELEMETRY_FILE_NUMBER_ID;
                     int number;
@@ -126,6 +126,7 @@ static void vTelemetryTask(void * pvParameters) {
                     event.data.i = number;
                     
                     sendToCommsQueue(&event);
+                    newFile = true;
                     break;
                 /* Any other case will be telemetry to store in the file */
                 default:
