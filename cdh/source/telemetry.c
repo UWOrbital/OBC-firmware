@@ -108,7 +108,7 @@ static void vTelemetryTask(void * pvParameters) {
             strcat(fileName, fileType);
 
             if(!fileOpen) {
-                telFile = fopen(fileName, "w"); 
+                telFile = fopen(fileName, "w"); // open new file with new file name
                 fileOpen = true;
             }
         }
