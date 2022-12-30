@@ -77,7 +77,7 @@ static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
 static void vTelemetryTask(void * pvParameters) {
     char fileName[14] = "telemetry"; // This will go into a particular directory on OBC sd card
     char fileNumber = '0'; // Will increment this everytime a new file needs to be created. 
-    char fileType[4] = ".tlm"; // Will be a .dat file for now
+    char fileType[4] = ".tlm"; // Will be a .tlm file for now
 
     strcat(fileName, &fileNumber);
     strcat(fileName, fileType);
@@ -90,12 +90,12 @@ static void vTelemetryTask(void * pvParameters) {
 
     while(1){
         if(newFile) { // if a new file is requested
-            strcpy(fileName, "telemetry"); // reset file name before apending file number and type
-
             if(fileOpen) {
                 fclose(telFile); // close the previously opened file
                 fileOpen = false;
             }
+
+            strcpy(fileName, "telemetry"); // reset file name before apending file number and type
 
             if(fileNumber == '9') { // if file number reaches 10 reset to 0
                 fileNumber = '0';
@@ -117,8 +117,7 @@ static void vTelemetryTask(void * pvParameters) {
         if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_RX_WAIT_PERIOD) != pdPASS){
             switch (queueMsg.eventID)
             {
-                /* If telemetry file name is requested by comms */
-                case SEND_FILE_NUMBER_TO_COMMS_EVENT_ID:
+                case SEND_FILE_NUMBER_TO_COMMS_EVENT_ID: /* If telemetry file name is requested by comms */
                     comms_event_t event;
                     event.eventID = TELEMETRY_FILE_NUMBER_ID;
                     int number;
@@ -128,14 +127,16 @@ static void vTelemetryTask(void * pvParameters) {
                     sendToCommsQueue(&event);
                     newFile = true;
                     break;
-                /* Any other case will be telemetry to store in the file */
-                default:
+                case TURN_ON_LED_EVENT_ID: 
+                    vTaskDelay(queueMsg.data.i);
+                    gioToggleBit(gioPORTB, 1);
+                    xTimerStart(ledTimerHandle, TELEMETRY_DELAY_TICKS);
+                    break;
+                default: /* Any other case will be telemetry to store in the file */
                     sendTelemetryToFile(telFile, queueMsg);
                     break;
                 }
         }
-
-
     }
 }
 
