@@ -24,7 +24,6 @@ int main(void) {
 
     // The supervisor is the only task running initially.
     initSupervisor();
-    initTelemetry();
 
     vTaskStartScheduler();
 }
