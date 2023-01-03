@@ -8,9 +8,6 @@
 #define SDC_SPI_REG          spiREG3
 #define SDC_SPI_CS           1
 
-#define CHECK_READY_WAIT pdMS_TO_TICKS(500)
-#define RCV_DATA_WAIT pdMS_TO_TICKS(500)
-
 /* Definitions for MMC/SDC command */
 #define CMD0    (0x40+0)    /* GO_IDLE_STATE */
 #define CMD1    (0x40+1)    /* SEND_OP_COND */
@@ -28,10 +25,14 @@
 #define CMD55    (0x40+55)    /* APP_CMD */
 #define CMD58    (0x40+58)    /* READ_OCR */
 
+#define SD_SECTOR_SIZE 512U
+#define SD_STOP_TRANSMISSION 0xFDU
+#define SD_DATA_RESPONSE_MASK 0x1FU
+#define SD_DATA_RESPONSE_ACCEPTED 0x05U
+
 typedef enum {
     POWER_OFF,
     POWER_ON,
-    POWER_GET
 } sdc_power_t;
 
 #endif /* SDC_RM46_H_ */

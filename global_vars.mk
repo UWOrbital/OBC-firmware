@@ -18,7 +18,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-# CC_FLAGS += -Os // TODO: Figure out why this breaks the SD Card code
+# CC_FLAGS += -Os # TODO: Figure out why this breaks the SD Card code
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
