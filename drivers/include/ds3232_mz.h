@@ -1,18 +1,13 @@
-#ifndef DRIVERS_INCLUDE_DS3232_MZH
-#define DRIVERS_INCLUDE_DS3232_MZH
+#ifndef DRIVERS_INCLUDE_DS3232_MZ_H_
+#define DRIVERS_INCLUDE_DS3232_MZ_H_
 
-#include "stdint.h"
-#include "gio.h"
+#include <stdint.h>
+#include <gio.h>
 
-//TODO
-// Implement get_rtc_hour, get_rtc_minutes, get_rtc_seconds, get_rtc_date, get_rtc_year, get_rtc_time, and get_rtc_date
-
-/*I2C Address for device*/
 
 #define DS3232_I2C_ADDRESS  0x68
 
-/*DS3232 registers*/
-
+/* DS3232 registers */
 #define DS3232_SECONDS      0x00
 #define DS3232_MINUTES      0x01
 #define DS3232_HOURS        0x02
@@ -40,13 +35,13 @@ typedef struct {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
-}rtc_time_t;
+} rtc_time_t;
 
 typedef struct {
     uint8_t date;
     uint8_t month;
     uint8_t year;
-}rtc_date_t;
+} rtc_date_t;
 
 typedef struct {
     uint8_t date;
@@ -55,7 +50,7 @@ typedef struct {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
-}rtc_date_time_t;
+} rtc_date_time_t;
 
 typedef struct {
     uint8_t EOSC;     // Enable oscillator
@@ -64,7 +59,7 @@ typedef struct {
     uint8_t INTCN;      // Interrupt control
     uint8_t A2IE;       // Alarm 2 interrupt enable
     uint8_t A1IE;       // Alarm 1 interrupt enable
-}rtc_control_t;
+} rtc_control_t;
 
 typedef struct {
     uint8_t OSF;     // oscillator stop flag
@@ -73,7 +68,7 @@ typedef struct {
     uint8_t BSY;      // Device busy
     uint8_t A2F;       // Alarm 2 flag
     uint8_t A1F;       // Alarm 1 flag
-}rtc_status_t;
+} rtc_status_t;
 
 typedef struct {
     uint8_t date;   // depends on the mode selected for alarm, could be day or date
@@ -81,23 +76,17 @@ typedef struct {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
-}rtc_alarm_time_t;
+} rtc_alarm_time_t;
 
 typedef struct {
     uint8_t A1M1;
     uint8_t A1M2;
     uint8_t A1M3;
     uint8_t A1M4;
-}rtc_alarm_mode_t;
-
-const rtc_alarm_time_t ALARM_ONCE_A_SECOND = {128, 128, 128, 128};
-const rtc_alarm_time_t SECONDS_MATCH = {128, 128, 128, 0};
-const rtc_alarm_time_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
-const rtc_alarm_time_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
-const rtc_alarm_time_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
+} rtc_alarm_mode_t;
 
 /*-------RESET RTC---------*/
-void resetRTC();
+void resetRTC(void);
 
 /*-------GET FUNCTIONS---------*/
 uint8_t getSecondsRTC(uint8_t* seconds);
@@ -124,7 +113,6 @@ uint8_t setDateRTC(uint8_t writeDates);
 uint8_t setMonthRTC(uint8_t writeMonths);
 uint8_t setYearRTC(uint8_t writeYears);
 uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode, uint8_t dayOrDate);
-// uint8_t setAlarmModeRTC();
 uint8_t setControlRTC(rtc_control_t *writeControl);
 uint8_t setStatusRTC(rtc_status_t *writeStatus);
 uint8_t setAgingOffsetRTC(int8_t writeAgingOffset);
@@ -132,4 +120,4 @@ uint8_t setAgingOffsetRTC(int8_t writeAgingOffset);
 /*-------UTILITY FUNCTIONS---------*/
 uint8_t combineWriteVal(uint8_t inputVal);
 
-#endif /* DS3232_MZH */
+#endif /* DRIVERS_INCLUDE_DS3232_MZ_H_ */
