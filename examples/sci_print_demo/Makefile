@@ -29,6 +29,7 @@ CPP_FLAGS += -D$(BOARD_TYPE)
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
+INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"drivers/include"
 
 LIBS := 
