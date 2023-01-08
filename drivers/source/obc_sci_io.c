@@ -1,4 +1,5 @@
 #include "obc_sci_io.h"
+#include "obc_errors.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -91,4 +92,63 @@ void uartAssertFailed(char *file, int line, char *expr) {
     
     sciPrintf("ASSERTION FAILED: %s, file %s, line %d\r\n",
                             expr, file, line);
+}
+
+obc_error_code_t sciReadByte(unsigned char *character) {
+    configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
+    SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+    configASSERT(mutex != NULL);
+
+    if(character == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE) {
+        *character = sciReceiveByte(UART_READ_REG);
+        xSemaphoreGive(mutex);
+        return OBC_ERR_CODE_SUCCESS;
+    }
+
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+}
+
+obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
+    configASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG));
+    SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+    configASSERT(mutex != NULL);
+
+    if (text == NULL || length < 1)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    uint32_t actualLength = 0;
+    unsigned char cChar;
+
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE) {
+        while(1) {
+            cChar = sciReceiveByte(UART_READ_REG);
+
+            if (cChar == '\b') {
+                if(actualLength > 0) {
+                    text[actualLength - 1] = '\0';
+                    actualLength--; 
+                }
+                continue;
+            }
+
+            if ((cChar == '\r') || (cChar == '\n') || (cChar == 0x1b))
+                break;
+            
+            text[actualLength] = cChar; 
+            actualLength++;
+
+            if (actualLength == (length - 1))
+                break;
+            
+        }
+        text[actualLength] = '\0';
+        xSemaphoreGive(mutex);
+        return OBC_ERR_CODE_SUCCESS;
+    }
+
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
