@@ -5,7 +5,6 @@
 
 #include <sci.h>
 #include <stdint.h>
-#include "obc_errors.h"
 
 #ifdef RM46_LAUNCHPAD
 	#define UART_PRINT_REG scilinREG
