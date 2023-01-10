@@ -25,9 +25,21 @@ INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"drivers/include"
+INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"examples/i2c_mpu6050_demo/include"
 
 LIBS := 
+
+CPP_FLAGS :=
+
+BOARD_TYPE ?= RM46_LAUNCHPAD
+CPP_FLAGS += -D$(BOARD_TYPE)
+
+DEBUG ?= 1
+ifeq ($(DEBUG), 1)
+	CPP_FLAGS += -DDEBUG
+endif
+
 
 SRC_DIRS := examples/i2c_mpu6050_demo
 SRC_DIRS += examples/i2c_mpu6050_demo/source
@@ -51,10 +63,10 @@ $(BUILD_DIR)/$(BIN): $(OBJS)
 	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
 
 $(BUILD_DIR)/%.o : %.c
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CC_FLAGS) $(LIBS) -o $@ $< 
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CC_FLAGS) $(CPP_FLAGS) $(LIBS) -o $@ $< 
 
 $(BUILD_DIR)/%.o : %.s
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CC_FLAGS) $(LIBS) -o $@ $<
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CC_FLAGS) $(CPP_FLAGS) $(LIBS) -o $@ $<
 
 .PHONY: clean
 clean:

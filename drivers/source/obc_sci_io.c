@@ -39,24 +39,28 @@ void initSciMutex(void) {
     configASSERT(sciLinMutex);
 }
 
-uint8_t sciPrintText(unsigned char *text, uint32_t length) {
-    configASSERT(text != NULL);
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length) {
     configASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG));
 
-    SemaphoreHandle_t mutex = (UART_PRINT_REG == sciREG) ? sciMutex : sciLinMutex;
+    if (text == NULL || length == 0)
+        return OBC_ERR_CODE_INVALID_ARG;
 
-    if (mutex != NULL){
-        if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
-            sciSendBytes(text, length);
-            xSemaphoreGive(mutex);
-            return 1;
-        }
+    SemaphoreHandle_t mutex = (UART_PRINT_REG == sciREG) ? sciMutex : sciLinMutex;
+    configASSERT(mutex);
+
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE){
+        sciSendBytes(text, length);
+        xSemaphoreGive(mutex);
+        return OBC_ERR_CODE_SUCCESS;
     }
     
-    return 0;
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
 static void sciSendBytes(unsigned char *bytes, uint32_t length) {
+    if (bytes == NULL || length == 0)
+        return; // Private function, so we can assume that the arguments are valid
+    
     for (int i = 0; i < length; i++) {
         if (bytes[i] == '\0')
             return;
@@ -65,28 +69,28 @@ static void sciSendBytes(unsigned char *bytes, uint32_t length) {
     }
 }
 
-uint8_t sciPrintf(const char *s, ...){
-    if (s == NULL){
-        return 0;
-    }
+obc_error_code_t sciPrintf(const char *s, ...){
+    if (s == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
 
+    char buf[MAX_PRINTF_SIZE] = {0};
+    
     va_list args;
     va_start(args, s);
-
-    char buf[MAX_PRINTF_SIZE];
-    int8_t n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
+    int n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
+    va_end(args);
 
     // n == MAX_PRINTF_SIZE invalid because null character isn't included in count
-    if (n < 0 || n >= MAX_PRINTF_SIZE){
-        // log an error message here
-        return 0;
-    }
+    if (n < 0 || n >= MAX_PRINTF_SIZE)
+        return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t ret = sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE);
-    return ret;
+    return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE);
 }
 
-void uartAssertFailed(char *file, int line, char *expr){
+void uartAssertFailed(char *file, int line, char *expr) {
+    if (file == NULL || line < 0 || expr == NULL)
+        return; // Only called by assert, so we can assume that the arguments are valid
+    
     sciPrintf("ASSERTION FAILED: %s, file %s, line %d\r\n",
                             expr, file, line);
 }
