@@ -64,10 +64,16 @@ void initADCSManager(void);
 obc_error_code_t sendToADCSQueue(adcs_event_t *event);
 
 /**
- * @brief Kalman Filter code and controls the state of the ADCS code
+ * @brief Changes the state of the appliation based on if the satellite is detumbling
  * @param pvParameter Task parameters.
  */
-void kalmanFilter(void * pvParameter);
+void detumblingMonitor(void * pvParameter);
+
+/**
+ * @brief Quest Algorithrm code
+ * @param pvParameter Task parameters.
+ */
+void questAlgorithm(void * pvParameter);
 
 /**
  * @brief Runs Detumbling Control Law Algorithrm

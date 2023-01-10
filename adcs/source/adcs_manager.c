@@ -77,12 +77,19 @@ static void vADCSManagerTask(void * pvParameters) {
 
 /*Algorithrm functions*/
 
-void kalmanFilter(void * pvParameter)
+void detumblingMonitor(void * pvParameter)
 {
     while (1)
     {
-        /*If the satellite is detumbling then set isDetumbling=0*/
-        /*If the satellite is NOT detumbling then set isDetumbling=1*/
+        /*If the satellite is detumbling then set isDetumbling=1 (true)*/
+        /*If the satellite is NOT detumbling then set isDetumbling=0 (false)*/
+
+        /*
+        if (satellite_is_detumbling) // change satellite_is_detumbling to boolean expression or value
+            isDetumbling=1;
+        else
+            isDetumbling=0;
+        */
 
         if (isDetumbling)
         {
@@ -95,6 +102,14 @@ void kalmanFilter(void * pvParameter)
             vTaskResume(orbitalDeterminationHandle);
             vTaskResume(momentumDumpingHandle);
         }
+    }
+}
+
+void questAlgorithm(void * pvParameter)
+{
+    while (1)
+    {
+        /*Main code will go here*/
     }
 }
 
@@ -143,8 +158,8 @@ void altitudeTracking(void * pvParameter)
 
         /*Main code will go here*/
 
-        /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0*/
-        /*If the satellite's error is GREATER than the error bounds then set hasAltitudeError=1*/
+        /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
+        /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
     }
 }
 
@@ -180,7 +195,8 @@ int initSupervisorTask(void)
 {
     /* Initialize the functions*/
     /*xTaskCreate(func, name, size, parameters, priorite, handler)*/
-    xTaskCreate(kalmanFilter, "Kalman Filter", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
+    xTaskCreate(questAlgorithm, "Quest Algorithm", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &detumblingHandle);
     xTaskCreate(reactionWheelControl, "Reaction Wheel Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &reactionWheelHandle);
     xTaskCreate(altitudeTracking, "Altitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &altitudeTrackingHandle);
