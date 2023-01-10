@@ -73,11 +73,12 @@ obc_error_code_t sciPrintf(const char *s, ...){
     if (s == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
+    char buf[MAX_PRINTF_SIZE] = {0};
+    
     va_list args;
     va_start(args, s);
-
-    char buf[MAX_PRINTF_SIZE];
-    int8_t n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
+    int n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
+    va_end(args);
 
     // n == MAX_PRINTF_SIZE invalid because null character isn't included in count
     if (n < 0 || n >= MAX_PRINTF_SIZE)
