@@ -40,39 +40,38 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 
 	int ret = 0;
 
-	// File & line number
-	char infobuf[MAX_FNAME_LINENUM_SIZE];
-	ret = snprintf(infobuf, sizeof(infobuf), "%-5s -> %s:%lu", LEVEL_STRINGS[msgLevel], file, line);
-	if (ret < 0)
-		return OBC_ERR_CODE_INVALID_ARG;
-	if (ret >= MAX_FNAME_LINENUM_SIZE)
-		return OBC_ERR_CODE_BUFF_TOO_SMALL;
-
 	// Message
+	char msgbuf[MAX_MSG_SIZE] = {0};
 	va_list args;
 	va_start(args, s);
-	char msgbuf[MAX_MSG_SIZE];
-	ret = vsnprintf(msgbuf, sizeof(msgbuf), s, args);
+	ret = vsnprintf(msgbuf, MAX_MSG_SIZE, s, args);
 	va_end(args);
 	if (ret < 0)
 		return OBC_ERR_CODE_INVALID_ARG;
 	if (ret >= MAX_MSG_SIZE)
 		return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
+
+	// File & line number
+	char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
+	ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[msgLevel], file, line);
+	if (ret < 0)
+		return OBC_ERR_CODE_INVALID_ARG;
+	if (ret >= MAX_FNAME_LINENUM_SIZE)
+		return OBC_ERR_CODE_BUFF_TOO_SMALL;
+
 	// Prepare entire output
-	char buf[MAX_LOG_SIZE];
-	ret = snprintf(buf, sizeof(buf), "%s - %s\r\n", infobuf, msgbuf);
+	char buf[MAX_LOG_SIZE] = {0};
+	ret = snprintf(buf, MAX_LOG_SIZE, "%s - %s\r\n", infobuf, msgbuf);
 	if (ret < 0)
 		return OBC_ERR_CODE_INVALID_ARG;
 	if (ret >= MAX_LOG_SIZE)
 		return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
-	if (outputLocation == LOG_TO_UART){
-		uint8_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf));
-		if (retSci)
-			return OBC_ERR_CODE_SUCCESS;
-	}
-	else if (outputLocation == LOG_TO_SDCARD){
+	if (outputLocation == LOG_TO_UART) {
+		obc_error_code_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf));
+		return retSci;
+	} else if (outputLocation == LOG_TO_SDCARD) {
 		// implement when SD card driver is written
 	}
 
