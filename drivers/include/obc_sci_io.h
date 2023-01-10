@@ -18,6 +18,14 @@
 	#error Board not defined
 #endif
 
+#ifndef SCI1_BAUDRATE
+#define SCI1_BAUDRATE 115200
+#endif
+
+#ifndef SCI2_BAUDRATE
+#define SCI2_BAUDRATE 115200
+#endif
+
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
  */
