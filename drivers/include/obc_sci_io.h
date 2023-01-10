@@ -19,11 +19,11 @@
 #endif
 
 #ifndef SCI1_BAUDRATE
-#define SCI1_BAUDRATE 115200
+#define SCI1_BAUDRATE 115200U
 #endif
 
 #ifndef SCI2_BAUDRATE
-#define SCI2_BAUDRATE 115200
+#define SCI2_BAUDRATE 115200U
 #endif
 
 /**
