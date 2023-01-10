@@ -18,9 +18,6 @@ int main(void) {
     sciInit();
     i2cInit();
 
-    sciSetBaudrate(scilinREG, SCI1_BAUDRATE);
-    sciSetBaudrate(sciREG, SCI2_BAUDRATE);
-
     // Initialize logger
     initLogger();
 
