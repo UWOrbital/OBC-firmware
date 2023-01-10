@@ -38,7 +38,7 @@ typedef enum {
 } log_level_t;
 
 #ifndef LOG_DEFAULT_LEVEL
-#define LOG_DEFAULT_LEVEL LOG_WARN
+#define LOG_DEFAULT_LEVEL LOG_TRACE
 #endif
 
 #define LOG_TRACE(...)  logLog(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
