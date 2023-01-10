@@ -36,6 +36,7 @@ typedef enum {
 	LOG_FATAL,
 	LOG_OFF
 } log_level_t;
+
 #ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL LOG_WARN
 #endif
