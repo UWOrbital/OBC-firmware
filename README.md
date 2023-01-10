@@ -16,10 +16,14 @@ This repository holds all the code that runs on our CubeSat's onboard computer (
     * All code for the attitude determination and control system subsystem.
 * `cdh/`
     * All code for the command and data handling subsystem.
+* `common/`
+    * All code that is shared between the subsystems (ex: logging)
 * `comms/`
     * All code for the communications subsystem.
 * `drivers/`
     * All device drivers and helper functions for modules (I2C, SCI, ADC, etc.)
+* `eps/`
+    * All code for the EPS subsystem.
 * `examples/`
     * Example programs to help other developers.
 * `hal/`
@@ -38,10 +42,10 @@ This section will explain how to set up the repo, and how to build, flash, and d
 ### Dependencies
 
 The following software should be installed:
-* GCC ARM Embedded Toolchain
-* HALCoGen (Only on Windows machines)
-* UniFlash
-* Code Composer Studio
+* GCC ARM Embedded Toolchain - Used to build the firmware
+* HALCoGen (Only available on Windows machines) - Used to generate the HAL
+* UniFlash - Used to flash the RM46
+* Code Composer Studio - Used for debugging, but can also be used as a general IDE
 
 **Instructions on how to install these tools can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)**
 
@@ -56,11 +60,18 @@ git clone git@github.com:UWOrbital/OBC-firmware.git
 
 You can build the project using these commands at the top-level of the repo:
 
-```
+```sh
 make clean # Delete any previous build files
-make # Build the .out file. It should appear in the build directory.
+make # Build the executable for the dev version of the firmware. The .out file should appear in the build directory.
 ```
-If you get a main() already defined error, go remove the file hal/source/sys_main.c.
+If you get a main() already defined error, remove the `hal/source/sys_main.c` file by running `make clean`.
+
+To build the release version of the firmware, run the following:
+```sh
+make clean
+make DEBUG=0 # You can also specify the BOARD_TYPE
+```
+Take a look at `global_vars.mk` to see what other variables can be passed in with the `make` command.
 
 More information can be found on [this Notion page.](https://www.notion.so/uworbital/OBC-Firmware-Development-Workflow-ab037261ce6c45189ea5ca8486b02c6b)
 
