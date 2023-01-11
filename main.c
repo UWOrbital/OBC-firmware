@@ -24,6 +24,9 @@ int main(void) {
     // Initialize logger
     initLogger();
 
+    // Initialize logger
+    initLogger();
+
     // Initialize bus mutexes
     initSciMutex();
     initI2CMutex();

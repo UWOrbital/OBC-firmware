@@ -4,10 +4,13 @@
 typedef enum {
     /* Common Errors 0 - 99 */
     OBC_ERR_CODE_SUCCESS = 0,
-    OBC_ERR_CODE_UNKOWN = 1,
+    OBC_ERR_CODE_UNKNOWN = 1,
     OBC_ERR_CODE_INVALID_ARG = 2,
     OBC_ERR_CODE_QUEUE_FULL = 3,
     OBC_ERR_CODE_MUTEX_TIMEOUT = 4,
+    OBC_ERR_CODE_BUFF_TOO_SMALL = 5,
+    OBC_ERR_CODE_LOG_MSG_SILENCED = 6,
+
     /* Driver Errors 100 - 199*/
 
 
