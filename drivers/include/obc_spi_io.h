@@ -15,7 +15,7 @@
 /**
  * @brief Initialize mutexes protecting SPI ports.
  */
-void initSPIMutex(void);
+void initSpiMutex(void);
 
 /**
  * @brief Deselect chip select; set the chip select pin high.

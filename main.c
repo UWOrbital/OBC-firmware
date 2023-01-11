@@ -1,3 +1,4 @@
+#include "logging.h"
 #include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
@@ -20,11 +21,14 @@ int main(void) {
     i2cInit();
     spiInit();
 
+    // Initialize logger
+    initLogger();
+
     // Initialize bus mutexes
     initSciMutex();
     initI2CMutex();
-    initSPIMutex();
-
+    initSpiMutex();
+    
     // The supervisor is the only task running initially.
     initSupervisor();
 
