@@ -8,8 +8,7 @@
 #include <spi.h>
 #include <gio.h>
 
-// Note that SPI2 isn't available on the RM46 PGE package, so there's
-// technically only 4 SPI ports available on the RM46.
+// Note that SPI2 isn't available on the RM46 PGE package
 #define NUM_SPI_PORTS 5
 
 /**
