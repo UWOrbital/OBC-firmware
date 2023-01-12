@@ -24,14 +24,11 @@ int main(void) {
     // Initialize logger
     initLogger();
 
-    // Initialize logger
-    initLogger();
-
     // Initialize bus mutexes
     initSciMutex();
     initI2CMutex();
     initSpiMutex();
-    
+
     // The supervisor is the only task running initially.
     initSupervisor();
 
