@@ -94,14 +94,24 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
 
     if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
         spiDAT1_t spiData = {0};
+
+        // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
         uint16_t spiWordOut = (uint16_t)outb;
         uint16_t spiWordIn;
 
-        spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn); // TODO: Check return value
-        *inb = (uint8_t)spiWordIn;
+        uint32_t spiErr = spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
+        obc_error_code_t ret;
 
-        xSemaphoreGive(spiMutexes[spiRegIndex]); // Can only fail if the mutex wasn't taken
-        return OBC_ERR_CODE_SUCCESS;
+        if (spiErr != SPI_FLAG_SUCCESS) {
+            // To-do: Log and handle errors
+            ret = OBC_ERR_CODE_SPI_FAILURE;
+        } else {
+            *inb = (uint8_t)spiWordIn;
+            ret = OBC_ERR_CODE_SUCCESS;
+        }
+
+        xSemaphoreGive(spiMutexes[spiRegIndex]);
+        return ret;
     }
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
