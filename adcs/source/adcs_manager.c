@@ -90,13 +90,15 @@ void detumblingMonitor(void * pvParameter)
         else
             isDetumbling=0;
         */
-
+        printf("detumblingMonitor");
         if (isDetumbling)
-        {
+        {   
+            printf("EMERGENCY");
             vTaskResume(detumblingHandle);
         }
         else
         {
+            printf("EVERYTHING IS FINE");
             vTaskResume(reactionWheelHandle);
             vTaskResume(altitudeTrackingHandle);
             vTaskResume(orbitalDeterminationHandle);
@@ -110,6 +112,7 @@ void questAlgorithm(void * pvParameter)
     while (1)
     {
         /*Main code will go here*/
+        printf("Quest");
     }
 }
 
@@ -120,10 +123,12 @@ void detumblingControl(void * pvParameter)
         /*Suspends itself when the satellite is not detumbling*/
         if (!isDetumbling)
         {
+            printf("Suspending detumblingControl");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
+        printf("detumblingControl");
     }
 }
 
@@ -134,11 +139,12 @@ void reactionWheelControl(void * pvParameter)
         /*Suspends itself when the satellite is detumbling or doesn't have an altitude error*/
         if (isDetumbling || !hasAltitudeError)
         {
+            printf("Suspending reactionWheelControl");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
-
+        printf("reactionWheelControl");
     }
 }
 
@@ -149,15 +155,17 @@ void altitudeTracking(void * pvParameter)
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
         {
+            printf("Suspending altitudeTracking");
             vTaskSuspend(NULL);
         }
         if (hasAltitudeError)
         {
+            printf("Has error");
             vTaskResume(reactionWheelHandle);
         }
 
         /*Main code will go here*/
-
+        printf("altitudeTracking");
         /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
         /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
     }
@@ -170,10 +178,12 @@ void orbitalDetermination(void * pvParameter)
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
         {
+            printf("Suspending orbitalDetermination");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
+        printf("orbitalDetermination");
     }
 }
 
@@ -184,15 +194,18 @@ void momentumDumping(void * pvParameter)
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
         {
+            printf("Suspending momentumDumping");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
+        printf("momentumDumping");
     }
 }
 
 int initSupervisorTask(void)
 {
+    printf("Initialized ADCS");
     /* Initialize the functions*/
     /*xTaskCreate(func, name, size, parameters, priorite, handler)*/
     xTaskCreate(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
