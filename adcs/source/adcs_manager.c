@@ -6,8 +6,14 @@
 #include <os_queue.h>
 #include <os_task.h>
 
-#include <sys_common.h>
-#include <gio.h>
+// For testing purposes:
+// #include <sys_common.h>
+// #include <gio.h>
+
+#include <stdio.h>
+#include <assert.h>
+
+// undefined reference to `ASSERT' error
 
 static TaskHandle_t adcsTaskHandle = NULL;
 static StaticTask_t adcsTaskBuffer;
@@ -72,8 +78,6 @@ static void vADCSManagerTask(void * pvParameters) {
         }
     }
 }
-
-/* Code from other branch that needs to added into correct location:*/
 
 /*Algorithrm functions*/
 
