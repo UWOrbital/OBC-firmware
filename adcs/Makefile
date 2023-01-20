@@ -4,7 +4,7 @@
 CC := gcc
 
 # Name for the output executable file
-BIN := posix_example
+BIN := adcs.out
 
 # The build directory
 BUILD_DIR := adcs/build
@@ -59,3 +59,7 @@ ${BUILD_DIR}/%.o : %.c Makefile
 .PHONY: clean
 clean:
 	-rm -rf $(BUILD_DIR)
+
+# run:
+# 	build
+# 	./$(BUILD_DIR)/${BIN}
