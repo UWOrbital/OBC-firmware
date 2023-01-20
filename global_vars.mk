@@ -18,7 +18,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -Og
+# CC_FLAGS += -Os # TODO: Figure out why this breaks the SD Card code
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -31,6 +31,12 @@ CPP_FLAGS :=
 
 BOARD_TYPE ?= RM46_LAUNCHPAD
 CPP_FLAGS += -D$(BOARD_TYPE)
+
+LOG_OUTPUT ?= LOG_TO_UART
+CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT) 
+
+LOG_LEVEL ?= LOG_TRACE
+CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
@@ -47,6 +53,21 @@ INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
 INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
+# INCLUDE_DIRS += -I"fatfs/src"
+INCLUDE_DIRS += -I"fatfs/port"
+INCLUDE_DIRS += -I"reliance_edge/include"
+INCLUDE_DIRS += -I"reliance_edge/core/include"
+INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
+INCLUDE_DIRS += -I"reliance_edge/projects/newproj/host"
+
+
+# Reliance Edge File System
+INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
+INCLUDE_DIRS += -I"reliance_edge/include"
+INCLUDE_DIRS += -I"reliance_edge/core/include"
+INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
+INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
+
 
 LIBS := 
 

@@ -5,6 +5,7 @@
 #include "eps_manager.h"
 #include "payload_manager.h"
 #include "obc_errors.h"
+#include "logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -89,7 +90,8 @@ static void vSupervisorTask(void * pvParameters) {
 
         switch (inMsg.eventID) {
             case TURN_OFF_LED_EVENT_ID:
-                gioToggleBit(gioPORTB, 0);
+                gioSetBit(gioPORTB, 1, 0);
+                LOG_INFO("Turning off LED");
                 outMsgTelemetry.eventID = TURN_ON_LED_EVENT_ID;
                 outMsgTelemetry.data.i = TELEMETRY_DELAY_TICKS;
                 sendToTelemetryQueue(&outMsgTelemetry);

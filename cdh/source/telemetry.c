@@ -1,6 +1,10 @@
 #include "telemetry.h"
 #include "supervisor.h"
+<<<<<<< HEAD
 #include "comms_manager.h"
+=======
+#include "logging.h"
+>>>>>>> b5737e89f55d497f45065ecca975088053ac1f75
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -71,6 +75,7 @@ static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
     }
     fwrite(&queueMsg, sizeof(telemetry_event_t), 1, telFile);
 
+<<<<<<< HEAD
     return 1;
 }
 
@@ -135,7 +140,7 @@ static void vTelemetryTask(void * pvParameters) {
                 default: /* Any other case will be telemetry to store in the file */
                     sendTelemetryToFile(telFile, queueMsg);
                     break;
-                }
+            }
         }
     }
 }
