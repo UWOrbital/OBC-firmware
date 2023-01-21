@@ -28,7 +28,7 @@ int main(void) {
     initSciMutex();
     initI2CMutex();
     initSpiMutex();
-    
+
     // The supervisor is the only task running initially.
     initSupervisor();
 
