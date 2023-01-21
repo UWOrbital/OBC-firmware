@@ -13,6 +13,32 @@
 #include "obc_spi_io.h"
 
 /*---------------------------------------------*/
+/* SD Card Definitions                         */
+/*---------------------------------------------*/
+
+#define SDC_CMD_BASE       0x40U
+#define SDC_CMD0    (SDC_CMD_BASE)        /* GO_IDLE_STATE */
+#define SDC_CMD1    (SDC_CMD_BASE)      /* SEND_OP_COND */
+#define SDC_CMD8    (SDC_CMD_BASE+8)    /* SEND_IF_COND */
+#define SDC_CMD9    (SDC_CMD_BASE+9)    /* SEND_CSD */
+#define SDC_CMD10   (SDC_CMD_BASE+10)   /* SEND_CID */
+#define SDC_CMD12   (SDC_CMD_BASE+12)   /* STOP_TRANSMISSION */
+#define SDC_CMD16   (SDC_CMD_BASE+16)   /* SET_BLOCKLEN */
+#define SDC_CMD17   (SDC_CMD_BASE+17)   /* READ_SINGLE_BLOCK */
+#define SDC_CMD18   (SDC_CMD_BASE+18)   /* READ_MULTIPLE_BLOCK */
+#define SDC_CMD23   (SDC_CMD_BASE+23)   /* SET_BLOCK_COUNT */
+#define SDC_CMD24   (SDC_CMD_BASE+24)   /* WRITE_BLOCK */
+#define SDC_CMD25   (SDC_CMD_BASE+25)   /* WRITE_MULTIPLE_BLOCK */
+#define SDC_CMD41   (SDC_CMD_BASE+41)   /* SEND_OP_COND (ACMD) */
+#define SDC_CMD55   (SDC_CMD_BASE+55)   /* APP_CMD */
+#define SDC_CMD58   (SDC_CMD_BASE+58)   /* READ_OCR */
+
+#define SD_SECTOR_SIZE 512U
+#define SD_STOP_TRANSMISSION 0xFDU
+#define SD_DATA_RESPONSE_MASK 0x1FU
+#define SD_DATA_RESPONSE_ACCEPTED 0x05U
+
+/*---------------------------------------------*/
 /* SD Card Private Functions                   */
 /*---------------------------------------------*/
 
@@ -160,8 +186,8 @@ static bool sendDataBlock(const BYTE *buff, BYTE token) {
  * @return BYTE Response byte.
  */
 static BYTE sendCMD(BYTE cmd, DWORD arg) {
-    const uint8_t resetCmdCrc = 0x95U; // CRC for CMD0
-    const uint8_t checkVoltageCmdCrc = 0x87U; // CRC for CMD8
+    const uint8_t resetCmdCrc = 0x95U; // CRC for SDC_CMD0
+    const uint8_t checkVoltageCmdCrc = 0x87U; // CRC for SDC_CMD8
     
     if (!isCardReady()) return 0xFFU;
 
@@ -174,13 +200,13 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
 
     /* Some commands require a CRC to be sent */
     BYTE crc = 0xFFU;
-    if (cmd == CMD0) crc = resetCmdCrc;     
-    else if (cmd == CMD8) crc = checkVoltageCmdCrc;
+    if (cmd == SDC_CMD0) crc = resetCmdCrc;     
+    else if (cmd == SDC_CMD8) crc = checkVoltageCmdCrc;
     spiTransmitByte(SDC_SPI_REG, crc);
 
     /* Skip a byte after "stop reading" cmd is sent */
     unsigned char tmp;
-    if (cmd == CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);
+    if (cmd == SDC_CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);
     
     /* Receive command response */
     BYTE res;
@@ -194,20 +220,20 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
 }
 
 /**
- * @brief Send CMD12 to the SD card to stop a multi-block read.
+ * @brief Send SDC_CMD12 to the SD card to stop a multi-block read.
  * 
  * @return BYTE Response byte.
  */
 static BYTE stopTransmission(void) {
-    /* Send command packet - the argument for CMD12 is ignored. */
-    spiTransmitByte(SDC_SPI_REG, CMD12);
+    /* Send command packet - the argument for SDC_CMD12 is ignored. */
+    spiTransmitByte(SDC_SPI_REG, SDC_CMD12);
     spiTransmitByte(SDC_SPI_REG, 0);
     spiTransmitByte(SDC_SPI_REG, 0);
     spiTransmitByte(SDC_SPI_REG, 0);
     spiTransmitByte(SDC_SPI_REG, 0);
     spiTransmitByte(SDC_SPI_REG, 0);
 
-    /* Data transfer stops 2 bytes after 6-byte CMD12 */
+    /* Data transfer stops 2 bytes after 6-byte SDC_CMD12 */
     BYTE val;
     spiReceiveByte(SDC_SPI_REG, &val); spiReceiveByte(SDC_SPI_REG, &val);
 
@@ -245,11 +271,11 @@ DSTATUS disk_initialize(BYTE drv){
 
     const uint8_t maxTries = 100U;
     for (uint8_t i = 0; i < maxTries; i++) {
-        if (sendCMD(CMD0, 0) == 1U) break; /* Put the SD card into SPI mode*/
+        if (sendCMD(SDC_CMD0, 0) == 1U) break; /* Put the SD card into SPI mode*/
     }
     
-    // Even if CMD0 fails, we'll try to continue.
-    if (sendCMD(CMD8, 0x1AA) == 1U) {    
+    // Even if SDC_CMD0 fails, we'll try to continue.
+    if (sendCMD(SDC_CMD8, 0x1AA) == 1U) {    
         /* SDC Ver2+ */
         const uint8_t ocrSize = 4U;
         BYTE ocr[ocrSize];
@@ -258,9 +284,9 @@ DSTATUS disk_initialize(BYTE drv){
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
             /* The card can work at vdd range of 2.7-3.6V */
             for (uint8_t i = 0; i < maxTries; i++) {
-                if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 1UL << 30) == 0) {
-                    /* ACMD41 with HCS bit */
-                    if (sendCMD(CMD58, 0) == 0) {    /* Check CCS bit */
+                if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 1UL << 30) == 0) {
+                    /* SDC_CMD41 with HCS bit */
+                    if (sendCMD(SDC_CMD58, 0) == 0) {    /* Check CCS bit */
                         for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &ocr[i]);
                         ty = (ocr[0] & 0x40) ? 6 : 2;
                     }
@@ -269,15 +295,15 @@ DSTATUS disk_initialize(BYTE drv){
         }
     } else {                            
         /* SDC Ver1 or MMC */
-        ty = (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 0) <= 1) ? 2 : 1;    /* SDC : MMC */
+        ty = (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) <= 1) ? 2 : 1;    /* SDC : MMC */
         for (unsigned int i = 0; i < maxTries; i++) {
             if (ty == 2) {
-                if (sendCMD(CMD55, 0) <= 1 && sendCMD(CMD41, 0) == 0) break;    /* ACMD41 */
+                if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) == 0) break;    /* SDC_CMD41 */
             } else {
-                if (sendCMD(CMD1, 0) == 0) break;                                /* CMD1 */
+                if (sendCMD(SDC_CMD1, 0) == 0) break;                                /* SDC_CMD1 */
             }
 
-            if ((i == maxTries - 1) || sendCMD(CMD16, 512) != 0) {   /* Select R/W block length */    
+            if ((i == maxTries - 1) || sendCMD(SDC_CMD16, 512) != 0) {   /* Select R/W block length */    
                 ty = 0;
             }
         }
@@ -327,13 +353,13 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
     if (count == 1) {    
         /* Single block read */
-        if ((sendCMD(CMD17, sector) == 0)    /* READ_SINGLE_BLOCK */
+        if ((sendCMD(SDC_CMD17, sector) == 0)    /* READ_SINGLE_BLOCK */
             && rcvDataBlock(buff, 512))
             count = 0;
     }
     else {                
         /* Multiple block read */
-        if (sendCMD(CMD18, sector) == 0) {    /* READ_MULTIPLE_BLOCK */
+        if (sendCMD(SDC_CMD18, sector) == 0) {    /* READ_MULTIPLE_BLOCK */
             do {
                 if (!rcvDataBlock(buff, 512)) break;
                 buff += 512;
@@ -369,15 +395,15 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count) {
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     if (count == 1) {    /* Single block write */
-        if ((sendCMD(CMD24, sector) == 0)    /* WRITE_BLOCK */
+        if ((sendCMD(SDC_CMD24, sector) == 0)    /* WRITE_BLOCK */
             && sendDataBlock(buff, 0xFE))
             count = 0;
     }
     else {                /* Multiple block write */
         if (cardType & 2) {
-            sendCMD(CMD55, 0); sendCMD(CMD23, count);    /* ACMD23 */
+            sendCMD(SDC_CMD55, 0); sendCMD(SDC_CMD23, count);    /* SDC_CMD23 */
         }
-        if (sendCMD(CMD25, sector) == 0) {    /* WRITE_MULTIPLE_BLOCK */
+        if (sendCMD(SDC_CMD25, sector) == 0) {    /* WRITE_MULTIPLE_BLOCK */
             do {
                 if (!sendDataBlock(buff, 0xFC)) break;
                 buff += 512;
@@ -439,7 +465,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
 
         switch (ctrl) {
             case GET_SECTOR_COUNT :    /* Get number of sectors on the disk (DWORD) */
-                if ((sendCMD(CMD9, 0) == 0) && rcvDataBlock(csd, 16)) {
+                if ((sendCMD(SDC_CMD9, 0) == 0) && rcvDataBlock(csd, 16)) {
                     if ((csd[0] >> 6) == 1) {    /* SDC ver 2.00 */
                         csize = csd[9] + ((WORD)csd[8] << 8) + 1;
                         *(DWORD*)buff = (DWORD)csize << 10;
