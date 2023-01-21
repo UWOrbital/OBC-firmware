@@ -9,9 +9,9 @@
 // For testing purposes:
 // #include <sys_common.h>
 // #include <gio.h>
-
+//#include <sys_common.h>
 #include <stdio.h>
-// #include <assert.h>
+#include <assert.h>
 
 // All ASSERT() have been commented out
 
@@ -35,6 +35,7 @@ static TaskHandle_t reactionWheelHandle = NULL;
 static TaskHandle_t altitudeTrackingHandle = NULL;
 static TaskHandle_t orbitalDeterminationHandle = NULL;
 static TaskHandle_t momentumDumpingHandle = NULL;
+static TaskHandle_t lowPowerHandle = NULL;
 
 /**
  * @brief	ADCS Manager task.
@@ -43,7 +44,7 @@ static TaskHandle_t momentumDumpingHandle = NULL;
 static void vADCSManagerTask(void * pvParameters);
 
 void initADCSManager(void) {
-    // ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
+    //ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
     if (adcsTaskHandle == NULL) {
         adcsTaskHandle = xTaskCreateStatic(vADCSManagerTask, ADCS_MANAGER_NAME, ADCS_MANAGER_STACK_SIZE, NULL, ADCS_MANAGER_PRIORITY, adcsTaskStack, &adcsTaskBuffer);
     }
@@ -55,7 +56,7 @@ void initADCSManager(void) {
 }
 
 obc_error_code_t sendToADCSQueue(adcs_event_t *event) {
-    // ASSERT(adcsQueueHandle != NULL);
+    //ASSERT(adcsQueueHandle != NULL);
 
     if (event == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -77,7 +78,24 @@ static void vADCSManagerTask(void * pvParameters) {
         switch(queueMsg.eventID) {
             case ADCS_MANAGER_NULL_EVENT_ID:
                 break;
+            case ADCS_MANAGER_LOW_POWER_EVENT_ID:
+                if(queueMsg.data.i){
+                    // Do something
+                    vTaskResume(lowPowerHandle);
+                }
+                else{
+                    vTaskSuspend(lowPowerHandle);
+                }
+                break;
         }
+    }
+}
+
+void lowPower(void * pvParameters){
+    while(1){
+        // Insert Code here
+        printf("Low Power Mode\n");
+        timer(1000000);
     }
 }
 
@@ -261,7 +279,8 @@ int initSupervisorTask(void)
     xTaskCreate(altitudeTracking, "Altitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &altitudeTrackingHandle);
     xTaskCreate(orbitalDetermination, "Orbital Determination", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &orbitalDeterminationHandle);
     xTaskCreate(momentumDumping, "Momentum Dumping", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &momentumDumpingHandle);
-    
+    xTaskCreate(lowPower, "Low Power", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &lowPowerHandle);
+
     /*Start scheduler*/
     vTaskStartScheduler();
 

@@ -21,7 +21,8 @@
  * Enum containing all possible event IDs passed to the adcs event queue.
 */
 typedef enum {
-    ADCS_MANAGER_NULL_EVENT_ID
+    ADCS_MANAGER_NULL_EVENT_ID = 0,
+    ADCS_MANAGER_LOW_POWER_EVENT_ID = 1,
 } adcs_event_id_t;
 
 /**

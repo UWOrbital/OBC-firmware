@@ -28,8 +28,8 @@ SRC_DIRS += adcs/source
 
 # Preprocessor flags
 CPPFLAGS := $(INCLUDE_DIRS) 
-CPPFLAGS += -DBUILD_DIR=\"$(BUILD_DIR)\"
-CPPFLAGS += -D_WINDOWS_
+CPPFLAGS += -DBUILD_DIR="$(BUILD_DIR)"
+CPPFLAGS += -DWINDOWS
 CPPFLAGS += -DTRACE_ON_ENTER=0
 CPPFLAGS += -DprojCOVERAGE_TEST=0
 
@@ -59,3 +59,8 @@ ${BUILD_DIR}/%.o : %.c Makefile
 .PHONY: clean
 clean:
 	-rm -rf $(BUILD_DIR)
+
+rerun:
+	make -f adcs/Makefile clean
+	make -f adcs/Makefile
+	adcs/build/adcs.out
