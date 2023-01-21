@@ -18,7 +18,6 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-# CC_FLAGS += -Os # TODO: Figure out why this breaks the SD Card code
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -39,8 +38,12 @@ LOG_LEVEL ?= LOG_TRACE
 CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
 DEBUG ?= 1
+# TODO: Figure out why optimization breaks SPI-related code
 ifeq ($(DEBUG), 1)
 	CPP_FLAGS += -DDEBUG
+	# CC_FLAGS += -Og
+else
+	# CC_FLAGS += -Os
 endif
 
 INCLUDE_DIRS :=
