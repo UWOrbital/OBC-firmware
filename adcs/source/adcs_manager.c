@@ -95,37 +95,39 @@ void detumblingMonitor(void * pvParameter)
 {
     while (1)
     {
+        // Testing purposes
         static int detumblingRun = 0;
-        /*If the satellite is detumbling then set isDetumbling=1 (true)*/
-        /*If the satellite is NOT detumbling then set isDetumbling=0 (false)*/
-
         int satelliteDetumbling = detumblingRun % 10;
         printf("satelliteDetumbling: %d\n", satelliteDetumbling);
+
         if (satelliteDetumbling > 6 && satelliteDetumbling < 9) {
             isDetumbling=1; 
-        } // change satellite_is_detumbling to boolean expression or value  
+        } 
         else{
             isDetumbling=0;
         }
             
-        detumblingRun++;  
+        ++detumblingRun;  
         printf("detumblingMonitor \n");
         printf("Detumbling run %d \n", detumblingRun);
+        timer(1000000);
+
+        /*If the satellite is detumbling then set isDetumbling=1 (true)*/
+        /*If the satellite is NOT detumbling then set isDetumbling=0 (false)*/
 
         if (isDetumbling)
         {   
-            printf("EMERGENCY\n");
+            printf("\tEMERGENCY\n");
             vTaskResume(detumblingHandle);
         }
         else
         {
-            printf("EVERYTHING IS FINE\n");
+            printf("\tEVERYTHING IS FINE\n");
             vTaskResume(reactionWheelHandle);
             vTaskResume(altitudeTrackingHandle);
             vTaskResume(orbitalDeterminationHandle);
             vTaskResume(momentumDumpingHandle);
         }
-        timer(1000000);
     }
 }
 
@@ -177,7 +179,8 @@ void altitudeTracking(void * pvParameter)
 {
     while (1)
     {
-        static int altitudeRun = 0;
+        /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
+        /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
 
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
@@ -187,17 +190,20 @@ void altitudeTracking(void * pvParameter)
         }
         if (hasAltitudeError)
         {
-            printf("Has error\n");
+            printf("\tHAS ERROR\n");
             vTaskResume(reactionWheelHandle);
         }
 
         /*Main code will go here*/
+
+        // Testing purposes
+        static int altitudeRun = 0;
         printf("altitudeTracking\n");
-        /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
-        /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
-        altitudeRun++;
+        ++altitudeRun;
         int satelliteAltitude = altitudeRun % 10;
         printf("satelliteAltitude: %d \n", satelliteAltitude);
+        printf("altitudeRun: %d \n", altitudeRun);
+
         if(satelliteAltitude > 6 && satelliteAltitude < 9){
             hasAltitudeError = 1;
         }

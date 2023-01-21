@@ -59,7 +59,3 @@ ${BUILD_DIR}/%.o : %.c Makefile
 .PHONY: clean
 clean:
 	-rm -rf $(BUILD_DIR)
-
-# run:
-# 	build
-# 	./$(BUILD_DIR)/${BIN}
