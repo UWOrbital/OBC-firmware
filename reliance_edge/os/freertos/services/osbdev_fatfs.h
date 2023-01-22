@@ -123,8 +123,8 @@ static REDSTATUS DiskGetGeometry(
     BDEVINFO   *pInfo)
 {
     REDSTATUS   ret;
-    WORD        wSectorSize;
-    DWORD       dwSectorCount;
+    uint16_t        wSectorSize;
+    uint32_t       dwSectorCount;
     DRESULT     result;
 
     result = disk_ioctl(bVolNum, GET_SECTOR_SIZE, &wSectorSize);
@@ -179,7 +179,7 @@ static REDSTATUS DiskRead(
         uint32_t    ulTransfer = REDMIN(ulSectorCount - ulSectorIdx, MAX_SECTOR_TRANSFER);
         DRESULT     result;
 
-        result = disk_read(bVolNum, &pbBuffer[ulSectorIdx * ulSectorSize], (DWORD)(ullSectorStart + ulSectorIdx), (BYTE)ulTransfer);
+        result = disk_read(bVolNum, &pbBuffer[ulSectorIdx * ulSectorSize], (uint32_t)(ullSectorStart + ulSectorIdx), (uint8_t)ulTransfer);
         if(result != RES_OK)
         {
             ret = -RED_EIO;
@@ -224,7 +224,7 @@ static REDSTATUS DiskWrite(
         uint32_t    ulTransfer = REDMIN(ulSectorCount - ulSectorIdx, MAX_SECTOR_TRANSFER);
         DRESULT     result;
 
-        result = disk_write(bVolNum, &pbBuffer[ulSectorIdx * ulSectorSize], (DWORD)(ullSectorStart + ulSectorIdx), (BYTE)ulTransfer);
+        result = disk_write(bVolNum, &pbBuffer[ulSectorIdx * ulSectorSize], (uint32_t)(ullSectorStart + ulSectorIdx), (uint8_t)ulTransfer);
         if(result != RES_OK)
         {
             ret = -RED_EIO;

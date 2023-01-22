@@ -11,6 +11,7 @@
 #include "diskio.h"
 #include "sdc_rm46.h"
 #include "obc_spi_io.h"
+#include "logging.h"
 
 /*---------------------------------------------*/
 /* SD Card Definitions                         */
@@ -38,13 +39,26 @@
 #define SD_DATA_RESPONSE_MASK 0x1FU
 #define SD_DATA_RESPONSE_ACCEPTED 0x05U
 
+#define SDC_CMD17_DATA_TOKEN 0xFEU
+#define SDC_CMD18_DATA_TOKEN 0xFEU
+#define SDC_CMD24_DATA_TOKEN 0xFEU
+#define SDC_CMD25_DATA_TOKEN 0xFCU
+
+#define CARD_TYPE_MMC_MASK 0b001U
+#define CARD_TYPE_SDC_MASK 0b010U
+#define CARD_TYPE_BLOCK_ADDR_MASK 0b100U
+
+/*---------------------------------------------*/
+/* Global Variables                            */
+/*---------------------------------------------*/
+
+static volatile DSTATUS stat = STA_NOINIT;   /* Disk status */
+static uint8_t cardType;                        /* Card type flags: b0:MMC, b1:SDC, b2:Block addressing */
+static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
+
 /*---------------------------------------------*/
 /* SD Card Private Functions                   */
 /*---------------------------------------------*/
-
-static volatile DSTATUS stat = STA_NOINIT;    /* Disk status */
-static BYTE cardType;            /* b0:MMC, b1:SDC, b2:Block addressing */
-static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
 
 /**
  * @brief Check if card is ready
@@ -52,7 +66,7 @@ static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
  * @return bool True if card is ready, false otherwise.
  */
 static bool isCardReady(void) {
-    BYTE res;
+    uint8_t res;
 
     const uint8_t maxTries = 100U;
     for (uint8_t i = 0; i < maxTries; i++) {
@@ -113,12 +127,11 @@ static sdc_power_t checkPower(void) {
  * @param btr Number of bytes to receive (Must be an even number).
  * @return bool True if the packet was received successfully, false otherwise.
  */
-static bool rcvDataBlock(BYTE *buff, UINT btr) {
-    const uint8_t dataToken = 0xFEU; // Data token for single block read
+static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
     if (btr % 2 != 0) // Must be an even number
         return false;
 
-    BYTE token = 0xFF;
+    uint8_t token = 0xFF;
 
     /* Wait for a data packet */
     const uint8_t maxTries = 100;
@@ -129,7 +142,7 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
     }
 
     /* If not valid data token, return with error */
-    if(token != dataToken) return false;
+    if(token != SDC_CMD17_DATA_TOKEN) return false;
 
     /* Receive the data block into buffer */
     while (btr) {
@@ -150,11 +163,11 @@ static bool rcvDataBlock(BYTE *buff, UINT btr) {
 
 /**
  * @brief Send a data packet to the SD card.
- * @param buff 512 byte buffer containing the data to send.
+ * @param buff 512 uint8_t buffer containing the data to send.
  * @param token Data/Stop token.
  * @return bool True if the packet was sent successfully, false otherwise.
  */
-static bool sendDataBlock(const BYTE *buff, BYTE token) {
+static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
     if (!isCardReady()) return false;
 
     spiTransmitByte(SDC_SPI_REG, token); // Send token
@@ -169,7 +182,7 @@ static bool sendDataBlock(const BYTE *buff, BYTE token) {
         spiTransmitByte(SDC_SPI_REG, 0xFF);
         spiTransmitByte(SDC_SPI_REG, 0xFF);
         
-        BYTE resp;
+        uint8_t resp;
         spiReceiveByte(SDC_SPI_REG, &resp); /* Receive data response */
         if ((resp & SD_DATA_RESPONSE_MASK) != SD_DATA_RESPONSE_ACCEPTED) return false;
     }
@@ -181,11 +194,11 @@ static bool sendDataBlock(const BYTE *buff, BYTE token) {
 
 /**
  * @brief Send a command packet to the SD card.
- * @param cmd Command byte.
+ * @param cmd Command uint8_t.
  * @param arg Argument.
- * @return BYTE Response byte.
+ * @return uint8_t Response uint8_t.
  */
-static BYTE sendCMD(BYTE cmd, DWORD arg) {
+static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
     const uint8_t resetCmdCrc = 0x95U; // CRC for SDC_CMD0
     const uint8_t checkVoltageCmdCrc = 0x87U; // CRC for SDC_CMD8
     
@@ -193,23 +206,23 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
 
     /* Send command packet */
     spiTransmitByte(SDC_SPI_REG, cmd);                      /* Command */
-    spiTransmitByte(SDC_SPI_REG, (BYTE)(arg >> 24));        /* Argument[31..24] */
-    spiTransmitByte(SDC_SPI_REG, (BYTE)(arg >> 16));        /* Argument[23..16] */
-    spiTransmitByte(SDC_SPI_REG, (BYTE)(arg >> 8));         /* Argument[15..8] */
-    spiTransmitByte(SDC_SPI_REG, (BYTE)arg);                /* Argument[7..0] */
+    spiTransmitByte(SDC_SPI_REG, (uint8_t)(arg >> 24));        /* Argument[31..24] */
+    spiTransmitByte(SDC_SPI_REG, (uint8_t)(arg >> 16));        /* Argument[23..16] */
+    spiTransmitByte(SDC_SPI_REG, (uint8_t)(arg >> 8));         /* Argument[15..8] */
+    spiTransmitByte(SDC_SPI_REG, (uint8_t)arg);                /* Argument[7..0] */
 
     /* Some commands require a CRC to be sent */
-    BYTE crc = 0xFFU;
+    uint8_t crc = 0xFFU;
     if (cmd == SDC_CMD0) crc = resetCmdCrc;     
     else if (cmd == SDC_CMD8) crc = checkVoltageCmdCrc;
     spiTransmitByte(SDC_SPI_REG, crc);
 
-    /* Skip a byte after "stop reading" cmd is sent */
+    /* Skip a uint8_t after "stop reading" cmd is sent */
     unsigned char tmp;
     if (cmd == SDC_CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);
     
     /* Receive command response */
-    BYTE res;
+    uint8_t res;
     const uint8_t maxTries = 10U, cmdRespMask = 0x80U; 
     for (uint8_t i = 0; i < maxTries; i++) {
         spiReceiveByte(SDC_SPI_REG, &res);
@@ -222,9 +235,9 @@ static BYTE sendCMD(BYTE cmd, DWORD arg) {
 /**
  * @brief Send SDC_CMD12 to the SD card to stop a multi-block read.
  * 
- * @return BYTE Response byte.
+ * @return uint8_t Response uint8_t.
  */
-static BYTE stopTransmission(void) {
+static uint8_t stopTransmission(void) {
     /* Send command packet - the argument for SDC_CMD12 is ignored. */
     spiTransmitByte(SDC_SPI_REG, SDC_CMD12);
     spiTransmitByte(SDC_SPI_REG, 0);
@@ -233,13 +246,13 @@ static BYTE stopTransmission(void) {
     spiTransmitByte(SDC_SPI_REG, 0);
     spiTransmitByte(SDC_SPI_REG, 0);
 
-    /* Data transfer stops 2 bytes after 6-byte SDC_CMD12 */
-    BYTE val;
+    /* Data transfer stops 2 bytes after 6-uint8_t SDC_CMD12 */
+    uint8_t val;
     spiReceiveByte(SDC_SPI_REG, &val); spiReceiveByte(SDC_SPI_REG, &val);
 
-    /* SDC should now send 2-6 0xFF bytes, the response byte, and then another 0xFF */
+    /* SDC should now send 2-6 0xFF bytes, the response uint8_t, and then another 0xFF */
     /* Some cards don't send the 2-6 0xFF bytes */
-    BYTE res;
+    uint8_t res;
     const uint8_t numBytesRcv = 8U;
     for(unsigned int n = 0; n < numBytesRcv; n++) {
         spiReceiveByte(SDC_SPI_REG, &val);
@@ -260,67 +273,84 @@ static BYTE stopTransmission(void) {
  * @param pdrv Physical drive number (0).
  * @return DSTATUS Status
  */
-DSTATUS disk_initialize(BYTE drv){
+DSTATUS disk_initialize(uint8_t drv){
     if (drv) return STA_NOINIT;            /* Supports only single drive */
     if (stat & STA_NODISK) return stat;    /* No card in the socket */
 
     turnOnSDC();
 
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
-    BYTE ty = 0;
+    uint8_t ty = 0;
 
     const uint8_t maxTries = 100U;
-    for (uint8_t i = 0; i < maxTries; i++) {
-        if (sendCMD(SDC_CMD0, 0) == 1U) break; /* Put the SD card into SPI mode*/
+    for (unsigned int i = 0; i < maxTries; i++) {
+        // Reset the card and put it into SPI mode; response should be 0x01 if successful
+        if (sendCMD(SDC_CMD0, 0) == 1U) break;
     }
-    
     // Even if SDC_CMD0 fails, we'll try to continue.
+    
+    // Send CMD8 with 0x1AA arg. CRC handled in sendCMD.
     if (sendCMD(SDC_CMD8, 0x1AA) == 1U) {    
-        /* SDC Ver2+ */
+        // Card is SDC Ver2+
         const uint8_t ocrSize = 4U;
-        BYTE ocr[ocrSize];
+        uint8_t ocr[ocrSize];
         for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &ocr[i]);
         
+        // Check if the lower 12 bits in the response are 0x1AA
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
-            /* The card can work at vdd range of 2.7-3.6V */
-            for (uint8_t i = 0; i < maxTries; i++) {
+            // The card can work at vdd range of 2.7-3.6V
+            for (unsigned int i = 0; i < maxTries; i++) {
+                // Begin initialization process with ACMD41 with HCS[bit30] set as argument
+                // CMD55 must be sent before ACMD41
                 if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 1UL << 30) == 0) {
-                    /* SDC_CMD41 with HCS bit */
-                    if (sendCMD(SDC_CMD58, 0) == 0) {    /* Check CCS bit */
+                    // Read ocr with CMD58
+                    if (sendCMD(SDC_CMD58, 0) == 0) {    
+                        // Check bit 6 of response to determine if card is SDHC or standard SD card
+                        const uint8_t cardCapacityMask = (1U << 6);
                         for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &ocr[i]);
-                        ty = (ocr[0] & 0x40) ? 6 : 2;
+                        ty = (ocr[0] & cardCapacityMask) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK) : (CARD_TYPE_SDC_MASK);
                     }
                 }
             }
+        } else {
+            LOG_ERROR("SDC Card (Ver 2+) rejected due to invalid voltage range");   
         }
     } else {                            
-        /* SDC Ver1 or MMC */
-        ty = (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) <= 1) ? 2 : 1;    /* SDC : MMC */
+        // Card is SDC Ver1 or MMC
+        ty = (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) <= 1) ? (CARD_TYPE_SDC_MASK) : (CARD_TYPE_MMC_MASK);
+        
+        bool initSuccess = false;
         for (unsigned int i = 0; i < maxTries; i++) {
-            if (ty == 2) {
-                if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) == 0) break;    /* SDC_CMD41 */
+            // Begin the initialization process with ACMD41 for SDC or CMD1 for MMC
+            // CMD55 must be sent before ACMD41
+            if (ty & CARD_TYPE_SDC_MASK) {
+                if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) == 0) initSuccess = true;
             } else {
-                if (sendCMD(SDC_CMD1, 0) == 0) break;                                /* SDC_CMD1 */
+                if (sendCMD(SDC_CMD1, 0) == 0) initSuccess = true;
             }
 
-            if ((i == maxTries - 1) || sendCMD(SDC_CMD16, 512) != 0) {   /* Select R/W block length */    
-                ty = 0;
-            }
+            if (initSuccess) break;
         }
+
+        if (!initSuccess) {
+            LOG_ERROR("Failed initialization of SDCv1/MMC Card");
+            ty = 0;
+        }
+
+        // Set block length to 512 bytes
+        if (sendCMD(SDC_CMD16, SD_SECTOR_SIZE) != 0) ty = 0;
     }
 
     cardType = ty;
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    unsigned char tmp;
-    spiReceiveByte(SDC_SPI_REG, &tmp);            /* Idle (Release DO) */
+    // Ensure SDC releases MISO line by sending a dummy uint8_t
+    spiTransmitByte(SDC_SPI_REG, 0xFF);
 
     if (ty) {            
-        /* Initialization succeded */
         stat &= ~STA_NOINIT;    // Clear STA_NOINIT
     } else {            
-        /* Initialization failed */
-        turnOffSDC();
+        turnOffSDC();          // Initialization failed
     }
 
     return stat;
@@ -331,7 +361,7 @@ DSTATUS disk_initialize(BYTE drv){
  * @param pdrv Physical drive number (0).
  * @return DSTATUS Status
  */
-DSTATUS disk_status(BYTE pdrv) {
+DSTATUS disk_status(uint8_t pdrv) {
     if (pdrv != 0) return STA_NOINIT;        /* Supports only single drive */
     return stat;
 }
@@ -344,34 +374,33 @@ DSTATUS disk_status(BYTE pdrv) {
  * @param count Sector count (1..255).
  * @return DRESULT Result
  */
-DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
+DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) {
     if (pdrv || !count) return RES_PARERR;
     if (stat & STA_NOINIT) return RES_NOTRDY;
 
-    if (!(cardType & 4)) sector *= 512;    /* Convert to byte address if needed */
+    if (!(cardType & CARD_TYPE_BLOCK_ADDR_MASK)) sector *= SD_SECTOR_SIZE;    /* Convert to uint8_t address if needed */
 
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
     if (count == 1) {    
         /* Single block read */
-        if ((sendCMD(SDC_CMD17, sector) == 0)    /* READ_SINGLE_BLOCK */
-            && rcvDataBlock(buff, 512))
+        if ((sendCMD(SDC_CMD17, sector) == 0)
+            && rcvDataBlock(buff, SD_SECTOR_SIZE))
             count = 0;
-    }
-    else {                
+    } else {                
         /* Multiple block read */
-        if (sendCMD(SDC_CMD18, sector) == 0) {    /* READ_MULTIPLE_BLOCK */
+        if (sendCMD(SDC_CMD18, sector) == 0) {
             do {
-                if (!rcvDataBlock(buff, 512)) break;
-                buff += 512;
+                if (!rcvDataBlock(buff, SD_SECTOR_SIZE)) break;
+                buff += SD_SECTOR_SIZE;
             } while (--count);
-            stopTransmission();                /* STOP_TRANSMISSION */
+            stopTransmission();
         }
     }
 
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    unsigned char tmp;
-    spiReceiveByte(SDC_SPI_REG, &tmp);            /* Idle (Release DO) */
+    // Ensure SDC releases MISO line by sending a dummy uint8_t
+    spiTransmitByte(SDC_SPI_REG, 0xFF);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -385,37 +414,42 @@ DRESULT disk_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count) {
  * @param count Sector count (1..255).
  * @return DRESULT Result
  */
-DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count) {
+DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t count) {
     if (pdrv || !count) return RES_PARERR;
     if (stat & STA_NOINIT) return RES_NOTRDY;
     if (stat & STA_PROTECT) return RES_WRPRT;
 
-    if (!(cardType & 4)) sector *= 512;    /* Convert to byte address if needed */
+    if (!(cardType & (CARD_TYPE_BLOCK_ADDR_MASK))) sector *= SD_SECTOR_SIZE;    /* Convert to uint8_t address if needed */
 
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    if (count == 1) {    /* Single block write */
-        if ((sendCMD(SDC_CMD24, sector) == 0)    /* WRITE_BLOCK */
-            && sendDataBlock(buff, 0xFE))
+    if (count == 1) {    
+        /* Single block write */
+        if ( (sendCMD(SDC_CMD24, sector) == 0) && sendDataBlock(buff, SDC_CMD24_DATA_TOKEN) )
             count = 0;
-    }
-    else {                /* Multiple block write */
-        if (cardType & 2) {
-            sendCMD(SDC_CMD55, 0); sendCMD(SDC_CMD23, count);    /* SDC_CMD23 */
+    } else {                
+        /* Multiple block write */
+        if (cardType & CARD_TYPE_SDC_MASK) {
+            sendCMD(SDC_CMD55, 0); 
+            sendCMD(SDC_CMD23, count);
         }
-        if (sendCMD(SDC_CMD25, sector) == 0) {    /* WRITE_MULTIPLE_BLOCK */
+        
+        if (sendCMD(SDC_CMD25, sector) == 0) {
             do {
-                if (!sendDataBlock(buff, 0xFC)) break;
-                buff += 512;
+                if (!sendDataBlock(buff, SDC_CMD25_DATA_TOKEN)) break;
+                buff += SD_SECTOR_SIZE;
             } while (--count);
-            if (!sendDataBlock(0, 0xFD))    /* STOP_TRAN token */
+
+            // Send stop transmission token
+            if (!sendDataBlock(0, SD_STOP_TRANSMISSION))
                 count = 1;
         }
     }
+
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    unsigned char tmp;
-    spiReceiveByte(SDC_SPI_REG, &tmp);
+    // Ensure SDC releases MISO line by sending a dummy uint8_t
+    spiTransmitByte(SDC_SPI_REG, 0xFF);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -427,17 +461,15 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count) {
  * @param cmd Control command code.
  * @param buff Pointer to the control data.
  * @return DRESULT Result
+ * @warning buff must have a size of at least 2 bytes.
  */
-DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
-    DRESULT res;
-    BYTE n, csd[16], *ptr = buff;
-    WORD csize;
-
+DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
     if (pdrv) return RES_PARERR;
 
-    res = RES_ERROR;
+    DRESULT res = RES_ERROR;
 
     if (ctrl == CTRL_POWER) {
+        uint8_t *ptr = buff;
         switch (*ptr) {
             case 0:        
                 /* Sub control code == 0 (turn off power) */
@@ -452,7 +484,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
                 break;
             case 2:        
                 /* Sub control code == 2 (get power status) */
-                *(ptr+1) = (BYTE)checkPower();
+                *(ptr+1) = (uint8_t)checkPower();
                 res = RES_OK;
                 break;
             default :
@@ -463,35 +495,51 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE ctrl, void *buff) {
         
         assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
+
+        const uint8_t csdSize = 16U; // Size of buffer to hold CSD register data
+        uint8_t csd[csdSize]; // Card-specific data (CSD); Note the index numbers are opposite to the bit numbers in the CSD register
+        uint32_t csize; // Device size
         switch (ctrl) {
-            case GET_SECTOR_COUNT :    /* Get number of sectors on the disk (DWORD) */
-                if ((sendCMD(SDC_CMD9, 0) == 0) && rcvDataBlock(csd, 16)) {
-                    if ((csd[0] >> 6) == 1) {    /* SDC ver 2.00 */
-                        csize = csd[9] + ((WORD)csd[8] << 8) + 1;
-                        *(DWORD*)buff = (DWORD)csize << 10;
-                    } else {                    /* MMC or SDC ver 1.XX */
-                        n = (csd[5] & 15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
-                        csize = (csd[8] >> 6) + ((WORD)csd[7] << 2) + ((WORD)(csd[6] & 3) << 10) + 1;
-                        *(DWORD*)buff = (DWORD)csize << (n - 9);
+            case GET_SECTOR_COUNT:
+                /* Get number of sectors on the disk (uint32_t) */
+                // Read from CSD register
+                if ((sendCMD(SDC_CMD9, 0) == 0) && rcvDataBlock(csd, csdSize)) {
+                    // Check if SDCv2+ or SDCv1/MMC
+                    uint8_t csdStructField = (csd[0] >> 6); // 1 = SDCv2, 0 = SDCv1/MMC
+                    if (csdStructField == 1) {    
+                        // CSIZE field spans bits [69:48] of the CSD register
+                        // Disk size (bytes) = (CSIZE+1) * 512KB * 1024B/KB
+                        csize = ((uint32_t)(csd[7] & 0x3F) << 16) | ((uint16_t)csd[8] << 8) | csd[9];
+                        *(uint32_t*)buff = (uint32_t)(csize + 1) << 10;
+                    } else {                    
+                        // CSIZE field spans bits [73:62] of the CSD register
+                        // Capacity = (CSIZE+1) * 2^(C_SIZE_MULT+READ_BL_LEN+2)
+                        csize = ((uint32_t)(csd[6] & 0x03) << 10) | ((uint16_t)csd[7] << 2) | (csd[8] >> 6); 
+                        const uint8_t readBlLen = csd[5] & 0x0F; // READ_BL_LEN field spans bits [83:80] of the CSD register
+                        const uint8_t cSizeMult = ((csd[9] & 0x03) << 1) | (csd[10] >> 7); // C_SIZE_MULT field spans bits [49:47] of the CSD register
+                        const uint8_t n = (cSizeMult + readBlLen + 2);
+                        *(uint32_t*)buff = (uint32_t)(csize + 1) << (n - 9);
                     }
                     res = RES_OK;
                 }
                 break;
-            case GET_SECTOR_SIZE :    /* Get sectors on the disk (WORD) */
-                *(WORD*)buff = 512;
+            case GET_SECTOR_SIZE:    
+                *(uint16_t*)buff = SD_SECTOR_SIZE;
                 res = RES_OK;
                 break;
-            case CTRL_SYNC :    /* Make sure that data has been written */
+            case CTRL_SYNC:    
+                /* Make sure that data has been written */
                 if (isCardReady())
                     res = RES_OK;
                 break;
             default:
                 res = RES_PARERR;
         }
+        
         deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-        unsigned char tmp;
-        spiReceiveByte(SDC_SPI_REG, &tmp);
+        // Ensure SDC releases MISO line by sending a dummy uint8_t
+        spiTransmitByte(SDC_SPI_REG, 0xFF);
     }
 
     return res;
