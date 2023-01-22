@@ -17,22 +17,13 @@ obc_error_code_t lm75bdInit(lm75bd_config_t *config) {
     obc_error_code_t err;
 
     err = writeConfigLM75BD(config->devAddr, config->osFaultQueueSize, config->osPolarity, config->osOperationMode, config->devOperationMode);
-    if (err != OBC_ERR_CODE_SUCCESS) {
-        LOG_ERROR("Failed to write config to LM75BD - Addr 0x%02X", config->devAddr);
-        return err;
-    }
+    if (err != OBC_ERR_CODE_SUCCESS) return err;
 
     err = writeThystLM75BD(config->devAddr, config->hysteresisThresholdCelsius);
-    if (err != OBC_ERR_CODE_SUCCESS) {
-        LOG_ERROR("Failed to write hysteresis threshold to LM75BD - Addr 0x%02X", config->devAddr);
-        return err;
-    }
+    if (err != OBC_ERR_CODE_SUCCESS) return err;
     
     err = writeTosLM75BD(config->devAddr, config->overTempThresholdCelsius);
-    if (err != OBC_ERR_CODE_SUCCESS) {
-        LOG_ERROR("Failed to write over temperature threshold to LM75BD - Addr 0x%02X", config->devAddr);
-        return err;
-    }
+    if (err != OBC_ERR_CODE_SUCCESS) return err;
     
     return OBC_ERR_CODE_SUCCESS;
 }
