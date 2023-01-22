@@ -1,52 +1,54 @@
 #ifndef DRIVERS_INCLUDE_LM75BD_H_
 #define DRIVERS_INCLUDE_LM75BD_H_
 
+#include "obc_errors.h"
+
 #include <stdint.h>
 
 /* LM75BD I2C Device Addresses */
-#define LM75BD_BASE_I2C_ADDR 0x9
-#define LM75BD_OBC_I2C_ADDR 0x4F /* (LM75BD_BASE_I2C_ADDR << 3) | 0x7 */
+#define LM75BD_BASE_I2C_ADDR 0x9U
+#define LM75BD_OBC_I2C_ADDR 0x4FU /* (LM75BD_BASE_I2C_ADDR << 3) | 0x7 */
 
 /* LM75BD Registers (p.8) */
-#define LM75BD_REG_TEMP 0x00  /* Temperature Register (R) */
-#define LM75BD_REG_CONF 0x01  /* Configuration Register (R/W) */
-#define LM75BD_REG_THYST 0x02 /* Hysteresis Register (R/W) */
-#define LM75BD_REG_TOS 0x03   /* Overtemperature Shutdown Register (R/W) */
+#define LM75BD_REG_TEMP 0x00U  /* Temperature Register (R) */
+#define LM75BD_REG_CONF 0x01U  /* Configuration Register (R/W) */
+#define LM75BD_REG_THYST 0x02U /* Hysteresis Register (R/W) */
+#define LM75BD_REG_TOS 0x03U   /* Overtemperature Shutdown Register (R/W) */
 
 /* LM75BD Configuration Values */
-#define LM75BD_DEV_OP_MODE_NORMAL 0x00
-#define LM75BD_DEV_OP_MODE_SHUTDOWN 0x01
-#define LM75BD_OS_POL_ACTIVE_LOW 0x00
-#define LM75BD_OS_POL_ACTIVE_HIGH 0x01
-#define LM75BD_OS_OP_MODE_COMP 0x00
-#define LM75BD_OS_OP_MODE_INT 0x01
+#define LM75BD_DEV_OP_MODE_NORMAL 0x00U
+#define LM75BD_DEV_OP_MODE_SHUTDOWN 0x01U
+#define LM75BD_OS_POL_ACTIVE_LOW 0x00U
+#define LM75BD_OS_POL_ACTIVE_HIGH 0x01U
+#define LM75BD_OS_OP_MODE_COMP 0x00U
+#define LM75BD_OS_OP_MODE_INT 0x01U
 
 /* LM75BD Default State (p.12) */
 #define LM75BD_DEFAULT_DEV_OP_MODE LM75BD_DEV_OP_MODE_NORMAL
 #define LM75BD_DEFAULT_OS_OP_MODE LM75BD_OS_OP_MODE_COMP
-#define LM75BD_DEFAULT_TEMP_TOS 80.0 /* Degrees Celsius */
-#define LM75BD_DEFAULT_TEMP_HYS 75.0 /* Degrees Celsius */
+#define LM75BD_DEFAULT_TEMP_TOS 80.0f /* Degrees Celsius */
+#define LM75BD_DEFAULT_TEMP_HYS 75.0f /* Degrees Celsius */
 #define LM75BD_DEFAULT_OS_POL LM75BD_OS_POL_ACTIVE_LOW
-#define LM75BD_DEFAULT_OS_FAULT_QUEUE_SIZE 1 /* OS_F_QUE = 0 */
+#define LM75BD_DEFAULT_OS_FAULT_QUEUE_SIZE 1U /* OS_F_QUE = 0 */
 
 /* LM75BD Temperature Resolutions */
-#define LM75BD_THYST_RES 0.5 /* Degrees Celsius */
-#define LM75BD_TOS_RES 0.5 /* Degrees Celsius */
-#define LM75BD_TEMP_RES 0.125 /* Degrees Celsius */
+#define LM75BD_THYST_RES 0.5f /* Degrees Celsius */
+#define LM75BD_TOS_RES 0.5f /* Degrees Celsius */
+#define LM75BD_TEMP_RES 0.125f /* Degrees Celsius */
 
 /* LM75BD Number of Bits in Right Padding */
-#define LM75BD_THYST_LSB_PADDING 7 /* Number of bits */
-#define LM75BD_TOS_LSB_PADDING 7 /* Number of bits */
-#define LM75BD_TEMP_LSB_PADDING 5 /* Number of bits */
+#define LM75BD_THYST_LSB_PADDING 7U /* Number of bits */
+#define LM75BD_TOS_LSB_PADDING 7U /* Number of bits */
+#define LM75BD_TEMP_LSB_PADDING 5U /* Number of bits */
 
 /* Buffer Size of Registers (i.e. Number of Bytes to R/W) */
-#define LM75BD_TEMP_BUFF_SIZE 2
-#define LM75BD_CONF_BUFF_SIZE 1
-#define LM75BD_THYST_BUFF_SIZE 2
-#define LM75BD_TOS_BUFF_SIZE 2
+#define LM75BD_TEMP_BUFF_SIZE 2U
+#define LM75BD_CONF_BUFF_SIZE 1U
+#define LM75BD_THYST_BUFF_SIZE 2U
+#define LM75BD_TOS_BUFF_SIZE 2U
 
 /* LM75BD TOS and THYST Limits */
-#define LM75BD_TEMP_THRESH_MAX 127.5 /* Degrees Celsius */
+#define LM75BD_TEMP_THRESH_MAX 127.5f /* Degrees Celsius */
 
 /* LM75BD Config Reg Bit Masks */
 #define LM75BD_OS_FAULT_QUEUE_MASK 0b11000
@@ -81,7 +83,7 @@ typedef struct {
  * @param config Configuration struct for LM75BD
  * @return 1 if successful, 0 otherwise
  */
-uint8_t lm75bdInit(lm75bd_config_t *config);
+obc_error_code_t lm75bdInit(lm75bd_config_t *config);
 
 /**
  * @brief Read the temperature from the LM75BD
@@ -89,7 +91,7 @@ uint8_t lm75bdInit(lm75bd_config_t *config);
  * @param temp Pointer to float to store the temperature in degrees Celsius
  * @return 1 if successful, 0 otherwise
  */
-uint8_t readTempLM75BD(uint8_t devAddr, float *temp);
+obc_error_code_t readTempLM75BD(uint8_t devAddr, float *temp);
 
 /**
  * @brief Read the configuration register from the LM75BD
@@ -97,7 +99,7 @@ uint8_t readTempLM75BD(uint8_t devAddr, float *temp);
  * @param config Configuration struct for LM75BD
  * @return 1 if successful, 0 otherwise
  */
-uint8_t readConfigLM75BD(lm75bd_config_t *config);
+obc_error_code_t readConfigLM75BD(lm75bd_config_t *config);
 
 /**
  * @brief Write to the configuration register from the LM75BD
@@ -109,7 +111,7 @@ uint8_t readConfigLM75BD(lm75bd_config_t *config);
  * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
  * @return 1 if successful, 0 otherwise
  */
-uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
+obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
                           uint8_t devOperationMode);
 
 /**
@@ -119,7 +121,7 @@ uint8_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osP
  * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
  * @return 1 if successful, 0 otherwise
  */
-uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius);
+obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius);
 
 /**
  * @brief Set the hysteresis threshold for the LM75BD
@@ -128,7 +130,7 @@ uint8_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius);
  * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
  * @return 1 if successful, 0 otherwise
  */
-uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius);
+obc_error_code_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius);
 
 /**
  * @brief Get the overtemperature shutdown threshold from the LM75BD
@@ -137,7 +139,7 @@ uint8_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius);
  * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius
  * @return 1 if successful, 0 otherwise 
  */
-uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
+obc_error_code_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
 
 /**
  * @brief Set the overtemperature shutdown threshold for the LM75BD
@@ -146,7 +148,7 @@ uint8_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
  * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius
  * @return 1 if successful, 0 otherwise
  */
-uint8_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius);
+obc_error_code_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius);
 
 /**
  * @brief Handle an OS interrupt from the LM75BD
