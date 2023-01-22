@@ -45,6 +45,7 @@ LIBS :=
 SRC_DIRS :=
 SRC_DIRS += hal/source
 SRC_DIRS += drivers/source
+SRC_DIRS += common/source
 SRC_DIRS += examples/sd_reliance_edge_demo
 
 # Reliance Edge File System

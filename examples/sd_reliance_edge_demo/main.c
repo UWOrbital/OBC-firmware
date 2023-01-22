@@ -38,6 +38,10 @@ void vTask1(void *pvParameters) {
 
     sciPrintf("Reliance Edge initialized and mounted\r\n");
 
+    REDSTATFS statfs;
+    red_statvfs("", &statfs);
+    sciPrintf("Disk Info - Total Blocks: %d, Free Blocks: %d\r\n", statfs.f_blocks, statfs.f_bfree);
+
     int32_t file = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
     if (file < 0) {
         sciPrintf("red_open() returned %d\r\n", file);
