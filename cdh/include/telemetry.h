@@ -1,13 +1,15 @@
 #ifndef CDH_INCLUDE_TELEMETRY_H_
 #define CDH_INCLUDE_TELEMETRY_H_
 
+#include "obc_errors.h"
+
 #include <sys_common.h>
 
 /* Telemetry task config */
-#define TELEMETRY_STACK_SIZE   1024
+#define TELEMETRY_STACK_SIZE   1024U
 #define TELEMETRY_NAME         "telemetry"
-#define TELEMETRY_PRIORITY     1
-#define TELEMETRY_DELAY_TICKS  1000/portTICK_PERIOD_MS
+#define TELEMETRY_PRIORITY     1U
+#define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**
  * @enum	telemetry_event_id_t
@@ -41,9 +43,10 @@ typedef struct {
 } telemetry_event_t;
 
 /* Telemetry queue config */
-#define TELEMETRY_QUEUE_LENGTH 10
+#define TELEMETRY_QUEUE_LENGTH 10U
 #define TELEMETRY_QUEUE_ITEM_SIZE sizeof(telemetry_event_t)
-#define TELEMETRY_QUEUE_WAIT_PERIOD 10/portTICK_PERIOD_MS
+#define TELEMETRY_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define TELEMETRY_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the telemetry task and associated FreeRTOS constructs (queues, timers, etc.)
@@ -53,8 +56,8 @@ void initTelemetry(void);
 /**
  * @brief	Send an event to the telemetry queue.
  * @param	event	Event to send.
- * @return	1 if successful, 0 otherwise.
+ * @return The error code
  */
-uint8_t sendToTelemetryQueue(telemetry_event_t *event);
+obc_error_code_t sendToTelemetryQueue(telemetry_event_t *event);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */

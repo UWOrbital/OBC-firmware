@@ -320,7 +320,9 @@
       <HDRSPI>
         <NAME>spi.h</NAME>
       </HDRSPI>
-      <SRCSPI/>
+      <SRCSPI>
+        <NAME>spi.c</NAME>
+      </SRCSPI>
       <HDRCAN_R>
         <NAME>reg_can.h</NAME>
       </HDRCAN_R>
@@ -722,7 +724,7 @@
         <PATH>include\spi.h</PATH>
       </HDRSPI>
       <SRCSPI>
-        <PATH/>
+        <PATH>source\spi.c</PATH>
       </SRCSPI>
     </FILENAMES>
   </SPI>
