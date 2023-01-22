@@ -18,8 +18,8 @@
 /*---------------------------------------------*/
 
 #define SDC_CMD_BASE       0x40U
-#define SDC_CMD0    (SDC_CMD_BASE)        /* GO_IDLE_STATE */
-#define SDC_CMD1    (SDC_CMD_BASE)      /* SEND_OP_COND */
+#define SDC_CMD0    (SDC_CMD_BASE)      /* GO_IDLE_STATE */
+#define SDC_CMD1    (SDC_CMD_BASE+1)    /* SEND_OP_COND */
 #define SDC_CMD8    (SDC_CMD_BASE+8)    /* SEND_IF_COND */
 #define SDC_CMD9    (SDC_CMD_BASE+9)    /* SEND_CSD */
 #define SDC_CMD10   (SDC_CMD_BASE+10)   /* SEND_CID */
@@ -44,6 +44,7 @@
 #define SDC_CMD24_DATA_TOKEN 0xFEU
 #define SDC_CMD25_DATA_TOKEN 0xFCU
 
+// Card type masks (b0:MMC, b1:SDC, b2:Block addressing), see cardType variable
 #define CARD_TYPE_MMC_MASK 0b001U
 #define CARD_TYPE_SDC_MASK 0b010U
 #define CARD_TYPE_BLOCK_ADDR_MASK 0b100U
@@ -53,7 +54,7 @@
 /*---------------------------------------------*/
 
 static volatile DSTATUS stat = STA_NOINIT;   /* Disk status */
-static uint8_t cardType;                        /* Card type flags: b0:MMC, b1:SDC, b2:Block addressing */
+static uint8_t cardType;                     /* Card type flags: b0:MMC, b1:SDC, b2:Block addressing */
 static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
 
 /*---------------------------------------------*/
