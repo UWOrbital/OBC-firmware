@@ -289,7 +289,7 @@ float getTemperatureRTC(float* temperature) {
 
 
 uint8_t setSecondsRTC(uint8_t writeSeconds) {
-    uint8_t writeVal =  combineWriteVal(writeSeconds);
+    uint8_t writeVal =  TwoDigitDecimalToBCD(writeSeconds);
 
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_SECONDS, &writeVal, 1))
         return 0;
@@ -298,7 +298,7 @@ uint8_t setSecondsRTC(uint8_t writeSeconds) {
 }
 
 uint8_t setMinutesRTC(uint8_t writeMinutes) {
-    uint8_t writeVal =  combineWriteVal(writeMinutes);
+    uint8_t writeVal =  TwoDigitDecimalToBCD(writeMinutes);
 
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_MINUTES, &writeVal, 1))
         return 0;
@@ -308,7 +308,7 @@ uint8_t setMinutesRTC(uint8_t writeMinutes) {
 
 uint8_t setHourRTC(uint8_t writeHours) {
     // DEFAULT setting hour to 24 hour mode
-    uint8_t writeVal = HOUR_MODE | combineWriteVal(writeHours);
+    uint8_t writeVal = HOUR_MODE | TwoDigitDecimalToBCD(writeHours);
 
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, &writeVal, 1))
         return 0;
@@ -324,7 +324,7 @@ uint8_t setDayRTC(uint8_t writeDays) {
 }
 
 uint8_t setDateRTC(uint8_t writeDates) {
-    uint8_t writeVal =  combineWriteVal(writeDates);
+    uint8_t writeVal =  TwoDigitDecimalToBCD(writeDates);
     
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, &writeVal, 1))
         return 0;
@@ -333,7 +333,7 @@ uint8_t setDateRTC(uint8_t writeDates) {
 }
 
 uint8_t setMonthRTC(uint8_t writeMonths) {
-    uint8_t writeVal =  combineWriteVal(writeMonths);
+    uint8_t writeVal =  TwoDigitDecimalToBCD(writeMonths);
 
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_MONTH, &writeVal, 1))
         return 0;
@@ -342,7 +342,7 @@ uint8_t setMonthRTC(uint8_t writeMonths) {
 }
 
 uint8_t setYearRTC(uint8_t writeYears) {
-    uint8_t writeVal =  combineWriteVal(writeYears);
+    uint8_t writeVal =  TwoDigitDecimalToBCD(writeYears);
 
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_YEAR, &writeVal, 1))
         return 0;
@@ -356,31 +356,31 @@ I have combined seconds value with A1m1, minutes value with a2m2 before writing 
 similar with day or date mode */
 
 uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode,  uint8_t dayOrDate) {
-    uint8_t writeSeconds = combineWriteVal(writeAlarmTime->seconds) | writeAlarmMode-> A1M1;
+    uint8_t writeSeconds = TwoDigitDecimalToBCD(writeAlarmTime->seconds) | writeAlarmMode-> A1M1;
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, &writeSeconds, 1)) {
         return 0;
     }
 
-    uint8_t writeMinutes =  combineWriteVal(writeAlarmTime->minutes) | writeAlarmMode-> A1M2;
+    uint8_t writeMinutes =  TwoDigitDecimalToBCD(writeAlarmTime->minutes) | writeAlarmMode-> A1M2;
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_MINUTES, &writeMinutes, 1)) {
         return 0;
     }
 
     // DEFAULT setting hour to 24 hour mode
-    uint8_t writeHours = HOUR_MODE | combineWriteVal(writeAlarmTime->hours) | writeAlarmMode-> A1M3;
+    uint8_t writeHours = HOUR_MODE | TwoDigitDecimalToBCD(writeAlarmTime->hours) | writeAlarmMode-> A1M3;
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, &writeHours, 1)) {
         return 0;
     }
 
     // if dayOrDate is 1, its in day mode else date mode
     if (dayOrDate) {
-        uint8_t writeDay =  combineWriteVal(writeAlarmTime->day) | writeAlarmMode-> A1M4 | DAY_MODE;
+        uint8_t writeDay =  TwoDigitDecimalToBCD(writeAlarmTime->day) | writeAlarmMode-> A1M4 | DAY_MODE;
         if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, &writeDay, 1)) {
           return 0;
         }
     }
     else {
-        uint8_t writeDate =  combineWriteVal(writeAlarmTime->date) | writeAlarmMode-> A1M4 | DATE_MODE;
+        uint8_t writeDate =  TwoDigitDecimalToBCD(writeAlarmTime->date) | writeAlarmMode-> A1M4 | DATE_MODE;
         if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, &writeDate, 1)) {
           return 0;
         }
@@ -428,7 +428,7 @@ uint8_t setAgingOffsetRTC(int8_t writeAgingOffset) {
 }
 
 
-uint8_t combineWriteVal(uint8_t inputVal) {
+uint8_t TwoDigitDecimalToBCD(uint8_t inputVal) {
     uint8_t onesdigit = inputVal % 10;
     uint8_t tensdigit = (inputVal / 10) << 4;
     uint8_t writeVal = onesdigit | tensdigit;
