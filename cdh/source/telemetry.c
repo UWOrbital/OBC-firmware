@@ -1,10 +1,7 @@
 #include "telemetry.h"
 #include "supervisor.h"
-<<<<<<< HEAD
 #include "comms_manager.h"
-=======
 #include "logging.h"
->>>>>>> b5737e89f55d497f45065ecca975088053ac1f75
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -16,6 +13,7 @@
 #include <gio.h>
 
 #include <stdio.h>
+#include <redposix.h>
 #include <stdbool.h>
 
 static TaskHandle_t telemetryTaskHandle = NULL;
@@ -69,14 +67,19 @@ obc_error_code_t sendToTelemetryQueue(telemetry_event_t *event) {
     return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static uint8_t sendTelemetryToFile(FILE *telFile, telemetry_event_t queueMsg) {
-    if(telFile == NULL) {
+static uint8_t sendTelemetryToFile(int32_t telFile, telemetry_event_t queueMsg) {
+    if(telFile == -1) {
         return 0;
     }
-    fwrite(&queueMsg, sizeof(telemetry_event_t), 1, telFile);
+    
+    int32_t ret = red_write(telFile, &queueMsg, sizeof(telemetry_event_t));
 
-<<<<<<< HEAD
-    return 1;
+    if(ret == sizeof(telemetry_event_t)) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 static void vTelemetryTask(void * pvParameters) {
@@ -89,14 +92,13 @@ static void vTelemetryTask(void * pvParameters) {
 
     bool newFile = false;
 
-    FILE *telFile; // not sure if a new file object needs to be created whenever a new file is requested. 
-    telFile = fopen(fileName, "w"); 
+    int32_t telFile = red_open(fileName, RED_O_RDWR | RED_O_CREAT);
     bool fileOpen = true;
 
     while(1){
         if(newFile) { // if a new file is requested
             if(fileOpen) {
-                fclose(telFile); // close the previously opened file
+                red_close(telFile);
                 fileOpen = false;
             }
 
@@ -113,7 +115,7 @@ static void vTelemetryTask(void * pvParameters) {
             strcat(fileName, fileType);
 
             if(!fileOpen) {
-                telFile = fopen(fileName, "w"); // open new file with new file name
+                telFile = red_open(fileName, RED_O_RDWR | RED_O_CREAT);
                 fileOpen = true;
             }
         }
