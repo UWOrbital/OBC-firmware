@@ -1,3 +1,4 @@
+#include "logging.h"
 #include "obc_spi_io.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -70,9 +71,16 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
-        spiPort->DSET = (1 << csNum);
-        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
-        return OBC_ERR_CODE_SUCCESS;
+        if (gioGetBit(spiPort, csNum) == 0){
+            gioSetBit(spiPort, csNum, 1);
+            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            return OBC_ERR_CODE_SUCCESS;
+        }
+        else{
+            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            LOG_ERROR("Attempted to desassert non-asserted pin");
+            return OBC_ERR_CODE_SPI_DEASSERTING_HIGH_PIN;
+        }
     }
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
@@ -89,9 +97,21 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
-        spiPort->DCLR = (1 << csNum);
-        xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
-        return OBC_ERR_CODE_SUCCESS;
+        uint8_t cur_low_pins = 0;
+        for (int i = 0; i < numCSPins[spiPortIndex]; i++)
+            if (gioGetBit(spiPort, i) == 0)
+                cur_low_pins++;
+
+        if (cur_low_pins == 0){
+            gioSetBit(spiPort, csNum, 0);
+            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            return OBC_ERR_CODE_SUCCESS;
+        }
+        else{
+            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            LOG_ERROR("Attempted to assert CS pin when another pin has already been asserted");
+            return OBC_ERR_CODE_SPI_ASSERTING_MULTIPLE_PINS;
+        }
     }
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
