@@ -107,6 +107,10 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
             xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
             return OBC_ERR_CODE_SUCCESS;
         }
+        else if (cur_low_pins == 1 && gioGetBit(spiPort, csNum) == 0){ // Pin is already asserted
+            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            return OBC_ERR_CODE_SUCCESS;
+        }
         else{
             xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
             LOG_ERROR("Attempted to assert CS pin when another pin has already been asserted");
