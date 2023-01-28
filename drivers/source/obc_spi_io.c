@@ -54,7 +54,7 @@ static const uint8_t numCSPins[NUM_SPI_PORTS] = { 6, 0, 6, 1, 4 }; // Number of 
 
 void initSpiMutex(void) {
     for (int i = 0; i < NUM_SPI_PORTS; i++) {
-        spiMutexes[i] = xSemaphoreCreateMutexStatic(&spiMutexBuffers[i]);
+        spiMutexes[i] = xSemaphoreCreateRecursiveMutexStatic(&spiMutexBuffers[i]);
         configASSERT(spiMutexes[i]);
     }
 }
@@ -70,15 +70,18 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPortIndex < 0)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
-        if (gioGetBit(spiPort, csNum) == 0){
+    if (xSemaphoreTakeRecursive(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
+        if (gioGetBit(spiPort, csNum) == 0) {
             gioSetBit(spiPort, csNum, 1);
-            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex that was just taken
+            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex from asserting pin
             return OBC_ERR_CODE_SUCCESS;
         }
-        else{
-            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+        else {
             LOG_ERROR("Attempted to desassert non-asserted pin");
+            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex that was just taken
+            // Mutex from asserting pin is not returned
+            // Task should try again to deasserted the correct pin, otherwise it may hold the mutex forever
             return OBC_ERR_CODE_SPI_DEASSERTING_HIGH_PIN;
         }
     }
@@ -96,25 +99,15 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPortIndex < 0)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
-        uint8_t cur_low_pins = 0;
-        for (int i = 0; i < numCSPins[spiPortIndex]; i++)
-            if (gioGetBit(spiPort, i) == 0)
-                cur_low_pins++;
-
-        if (cur_low_pins == 0){
+    if (xSemaphoreTakeRecursive(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
+        if (gioGetBit(spiPort, csNum) == 1) {
             gioSetBit(spiPort, csNum, 0);
-            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+            // Mutex is returned after pin is deasserted
             return OBC_ERR_CODE_SUCCESS;
         }
-        else if (cur_low_pins == 1 && gioGetBit(spiPort, csNum) == 0){ // Pin is already asserted
-            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
+        else { // Pin was already asserted
+            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Give the mutex that was just taken
             return OBC_ERR_CODE_SUCCESS;
-        }
-        else{
-            xSemaphoreGive(spiMutexes[spiPortIndex]); // Can only fail if the mutex wasn't taken; we just took it, so this will never fail
-            LOG_ERROR("Attempted to assert CS pin when another pin has already been asserted");
-            return OBC_ERR_CODE_SPI_ASSERTING_MULTIPLE_PINS;
         }
     }
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
@@ -134,7 +127,9 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiData
     if (spiRegIndex < 0)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
+    if (xSemaphoreTakeRecursive(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
+        spiDAT1_t spiData = {0};
+
         // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
         uint16_t spiWordOut = (uint16_t)outb;
         uint16_t spiWordIn;
