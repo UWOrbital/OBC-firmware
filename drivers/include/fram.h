@@ -26,7 +26,7 @@ typedef enum cmdType{
 typedef enum readCmd{
     RDSR,           //Read Status Register
     READ,           //Normal read
-    FSTRD,          //Fast read
+    FSTRD,          //Fast read, Note this is used for serial flash compatibility not to read data fast!
     RDID            //Get Device ID
 }readCmd;
 

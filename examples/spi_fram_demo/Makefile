@@ -2,7 +2,7 @@ include .env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
 BUILD_DIR = examples/spi_fram_demo/build
-BIN = hello_world.out
+BIN = fram_demo.out
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -12,7 +12,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -Og
+#CC_FLAGS += -Og
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
