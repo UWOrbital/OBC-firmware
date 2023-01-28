@@ -14,8 +14,10 @@
 #include <assert.h>
 
 // All ASSERT() have been commented out
-
 // undefined reference to `ASSERT' error
+
+// Remove after testing
+int print_running = 0;
 
 static TaskHandle_t adcsTaskHandle = NULL;
 static StaticTask_t adcsTaskBuffer;
@@ -75,27 +77,26 @@ static void vADCSManagerTask(void * pvParameters) {
         if(xQueueReceive(adcsQueueHandle, &queueMsg, ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             queueMsg.eventID = ADCS_MANAGER_NULL_EVENT_ID;
 
+        if (print_running){
+            printf("vADCSManagerTask \n");
+        }
+
         switch(queueMsg.eventID) {
             case ADCS_MANAGER_NULL_EVENT_ID:
+                printf("NULL\n");
                 break;
             case ADCS_MANAGER_LOW_POWER_EVENT_ID:
                 if(queueMsg.data.i){
                     // Do something
+                    printf("Resuming low power mode\n");
                     vTaskResume(lowPowerHandle);
                 }
                 else{
+                    printf("Suspending low power mode\n");
                     vTaskSuspend(lowPowerHandle);
                 }
                 break;
         }
-    }
-}
-
-void lowPower(void * pvParameters){
-    while(1){
-        // Insert Code here
-        printf("Low Power Mode\n");
-        timer(1000000);
     }
 }
 
@@ -107,7 +108,39 @@ void timer(int delay){
     }
 }
 
+// Remove after testing
+void environment(void * pvParameter){
+    int count = 0;
+    while(1) {
+        adcs_event_t event;
+        event.eventID = ADCS_MANAGER_LOW_POWER_EVENT_ID;
+
+        if (count % 2 == 0){
+            printf("Sending low power ON\n");
+            event.data.i = 1;
+        } else {
+            printf("Sending low power OFF\n");
+            event.data.i = 0;
+        }
+        if (xQueueSend(adcsQueueHandle, &event, 0) != pdTRUE){
+            printf("Queue is full\n");
+        } 
+        ++count;
+        vTaskDelay(ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD / 2);
+    }
+}
+
 /*Algorithrm functions*/
+
+void lowPower(void * pvParameters){
+    while(1){
+        // Insert Code here
+        if(print_running){
+            printf("Low Power Mode\n");
+        }
+        timer(1000000);
+    }
+}
 
 void detumblingMonitor(void * pvParameter)
 {
@@ -116,7 +149,6 @@ void detumblingMonitor(void * pvParameter)
         // Testing purposes
         static int detumblingRun = 0;
         int satelliteDetumbling = detumblingRun % 10;
-        printf("satelliteDetumbling: %d\n", satelliteDetumbling);
 
         if (satelliteDetumbling > 6 && satelliteDetumbling < 9) {
             isDetumbling=1; 
@@ -126,8 +158,13 @@ void detumblingMonitor(void * pvParameter)
         }
             
         ++detumblingRun;  
-        printf("detumblingMonitor \n");
-        printf("Detumbling run %d \n", detumblingRun);
+
+        if (print_running){
+            printf("satelliteDetumbling: %d\n", satelliteDetumbling);
+            printf("detumblingMonitor \n");
+            printf("Detumbling run %d \n", detumblingRun);
+        }
+        
         timer(1000000);
 
         /*If the satellite is detumbling then set isDetumbling=1 (true)*/
@@ -135,12 +172,12 @@ void detumblingMonitor(void * pvParameter)
 
         if (isDetumbling)
         {   
-            printf("\tEMERGENCY\n");
+            // printf("\tEMERGENCY\n");
             vTaskResume(detumblingHandle);
         }
         else
         {
-            printf("\tEVERYTHING IS FINE\n");
+            // printf("\tEVERYTHING IS FINE\n");
             vTaskResume(reactionWheelHandle);
             vTaskResume(altitudeTrackingHandle);
             vTaskResume(orbitalDeterminationHandle);
@@ -154,7 +191,9 @@ void questAlgorithm(void * pvParameter)
     while (1)
     {
         /*Main code will go here*/
-        printf("Quest\n");
+        if (print_running){
+            printf("Quest\n");  
+        }
         timer(1000000);
     }
 }
@@ -166,12 +205,14 @@ void detumblingControl(void * pvParameter)
         /*Suspends itself when the satellite is not detumbling*/
         if (!isDetumbling)
         {
-            printf("Suspending detumblingControl\n");
+            // printf("Suspending detumblingControl\n");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
-        printf("detumblingControl\n");
+        if (print_running){
+            printf("detumblingControl\n");
+        }
         timer(1000000);
     }
 }
@@ -183,12 +224,14 @@ void reactionWheelControl(void * pvParameter)
         /*Suspends itself when the satellite is detumbling or doesn't have an altitude error*/
         if (isDetumbling || !hasAltitudeError)
         {
-            printf("Suspending reactionWheelControl\n");
+            // printf("Suspending reactionWheelControl\n");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
-        printf("reactionWheelControl\n");
+        if (print_running){
+            printf("reactionWheelControl\n"); 
+        }
         timer(1000000);
     }
 }
@@ -203,12 +246,12 @@ void altitudeTracking(void * pvParameter)
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
         {
-            printf("Suspending altitudeTracking\n");
+            // printf("Suspending altitudeTracking\n");
             vTaskSuspend(NULL);
         }
         if (hasAltitudeError)
         {
-            printf("\tHAS ERROR\n");
+            // printf("\tHAS ERROR\n");
             vTaskResume(reactionWheelHandle);
         }
 
@@ -216,11 +259,14 @@ void altitudeTracking(void * pvParameter)
 
         // Testing purposes
         static int altitudeRun = 0;
-        printf("altitudeTracking\n");
         ++altitudeRun;
         int satelliteAltitude = altitudeRun % 10;
-        printf("satelliteAltitude: %d \n", satelliteAltitude);
-        printf("altitudeRun: %d \n", altitudeRun);
+
+        if (print_running){
+            printf("altitudeTracking\n");
+            printf("satelliteAltitude: %d \n", satelliteAltitude);
+            printf("altitudeRun: %d \n", altitudeRun);
+        }
 
         if(satelliteAltitude > 6 && satelliteAltitude < 9){
             hasAltitudeError = 1;
@@ -240,12 +286,14 @@ void orbitalDetermination(void * pvParameter)
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
         {
-            printf("Suspending orbitalDetermination\n");
+            // printf("Suspending orbitalDetermination\n");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
-        printf("orbitalDetermination\n");
+        if (print_running){
+            printf("orbitalDetermination\n");  
+        }
         timer(1000000);
     }
 }
@@ -257,12 +305,14 @@ void momentumDumping(void * pvParameter)
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling)
         {
-            printf("Suspending momentumDumping\n");
+            // printf("Suspending momentumDumping\n");
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
-        printf("momentumDumping\n");
+        if (print_running){
+            printf("momentumDumping\n");
+        }
         timer(1000000);
     }
 }
@@ -271,7 +321,9 @@ int initSupervisorTask(void)
 {
     printf("Initialized ADCS\n");
     /* Initialize the functions*/
-    /*xTaskCreate(func, name, size, parameters, priorite, handler)*/
+    /*xTaskCreate(func, name, size, parameters, priority, handle)*/
+    initADCSManager();
+    xTaskCreate(environment, "Environment", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(questAlgorithm, "Quest Algorithm", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &detumblingHandle);
