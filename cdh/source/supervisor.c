@@ -1,5 +1,11 @@
 #include "supervisor.h"
 #include "telemetry.h"
+#include "adcs_manager.h"
+#include "comms_manager.h"
+#include "eps_manager.h"
+#include "payload_manager.h"
+#include "obc_errors.h"
+#include "logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -40,14 +46,16 @@ void initSupervisor(void) {
     }
 }
 
-uint8_t sendToSupervisorQueue(supervisor_event_t *event) {
-    if (supervisorQueueHandle == NULL) {
-        return 0;
-    }
-    if ( xQueueSend(supervisorQueueHandle, (void *) event, portMAX_DELAY) == pdPASS ) {
-        return 1;
-    }
-    return 0;
+obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
+    ASSERT(supervisorQueueHandle != NULL);
+
+    if (event == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if (xQueueSend(supervisorQueueHandle, (void *) event, SUPERVISOR_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+        return OBC_ERR_CODE_SUCCESS;
+    
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static void sendStartupMessages(void) {
@@ -61,27 +69,34 @@ static void sendStartupMessages(void) {
 }
 
 static void vSupervisorTask(void * pvParameters) {
+    ASSERT(supervisorQueueHandle != NULL);
+
     /* Initialize other tasks */
     initTelemetry();
+    initADCSManager();
+    initCommsManager();
+    initEPSManager();
+    initPayloadManager();
 
     /* Send initial messages to system queues */
     sendStartupMessages();    
     
-    while(1){
+    while(1) {
         supervisor_event_t inMsg;
         telemetry_event_t outMsgTelemetry;
 
-        if(xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_WAIT_PERIOD) != pdPASS) {
+        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             inMsg.eventID = SUPERVISOR_NULL_EVENT_ID;
-        }
 
-        switch(inMsg.eventID)
-        {
+        switch (inMsg.eventID) {
             case TURN_OFF_LED_EVENT_ID:
-                gioToggleBit(gioPORTB, 0);
+                gioSetBit(gioPORTB, 1, 0);
+                LOG_INFO("Turning off LED");
                 outMsgTelemetry.eventID = TURN_ON_LED_EVENT_ID;
                 outMsgTelemetry.data.i = TELEMETRY_DELAY_TICKS;
                 sendToTelemetryQueue(&outMsgTelemetry);
+                break;
+            case SUPERVISOR_NULL_EVENT_ID:
                 break;
             default:
                 ;

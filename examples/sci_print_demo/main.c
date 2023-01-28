@@ -12,14 +12,11 @@ int main(void) {
     initSciMutex();
 
     while(1) {
-        // Send a string of text via SCI2 (aka LIN module configured as SCI interface).
-        // Note: This will send through the USB port on the LaunchPad
-        printTextSci(scilinREG, (unsigned char *)"Hello from SCILin!\r\n", 20);
-
         // Send a string of text via SCI
-        // Note: This will send through the SCITX pin on the LaunchPad; you'll need to 
-        // connect an external USB-TTY converter to the LaunchPad to see the text.
-        printTextSci(sciREG, (unsigned char *)"Hello from SCI!\r\n", 17);
+        sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20);
+        
+        // Test sciPrintf
+        sciPrintf("Testing sciPrintf: %d %d %s\r\n", 0, 1, "Hello");
 
         // Toggle the LED.
         gioToggleBit(gioPORTB, 1);
