@@ -1,6 +1,5 @@
 #include "ds3232_mz.h"
 #include "obc_i2c_io.h"
-
 #include <stdint.h>
 
 const rtc_alarm_time_t ALARM_ONCE_A_SECOND = {128, 128, 128, 128};
@@ -26,7 +25,6 @@ uint8_t getSecondsRTC(uint8_t *seconds) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_SECONDS, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read seconds data\r\n", 35);
         return 0;
     }
     *seconds = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
@@ -38,7 +36,6 @@ uint8_t getMinutesRTC(uint8_t *minutes) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_MINUTES, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read minutes data\r\n", 35);
         return 0;
     }
     *minutes = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
@@ -49,7 +46,6 @@ uint8_t getMinutesRTC(uint8_t *minutes) {
 uint8_t getHourRTC(uint8_t *hours){
     uint8_t data;
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_HOURS, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read hours data\r\n", 35);
         return 0;
     }
     *hours = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
@@ -61,7 +57,6 @@ uint8_t getDayRTC(uint8_t *days) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_DAY, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read days data\r\n", 35);
         return 0;
     }
     
@@ -74,7 +69,6 @@ uint8_t getDateRTC(uint8_t* date) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_DATE, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read date data\r\n", 35);
         return 0;
     }
     *date = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, 0b00110000);
@@ -86,7 +80,6 @@ uint8_t getMonthRTC(uint8_t *month) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_MONTH, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read month data\r\n", 35);
         return 0;
     }
     *month = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, 0b00010000);
@@ -98,7 +91,6 @@ uint8_t getYearRTC(uint8_t* year) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_YEAR, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read years data\r\n", 35);
         return 0;
     }
     *year = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
@@ -194,14 +186,13 @@ uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
         alarmTime->day = (dayOrDates & ONES_DIGIT_BIT_MASK);
     else
         alarmTime->date = TwoDigitDecimalFromBCD(dayOrDates, ONES_DIGIT_BIT_MASK, 0b110000);
-           
+
     return 1;
 }
 
 uint8_t getControlRTC(rtc_control_t *control) {
     uint8_t data;
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_CONTROL, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read control data\r\n", 35);
         return 0;
     }
 
@@ -219,7 +210,6 @@ uint8_t getStatusRTC(rtc_status_t *status) {
     uint8_t data;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_STATUS, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read status data\r\n", 35);
         return 0;
     }
 
@@ -237,7 +227,6 @@ uint8_t getAgingOffsetRTC(int8_t* agingOffset) {
     uint8_t data;
     
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_AGING, &data, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read aging offset data\r\n", 35);
         return 0;
     }
 
@@ -249,12 +238,10 @@ float getTemperatureRTC(float* temperature) {
     uint8_t dataLSB, dataMSB;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_TEMP_MSB, &dataMSB, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read temperature MSB data\r\n", 35);
         return 0;
     }
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_TEMP_LSB, &dataLSB, 1) == 0) {
-        // sciPrintText( (uint8_t*)"Failed to read temperature LSB data\r\n", 35);
         return 0;
     }
 
