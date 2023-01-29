@@ -27,9 +27,12 @@
 #define DS3232_ALARM_1_DAY_OR_DATE  0x0AU
 
 #define HOUR_MODE           32
-
 #define DAY_MODE            64
 #define DATE_MODE           0
+
+#define RTC_RST_GIO_PIN     1
+#define RTC_RST_GIO_PORT    gioPORTA
+
 
 typedef struct {
     uint8_t hours;
@@ -295,6 +298,23 @@ uint8_t setStatusRTC(rtc_status_t *writeStatus);
 uint8_t setAgingOffsetRTC(int8_t writeAgingOffset);
 
 /*-------UTILITY FUNCTIONS---------*/
-uint8_t TwoDigitDecimalToBCD(uint8_t inputVal);
+
+/**
+ * @brief Converts a two digit decimal number to corresponding binary coded data to write to RTC registers.
+ * 
+ * @param inputVal 2 digit decimla number to be converted
+ * @return the binary coded data.
+ */
+static uint8_t TwoDigitDecimalToBCD(uint8_t inputVal);
+
+/**
+ * @brief Gets a two digit decimal number from corresponding binary coded data from RTC registers.
+ * 
+ * @param data variable populated with the BCD.
+ * @param onesDigitBitMask uint8_t variable used to get the ones digit value.
+ * @param tensDigitBitMask uint8_t variable used to get the tens digit value.
+ * @return the two digit decimal number.
+ */
+static uint8_t TwoDigitDecimalFromBCD(uint8_t data, uint8_t onesDigitBitMask, uint8_t tensDigitBitMask);
 
 #endif /* DRIVERS_INCLUDE_DS3232_MZ_H_ */

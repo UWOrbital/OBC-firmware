@@ -9,16 +9,17 @@ const rtc_alarm_time_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
 const rtc_alarm_time_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
 const rtc_alarm_time_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
 
-const uint8_t LOW_BIT_MASK = 0b00001111;
-const uint8_t HIGH_BIT_MASK = 0b01110000;
+const uint8_t ONES_DIGIT_BIT_MASK = 0b00001111;
+const uint8_t TENS_DIGIT_BIT_MASK = 0b01110000;
+const uint8_t GET_SEVENTH_BIT = 0b1000000;
 
 void resetRTC(void) {
     /* GIO pin output in the rm46 is the input for the RST pin the RTC. Setting GIOApin1 to 0
     means that the open drain circuit in the RTC will be high impedence (no current flows). So
     nothing will happen. Setting it high will pull the open draain circuit to ground making it 0
     which resets the RTC. */ 
-    gioSetBit(gioPORTA, 1, 1);
-    gioSetBit(gioPORTA, 1, 0);
+    gioSetBit(RTC_RST_GIO_PORT, 1, 1);
+    gioSetBit(RTC_RST_GIO_PORT, 1, 0);
 }
 
 uint8_t getSecondsRTC(uint8_t *seconds) {
@@ -28,11 +29,7 @@ uint8_t getSecondsRTC(uint8_t *seconds) {
         // sciPrintText( (uint8_t*)"Failed to read seconds data\r\n", 35);
         return 0;
     }
-
-    uint8_t oneSeconds = data & LOW_BIT_MASK;
-    uint8_t ten_seconds = (data & HIGH_BIT_MASK) >> 4;
-
-    *seconds = ten_seconds*10 + oneSeconds;
+    *seconds = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
 
     return 1;
 }
@@ -44,10 +41,7 @@ uint8_t getMinutesRTC(uint8_t *minutes) {
         // sciPrintText( (uint8_t*)"Failed to read minutes data\r\n", 35);
         return 0;
     }
-    uint8_t one_minutes = data & LOW_BIT_MASK;
-    uint8_t ten_minutes = (data & HIGH_BIT_MASK) >> 4;
-
-    *minutes = ten_minutes*10 + one_minutes;
+    *minutes = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
 
     return 1;
 }
@@ -58,11 +52,7 @@ uint8_t getHourRTC(uint8_t *hours){
         // sciPrintText( (uint8_t*)"Failed to read hours data\r\n", 35);
         return 0;
     }
-
-    uint8_t one_hours = data & LOW_BIT_MASK;
-    uint8_t ten_hours = (data & 48) >> 4;
-
-    *hours = ten_hours*10 + one_hours;
+    *hours = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
     return 1;
 
 } 
@@ -87,10 +77,7 @@ uint8_t getDateRTC(uint8_t* date) {
         // sciPrintText( (uint8_t*)"Failed to read date data\r\n", 35);
         return 0;
     }
-
-    uint8_t ones_date = data & LOW_BIT_MASK;
-    uint8_t tens_date = (data & 48) >> 4;   // 48 = 0011 0000
-    *date = tens_date*10 + ones_date;
+    *date = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, 0b00110000);
 
     return 1;
 }
@@ -102,10 +89,7 @@ uint8_t getMonthRTC(uint8_t *month) {
         // sciPrintText( (uint8_t*)"Failed to read month data\r\n", 35);
         return 0;
     }
-    
-    uint8_t ones_month = data & LOW_BIT_MASK;
-    uint8_t tens_month = (data & 16) >> 4; 
-    *month = tens_month*10 + ones_month;
+    *month = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, 0b00010000);
 
     return 1;
 }
@@ -117,11 +101,7 @@ uint8_t getYearRTC(uint8_t* year) {
         // sciPrintText( (uint8_t*)"Failed to read years data\r\n", 35);
         return 0;
     }
-    
-    uint8_t ones_year = data & LOW_BIT_MASK;
-    uint8_t tens_year = (data & HIGH_BIT_MASK) >> 4;
-
-    *year = tens_year*10 + ones_year;
+    *year = TwoDigitDecimalFromBCD(data, ONES_DIGIT_BIT_MASK, TENS_DIGIT_BIT_MASK);
 
     return 1;
 }
@@ -190,19 +170,19 @@ uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, &seconds, 1) == 0) {
         return 0;
     }
-    alarmTime->seconds = (seconds & LOW_BIT_MASK) | (seconds & HIGH_BIT_MASK);
+    alarmTime->seconds = (seconds & ONES_DIGIT_BIT_MASK) | (seconds & TENS_DIGIT_BIT_MASK);
 
     uint8_t minutes;
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_MINUTES, &minutes, 1) == 0) {
         return 0;
     }
-    alarmTime->minutes = (minutes & LOW_BIT_MASK) | (minutes & HIGH_BIT_MASK);
+    alarmTime->minutes = (minutes & ONES_DIGIT_BIT_MASK) | (minutes & TENS_DIGIT_BIT_MASK);
 
     uint8_t hours;
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_HOURS, &hours, 1) == 0) {
         return 0;
     }
-    alarmTime->hours = (hours & LOW_BIT_MASK) | (hours & 48);
+    alarmTime->hours = (hours & ONES_DIGIT_BIT_MASK) | (hours & 48);
 
     uint8_t dayOrDates;
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_DAY_OR_DATE, &dayOrDates, 1) == 0) {
@@ -210,11 +190,11 @@ uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
     }
 
     // True if day, false if date
-    if (dayOrDates & 64U)
-        alarmTime->day = (dayOrDates & LOW_BIT_MASK);
+    if (dayOrDates & GET_SEVENTH_BIT)
+        alarmTime->day = (dayOrDates & ONES_DIGIT_BIT_MASK);
     else
-        alarmTime->date = (dayOrDates & LOW_BIT_MASK) + ((dayOrDates & 0b110000) >> 4) * 10;
-    
+        alarmTime->date = TwoDigitDecimalFromBCD(dayOrDates, ONES_DIGIT_BIT_MASK, 0b110000);
+           
     return 1;
 }
 
@@ -428,10 +408,17 @@ uint8_t setAgingOffsetRTC(int8_t writeAgingOffset) {
 }
 
 
-uint8_t TwoDigitDecimalToBCD(uint8_t inputVal) {
+static uint8_t TwoDigitDecimalToBCD(uint8_t inputVal) {
     uint8_t onesdigit = inputVal % 10;
     uint8_t tensdigit = (inputVal / 10) << 4;
     uint8_t writeVal = onesdigit | tensdigit;
 
     return writeVal;
+}
+
+static uint8_t TwoDigitDecimalFromBCD(uint8_t data, uint8_t onesDigitBitMask, uint8_t tensDigitBitMask) {
+    uint8_t onesDigit = data & onesDigitBitMask;
+    uint8_t tensDigit = (data & tensDigitBitMask) >> 4;
+    uint8_t result = tensDigit*10 + onesDigit;
+    return result;
 }
