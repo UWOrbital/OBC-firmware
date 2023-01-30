@@ -3,7 +3,7 @@
 
 #include "obc_errors.h"
 
-#include <sys_common.h>
+// #include <sys_common.h>
 
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U
@@ -21,7 +21,8 @@
  * Enum containing all possible event IDs passed to the adcs event queue.
 */
 typedef enum {
-    ADCS_MANAGER_NULL_EVENT_ID
+    ADCS_MANAGER_NULL_EVENT_ID = 0,
+    ADCS_MANAGER_LOW_POWER_EVENT_ID = 1,
 } adcs_event_id_t;
 
 /**
@@ -91,7 +92,7 @@ void reactionWheelControl(void * pvParameter);
  * @brief Runs Altitude Tracking Algorithrm (Might need to include the Solar Panel and/or Ground Target Tracking Code here or in seperate function(s))
  * @param pvParameter Task parameters.
  */
-void altitudeTracking(void * pvParameter);
+void attitudeTracking(void * pvParameter);
 
 /**
  * @brief Runs Orbital Determination Algorithrm 
@@ -104,6 +105,12 @@ void orbitalDetermination(void * pvParameter);
  * @param pvParameter Task parameters.
  */
 void momentumDumping(void * pvParameter);
+
+/**
+ * @brief Runs low power mode Algorithrm
+ * @param pvParameter Task parameters.
+ */
+void lowPower(void * pvParameter);
 
 /**
  * @brief Initializes the ADCS supervisor task code (Need to add to where this gets run)

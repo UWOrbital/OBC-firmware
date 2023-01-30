@@ -8,6 +8,7 @@
 
 #include <sys_common.h>
 #include <gio.h>
+#include <sys_common.h>
 
 static TaskHandle_t adcsTaskHandle = NULL;
 static StaticTask_t adcsTaskBuffer;
@@ -19,7 +20,7 @@ static uint8_t adcsQueueStack[ADCS_MANAGER_QUEUE_LENGTH*ADCS_MANAGER_QUEUE_ITEM_
 
 /*Boolean values related to the state of the program*/
 uint16_t isDetumbling = 0;
-uint16_t hasAltitudeError = 0;
+uint16_t hasAttitudeError = 0;
 
 /*Task Handlers*/
 static TaskHandle_t detumblingHandle = NULL;
@@ -27,6 +28,7 @@ static TaskHandle_t reactionWheelHandle = NULL;
 static TaskHandle_t altitudeTrackingHandle = NULL;
 static TaskHandle_t orbitalDeterminationHandle = NULL;
 static TaskHandle_t momentumDumpingHandle = NULL;
+static TaskHandle_t lowPowerHandle = NULL;
 
 /**
  * @brief	ADCS Manager task.
@@ -61,7 +63,7 @@ obc_error_code_t sendToADCSQueue(adcs_event_t *event) {
 static void vADCSManagerTask(void * pvParameters) {
     ASSERT(adcsQueueHandle != NULL);
 
-    while(1){
+    while(1) {
         adcs_event_t queueMsg;
         if(xQueueReceive(adcsQueueHandle, &queueMsg, ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             queueMsg.eventID = ADCS_MANAGER_NULL_EVENT_ID;
@@ -69,13 +71,24 @@ static void vADCSManagerTask(void * pvParameters) {
         switch(queueMsg.eventID) {
             case ADCS_MANAGER_NULL_EVENT_ID:
                 break;
+            case ADCS_MANAGER_LOW_POWER_EVENT_ID:
+                if(queueMsg.data.i) {
+                    vTaskResume(lowPowerHandle);
+                } else {
+                    vTaskSuspend(lowPowerHandle);
+                }
+                break;
         }
     }
 }
 
-/* Code from other branch that needs to added into correct location:*/
-
 /*Algorithrm functions*/
+
+void lowPower(void * pvParameters){
+    while(1) {
+        // Insert Code here
+    }
+}
 
 void detumblingMonitor(void * pvParameter)
 {
@@ -84,45 +97,34 @@ void detumblingMonitor(void * pvParameter)
         /*If the satellite is detumbling then set isDetumbling=1 (true)*/
         /*If the satellite is NOT detumbling then set isDetumbling=0 (false)*/
 
-        /*
-        if (satellite_is_detumbling) // change satellite_is_detumbling to boolean expression or value
-            isDetumbling=1;
-        else
-            isDetumbling=0;
-        */
-
-        if (isDetumbling)
-        {
+        if (isDetumbling) {   
             vTaskResume(detumblingHandle);
-        }
-        else
-        {
+        } else {
             vTaskResume(reactionWheelHandle);
             vTaskResume(altitudeTrackingHandle);
             vTaskResume(orbitalDeterminationHandle);
             vTaskResume(momentumDumpingHandle);
         }
+
+        /*Main code will go here*/
     }
 }
 
 void questAlgorithm(void * pvParameter)
 {
-    while (1)
-    {
+    while (1) {
         /*Main code will go here*/
     }
 }
 
 void detumblingControl(void * pvParameter)
 {
-    while (1)
-    {
+    while (1) {
         /*Suspends itself when the satellite is not detumbling*/
-        if (!isDetumbling)
-        {
+        if (!isDetumbling) {
             vTaskSuspend(NULL);
         }
-
+        
         /*Main code will go here*/
     }
 }
@@ -132,44 +134,38 @@ void reactionWheelControl(void * pvParameter)
     while (1)
     {
         /*Suspends itself when the satellite is detumbling or doesn't have an altitude error*/
-        if (isDetumbling || !hasAltitudeError)
-        {
+        if (isDetumbling || !hasAttitudeError) {
             vTaskSuspend(NULL);
         }
 
         /*Main code will go here*/
-
     }
 }
 
-void altitudeTracking(void * pvParameter)
+void attitudeTracking(void * pvParameter)
 {
-    while (1)
-    {
+    while (1){
+        /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
+        /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
+
         /*Suspends itself when the satellite is detumbling*/
-        if (isDetumbling)
-        {
+        if (isDetumbling) {
             vTaskSuspend(NULL);
         }
-        if (hasAltitudeError)
-        {
+        if (hasAttitudeError) {
             vTaskResume(reactionWheelHandle);
         }
 
         /*Main code will go here*/
 
-        /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
-        /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
     }
 }
 
 void orbitalDetermination(void * pvParameter)
 {
-    while (1)
-    {
+    while (1) {
         /*Suspends itself when the satellite is detumbling*/
-        if (isDetumbling)
-        {
+        if (isDetumbling) {
             vTaskSuspend(NULL);
         }
 
@@ -177,13 +173,10 @@ void orbitalDetermination(void * pvParameter)
     }
 }
 
-void momentumDumping(void * pvParameter)
-{
-    while (1)
-    {
+void momentumDumping(void * pvParameter) {
+    while (1) {
         /*Suspends itself when the satellite is detumbling*/
-        if (isDetumbling)
-        {
+        if (isDetumbling) {
             vTaskSuspend(NULL);
         }
 
@@ -191,22 +184,22 @@ void momentumDumping(void * pvParameter)
     }
 }
 
-int initSupervisorTask(void)
-{
+int initSupervisorTask(void) {
     /* Initialize the functions*/
-    /*xTaskCreate(func, name, size, parameters, priorite, handler)*/
+    /*xTaskCreate(func, name, size, parameters, priority, handle)*/
+    initADCSManager();
     xTaskCreate(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(questAlgorithm, "Quest Algorithm", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &detumblingHandle);
     xTaskCreate(reactionWheelControl, "Reaction Wheel Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &reactionWheelHandle);
-    xTaskCreate(altitudeTracking, "Altitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &altitudeTrackingHandle);
+    xTaskCreate(attitudeTracking, "Attitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &altitudeTrackingHandle);
     xTaskCreate(orbitalDetermination, "Orbital Determination", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &orbitalDeterminationHandle);
     xTaskCreate(momentumDumping, "Momentum Dumping", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &momentumDumpingHandle);
-    
+    xTaskCreate(lowPower, "Low Power", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &lowPowerHandle);
+
     /*Start scheduler*/
     vTaskStartScheduler();
 
     while (1) {};
     return 0;
 }
-
