@@ -92,7 +92,7 @@ void reactionWheelControl(void * pvParameter);
  * @brief Runs Altitude Tracking Algorithrm (Might need to include the Solar Panel and/or Ground Target Tracking Code here or in seperate function(s))
  * @param pvParameter Task parameters.
  */
-void altitudeTracking(void * pvParameter);
+void attitudeTracking(void * pvParameter);
 
 /**
  * @brief Runs Orbital Determination Algorithrm 
@@ -105,6 +105,12 @@ void orbitalDetermination(void * pvParameter);
  * @param pvParameter Task parameters.
  */
 void momentumDumping(void * pvParameter);
+
+/**
+ * @brief Runs low power mode Algorithrm
+ * @param pvParameter Task parameters.
+ */
+void lowPower(void * pvParameter);
 
 /**
  * @brief Initializes the ADCS supervisor task code (Need to add to where this gets run)
