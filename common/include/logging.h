@@ -48,6 +48,25 @@ typedef enum {
 #define LOG_ERROR(...)  logLog(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_FATAL(...)  logLog(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
 
+#define LOG_ERROR_CODE(errCode) LOG_ERROR("Error code: %lu", (uint32_t)errCode)
+
+#define RETURN_IF_ERROR_CODE(_ret) {                                    \
+                                errCode = _ret;                         \
+                                if (errCode != OBC_ERR_CODE_SUCCESS) {  \
+                                    LOG_ERROR_CODE(errCode);            \
+                                    return errCode;                     \
+                                }                                       \
+                            }
+                            
+
+#define LOG_IF_ERROR_CODE(_ret) {                                       \
+                                errCode = _ret;                         \
+                                if (errCode != OBC_ERR_CODE_SUCCESS) {  \
+                                    LOG_ERROR_CODE(errCode);            \
+                                }                                       \
+                            }
+                        
+
 /**
  * @brief Initialize the logger
  */

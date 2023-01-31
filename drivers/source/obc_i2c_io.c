@@ -1,5 +1,6 @@
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
+#include "logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -89,24 +90,23 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, void *buf) {
 }
 
 obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes) {
+    obc_error_code_t errCode;
+    
     ASSERT(i2cMutex != NULL);
 
     if (data == NULL || numBytes < 1)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    obc_error_code_t err;
-    err = i2cSendTo(sAddr, 1, &reg);
-    if (err != OBC_ERR_CODE_SUCCESS)
-        return err;
+    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, 1, &reg));
 
-    err = i2cReceiveFrom(sAddr, numBytes, data);
-    if (err != OBC_ERR_CODE_SUCCESS)
-        return err;
+    RETURN_IF_ERROR_CODE(i2cReceiveFrom(sAddr, numBytes, data));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes) {
+    obc_error_code_t errCode;
+
     ASSERT(i2cMutex != NULL);
 
     if (data == NULL || numBytes < 1 || numBytes > I2C_WRITE_REG_MAX_BYTES)
@@ -119,5 +119,6 @@ obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t 
         dataBuf[i + 1] = data[i];
     }
 
-    return i2cSendTo(sAddr, numBytes + 1, &dataBuf);
-}  
+    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, numBytes + 1, &dataBuf));
+    return OBC_ERR_CODE_SUCCESS;
+}

@@ -1,4 +1,6 @@
 #include "obc_spi_io.h"
+#include "obc_errors.h"
+#include "logging.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -117,12 +119,17 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
 }
 
 obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb) {
+    obc_error_code_t errCode;
     uint8_t inb;
-    return spiTransmitAndReceiveByte(spiReg, outb, &inb);
+
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, outb, &inb));
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb) {
-    return spiTransmitAndReceiveByte(spiReg, 0xFF, inb);
+    obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, 0xFF, inb));
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 static int8_t spiPortToIndex(gioPORT_t *spiPort) {
