@@ -8,7 +8,6 @@
 
 #include <sys_common.h>
 #include <gio.h>
-#include <sys_common.h>
 
 static TaskHandle_t adcsTaskHandle = NULL;
 static StaticTask_t adcsTaskBuffer;
@@ -97,6 +96,7 @@ void detumblingMonitor(void * pvParameter)
         /*If the satellite is detumbling then set isDetumbling=1 (true)*/
         /*If the satellite is NOT detumbling then set isDetumbling=0 (false)*/
 
+        /*If the satellite is detumbling then resume the detumbling control task*/
         if (isDetumbling) {   
             vTaskResume(detumblingHandle);
         } else {
