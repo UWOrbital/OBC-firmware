@@ -50,21 +50,21 @@ typedef enum {
 
 #define LOG_ERROR_CODE(errCode) LOG_ERROR("Error code: %lu", (uint32_t)errCode)
 
-#define RETURN_IF_ERROR_CODE(_ret) {                                    \
-                                errCode = _ret;                         \
-                                if (errCode != OBC_ERR_CODE_SUCCESS) {  \
-                                    LOG_ERROR_CODE(errCode);            \
-                                    return errCode;                     \
-                                }                                       \
-                            }
+#define RETURN_IF_ERROR_CODE(_ret)  do {                                        \
+                                        errCode = _ret;                         \
+                                        if (errCode != OBC_ERR_CODE_SUCCESS) {  \
+                                            LOG_ERROR_CODE(errCode);            \
+                                            return errCode;                     \
+                                        }                                       \
+                                    } while (0)
                             
 
-#define LOG_IF_ERROR_CODE(_ret) {                                       \
-                                errCode = _ret;                         \
-                                if (errCode != OBC_ERR_CODE_SUCCESS) {  \
-                                    LOG_ERROR_CODE(errCode);            \
-                                }                                       \
-                            }
+#define LOG_IF_ERROR_CODE(_ret) do {                                        \
+                                    errCode = _ret;                         \
+                                    if (errCode != OBC_ERR_CODE_SUCCESS) {  \
+                                        LOG_ERROR_CODE(errCode);            \
+                                    }                                       \
+                                } while (0)
                         
 
 /**
