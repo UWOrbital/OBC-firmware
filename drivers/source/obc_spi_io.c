@@ -1,6 +1,6 @@
 #include "obc_spi_io.h"
 #include "obc_errors.h"
-#include "logging.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -8,6 +8,19 @@
 
 #include <gio.h>
 #include <spi.h>
+
+// This includes SPI2 which isn't available on the RM46 PGE package
+#define NUM_SPI_PORTS 5
+
+// SPIFLG Errors
+#define SPI_FLAG_ERR_MASK 0xFFU // All errors are shwon in the LSB of SPIFLG
+#define SPI_FLAG_SUCCESS 0x00U // No errors
+#define SPI_FLAG_DLENERR 0x01U // Data length error
+#define SPI_FLAG_TIMEOUT 0x02U // Timeout error
+#define SPI_FLAG_PARERR 0x04U // Parity error
+#define SPI_FLAG_DESYNC 0x08U // Desynchronization error
+#define SPI_FLAG_BITERR 0x10U // Bit error
+#define SPI_FLAG_RXOVRNINT 0x40U // Receive overrun interrupt flag
 
 /**
  * @brief Get index of spiPort in spiMutexes and spiMutexBuffers
