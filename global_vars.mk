@@ -18,7 +18,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -Og
+# CC_FLAGS += -Og
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -29,6 +29,15 @@ CC_FLAGS += -std=gnu99
 
 CPP_FLAGS :=
 
+BOARD_TYPE ?= RM46_LAUNCHPAD
+CPP_FLAGS += -D$(BOARD_TYPE)
+
+LOG_OUTPUT ?= LOG_TO_UART
+CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT) 
+
+LOG_LEVEL ?= LOG_TRACE
+CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
+
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
 	CPP_FLAGS += -DDEBUG
@@ -38,9 +47,11 @@ INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"drivers/include"
+INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"adcs/include"
 INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
 
 LIBS := 

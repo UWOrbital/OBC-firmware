@@ -1,8 +1,22 @@
 #ifndef DRIVERS_INCLUDE_OBC_SCI_IO_H_
 #define DRIVERS_INCLUDE_OBC_SCI_IO_H_
 
+#include "obc_errors.h"
+
 #include <sci.h>
 #include <stdint.h>
+
+#ifdef RM46_LAUNCHPAD
+	#define UART_PRINT_REG scilinREG
+	#define UART_READ_REG scilinREG 
+#elif OBC_REVISION_1
+	#define UART_PRINT_REG sciREG 
+	#define UART_READ_REG sciREG
+#elif OBC_REVISION_2
+	#error Serial port not yet chosen for OBC_REVISION_2
+#else
+	#error Board not defined
+#endif
 
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
@@ -10,22 +24,41 @@
 void initSciMutex(void);
 
 /**
- * @brief Send a string of text via SCI or SCI2.
- * @param sci The SCI register to use (sciREG or scilinREG).
+ * @brief Send a string of text via UART_PRINT_REG.
+ * 
  * @param text The text to send.
  * @param length The length of the text to send.
- * @return 1 if the text was sent, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-uint8_t printTextSci(sciBASE_t *sci, unsigned char *text, uint32_t length);
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length);
 
 /**
- * @brief Printf via SCI or SCI2.
+ * @brief Printf via UART_PRINT_REG.
  * 
- * @param sci The SCI register to use (sciREG or scilinREG)
  * @param s The format string
  * @param ... Arguments to use in format string
- * @return 1 if text was printed, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-uint8_t sciPrintf(sciBASE_t *sci, const char *s, ...);
+obc_error_code_t sciPrintf(const char *s, ...);
+
+/**
+ * @brief Read a byte from UART_READ_REG by polling.
+ * 
+ * @param character The character that is read
+ * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
+ */
+obc_error_code_t sciReadByte(unsigned char *character);
+
+/**
+ * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.
+ * 
+ * @param text The text that stores the characters read
+ * @param length The number of bytes to read
+ * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
+ * 
+ * @note Bytes will be read until a newline character or (length - 1) characters are received.
+ * A null terminator will be added to the end of the string.
+ */
+obc_error_code_t sciRead(unsigned char *text, uint32_t length);
 
 #endif /* DRIVERS_INCLUDE_OBC_SCI_IO_H_ */

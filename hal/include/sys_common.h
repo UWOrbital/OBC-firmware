@@ -49,12 +49,14 @@
 
 #include "hal_stdtypes.h"
 
-#include <string.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 /* USER CODE BEGIN (0) */
+#include <FreeRTOS.h>
+#include <os_task.h>
+
+#include <string.h>
 /* USER CODE END */
 
 /************************************************************/
@@ -108,6 +110,18 @@ typedef enum config_value_type
 /* The ASSERT macro, which does the actual assertion checking.  Typically, this */
 /* will be for procedure arguments.                                             */
 /********************************************************************************/
+#ifdef DEBUG
+#define ASSERT(expr) {                                      \
+                         if(!(expr))                        \
+                         {                                  \
+                             __error__(__FILE__, __LINE__); \
+                         }                                  \
+                     }
+#else
+#define ASSERT(expr)
+#endif
+
+/* USER CODE BEGIN (2) */
 
 /**
  * @brief Print information for a failed assertion.
@@ -117,18 +131,19 @@ typedef enum config_value_type
  */
 void uartAssertFailed(char *file, int line, char *expr);
 
+#undef ASSERT
 #ifdef DEBUG
 #define ASSERT(expr) {                                                          \
                          if(!(expr))                                            \
                          {                                                      \
                              uartAssertFailed(__FILE__, __LINE__, #expr);       \
+                             taskDISABLE_INTERRUPTS();                          \
+                             while(1);                                          \
                          }                                                      \
                      }
 #else
 #define ASSERT(expr)
 #endif
-
-/* USER CODE BEGIN (2) */
 /* USER CODE END */
 
 /* USER CODE BEGIN (3) */
