@@ -1,6 +1,6 @@
 #include "telemetry.h"
 #include "supervisor.h"
-#include "logging.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -70,7 +70,7 @@ static void vTelemetryTask(void * pvParameters) {
 
         switch (queueMsg.eventID) {
             case TURN_ON_LED_EVENT_ID:
-                vTaskDelay(queueMsg.data.i);
+                vTaskDelay((uint32_t)queueMsg.data.i);
                 gioSetBit(gioPORTB, 1, 1);
                 LOG_INFO("Turning on LED");
                 xTimerStart(ledTimerHandle, TELEMETRY_DELAY_TICKS);
