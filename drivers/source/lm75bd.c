@@ -42,7 +42,12 @@ obc_error_code_t lm75bdInit(lm75bd_config_t *config) {
     if (config->hysteresisThresholdCelsius >= config->overTempThresholdCelsius)
         return OBC_ERR_CODE_INVALID_ARG;
     
-    RETURN_IF_ERROR_CODE(writeConfigLM75BD(config->devAddr, config->osFaultQueueSize, config->osPolarity, config->osOperationMode, config->devOperationMode));
+    RETURN_IF_ERROR_CODE(writeConfigLM75BD(config->devAddr, 
+                                            config->osFaultQueueSize, 
+                                            config->osPolarity, 
+                                            config->osOperationMode, 
+                                            config->devOperationMode));
+
     RETURN_IF_ERROR_CODE(writeThystLM75BD(config->devAddr, config->hysteresisThresholdCelsius));
     RETURN_IF_ERROR_CODE(writeTosLM75BD(config->devAddr, config->overTempThresholdCelsius));
     
