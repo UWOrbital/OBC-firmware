@@ -8,15 +8,6 @@
 #include <i2c.h>
 #include <os_projdefs.h>
 
-// Max number of bytes you can send when calling i2cWriteReg
-#define I2C_WRITE_REG_MAX_BYTES 32U
-
-// The I2C bus to use for the OBC
-#define I2C_REG i2cREG1
-
-// The mutex timeout for the I2C bus
-#define I2C_MUTEX_TIMEOUT portMAX_DELAY
-
 /**
  * @brief Initialize the I2C bus mutex
  */

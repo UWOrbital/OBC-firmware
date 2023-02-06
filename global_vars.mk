@@ -18,11 +18,18 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -Og
+CC_FLAGS += -Os
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
 CC_FLAGS += -Wall
+CC_FLAGS += -Wextra
+CC_FLAGS += -Wno-unused-parameter
+# CC_FLAGS += -Werror TODO: Enable this if we solve all hal warnings
+
+CC_FLAGS += -fstack-usage
+CC_FLAGS += -fdump-ipa-cgraph
+
 CC_FLAGS += -specs="nosys.specs"
 CC_FLAGS += -MMD
 CC_FLAGS += -std=gnu99
