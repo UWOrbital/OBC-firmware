@@ -5,10 +5,16 @@
 # Please also use these flags in subsystem compilation as well
 # Please be careful when modifying anything here, you should not need to
 
-include .env
+ifndef ROOT_DIR
+ROOT_DIR = .
+endif
+ifndef BUILD_DIR
+BUILD_DIR = $(ROOT_DIR)/build
+endif
+
+include $(ROOT_DIR)/.env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
-BUILD_DIR = build
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -52,19 +58,19 @@ endif
 
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
-INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"drivers/include"
-INCLUDE_DIRS += -I"common/include"
-INCLUDE_DIRS += -I"adcs/include"
-INCLUDE_DIRS += -I"cdh/include"
-INCLUDE_DIRS += -I"comms/include"
-INCLUDE_DIRS += -I"eps/include"
-INCLUDE_DIRS += -I"payload/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/hal/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/common/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/adcs/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/cdh/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/comms/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/eps/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/payload/include"
 
 LIBS := 
 
-$(BUILD_DIR)/%.o : %.c
+$(BUILD_DIR)/%.o : $(ROOT_DIR)/%.c
 	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $< 
 
-$(BUILD_DIR)/%.o : %.s
+$(BUILD_DIR)/%.o : $(ROOT_DIR)/%.s
 	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<
