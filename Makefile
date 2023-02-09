@@ -13,18 +13,18 @@ DEPS := $(patsubst %.o,%.d,$(OBJS))
 OBJ_DIRS := $(sort $(foreach obj,$(OBJS),$(dir $(obj))))
 -include $(DEPS)
 
-OBJS += build/main.o
+OBJS += $(BUILD_DIR)/main.o
 
 $(foreach dir,$(OBJ_DIRS), $(shell mkdir -p $(dir)))
 
 all: $(BUILD_DIR)/OBC-firmware.out
 
 $(BUILD_DIR)/OBC-firmware.out: $(OBJS)
-	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
+	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"$(ROOT_DIR)/hal/source/sys_link.ld"
 
 
 clean:
-	rm -rf build/*
-	rm -f hal/source/sys_main.c
+	rm -rf $(BUILD_DIR)/*
+	rm -f $(ROOT_DIR)/hal/source/sys_main.c
 
 .PHONY: all clean
