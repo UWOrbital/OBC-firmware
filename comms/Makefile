@@ -8,7 +8,6 @@ include $(ROOT_DIR)/global_vars.mk
 
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += drivers/source
 SRC_DIRS += drivers/cc1120/source
 SRC_DIRS += common/source
 SRC_DIRS += comms/source
