@@ -5,12 +5,8 @@
 # Please also use these flags in subsystem compilation as well
 # Please be careful when modifying anything here, you should not need to
 
-ifndef ROOT_DIR
-ROOT_DIR = .
-endif
-ifndef BUILD_DIR
-BUILD_DIR = $(ROOT_DIR)/build
-endif
+ROOT_DIR ?= .
+BUILD_DIR ?= $(ROOT_DIR)/build
 
 include $(ROOT_DIR)/.env
 
