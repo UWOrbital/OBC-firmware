@@ -7,7 +7,7 @@ void resetSW(reset_t reason){
 
     if(reason != NULLREASON){
 
-        resetAddress =  (uint32_t*)(*resetAddress | (uint32_t)0x00008000);
+        resetAddress =  (uint32_t*)((uint32_t)resetAddress | (uint32_t)0x00008000);
     }
 
 }
