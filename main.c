@@ -1,4 +1,4 @@
-#include "logging.h"
+#include "obc_logging.h"
 #include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"

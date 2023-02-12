@@ -1,4 +1,4 @@
-#include "logging.h"
+#include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_sci_io.h"
 
@@ -48,7 +48,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 	va_end(args);
 	if (ret < 0)
 		return OBC_ERR_CODE_INVALID_ARG;
-	if (ret >= MAX_MSG_SIZE)
+	if ((uint32_t)ret >= MAX_MSG_SIZE)
 		return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
 
@@ -57,7 +57,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 	ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[msgLevel], file, line);
 	if (ret < 0)
 		return OBC_ERR_CODE_INVALID_ARG;
-	if (ret >= MAX_FNAME_LINENUM_SIZE)
+	if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE)
 		return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
 	// Prepare entire output
@@ -65,7 +65,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 	ret = snprintf(buf, MAX_LOG_SIZE, "%s - %s\r\n", infobuf, msgbuf);
 	if (ret < 0)
 		return OBC_ERR_CODE_INVALID_ARG;
-	if (ret >= MAX_LOG_SIZE)
+	if ((uint32_t)ret >= MAX_LOG_SIZE)
 		return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
 	if (outputLocation == LOG_TO_UART) {
