@@ -29,6 +29,7 @@
 #define HOUR_MODE           32
 #define DAY_MODE            64
 #define DATE_MODE           0
+#define TEMP_RESOLUTION     0.25
 
 #define RTC_RST_GIO_PIN     1
 #define RTC_RST_GIO_PORT    gioPORTA

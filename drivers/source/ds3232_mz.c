@@ -281,7 +281,7 @@ float getTemperatureRTC(float* temperature) {
 
     uint8_t tempFraction = dataLSB;
     int16_t tempCombined = (tempDecimal<<2) | (tempFraction>>6);
-    *temperature = tempCombined * 0.25;
+    *temperature = tempCombined * TEMP_RESOLUTION;
 
     return OBC_ERR_CODE_SUCCESS;
 }
