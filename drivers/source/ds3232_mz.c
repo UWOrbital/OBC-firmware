@@ -3,11 +3,11 @@
 #include "obc_errors.h"
 #include <stdint.h>
 
-const rtc_alarm_time_t ALARM_ONCE_A_SECOND = {128, 128, 128, 128};
-const rtc_alarm_time_t SECONDS_MATCH = {128, 128, 128, 0};
-const rtc_alarm_time_t SECONDS_MINUTES_MATCH = {128, 128, 0, 0};
-const rtc_alarm_time_t SECONDS_MINUTES_HOURS_MATCH = {128, 0, 0, 0};
-const rtc_alarm_time_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
+const rtc_alarm_mode_t ALARM_ONCE_A_SECOND = {1, 1, 1, 1};
+const rtc_alarm_mode_t SECONDS_MATCH = {1, 1, 1, 0};
+const rtc_alarm_mode_t SECONDS_MINUTES_MATCH = {1, 1, 0, 0};
+const rtc_alarm_mode_t SECONDS_MINUTES_HOURS_MATCH = {1, 0, 0, 0};
+const rtc_alarm_mode_t SECONDS_MINUTES_HOURS_DAY_OR_DATE_MATCH = {0, 0, 0, 0};
 
 const uint8_t ONES_DIGIT_BIT_MASK = 0b00001111;
 const uint8_t TENS_DIGIT_BIT_MASK = 0b01110000;
@@ -222,11 +222,11 @@ uint8_t getControlRTC(rtc_control_t *control) {
         return retVal;
     }
 
-    control->EOSC = (data & 128) >> 7;
-    control->BBSQW = (data & 64) >> 6;
-    control->CONV = (data & 32) >> 5;
-    control->INTCN = (data & 4) >> 2;
-    control->A2IE = (data & 2) >> 1;
+    control->EOSC = (data >> 7) & 1;
+    control->BBSQW = (data >> 6) & 1;
+    control->CONV = (data >> 5) & 1;
+    control->INTCN = (data >> 2) & 1;
+    control->A2IE = (data >> 1) & 1;
     control->A1IE = (data & 1);
 
     return OBC_ERR_CODE_SUCCESS;
@@ -242,11 +242,11 @@ uint8_t getStatusRTC(rtc_status_t *status) {
         return retVal;
     }
 
-    status->OSF = (data & 128) >> 7;
-    status->BB32KHZ = (data & 64) >> 6;
-    status->EN32KHZ = (data & 8) >> 3;
-    status->BSY = (data & 4) >> 2;
-    status->A2F = (data & 2) >> 1;
+    status->OSF = (data >> 7) & 1;
+    status->BB32KHZ = (data >> 6) & 1;
+    status->EN32KHZ = (data >> 3) & 1;
+    status->BSY = (data >> 2) & 1;
+    status->A2F = (data >> 1) & 1;
     status->A1F = (data & 1);
 
     return OBC_ERR_CODE_SUCCESS;
@@ -361,31 +361,31 @@ I have combined seconds value with A1m1, minutes value with a2m2 before writing 
 similar with day or date mode */
 
 uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode,  uint8_t dayOrDate) {
-    uint8_t writeSeconds = TwoDigitDecimalToBCD(writeAlarmTime->seconds) | writeAlarmMode-> A1M1;
+    uint8_t writeSeconds = TwoDigitDecimalToBCD(writeAlarmTime->seconds) | ((writeAlarmMode-> A1M1) << 7);
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, &writeSeconds, 1)) {
         return 0;
     }
 
-    uint8_t writeMinutes =  TwoDigitDecimalToBCD(writeAlarmTime->minutes) | writeAlarmMode-> A1M2;
+    uint8_t writeMinutes =  TwoDigitDecimalToBCD(writeAlarmTime->minutes) | ((writeAlarmMode-> A1M2) << 7);
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_MINUTES, &writeMinutes, 1)) {
         return 0;
     }
 
     // DEFAULT setting hour to 24 hour mode
-    uint8_t writeHours = HOUR_MODE | TwoDigitDecimalToBCD(writeAlarmTime->hours) | writeAlarmMode-> A1M3;
+    uint8_t writeHours = HOUR_MODE | TwoDigitDecimalToBCD(writeAlarmTime->hours) | ((writeAlarmMode-> A1M3) >> 7);
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, &writeHours, 1)) {
         return 0;
     }
 
     // if dayOrDate is 1, its in day mode else date mode
     if (dayOrDate) {
-        uint8_t writeDay =  TwoDigitDecimalToBCD(writeAlarmTime->day) | writeAlarmMode-> A1M4 | DAY_MODE;
+        uint8_t writeDay =  TwoDigitDecimalToBCD(writeAlarmTime->day) | ((writeAlarmMode-> A1M4) >> 7) | DAY_MODE;
         if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, &writeDay, 1)) {
           return 0;
         }
     }
     else {
-        uint8_t writeDate =  TwoDigitDecimalToBCD(writeAlarmTime->date) | writeAlarmMode-> A1M4 | DATE_MODE;
+        uint8_t writeDate =  TwoDigitDecimalToBCD(writeAlarmTime->date) | ((writeAlarmMode-> A1M4) >> 7) | DATE_MODE;
         if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, &writeDate, 1)) {
           return 0;
         }
