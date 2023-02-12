@@ -43,6 +43,13 @@ BUILD_PATHS = $(PATHB) $(PATHD) $(PATHO) $(PATHR)
 
 SRCT = $(wildcard $(PATHT)*.c)
 
+# SRCS := $(foreach dir,$(PATHS),$(wildcard $(dir)/*.c))
+# SRCS += $(foreach dir,$(PATHS),$(wildcard $(dir)/*.s))
+# OBJS := $(foreach file,$(SRCS),$(BUILD_DIR)/$(basename $(file)).o)
+# OBJ_DIRS := $(sort $(foreach obj,$(OBJS),$(dir $(obj))))
+
+# $(foreach dir,$(OBJ_DIRS), $(shell mkdir -p $(dir)))
+
 COMPILE=gcc -c
 LINK=gcc
 DEPEND=gcc -MM -MG -MF
