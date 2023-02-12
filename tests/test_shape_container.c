@@ -3,6 +3,10 @@
 #include "shape_container.h" // The header for the code we are testing
 #include "mock_rectangle.h" // A mock header
 
+void setUp(void) {}
+
+void tearDown(void) {}
+
 void test_shape_container_init(void) {
     // Set up known values
     uint16_t length = 4;
@@ -13,4 +17,10 @@ void test_shape_container_init(void) {
 
     //Run Actual Function Under Test
     shape_container_init(length, width);
+}
+
+int main(void) {
+    UNITY_BEGIN();
+    RUN_TEST(test_shape_container_init);
+    return UNITY_END();
 }
