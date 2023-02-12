@@ -1,36 +1,10 @@
-set(CMAKE_SYSTEM_NAME Generic)
-cmake_minimum_required(VERSION 3.5.0)
-project (OBC-firmware C ASM)
+cmake_minimum_required(VERSION 3.15)
 
-set(CMAKE_GENERATOR "Unix Makefiles")
-set(CMAKE_C_COMPILER "../compiler/bin/arm-none-eabi-gcc")
-set(CMAKE_ASM_COMPILER "../compiler/bin/arm-none-eabi-gcc")
+set(CMAKE_TOOLCHAIN_FILE toolchain_arm_none_eabi.cmake)
 
-set(CMAKE_C_COMPILER_FORCED TRUE)
-set(CMAKE_ASM_COMPILER_FORCED TRUE)
+set(LINKER_SCRIPT ../hal/source/sys_link.ld)
 
-set(CMAKE_C_STANDARD 99)
-
-add_compile_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
-add_compile_options(-Os -g -gdwarf-3 -gstrict-dwarf -Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa-cgraph --specs=nosys.specs  -MMD)
-
-# if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-#     message(STATUS "Maximum optimization for speed")
-#     add_compile_options(-Ofast)
-# elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-#     message(STATUS "Maximum optimization for speed, debug info included")
-#     add_compile_options(-Ofast -g)
-# elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
-#     message(STATUS "Maximum optimization for size")
-#     add_compile_options(-Os)
-# else ()
-#     message(STATUS "Minimal optimization, debug info included")
-#     add_compile_options(-Og -g)
-# endif ()
-
-add_definitions(-DDEBUG -DRM46_LAUNCHPAD -DLOG_DEFAULT_OUTPUT_LOCATION=LOG_TO_UART -DLOG_DEFAULT_LEVEL=LOG_TRACE)
-
-# set(CC_FOLDER_ROOT C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/11.2 2022.02)
+project(OBC-firmware LANGUAGES C ASM)
 
 include_directories(
     compiler/arm-none-eabi/include
@@ -75,7 +49,6 @@ set(SOURCES
     hal/source/pinmux.c
     hal/source/sci.c
     hal/source/spi.c
-    hal/source/sys_calls.c
     hal/source/sys_core.s
     hal/source/sys_dma.c
     hal/source/sys_intvecs.s
@@ -91,13 +64,6 @@ set(SOURCES
     payload/source/payload_manager.c
     )
 
-set(LINKER_SCRIPT ../hal/source/sys_link.ld)
-
 # add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
-add_link_options(-Wl,-Map,${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
-add_link_options(-T ${LINKER_SCRIPT})
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
-
-set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
-set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
+add_executable(${PROJECT_NAME}.out ${SOURCES})

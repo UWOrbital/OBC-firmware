@@ -1,0 +1,5 @@
+- Move arm-none-eabi contents to compiler/ directory
+- mkdir build
+- cd build
+- cmake -G "Unix Makefiles" ..
+- make
