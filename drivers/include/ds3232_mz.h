@@ -34,19 +34,43 @@
 #define RTC_RST_GIO_PIN     1
 #define RTC_RST_GIO_PORT    gioPORTA
 
-
+/**
+ * @struct rtc_time_t
+ * @brief DS3232 time structure definition
+ * @var hours Specifies the RTC hour value. (0-23) 
+ * @var minutes Specifies the RTC minutes value. (0-59)
+ * @var seconds Specifies the RTC seconds value. (0-59)
+ * @note This stucture is used to set and get the RTC time. The time is set in the 24-hour format by default.
+ */
 typedef struct {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
 } rtc_time_t;
 
+/**
+ * @struct rtc_date_t
+ * @brief DS3232 date structure definition
+ * @var date Specifies the RTC date value. (01-31) 
+ * @var month Specifies the RTC month value. (01-12)
+ * @var year Specifies the RTC year value. (00-99)
+ */
 typedef struct {
     uint8_t date;
     uint8_t month;
     uint8_t year;
 } rtc_date_t;
 
+/**
+ * @struct rtc_date_time_t
+ * @brief DS3232 date plus time structure definition
+ * @var date Specifies the RTC date value. (01-31) 
+ * @var month Specifies the RTC month value. (01-12)
+ * @var year Specifies the RTC year value. (00-99)
+ * @var hours Specifies the RTC hour value. (0-23) 
+ * @var minutes Specifies the RTC minutes value. (0-59)
+ * @var seconds Specifies the RTC seconds value. (0-59)
+ */
 typedef struct {
     uint8_t date;
     uint8_t month;
@@ -56,15 +80,37 @@ typedef struct {
     uint8_t seconds;
 } rtc_date_time_t;
 
+/**
+ * @struct rtc_control_t
+ * @brief DS3232 control register structure definition
+ * @var EOSC    Enable oscillator
+ * @var BBSQW   Battery-backed square-wave enable
+ * @var CONV    Convert temperature
+ * @var INTCN   Interrupt control 
+ * @var A2IE    Alarm 2 interrupt enable
+ * @var A1IE    Alarm 1 interrupt enable
+ * @note Used to get and set the control registers
+ */
 typedef struct {
-    uint8_t EOSC;     // Enable oscillator
-    uint8_t BBSQW;     // Battery-backed square-wave enable
-    uint8_t CONV;       // Convert temperature
-    uint8_t INTCN;      // Interrupt control
-    uint8_t A2IE;       // Alarm 2 interrupt enable
-    uint8_t A1IE;       // Alarm 1 interrupt enable
+    uint8_t EOSC;    
+    uint8_t BBSQW;     
+    uint8_t CONV;      
+    uint8_t INTCN;     
+    uint8_t A2IE;     
+    uint8_t A1IE;       
 } rtc_control_t;
 
+/**
+ * @struct rtc_status_t
+ * @brief DS3232 status register structure definition
+ * @var OSF     Oscillator stop flag
+ * @var BB32KHZ Battery-backed 32kHz output
+ * @var EN32KHZ Enabled 32.768kHz output
+ * @var BSY     Busy. This bit indicates the device is busy executing temperature conversion function
+ * @var A2F     Alarm 2 flag
+ * @var A1F     Alarm 1 flag
+ * @note Used to get and set the status registers
+ */
 typedef struct {
     uint8_t OSF;     // oscillator stop flag
     uint8_t BB32KHZ;     // Battery-backed 32 kHz output
@@ -74,14 +120,30 @@ typedef struct {
     uint8_t A1F;       // Alarm 1 flag
 } rtc_status_t;
 
+/**
+ * @struct rtc_alarm_time_t
+ * @brief DS3232 alarm time structure definition
+ * @var date    Specifies the alarm date value. (01-31) 
+ * @var day     Specifies the alarm day value. (1-7)
+ * @var hours   Specifies the alarm hours value. (00-24)
+ * @var minutes Specifies the alarm minutes value. (0-59)
+ * @var seconds Specifies the alarm seconds value. (0-59)
+ * @note Used to get and set alarm 1. Day or date depends on the mode selected as both of them write to the same address. This is provisioned in the setAlarmRTC() function
+ */
 typedef struct {
-    uint8_t date;   // depends on the mode selected for alarm, could be day or date
-    uint8_t day;    // depends on the mode selected for alarm, could be day or date
+    uint8_t date;   
+    uint8_t day;   
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
 } rtc_alarm_time_t;
 
+/**
+ * @struct rtc_alarm_mode_t
+ * @brief DS3232 alarm mode structure definition
+ * @var A1M1, A1M2, A1M3, A1M4 are variables that need to be set to one or zero
+ * @note The different modes and combinations in which A1M1 - A1M4 need to be set are given as ready constants at the top of the source file for this driver
+ */
 typedef struct {
     uint8_t A1M1;
     uint8_t A1M2;
