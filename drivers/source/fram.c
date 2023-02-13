@@ -28,15 +28,15 @@
 #define FRAM_WAKE_BUSY_WAIT     99000U      //Assume RM46 is 220 MHz, value for wait loop should give ~450us delay
 
 typedef enum cmd{
-    RDSR,           //Read Status Register
-    READ,           //Normal read
-    FSTRD,          //Fast read, Note this is used for serial flash compatibility not to read data fast!
-    RDID,           //Get Device ID
-    WREN,           //Set Write EN
-    WRDI,           //Reset Write EN
-    WRSR,           //Write to Status Register
-    WRITE,          //Write memory data
-    SLEEP           //Put FRAM to sleep
+    FRAM_READ_STATUS_REG,               //Read Status Register
+    FRAM_READ,                          //Normal read
+    FRAM_FAST_READ,                     //Fast read, Note this is used for serial flash compatibility not to read data fast!
+    FRAM_READ_ID,                       //Get Device ID
+    FRAM_WRITE_EN,                      //Set Write EN
+    FRAM_WRITE_EN_RESET,                //Reset Write EN
+    FRAM_WRITE_STATUS_REG,              //Write to Status Register
+    FRAM_WRITE,                         //Write memory data
+    FRAM_SLEEP                          //Put FRAM to sleep
 }cmd_t;
 
 
@@ -46,33 +46,24 @@ static obc_error_code_t framTransmitAddress(uint32_t addr);
 
 static obc_error_code_t framTransmitOpCode(cmd_t cmd){
     switch (cmd) {
-        case READ:
+        case FRAM_READ:
             return spiTransmitByte(FRAM_spiREG, OP_READ);
-            break;
-        case FSTRD:
+        case FRAM_FAST_READ:
             return spiTransmitByte(FRAM_spiREG, OP_FREAD);
-            break;
-        case RDSR:
+        case FRAM_READ_STATUS_REG:
             return spiTransmitByte(FRAM_spiREG, OP_READ_STAT_REG);
-            break;
-        case RDID:
+        case FRAM_READ_ID:
             return spiTransmitByte(FRAM_spiREG, OP_GET_ID);
-            break;
-        case WREN:
+        case FRAM_WRITE_EN:
             return spiTransmitByte(FRAM_spiREG, OP_WRITE_ENABLE);
-            break;
-        case WRDI:
+        case FRAM_WRITE_EN_RESET:
             return spiTransmitByte(FRAM_spiREG, OP_WRITE_RESET);
-            break;
-        case WRSR:
+        case FRAM_WRITE_STATUS_REG:
             return spiTransmitByte(FRAM_spiREG, OP_WRITE_STAT_REG);
-            break;
-        case WRITE:
+        case FRAM_WRITE:
             return spiTransmitByte(FRAM_spiREG, OP_WRITE);
-            break;
-        case SLEEP:
+        case FRAM_SLEEP:
             return spiTransmitByte(FRAM_spiREG, OP_SLEEP);
-            break;
         default:
             return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -85,6 +76,7 @@ static obc_error_code_t framTransmitAddress(uint32_t addr) {
         return OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE;
     }
     
+    //Send last 3 bytes MSB first
     for(int i=2; i >=0; i--){
         uint8_t byte = (addr >> (i*8)) & (0xFF);
         obc_error_code_t ret = spiTransmitByte(FRAM_spiREG, (unsigned char) byte);
@@ -102,7 +94,7 @@ obc_error_code_t framReadStatusReg(uint8_t *status){
     }
 
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
-    ret = framTransmitOpCode(RDSR);
+    ret = framTransmitOpCode(FRAM_READ_STATUS_REG);
     if(ret != OBC_ERR_CODE_SUCCESS){
         deassertChipSelect(FRAM_spiPORT, FRAM_CS);
         return ret;
@@ -118,14 +110,14 @@ obc_error_code_t framWriteStatusReg(uint8_t status){
     obc_error_code_t ret;
     //Send WREN
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
-    ret = framTransmitOpCode(WREN);
+    ret = framTransmitOpCode(FRAM_WRITE_EN);
     deassertChipSelect(FRAM_spiPORT, FRAM_CS);
     if(ret != OBC_ERR_CODE_SUCCESS){
         return ret;
     }
 
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
-    ret = framTransmitOpCode(WRSR);
+    ret = framTransmitOpCode(FRAM_WRITE_STATUS_REG);
     if(ret != OBC_ERR_CODE_SUCCESS){
         deassertChipSelect(FRAM_spiPORT, FRAM_CS);
         return ret;
@@ -145,7 +137,7 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes){
 
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
 
-    ret = framTransmitOpCode(FSTRD);
+    ret = framTransmitOpCode(FRAM_FAST_READ);
     if(ret != OBC_ERR_CODE_SUCCESS){
         deassertChipSelect(FRAM_spiPORT, FRAM_CS);
         return ret;
@@ -186,7 +178,7 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes){
 
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
 
-    ret = framTransmitOpCode(READ);
+    ret = framTransmitOpCode(FRAM_READ);
     if(ret != OBC_ERR_CODE_SUCCESS){
         deassertChipSelect(FRAM_spiPORT, FRAM_CS);
         return ret;
@@ -220,7 +212,7 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes){
 
     //Send WREN
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
-    ret = framTransmitOpCode(WREN);
+    ret = framTransmitOpCode(FRAM_WRITE_EN);
     deassertChipSelect(FRAM_spiPORT, FRAM_CS);
     if(ret != OBC_ERR_CODE_SUCCESS){
         return ret;
@@ -228,7 +220,7 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes){
 
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
 
-    ret = framTransmitOpCode(WRITE);
+    ret = framTransmitOpCode(FRAM_WRITE);
     if(ret != OBC_ERR_CODE_SUCCESS){
         deassertChipSelect(FRAM_spiPORT, FRAM_CS);
         return ret;
@@ -255,7 +247,7 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes){
 obc_error_code_t framSleep(){
     obc_error_code_t ret;
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
-    ret = framTransmitOpCode(SLEEP);
+    ret = framTransmitOpCode(FRAM_SLEEP);
     deassertChipSelect(FRAM_spiPORT, FRAM_CS);
     return ret;
 }
@@ -276,7 +268,7 @@ obc_error_code_t framReadID(uint8_t *ID, size_t nBytes){
         return OBC_ERR_CODE_INVALID_ARG;
     }
     assertChipSelect(FRAM_spiPORT, FRAM_CS);
-    ret = framTransmitOpCode(RDID);
+    ret = framTransmitOpCode(FRAM_READ_ID);
     if(ret != OBC_ERR_CODE_SUCCESS){
         deassertChipSelect(FRAM_spiPORT, FRAM_CS);
         return ret;
