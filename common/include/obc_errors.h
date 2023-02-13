@@ -13,7 +13,7 @@ typedef enum {
 
     /* Driver Errors 100 - 199*/
     OBC_ERR_CODE_SPI_FAILURE = 100,
-
+    OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE = 101,
     /* CDH errors 200 - 299 */
 
 

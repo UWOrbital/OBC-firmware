@@ -1,45 +1,23 @@
 #ifndef DRIVERS_INCLUDE_FRAM_H_
 #define DRIVERS_INCLUDE_FRAM_H_
 
+//FRAM LIMITS
+#define FRAM_MAX_ADDRESS        0x3FFFFU
+#define FRAM_ID_LEN             9
+
 #include <stdlib.h>
 #include <stdint.h>
+#include <obc_errors.h>
 
-//FRAM OPCODES
-#define OP_WRITE_ENABLE        0x06
-#define OP_WRITE_RESET         0x04
-#define OP_READ_STAT_REG       0x05
-#define OP_WRITE_STAT_REG      0x01
+obc_error_code_t framReadStatusReg(uint8_t *status);
+obc_error_code_t framWriteStatusReg(uint8_t status);
 
-#define OP_READ                0x03
-#define OP_FREAD               0x0B
-#define OP_WRITE               0x02
+obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
+obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
+obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes);
 
-#define OP_SLEEP               0xB9
-#define OP_GET_ID              0x9F
+obc_error_code_t framSleep(void);
+obc_error_code_t framWakeUp(void);
 
-typedef enum cmdType{
-    rCmd,
-    wCmd,
-    sCmd
-}cmdType;
-
-typedef enum readCmd{
-    RDSR,           //Read Status Register
-    READ,           //Normal read
-    FSTRD,          //Fast read, Note this is used for serial flash compatibility not to read data fast!
-    RDID            //Get Device ID
-}readCmd;
-
-typedef enum writeCmd{
-    WREN,           //Set Write EN
-    WRDI,           //Reset Write EN
-    WRSR,           //Write to Status Register
-    WRITE           //Write memory data
-}writeCmd;
-
-static uint8_t framTransmitOpCode(int cmd, cmdType cmdType);
-static uint8_t framTransmitAddress(void* addr);
-uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd);
-uint8_t framWrite(uint8_t *addr, uint8_t *data, size_t nBytes, writeCmd cmd);
-uint8_t framSleep();
+obc_error_code_t framReadID(uint8_t *ID, size_t nBytes);
 #endif
