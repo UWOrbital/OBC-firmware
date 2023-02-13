@@ -1,13 +1,17 @@
 #include "obc_reset_sw.h"
-#include "reg_system.h"    
+#include "reg_system.h" 
+#include "obc_privilege.h"
 
-void resetSW(reset_t reason){
+void resetSW(obc_reset_reason_t reason){
+    
+    BaseType_t xRunningPrivileged = prvRaisePrivilege();
+    portRESET_PRIVILEGE(xRunningPrivileged);
 
-    uint32_t* resetAddress = (uint32_t*)(systemREG1 -> SYSECR);
+    uint32_t resetAddress = systemREG1 -> SYSECR;
+    
+    if(reason != RESET_REASON_TESTIG){
 
-    if(reason != NULLREASON){
-
-        resetAddress =  (uint32_t*)((uint32_t)resetAddress | (uint32_t)0x00008000);
+        systemREG1->SYSECR =  resetAddress | RESET_ADDR_MASK;
     }
 
 }
