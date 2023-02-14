@@ -22,7 +22,5 @@ int main(void) {
     initSciMutex();
     initSpiMutex();
 
-    sciPrintf("Hello from comms!\n");
-
     vTaskStartScheduler();
 }
