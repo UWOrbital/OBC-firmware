@@ -4,12 +4,19 @@
 #define RESET_ADDR_MASK (1 << 15)
 
 /**
- * @brief Stored reasons to reset cpu
+ * @brief Reasons for resetting the system
  */
 typedef enum{
     //Example reset reason
-    RESET_REASON_TESTIG = 0
+    RESET_REASON_TESTING = 0
 
 }obc_reset_reason_t;
+
+/**
+ * @brief reset the systems
+ * 
+ * @param obc_reset_reason_t - the reason to reset system
+ */
+extern void resetSystem(obc_reset_reason_t reason);
 
 #endif //DRIVERS_INCLUDE_OBC_RESET_SW_H
