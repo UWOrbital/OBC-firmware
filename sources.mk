@@ -13,6 +13,7 @@ SRC_DIRS += drivers/common/source
 SRC_DIRS += drivers/ds3232/source
 SRC_DIRS += drivers/fram/source
 SRC_DIRS += drivers/lm75bd/source
+SRC_DIRS += drivers/cc1120/source
 
 SRC_DIRS += common/source
 SRC_DIRS += adcs/source
