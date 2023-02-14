@@ -17,6 +17,6 @@ typedef enum{
  * 
  * @param obc_reset_reason_t - the reason to reset system
  */
-extern void resetSystem(obc_reset_reason_t reason);
+void resetSystem(obc_reset_reason_t reason);
 
 #endif //DRIVERS_INCLUDE_OBC_RESET_SW_H
