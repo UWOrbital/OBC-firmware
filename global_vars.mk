@@ -55,6 +55,7 @@ INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/hal/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/cc1120/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/common/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/adcs/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/cdh/include"
