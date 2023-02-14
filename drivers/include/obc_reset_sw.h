@@ -3,6 +3,9 @@
 
 #define RESET_ADDR_MASK (1 << 15)
 
+/**
+ * @brief Stored reasons to reset cpu
+ */
 typedef enum{
     //Example reset reason
     RESET_REASON_TESTIG = 0
