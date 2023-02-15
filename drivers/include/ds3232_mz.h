@@ -72,12 +72,8 @@ typedef struct {
  * @var seconds Specifies the RTC seconds value. (0-59)
  */
 typedef struct {
-    uint8_t date;
-    uint8_t month;
-    uint8_t year;
-    uint8_t hours;
-    uint8_t minutes;
-    uint8_t seconds;
+    rtc_date_t *date;
+    rtc_time_t *time;
 } rtc_date_time_t;
 
 /**
@@ -133,9 +129,7 @@ typedef struct {
 typedef struct {
     uint8_t date;   
     uint8_t day;   
-    uint8_t hours;
-    uint8_t minutes;
-    uint8_t seconds;
+    rtc_time_t *time;
 } rtc_alarm_time_t;
 
 /**
