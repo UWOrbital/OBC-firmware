@@ -1,6 +1,8 @@
 #ifndef DRIVERS_INCLUDE_OBC_RESET_H_
 #define DRIVERS_INCLUDE_OBC_RESET_H_
 
+#define RESET_ADDR_MASK (1 << 15)
+
 /**
  * @brief Reasons for resetting the system
  */
