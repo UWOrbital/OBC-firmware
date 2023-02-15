@@ -1,5 +1,5 @@
-#ifndef DRIVERS_INCLUDE_OBC_RESET_SW_H_
-#define DRIVERS_INCLUDE_OBC_RESET_SW_H_
+#ifndef DRIVERS_INCLUDE_OBC_RESET_H_
+#define DRIVERS_INCLUDE_OBC_RESET_H_
 
 #define RESET_ADDR_MASK (1 << 15)
 
@@ -19,4 +19,4 @@ typedef enum{
  */
 void resetSystem(obc_reset_reason_t reason);
 
-#endif //DRIVERS_INCLUDE_OBC_RESET_SW_H
+#endif //DRIVERS_INCLUDE_OBC_RESET_H_

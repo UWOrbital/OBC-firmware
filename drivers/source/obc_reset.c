@@ -1,4 +1,4 @@
-#include "obc_reset_sw.h"
+#include "obc_reset.h"
 #include "reg_system.h" 
 #include "obc_privilege.h"
 
