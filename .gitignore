@@ -57,4 +57,3 @@ dkms.conf
 
 .env
 build/
-compiler/
