@@ -7,7 +7,7 @@
  * @brief Reasons for resetting the system
  */
 typedef enum{
-    //Example reset reason
+    
     RESET_REASON_TESTING = 0
 
 }obc_reset_reason_t;
