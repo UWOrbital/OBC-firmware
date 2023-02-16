@@ -1,5 +1,7 @@
-- Move arm-none-eabi contents to compiler/ directory
+- Copy path to arm-none-eabi into .env file
+
 - mkdir build
-- cd build
+- cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Test
+
+- mkdir build_arm
 - cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Firmware
-- make

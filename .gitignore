@@ -56,6 +56,6 @@ dkms.conf
 .idea/
 
 .env
-build/
 
-compiler/
+build/
+build_arm/
