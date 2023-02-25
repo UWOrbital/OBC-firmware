@@ -1,4 +1,3 @@
-#include "logging.h"
 #include "obc_spi_io.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -70,22 +69,21 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     if (spiPortIndex < 0)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTakeRecursive(spiMutexes[spiPortIndex], portMAX_DELAY) == pdTRUE) {
-        if (gioGetBit(spiPort, csNum) == 0) {
-            gioSetBit(spiPort, csNum, 1);
-            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex that was just taken
-            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex from asserting pin
-            return OBC_ERR_CODE_SUCCESS;
-        }
-        else {
-            LOG_ERROR("Attempted to desassert non-asserted pin");
-            xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex that was just taken
-            // Mutex from asserting pin is not returned
-            // Task should try again to deasserted the correct pin, otherwise it may hold the mutex forever
-            return OBC_ERR_CODE_SPI_DEASSERTING_HIGH_PIN;
-        }
+    if (xSemaphoreTakeRecursive(spiMutexes[spiPortIndex], portMAX_DELAY) != pdTRUE)
+        return OBC_ERR_CODE_MUTEX_TIMEOUT;
+
+    if (gioGetBit(spiPort, csNum) == 0) {
+        gioSetBit(spiPort, csNum, 1);
+        xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex that was just taken
+        xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex from asserting pin
+        return OBC_ERR_CODE_SUCCESS;
     }
-    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+    // CS is already HIGH and cannot be de-asserted
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_DEASSERTING_HIGH_PIN);
+    xSemaphoreGiveRecursive(spiMutexes[spiPortIndex]); // Return the mutex that was just taken
+    // Mutex from asserting pin is not returned
+    // Task should try again to deasserted the correct pin, otherwise it may hold the mutex forever
+    return OBC_ERR_CODE_SPI_DEASSERTING_HIGH_PIN;
 }
 
 obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
@@ -135,7 +133,7 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiData
         uint16_t spiWordIn;
 
         uint32_t spiErr = spiTransmitAndReceiveData(spiReg, spiDataFormat, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
-        xSemaphoreGive(spiMutexes[spiRegIndex]);
+        xSemaphoreGiveRecursive(spiMutexes[spiRegIndex]);
 
         if (spiErr == SPI_FLAG_SUCCESS) {
             *inb = (uint8_t)spiWordIn;
