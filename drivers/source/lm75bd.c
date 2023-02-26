@@ -2,9 +2,14 @@
 #include "obc_i2c_io.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
+#include "obc_assert.h"
 
 #include <stdint.h>
 #include <math.h>
+
+#define LM75BD_I2C_BASE_ADDR 0x9U
+
+STATIC_ASSERT_EQ(LM75BD_OBC_I2C_ADDR >> 3, LM75BD_I2C_BASE_ADDR);
 
 /* LM75BD Registers (p.8) */
 #define LM75BD_REG_TEMP 0x00U  /* Temperature Register (R) */
