@@ -18,8 +18,8 @@ static StaticQueue_t adcsQueue;
 static uint8_t adcsQueueStack[ADCS_MANAGER_QUEUE_LENGTH*ADCS_MANAGER_QUEUE_ITEM_SIZE];
 
 /*Boolean values related to the state of the program*/
-uint16_t isDetumbling = 0;
-uint16_t hasAttitudeError = 0;
+static uint16_t isDetumbling = 0;
+static uint16_t hasAttitudeError = 0;
 
 /*Task Handlers*/
 static TaskHandle_t detumblingHandle = NULL;
@@ -83,13 +83,21 @@ static void vADCSManagerTask(void * pvParameters) {
 
 /*Algorithrm functions*/
 
-void lowPower(void * pvParameters){
+/**
+ * @brief Runs low power mode Algorithrm
+ * @param pvParameter Task parameters.
+ */
+static void lowPower(void * pvParameters){
     while(1) {
         // Insert Code here
     }
 }
 
-void detumblingMonitor(void * pvParameter)
+/**
+ * @brief Changes the state of the appliation based on if the satellite is detumbling
+ * @param pvParameter Task parameters.
+ */
+static void detumblingMonitor(void * pvParameter)
 {
     while (1)
     {
@@ -110,14 +118,22 @@ void detumblingMonitor(void * pvParameter)
     }
 }
 
-void questAlgorithm(void * pvParameter)
+/**
+ * @brief Quest Algorithrm code
+ * @param pvParameter Task parameters.
+ */
+static void questAlgorithm(void * pvParameter)
 {
     while (1) {
         /*Main code will go here*/
     }
 }
 
-void detumblingControl(void * pvParameter)
+/**
+ * @brief Runs Detumbling Control Law Algorithrm
+ * @param pvParameter Task parameters.
+ */
+static void detumblingControl(void * pvParameter)
 {
     while (1) {
         /*Suspends itself when the satellite is not detumbling*/
@@ -129,7 +145,11 @@ void detumblingControl(void * pvParameter)
     }
 }
 
-void reactionWheelControl(void * pvParameter)
+/**
+ * @brief Runs Reaction Wheel Control Law Algorithrm
+ * @param pvParameter Task parameters.
+ */
+static void reactionWheelControl(void * pvParameter)
 {
     while (1)
     {
@@ -142,7 +162,11 @@ void reactionWheelControl(void * pvParameter)
     }
 }
 
-void attitudeTracking(void * pvParameter)
+/**
+ * @brief Runs Altitude Tracking Algorithrm (Might need to include the Solar Panel and/or Ground Target Tracking Code here or in seperate function(s))
+ * @param pvParameter Task parameters.
+ */
+static void attitudeTracking(void * pvParameter)
 {
     while (1){
         /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
@@ -161,7 +185,11 @@ void attitudeTracking(void * pvParameter)
     }
 }
 
-void orbitalDetermination(void * pvParameter)
+/**
+ * @brief Runs Orbital Determination Algorithrm 
+ * @param pvParameter Task parameters.
+ */
+static void orbitalDetermination(void * pvParameter)
 {
     while (1) {
         /*Suspends itself when the satellite is detumbling*/
@@ -173,7 +201,11 @@ void orbitalDetermination(void * pvParameter)
     }
 }
 
-void momentumDumping(void * pvParameter) {
+/**
+ * @brief Runs Momuntum Dumping Algorithrm
+ * @param pvParameter Task parameters.
+ */
+static void momentumDumping(void * pvParameter) {
     while (1) {
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling) {
@@ -184,7 +216,10 @@ void momentumDumping(void * pvParameter) {
     }
 }
 
-int initSupervisorTask(void) {
+/**
+ * @brief Initializes the ADCS supervisor task code
+ */
+static int initSupervisorTask(void) {
     /* Initialize the functions*/
     /*xTaskCreate(func, name, size, parameters, priority, handle)*/
     initADCSManager();
