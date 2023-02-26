@@ -18,6 +18,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
+CC_FLAGS += -Og
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -45,12 +46,8 @@ LOG_LEVEL ?= LOG_TRACE
 CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
 DEBUG ?= 1
-# TODO: Figure out why optimization breaks SPI-related code
 ifeq ($(DEBUG), 1)
 	CPP_FLAGS += -DDEBUG
-	# CC_FLAGS += -Og
-else
-	# CC_FLAGS += -Os
 endif
 
 INCLUDE_DIRS :=
@@ -63,14 +60,6 @@ INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
 INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
-
-# Reliance Edge File System
-INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
-INCLUDE_DIRS += -I"reliance_edge/include"
-INCLUDE_DIRS += -I"reliance_edge/core/include"
-INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
-INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
-
 
 LIBS := 
 
