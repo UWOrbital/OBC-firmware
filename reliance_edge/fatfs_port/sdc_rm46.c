@@ -171,7 +171,7 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
         spiReceiveByte(SDC_SPI_REG, &token);
         if (token != 0xFF)
             break;
-        vTaskDelay(SDC_DELAY_1MS)
+        vTaskDelay(SDC_DELAY_1MS);
     }
 
     /* If not valid data token, return with error */
