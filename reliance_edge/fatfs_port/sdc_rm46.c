@@ -19,7 +19,7 @@
     #define SDC_SPI_PORT         spiPORT3
     #define SDC_SPI_REG          spiREG3
     #define SDC_SPI_CS           1UL
-#elif defined(OBC_REV_1)
+#elif defined(OBC_REVISION_1)
     #define SDC_SPI_PORT         spiPORT1
     #define SDC_SPI_REG          spiREG1
     #define SDC_SPI_CS           0UL
