@@ -48,6 +48,10 @@ typedef struct {
     uint8_t seconds;
 } rtc_time_t;
 
+//temporary time struct
+rtc_time_t tempTime = {0, 0, 0};
+rtc_date_t *ptrTempTime = &tempTime;
+
 /**
  * @struct rtc_date_t
  * @brief DS3232 date structure definition
@@ -60,6 +64,10 @@ typedef struct {
     uint8_t month;
     uint8_t year;
 } rtc_date_t;
+
+//temporary date struct 
+rtc_date_t tempDate = {0, 0, 0};
+rtc_date_t *ptrTempDate = &tempDate;
 
 /**
  * @struct rtc_date_time_t
@@ -76,6 +84,9 @@ typedef struct {
     rtc_time_t *time;
 } rtc_date_time_t;
 
+//temporary date-time struct 
+rtc_date_time_t tempDateTime = {{0, 0, 0}, {0, 0, 0}};
+rtc_date_time_t *ptrTempDateTime = &tempDateTime;
 /**
  * @struct rtc_control_t
  * @brief DS3232 control register structure definition

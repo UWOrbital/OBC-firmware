@@ -121,76 +121,25 @@ obc_error_code_t getYearRTC(uint8_t* year) {
 }
 
 obc_error_code_t getCurrentTimeRTC(rtc_time_t *time) {
-    uint8_t result = 0;
-    rtc_time_t *temp;
-    obc_error_code_t retValMin = getMinutesRTC(&(temp->minutes));
-    obc_error_code_t retValSec = getSecondsRTC(&(temp->seconds));
-    obc_error_code_t retValHour = geHourRTC(&(temp->hours));
-    obc_error_code_t retVal;
+    RETURN_IF_ERROR_CODE(getMinutesRTC(&(ptrTempTime->minutes)));
+    RETURN_IF_ERROR_CODE(getSecondsRTC(&(ptrTempTime->seconds)));
+    RETURN_IF_ERROR_CODE(geHourRTC(&(ptrTempTime->hours)));
 
-    if(retValMin == OBC_ERR_CODE_SUCCESS && retValSec == OBC_ERR_CODE_SUCCESS 
-        && retValHour == OBC_ERR_CODE_SUCCESS) 
-    {
-        time = temp;
-        return OBC_ERR_CODE_SUCCESS;
-    }
-    else
-        return OBC_ERR_CODE_UNKNOWN;
-        
-
-    if (getMinutesRTC(&(temp->minutes)) == OBC_ERR_CODE_SUCCESS) 
-        retVal = OBC_ERR_CODE_SUCCESS;
-    else
-        return OBC_ERR_CODE_UNKNOWN;
-
-    if (getSecondsRTC(&(temp->seconds)) == OBC_ERR_CODE_SUCCESS) 
-        retVal = OBC_ERR_CODE_SUCCESS;
-    else
-        return OBC_ERR_CODE_UNKNOWN;
-
-    if (getHourRTC(&(temp->hours)) == OBC_ERR_CODE_SUCCESS) 
-        retVal = OBC_ERR_CODE_SUCCESS;
-    else
-        return OBC_ERR_CODE_UNKNOWN;
-
-    return result;
-
+    time = ptrTempTime;
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
-    uint8_t result = 0;
+    RETURN_IF_ERROR_CODE(getDateRTC(&(ptrTempDateTime->date->date)));
+    RETURN_IF_ERROR_CODE(getMonthRTC(&(ptrTempDateTime->date->month))); 
+    RETURN_IF_ERROR_CODE(getYearRTC(&(ptrTempDateTime->date->year))); 
+    RETURN_IF_ERROR_CODE(getHourRTC(&(ptrTempDateTime->time->hours))); 
+    RETURN_IF_ERROR_CODE(getMinutesRTC(&(ptrTempDateTime->time->minutes))); 
+    RETURN_IF_ERROR_CODE(getSecondsRTC(&(ptrTempDateTime->time->seconds))); 
 
-    if (getDateRTC(&(dateTime->date->date))) 
-        result = 1;
-    else
-        result = 0;
-
-    if (getMonthRTC(&(dateTime->date->month))) 
-        result = 1;
-    else
-        result = 0;
-
-    if (getYearRTC(&(dateTime->date->year))) 
-        result = 1;
-    else
-        result = 0;
-
-    if (getHourRTC(&(dateTime->time->hours))) 
-        result = 1;
-    else
-        result = 0;
-
-    if (getMinutesRTC(&(dateTime->time->minutes))) 
-        result = 1;
-    else
-        result = 0;
-
-    if (getSecondsRTC(&(dateTime->time->seconds))) 
-        result = 1;
-    else
-        result = 0;
-
-    return result;
+    dateTime = ptrTempDateTime;
+    
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
