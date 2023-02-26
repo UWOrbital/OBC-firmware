@@ -96,56 +96,7 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb) {
-    if (spiReg == NULL)
-        return OBC_ERR_CODE_INVALID_ARG;
-
-    if (inb == NULL)
-        return OBC_ERR_CODE_INVALID_ARG;
-
-    int8_t spiRegIndex = spiRegToIndex(spiReg);
-    if (spiRegIndex < 0)
-        return OBC_ERR_CODE_INVALID_ARG;
-
-    if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
-        spiDAT1_t spiData = {0};
-
-        // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
-        uint16_t spiWordOut = (uint16_t)outb;
-        uint16_t spiWordIn;
-
-        uint32_t spiErr = spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
-        obc_error_code_t ret;
-
-        if (spiErr != SPI_FLAG_SUCCESS) {
-            // To-do: Log and handle errors
-            ret = OBC_ERR_CODE_SPI_FAILURE;
-        } else {
-            *inb = (uint8_t)spiWordIn;
-            ret = OBC_ERR_CODE_SUCCESS;
-        }
-
-        xSemaphoreGive(spiMutexes[spiRegIndex]);
-        return ret;
-    }
-    return OBC_ERR_CODE_MUTEX_TIMEOUT;
-}
-
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb) {
-    obc_error_code_t errCode;
-    uint8_t inb;
-
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, outb, &inb));
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb) {
-    obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, 0xFF, inb));
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes, uint8_t *inBytes, int dataLength) {
+obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes, uint8_t *inBytes, int numBytes) {
     if (spiReg == NULL || inBytes == NULL || outBytes == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
@@ -157,9 +108,9 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes
         spiDAT1_t spiData = {0};
         obc_error_code_t ret;
 
-        for(int count = 0; count < dataLength; count++)
+        for(int currentByte = 0; currentByte < numBytes; currentByte++)
         {
-            uint16_t spiWordOut = (uint16_t)outBytes[count];
+            uint16_t spiWordOut = (uint16_t)outBytes[currentByte];
             uint16_t spiWordIn;
 
             uint32_t spiErr = spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
@@ -169,7 +120,7 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes
                 ret = OBC_ERR_CODE_SPI_FAILURE;\
                 break;
             } else {
-                inBytes[count] = (uint8_t)spiWordIn;
+                inBytes[currentByte] = (uint8_t)spiWordIn;
                 ret = OBC_ERR_CODE_SUCCESS;
             }
         }
@@ -180,17 +131,18 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, int dataLength) {
+obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, int numBytes) {
     obc_error_code_t errCode;
     uint8_t inBytes;
 
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveBytes(spiReg, outBytes, &inBytes, dataLength));
-    return inBytes;
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveBytes(spiReg, outBytes, &inBytes, numBytes));
+    return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, int dataLength) {
+obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, int numBytes) {
     obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveBytes(spiReg, 0xFF, inBytes, dataLength));
+    uint8_t outB = 0xFF;
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveBytes(spiReg, &outB, inBytes, numBytes));
     return OBC_ERR_CODE_SUCCESS;
 }
 
