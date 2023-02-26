@@ -35,6 +35,11 @@ static TaskHandle_t lowPowerHandle = NULL;
  */
 static void vADCSManagerTask(void * pvParameters);
 
+/**
+ * @brief Initializes the ADCS supervisor task code
+ */
+static int initSupervisorTask(void);
+
 void initADCSManager(void) {
     ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
     if (adcsTaskHandle == NULL) {
@@ -45,6 +50,8 @@ void initADCSManager(void) {
     if (adcsQueueHandle == NULL) {
         adcsQueueHandle = xQueueCreateStatic(ADCS_MANAGER_QUEUE_LENGTH, ADCS_MANAGER_QUEUE_ITEM_SIZE, adcsQueueStack, &adcsQueue);
     }
+
+    initSupervisorTask();
 }
 
 obc_error_code_t sendToADCSQueue(adcs_event_t *event) {
@@ -216,13 +223,9 @@ static void momentumDumping(void * pvParameter) {
     }
 }
 
-/**
- * @brief Initializes the ADCS supervisor task code
- */
 static int initSupervisorTask(void) {
     /* Initialize the functions*/
     /*xTaskCreate(func, name, size, parameters, priority, handle)*/
-    initADCSManager();
     xTaskCreate(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(questAlgorithm, "Quest Algorithm", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
     xTaskCreate(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &detumblingHandle);
@@ -234,7 +237,7 @@ static int initSupervisorTask(void) {
 
     /*Start scheduler*/
     vTaskStartScheduler();
-
+    
     while (1) {};
     return 0;
 }
