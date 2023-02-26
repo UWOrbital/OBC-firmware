@@ -3,11 +3,6 @@
 
 #include <sys_common.h>
 
-/* SD Card SPI Config */
-#define SDC_SPI_PORT         spiPORT3
-#define SDC_SPI_REG          spiREG3
-#define SDC_SPI_CS           1
-
 typedef enum {
     POWER_OFF,
     POWER_ON,

@@ -11,7 +11,21 @@
 #include "diskio.h"
 #include "sdc_rm46.h"
 #include "obc_spi_io.h"
-#include "logging.h"
+#include "obc_logging.h"
+#include "obc_assert.h"
+
+/* SD Card SPI Config */
+#ifdef RM46_LAUNCHPAD
+    #define SDC_SPI_PORT         spiPORT3
+    #define SDC_SPI_REG          spiREG3
+    #define SDC_SPI_CS           1UL
+#elif defined(OBC_REV_1)
+    #define SDC_SPI_PORT         spiPORT1
+    #define SDC_SPI_REG          spiREG1
+    #define SDC_SPI_CS           0UL
+#else
+    #error Board configuration not defined yet
+#endif
 
 /*---------------------------------------------*/
 /* SD Card Definitions                         */
