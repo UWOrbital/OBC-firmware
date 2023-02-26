@@ -63,6 +63,22 @@
 #define CARD_TYPE_SDC_MASK 0b010U
 #define CARD_TYPE_BLOCK_ADDR_MASK 0b100U
 
+#define SDC_CMD_RESP_MASK 0x80U
+#define CARD_CAPACITY_OCR_MASK (1 << 6)
+
+#define SDC_CMD0_RESET_CRC 0x95U
+#define SDC_CMD8_CHECK_VOLTAGE_CRC 0x87U
+
+#define DISK_INIT_RESET_ARG 0x1AAUL
+
+// 10 bytes = 80 clock transitions
+#define SDC_CLOCK_TRANSITION_BYTES 10U
+
+#define SDC_ACTION_NUM_ATTEMPTS_DEFAULT 50U
+STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255, "SDC_ACTION_NUM_ATTEMPTS_DEFAULT must be <= 255");
+
+#define SDC_DELAY_1MS pdMS_TO_TICKS(1)
+
 /*---------------------------------------------*/
 /* Global Variables                            */
 /*---------------------------------------------*/
@@ -81,13 +97,17 @@ static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
  * @return bool True if card is ready, false otherwise.
  */
 static bool isCardReady(void) {
-    uint8_t res;
+    obc_error_code_t errCode;
 
-    const uint8_t maxTries = 100U;
-    for (uint8_t i = 0; i < maxTries; i++) {
-        spiReceiveByte(SDC_SPI_REG, &res);
+    for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
+        uint8_t res;
+        
+        LOG_IF_ERROR_CODE(spiReceiveByte(SDC_SPI_REG, &res));
+        
         if (res == 0xFF)
             return true;
+        
+        vTaskDelay(SDC_DELAY_1MS);
     }
 
     return false;
@@ -98,12 +118,10 @@ static bool isCardReady(void) {
  * @brief Send >74 clock transitions with CS and DI held high. This is
  * required after card power up to get it into SPI mode.
  */
-static void sendClockTrain(void) {   
-    const uint8_t numClkTransitions = 80U, numBytes = numClkTransitions / 8U;
-    
+static void sendClockTrain(void) {     
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    for (uint8_t i = 0; i < numBytes; i++) {
+    for (uint8_t i = 0; i < SDC_CLOCK_TRANSITION_BYTES; i++) {
         spiTransmitByte(SDC_SPI_REG, 0xFF);
     }
 }
@@ -149,11 +167,11 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
     uint8_t token = 0xFF;
 
     /* Wait for a data packet */
-    const uint8_t maxTries = 100;
-    for (uint8_t i = 0; i < maxTries; i++) {
+    for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
         spiReceiveByte(SDC_SPI_REG, &token);
         if (token != 0xFF)
             break;
+        vTaskDelay(SDC_DELAY_1MS)
     }
 
     /* If not valid data token, return with error */
@@ -213,10 +231,7 @@ static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
  * @param arg Argument.
  * @return uint8_t Response uint8_t.
  */
-static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
-    const uint8_t resetCmdCrc = 0x95U; // CRC for SDC_CMD0
-    const uint8_t checkVoltageCmdCrc = 0x87U; // CRC for SDC_CMD8
-    
+static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {    
     if (!isCardReady()) return 0xFFU;
 
     /* Send command packet */
@@ -228,8 +243,8 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
 
     /* Some commands require a CRC to be sent */
     uint8_t crc = 0xFFU;
-    if (cmd == SDC_CMD0) crc = resetCmdCrc;     
-    else if (cmd == SDC_CMD8) crc = checkVoltageCmdCrc;
+    if (cmd == SDC_CMD0) crc = SDC_CMD0_RESET_CRC;     
+    else if (cmd == SDC_CMD8) crc = SDC_CMD8_CHECK_VOLTAGE_CRC;
     spiTransmitByte(SDC_SPI_REG, crc);
 
     /* Skip a uint8_t after "stop reading" cmd is sent */
@@ -238,10 +253,10 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
     
     /* Receive command response */
     uint8_t res;
-    const uint8_t maxTries = 10U, cmdRespMask = 0x80U; 
-    for (uint8_t i = 0; i < maxTries; i++) {
+    for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
         spiReceiveByte(SDC_SPI_REG, &res);
-        if (!(res & cmdRespMask)) break;
+        if (!(res & SDC_CMD_RESP_MASK)) break;
+        vTaskDelay(SDC_DELAY_1MS);
     }
 
     return res;
@@ -297,15 +312,15 @@ DSTATUS disk_initialize(uint8_t drv){
     assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
     uint8_t ty = 0;
 
-    const uint8_t maxTries = 100U;
-    for (unsigned int i = 0; i < maxTries; i++) {
+    for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
         // Reset the card and put it into SPI mode; response should be 0x01 if successful
         if (sendCMD(SDC_CMD0, 0) == 1U) break;
+        vTaskDelay(SDC_DELAY_1MS);    
     }
     // Even if SDC_CMD0 fails, we'll try to continue.
     
     // Send CMD8 with 0x1AA arg. CRC handled in sendCMD.
-    if (sendCMD(SDC_CMD8, 0x1AA) == 1U) {    
+    if (sendCMD(SDC_CMD8, DISK_INIT_RESET_ARG) == 1U) {    
         // Card is SDC Ver2+
         const uint8_t ocrSize = 4U;
         uint8_t ocr[ocrSize];
@@ -314,18 +329,18 @@ DSTATUS disk_initialize(uint8_t drv){
         // Check if the lower 12 bits in the response are 0x1AA
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
             // The card can work at vdd range of 2.7-3.6V
-            for (unsigned int i = 0; i < maxTries; i++) {
+            for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
                 // Begin initialization process with ACMD41 with HCS[bit30] set as argument
                 // CMD55 must be sent before ACMD41
                 if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 1UL << 30) == 0) {
                     // Read ocr with CMD58
                     if (sendCMD(SDC_CMD58, 0) == 0) {    
                         // Check bit 6 of response to determine if card is SDHC or standard SD card
-                        const uint8_t cardCapacityMask = (1U << 6);
                         for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &ocr[i]);
-                        ty = (ocr[0] & cardCapacityMask) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK) : (CARD_TYPE_SDC_MASK);
+                        ty = (ocr[0] & CARD_CAPACITY_OCR_MASK) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK) : (CARD_TYPE_SDC_MASK);
                     }
                 }
+                vTaskDelay(SDC_DELAY_1MS);
             }
         } else {
             LOG_ERROR("SDC Card (Ver 2+) rejected due to invalid voltage range");   
@@ -335,7 +350,7 @@ DSTATUS disk_initialize(uint8_t drv){
         ty = (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) <= 1) ? (CARD_TYPE_SDC_MASK) : (CARD_TYPE_MMC_MASK);
         
         bool initSuccess = false;
-        for (unsigned int i = 0; i < maxTries; i++) {
+        for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
             // Begin the initialization process with ACMD41 for SDC or CMD1 for MMC
             // CMD55 must be sent before ACMD41
             if (ty & CARD_TYPE_SDC_MASK) {
@@ -345,6 +360,7 @@ DSTATUS disk_initialize(uint8_t drv){
             }
 
             if (initSuccess) break;
+            vTaskDelay(SDC_DELAY_1MS);
         }
 
         if (!initSuccess) {
@@ -530,8 +546,8 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
                         // CSIZE field spans bits [73:62] of the CSD register
                         // Capacity = (CSIZE+1) * 2^(C_SIZE_MULT+READ_BL_LEN+2)
                         csize = ((uint32_t)(csd[6] & 0x03) << 10) | ((uint16_t)csd[7] << 2) | (csd[8] >> 6); 
-                        const uint8_t readBlLen = csd[5] & 0x0F; // READ_BL_LEN field spans bits [83:80] of the CSD register
-                        const uint8_t cSizeMult = ((csd[9] & 0x03) << 1) | (csd[10] >> 7); // C_SIZE_MULT field spans bits [49:47] of the CSD register
+                        const uint8_t readBlLen = csd[5] & 0xF; // READ_BL_LEN field spans bits [83:80] of the CSD register
+                        const uint8_t cSizeMult = ((csd[9] & 0x3) << 1) | (csd[10] >> 7); // C_SIZE_MULT field spans bits [49:47] of the CSD register
                         const uint8_t n = (cSizeMult + readBlLen + 2);
                         *(uint32_t*)buff = (uint32_t)(csize + 1) << (n - 9);
                     }
