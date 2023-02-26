@@ -154,113 +154,113 @@ void resetRTC(void);
  * @brief Gets seconds data from RTC.
  * 
  * @param seconds uint8_t pointer to store seconds.
- * @return 1 if the seconds was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the seconds was accesed, appropriate error code otherwise.
  */
-uint8_t getSecondsRTC(uint8_t* seconds);
+obc_error_code_t getSecondsRTC(uint8_t* seconds);
 
 /**
  * @brief Gets minutes data from RTC.
  * 
  * @param minutes uint8_t pointer to store minutes.
- * @return 1 if the minutes was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the minutes was accesed, appropriate error code otherwise.
  */
-uint8_t getMinutesRTC(uint8_t* minutes);
+obc_error_code_t getMinutesRTC(uint8_t* minutes);
 
 /**
  * @brief Gets hour data from RTC.
  * 
  * @param hour uint8_t pointer to store hour.
- * @return 1 if the hour was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the hour was accesed, appropriate error code otherwise.
  */
-uint8_t getHoursRTC(uint8_t* hours);
+obc_error_code_t getHoursRTC(uint8_t* hours);
 
 /**
  * @brief Gets days data from RTC.
  * 
  * @param days uint8_t pointer to store days.
- * @return 1 if the days was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the days was accesed, appropriate error code otherwise.
  */
-uint8_t getDayRTC(uint8_t* day);
+obc_error_code_t getDayRTC(uint8_t* day);
 
 /**
  * @brief Gets date data from RTC.
  * 
  * @param date uint8_t pointer to store date.
- * @return 1 if the date was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the date was accesed, appropriate error code otherwise.
  */
-uint8_t getDateRTC(uint8_t* date);
+obc_error_code_t getDateRTC(uint8_t* date);
 
 /**
  * @brief Gets month data from RTC.
  * 
  * @param month uint8_t pointer to store month.
- * @return 1 if the month was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the month was accesed, appropriate error code otherwise.
  */
-uint8_t getMonthRTC(uint8_t* month);
+obc_error_code_t getMonthRTC(uint8_t* month);
 
 /**
  * @brief Gets year data from RTC.
  * 
  * @param year uint8_t pointer to store year.
- * @return 1 if the year was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the year was accesed, appropriate error code otherwise.
  */
-uint8_t getYearRTC(uint8_t* year); 
+obc_error_code_t getYearRTC(uint8_t* year); 
 
 /**
  * @brief Gets date and time data from RTC by populating rtc_date_time_t struct members.
  * 
  * @param dateTime struct pointer to store date and time.
- * @return 1 if the date and time were accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the date and time were accesed, appropriate error code otherwise.
  */
-uint8_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime);
+obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime);
 
 /**
  * @brief Gets current time data from RTC by populating rtc_date_time_t struct members.
  * 
  * @param time struct pointer to store current time.
- * @return 1 if the current time was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the current time was accesed, appropriate error code otherwise.
  */
-uint8_t getCurrentTimeRTC(rtc_time_t *time); 
+obc_error_code_t getCurrentTimeRTC(rtc_time_t *time); 
 
 /**
  * @brief Gets current alarm configuration from RTC by populating rtc_alarm_time_t struct members.
  * 
  * @param alarmTime struct pointer to store alarm time.
- * @return 1 if the alarm time was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the alarm time was accesed, appropriate error code otherwise.
  */
-uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime);
+obc_error_code_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime);
 
 /**
  * @brief Gets current control register configuration from RTC by populating rtc_control_t struct members.
  * 
  * @param control struct pointer to store control configuration.
- * @return 1 if control register was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if control register was accesed, appropriate error code otherwise.
  */
-uint8_t getControlRTC(rtc_control_t *control);
+obc_error_code_t getControlRTC(rtc_control_t *control);
 
 /**
  * @brief Gets current status register configuration from RTC by populating rtc_status_t struct members.
  * 
  * @param status struct pointer to store status configuration.
- * @return 1 if status register was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if status register was accesed, appropriate error code otherwise.
  */
-uint8_t getStatusRTC(rtc_status_t *status);
+obc_error_code_t getStatusRTC(rtc_status_t *status);
 
 /**
  * @brief Gets aging offset from RTC.
  * 
  * @param agingOffset int8_t pointer to store aging offset.
- * @return 1 if aging register was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if aging register was accesed, appropriate error code otherwise.
  */
-uint8_t getAgingOffsetRTC(int8_t* agingOffset);
+obc_error_code_t getAgingOffsetRTC(int8_t* agingOffset);
 
 /**
  * @brief Gets temperature from RTC.
  * 
  * @param temperature float pointer to store temperature.
- * @return 1 if temperature register was accesed, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if temperature register was accesed, appropriate error code otherwise.
  */
-float getTemperatureRTC(float* temperature);
+obc_error_code_t getTemperatureRTC(float* temperature);
 
 /*-------SET FUNCTIONS---------*/
 
@@ -268,57 +268,57 @@ float getTemperatureRTC(float* temperature);
  * @brief set seconds in RTC.
  * 
  * @param writeSeconds uint8_t variable for seconds value to be set in RTC.
- * @return 1 if seconds was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if seconds was set, appropriate error code otherwise.
  */
-uint8_t setSecondsRTC(uint8_t writeSeconds);
+obc_error_code_t setSecondsRTC(uint8_t writeSeconds);
 
 /**
  * @brief set minutes in RTC.
  * 
  * @param writeMinutes uint8_t variable for minutes value to be set in RTC.
- * @return 1 if minutes was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if minutes was set, appropriate error code otherwise.
  */
-uint8_t setMinutesRTC(uint8_t writeMinutes);
+obc_error_code_t setMinutesRTC(uint8_t writeMinutes);
 
 /**
  * @brief set hours in RTC.
  * 
  * @param writeHouruint8_t variable for hours value to be set in RTC.
- * @return 1 if hours was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if hours was set, appropriate error code otherwise.
  */
-uint8_t setHourRTC(uint8_t writeHour);
+obc_error_code_t setHourRTC(uint8_t writeHour);
 
 /**
  * @brief set day in RTC.
  * 
  * @param writeDays uint8_t variable for day value to be set in RTC.
- * @return 1 if day was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if day was set, appropriate error code otherwise.
  */
-uint8_t setDayRTC(uint8_t writeDays);
+obc_error_code_t setDayRTC(uint8_t writeDays);
 
 /**
  * @brief set date in RTC.
  * 
  * @param writeDates uint8_t variable for date value to be set in RTC.
- * @return 1 if date was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if date was set, appropriate error code otherwise.
  */
-uint8_t setDateRTC(uint8_t writeDates);
+obc_error_code_t setDateRTC(uint8_t writeDates);
 
 /**
  * @brief set month in RTC.
  * 
  * @param writeMonths uint8_t variable for month value to be set in RTC.
- * @return 1 if month was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if month was set, appropriate error code otherwise.
  */
-uint8_t setMonthRTC(uint8_t writeMonths);
+obc_error_code_t setMonthRTC(uint8_t writeMonths);
 
 /**
  * @brief set year in RTC.
  * 
  * @param writeYears uint8_t variable for year value to be set in RTC.
- * @return 1 if year was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if year was set, appropriate error code otherwise.
  */
-uint8_t setYearRTC(uint8_t writeYears);
+obc_error_code_t setYearRTC(uint8_t writeYears);
 
 /**
  * @brief set alarm in RTC.
@@ -326,33 +326,33 @@ uint8_t setYearRTC(uint8_t writeYears);
  * @param writeAlarmTime struct with alarm time data to be set in RTC
  * @param writeAlarmMode struct with alarm mode data to be set in RTC
  * @param dayOrDate choose mode to set either day or date in alarm along with h,m,s
- * @return 1 if alarm was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if alarm was set, appropriate error code otherwise.
  */
-uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode, uint8_t dayOrDate);
+obc_error_code_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode, uint8_t dayOrDate);
 
 /**
  * @brief set control mode in RTC.
  * 
  * @param writeControl struct used to set control variables in RTC.
- * @return 1 if control was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if control was set, appropriate error code otherwise.
  */
-uint8_t setControlRTC(rtc_control_t *writeControl);
+obc_error_code_t setControlRTC(rtc_control_t *writeControl);
 
 /**
  * @brief set status mode in RTC.
  * 
  * @param writeStatus struct used to set status variables in RTC.
- * @return 1 if status was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if status was set, appropriate error code otherwise.
  */
-uint8_t setStatusRTC(rtc_status_t *writeStatus);
+obc_error_code_t setStatusRTC(rtc_status_t *writeStatus);
 
 /**
  * @brief set aging offset in RTC.
  * 
  * @param writeAgingOffset int8_t variable used to set aging offset in RTC.
- * @return 1 if year was set, 0 otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if year was set, appropriate error code otherwise.
  */
-uint8_t setAgingOffsetRTC(int8_t writeAgingOffset);
+obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset);
 
 /*-------UTILITY FUNCTIONS---------*/
 

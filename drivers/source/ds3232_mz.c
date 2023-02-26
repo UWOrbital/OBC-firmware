@@ -22,7 +22,7 @@ void resetRTC(void) {
     gioSetBit(RTC_RST_GIO_PORT, 1, 0);
 }
 
-uint8_t getSecondsRTC(uint8_t *seconds) {
+obc_error_code_t getSecondsRTC(uint8_t *seconds) {
     if (seconds == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -36,7 +36,7 @@ uint8_t getSecondsRTC(uint8_t *seconds) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getMinutesRTC(uint8_t *minutes) {
+obc_error_code_t getMinutesRTC(uint8_t *minutes) {
     if (minutes == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -50,7 +50,7 @@ uint8_t getMinutesRTC(uint8_t *minutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getHourRTC(uint8_t *hours){
+obc_error_code_t getHourRTC(uint8_t *hours){
     if (hours == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -64,7 +64,7 @@ uint8_t getHourRTC(uint8_t *hours){
 
 } 
 
-uint8_t getDayRTC(uint8_t *days) {
+obc_error_code_t getDayRTC(uint8_t *days) {
     if (days == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -78,7 +78,7 @@ uint8_t getDayRTC(uint8_t *days) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getDateRTC(uint8_t* date) {
+obc_error_code_t getDateRTC(uint8_t* date) {
     if (date == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -92,7 +92,7 @@ uint8_t getDateRTC(uint8_t* date) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getMonthRTC(uint8_t *month) {
+obc_error_code_t getMonthRTC(uint8_t *month) {
     if (month == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -106,7 +106,7 @@ uint8_t getMonthRTC(uint8_t *month) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getYearRTC(uint8_t* year) {
+obc_error_code_t getYearRTC(uint8_t* year) {
     if (year == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -120,12 +120,13 @@ uint8_t getYearRTC(uint8_t* year) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getCurrentTimeRTC(rtc_time_t *time) {
+obc_error_code_t getCurrentTimeRTC(rtc_time_t *time) {
     uint8_t result = 0;
     rtc_time_t *temp;
     obc_error_code_t retValMin = getMinutesRTC(&(temp->minutes));
     obc_error_code_t retValSec = getSecondsRTC(&(temp->seconds));
     obc_error_code_t retValHour = geHourRTC(&(temp->hours));
+    obc_error_code_t retVal;
 
     if(retValMin == OBC_ERR_CODE_SUCCESS && retValSec == OBC_ERR_CODE_SUCCESS 
         && retValHour == OBC_ERR_CODE_SUCCESS) 
@@ -156,7 +157,7 @@ uint8_t getCurrentTimeRTC(rtc_time_t *time) {
 
 }
 
-uint8_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
+obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
     uint8_t result = 0;
 
     if (getDateRTC(&(dateTime->date->date))) 
@@ -192,7 +193,7 @@ uint8_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
     return result;
 }
 
-uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
+obc_error_code_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
     uint8_t seconds;
 
     if (i2cReadReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, &seconds, 1) == 0) {
@@ -226,7 +227,7 @@ uint8_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getControlRTC(rtc_control_t *control) {
+obc_error_code_t getControlRTC(rtc_control_t *control) {
     if (control == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -246,7 +247,7 @@ uint8_t getControlRTC(rtc_control_t *control) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getStatusRTC(rtc_status_t *status) {
+obc_error_code_t getStatusRTC(rtc_status_t *status) {
     if (status == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -266,7 +267,7 @@ uint8_t getStatusRTC(rtc_status_t *status) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t getAgingOffsetRTC(int8_t* agingOffset) {
+obc_error_code_t getAgingOffsetRTC(int8_t* agingOffset) {
     if (agingOffset == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -280,7 +281,7 @@ uint8_t getAgingOffsetRTC(int8_t* agingOffset) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-float getTemperatureRTC(float* temperature) {
+obc_error_code_t getTemperatureRTC(float* temperature) {
     if (temperature == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
         
@@ -301,7 +302,7 @@ float getTemperatureRTC(float* temperature) {
 }
 
 
-uint8_t setSecondsRTC(uint8_t writeSeconds) {
+obc_error_code_t setSecondsRTC(uint8_t writeSeconds) {
     uint8_t writeVal =  TwoDigitDecimalToBCD(writeSeconds);
     obc_error_code_t retVal = i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_SECONDS, &writeVal, 1);
     if (retVal != OBC_ERR_CODE_SUCCESS) {
@@ -311,7 +312,7 @@ uint8_t setSecondsRTC(uint8_t writeSeconds) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setMinutesRTC(uint8_t writeMinutes) {
+obc_error_code_t setMinutesRTC(uint8_t writeMinutes) {
     uint8_t writeVal =  TwoDigitDecimalToBCD(writeMinutes);
     obc_error_code_t retVal = i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_MINUTES, &writeVal, 1);
     if (retVal != OBC_ERR_CODE_SUCCESS) {
@@ -321,7 +322,7 @@ uint8_t setMinutesRTC(uint8_t writeMinutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setHourRTC(uint8_t writeHours) {
+obc_error_code_t setHourRTC(uint8_t writeHours) {
     // DEFAULT setting hour to 24 hour mode
     uint8_t writeVal = HOUR_MODE | TwoDigitDecimalToBCD(writeHours);
     obc_error_code_t retVal = i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_HOURS, &writeVal, 1);
@@ -332,14 +333,14 @@ uint8_t setHourRTC(uint8_t writeHours) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setDayRTC(uint8_t writeDays) {
+obc_error_code_t setDayRTC(uint8_t writeDays) {
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DAY, &writeDays, 1))
         return 0;
     
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setDateRTC(uint8_t writeDates) {
+obc_error_code_t setDateRTC(uint8_t writeDates) {
     uint8_t writeVal =  TwoDigitDecimalToBCD(writeDates);
     obc_error_code_t retVal = i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_DATE, &writeVal, 1);
     if (retVal != OBC_ERR_CODE_SUCCESS) {
@@ -349,7 +350,7 @@ uint8_t setDateRTC(uint8_t writeDates) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setMonthRTC(uint8_t writeMonths) {
+obc_error_code_t setMonthRTC(uint8_t writeMonths) {
     uint8_t writeVal =  TwoDigitDecimalToBCD(writeMonths);
     obc_error_code_t retVal = i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_MONTH, &writeVal, 1);
     if (retVal != OBC_ERR_CODE_SUCCESS) {
@@ -359,7 +360,7 @@ uint8_t setMonthRTC(uint8_t writeMonths) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setYearRTC(uint8_t writeYears) {
+obc_error_code_t setYearRTC(uint8_t writeYears) {
     uint8_t writeVal =  TwoDigitDecimalToBCD(writeYears);
     obc_error_code_t retVal = i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_YEAR, &writeVal, 1);
     if (retVal != OBC_ERR_CODE_SUCCESS) {
@@ -374,7 +375,7 @@ uint8_t setYearRTC(uint8_t writeYears) {
 I have combined seconds value with A1m1, minutes value with a2m2 before writing it to the correct address. Something
 similar with day or date mode */
 
-uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode,  uint8_t dayOrDate) {
+obc_error_code_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode,  uint8_t dayOrDate) {
     uint8_t writeSeconds = TwoDigitDecimalToBCD(writeAlarmTime->time->seconds) | ((writeAlarmMode-> A1M1) << 7);
     if (!i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_ALARM_1_SECONDS, &writeSeconds, 1)) {
         return 0;
@@ -408,7 +409,7 @@ uint8_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAla
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setControlRTC(rtc_control_t *writeControl) {
+obc_error_code_t setControlRTC(rtc_control_t *writeControl) {
    uint8_t writeVal =  (writeControl->EOSC << 7) |
                         (writeControl->BBSQW << 6) |
                         (writeControl->CONV << 5) |
@@ -424,7 +425,7 @@ uint8_t setControlRTC(rtc_control_t *writeControl) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setStatusRTC(rtc_status_t *writeStatus) {
+obc_error_code_t setStatusRTC(rtc_status_t *writeStatus) {
     uint8_t writeVal = (writeStatus->OSF << 7) |
                         (writeStatus->BB32KHZ << 6) |
                         (writeStatus->EN32KHZ << 3) |
@@ -440,7 +441,7 @@ uint8_t setStatusRTC(rtc_status_t *writeStatus) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-uint8_t setAgingOffsetRTC(int8_t writeAgingOffset) {
+obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset) {
     uint8_t writeVal = (writeAgingOffset < 0) ? (1 << 7) : 0;
     writeVal |= (writeAgingOffset < 0) ? -writeAgingOffset : writeAgingOffset;
 
