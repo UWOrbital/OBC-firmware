@@ -56,4 +56,34 @@ obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
  */
 obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb);
 
+/**
+ * @brief Send and receive multiple bytes via SPI.
+ * @param spiReg The SPI register to use.
+ * @param outBytes The byte to send.
+ * @param inBytes Buffer to store the received byte.
+ * @param dataLength The number of bytes to send and receive
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes, uint8_t *inBytes, int dataLength);
+
+/**
+ * @brief Send multiple bytes via SPI.
+ * 
+ * @param spiReg The SPI register to use.
+ * @param outBytes The bytes to send.
+ * @param dataLength The number of bytes to send
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, int dataLength);
+
+/**
+ * @brief Receive multiple bytes via SPI.
+ * 
+ * @param spiReg The SPI register to use.
+ * @param inBytes Buffer to store the received byte.
+ * @param dataLength The number of bytes to receive
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, int dataLength);
+
 #endif // DRIVERS_INCLUDE_OBC_SPI_IO_H_
