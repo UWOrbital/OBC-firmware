@@ -1,5 +1,7 @@
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
+#include "obc_assert.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -8,6 +10,17 @@
 
 #include <i2c.h>
 #include <sys_common.h>
+
+// The I2C bus to use for the OBC
+#define I2C_REG i2cREG1
+
+// Max number of bytes you can send when calling i2cWriteReg
+#define I2C_WRITE_REG_MAX_BYTES 32U
+
+// The mutex timeout for the I2C bus
+#define I2C_MUTEX_TIMEOUT portMAX_DELAY
+
+STATIC_ASSERT(I2C_REG == i2cREG1, "I2C_REG must be i2cREG1");
 
 static SemaphoreHandle_t i2cMutex = NULL;
 static StaticSemaphore_t i2cMutexBuffer;
@@ -89,24 +102,23 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, void *buf) {
 }
 
 obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes) {
+    obc_error_code_t errCode;
+    
     ASSERT(i2cMutex != NULL);
 
     if (data == NULL || numBytes < 1)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    obc_error_code_t err;
-    err = i2cSendTo(sAddr, 1, &reg);
-    if (err != OBC_ERR_CODE_SUCCESS)
-        return err;
+    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, 1, &reg));
 
-    err = i2cReceiveFrom(sAddr, numBytes, data);
-    if (err != OBC_ERR_CODE_SUCCESS)
-        return err;
+    RETURN_IF_ERROR_CODE(i2cReceiveFrom(sAddr, numBytes, data));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes) {
+    obc_error_code_t errCode;
+
     ASSERT(i2cMutex != NULL);
 
     if (data == NULL || numBytes < 1 || numBytes > I2C_WRITE_REG_MAX_BYTES)
@@ -119,5 +131,6 @@ obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t 
         dataBuf[i + 1] = data[i];
     }
 
-    return i2cSendTo(sAddr, numBytes + 1, &dataBuf);
-}  
+    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, numBytes + 1, &dataBuf));
+    return OBC_ERR_CODE_SUCCESS;
+}

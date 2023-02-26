@@ -6,18 +6,6 @@
 #include <sci.h>
 #include <stdint.h>
 
-#ifdef RM46_LAUNCHPAD
-	#define UART_PRINT_REG scilinREG
-	#define UART_READ_REG scilinREG 
-#elif OBC_REVISION_1
-	#define UART_PRINT_REG sciREG 
-	#define UART_READ_REG sciREG
-#elif OBC_REVISION_2
-	#error Serial port not yet chosen for OBC_REVISION_2
-#else
-	#error Board not defined
-#endif
-
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
  */
