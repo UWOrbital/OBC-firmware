@@ -39,7 +39,7 @@ int main(void) {
     
     uint32_t addr = 0x31415;
     uint8_t byteData = 0xAB;
-    snprintf(msg, 50, "Writting %X to %p\r\n", byteData, addr);
+    snprintf(msg, 50, "Writting %X to %lX\r\n", byteData, addr);
     sciPrintText((unsigned char *) msg, strlen(msg));
     framWrite(addr, &byteData, 1);
     
@@ -47,12 +47,12 @@ int main(void) {
     addr = 0x31415;
     byteData = 0;
     framRead(addr, &byteData, 1);
-    snprintf(msg, 50, "Read %X from %p\r\n", byteData, addr);
+    snprintf(msg, 50, "Read %X from %lX\r\n", byteData, addr);
     sciPrintText((unsigned char *) msg, strlen(msg));
 
     //Multipe Bytes
     unsigned char hello_world[12] = {'H','e','l','l','o',' ','W','o','r','l','d'};
-    snprintf(msg, 50, "Writting %s to %p\r\n", hello_world, addr);
+    snprintf(msg, 50, "Writting %s to %lX\r\n", hello_world, addr);
     sciPrintText((unsigned char *) msg, strlen(msg));
     //Write Hello World to 0x12345
     addr = 0x12345;
@@ -61,7 +61,7 @@ int main(void) {
     //Read Hello World from 0x12345
     memset(hello_world,0,sizeof(hello_world));
     framRead(addr, hello_world, sizeof(hello_world));
-    snprintf(msg, 50, "Read %s from %p\r\n", hello_world, addr);
+    snprintf(msg, 50, "Read %s from %lX\r\n", hello_world, addr);
     sciPrintText((unsigned char *) msg, strlen(msg));
 
     //Read Status Register
@@ -84,13 +84,13 @@ int main(void) {
     framWriteStatusReg(oldStatusReg);
 
     //Sleep
-    sciPrintText("Going to sleep\r\n", strlen("Going to sleep\r\n"));
+    sciPrintText((unsigned char *)"Going to sleep\r\n", strlen("Going to sleep\r\n"));
     framSleep();
     framWakeUp();
     //Read Hello World from 0x1234
     memset(hello_world,0,sizeof(hello_world));
     framRead(addr, hello_world, sizeof(hello_world));
-    snprintf(msg, 50, "Read %s from %p after wakeup\r\n", hello_world, addr);
+    snprintf(msg, 50, "Read %s from %lX after wakeup\r\n", hello_world, addr);
     sciPrintText((unsigned char *) msg, strlen(msg));
 
     return 0;

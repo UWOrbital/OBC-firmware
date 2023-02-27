@@ -37,6 +37,7 @@ LIBS :=
 SRC_DIRS :=
 SRC_DIRS += hal/source
 SRC_DIRS += drivers/source
+SRC_DIRS += common/source
 SRC_DIRS += examples/spi_fram_demo
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
