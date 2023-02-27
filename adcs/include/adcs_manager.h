@@ -3,7 +3,7 @@
 
 #include "obc_errors.h"
 
-#include <sys_common.h>
+// #include <sys_common.h>
 
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U
