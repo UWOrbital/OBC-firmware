@@ -1,38 +1,10 @@
 #ifndef DRIVERS_INCLUDE_DS3232_MZ_H_
 #define DRIVERS_INCLUDE_DS3232_MZ_H_
 
+#include "obc_errors.h"
+
 #include <stdint.h>
-#include <gio.h>
-
-
-#define DS3232_I2C_ADDRESS  0x68U
-
-/* DS3232 registers */
-#define DS3232_SECONDS      0x00U
-#define DS3232_MINUTES      0x01U
-#define DS3232_HOURS        0x02U
-#define DS3232_DAY          0x03U
-#define DS3232_DATE         0X04U
-#define DS3232_MONTH        0x05U
-#define DS3232_YEAR         0x06U
-#define DS3232_TEMP_MSB     0x11U
-#define DS3232_TEMP_LSB     0x12U            
-#define DS3232_CONTROL      0X0EU
-#define DS3232_STATUS       0X0FU
-#define DS3232_AGING        0X10U
-
-#define DS3232_ALARM_1_SECONDS      0x07U
-#define DS3232_ALARM_1_MINUTES      0x08U
-#define DS3232_ALARM_1_HOURS        0x09U
-#define DS3232_ALARM_1_DAY_OR_DATE  0x0AU
-
-#define HOUR_MODE           32
-#define DAY_MODE            64
-#define DATE_MODE           0
-#define TEMP_RESOLUTION     0.25
-
-#define RTC_RST_GIO_PIN     1
-#define RTC_RST_GIO_PORT    gioPORTA
+#include <stdbool.h>
 
 /**
  * @struct rtc_time_t
@@ -40,17 +12,12 @@
  * @var hours Specifies the RTC hour value. (0-23) 
  * @var minutes Specifies the RTC minutes value. (0-59)
  * @var seconds Specifies the RTC seconds value. (0-59)
- * @note This stucture is used to set and get the RTC time. The time is set in the 24-hour format by default.
  */
 typedef struct {
     uint8_t hours;
     uint8_t minutes;
     uint8_t seconds;
 } rtc_time_t;
-
-//temporary time struct
-rtc_time_t tempTime = {0, 0, 0};
-rtc_date_t *ptrTempTime = &tempTime;
 
 /**
  * @struct rtc_date_t
@@ -65,28 +32,17 @@ typedef struct {
     uint8_t year;
 } rtc_date_t;
 
-//temporary date struct 
-rtc_date_t tempDate = {0, 0, 0};
-rtc_date_t *ptrTempDate = &tempDate;
-
 /**
  * @struct rtc_date_time_t
  * @brief DS3232 date plus time structure definition
- * @var date Specifies the RTC date value. (01-31) 
- * @var month Specifies the RTC month value. (01-12)
- * @var year Specifies the RTC year value. (00-99)
- * @var hours Specifies the RTC hour value. (0-23) 
- * @var minutes Specifies the RTC minutes value. (0-59)
- * @var seconds Specifies the RTC seconds value. (0-59)
+ * @var date Specifies the RTC date
+ * @var time Specifies the RTC time
  */
 typedef struct {
-    rtc_date_t *date;
-    rtc_time_t *time;
+    rtc_date_t date;
+    rtc_time_t time;
 } rtc_date_time_t;
 
-//temporary date-time struct 
-rtc_date_time_t tempDateTime = {{0, 0, 0}, {0, 0, 0}};
-rtc_date_time_t *ptrTempDateTime = &tempDateTime;
 /**
  * @struct rtc_control_t
  * @brief DS3232 control register structure definition
@@ -96,15 +52,14 @@ rtc_date_time_t *ptrTempDateTime = &tempDateTime;
  * @var INTCN   Interrupt control 
  * @var A2IE    Alarm 2 interrupt enable
  * @var A1IE    Alarm 1 interrupt enable
- * @note Used to get and set the control registers
  */
 typedef struct {
-    uint8_t EOSC;    
-    uint8_t BBSQW;     
-    uint8_t CONV;      
-    uint8_t INTCN;     
-    uint8_t A2IE;     
-    uint8_t A1IE;       
+    uint8_t EOSC : 1;    
+    uint8_t BBSQW : 1;     
+    uint8_t CONV : 1;    
+    uint8_t INTCN : 1;  
+    uint8_t A2IE : 1;
+    uint8_t A1IE : 1;   
 } rtc_control_t;
 
 /**
@@ -116,48 +71,66 @@ typedef struct {
  * @var BSY     Busy. This bit indicates the device is busy executing temperature conversion function
  * @var A2F     Alarm 2 flag
  * @var A1F     Alarm 1 flag
- * @note Used to get and set the status registers
  */
 typedef struct {
-    uint8_t OSF;     // oscillator stop flag
-    uint8_t BB32KHZ;     // Battery-backed 32 kHz output
-    uint8_t EN32KHZ;       //  Enabled 32.768kHz output
-    uint8_t BSY;      // Device busy
-    uint8_t A2F;       // Alarm 2 flag
-    uint8_t A1F;       // Alarm 1 flag
+    uint8_t OSF : 1;    
+    uint8_t BB32KHZ : 1;     
+    uint8_t EN32KHZ : 1;    
+    uint8_t BSY : 1;  
+    uint8_t A2F : 1;
+    uint8_t A1F : 1;   
 } rtc_status_t;
 
 /**
  * @struct rtc_alarm_time_t
  * @brief DS3232 alarm time structure definition
- * @var date    Specifies the alarm date value. (01-31) 
- * @var day     Specifies the alarm day value. (1-7)
- * @var hours   Specifies the alarm hours value. (00-24)
+ * @var date    Specifies the alarm date value. (1-31) 
+ * @var hours   Specifies the alarm hours value. (0-23)
  * @var minutes Specifies the alarm minutes value. (0-59)
  * @var seconds Specifies the alarm seconds value. (0-59)
- * @note Used to get and set alarm 1. Day or date depends on the mode selected as both of them write to the same address. This is provisioned in the setAlarmRTC() function
  */
 typedef struct {
     uint8_t date;   
-    uint8_t day;   
-    rtc_time_t *time;
+    rtc_time_t time;
 } rtc_alarm_time_t;
 
-/**
- * @struct rtc_alarm_mode_t
- * @brief DS3232 alarm mode structure definition
- * @var A1M1, A1M2, A1M3, A1M4 are variables that need to be set to one or zero
- * @note The different modes and combinations in which A1M1 - A1M4 need to be set are given as ready constants at the top of the source file for this driver
- */
-typedef struct {
-    uint8_t A1M1;
-    uint8_t A1M2;
-    uint8_t A1M3;
-    uint8_t A1M4;
-} rtc_alarm_mode_t;
+typedef enum {
+    RTC_ALARM1_ONCE_PER_SECOND = 0x0F,
+    RTC_ALARM1_MATCH_SECONDS = 0x0E,
+    RTC_ALARM1_MATCH_MINUTES_SECONDS = 0x0C,
+    RTC_ALARM1_MATCH_HOURS_MINUTES_SECONDS = 0x08,
+    RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS = 0x00,
+    // ALARM_MATCH_DAY_HOURS_MINUTES_SECONDS = 0x10 // Not supported
+} rtc_alarm1_mode_t;
 
-/*-------RESET RTC---------*/
+typedef enum {
+    RTC_ALARM2_ONCE_PER_MINUTE = 0x07,
+    RTC_ALARM2_MATCH_MINUTES = 0x06,
+    RTC_ALARM2_MATCH_HOURS_MINUTES = 0x04,
+    RTC_ALARM2_MATCH_DATE_HOURS_MINUTES = 0x00,
+    // ALARM_MATCH_DAY_HOURS_MINUTES = 0x08 // Not supported
+} rtc_alarm2_mode_t;
+
+
+/**
+ * @brief Initializes the RTC.
+ * @param dateTime struct used to set date and time variables in RTC.
+ * @return OBC_ERR_CODE_SUCCESS if the RTC was initialized, appropriate error code otherwise.
+ */
+obc_error_code_t rtcInit(rtc_date_time_t *dateTime);
+
+/**
+ * @brief Turns on the RTC.
+ * 
+ */
+void turnOnRTC(void);
+
+/**
+ * @brief Resets the RTC.
+ * 
+ */
 void resetRTC(void);
+
 
 /*-------GET FUNCTIONS---------*/
 
@@ -165,7 +138,7 @@ void resetRTC(void);
  * @brief Gets seconds data from RTC.
  * 
  * @param seconds uint8_t pointer to store seconds.
- * @return OBC_ERR_CODE_SUCCESS if the seconds was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the seconds was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getSecondsRTC(uint8_t* seconds);
 
@@ -173,7 +146,7 @@ obc_error_code_t getSecondsRTC(uint8_t* seconds);
  * @brief Gets minutes data from RTC.
  * 
  * @param minutes uint8_t pointer to store minutes.
- * @return OBC_ERR_CODE_SUCCESS if the minutes was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the minutes was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getMinutesRTC(uint8_t* minutes);
 
@@ -181,7 +154,7 @@ obc_error_code_t getMinutesRTC(uint8_t* minutes);
  * @brief Gets hour data from RTC.
  * 
  * @param hour uint8_t pointer to store hour.
- * @return OBC_ERR_CODE_SUCCESS if the hour was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the hour was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getHoursRTC(uint8_t* hours);
 
@@ -189,7 +162,7 @@ obc_error_code_t getHoursRTC(uint8_t* hours);
  * @brief Gets days data from RTC.
  * 
  * @param days uint8_t pointer to store days.
- * @return OBC_ERR_CODE_SUCCESS if the days was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the days was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getDayRTC(uint8_t* day);
 
@@ -197,7 +170,7 @@ obc_error_code_t getDayRTC(uint8_t* day);
  * @brief Gets date data from RTC.
  * 
  * @param date uint8_t pointer to store date.
- * @return OBC_ERR_CODE_SUCCESS if the date was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the date was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getDateRTC(uint8_t* date);
 
@@ -205,7 +178,7 @@ obc_error_code_t getDateRTC(uint8_t* date);
  * @brief Gets month data from RTC.
  * 
  * @param month uint8_t pointer to store month.
- * @return OBC_ERR_CODE_SUCCESS if the month was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the month was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getMonthRTC(uint8_t* month);
 
@@ -213,7 +186,7 @@ obc_error_code_t getMonthRTC(uint8_t* month);
  * @brief Gets year data from RTC.
  * 
  * @param year uint8_t pointer to store year.
- * @return OBC_ERR_CODE_SUCCESS if the year was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the year was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getYearRTC(uint8_t* year); 
 
@@ -221,7 +194,7 @@ obc_error_code_t getYearRTC(uint8_t* year);
  * @brief Gets date and time data from RTC by populating rtc_date_time_t struct members.
  * 
  * @param dateTime struct pointer to store date and time.
- * @return OBC_ERR_CODE_SUCCESS if the date and time were accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the date and time were accessed, appropriate error code otherwise.
  */
 obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime);
 
@@ -229,7 +202,7 @@ obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime);
  * @brief Gets current time data from RTC by populating rtc_date_time_t struct members.
  * 
  * @param time struct pointer to store current time.
- * @return OBC_ERR_CODE_SUCCESS if the current time was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the current time was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getCurrentTimeRTC(rtc_time_t *time); 
 
@@ -237,7 +210,7 @@ obc_error_code_t getCurrentTimeRTC(rtc_time_t *time);
  * @brief Gets current alarm configuration from RTC by populating rtc_alarm_time_t struct members.
  * 
  * @param alarmTime struct pointer to store alarm time.
- * @return OBC_ERR_CODE_SUCCESS if the alarm time was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if the alarm time was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime);
 
@@ -245,7 +218,7 @@ obc_error_code_t getAlarmTimeRTC(rtc_alarm_time_t *alarmTime);
  * @brief Gets current control register configuration from RTC by populating rtc_control_t struct members.
  * 
  * @param control struct pointer to store control configuration.
- * @return OBC_ERR_CODE_SUCCESS if control register was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if control register was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getControlRTC(rtc_control_t *control);
 
@@ -253,7 +226,7 @@ obc_error_code_t getControlRTC(rtc_control_t *control);
  * @brief Gets current status register configuration from RTC by populating rtc_status_t struct members.
  * 
  * @param status struct pointer to store status configuration.
- * @return OBC_ERR_CODE_SUCCESS if status register was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if status register was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getStatusRTC(rtc_status_t *status);
 
@@ -261,7 +234,7 @@ obc_error_code_t getStatusRTC(rtc_status_t *status);
  * @brief Gets aging offset from RTC.
  * 
  * @param agingOffset int8_t pointer to store aging offset.
- * @return OBC_ERR_CODE_SUCCESS if aging register was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if aging register was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getAgingOffsetRTC(int8_t* agingOffset);
 
@@ -269,9 +242,10 @@ obc_error_code_t getAgingOffsetRTC(int8_t* agingOffset);
  * @brief Gets temperature from RTC.
  * 
  * @param temperature float pointer to store temperature.
- * @return OBC_ERR_CODE_SUCCESS if temperature register was accesed, appropriate error code otherwise.
+ * @return OBC_ERR_CODE_SUCCESS if temperature register was accessed, appropriate error code otherwise.
  */
 obc_error_code_t getTemperatureRTC(float* temperature);
+
 
 /*-------SET FUNCTIONS---------*/
 
@@ -296,6 +270,7 @@ obc_error_code_t setMinutesRTC(uint8_t writeMinutes);
  * 
  * @param writeHouruint8_t variable for hours value to be set in RTC.
  * @return OBC_ERR_CODE_SUCCESS if hours was set, appropriate error code otherwise.
+ * @warning 24 hour format is used.
  */
 obc_error_code_t setHourRTC(uint8_t writeHour);
 
@@ -332,14 +307,12 @@ obc_error_code_t setMonthRTC(uint8_t writeMonths);
 obc_error_code_t setYearRTC(uint8_t writeYears);
 
 /**
- * @brief set alarm in RTC.
+ * @brief set date and time in RTC.
  * 
- * @param writeAlarmTime struct with alarm time data to be set in RTC
- * @param writeAlarmMode struct with alarm mode data to be set in RTC
- * @param dayOrDate choose mode to set either day or date in alarm along with h,m,s
- * @return OBC_ERR_CODE_SUCCESS if alarm was set, appropriate error code otherwise.
+ * @param writeDateTime struct used to set date and time variables in RTC.
+ * @return OBC_ERR_CODE_SUCCESS if date and time was set, appropriate error code otherwise.
  */
-obc_error_code_t setAlarmRTC(rtc_alarm_time_t *writeAlarmTime, rtc_alarm_mode_t *writeAlarmMode, uint8_t dayOrDate);
+obc_error_code_t setCurrentDateTimeRTC(rtc_date_time_t *writeDateTime);
 
 /**
  * @brief set control mode in RTC.
@@ -365,24 +338,87 @@ obc_error_code_t setStatusRTC(rtc_status_t *writeStatus);
  */
 obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset);
 
-/*-------UTILITY FUNCTIONS---------*/
+/**
+ * @brief Set the value of the alarm 1 seconds register.
+ * 
+ * @param enable True if seconds should match, false otherwise.
+ * @param seconds uint8_t Number of seconds to match. (0-59)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t setAlarm1SecondsRTC(bool enable, uint8_t seconds);
 
 /**
- * @brief Converts a two digit decimal number to corresponding binary coded data to write to RTC registers.
+ * @brief Set the value of the alarm 1 minutes register.
  * 
- * @param inputVal 2 digit decimla number to be converted
- * @return the binary coded data.
+ * @param enable True if minutes should match, false otherwise.
+ * @param minutes uint8_t Number of minutes to match. (0-59)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-static uint8_t TwoDigitDecimalToBCD(uint8_t inputVal);
+obc_error_code_t setAlarm1MinutesRTC(bool enable, uint8_t minutes);
 
 /**
- * @brief Gets a two digit decimal number from corresponding binary coded data from RTC registers.
+ * @brief Set the value of the alarm 1 hours register.
  * 
- * @param data variable populated with the BCD.
- * @param onesDigitBitMask uint8_t variable used to get the ones digit value.
- * @param tensDigitBitMask uint8_t variable used to get the tens digit value.
- * @return the two digit decimal number.
+ * @param enable True if hours should match, false otherwise.
+ * @param hour uint8_t Number of hours to match. (0-23)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-static uint8_t TwoDigitDecimalFromBCD(uint8_t data, uint8_t onesDigitBitMask, uint8_t tensDigitBitMask);
+obc_error_code_t setAlarm1HoursRTC(bool enable, uint8_t hour);
+
+/**
+ * @brief Set the value of the alarm 1 date register.
+ * 
+ * @param enable True if date should match, false otherwise.
+ * @param date uint8_t Number of date to match. (1-31)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t setAlarm1DateRTC(bool enable, uint8_t date);
+
+/**
+ * @brief Set alarm 1
+ * 
+ * @param mode Alarm mode.
+ * @param dt Alarm time.
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ * @note Alarm 1 interrupt must be enabled in the control register.
+ */
+obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt);
+
+/**
+ * @brief Set the value of the alarm 2 minutes register.
+ * 
+ * @param enable True if minutes should match, false otherwise.
+ * @param minutes uint8_t Number of minutes to match. (0-59)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t setAlarm2MinutesRTC(bool enable, uint8_t minutes);
+
+/**
+ * @brief Set the value of the alarm 2 hours register.
+ * 
+ * @param enable True if hours should match, false otherwise.
+ * @param hour uint8_t Number of hours to match. (0-23)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t setAlarm2HoursRTC(bool enable, uint8_t hour);
+
+/**
+ * @brief Set the value of the alarm 2 date register.
+ * 
+ * @param enable True if date should match, false otherwise.
+ * @param date uint8_t Number of date to match. (1-31)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t setAlarm2DateRTC(bool enable, uint8_t date);
+
+/**
+ * @brief Set alarm 2
+ * 
+ * @param mode Alarm mode.
+ * @param dt Alarm time.
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ * @note Alarm 2 interrupt must be enabled in the control register.
+ */
+obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt);
 
 #endif /* DRIVERS_INCLUDE_DS3232_MZ_H_ */
