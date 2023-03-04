@@ -19,7 +19,7 @@ static inline uint8_t twoDigitDecimalToBCD(uint8_t inputVal) {
  * @param data Binary coded decimal value
  * @return the decimal value.
  */
-static uint8_t twoDigitDecimalFromBCD(uint8_t data) {
+static inline uint8_t twoDigitDecimalFromBCD(uint8_t data) {
     return ((data >> 4) * 10) + (data & 0xF);
 }
 
