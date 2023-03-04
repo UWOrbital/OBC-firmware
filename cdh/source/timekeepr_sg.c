@@ -25,8 +25,8 @@ obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMo
     return setAlarm2RTC(alarmMode, alarmTime);
 }
 
-obc_error_code_t setCurrentTime(rtc_time_t currentTime) {
-    return setCurrentTimeRTC(currentTime);
+obc_error_code_t setCurrentDateTime(rtc_date_time_t *currentTime) {
+    return setCurrentDateTimeRTC(&currentTime);
 }
 
 obc_error_code_t getCurrentTime(rtc_time_t *getTime) {

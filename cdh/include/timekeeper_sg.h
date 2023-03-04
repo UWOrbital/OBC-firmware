@@ -14,7 +14,7 @@ both the alarm enums from the rtc driver, based on the mode the function will ch
 which alarm is available? If we go with this, then setalar1 and setAlarm2 functions should not be declared in the header file as it is not part of the interface we
 want the other seubteams to see*/
 
-obc_error_code_t setCurrentTime(rtc_time_t currentTime);
+obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
 
 obc_error_code_t getCurrentTime(rtc_time_t *getTime);
 
