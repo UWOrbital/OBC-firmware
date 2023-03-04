@@ -34,7 +34,7 @@ static void printPositionDataManager(const position_data_manager_t *manager){
  * @brief Returns true if data1 and data2 are identifical. 
  * @attention USED ONLY FOR TESTING PURPOSES.
 */
-static int positionDataEquals(const position_data_t data1, const position_data_t data2) {
+static int equalsPositionData(const position_data_t data1, const position_data_t data2) {
     return data1.julianDate == data2.julianDate && data1.x == data2.x && data1.y == data2.y && data1.z == data2.z;
 }
 
@@ -42,7 +42,7 @@ static int positionDataEquals(const position_data_t data1, const position_data_t
  * @brief Returns the position at the given index % ADCS_POSITION_DATA_SIZE of the manager
  * @attention Requires index is non-zero and manager is a valid pointer
 */
-static position_data_t getPositionData(const position_data_manager_t *manager, int index) {
+static position_data_t getPositionDataByIndex(const position_data_manager_t *manager, int index) {
     assert(manager);
     assert(index >= 0);
     return manager->data[index % ADCS_POSITION_DATA_SIZE];
@@ -52,10 +52,28 @@ static position_data_t getPositionData(const position_data_manager_t *manager, i
  * @brief get the julian data at the given index in the manager
  * @attention requires manager is a valid pointer and index >= 0
 */
-static float getJulianDate(const position_data_manager_t *manager, int index) {
+static float getJulianDateByIndex(const position_data_manager_t *manager, int index) {
     assert(manager);
     assert(index >= 0);
-    return getPositionData(manager, index).julianDate;
+    return getPositionDataByIndex(manager, index).julianDate;
+}
+
+/**
+ * @brief Gets the minimum julian date stored in manager
+ * @attention Requires manager is a valid pointer
+*/
+static float getMinJulianDate(const position_data_manager_t *manager) {
+    assert(manager);
+    return manager->data[manager->writeIndex].julianDate;
+}
+
+/**
+ * @brief Gets the maxiumum julian date stored in manager uses the write index location
+ * @attention Requires manager is a valid pointer
+*/
+static float getMaxJulianDate(const position_data_manager_t *manager) {
+    assert(manager);
+    return manager->data[(manager->writeIndex + ADCS_POSITION_DATA_SIZE - 1) % ADCS_POSITION_DATA_SIZE].julianDate;
 }
 
 /**
@@ -74,40 +92,21 @@ static position_data_t readData(position_data_manager_t *manager) {
 */
 static void writeData(position_data_manager_t *manager, position_data_t data) {
     assert(manager);
-    int index = manager->writeIndex;
-    assert((getJulianDate(manager, index - 1 + ADCS_POSITION_DATA_SIZE) < data.julianDate));
+    assert((getMaxJulianDate(manager) < data.julianDate));
 
+    int index = manager->writeIndex;
     manager->data[index] = data;
     manager->writeIndex = (index + 1) % ADCS_POSITION_DATA_SIZE;
 }
 
 /**
- * @brief Gets the minimum julian date 
- * @attention Requires manager is a valid pointer
-*/
-static float getMinJulianDate(const position_data_manager_t *manager) {
-    assert(manager);
-    return manager->data[manager->writeIndex].julianDate;
-}
-
-/**
- * @brief Gets the minimum julian date 
- * @attention Requires manager is a valid pointer
-*/
-static float getMaxJulianDate(const position_data_manager_t *manager) {
-    assert(manager);
-    return manager->data[(manager->writeIndex + ADCS_POSITION_DATA_SIZE - 1) % ADCS_POSITION_DATA_SIZE].julianDate;
-}
-
-
-/**
- * @brief Searchs linearly for the julian_date in the manager and returns the index of the julian date in the manager that 
- * is greater or equal to the julian_date
+ * @brief Searchs linearly for the julianDate in the manager and returns the index of the julian date in the manager that 
+ * is greater or equal to the julianDate argument
  * @attention manager must be a valid pointer and julian_data is greater than 0
 */
 static int searchManagerLinear(const position_data_manager_t *manager, float julianDate) {
     assert(manager);
-    assert(julianDate > 0);
+    assert(julianDate > ADCS_INVALID_JULIAN_DATE);
 
     int writeIndex = manager->writeIndex;
     int index = writeIndex;
@@ -125,19 +124,19 @@ static int searchManagerLinear(const position_data_manager_t *manager, float jul
 /**
  * @brief Searchs for the julianDate in the manager and returns the index of the julian date in the manager that 
  * is greater or equal to the julianDate
- * @attention manager must be a valid pointer and julian_data is greater than 0
+ * @attention manager must be a valid pointer and julianData is greater than 0
 */
 static int searchManager(const position_data_manager_t *manager, float julianDate) {
     assert(manager);
-    assert(julianDate > 0);
+    assert(julianDate > ADCS_INVALID_JULIAN_DATE);
     int low = manager->writeIndex;
     int high = (low - 1 + ADCS_POSITION_DATA_SIZE) % ADCS_POSITION_DATA_SIZE;
     int mid = -1;
 
     // Edge cases:
-    if (julianDate >= getJulianDate(manager, high)) {
+    if (julianDate >= getJulianDateByIndex(manager, high)) {
         return high;
-    } else if (julianDate <= getJulianDate(manager, low)) {
+    } else if (julianDate <= getJulianDateByIndex(manager, low)) {
         return low;
     }
 
@@ -148,13 +147,13 @@ static int searchManager(const position_data_manager_t *manager, float julianDat
             mid = (low + high) / 2;
         } else {
             // low == high
-            if (julianDate <= getJulianDate(manager, low)) {
+            if (julianDate <= getJulianDateByIndex(manager, low)) {
                 return low;
             } else {
                 return (low + 1) % ADCS_POSITION_DATA_SIZE;
             }
         }
-        int foundJulianDate = getJulianDate(manager, mid);
+        int foundJulianDate = getJulianDateByIndex(manager, mid);
 
         if (foundJulianDate == julianDate) {
             return mid;
@@ -165,8 +164,6 @@ static int searchManager(const position_data_manager_t *manager, float julianDat
         }
 
     }
-    // Never supposed to get here
-    return -1;
 }
 
 /**
@@ -183,17 +180,17 @@ static float calculateValue(float targetJulanDate, float point1, float point2, f
  * @brief Gets the adjusted value at the given julian date
  * @attention Requires manager is a valid pointer and julian date greater or equal than the min julian date stored in manager
 */
-static position_data_t getPositionDataAdjusted(const position_data_manager_t *manager, float julianDate) {
+static position_data_t getPositionData(const position_data_manager_t *manager, float julianDate) {
     assert(manager);
     assert(julianDate >= getMinJulianDate(manager));
 
     int index = searchManager(manager, julianDate);
-    position_data_t dataHigher = getPositionData(manager, index);
+    position_data_t dataHigher = getPositionDataByIndex(manager, index);
 
     if (dataHigher.julianDate == julianDate) {
         return dataHigher;
     } else {
-        position_data_t dataLower = getPositionData(manager, index - 1 + ADCS_POSITION_DATA_SIZE);
+        position_data_t dataLower = getPositionDataByIndex(manager, index - 1 + ADCS_POSITION_DATA_SIZE);
         position_data_t newData = {julianDate};
         newData.x = calculateValue(julianDate, dataLower.x, dataHigher.x, dataLower.julianDate, dataHigher.julianDate);
         newData.y = calculateValue(julianDate, dataLower.y, dataHigher.y, dataLower.julianDate, dataHigher.julianDate);
@@ -205,8 +202,8 @@ static position_data_t getPositionDataAdjusted(const position_data_manager_t *ma
 /**
  * @brief Initializes a position data point
 */
-static position_data_t initPositionData(void) {
-    position_data_t data = {0, 0, 0, 0};
+static position_data_t initPositionData(float julianDate, float x, float y, float z) {
+    position_data_t data = {julianDate, x, y, z};
     return data;
 }
 
@@ -218,7 +215,7 @@ static position_data_manager_t initPositionDataManager(void) {
     position_data_manager_t manager;
 
     for(int i=0; i<ADCS_POSITION_DATA_SIZE; i++) {
-        manager.data[i] = initPositionData();
+        manager.data[i] = initPositionData(ADCS_INVALID_JULIAN_DATE, 0, 0, 0);
     }
 
     manager.readIndex = 0;
@@ -241,7 +238,7 @@ int main(void) {
     for (int i=0; i<15; i++) {
         position_data_t d = readData(&manager);
         printPositionData(&d);
-        float jd = getJulianDate(&manager, i);
+        float jd = getJulianDateByIndex(&manager, i);
         printf("%f\n", jd);
     }
     printf("\n");
@@ -257,11 +254,11 @@ int main(void) {
     assert(searchManagerLinear(&manager, 12) == 0);
 
 // Tests access based on above manager
-    assert(getPositionData(&manager, 0).julianDate == 11);
-    assert(getPositionData(&manager, 1).julianDate == 2);
-    assert(getPositionData(&manager, 9).julianDate == 10);
-    assert(getPositionData(&manager, 10).julianDate == 11);
-    assert(getPositionData(&manager, 5).julianDate == 6);
+    assert(getPositionDataByIndex(&manager, 0).julianDate == 11);
+    assert(getPositionDataByIndex(&manager, 1).julianDate == 2);
+    assert(getPositionDataByIndex(&manager, 9).julianDate == 10);
+    assert(getPositionDataByIndex(&manager, 10).julianDate == 11);
+    assert(getPositionDataByIndex(&manager, 5).julianDate == 6);
 
 // tests for bs based on above manager
     assert(searchManager(&manager, 1.5) == 1);
@@ -278,19 +275,19 @@ int main(void) {
     assert(getMaxJulianDate(&manager) == 11);
     position_data_t data1 = {1.2, -3.5, 4, 8};
     position_data_t data2 = {1.2, -3.5, 4, 8};
-    assert(positionDataEquals(data1, data2));
+    assert(equalsPositionData(data1, data2));
     data2.x = 0;
-    assert(!positionDataEquals(data1, data2));
+    assert(!equalsPositionData(data1, data2));
 
 // tests interpolation and extrapolation
     position_data_t data3 = {2, 4, 6, -2};
     position_data_t data4 = {5, 10, 15, -5};
     position_data_t data5 = {6.9, 13.8, 20.7, -6.9};
     position_data_t data6 = {13, 26, 39, -13};
-    assert(positionDataEquals(getPositionDataAdjusted(&manager, 2), data3));
-    assert(positionDataEquals(getPositionDataAdjusted(&manager, 5), data4));
-    assert(positionDataEquals(getPositionDataAdjusted(&manager, 6.9), data5));
-    assert(positionDataEquals(getPositionDataAdjusted(&manager, 13), data6));
+    assert(equalsPositionData(getPositionData(&manager, 2), data3));
+    assert(equalsPositionData(getPositionData(&manager, 5), data4));
+    assert(equalsPositionData(getPositionData(&manager, 6.9), data5));
+    assert(equalsPositionData(getPositionData(&manager, 13), data6));
 
     printf("Assertions passed\n");
     return 0;

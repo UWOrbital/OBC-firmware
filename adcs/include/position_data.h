@@ -7,6 +7,7 @@
 #include <stddef.h>
 
 #define ADCS_POSITION_DATA_SIZE 10U
+#define ADCS_INVALID_JULIAN_DATE 0
 
 /**
  * @struct	position_data_t
