@@ -25,12 +25,15 @@ obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMo
     return setAlarm2RTC(alarmMode, alarmTime);
 }
 
-obc_error_code_t setCurrentDateTime(rtc_date_time_t *currentTime) {
+obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime) {
     return setCurrentDateTimeRTC(&currentTime);
 }
 
-obc_error_code_t getCurrentTime(rtc_time_t *getTime) {
-    return getCurrentTimeRTC(&getTime);
+//can't be of the type obc_Err else to get time we will have to do pass by pointer to actually get the time, BUT the function getCurrenTimeRTC() also has pass by pointer which is requiring me to pass
+// a double pointer that leads to incompatible types, hence here error code can't be returned. Can't think of any other method
+rtc_time_t getCurrentTime(rtc_time_t getTime) {
+    getCurrentTimeRTC(&getTime);
+    return getTime;
 }
 
 

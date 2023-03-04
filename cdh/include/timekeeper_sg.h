@@ -16,6 +16,6 @@ want the other seubteams to see*/
 
 obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
 
-obc_error_code_t getCurrentTime(rtc_time_t *getTime);
+rtc_time_t getCurrentTime(rtc_time_t getTime);
 
 #endif /*CDH_INCLUDE_TIMEKEEPER_SG_H_*/
