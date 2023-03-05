@@ -341,38 +341,38 @@ obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset);
 /**
  * @brief Set the value of the alarm 1 seconds register.
  * 
- * @param enable True if seconds should match, false otherwise.
+ * @param enable Choose whether seconds should match or not.
  * @param seconds uint8_t Number of seconds to match. (0-59)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm1SecondsRTC(bool enable, uint8_t seconds);
+obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds);
 
 /**
  * @brief Set the value of the alarm 1 minutes register.
  * 
- * @param enable True if minutes should match, false otherwise.
+ * @param enable Choose whether minutes should match or not.
  * @param minutes uint8_t Number of minutes to match. (0-59)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm1MinutesRTC(bool enable, uint8_t minutes);
+obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes);
 
 /**
  * @brief Set the value of the alarm 1 hours register.
  * 
- * @param enable True if hours should match, false otherwise.
+ * @param enable Choose whether hours should match or not.
  * @param hour uint8_t Number of hours to match. (0-23)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm1HoursRTC(bool enable, uint8_t hour);
+obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hour);
 
 /**
  * @brief Set the value of the alarm 1 date register.
  * 
- * @param enable True if date should match, false otherwise.
+ * @param enable Choose whether date should match or not.
  * @param date uint8_t Number of date to match. (1-31)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm1DateRTC(bool enable, uint8_t date);
+obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date);
 
 /**
  * @brief Set alarm 1
@@ -387,29 +387,29 @@ obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt);
 /**
  * @brief Set the value of the alarm 2 minutes register.
  * 
- * @param enable True if minutes should match, false otherwise.
+ * @param enable Choose whether minutes should match or not.
  * @param minutes uint8_t Number of minutes to match. (0-59)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm2MinutesRTC(bool enable, uint8_t minutes);
+obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes);
 
 /**
  * @brief Set the value of the alarm 2 hours register.
  * 
- * @param enable True if hours should match, false otherwise.
+ * @param enable Choose whether hours should match or not.
  * @param hour uint8_t Number of hours to match. (0-23)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm2HoursRTC(bool enable, uint8_t hour);
+obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hour);
 
 /**
  * @brief Set the value of the alarm 2 date register.
  * 
- * @param enable True if date should match, false otherwise.
+ * @param enable Choose whether date should match or not.
  * @param date uint8_t Number of date to match. (1-31)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
-obc_error_code_t setAlarm2DateRTC(bool enable, uint8_t date);
+obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date);
 
 /**
  * @brief Set alarm 2
