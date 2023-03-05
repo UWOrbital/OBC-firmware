@@ -50,6 +50,10 @@
 #define MAX_MONTH           12U
 #define MAX_YEAR            99U
 
+typedef enum {
+    ENABLE_MATCH = 0U,
+    DISABLE_MATCH = 1U,
+} alarm_match_t;
 
 obc_error_code_t rtcInit(rtc_date_time_t *dt) {
     obc_error_code_t errCode;
@@ -425,10 +429,8 @@ obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1SecondsRTC(bool en, uint8_t seconds) {
+obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (seconds > MAX_SECONDS)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -439,10 +441,8 @@ obc_error_code_t setAlarm1SecondsRTC(bool en, uint8_t seconds) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1MinutesRTC(bool en, uint8_t minutes) {
+obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (minutes > MAX_MINUTES)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -453,10 +453,8 @@ obc_error_code_t setAlarm1MinutesRTC(bool en, uint8_t minutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1HoursRTC(bool en, uint8_t hours) {
+obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hours) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (hours > MAX_HOURS)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -467,10 +465,8 @@ obc_error_code_t setAlarm1HoursRTC(bool en, uint8_t hours) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1DateRTC(bool en, uint8_t date) {
+obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (date < MIN_DATE || date > MAX_DATE)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -486,34 +482,34 @@ obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt) {
 
     switch (mode) {
         case RTC_ALARM1_ONCE_PER_SECOND:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM1_MATCH_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(true, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM1_MATCH_MINUTES_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(true, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(true, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM1_MATCH_HOURS_MINUTES_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(true, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(true, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(true, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(ENABLE_MATCH, dt.time.hours));
+            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(true, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(true, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(true, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(true, dt.date));
+            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(ENABLE_MATCH, dt.time.hours));
+            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(ENABLE_MATCH, dt.date));
             break;
         default:
             return OBC_ERR_CODE_INVALID_ARG;
@@ -522,10 +518,8 @@ obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2MinutesRTC(bool en, uint8_t minutes) {
+obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (minutes > MAX_MINUTES)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -536,10 +530,8 @@ obc_error_code_t setAlarm2MinutesRTC(bool en, uint8_t minutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2HoursRTC(bool en, uint8_t hours) {
+obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hours) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (hours > MAX_HOURS)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -550,10 +542,8 @@ obc_error_code_t setAlarm2HoursRTC(bool en, uint8_t hours) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2DateRTC(bool en, uint8_t date) {
+obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date) {
     obc_error_code_t errCode;
-
-    en = !en; // Invert enable bit
 
     if (date < MIN_DATE || date > MAX_DATE)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -569,24 +559,24 @@ obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt) {
 
     switch (mode) {
         case RTC_ALARM2_ONCE_PER_MINUTE:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM2_MATCH_MINUTES:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(true, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(false, 0));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(DISABLE_MATCH, 0));
+            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM2_MATCH_HOURS_MINUTES:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(true, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(true, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(false, 1));
+            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(ENABLE_MATCH, dt.time.hours));
+            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
             break;
         case RTC_ALARM2_MATCH_DATE_HOURS_MINUTES:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(true, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(true, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(true, dt.date));
+            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(ENABLE_MATCH, dt.time.hours));
+            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(ENABLE_MATCH, dt.date));
             break;
         default:
             return OBC_ERR_CODE_INVALID_ARG;
