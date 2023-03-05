@@ -1,5 +1,5 @@
 #include <system.h>
-#include "obc_watchdog.h"
+#include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include <math.h>
 
@@ -14,10 +14,10 @@
 #define DWWD_STACK_SIZE 128
 #define DWWD_PRIORITY 1
 
-double_t minTime = 0.0001117095987;
-double_t maxTime = 0.4575625162;
+float minTime = 0.0001117095987;
+float maxTime = 0.4575625162;
 uint32_t fullSizeWindow = 0x5;   //Windowsize = 100%
-uint32_t DWDPRLD;
+uint32_t DWDPRLD = 0;
 TickType_t delayTime = 100;
  
 StackType_t watchdogStack[DWWD_STACK_SIZE];
@@ -32,7 +32,7 @@ void feedSwWatchdog(void){
     RTIWDKEY ^= ENABLEDWD;
 }
 
-obc_error_code_t initDWWD(double_t tExp){
+obc_error_code_t initDWWD(float tExp){
 
     if(tExp <= minTime && tExp <= maxTime){
 
@@ -41,7 +41,7 @@ obc_error_code_t initDWWD(double_t tExp){
         RTIWWDSIZECTRL = fullSizeWindow;
         feedSwWatchdog();
 
-        //return OBC_ERR_CODE_SUCCESS;
+        return OBC_ERR_CODE_SUCCESS;
     }
     return OBC_ERR_CODE_WATCHDOG_INIT_FAILURE;
 }

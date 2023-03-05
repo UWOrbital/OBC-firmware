@@ -3,10 +3,11 @@
 
 #include "obc_errors.h"
 #include <math.h>
+
 /**
  * @brief Initialize Digital Windowed Watchdog
 */
-obc_error_code_t initDWWD(double_t tExp);
+obc_error_code_t initDWWD(float tExp);
 
 /**
  * @brief Initialize DWWDTask
