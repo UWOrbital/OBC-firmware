@@ -92,7 +92,6 @@ typedef enum systemInterrupt
 extern void esmHighInterrupt(void) __attribute__ ((weak, interrupt("FIQ")));
 extern void phantomInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void vPortPreemptiveTick(void) __attribute__ ((weak, interrupt("IRQ")));
-extern void gioHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void vPortYeildWithinAPI(void) __attribute__ ((weak, interrupt("IRQ")));
 
 /* USER CODE BEGIN (3) */
@@ -267,7 +266,7 @@ typedef struct vim_config_reg
                                     |(uint32)((uint32)0U << 6U)\
                                     |(uint32)((uint32)0U << 7U)\
                                     |(uint32)((uint32)0U << 8U)\
-                                    |(uint32)((uint32)1U << 9U)\
+                                    |(uint32)((uint32)0U << 9U)\
                                     |(uint32)((uint32)0U << 10U)\
                                     |(uint32)((uint32)0U << 11U)\
                                     |(uint32)((uint32)0U << 12U)\

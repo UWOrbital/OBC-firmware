@@ -43,7 +43,7 @@ typedef struct {
  * @brief Initialize the LM75BD
  *
  * @param config Configuration struct for LM75BD
- * @return 1 if successful, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t lm75bdInit(lm75bd_config_t *config);
 
@@ -51,7 +51,7 @@ obc_error_code_t lm75bdInit(lm75bd_config_t *config);
  * @brief Read the temperature from the LM75BD
  *
  * @param temp Pointer to float to store the temperature in degrees Celsius
- * @return 1 if successful, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t readTempLM75BD(uint8_t devAddr, float *temp);
 
@@ -59,7 +59,7 @@ obc_error_code_t readTempLM75BD(uint8_t devAddr, float *temp);
  * @brief Read the configuration register from the LM75BD
  * 
  * @param config Configuration struct for LM75BD
- * @return 1 if successful, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t readConfigLM75BD(lm75bd_config_t *config);
 
@@ -71,7 +71,7 @@ obc_error_code_t readConfigLM75BD(lm75bd_config_t *config);
  * @param osPolarity OS output polarity, 0 = active low, 1 = active high
  * @param osOperationMode OS output operation mode, 0 = comparator, 1 = interrupt
  * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
- * @return 1 if successful, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osPolarity, uint8_t osOperationMode, 
                           uint8_t devOperationMode);
@@ -81,7 +81,7 @@ obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, ui
  * 
  * @param devAddr I2C address of the LM75BD
  * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
- * @return 1 if successful, 0 otherwise
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius);
 
@@ -89,8 +89,8 @@ obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCels
  * @brief Set the hysteresis threshold for the LM75BD
  * 
  * @param devAddr I2C address of the LM75BD
- * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
- * @return 1 if successful, 0 otherwise
+ * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius (<= 127.5)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius);
 
@@ -99,7 +99,7 @@ obc_error_code_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCels
  * 
  * @param devAddr I2C address of the LM75BD
  * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius
- * @return 1 if successful, 0 otherwise 
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise 
  */
 obc_error_code_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
 
@@ -107,8 +107,8 @@ obc_error_code_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius)
  * @brief Set the overtemperature shutdown threshold for the LM75BD
  * 
  * @param devAddr I2C address of the LM75BD
- * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius
- * @return 1 if successful, 0 otherwise
+ * @param overTempThresholdCelsius Overtemperature shutdown threshold, in degrees Celsius (<= 127.5)
+ * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
 obc_error_code_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius);
 
