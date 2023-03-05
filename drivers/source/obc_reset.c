@@ -12,6 +12,4 @@ void resetSystem(obc_reset_reason_t reason){
 
     portRESET_PRIVILEGE(xRunningPrivileged);
 
-    
-
 }

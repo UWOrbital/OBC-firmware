@@ -13,4 +13,4 @@ extern BaseType_t prvRaisePrivilege(void);
  */
 #define portRESET_PRIVILEGE(xRunningPrivileged) if( xRunningPrivileged == 0 ) portSWITCH_TO_USER_MODE()
 
-#endif //COMMON_INCLUDE_OBC_PRIVILEGE_H_
+#endif //_COMMON_INCLUDE_OBC_PRIVILEGE_H_
