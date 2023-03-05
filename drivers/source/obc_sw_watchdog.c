@@ -17,7 +17,7 @@
 double_t minTime = 0.0001117095987;
 double_t maxTime = 0.4575625162;
 uint32_t fullSizeWindow = 0x5;   //Windowsize = 100%
-
+uint32_t DWDPRLD;
 TickType_t delayTime = 100;
  
 StackType_t watchdogStack[DWWD_STACK_SIZE];
@@ -25,7 +25,7 @@ StaticTask_t xWatchdogTaskBuffer;
 
 static TaskHandle_t watchdogTaskHandle = NULL;
 
-static void DWWDTask(void * pvParameters);
+static void swWatcdogFeeder(void * pvParameters);
 
 void feedSwWatchdog(void){
     RTIWDKEY ^= STARTDWD;
@@ -36,12 +36,12 @@ obc_error_code_t initDWWD(double_t tExp){
 
     if(tExp <= minTime && tExp <= maxTime){
 
-        uint32_t DWDPRLD = (uint32_t)((tExp*RTI_FREQ*pow(10, 6))/(pow(2, 13))-1);
+        DWDPRLD = (uint32_t)((tExp*RTI_FREQ*pow(10, 6))/(pow(2, 13))-1);
         RTIDWDPRLD = DWDPRLD;
         RTIWWDSIZECTRL = fullSizeWindow;
         feedSwWatchdog();
 
-        return OBC_ERR_CODE_SUCCESS;
+        //return OBC_ERR_CODE_SUCCESS;
     }
     return OBC_ERR_CODE_WATCHDOG_INIT_FAILURE;
 }
@@ -51,12 +51,12 @@ obc_error_code_t initDWWDTask(void){
     if(watchdogTaskHandle == NULL){
 
         watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder,
-                                      DWWD_NAME,
-                                      DWWD_STACK_SIZE,
-                                      NULL,
-                                      DWWD_PRIORITY,
-                                      watchdogStack,
-                                      &xWatchdogTaskBuffer);
+                                                DWWD_NAME,
+                                                DWWD_STACK_SIZE,
+                                                NULL,
+                                                DWWD_PRIORITY,
+                                                watchdogStack,
+                                                &xWatchdogTaskBuffer);
             }
 
     if(watchdogTaskHandle == NULL){
@@ -71,9 +71,11 @@ obc_error_code_t initDWWDTask(void){
 static void swWatcdogFeeder(void * pvParameters){
     TickType_t lastTime = 0;
     TickType_t currentTime = 0;
+
+    uint32_t tExp = (uint32_t)((1+DWDPRLD)*pow(2,13)/RTI_FREQ*pow(10, 6));
     while(1){
         currentTime = xTaskGetTickCount();
-        if(currentTime - lastTime > 10000){
+        if(currentTime - lastTime > tExp){
             RTIWDKEY ^= RESETDWD;
         }else{
             feedSwWatchdog();

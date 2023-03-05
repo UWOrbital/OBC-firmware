@@ -1,7 +1,8 @@
 #ifndef _DRIVERS_INCLUDE_OBC_WATCHDOG_H_
 #define _DRIVERS_INCLUDE_OBC_WATCHDOG_H_
 
-
+#include "obc_errors.h"
+#include <math.h>
 /**
  * @brief Initialize Digital Windowed Watchdog
 */
