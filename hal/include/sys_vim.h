@@ -94,6 +94,7 @@ extern void phantomInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void vPortPreemptiveTick(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void gioHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void vPortYeildWithinAPI(void) __attribute__ ((weak, interrupt("IRQ")));
+extern void gioLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 
 /* USER CODE BEGIN (3) */
 /* USER CODE END */
@@ -281,7 +282,7 @@ typedef struct vim_config_reg
                                     |(uint32)((uint32)0U << 20U)\
                                     |(uint32)((uint32)1U << 21U)\
                                     |(uint32)((uint32)0U << 22U)\
-                                    |(uint32)((uint32)0U << 23U)\
+                                    |(uint32)((uint32)1U << 23U)\
                                     |(uint32)((uint32)0U << 24U)\
                                     |(uint32)((uint32)0U << 25U)\
                                     |(uint32)((uint32)0U << 26U)\
