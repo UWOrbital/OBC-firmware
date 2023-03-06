@@ -25,4 +25,3 @@ static inline uint8_t twoDigitDecimalFromBCD(uint8_t data) {
 
 #endif // COMMON_INCLUDE_OBC_BIT_OPS_H_
 
-#endif // COMMON_INCLUDE_OBC_BIT_OPS_H_
