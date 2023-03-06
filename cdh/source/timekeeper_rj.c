@@ -25,7 +25,7 @@ void currentTimekeepingTask(void *pvParameters)
     uint32_t last_update_time = 0; // The time when we last updated the RTC time
     
     while(1){
-
+        //Shourrya: We can create an increment function which will handle the logic of incrementing hours, min and seconds in relation to each other
         local_time++; // Increment the local time value every second
 
         // Compare the local time with the RTC time every minute
