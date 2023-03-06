@@ -236,7 +236,7 @@ void stcSelfCheck(void)
     /* wait for 16 VBUS clock cycles at least, based on HCLK to VCLK ratio */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
-    for (i=0U; i<(16U + (16U * 1U)); i++){ /* Wait */ }
+    for (i=0U; i<(16U + (16U * 2U)); i++){ /* Wait */ }
 
     /* Enable self-test */
     stcREG->STCGCR1 = 0xAU;
@@ -283,7 +283,7 @@ void cpuSelfTest(uint32 no_of_intervals, uint32 max_timeout, boolean restart_tes
     /* wait for 16 VBUS clock cycles at least, based on HCLK to VCLK ratio */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
-    for (i=0U; i<(16U + (16U * 1U)); i++){ /* Wait */ }
+    for (i=0U; i<(16U + (16U * 2U)); i++){ /* Wait */ }
 
     /* Enable self-test */
     stcREG->STCGCR1 = 0xAU;
@@ -339,7 +339,7 @@ void pbistSelfCheck(void)
     /* wait for 32 VBUS clock cycles at least, based on HCLK to VCLK ratio */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
-    for (i=0U; i<(32U + (32U * 1U)); i++){ /* Wait */ }
+    for (i=0U; i<(32U + (32U * 2U)); i++){ /* Wait */ }
 
 /* USER CODE BEGIN (14) */
 /* USER CODE END */
@@ -440,7 +440,7 @@ void pbistRun(uint32 raminfoL, uint32 algomask)
     /* wait for 32 VBUS clock cycles at least, based on HCLK to VCLK ratio */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
 	/*SAFETYMCUSW 134 S MR:12.2 <APPROVED> "Wait for few clock cycles (Value of i not used)" */
-    for (i=0U; i<(32U + (32U * 1U)); i++){ /* Wait */ }
+    for (i=0U; i<(32U + (32U * 2U)); i++){ /* Wait */ }
 
 /* USER CODE BEGIN (18) */
 /* USER CODE END */
