@@ -68,4 +68,18 @@ obc_error_code_t cc1120_get_packets_in_rx_fifo(uint8_t *numPackets);
  */
 obc_error_code_t cc1120_receive(uint8_t data[]);
 
+/**
+ * @brief Gets the handle of the RX semaphore
+ *
+ * @return SemaphoreHandle_t - The handle of the RX Semaphore
+ */
+SemaphoreHandle_t getRxSemaphore();
+
+/**
+ * @brief Gets the handle of the TX semaphore
+ *
+ * @return SemaphoreHandle_t - The handle of the TX Semaphore
+ */
+SemaphoreHandle_t getTxSemaphore();
+
 #endif /* CC1120_TXRX_H */

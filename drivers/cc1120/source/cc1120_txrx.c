@@ -266,3 +266,11 @@ obc_error_code_t cc1120_receive(uint8_t data[])
     }
     return errCode;
 }
+
+SemaphoreHandle_t getRxSemaphore(){
+    return rxSemaphore;
+}
+
+SemaphoreHandle_t getTxSemaphore(){
+    return txSemaphore;
+}
