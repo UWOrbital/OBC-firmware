@@ -55,6 +55,9 @@
 #include "spi.h"
 #include "i2c.h"
 #include "sys_dma.h"
+#include "cc1120_txrx.h"
+
+#include <semphr.h>
 
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
@@ -98,6 +101,14 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (19) */
+if(port == gioPORTB){
+    if (bit & (1 << 2)){
+        xSemaphoreGiveFromISR(getRxSemaphore(), NULL);
+    }
+    if (bit & (1 << 3)){
+        xSemaphoreGiveFromISR(getTxSemaphore(), NULL);
+    }
+}
 /* USER CODE END */
 }
 
