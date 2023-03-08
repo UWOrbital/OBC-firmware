@@ -3,6 +3,9 @@
 #include "cc1120_mcu.h"
 #include "cc1120_spi.h"
 
+#include <FreeRTOS.h>
+#include <os_semphr.h>
+#include <sys_common.h>
 
 #include <stdbool.h>
 
@@ -136,7 +139,7 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
 
     if (len < 1)
     {
-        LOG_ERROR(CC1120_ERROR_CODE_INVALID_PARAM);
+        mcu_log(CC1120_LOG_LEVEL_ERROR, "cc1120_send: Invalid data size!\n");
         return CC1120_ERROR_CODE_INVALID_PARAM;
     }
 
@@ -262,12 +265,4 @@ obc_error_code_t cc1120_receive(uint8_t data[])
         }
     }
     return errCode;
-}
-
-SemaphoreHandle_t getRxSemaphore(){
-    return rxSemaphore;
-}
-
-SemaphoreHandle_t getTxSemaphore(){
-    return txSemaphore;
 }
