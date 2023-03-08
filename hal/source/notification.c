@@ -59,7 +59,8 @@
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
-
+#include <FreeRTOSConfig.h>
+#include <os_portmacro.h>
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)

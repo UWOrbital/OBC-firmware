@@ -6,6 +6,8 @@
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 #include <sys_common.h>
+#include <FreeRTOSConfig.h>
+#include <os_portmacro.h>
 
 #include <stdbool.h>
 
