@@ -57,7 +57,8 @@
 #include "sys_dma.h"
 #include "cc1120_txrx.h"
 
-#include <semphr.h>
+#include <FreeRTOS.h>
+#include <os_semphr.h>
 
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
