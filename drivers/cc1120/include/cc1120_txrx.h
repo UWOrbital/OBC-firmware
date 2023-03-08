@@ -16,9 +16,9 @@ typedef struct
     uint8_t val;
 } registerSetting_t;
 
-void initRxSemaphore(void)
+void initRxSemaphore();
 
-void initTxSemaphore(void);
+void initTxSemaphore();
 /**
  * @brief Gets the number of packets queued in the TX FIFO
  *
