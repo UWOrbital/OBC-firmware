@@ -17,8 +17,7 @@ typedef enum {
     OBC_ERR_CODE_UART_FAILURE = 102,
 
     /* CDH errors 200 - 299 */
-    OBC_ERR_CODE_WATCHDOG_INIT_FAILURE = 200,
-    OBC_ERR_CODE_TASK_INIT_FAILURE = 201,
+
     /* ADCS errors 300 - 399 */
 
 

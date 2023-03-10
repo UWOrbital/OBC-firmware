@@ -1,53 +1,39 @@
 #include <system.h>
 #include "obc_sw_watchdog.h"
-#include "obc_errors.h"
 #include <math.h>
+#include "reg_rti.h"
+#include <assert.h>
 
-#define RTIWDKEY (*(uint32_t *) 0xFFFFFC9C)
-#define RTIDWDPRLD (* (uint32_t *) 0xFFFFFFC94)
-#define RTIWWDSIZECTRL (* (uint32_t *) 0xFFFFFCA8)
-#define STARTDWD 0x53C8
-#define ENABLEDWD 0x190D
-#define RESETDWD 0x0000
+#define RESET_DWD_CMD1 0x53C8       //Timer is reset by wrting RESET_DWD_CMD1
+#define RESET_DWD_CMD2 0x190D       // and RESET_DWD_CMD2 as a sequence
 
+#define MIN_DWD_PRELOAD_VAL 0
+#define MAX_DWD_PRELOAD_VAL 0xFFF
+
+#define DWD_FULL_SIZE_WINDOW 0x5    //Window size 100%; This watchdog is timeout-only
+#define DWD_FEEDING_PERIOD pdMS_TO_TICKS(300)
 #define DWWD_NAME "Digital Windowed Watchdog"
 #define DWWD_STACK_SIZE 128
-#define DWWD_PRIORITY 1
+#define DWWD_PRIORITY 0xFF
 
-float minTime = 0.0001117095987;
-float maxTime = 0.4575625162;
-uint32_t fullSizeWindow = 0x5;   //Windowsize = 100%
-uint32_t DWDPRLD = 0;
-TickType_t delayTime = 100;
- 
-StackType_t watchdogStack[DWWD_STACK_SIZE];
-StaticTask_t xWatchdogTaskBuffer;
+const uint32_t DWD_PRELOAD_VAL = 0xFBB; // set tExp as 0.3 Seconds
+const float tExp = 0.2999761455F;
+
+static watchdogStack[DWWD_STACK_SIZE];
+static xWatchdogTaskBuffer;
 
 static TaskHandle_t watchdogTaskHandle = NULL;
 
 static void swWatcdogFeeder(void * pvParameters);
 
-void feedSwWatchdog(void){
-    RTIWDKEY ^= STARTDWD;
-    RTIWDKEY ^= ENABLEDWD;
+static feedSwWatchdog(void){
+    rtiREG1->WDKEY ^= RESET_DWD_CMD1;
+    rtiREG1->WDKEY ^= RESET_DWD_CMD2;
 }
 
-obc_error_code_t initDWWD(float tExp){
+void initDWWDTask(void){
 
-    if(tExp <= minTime && tExp <= maxTime){
-
-        DWDPRLD = (uint32_t)((tExp*RTI_FREQ*pow(10, 6))/(pow(2, 13))-1);
-        RTIDWDPRLD = DWDPRLD;
-        RTIWWDSIZECTRL = fullSizeWindow;
-        feedSwWatchdog();
-
-        return OBC_ERR_CODE_SUCCESS;
-    }
-    return OBC_ERR_CODE_WATCHDOG_INIT_FAILURE;
-}
-
-obc_error_code_t initDWWDTask(void){
-
+    ASSERT(watchdogStack && &xWatchdogTaskBuffer);
     if(watchdogTaskHandle == NULL){
 
         watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder,
@@ -57,30 +43,19 @@ obc_error_code_t initDWWDTask(void){
                                                 DWWD_PRIORITY,
                                                 watchdogStack,
                                                 &xWatchdogTaskBuffer);
-            }
-
-    if(watchdogTaskHandle == NULL){
-        return OBC_ERR_CODE_TASK_INIT_FAILURE;
     }
 
-    return OBC_ERR_CODE_SUCCESS;
+    ASSERT(watchdogTaskHandle);
 }
 
-
-
 static void swWatcdogFeeder(void * pvParameters){
-    TickType_t lastTime = 0;
-    TickType_t currentTime = 0;
+    _Static_assert(MIN_DWD_PRELOAD_VAL<=DWD_PRELOAD_VAL && DWD_PRELOAD_VAL<=MAX_DWD_PRELOAD_VAL);
 
-    uint32_t tExp = (uint32_t)((1+DWDPRLD)*pow(2,13)/RTI_FREQ*pow(10, 6));
+    rtiREG1->DWDPRLD = DWD_PRELOAD_VAL;
+    rtiREG1->WWDSIZECTRL = DWD_FULL_SIZE_WINDOW;
+
     while(1){
-        currentTime = xTaskGetTickCount();
-        if(currentTime - lastTime > tExp){
-            RTIWDKEY ^= RESETDWD;
-        }else{
-            feedSwWatchdog();
-        }
-        vTaskDelay(delayTime);
-        lastTime = delayTime + currentTime;
+        feedSwWatchdog();
+        vTaskDelay(DWD_FEEDING_PERIOD);
     }
 }
