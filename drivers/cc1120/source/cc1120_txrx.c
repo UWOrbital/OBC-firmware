@@ -3,12 +3,6 @@
 #include "cc1120_mcu.h"
 #include "cc1120_spi.h"
 
-#include <FreeRTOS.h>
-#include <os_semphr.h>
-#include <sys_common.h>
-#include <FreeRTOSConfig.h>
-#include <os_portmacro.h>
-#include <os_task.h>
 
 #include <stdbool.h>
 
@@ -142,7 +136,7 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
 
     if (len < 1)
     {
-        mcu_log(CC1120_LOG_LEVEL_ERROR, "cc1120_send: Invalid data size!\n");
+        LOG_ERROR(CC1120_ERROR_CODE_INVALID_PARAM);
         return CC1120_ERROR_CODE_INVALID_PARAM;
     }
 
