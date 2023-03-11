@@ -30,11 +30,7 @@ static void printPositionDataManager(const position_data_manager_t *manager){
     printf("Write Index: %zu\n", manager->writeIndex);
 }
 
-/**
- * @brief Returns true if data1 and data2 are identifical. 
- * @attention USED ONLY FOR TESTING PURPOSES.
-*/
-static int equalsPositionData(const position_data_t data1, const position_data_t data2) {
+int equalsPositionData(const position_data_t data1, const position_data_t data2) {
     return data1.julianDate == data2.julianDate && data1.x == data2.x && data1.y == data2.y && data1.z == data2.z;
 }
 
@@ -58,26 +54,21 @@ static float getJulianDateByIndex(const position_data_manager_t *manager, int in
     return getPositionDataByIndex(manager, index).julianDate;
 }
 
-/**
- * @brief Gets the minimum julian date stored in manager
- * @attention Requires manager is a valid pointer
-*/
-static float getMinJulianDate(const position_data_manager_t *manager) {
+float getMinJulianDate(const position_data_manager_t *manager) {
     assert(manager);
     return manager->data[manager->writeIndex].julianDate;
 }
 
-/**
- * @brief Gets the maxiumum julian date stored in manager uses the write index location
- * @attention Requires manager is a valid pointer
-*/
-static float getMaxJulianDate(const position_data_manager_t *manager) {
+float getMaxJulianDate(const position_data_manager_t *manager) {
     assert(manager);
     return manager->data[(manager->writeIndex + ADCS_POSITION_DATA_SIZE - 1) % ADCS_POSITION_DATA_SIZE].julianDate;
 }
 
 /**
- * @brief Reads the data from the manager at read_index and shifts the read_index over
+ * @brief Reads the data from the manager at readIndex and shifts the readIndex over
+ * @attention manager must be a valid pointer to a position_data_manager_t
+ * @param manager The manager to be read from
+ * @return The position data at the current readIndex before shifting 
 */
 static position_data_t readData(position_data_manager_t *manager) {
     assert(manager);
@@ -87,8 +78,13 @@ static position_data_t readData(position_data_manager_t *manager) {
 }
 
 /**
- * @brief Writes the data to the manager at write_index and shifts the write_index over
+ * @brief Writes the data to the manager at writeIndex and shifts the writeIndex over
+ * 
  * @attention manager must be a valid pointer; all julian dates in the manager and data are unique [not tested]
+ * 
+ * @param manager The manager to be written to
+ * @param data The data to be written
+ * 
 */
 static void writeData(position_data_manager_t *manager, position_data_t data) {
     assert(manager);
@@ -169,18 +165,23 @@ static int searchManager(const position_data_manager_t *manager, float julianDat
 /**
  * @brief Calculates the value of the point based on the target JD using the point1 as the lower value in the linear 
  * interpolation
+ * 
  * @attention requires jd1 is not equal to jd2
+ * 
+ * @param targetJulianDate The data for the julian date we want
+ * @param point1 The 1st point we are using to linearly interpolate
+ * @param point2 The 2nd point we are using to linearly interpolate
+ * @param jd1 The 1st julian date we are using to linearly interpolate
+ * @param jd2 The 1st julian date we are using to linearly interpolate
+ * 
+ * @return Returns the value of the point at the targetJulanDate liner interpolated
 */
-static float calculateValue(float targetJulanDate, float point1, float point2, float jd1, float jd2) {
+static float calculateValue(float targetJulianDate, float point1, float point2, float jd1, float jd2) {
     assert(jd1 != jd2);
-    return point1 + ((point1 - point2) / (jd1 - jd2)) * (targetJulanDate - jd1);
+    return point1 + ((point1 - point2) / (jd1 - jd2)) * (targetJulianDate - jd1);
 }
 
-/**
- * @brief Gets the adjusted value at the given julian date
- * @attention Requires manager is a valid pointer and julian date greater or equal than the min julian date stored in manager
-*/
-static position_data_t getPositionData(const position_data_manager_t *manager, float julianDate) {
+position_data_t getPositionData(const position_data_manager_t *manager, float julianDate) {
     assert(manager);
     assert(julianDate >= getMinJulianDate(manager));
 
@@ -201,17 +202,20 @@ static position_data_t getPositionData(const position_data_manager_t *manager, f
 
 /**
  * @brief Initializes a position data point
+ * 
+ * @param julianDate The julian data of the position data
+ * @param x The x coordinate of the position data
+ * @param y The y coordinate of the position data
+ * @param z The z coordinate of the position data
+ * 
+ * @return The position data point with the given data
 */
 static position_data_t initPositionData(float julianDate, float x, float y, float z) {
     position_data_t data = {julianDate, x, y, z};
     return data;
 }
 
-/**
- * @brief Creates a position data manager struct of size ADCS_POSITION_DATA_SIZE. Could allow the function to
- * be flexible by taking in a length but then would need to use malloc and free and track the size in the struct.
-*/
-static position_data_manager_t initPositionDataManager(void) {
+position_data_manager_t initPositionDataManager(void) {
     position_data_manager_t manager;
 
     for(int i=0; i<ADCS_POSITION_DATA_SIZE; i++) {
