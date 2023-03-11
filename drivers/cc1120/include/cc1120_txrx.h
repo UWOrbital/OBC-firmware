@@ -5,6 +5,13 @@
 #include "cc1120_regs.h"
 #include "obc_logging.h"
 
+#include <FreeRTOS.h>
+#include <os_semphr.h>
+#include <sys_common.h>
+#include <FreeRTOSConfig.h>
+#include <os_portmacro.h>
+#include <os_task.h>
+
 #define CC1120_MAX_PACKET_LEN 255
 #define CC1120_TX_FIFO_SIZE 128
 
@@ -16,9 +23,9 @@ typedef struct
     uint8_t val;
 } registerSetting_t;
 
-void initRxSemaphore(void)
+void initRxSemaphore();
 
-void initTxSemaphore(void);
+void initTxSemaphore();
 /**
  * @brief Gets the number of packets queued in the TX FIFO
  *
