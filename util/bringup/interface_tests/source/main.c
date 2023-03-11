@@ -72,7 +72,7 @@ int main(void) {
 
     sciPrintf("Starting Bringup Utility...\r\n");
 
-    xTaskCreateStatic(utilityCLI, "Bringup Utility", 1024, NULL, 1, taskStack, &taskBuffer);
+    xTaskCreateStatic(utilityCLI, "Bringup Utility", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
     vTaskStartScheduler();
 
