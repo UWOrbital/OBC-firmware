@@ -96,8 +96,11 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb) {
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat,uint8_t outb, uint8_t *inb) {
     if (spiReg == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    if (spiDataFormat == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (inb == NULL)
@@ -108,13 +111,11 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
-        spiDAT1_t spiData = {0};
-
         // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
         uint16_t spiWordOut = (uint16_t)outb;
         uint16_t spiWordIn;
 
-        uint32_t spiErr = spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
+        uint32_t spiErr = spiTransmitAndReceiveData(spiReg, spiDataFormat, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
         obc_error_code_t ret;
 
         if (spiErr != SPI_FLAG_SUCCESS) {
@@ -131,17 +132,17 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb) {
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat,uint8_t outb) {
     obc_error_code_t errCode;
     uint8_t inb;
 
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, outb, &inb));
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, spiDataFormat, outb, &inb));
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb) {
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inb) {
     obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, 0xFF, inb));
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiReg, spiDataFormat, 0xFF, inb));
     return OBC_ERR_CODE_SUCCESS;
 }
 
