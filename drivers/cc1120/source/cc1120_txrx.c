@@ -8,6 +8,7 @@
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
 #include <os_portmacro.h>
+#include <os_task.h>
 
 #include <stdbool.h>
 
