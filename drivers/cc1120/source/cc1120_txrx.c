@@ -2,16 +2,23 @@
 #include "obc_logging.h"
 #include "cc1120_mcu.h"
 #include "cc1120_spi.h"
+#include "cc1120_regs.h"
 
+
+#include <FreeRTOS.h>
+#include <os_semphr.h>
+#include <sys_common.h>
+#include <FreeRTOSConfig.h>
 
 #include <stdbool.h>
+
 
 static SemaphoreHandle_t rxSemaphore = NULL;
 static StaticSemaphore_t rxSemaphoreBuffer;
 static SemaphoreHandle_t txSemaphore = NULL;
 static StaticSemaphore_t txSemaphoreBuffer;
 
-registerSetting_t cc1120SettingsStd[] = {
+static const register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_IOCFG3, 0xB0U},
     {CC1120_REGS_IOCFG2, 0x06U},
     {CC1120_REGS_IOCFG1, 0x03U},
@@ -41,7 +48,7 @@ registerSetting_t cc1120SettingsStd[] = {
     {CC1120_REGS_PA_CFG0, 0x7DU},
     {CC1120_REGS_PKT_LEN, 0x0CU}};
 
-registerSetting_t cc1120SettingsExt[] = {
+static const register_setting_t cc1120SettingsExt[] = {
     {CC1120_REGS_EXT_IF_MIX_CFG, 0x00U},
     {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U},
     {CC1120_REGS_EXT_FREQ2, 0x6CU},
@@ -63,15 +70,12 @@ registerSetting_t cc1120SettingsExt[] = {
     {CC1120_REGS_EXT_XOSC1, 0x03U},
     {CC1120_REGS_EXT_TOC_CFG, 0x89U}};
 
-void initRxSemaphore(void) {
-    if(rxSemaphore == NULL) {
-        rxSemaphore = xSemaphoreCreateBinaryStatic(&rxSemaphoreBuffer);
-    }
-}
-
-void initTxSemaphore(void) {
+void initTxRxSemaphores(void){
     if(txSemaphore == NULL) {
         txSemaphore = xSemaphoreCreateBinaryStatic(&txSemaphoreBuffer);
+    }
+    if(rxSemaphore == NULL) {
+        rxSemaphore = xSemaphoreCreateBinaryStatic(&rxSemaphoreBuffer);
     }
 }
 
@@ -83,6 +87,9 @@ void initTxSemaphore(void) {
  */
 obc_error_code_t cc1120_get_packets_in_tx_fifo(uint8_t *numPackets)
 {
+    if(numPackets == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
     return cc1120_read_ext_addr_spi(CC1120_REGS_EXT_NUM_TXBYTES, numPackets, 1);
 }
 
@@ -94,6 +101,9 @@ obc_error_code_t cc1120_get_packets_in_tx_fifo(uint8_t *numPackets)
  */
 obc_error_code_t cc1120_get_state(uint8_t *stateNum)
 {
+    if(stateNum == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
     obc_error_code_t errCode = cc1120_read_ext_addr_spi(CC1120_REGS_EXT_MARCSTATE, stateNum, 1);
     *stateNum &= 0b11111;
     return errCode;
@@ -104,17 +114,17 @@ obc_error_code_t cc1120_get_state(uint8_t *stateNum)
  *
  * @return obc_error_code_t - Whether or not the setup was a success
  */
-obc_error_code_t cc1120_init()
+obc_error_code_t cc1120_init(void)
 {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
-    for (uint8_t i = 0; i < sizeof(cc1120SettingsStd) / sizeof(registerSetting_t); i++)
+    for (uint8_t i = 0; i < sizeof(cc1120SettingsStd) / sizeof(register_setting_t); i++)
     {
         errCode = cc1120_write_spi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1);
         RETURN_IF_ERROR_CODE(errCode);
     }
 
-    for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(registerSetting_t); i++)
+    for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++)
     {
         errCode = cc1120_write_ext_addr_spi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1);
         RETURN_IF_ERROR_CODE(errCode);
@@ -136,8 +146,7 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
 
     if (len < 1)
     {
-        LOG_ERROR(CC1120_ERROR_CODE_INVALID_PARAM);
-        return CC1120_ERROR_CODE_INVALID_PARAM;
+        return OBC_ERR_CODE_INVALID_ARG;
     }
 
     bool largePacketFlag = false;
@@ -181,7 +190,7 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
     RETURN_IF_ERROR_CODE(errCode);
     errCode = cc1120_strobe_spi(CC1120_STROBE_STX);
     RETURN_IF_ERROR_CODE(errCode);
-    uint8_t i;
+    uint32_t i;
     for (i = 0; i < (len - CC1120_TX_FIFO_SIZE) / 100; i++)
     {
         if (xSemaphoreTake(txSemaphore, portMAX_DELAY) == pdTRUE){
@@ -238,7 +247,7 @@ obc_error_code_t cc1120_receive(uint8_t data[])
     RETURN_IF_ERROR_CODE(errCode);
 
     // Set packet length to 78 so that the correct number of bits
-    // are received when fixed packet mode gets reactivated
+    // are received when fixed packet mode gets reactivated after receiving 200 bytes
     temp = 78;
     errCode = cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1);
     RETURN_IF_ERROR_CODE(errCode);
@@ -252,7 +261,7 @@ obc_error_code_t cc1120_receive(uint8_t data[])
             }
         }
         // Set to variable packet length mode
-        uint8_t temp = 0x20;
+        temp = 0x20;
         errCode = cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1);
         RETURN_IF_ERROR_CODE(errCode);
 
@@ -264,10 +273,10 @@ obc_error_code_t cc1120_receive(uint8_t data[])
     return errCode;
 }
 
-SemaphoreHandle_t getRxSemaphore(){
+SemaphoreHandle_t getRxSemaphore(void){
     return rxSemaphore;
 }
 
-SemaphoreHandle_t getTxSemaphore(){
+SemaphoreHandle_t getTxSemaphore(void){
     return txSemaphore;
 }

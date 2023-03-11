@@ -1,19 +1,16 @@
-#ifndef CC1120_TXRX_H
-#define CC1120_TXRX_H
+#ifndef DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H
+#define DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H
 
 #include <stdint.h>
-#include "cc1120_regs.h"
 #include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
-#include <os_portmacro.h>
-#include <os_task.h>
-
 #define CC1120_MAX_PACKET_LEN 255
 #define CC1120_TX_FIFO_SIZE 128
+#define RX_EXPECTED_PACKET_SIZE 278
 
 #define min(a, b) (a < b ? a : b)
 
@@ -21,11 +18,9 @@ typedef struct
 {
     uint8_t addr;
     uint8_t val;
-} registerSetting_t;
+} register_setting_t;
 
-void initRxSemaphore();
-
-void initTxSemaphore();
+void initTxRxSemaphores(void);
 /**
  * @brief Gets the number of packets queued in the TX FIFO
  *
@@ -47,7 +42,7 @@ obc_error_code_t cc1120_get_state(uint8_t *stateNum);
  *
  * @return obc_error_code_t - Whether or not the setup was a success
  */
-obc_error_code_t cc1120_init();
+obc_error_code_t cc1120_init(void);
 
 /**
  * @brief Adds the given data to the CC1120 FIFO buffer and transmits
@@ -80,13 +75,13 @@ obc_error_code_t cc1120_receive(uint8_t data[]);
  *
  * @return SemaphoreHandle_t - The handle of the RX Semaphore
  */
-SemaphoreHandle_t getRxSemaphore();
+SemaphoreHandle_t getRxSemaphore(void);
 
 /**
  * @brief Gets the handle of the TX semaphore
  *
  * @return SemaphoreHandle_t - The handle of the TX Semaphore
  */
-SemaphoreHandle_t getTxSemaphore();
+SemaphoreHandle_t getTxSemaphore(void);
 
-#endif /* CC1120_TXRX_H */
+#endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */
