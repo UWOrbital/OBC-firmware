@@ -205,7 +205,6 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
         xSemaphoreGive(spiMutexes[spiRegIndex]);
         return OBC_ERR_CODE_SUCCESS;
     }
-    
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
