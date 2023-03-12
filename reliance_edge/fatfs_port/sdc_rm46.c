@@ -19,10 +19,12 @@
     #define SDC_SPI_PORT         spiPORT3
     #define SDC_SPI_REG          spiREG3
     #define SDC_SPI_CS           1UL
+    #define SPI_DATA_FORMAT      SPI_FMT_0
 #elif defined(OBC_REVISION_1)
     #define SDC_SPI_PORT         spiPORT1
     #define SDC_SPI_REG          spiREG1
     #define SDC_SPI_CS           0UL
+    #define SPI_DATA_FORMAT      SPI_FMT_0
 #else
     #error Board configuration not defined yet
 #endif
@@ -83,6 +85,15 @@ STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255, "SDC_ACTION_NUM_ATTEMPTS_D
 /* Global Variables                            */
 /*---------------------------------------------*/
 
+// SPI configuration for SD card
+// CS selected using SPI assert/deassert functions; not using CSNR
+static spiDAT1_t sdcSpiConfig = {
+    .CS_HOLD = 0,
+    .WDEL = 0,
+    .DFSEL = SPI_DATA_FORMAT,
+    .CSNR = 0,
+};
+
 static volatile DSTATUS stat = STA_NOINIT;   /* Disk status */
 static uint8_t cardType;                     /* Card type flags: b0:MMC, b1:SDC, b2:Block addressing */
 static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
@@ -102,7 +113,7 @@ static bool isCardReady(void) {
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
         uint8_t res;
         
-        LOG_IF_ERROR_CODE(spiReceiveByte(SDC_SPI_REG, &res));
+        LOG_IF_ERROR_CODE(spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &res));
         
         if (res == 0xFF)
             return true;
@@ -122,7 +133,7 @@ static void sendClockTrain(void) {
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     for (uint8_t i = 0; i < SDC_CLOCK_TRANSITION_BYTES; i++) {
-        spiTransmitByte(SDC_SPI_REG, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
     }
 }
 
@@ -168,7 +179,7 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
     /* Wait for a data packet */
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-        spiReceiveByte(SDC_SPI_REG, &token);
+        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &token);
         if (token != 0xFF)
             break;
         vTaskDelay(SDC_DELAY_1MS);
@@ -179,15 +190,15 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
     /* Receive the data block into buffer */
     while (btr) {
-        spiReceiveByte(SDC_SPI_REG, buff++);
-        spiReceiveByte(SDC_SPI_REG, buff++);
+        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, buff++);
+        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, buff++);
         btr -= 2;
     }
     
     /* Discard CRC */
     unsigned char crc;
-    spiReceiveByte(SDC_SPI_REG, &crc); 
-    spiReceiveByte(SDC_SPI_REG, &crc);
+    spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &crc); 
+    spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &crc);
 
     return true;
 }
@@ -203,20 +214,20 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
     if (!isCardReady()) return false;
 
-    spiTransmitByte(SDC_SPI_REG, token); // Send token
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, token); // Send token
 
     if (token != SD_STOP_TRANSMISSION) { 
         for (unsigned int wc = 0; wc < SD_SECTOR_SIZE; wc++) { 
             // Send the data block
-            spiTransmitByte(SDC_SPI_REG, *buff++);
+            spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, *buff++);
         }
         
         // Send dummy CRC
-        spiTransmitByte(SDC_SPI_REG, 0xFF);
-        spiTransmitByte(SDC_SPI_REG, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
         
         uint8_t resp;
-        spiReceiveByte(SDC_SPI_REG, &resp); /* Receive data response */
+        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &resp); /* Receive data response */
         if ((resp & SD_DATA_RESPONSE_MASK) != SD_DATA_RESPONSE_ACCEPTED) return false;
     }
 
@@ -235,26 +246,26 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
     if (!isCardReady()) return 0xFFU;
 
     /* Send command packet */
-    spiTransmitByte(SDC_SPI_REG, cmd);                      /* Command */
-    spiTransmitByte(SDC_SPI_REG, (uint8_t)(arg >> 24));        /* Argument[31..24] */
-    spiTransmitByte(SDC_SPI_REG, (uint8_t)(arg >> 16));        /* Argument[23..16] */
-    spiTransmitByte(SDC_SPI_REG, (uint8_t)(arg >> 8));         /* Argument[15..8] */
-    spiTransmitByte(SDC_SPI_REG, (uint8_t)arg);                /* Argument[7..0] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, cmd);                      /* Command */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 24));        /* Argument[31..24] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 16));        /* Argument[23..16] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 8));         /* Argument[15..8] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)arg);                /* Argument[7..0] */
 
     /* Some commands require a CRC to be sent */
     uint8_t crc = 0xFFU;
     if (cmd == SDC_CMD0) crc = SDC_CMD0_RESET_CRC;     
     else if (cmd == SDC_CMD8) crc = SDC_CMD8_CHECK_VOLTAGE_CRC;
-    spiTransmitByte(SDC_SPI_REG, crc);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, crc);
 
     /* Skip a uint8_t after "stop reading" cmd is sent */
     unsigned char tmp;
-    if (cmd == SDC_CMD12) spiReceiveByte(SDC_SPI_REG, &tmp);
+    if (cmd == SDC_CMD12) spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &tmp);
     
     /* Receive command response */
     uint8_t res;
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-        spiReceiveByte(SDC_SPI_REG, &res);
+        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &res);
         if (!(res & SDC_CMD_RESP_MASK)) break;
         vTaskDelay(SDC_DELAY_1MS);
     }
@@ -269,23 +280,23 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
  */
 static uint8_t stopTransmission(void) {
     /* Send command packet - the argument for SDC_CMD12 is ignored. */
-    spiTransmitByte(SDC_SPI_REG, SDC_CMD12);
-    spiTransmitByte(SDC_SPI_REG, 0);
-    spiTransmitByte(SDC_SPI_REG, 0);
-    spiTransmitByte(SDC_SPI_REG, 0);
-    spiTransmitByte(SDC_SPI_REG, 0);
-    spiTransmitByte(SDC_SPI_REG, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, SDC_CMD12);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
 
     /* Data transfer stops 2 bytes after 6-uint8_t SDC_CMD12 */
     uint8_t val;
-    spiReceiveByte(SDC_SPI_REG, &val); spiReceiveByte(SDC_SPI_REG, &val);
+    spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &val); spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &val);
 
     /* SDC should now send 2-6 0xFF bytes, the response uint8_t, and then another 0xFF */
     /* Some cards don't send the 2-6 0xFF bytes */
     uint8_t res;
     const uint8_t numBytesRcv = 8U;
     for(unsigned int n = 0; n < numBytesRcv; n++) {
-        spiReceiveByte(SDC_SPI_REG, &val);
+        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &val);
         if(val != 0xFF)
             res = val;
     }
@@ -304,6 +315,11 @@ static uint8_t stopTransmission(void) {
  * @return DSTATUS Status
  */
 DSTATUS disk_initialize(uint8_t drv){
+    // Re-initialize static variables
+    stat = STA_NOINIT;
+    cardType = 0;
+    powerFlag = POWER_OFF; 
+
     if (drv) return STA_NOINIT;            /* Supports only single drive */
     if (stat & STA_NODISK) return stat;    /* No card in the socket */
 
@@ -324,7 +340,7 @@ DSTATUS disk_initialize(uint8_t drv){
         // Card is SDC Ver2+
         const uint8_t ocrSize = 4U;
         uint8_t ocr[ocrSize];
-        for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &ocr[i]);
+        for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &ocr[i]);
         
         // Check if the lower 12 bits in the response are 0x1AA
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
@@ -336,7 +352,7 @@ DSTATUS disk_initialize(uint8_t drv){
                     // Read ocr with CMD58
                     if (sendCMD(SDC_CMD58, 0) == 0) {    
                         // Check bit 6 of response to determine if card is SDHC or standard SD card
-                        for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &ocr[i]);
+                        for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &ocr[i]);
                         ty = (ocr[0] & CARD_CAPACITY_OCR_MASK) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK) : (CARD_TYPE_SDC_MASK);
                     }
                 }
@@ -376,7 +392,7 @@ DSTATUS disk_initialize(uint8_t drv){
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     // Ensure SDC releases MISO line by sending a dummy uint8_t
-    spiTransmitByte(SDC_SPI_REG, 0xFF);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
 
     if (ty) {            
         stat &= ~STA_NOINIT;    // Clear STA_NOINIT
@@ -431,7 +447,7 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     // Ensure SDC releases MISO line by sending a dummy uint8_t
-    spiTransmitByte(SDC_SPI_REG, 0xFF);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -480,7 +496,7 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t 
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     // Ensure SDC releases MISO line by sending a dummy uint8_t
-    spiTransmitByte(SDC_SPI_REG, 0xFF);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -570,7 +586,7 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
         deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
         // Ensure SDC releases MISO line by sending a dummy uint8_t
-        spiTransmitByte(SDC_SPI_REG, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
     }
 
     return res;
