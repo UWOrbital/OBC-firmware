@@ -1,8 +1,7 @@
 #include <system.h>
 #include "obc_sw_watchdog.h"
-#include <math.h>
+#include "obc_assert.h"
 #include "reg_rti.h"
-#include <assert.h>
 
 #define RESET_DWD_CMD1 0x53C8       //Timer is reset by wrting RESET_DWD_CMD1
 #define RESET_DWD_CMD2 0x190D       // and RESET_DWD_CMD2 as a sequence
@@ -15,9 +14,10 @@
 #define DWWD_NAME "Digital Windowed Watchdog"
 #define DWWD_STACK_SIZE 128
 #define DWWD_PRIORITY 0xFF
+#define DWD_PRELOAD_VAL 0xFBB // set tExp as 0.3 Seconds
 
-const uint32_t DWD_PRELOAD_VAL = 0xFBB; // set tExp as 0.3 Seconds
-const float tExp = 0.2999761455F;
+STATIC_ASSERT(MIN_DWD_PRELOAD_VAL<=DWD_PRELOAD_VAL && DWD_PRELOAD_VAL<=MAX_DWD_PRELOAD_VAL,
+                "Watchdog requires the preload value to be within minimum and maximum value.");
 
 static watchdogStack[DWWD_STACK_SIZE];
 static xWatchdogTaskBuffer;
@@ -49,8 +49,7 @@ void initDWWDTask(void){
 }
 
 static void swWatcdogFeeder(void * pvParameters){
-    _Static_assert(MIN_DWD_PRELOAD_VAL<=DWD_PRELOAD_VAL && DWD_PRELOAD_VAL<=MAX_DWD_PRELOAD_VAL);
-
+    
     rtiREG1->DWDPRLD = DWD_PRELOAD_VAL;
     rtiREG1->WWDSIZECTRL = DWD_FULL_SIZE_WINDOW;
 
