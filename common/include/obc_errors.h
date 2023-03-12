@@ -12,7 +12,9 @@ typedef enum {
     OBC_ERR_CODE_LOG_MSG_SILENCED = 6,
 
     /* Driver Errors 100 - 199*/
-
+    OBC_ERR_CODE_SPI_FAILURE = 100,
+    OBC_ERR_CODE_I2C_FAILURE = 101,
+    OBC_ERR_CODE_UART_FAILURE = 102,
 
     /* CDH errors 200 - 299 */
 

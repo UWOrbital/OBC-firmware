@@ -8,10 +8,6 @@
 #include <spi.h>
 #include <gio.h>
 
-// Note that SPI2 isn't available on the RM46 PGE package, so there's
-// technically only 4 SPI ports available on the RM46.
-#define NUM_SPI_PORTS 5
-
 /**
  * @brief Initialize mutexes protecting SPI ports.
  */
@@ -36,11 +32,12 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
 /**
  * @brief Send and receive a byte via SPI.
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param outb The byte to send.
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb);
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb, uint8_t *inb);
 
 /**
  * @brief Send a byte via SPI.
@@ -49,7 +46,7 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
  * @param outb The byte to send.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb);
 
 /**
  * @brief Receive a byte via SPI.
@@ -58,6 +55,6 @@ obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb);
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inb);
 
 #endif // DRIVERS_INCLUDE_OBC_SPI_IO_H_

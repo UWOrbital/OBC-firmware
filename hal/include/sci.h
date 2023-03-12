@@ -138,7 +138,7 @@ typedef struct sci_config_reg
                                    |(uint32)((uint32)0U << 0U))
                                    
 #define SCI_FORMAT_CONFIGVALUE     (8U - 1U)
-#define SCI_BRS_CONFIGVALUE        (238U)
+#define SCI_BRS_CONFIGVALUE        (39U)
 #define SCI_PIO0_CONFIGVALUE       ((uint32)((uint32)1U << 2U ) | (uint32)((uint32)1U << 1U))
 #define SCI_PIO1_CONFIGVALUE       ((uint32)((uint32)0U << 2U ) | (uint32)((uint32)0U << 1U))
 #define SCI_PIO6_CONFIGVALUE       ((uint32)((uint32)0U << 2U ) | (uint32)((uint32)0U << 1U))

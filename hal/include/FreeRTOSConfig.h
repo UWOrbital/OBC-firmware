@@ -156,7 +156,6 @@
 #define INCLUDE_xTaskGetIdleTaskHandle      1
 
 /* USER CODE BEGIN (4) */
-#define INCLUDE_xTaskGetCurrentTaskHandle   1
 /* USER CODE END */
 
 
@@ -166,6 +165,9 @@
 /* USER CODE BEGIN (5) */
 #undef configSUPPORT_STATIC_ALLOCATION
 #define configSUPPORT_STATIC_ALLOCATION 1
+
+#undef INCLUDE_xTaskGetCurrentTaskHandle
+#define INCLUDE_xTaskGetCurrentTaskHandle 1
 /* USER CODE END */
 
 #endif /* FREERTOS_CONFIG_H */

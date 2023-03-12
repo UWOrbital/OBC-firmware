@@ -10,7 +10,7 @@
 4. Find the COM port identified as `XDS Class Application/User UART`
 5. Set the serial port settings:
     - COM Port: What you found above
-    - Baud Rate: 19200
+    - Baud Rate: 115200
     - Data Bits: 8
     - Stop Bits: 2
     - Parity: None
