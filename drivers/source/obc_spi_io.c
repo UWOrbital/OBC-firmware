@@ -198,7 +198,6 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-
 obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb, uint8_t *inb) {
     obc_error_code_t errCode;
 

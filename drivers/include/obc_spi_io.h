@@ -31,8 +31,8 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
 
 /**
  * @brief Send a byte via SPI.
- * 
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param outb The byte to send.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
@@ -40,18 +40,18 @@ obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
 
 /**
  * @brief Send multiple bytes via SPI.
- * 
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param outBytes The bytes to send.
- * @param dataLength The number of bytes to send
+ * @param numBytes The number of bytes to send.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes, size_t numBytes);
 
 /**
  * @brief Receive a byte via SPI.
- * 
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
@@ -59,10 +59,10 @@ obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uin
 
 /**
  * @brief Receive multiple bytes via SPI.
- * 
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param inBytes Buffer to store the received byte.
- * @param dataLength The number of bytes to receive
+ * @param numBytes The number of bytes to receive
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inBytes, size_t numBytes);
@@ -70,6 +70,7 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
 /**
  * @brief Send and receive a byte via SPI.
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param outb The byte to send.
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
@@ -79,6 +80,7 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiData
 /**
  * @brief Send and receive multiple bytes via SPI.
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param outBytes The byte to send.
  * @param inBytes Buffer to store the received byte.
  * @param numBytes The number of bytes to send and receive
