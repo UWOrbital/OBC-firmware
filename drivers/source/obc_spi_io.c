@@ -96,23 +96,25 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb) {
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb) {
     obc_error_code_t errCode;
-    //uint8_t inb;
 
-    RETURN_IF_ERROR_CODE(spiTransmitBytes(spiReg, &outb, 1));
+    RETURN_IF_ERROR_CODE(spiTransmitBytes(spiReg, spiDataFormat, &outb, 1));
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb) {
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inb) {
     obc_error_code_t errCode;
 
-    RETURN_IF_ERROR_CODE(spiReceiveBytes(spiReg, inb, 1));
+    RETURN_IF_ERROR_CODE(spiReceiveBytes(spiReg, spiDataFormat, inb, 1));
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, size_t numBytes) {
+obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes, size_t numBytes) {
     if (spiReg == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    if (spiDataFormat == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (outBytes == NULL)
@@ -123,7 +125,6 @@ obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, size_t n
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {
-        spiDAT1_t spiData = {0};
         // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
         uint16_t spiWordOut;
         obc_error_code_t ret = OBC_ERR_CODE_UNKNOWN;
@@ -136,7 +137,7 @@ obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, size_t n
                 spiWordOut = (uint16_t) outBytes[i];
             }
 
-            uint32_t spiErr = spiTransmitData(spiReg, &spiData, 1, &spiWordOut) & SPI_FLAG_ERR_MASK;
+            uint32_t spiErr = spiTransmitData(spiReg, spiDataFormat, 1, &spiWordOut) & SPI_FLAG_ERR_MASK;
 
             if (spiErr != SPI_FLAG_SUCCESS) {
                 // To-do: Log and handle errors
@@ -151,8 +152,11 @@ obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, size_t n
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, size_t numBytes) {
+obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inBytes, size_t numBytes) {
    if (spiReg == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    if (spiDataFormat == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (inBytes == NULL)
@@ -163,7 +167,6 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, size_t num
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {
-        spiDAT1_t spiData = {0};
         // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
         uint16_t spiWordIn;
         obc_error_code_t ret = OBC_ERR_CODE_UNKNOWN;
@@ -176,7 +179,7 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, size_t num
                 spiWordIn = (uint16_t) inBytes[i];
             }
 
-            uint32_t spiErr = spiReceiveData(spiReg, &spiData, 1, &spiWordIn) & SPI_FLAG_ERR_MASK;
+            uint32_t spiErr = spiReceiveData(spiReg, spiDataFormat, 1, &spiWordIn) & SPI_FLAG_ERR_MASK;
 
             if (spiErr != SPI_FLAG_SUCCESS) {
                 // To-do: Log and handle errors
@@ -196,15 +199,18 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, size_t num
 }
 
 
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb) {
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb, uint8_t *inb) {
     obc_error_code_t errCode;
 
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveBytes(spiReg, &outb, inb, 1));
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveBytes(spiReg, spiDataFormat, &outb, inb, 1));
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes, uint8_t *inBytes, size_t numBytes) {
+obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes, uint8_t *inBytes, size_t numBytes) {
     if (spiReg == NULL || inBytes == NULL || outBytes == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    if (spiDataFormat == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
     int8_t spiRegIndex = spiRegToIndex(spiReg);
@@ -212,7 +218,6 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (xSemaphoreTake(spiMutexes[spiRegIndex], portMAX_DELAY) == pdTRUE) {        
-        spiDAT1_t spiData = {0};
         // The SPI HAL functions take 16-bit arguments, but we're using 8-bit word size
         uint16_t spiWordOut;
         uint16_t spiWordIn;
@@ -228,7 +233,7 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes
                 spiWordIn = (uint16_t) inBytes[i];
             }
 
-            uint32_t spiErr = spiTransmitAndReceiveData(spiReg, &spiData, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
+            uint32_t spiErr = spiTransmitAndReceiveData(spiReg, spiDataFormat, 1, &spiWordOut, &spiWordIn) & SPI_FLAG_ERR_MASK;
 
             if (spiErr != SPI_FLAG_SUCCESS) {
                 // To-do: Log and handle errors

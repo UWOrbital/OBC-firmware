@@ -36,7 +36,7 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
  * @param outb The byte to send.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb);
 
 /**
  * @brief Send multiple bytes via SPI.
@@ -46,7 +46,7 @@ obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
  * @param dataLength The number of bytes to send
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, size_t numBytes);
+obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes, size_t numBytes);
 
 /**
  * @brief Receive a byte via SPI.
@@ -55,7 +55,7 @@ obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, uint8_t *outBytes, size_t n
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb);
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inb);
 
 /**
  * @brief Receive multiple bytes via SPI.
@@ -65,7 +65,7 @@ obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb);
  * @param dataLength The number of bytes to receive
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, size_t numBytes);
+obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inBytes, size_t numBytes);
 
 /**
  * @brief Send and receive a byte via SPI.
@@ -74,7 +74,7 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, uint8_t *inBytes, size_t num
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb);
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb, uint8_t *inb);
 
 /**
  * @brief Send and receive multiple bytes via SPI.
@@ -84,6 +84,6 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
  * @param numBytes The number of bytes to send and receive
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, uint8_t *outBytes, uint8_t *inBytes, size_t numBytes);
+obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes, uint8_t *inBytes, size_t numBytes);
 
 #endif // DRIVERS_INCLUDE_OBC_SPI_IO_H_
