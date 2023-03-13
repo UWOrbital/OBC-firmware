@@ -10,7 +10,7 @@
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcu_cc1120_spi_transfer(uint8_t outb, uint8_t *inb) {
-    return spiTransmitAndReceiveByte(spiREG1, outb, inb);
+    return spiTransmitAndReceiveByte(spiREG4, outb, inb);
 }
 
 /**
@@ -19,7 +19,7 @@ obc_error_code_t mcu_cc1120_spi_transfer(uint8_t outb, uint8_t *inb) {
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcu_cc1120_cs_assert() {
-    return assertChipSelect(gioPORTA, 0);
+    return assertChipSelect(spiPORT4, 0);
 }
 
 /**
@@ -28,5 +28,5 @@ obc_error_code_t mcu_cc1120_cs_assert() {
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcu_cc1120_cs_deassert() {
-    return deassertChipSelect(gioPORTA, 0);
+    return deassertChipSelect(spiPORT4, 0);
 }
