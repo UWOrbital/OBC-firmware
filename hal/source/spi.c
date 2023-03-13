@@ -1199,4 +1199,3 @@ void spi4GetConfigValue(spi_config_reg_t *config_reg, config_value_type_t type)
 
 
 
-
