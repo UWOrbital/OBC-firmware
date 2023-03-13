@@ -18,7 +18,6 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-# CC_FLAGS += -Os # TODO: Figure out why this breaks the SD Card code
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -60,13 +59,6 @@ INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"comms/include"
 INCLUDE_DIRS += -I"eps/include"
 INCLUDE_DIRS += -I"payload/include"
-# INCLUDE_DIRS += -I"fatfs/src"
-INCLUDE_DIRS += -I"fatfs/port"
-INCLUDE_DIRS += -I"reliance_edge/include"
-INCLUDE_DIRS += -I"reliance_edge/core/include"
-INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
-INCLUDE_DIRS += -I"reliance_edge/projects/newproj/host"
-
 
 # Reliance Edge File System
 INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
@@ -74,7 +66,6 @@ INCLUDE_DIRS += -I"reliance_edge/include"
 INCLUDE_DIRS += -I"reliance_edge/core/include"
 INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
-
 
 LIBS := 
 

@@ -12,7 +12,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -O0 # TODO: Figure out why this breaks the SD Card code
+CC_FLAGS += -O0
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -45,6 +45,7 @@ LIBS :=
 SRC_DIRS :=
 SRC_DIRS += hal/source
 SRC_DIRS += drivers/source
+SRC_DIRS += common/source
 SRC_DIRS += examples/sd_reliance_edge_demo
 
 # Reliance Edge File System
