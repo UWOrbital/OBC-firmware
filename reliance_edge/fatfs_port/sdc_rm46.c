@@ -19,12 +19,12 @@
     #define SDC_SPI_PORT         spiPORT3
     #define SDC_SPI_REG          spiREG3
     #define SDC_SPI_CS           1UL
-    #define SPI_DATA_FORMAT      SPI_FMT_0
+    #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
 #elif defined(OBC_REVISION_1)
     #define SDC_SPI_PORT         spiPORT1
     #define SDC_SPI_REG          spiREG1
     #define SDC_SPI_CS           0UL
-    #define SPI_DATA_FORMAT      SPI_FMT_0
+    #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
 #else
     #error Board configuration not defined yet
 #endif
@@ -88,10 +88,10 @@ STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255, "SDC_ACTION_NUM_ATTEMPTS_D
 // SPI configuration for SD card
 // CS selected using SPI assert/deassert functions; not using CSNR
 static spiDAT1_t sdcSpiConfig = {
-    .CS_HOLD = 0,
-    .WDEL = 0,
-    .DFSEL = SPI_DATA_FORMAT,
-    .CSNR = 0,
+    .CS_HOLD = false,
+    .WDEL = false,
+    .DFSEL = SDC_SPI_DATA_FORMAT,
+    .CSNR = SPI_CS_NONE,
 };
 
 static volatile DSTATUS stat = STA_NOINIT;   /* Disk status */
