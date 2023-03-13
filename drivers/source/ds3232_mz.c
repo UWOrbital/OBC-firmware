@@ -7,50 +7,51 @@
 #include <stdint.h>
 #include <gio.h>
 
-#define DS3232_I2C_ADDRESS  0x68U
+#define DS3232_I2C_ADDRESS 0x68U
 
 /* DS3232 registers */
-#define DS3232_REG_SECONDS              0x00U
-#define DS3232_REG_MINUTES              0x01U
-#define DS3232_REG_HOURS                0x02U
-#define DS3232_REG_DAY                  0x03U
-#define DS3232_REG_DATE                 0X04U
-#define DS3232_REG_MONTH                0x05U
-#define DS3232_REG_YEAR                 0x06U
-#define DS3232_REG_ALARM_1_SECONDS      0x07U
-#define DS3232_REG_ALARM_1_MINUTES      0x08U
-#define DS3232_REG_ALARM_1_HOURS        0x09U
-#define DS3232_REG_ALARM_1_DAY_DATE     0x0AU
-#define DS3232_REG_ALARM_2_MINUTES      0x0BU
-#define DS3232_REG_ALARM_2_HOURS        0x0CU
-#define DS3232_REG_ALARM_2_DAY_DATE     0x0DU          
-#define DS3232_REG_CONTROL              0X0EU
-#define DS3232_REG_STATUS               0X0FU
-#define DS3232_REG_AGING                0X10U
-#define DS3232_REG_TEMP_MSB             0x11U
-#define DS3232_REG_TEMP_LSB             0x12U  
+#define DS3232_REG_SECONDS 0x00U
+#define DS3232_REG_MINUTES 0x01U
+#define DS3232_REG_HOURS 0x02U
+#define DS3232_REG_DAY 0x03U
+#define DS3232_REG_DATE 0X04U
+#define DS3232_REG_MONTH 0x05U
+#define DS3232_REG_YEAR 0x06U
+#define DS3232_REG_ALARM_1_SECONDS 0x07U
+#define DS3232_REG_ALARM_1_MINUTES 0x08U
+#define DS3232_REG_ALARM_1_HOURS 0x09U
+#define DS3232_REG_ALARM_1_DAY_DATE 0x0AU
+#define DS3232_REG_ALARM_2_MINUTES 0x0BU
+#define DS3232_REG_ALARM_2_HOURS 0x0CU
+#define DS3232_REG_ALARM_2_DAY_DATE 0x0DU
+#define DS3232_REG_CONTROL 0X0EU
+#define DS3232_REG_STATUS 0X0FU
+#define DS3232_REG_AGING 0X10U
+#define DS3232_REG_TEMP_MSB 0x11U
+#define DS3232_REG_TEMP_LSB 0x12U
 
-#define DS3232_TEMP_RESOLUTION  0.25f
+#define DS3232_TEMP_RESOLUTION 0.25f
 
-#define RTC_RST_GIO_PIN     1UL
-#define RTC_RST_GIO_PORT    gioPORTA
+#define RTC_RST_GIO_PIN 1UL
+#define RTC_RST_GIO_PORT gioPORTA
 
-// GPIO connected to RST configured as open drain 
-#define RTC_OFF             1UL
-#define RTC_ON              0UL
+// GPIO connected to RST configured as open drain
+#define RTC_OFF 1UL
+#define RTC_ON 0UL
 
-#define MAX_SECONDS         59U
-#define MAX_MINUTES         59U
-#define MAX_HOURS           23U
-#define MIN_DAY             1U
-#define MAX_DAY             7U
-#define MIN_DATE            1U
-#define MAX_DATE            31U
-#define MIN_MONTH           1U
-#define MAX_MONTH           12U
-#define MAX_YEAR            99U
+#define MAX_SECONDS 59U
+#define MAX_MINUTES 59U
+#define MAX_HOURS 23U
+#define MIN_DAY 1U
+#define MAX_DAY 7U
+#define MIN_DATE 1U
+#define MAX_DATE 31U
+#define MIN_MONTH 1U
+#define MAX_MONTH 12U
+#define MAX_YEAR 99U
 
-typedef enum {
+typedef enum
+{
     ENABLE_MATCH = 0U,
     DISABLE_MATCH = 1U,
 } alarm_match_t;
@@ -59,7 +60,7 @@ typedef enum {
 
 /**
  * @brief Set the value of the alarm 1 seconds register.
- * 
+ *
  * @param enable Choose whether seconds should match or not.
  * @param seconds uint8_t Number of seconds to match. (0-59)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
@@ -68,7 +69,7 @@ static obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds);
 
 /**
  * @brief Set the value of the alarm 1 minutes register.
- * 
+ *
  * @param enable Choose whether minutes should match or not.
  * @param minutes uint8_t Number of minutes to match. (0-59)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
@@ -77,7 +78,7 @@ static obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes);
 
 /**
  * @brief Set the value of the alarm 1 hours register.
- * 
+ *
  * @param enable Choose whether hours should match or not.
  * @param hour uint8_t Number of hours to match. (0-23)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
@@ -86,7 +87,7 @@ static obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hour);
 
 /**
  * @brief Set the value of the alarm 1 date register.
- * 
+ *
  * @param enable Choose whether date should match or not.
  * @param date uint8_t Number of date to match. (1-31)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
@@ -95,7 +96,7 @@ static obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date);
 
 /**
  * @brief Set the value of the alarm 2 minutes register.
- * 
+ *
  * @param enable Choose whether minutes should match or not.
  * @param minutes uint8_t Number of minutes to match. (0-59)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
@@ -104,7 +105,7 @@ static obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes);
 
 /**
  * @brief Set the value of the alarm 2 hours register.
- * 
+ *
  * @param enable Choose whether hours should match or not.
  * @param hour uint8_t Number of hours to match. (0-23)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
@@ -113,15 +114,15 @@ static obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hour);
 
 /**
  * @brief Set the value of the alarm 2 date register.
- * 
+ *
  * @param enable Choose whether date should match or not.
  * @param date uint8_t Number of date to match. (1-31)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
  */
 static obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date);
 
-
-obc_error_code_t rtcInit(rtc_date_time_t *dt) {
+obc_error_code_t rtcInit(rtc_date_time_t *dt)
+{
     obc_error_code_t errCode;
 
     if (dt == NULL)
@@ -133,24 +134,28 @@ obc_error_code_t rtcInit(rtc_date_time_t *dt) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-void turnOnRTC(void) {
+void turnOnRTC(void)
+{
     gioSetBit(RTC_RST_GIO_PORT, RTC_RST_GIO_PIN, RTC_ON);
 }
 
-void resetRTC(void) {
+void resetRTC(void)
+{
     gioSetBit(RTC_RST_GIO_PORT, RTC_RST_GIO_PIN, RTC_OFF);
-    
-    while (gioGetBit(RTC_RST_GIO_PORT, RTC_RST_GIO_PIN) != RTC_OFF);
+
+    while (gioGetBit(RTC_RST_GIO_PORT, RTC_RST_GIO_PIN) != RTC_OFF)
+        ;
 
     gioSetBit(RTC_RST_GIO_PORT, RTC_RST_GIO_PIN, RTC_ON);
 }
 
-obc_error_code_t getSecondsRTC(uint8_t *seconds) {
+obc_error_code_t getSecondsRTC(uint8_t *seconds)
+{
     obc_error_code_t errCode;
 
     if (seconds == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &data, 1));
 
@@ -159,11 +164,12 @@ obc_error_code_t getSecondsRTC(uint8_t *seconds) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getMinutesRTC(uint8_t *minutes) {
+obc_error_code_t getMinutesRTC(uint8_t *minutes)
+{
     obc_error_code_t errCode;
     if (minutes == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &data, 1));
 
@@ -172,26 +178,28 @@ obc_error_code_t getMinutesRTC(uint8_t *minutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getHourRTC(uint8_t *hours) {
+obc_error_code_t getHourRTC(uint8_t *hours)
+{
     obc_error_code_t errCode;
 
     if (hours == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &data, 1));
 
     *hours = twoDigitDecimalFromBCD(data);
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getDayRTC(uint8_t *days) {
+obc_error_code_t getDayRTC(uint8_t *days)
+{
     obc_error_code_t errCode;
 
     if (days == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &data, 1));
 
@@ -200,12 +208,13 @@ obc_error_code_t getDayRTC(uint8_t *days) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getDateRTC(uint8_t* date) {
+obc_error_code_t getDateRTC(uint8_t *date)
+{
     obc_error_code_t errCode;
 
     if (date == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &data, 1));
 
@@ -214,12 +223,13 @@ obc_error_code_t getDateRTC(uint8_t* date) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getMonthRTC(uint8_t *month) {
+obc_error_code_t getMonthRTC(uint8_t *month)
+{
     obc_error_code_t errCode;
 
     if (month == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &data, 1));
 
@@ -228,12 +238,13 @@ obc_error_code_t getMonthRTC(uint8_t *month) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getYearRTC(uint8_t *year) {
+obc_error_code_t getYearRTC(uint8_t *year)
+{
     obc_error_code_t errCode;
 
     if (year == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &data, 1));
 
@@ -242,7 +253,8 @@ obc_error_code_t getYearRTC(uint8_t *year) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getCurrentTimeRTC(rtc_time_t *time) {
+obc_error_code_t getCurrentTimeRTC(rtc_time_t *time)
+{
     obc_error_code_t errCode;
 
     rtc_time_t tmp = {0};
@@ -256,7 +268,8 @@ obc_error_code_t getCurrentTimeRTC(rtc_time_t *time) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
+obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime)
+{
     obc_error_code_t errCode;
 
     rtc_date_time_t tmp = {0};
@@ -270,16 +283,17 @@ obc_error_code_t getCurrentDateTimeRTC(rtc_date_time_t *dateTime) {
     RETURN_IF_ERROR_CODE(getSecondsRTC(&tmp.time.seconds));
 
     *dateTime = tmp;
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getControlRTC(rtc_control_t *control) {
+obc_error_code_t getControlRTC(rtc_control_t *control)
+{
     obc_error_code_t errCode;
-    
+
     if (control == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &data, 1));
 
@@ -293,12 +307,13 @@ obc_error_code_t getControlRTC(rtc_control_t *control) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getStatusRTC(rtc_status_t *status) {
+obc_error_code_t getStatusRTC(rtc_status_t *status)
+{
     obc_error_code_t errCode;
 
     if (status == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &data, 1));
 
@@ -312,12 +327,13 @@ obc_error_code_t getStatusRTC(rtc_status_t *status) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getAgingOffsetRTC(int8_t* agingOffset) {
+obc_error_code_t getAgingOffsetRTC(int8_t *agingOffset)
+{
     obc_error_code_t errCode;
 
     if (agingOffset == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t data;
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &data, 1));
 
@@ -326,12 +342,13 @@ obc_error_code_t getAgingOffsetRTC(int8_t* agingOffset) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getTemperatureRTC(float* temperature) {
+obc_error_code_t getTemperatureRTC(float *temperature)
+{
     obc_error_code_t errCode;
 
     if (temperature == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
-        
+
     uint8_t dataBuff[2];
     RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_TEMP_MSB, dataBuff, 2));
 
@@ -344,34 +361,36 @@ obc_error_code_t getTemperatureRTC(float* temperature) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-
-obc_error_code_t setSecondsRTC(uint8_t writeSeconds) {
+obc_error_code_t setSecondsRTC(uint8_t writeSeconds)
+{
     obc_error_code_t errCode;
-    
+
     if (writeSeconds > MAX_SECONDS)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t writeVal =  twoDigitDecimalToBCD(writeSeconds);
+    uint8_t writeVal = twoDigitDecimalToBCD(writeSeconds);
 
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &writeVal, 1));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setMinutesRTC(uint8_t writeMinutes) {
+obc_error_code_t setMinutesRTC(uint8_t writeMinutes)
+{
     obc_error_code_t errCode;
 
     if (writeMinutes > MAX_MINUTES)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t writeVal =  twoDigitDecimalToBCD(writeMinutes);
+    uint8_t writeVal = twoDigitDecimalToBCD(writeMinutes);
 
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &writeVal, 1));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setHourRTC(uint8_t writeHours) {
+obc_error_code_t setHourRTC(uint8_t writeHours)
+{
     obc_error_code_t errCode;
 
     if (writeHours > MAX_HOURS)
@@ -383,55 +402,60 @@ obc_error_code_t setHourRTC(uint8_t writeHours) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setDayRTC(uint8_t writeDays) {
+obc_error_code_t setDayRTC(uint8_t writeDays)
+{
     obc_error_code_t errCode;
 
     if (writeDays < MIN_DAY || writeDays > MAX_DAY)
         return OBC_ERR_CODE_INVALID_ARG;
 
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &writeDays, 1));
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setDateRTC(uint8_t writeDates) {
+obc_error_code_t setDateRTC(uint8_t writeDates)
+{
     obc_error_code_t errCode;
 
     if (writeDates < MIN_DATE || writeDates > MAX_DATE)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t writeVal =  twoDigitDecimalToBCD(writeDates);
+    uint8_t writeVal = twoDigitDecimalToBCD(writeDates);
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &writeVal, 1));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setMonthRTC(uint8_t writeMonths) {
+obc_error_code_t setMonthRTC(uint8_t writeMonths)
+{
     obc_error_code_t errCode;
-    
+
     uint8_t monthNum = writeMonths & 0x1F;
     if (monthNum > MAX_MONTH || monthNum < MIN_MONTH)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t writeVal =  twoDigitDecimalToBCD(writeMonths);
+    uint8_t writeVal = twoDigitDecimalToBCD(writeMonths);
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &writeVal, 1));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setYearRTC(uint8_t writeYears) {
+obc_error_code_t setYearRTC(uint8_t writeYears)
+{
     obc_error_code_t errCode;
 
     if (writeYears > MAX_YEAR)
         return OBC_ERR_CODE_INVALID_ARG;
-    
-    uint8_t writeVal =  twoDigitDecimalToBCD(writeYears);
+
+    uint8_t writeVal = twoDigitDecimalToBCD(writeYears);
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &writeVal, 1));
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setCurrentDateTimeRTC(rtc_date_time_t *writeDateTime) {
+obc_error_code_t setCurrentDateTimeRTC(rtc_date_time_t *writeDateTime)
+{
     obc_error_code_t errCode;
 
     if (writeDateTime == NULL)
@@ -448,54 +472,58 @@ obc_error_code_t setCurrentDateTimeRTC(rtc_date_time_t *writeDateTime) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setControlRTC(rtc_control_t *writeControl) {
+obc_error_code_t setControlRTC(rtc_control_t *writeControl)
+{
     obc_error_code_t errCode;
 
     if (writeControl == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t writeVal =  (writeControl->EOSC << 7) |
-                        (writeControl->BBSQW << 6) |
-                        (writeControl->CONV << 5) |
-                        (writeControl->INTCN << 2) |
-                        (writeControl->A2IE << 1) |
-                        (writeControl->A1IE);
+    uint8_t writeVal = (writeControl->EOSC << 7) |
+                       (writeControl->BBSQW << 6) |
+                       (writeControl->CONV << 5) |
+                       (writeControl->INTCN << 2) |
+                       (writeControl->A2IE << 1) |
+                       (writeControl->A1IE);
 
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &writeVal, 1));
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setStatusRTC(rtc_status_t *writeStatus) {
+obc_error_code_t setStatusRTC(rtc_status_t *writeStatus)
+{
     obc_error_code_t errCode;
 
     if (writeStatus == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    uint8_t writeVal =  (writeStatus->OSF << 7) |
-                        (writeStatus->BB32KHZ << 6) |
-                        (writeStatus->EN32KHZ << 3) |
-                        (writeStatus->BSY << 2) |
-                        (writeStatus->A2F << 1) |
-                        (writeStatus->A1F);
+    uint8_t writeVal = (writeStatus->OSF << 7) |
+                       (writeStatus->BB32KHZ << 6) |
+                       (writeStatus->EN32KHZ << 3) |
+                       (writeStatus->BSY << 2) |
+                       (writeStatus->A2F << 1) |
+                       (writeStatus->A1F);
 
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &writeVal, 1));
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset) {
+obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset)
+{
     obc_error_code_t errCode;
-    
+
     uint8_t writeVal = (writeAgingOffset < 0) ? (1 << 7) : 0;
     writeVal |= (writeAgingOffset < 0) ? -writeAgingOffset : writeAgingOffset;
 
     RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &writeVal, 1));
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds) {
+obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds)
+{
     obc_error_code_t errCode;
 
     if (seconds > MAX_SECONDS)
@@ -507,7 +535,8 @@ obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes) {
+obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes)
+{
     obc_error_code_t errCode;
 
     if (minutes > MAX_MINUTES)
@@ -519,7 +548,8 @@ obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hours) {
+obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hours)
+{
     obc_error_code_t errCode;
 
     if (hours > MAX_HOURS)
@@ -531,7 +561,8 @@ obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hours) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date) {
+obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date)
+{
     obc_error_code_t errCode;
 
     if (date < MIN_DATE || date > MAX_DATE)
@@ -543,48 +574,51 @@ obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt) {
+obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt)
+{
     obc_error_code_t errCode;
 
-    switch (mode) {
-        case RTC_ALARM1_ONCE_PER_SECOND:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM1_MATCH_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM1_MATCH_MINUTES_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM1_MATCH_HOURS_MINUTES_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(ENABLE_MATCH, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS:
-            RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
-            RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(ENABLE_MATCH, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm1DateRTC(ENABLE_MATCH, dt.date));
-            break;
-        default:
-            return OBC_ERR_CODE_INVALID_ARG;
+    switch (mode)
+    {
+    case RTC_ALARM1_ONCE_PER_SECOND:
+        RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM1_MATCH_SECONDS:
+        RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+        RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM1_MATCH_MINUTES_SECONDS:
+        RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+        RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+        RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM1_MATCH_HOURS_MINUTES_SECONDS:
+        RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+        RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+        RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(ENABLE_MATCH, dt.time.hours));
+        RETURN_IF_ERROR_CODE(setAlarm1DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS:
+        RETURN_IF_ERROR_CODE(setAlarm1SecondsRTC(ENABLE_MATCH, dt.time.seconds));
+        RETURN_IF_ERROR_CODE(setAlarm1MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+        RETURN_IF_ERROR_CODE(setAlarm1HoursRTC(ENABLE_MATCH, dt.time.hours));
+        RETURN_IF_ERROR_CODE(setAlarm1DateRTC(ENABLE_MATCH, dt.date));
+        break;
+    default:
+        return OBC_ERR_CODE_INVALID_ARG;
     }
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes) {
+obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes)
+{
     obc_error_code_t errCode;
 
     if (minutes > MAX_MINUTES)
@@ -596,7 +630,8 @@ obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hours) {
+obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hours)
+{
     obc_error_code_t errCode;
 
     if (hours > MAX_HOURS)
@@ -608,7 +643,8 @@ obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hours) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date) {
+obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date)
+{
     obc_error_code_t errCode;
 
     if (date < MIN_DATE || date > MAX_DATE)
@@ -620,32 +656,34 @@ obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt) {
+obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt)
+{
     obc_error_code_t errCode;
 
-    switch (mode) {
-        case RTC_ALARM2_ONCE_PER_MINUTE:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM2_MATCH_MINUTES:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(DISABLE_MATCH, 0));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM2_MATCH_HOURS_MINUTES:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(ENABLE_MATCH, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
-            break;
-        case RTC_ALARM2_MATCH_DATE_HOURS_MINUTES:
-            RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
-            RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(ENABLE_MATCH, dt.time.hours));
-            RETURN_IF_ERROR_CODE(setAlarm2DateRTC(ENABLE_MATCH, dt.date));
-            break;
-        default:
-            return OBC_ERR_CODE_INVALID_ARG;
+    switch (mode)
+    {
+    case RTC_ALARM2_ONCE_PER_MINUTE:
+        RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM2_MATCH_MINUTES:
+        RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+        RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(DISABLE_MATCH, 0));
+        RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM2_MATCH_HOURS_MINUTES:
+        RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+        RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(ENABLE_MATCH, dt.time.hours));
+        RETURN_IF_ERROR_CODE(setAlarm2DateRTC(DISABLE_MATCH, 1));
+        break;
+    case RTC_ALARM2_MATCH_DATE_HOURS_MINUTES:
+        RETURN_IF_ERROR_CODE(setAlarm2MinutesRTC(ENABLE_MATCH, dt.time.minutes));
+        RETURN_IF_ERROR_CODE(setAlarm2HoursRTC(ENABLE_MATCH, dt.time.hours));
+        RETURN_IF_ERROR_CODE(setAlarm2DateRTC(ENABLE_MATCH, dt.date));
+        break;
+    default:
+        return OBC_ERR_CODE_INVALID_ARG;
     }
 
     return OBC_ERR_CODE_SUCCESS;
