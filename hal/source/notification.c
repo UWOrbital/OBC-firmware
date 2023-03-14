@@ -99,6 +99,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (19) */
+osHandlerLM75BD(LM75BD_OBC_I2C_ADDR);
 /* USER CODE END */
 }
 
@@ -108,7 +109,6 @@ void i2cNotification(i2cBASE_t *i2c, uint32 flags)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (21) */
-osHandlerLM75BD(LM75BD_OBC_I2C_ADDR);
 /* USER CODE END */
 }
 
