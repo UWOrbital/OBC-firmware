@@ -2,7 +2,6 @@
 #define ADCS_INCLUDE_ADCS_MANAGER_H_
 
 #include "obc_errors.h"
-#include "task_config.h"
 
 #include <sys_common.h>
 

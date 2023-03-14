@@ -6,9 +6,9 @@
 #include <sys_common.h>
 
 /* EPS Manager task config */
-#define EPS_MANAGER_STACK_SIZE   1024U
-#define EPS_MANAGER_NAME         "eps_manager"
-#define EPS_MANAGER_PRIORITY     1U
+// #define EPS_MANAGER_STACK_SIZE   1024U
+// #define EPS_MANAGER_NAME         "eps_manager"
+// #define EPS_MANAGER_PRIORITY     1U
 
 /**
  * @enum	eps_event_id_t
@@ -41,10 +41,10 @@ typedef struct {
 } eps_event_t;
 
 /* EPS queue config */
-#define EPS_MANAGER_QUEUE_LENGTH 10U
-#define EPS_MANAGER_QUEUE_ITEM_SIZE sizeof(eps_event_t)
-#define EPS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-#define EPS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+// #define EPS_MANAGER_QUEUE_LENGTH 10U
+// #define EPS_MANAGER_QUEUE_ITEM_SIZE sizeof(eps_event_t)
+// #define EPS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+// #define EPS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the EPS Manager task and associated FreeRTOS constructs (queues, timers, etc.)

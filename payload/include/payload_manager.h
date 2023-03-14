@@ -6,9 +6,9 @@
 #include <sys_common.h>
 
 /* Payload Manager task config */
-#define PAYLOAD_MANAGER_STACK_SIZE   1024U
-#define PAYLOAD_MANAGER_NAME         "payload_manager"
-#define PAYLOAD_MANAGER_PRIORITY     1U
+// #define PAYLOAD_MANAGER_STACK_SIZE   1024U
+// #define PAYLOAD_MANAGER_NAME         "payload_manager"
+// #define PAYLOAD_MANAGER_PRIORITY     1U
 
 /**
  * @enum	payload_event_id_t
@@ -41,10 +41,10 @@ typedef struct {
 } payload_event_t;
 
 /* payload queue config */
-#define PAYLOAD_MANAGER_QUEUE_LENGTH 10U
-#define PAYLOAD_MANAGER_QUEUE_ITEM_SIZE sizeof(payload_event_t)
-#define PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-#define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+// #define PAYLOAD_MANAGER_QUEUE_LENGTH 10U
+// #define PAYLOAD_MANAGER_QUEUE_ITEM_SIZE sizeof(payload_event_t)
+// #define PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+// #define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs (queues, timers, etc.)

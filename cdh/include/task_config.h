@@ -45,3 +45,25 @@
 #define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
 #define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+
+/* EPS Manager task config */
+#define EPS_MANAGER_STACK_SIZE   1024U
+#define EPS_MANAGER_NAME         "eps_manager"
+#define EPS_MANAGER_PRIORITY     1U
+
+/* EPS queue config */
+#define EPS_MANAGER_QUEUE_LENGTH 10U
+#define EPS_MANAGER_QUEUE_ITEM_SIZE sizeof(eps_event_t)
+#define EPS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define EPS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+
+/* Payload Manager task config */
+#define PAYLOAD_MANAGER_STACK_SIZE   1024U
+#define PAYLOAD_MANAGER_NAME         "payload_manager"
+#define PAYLOAD_MANAGER_PRIORITY     1U
+
+/* payload queue config */
+#define PAYLOAD_MANAGER_QUEUE_LENGTH 10U
+#define PAYLOAD_MANAGER_QUEUE_ITEM_SIZE sizeof(payload_event_t)
+#define PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)

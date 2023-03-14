@@ -2,7 +2,6 @@
 #define CDH_INCLUDE_TELEMETRY_H_
 
 #include "obc_errors.h"
-#include "task_config.h"
 
 #include <sys_common.h>
 

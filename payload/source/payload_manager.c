@@ -1,5 +1,6 @@
 #include "payload_manager.h"
 #include "obc_errors.h"
+#include "task_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
