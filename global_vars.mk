@@ -8,7 +8,10 @@
 ROOT_DIR ?= .
 BUILD_DIR ?= $(ROOT_DIR)/build
 
-include $(ROOT_DIR)/.env
+ROOT_DIR ?= .
+BUILD_DIR ?= $(ROOT_DIR)/build
+
+include $(ROOT_DIR)/$(ROOT_DIR)/.env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
 
