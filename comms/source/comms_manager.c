@@ -1,5 +1,6 @@
 #include "comms_manager.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -27,6 +28,11 @@ void initCommsManager(void) {
     ASSERT( (commsTaskStack != NULL) && (&commsTaskBuffer != NULL) );
     if (commsTaskHandle == NULL) {
         commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, NULL, COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
+    }
+    if (commsTaskHandle != NULL) {
+        LOG_INFO("Task has started - <Comms Manager task> \n");
+    } else {
+        LOG_ERROR("Task has not started - <Comms Manager task>\n");
     }
 
     ASSERT( (commsQueueStack != NULL) && (&commsQueue != NULL) );

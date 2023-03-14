@@ -4,6 +4,7 @@
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
+#include <obc_logging.h>
 
 #include <sys_common.h>
 #include <gio.h>
@@ -26,6 +27,11 @@ void initEPSManager(void) {
     ASSERT( (epsTaskStack != NULL) && (&epsTaskBuffer != NULL) );
     if (epsTaskHandle == NULL) {
         epsTaskHandle = xTaskCreateStatic(vEPSManagerTask, EPS_MANAGER_NAME, EPS_MANAGER_STACK_SIZE, NULL, EPS_MANAGER_PRIORITY, epsTaskStack, &epsTaskBuffer);
+    }
+    if (epsTaskStack != NULL) {
+        LOG_INFO("Task has started - <EPS Manager task> \n");
+    } else {
+        LOG_ERROR("Task has not started - <EPS Manager task>\n");
     }
 
     ASSERT( (epsQueueStack != NULL) && (&epsQueue != NULL) );

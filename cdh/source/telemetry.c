@@ -38,11 +38,17 @@ void initTelemetry(void) {
     if (telemetryTaskHandle == NULL) {
         telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
     }
+    if (telemetryTaskStack != NULL) {
+        LOG_INFO("Task has started - <Telemetry task> \n");
+    } else {
+        LOG_ERROR("Task has not started - <Telemetry task>\n");
+    }
 
     ASSERT( (telemetryQueueStack != NULL) && (&telemetryQueue != NULL) );
     if (telemetryQueueHandle == NULL) {
         telemetryQueueHandle = xQueueCreateStatic(TELEMETRY_QUEUE_LENGTH, TELEMETRY_QUEUE_ITEM_SIZE, telemetryQueueStack, &telemetryQueue);
     }
+    
 
     ASSERT(&ledTimerBuffer != NULL);
     if (ledTimerHandle == NULL) {
