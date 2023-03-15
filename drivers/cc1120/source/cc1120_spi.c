@@ -18,13 +18,13 @@ obc_error_code_t cc1120_read_spi(uint8_t addr, uint8_t data[], uint8_t len) {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     
     if (addr >= CC1120_REGS_EXT_ADDR) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -66,13 +66,13 @@ obc_error_code_t cc1120_read_ext_addr_spi(uint8_t addr, uint8_t data[], uint8_t 
     if ((addr > CC1120_REGS_EXT_PA_CFG3 && addr < CC1120_REGS_EXT_WOR_TIME1) ||
         (addr > CC1120_REGS_EXT_XOSC_TEST0 && addr < CC1120_REGS_EXT_RXFIRST) ||
         (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES)) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM; // invalid params
+        errCode = OBC_ERR_CODE_INVALID_ARG; // invalid params
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -93,7 +93,7 @@ obc_error_code_t cc1120_read_ext_addr_spi(uint8_t addr, uint8_t data[], uint8_t 
         uint8_t recvData;
         RETURN_IF_ERROR_CODE(mcu_cc1120_spi_transfer(addr, &recvData));
         if (recvData != 0x00) { // When sending the extended address, SO will return all zeros. See section 3.2.
-            errCode = CC1120_ERROR_CODE_READ_EXT_ADDR_SPI_FAILED;
+            errCode = CC1120_ERR_CODE_READ_EXT_ADDR_SPI_FAILED;
             LOG_ERROR_CODE(errCode);
             return errCode;
         }
@@ -125,13 +125,13 @@ obc_error_code_t cc1120_write_spi(uint8_t addr, uint8_t data[], uint8_t len) {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
     if(addr >= CC1120_REGS_EXT_ADDR) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -171,13 +171,13 @@ obc_error_code_t cc1120_write_ext_addr_spi(uint8_t addr, uint8_t data[], uint8_t
     if ((addr > CC1120_REGS_EXT_PA_CFG3 && addr < CC1120_REGS_EXT_WOR_TIME1) ||
         (addr > CC1120_REGS_EXT_XOSC_TEST0 && addr < CC1120_REGS_EXT_RXFIRST) ||
         (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES)) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -196,7 +196,7 @@ obc_error_code_t cc1120_write_ext_addr_spi(uint8_t addr, uint8_t data[], uint8_t
         uint8_t recvData;
         RETURN_IF_ERROR_CODE(mcu_cc1120_spi_transfer(addr, &recvData));
         if (recvData != 0x00) { // When sending the extended address, SO will return all zeros. See section 3.2.
-            errCode = CC1120_ERROR_CODE_WRITE_EXT_ADDR_SPI_FAILED;
+            errCode = CC1120_ERR_CODE_WRITE_EXT_ADDR_SPI_FAILED;
             LOG_ERROR_CODE(errCode);
             return errCode;
         }
@@ -225,7 +225,7 @@ obc_error_code_t cc1120_strobe_spi(uint8_t addr) {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
     if (addr < CC1120_STROBE_SRES || addr > CC1120_STROBE_SNOP) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -252,7 +252,7 @@ obc_error_code_t cc1120_read_fifo(uint8_t data[], uint8_t len) {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -263,7 +263,7 @@ obc_error_code_t cc1120_read_fifo(uint8_t data[], uint8_t len) {
 
         RETURN_IF_ERROR_CODE(mcu_cc1120_cs_assert());
         if (cc1120_send_byte_receive_status(header) != OBC_ERR_CODE_SUCCESS) {
-            errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+            errCode = OBC_ERR_CODE_INVALID_ARG;
             return errCode;
         }
     }
@@ -292,7 +292,7 @@ obc_error_code_t cc1120_write_fifo(uint8_t data[], uint8_t len) {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -336,14 +336,14 @@ obc_error_code_t cc1120_read_fifo_direct(uint8_t addr, uint8_t data[], uint8_t l
     /*
     // Always true, since addr is uint8_t:
     if (addr < CC1120_FIFO_TX_START || addr > CC1120_FIFO_RX_END) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
     */
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -389,14 +389,14 @@ obc_error_code_t cc1120_write_fifo_direct(uint8_t addr, uint8_t data[], uint8_t 
     /*
     // Always true, since addr is uint8_t:
     if (addr < CC1120_FIFO_TX_START || addr > CC1120_FIFO_RX_END) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
     */
 
     if (len < 1) {
-        errCode = CC1120_ERROR_CODE_INVALID_PARAM;
+        errCode = OBC_ERR_CODE_INVALID_ARG;
         LOG_ERROR_CODE(errCode);
         return errCode;
     }
@@ -435,7 +435,7 @@ obc_error_code_t cc1120_write_fifo_direct(uint8_t addr, uint8_t data[], uint8_t 
  * @return CC1120_ERROR_CODE_SEND_BYTE_RECEIVE_STATUS_INVALID_STATUS_BYTE - If the status byte is invalid.
  */
 obc_error_code_t cc1120_send_byte_receive_status(uint8_t data) {
-    obc_error_code_t errCode = CC1120_ERROR_CODE_INVALID_STATUS_BYTE;
+    obc_error_code_t errCode = CC1120_ERR_CODE_INVALID_STATUS_BYTE;
     union cc_st ccstatus;
 
     // TODO: This is a hacky way to do this. We should implement a mutex + timeout.
