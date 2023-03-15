@@ -14,7 +14,7 @@
     #define FRAM_spiPORT    spiPORT3
     #define FRAM_CS         1
     static spiDAT1_t framSPIDataFmt = {.CS_HOLD=0,
-                                        .CSNR = 0, 
+                                        .CSNR = SPI_CS_NONE, 
                                         .DFSEL = SPI_FMT_1, 
                                         .WDEL = 0};
 #elif defined(OBC_REVISION_1)
@@ -22,7 +22,7 @@
     #define FRAM_spiPORT    spiPORT1
     #define FRAM_CS         1
     static spiDAT1_t framSPIDataFmt = {.CS_HOLD=0,
-                                        .CSNR = 0, 
+                                        .CSNR = SPI_CS_NONE, 
                                         .DFSEL = SPI_FMT_1, 
                                         .WDEL = 0};
 #elif defined(OBC_REVISION_2)
