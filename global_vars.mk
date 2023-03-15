@@ -70,6 +70,13 @@ INCLUDE_DIRS += -I"reliance_edge/core/include"
 INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
 
+# Reliance Edge File System
+INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
+INCLUDE_DIRS += -I"reliance_edge/include"
+INCLUDE_DIRS += -I"reliance_edge/core/include"
+INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
+INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
+
 LIBS := 
 
 $(BUILD_DIR)/%.o : $(ROOT_DIR)/%.c
