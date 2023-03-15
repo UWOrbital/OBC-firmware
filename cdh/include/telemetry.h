@@ -3,91 +3,105 @@
 
 #include "obc_errors.h"
 
-#include <sys_common.h>
-#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
 
-/* Telemetry task config */
-#define TELEMETRY_STACK_SIZE   1024U
-#define TELEMETRY_NAME         "telemetry"
-#define TELEMETRY_PRIORITY     1U
-#define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
+/* Telemetry file config */
+#define TELEMETRY_FILE_DIRECTORY "/telemetry/"
+#define TELEMETRY_FILE_PREFIX "t_"
+#define TELEMETRY_FILE_EXTENSION ".tlm"
+#define TELEMETRY_FILE_NAME_MAX_LENGTH 10 // uint32_t max length
+#define TELEMETRY_FILE_PATH_MAX_LENGTH \
+            sizeof(TELEMETRY_FILE_DIRECTORY) + \
+            sizeof(TELEMETRY_FILE_PREFIX) + \
+            sizeof(TELEMETRY_FILE_EXTENSION) + \
+            TELEMETRY_FILE_NAME_MAX_LENGTH - 3 + 1 // -3 for the 3 %s in the format string, +1 for the null terminator
 
-/**
- * @enum	telemetry_event_id_t
- * @brief	Telemetry event ID enum.
- *
- * Enum containing all possible event IDs passed to the telemetry event queue.
-*/
 typedef enum {
-    TELEMETRY_NULL_EVENT_ID,
-    COMMS_SW_ID,
-    COMMS_BOARD_ID,
-    OBC_TEMP_ID,
-    ADCS_MAG_BOARD_TEMP_ID,
-    ADCS_SENSOR_BOARD_ID,
-    EPS_BOARD_TEMP_ID,
-    SOLAR_PANEL_1_TEMP_ID,
-    SOLAR_PANEL_2_TEMP_ID,
-    SOLAR_PANEL_3_TEMP_ID,
-    SONAR_PANEL_4_TEMP_ID,
-    EPS_COMMS_5V_CURRENT_ID,
-    EPS_COMMS_3_3V_CURRENT_ID,
-    EPS_MAG_8V_CURRENT_ID,
-    EPS_ADCS_5V_CURRENT_ID,
-    EPS_ADCS_3_3V_CURRENT_ID,
-    EPS_OBC_CURRENT_ID,
-    EPS_COMMS_5V_VOLTAGE_ID,
-    EPS_COMMS_3_3V_VOLTAGE_ID,
-    EPS_MAG_8V_VOLTAGE_ID,
-    EPS_ADCS_5V_VOLTAGE_ID,
-    EPS_ADCS_3_3V_VOLTAGE_ID,
-    EPS_OBC_VOLTAGE_ID,
-    COMMS_BOARD_CC1120_TEMP_ID,
-    CDH_SW_OBC_STATE_HISTORY_ID,
-    CDH_SW_EPS_STATE_HISTORY_ID,
-    ADCS_SENSOR_EXCEED_THRESHOLD_ID,
-    ADCS_SENSOR_ANGULAR_RATES_ID,
-    ADCS_SENSOR_SUN_ID,
-    SEND_FILE_NUMBER_TO_COMMS_EVENT_ID,
-    TURN_ON_LED_EVENT_ID,
-} telemetry_event_id_t;
+    // Temperature values
+    TELEM_CC1120_TEMP,
+    TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP,
+    TELEM_OBC_TEMP,
+    TELEM_ADCS_MAG_BOARD_TEMP,
+    TELEM_ADCS_SENSOR_BOARD_TEMP,
+    TELEM_EPS_BOARD_TEMP,
+    TELEM_SOLAR_PANEL_1_TEMP,
+    TELEM_SOLAR_PANEL_2_TEMP,
+    TELEM_SOLAR_PANEL_3_TEMP,
+    TELEM_SOLAR_PANEL_4_TEMP,
 
-/**
- * @union	telemetry_event_data_t
- * @brief	Telemetry event data union
-*/
-typedef union {
-    int i;
-    float f;
-} telemetry_event_data_t;
+    // Current values
+    TELEM_EPS_COMMS_5V_CURRENT,
+    TELEM_EPS_COMMS_3V3_CURRENT,
+    TELEM_EPS_MAGNETORQUER_8V_CURRENT,
+    TELEM_EPS_ADCS_5V_CURRENT,
+    TELEM_EPS_ADCS_3V3_CURRENT,
+    TELEM_EPS_OBC_3V3_CURRENT,
 
-/**
- * @struct	telemetry_event_t
- * @brief	Telemetry event struct
- *
- * Holds the message data for each event sent/received by the telemetry manager queue.
-*/
+    // Voltage values
+    TELEM_EPS_COMMS_5V_VOLTAGE,
+    TELEM_EPS_COMMS_3V3_VOLTAGE,
+    TELEM_EPS_MAGNETORQUER_8V_VOLTAGE,
+    TELEM_EPS_ADCS_5V_VOLTAGE,
+    TELEM_EPS_ADCS_3V3_VOLTAGE,
+    TELEM_EPS_OBC_3V3_VOLTAGE,
+    
+    TELEM_OBC_STATE,
+    TELEM_EPS_STATE,
+
+    TELEM_LOG_FILE_NUMBER,
+    TELEM_NUM_CSP_PACKETS_RCVD,  
+} telemetry_data_id_t;
+
 typedef struct {
-    telemetry_event_id_t eventID;
-    telemetry_event_data_t data;
-} telemetry_event_t;
+    telemetry_data_id_t id;
+    uint32_t timestamp; // seconds since epoch
+    union {
+        // Temperature values
+        float cc1120Temp;
+        float commsCustomTransceiverTemp;
+        float obcTemp;
+        float adcsMagBoardTemp;
+        float adcsSensorBoardTemp;
+        float epsBoardTemp;
+        float solarPanel1Temp;
+        float solarPanel2Temp;
+        float solarPanel3Temp;
+        float solarPanel4Temp;
 
-/* Telemetry queue config */
-#define TELEMETRY_QUEUE_LENGTH 10U
-#define TELEMETRY_QUEUE_ITEM_SIZE sizeof(telemetry_event_t)
-#define TELEMETRY_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-#define TELEMETRY_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+        // Current values
+        float epsComms5vCurrent;
+        float epsComms3v3Current;
+        float epsMagnetorquer8vCurrent;
+        float epsAdcs5vCurrent;
+        float epsAdcs3v3Current;
+        float epsObc3v3Current;
+
+        // Voltage values
+        float epsComms5vVoltage;
+        float epsComms3v3Voltage;
+        float epsMagnetorquer8vVoltage;
+        float epsAdcs5vVoltage;
+        float epsAdcs3v3Voltage;
+        float epsObc3v3Voltage;
+
+        uint8_t obcState;
+        uint8_t epsState;
+
+        uint32_t numCspPacketsRcvd;
+    };
+
+} telemetry_data_t;
 
 /**
  * @brief	Initialize the telemetry task and associated FreeRTOS constructs (queues, timers, etc.)
  */
 void initTelemetry(void);
 
-/**
- * @brief	Send an event to the telemetry queue.
- * @param	event	Event to send.
- * @return The error code
- */
-obc_error_code_t sendToTelemetryQueue(telemetry_event_t *event);
+obc_error_code_t addTelemetryData(telemetry_data_t *data);
+
+obc_error_code_t getTelemetryFileName(uint32_t telemBatchId, char *buff, size_t buffSize);
+
+obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemData);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */

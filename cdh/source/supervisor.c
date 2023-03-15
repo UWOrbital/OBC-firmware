@@ -6,6 +6,7 @@
 #include "payload_manager.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_states.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -44,6 +45,8 @@ void initSupervisor(void) {
     if (supervisorQueueHandle == NULL) {
         supervisorQueueHandle = xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE, supervisorQueueStack, &supervisorQueue);
     }
+
+    changeStateOBC(OBC_STATE_INITIALIZING);
 }
 
 obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
@@ -60,11 +63,6 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 
 static void sendStartupMessages(void) {
     /* Send startup message to telemetry task as example */
-    telemetry_event_t newMsg;
-    newMsg.eventID = TURN_ON_LED_EVENT_ID;
-    newMsg.data.i = TELEMETRY_DELAY_TICKS;
-    sendToTelemetryQueue(&newMsg);
-
     /* TODO: Add startup messages to other tasks */
 }
 
@@ -80,26 +78,18 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Send initial messages to system queues */
     sendStartupMessages();    
+
+    changeStateOBC(OBC_STATE_NORMAL);
     
     while(1) {
         supervisor_event_t inMsg;
-        telemetry_event_t outMsgTelemetry;
-
+        
         if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS)
             inMsg.eventID = SUPERVISOR_NULL_EVENT_ID;
 
         switch (inMsg.eventID) {
-            case TURN_OFF_LED_EVENT_ID:
-                gioSetBit(gioPORTB, 1, 0);
-                LOG_INFO("Turning off LED");
-                outMsgTelemetry.eventID = TURN_ON_LED_EVENT_ID;
-                outMsgTelemetry.data.i = TELEMETRY_DELAY_TICKS;
-                sendToTelemetryQueue(&outMsgTelemetry);
-                break;
-            case SUPERVISOR_NULL_EVENT_ID:
-                break;
             default:
-                ;
+                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
     }
 }

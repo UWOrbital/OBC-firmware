@@ -18,17 +18,8 @@
 */
 typedef enum {
     COMMS_MANAGER_NULL_EVENT_ID,
-    TELEMETRY_FILE_NUMBER_ID,
+    DOWNLINK_TELEMETRY,
 } comms_event_id_t;
-
-/**
- * @union	comms_event_data_t
- * @brief	comms event data union
-*/
-typedef union {
-    int i;
-    float f;
-} comms_event_data_t;
 
 /**
  * @struct	comms_event_t
@@ -38,7 +29,9 @@ typedef union {
 */
 typedef struct {
     comms_event_id_t eventID;
-    comms_event_data_t data;
+    union {
+        uint32_t telemetryBatchId;
+    };
 } comms_event_t;
 
 /* Comms Manager event queue config */

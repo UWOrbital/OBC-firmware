@@ -1,154 +1,214 @@
 #include "telemetry.h"
-#include "supervisor.h"
 #include "comms_manager.h"
 #include "obc_logging.h"
+#include "obc_errors.h"
+#include "obc_assert.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
-#include <os_timer.h>
-
+#include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
 
-#include <stdio.h>
 #include <redposix.h>
+
+#include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+
+/* Telemetry task config */
+#define TELEMETRY_STACK_SIZE   1024U
+#define TELEMETRY_NAME         "telemetry"
+#define TELEMETRY_PRIORITY     1U
+#define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
+
+/* Telemetry data queue config */
+#define TELEMETRY_DATA_QUEUE_LENGTH 128U
+#define TELEMETRY_DATA_QUEUE_ITEM_SIZE sizeof(telemetry_data_t)
+#define TELEMETRY_DATA_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(1000)
+
+STATIC_ASSERT(sizeof(telemetry_data_t) <= INT32_MAX, "Telemetry data size is too large");
+
+static void vTelemetryTask(void * pvParameters);
+static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData);
+static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId);
+static obc_error_code_t closeTelemetryFile(int32_t telemFileId);
+
+static bool checkDownlinkAlarm(void);
 
 static TaskHandle_t telemetryTaskHandle = NULL;
 static StaticTask_t telemetryTaskBuffer;
 static StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
 
-static QueueHandle_t telemetryQueueHandle = NULL;
-static StaticQueue_t telemetryQueue;
-static uint8_t telemetryQueueStack[TELEMETRY_QUEUE_LENGTH*TELEMETRY_QUEUE_ITEM_SIZE];
+// Telemetry Data Queue
+static QueueHandle_t telemetryDataQueueHandle = NULL;
+static StaticQueue_t telemetryDataQueue;
+static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH*TELEMETRY_DATA_QUEUE_ITEM_SIZE];
 
-static TimerHandle_t ledTimerHandle = NULL;
-static StaticTimer_t ledTimerBuffer;
-
-/**
- * @brief	Telemetry task.
- * @param	pvParameters	Task parameters.
- */
-static void vTelemetryTask(void * pvParameters);
-
-/**
- * @brief Example timer callback function for "Turn on LED" event
- */
-static void timerCallback(TimerHandle_t xTimer);
+// Current telemetry file ID
+static int32_t telemetryFileId;
+static uint32_t telemetryBatchId;
 
 void initTelemetry(void) {
+    memset(&telemetryTaskBuffer, 0, sizeof(telemetryTaskBuffer));
+    memset(&telemetryTaskStack, 0, sizeof(telemetryTaskStack));
+
+    memset(&telemetryDataQueue, 0, sizeof(telemetryDataQueue));
+    memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
+
+    memset(&telemetryFileId, 0, sizeof(telemetryFileId));
+    memset(&telemetryBatchId, 0, sizeof(telemetryBatchId));
+
     ASSERT( (telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL) );
-    if (telemetryTaskHandle == NULL) {
-        telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
-    }
+    telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
 
-    ASSERT( (telemetryQueueStack != NULL) && (&telemetryQueue != NULL) );
-    if (telemetryQueueHandle == NULL) {
-        telemetryQueueHandle = xQueueCreateStatic(TELEMETRY_QUEUE_LENGTH, TELEMETRY_QUEUE_ITEM_SIZE, telemetryQueueStack, &telemetryQueue);
-    }
-
-    ASSERT(&ledTimerBuffer != NULL);
-    if (ledTimerHandle == NULL) {
-        ledTimerHandle = xTimerCreateStatic("ledTimer", pdMS_TO_TICKS(1000), false, NULL, timerCallback, &ledTimerBuffer);
-    }
+    ASSERT( (telemetryDataQueueStack != NULL) && (&telemetryDataQueue != NULL) );
+    telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE, telemetryDataQueueStack, &telemetryDataQueue);
 }
 
-obc_error_code_t sendToTelemetryQueue(telemetry_event_t *event) {
-    ASSERT(telemetryQueueHandle != NULL);
+obc_error_code_t addTelemetryData(telemetry_data_t *data) {
+    if (telemetryDataQueueHandle == NULL) {
+        return OBC_ERR_CODE_INVALID_STATE;
+    }
 
-    if (event == NULL)
+    if (data == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
+    }
 
-    if (xQueueSend(telemetryQueueHandle, (void *) event, TELEMETRY_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+    if (xQueueSend(telemetryDataQueueHandle, (void *) data, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
         return OBC_ERR_CODE_SUCCESS;
+    }
     
     return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static uint8_t sendTelemetryToFile(int32_t telFile, telemetry_event_t queueMsg) {
-    if(telFile == -1) {
-        return 0;
+obc_error_code_t getTelemetryFileName(uint32_t telemBatchId, char *buff, size_t buffSize) {
+    if (buff == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    if (buffSize < TELEMETRY_FILE_PATH_MAX_LENGTH) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    int ret = snprintf(buff, buffSize, "%s%s%lu%s", TELEMETRY_FILE_DIRECTORY, TELEMETRY_FILE_PREFIX, telemBatchId, TELEMETRY_FILE_EXTENSION);
+    if (ret < 0) {
+        return OBC_ERR_CODE_INVALID_FILE_NAME;
+    }
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemData) {
+    if (telemData == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    if (telemFileId < 0) {
+        return OBC_ERR_CODE_INVALID_ARG;
     }
     
-    int32_t ret = red_write(telFile, &queueMsg, sizeof(telemetry_event_t));
+    int32_t bytesRead = red_read(telemFileId, (void *) telemData, sizeof(telemetry_data_t));
 
-    if(ret == sizeof(telemetry_event_t)) {
-        return 1;
+    if (bytesRead == 0) {
+        return OBC_ERR_CODE_REACHED_EOF;
     }
-    else {
-        return 0;
+
+    if (bytesRead != sizeof(telemetry_data_t)) {
+        return OBC_ERR_CODE_FAILED_FILE_READ;
     }
+
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 static void vTelemetryTask(void * pvParameters) {
-    char fileName[14] = "telemetry"; // This will go into a particular directory on OBC sd card
-    char fileNumber = '0'; // Will increment this everytime a new file needs to be created. 
-    char fileType[4] = ".tlm"; // Will be a .tlm file for now
+    obc_error_code_t errCode;
 
-    strcat(fileName, &fileNumber);
-    strcat(fileName, fileType);
+    // TODO: Use new file for each batch of telemetry data
+    // TODO: Deal with this possibly failing
+    LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
 
-    bool newFile = false;
-
-    int32_t telFile = red_open(fileName, RED_O_RDWR | RED_O_CREAT);
-    bool fileOpen = true;
-
-    while(1){
-        if(newFile) { // if a new file is requested
-            if(fileOpen) {
-                red_close(telFile);
-                fileOpen = false;
-            }
-
-            strcpy(fileName, "telemetry"); // reset file name before apending file number and type
-
-            if(fileNumber == '9') { // if file number reaches 10 reset to 0
-                fileNumber = '0';
-            }
-            else {
-                fileNumber++; // increment file number by one
-            }
-
-            strcat(fileName, &fileNumber);
-            strcat(fileName, fileType);
-
-            if(!fileOpen) {
-                telFile = red_open(fileName, RED_O_RDWR | RED_O_CREAT);
-                fileOpen = true;
-            }
+    while (1) {
+        telemetry_data_t telemData;
+        if (xQueueReceive(telemetryDataQueueHandle, &telemData, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
+            writeTelemetryToFile(telemetryFileId, telemData);
         }
- 
-        telemetry_event_t queueMsg;
-        if(xQueueReceive(telemetryQueueHandle, &queueMsg, TELEMETRY_QUEUE_RX_WAIT_PERIOD) != pdPASS){
-            switch (queueMsg.eventID)
-            {
-                case SEND_FILE_NUMBER_TO_COMMS_EVENT_ID: /* If telemetry file name is requested by comms */
-                    comms_event_t event;
-                    event.eventID = TELEMETRY_FILE_NUMBER_ID;
-                    int number;
-                    sscanf(&fileNumber, "%d", &number);
-                    event.data.i = number;
-                    
-                    sendToCommsQueue(&event);
-                    newFile = true;
-                    break;
-                case TURN_ON_LED_EVENT_ID: 
-                    vTaskDelay(queueMsg.data.i);
-                    gioToggleBit(gioPORTB, 1);
-                    xTimerStart(ledTimerHandle, TELEMETRY_DELAY_TICKS);
-                    break;
-                default: /* Any other case will be telemetry to store in the file */
-                    sendTelemetryToFile(telFile, queueMsg);
-                    break;
+
+        // TODO: Make this more efficient instead of basically polling with a delay
+        if ((checkDownlinkAlarm())) {
+            LOG_IF_ERROR_CODE(closeTelemetryFile(telemetryFileId));
+
+            comms_event_t downlinkEvent = {0};
+            downlinkEvent.eventID = DOWNLINK_TELEMETRY;
+            downlinkEvent.telemetryBatchId = telemetryBatchId;
+
+            // TODO: Deal with this possibly failing
+            LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+
+            // TODO: We don't want to just reset this
+            if (telemetryBatchId == UINT32_MAX) {
+                telemetryBatchId = 0;
+            } else {
+                telemetryBatchId++;
             }
+
+            LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
         }
     }
 }
 
-static void timerCallback(TimerHandle_t xTimer) {
-    supervisor_event_t newMsg;
-    newMsg.eventID = TURN_OFF_LED_EVENT_ID;
-    sendToSupervisorQueue(&newMsg);
+static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData) {
+    if (telFileId < 0) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    // TODO: Handle power resets during read/write (i.e partial data)
+    // Idea: Add header and footer to each file, and check for them on read (investigate checksum feasability)
+    int32_t ret = red_write(telFileId, &telemetryData, sizeof(telemetry_data_t));
+
+    if(ret == sizeof(telemetry_data_t)) {
+        return OBC_ERR_CODE_SUCCESS;
+    }
+    
+    return OBC_ERR_CODE_FAILED_FILE_WRITE;
+}
+
+static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId) {
+    obc_error_code_t errCode;
+
+    if (telemFileId == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
+    RETURN_IF_ERROR_CODE(getTelemetryFileName(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
+
+    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDWR | RED_O_CREAT);
+    if (telFile < 0) {
+        return OBC_ERR_CODE_FAILED_FILE_OPEN;
+    }
+
+    *telemFileId = telFile;
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t closeTelemetryFile(int32_t telemFileId) {
+    if (telemFileId < 0) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    int32_t ret = red_close(telemFileId);
+    if (ret < 0) {
+        return OBC_ERR_CODE_FAILED_FILE_CLOSE;
+    }
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+static bool checkDownlinkAlarm(void) {
+    // TODO: Check if it's time to downlink telemetry data
+    return false;
 }

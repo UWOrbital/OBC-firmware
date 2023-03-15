@@ -9,7 +9,6 @@
 #define SUPERVISOR_STACK_SIZE   1024U
 #define SUPERVISOR_NAME         "supervisor"
 #define SUPERVISOR_PRIORITY     1U
-#define SUPERVISOR_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**
  * @enum	supervisor_event_id_t
@@ -19,7 +18,6 @@
 */
 typedef enum {
     SUPERVISOR_NULL_EVENT_ID,
-    TURN_OFF_LED_EVENT_ID,
 } supervisor_event_id_t;
 
 /**

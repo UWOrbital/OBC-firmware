@@ -1,10 +1,14 @@
 #include "comms_manager.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
+#include "telemetry.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
+
+#include <redposix.h>
 
 #include <sys_common.h>
 #include <gio.h>
@@ -48,18 +52,36 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
 }
 
 static void vCommsManagerTask(void * pvParameters) {
+    obc_error_code_t errCode;
+
     ASSERT(commsQueueHandle != NULL);
     
     while(1){
         comms_event_t queueMsg;
         if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
-            queueMsg.eventID = COMMS_MANAGER_NULL_EVENT_ID;
-
+            continue;
+        
         switch (queueMsg.eventID) {
-            case COMMS_MANAGER_NULL_EVENT_ID:
+            case DOWNLINK_TELEMETRY: {
+                char filename[TELEMETRY_FILE_NAME_MAX_LENGTH] = {'\0'};
+                LOG_IF_ERROR_CODE(getTelemetryFileName(queueMsg.telemetryBatchId, filename, TELEMETRY_FILE_NAME_MAX_LENGTH));
+
+                int32_t fd = red_open(filename, RED_O_RDONLY);
+                if (fd < 0) {
+                    LOG_ERROR("Failed to open telemetry file: %s", filename);
+                    break;
+                }
+
+                telemetry_data_t telemetryData;
+                getNextTelemetry(fd, &telemetryData);
+
+                LOG_DEBUG("Sending telemetry");
+
+                red_close(fd);
                 break;
-            case TELEMETRY_FILE_NUMBER_ID:
-                break;
+            } default: {
+                LOG_ERROR("Comms Manager received invalid event: %d", queueMsg.eventID);
+            }
         }
     }
 }
