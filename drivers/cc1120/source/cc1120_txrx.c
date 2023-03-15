@@ -128,6 +128,8 @@ obc_error_code_t cc1120_init(void)
         RETURN_IF_ERROR_CODE(cc1120_write_ext_addr_spi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
     }
 
+    initTxRxSemaphores();
+
     return cc1120_strobe_spi(CC1120_STROBE_SFSTXON);
 }
 
