@@ -5,10 +5,7 @@
 
 #include <sys_common.h>
 
-/* ADCS Manager task config */
-// #define ADCS_MANAGER_STACK_SIZE   1024U
-// #define ADCS_MANAGER_NAME         "adcs_manager"
-// #define ADCS_MANAGER_PRIORITY     1U
+
 
 /**
  * @enum	adcs_event_id_t
@@ -41,10 +38,10 @@ typedef struct {
 } adcs_event_t;
 
 /* adcs queue config */
-// #define ADCS_MANAGER_QUEUE_LENGTH 10U
-// #define ADCS_MANAGER_QUEUE_ITEM_SIZE sizeof(adcs_event_t)
-// #define ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-// #define ADCS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define ADCS_MANAGER_QUEUE_LENGTH 10U
+#define ADCS_MANAGER_QUEUE_ITEM_SIZE sizeof(adcs_event_t)
+#define ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define ADCS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 
 /**

@@ -5,11 +5,6 @@
 
 #include <sys_common.h>
 
-/* Telemetry task config */
-// #define TELEMETRY_STACK_SIZE   1024U
-// #define TELEMETRY_NAME         "telemetry"
-// #define TELEMETRY_PRIORITY     1U
-// #define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**
  * @enum	telemetry_event_id_t
@@ -43,10 +38,10 @@ typedef struct {
 } telemetry_event_t;
 
 /* Telemetry queue config */
-// #define TELEMETRY_QUEUE_LENGTH 10U
-// #define TELEMETRY_QUEUE_ITEM_SIZE sizeof(telemetry_event_t)
-// #define TELEMETRY_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-// #define TELEMETRY_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define TELEMETRY_QUEUE_LENGTH 10U
+#define TELEMETRY_QUEUE_ITEM_SIZE sizeof(telemetry_event_t)
+#define TELEMETRY_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define TELEMETRY_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the telemetry task and associated FreeRTOS constructs (queues, timers, etc.)
