@@ -10,7 +10,12 @@
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcu_cc1120_spi_transfer(uint8_t outb, uint8_t *inb) {
-    return spiTransmitAndReceiveByte(spiREG4, outb, inb);
+    spiDAT1_t spiConfig;
+    spiConfig.CS_HOLD = false;
+    spiConfig.WDEL = false;
+    spiConfig.DFSEL = 0;
+    spiConfig.CSNR = SPI_CS_NONE;
+    return spiTransmitAndReceiveByte(spiREG4, &spiConfig, outb, inb);
 }
 
 /**
