@@ -36,7 +36,7 @@ typedef struct {
     comms_event_data_t data;
 } comms_event_t;
 
-// /* Comms Manager event queue config */
+/* Comms Manager event queue config */
 #define COMMS_MANAGER_QUEUE_LENGTH 10U
 #define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
 #define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)

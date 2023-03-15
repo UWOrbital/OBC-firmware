@@ -4,13 +4,11 @@
 #define SUPERVISOR_STACK_SIZE   1024U
 #define SUPERVISOR_NAME         "supervisor"
 #define SUPERVISOR_PRIORITY     1U
-#define SUPERVISOR_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /* Telemetry task config */
 #define TELEMETRY_STACK_SIZE   1024U
 #define TELEMETRY_NAME         "telemetry"
 #define TELEMETRY_PRIORITY     1U
-#define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U

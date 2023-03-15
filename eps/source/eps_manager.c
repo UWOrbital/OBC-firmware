@@ -1,5 +1,5 @@
 #include "eps_manager.h"
-#include "task_config.h"
+#include "obc_task_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

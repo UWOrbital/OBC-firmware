@@ -5,6 +5,7 @@
 
 #include <sys_common.h>
 
+#define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**
  * @enum	telemetry_event_id_t
