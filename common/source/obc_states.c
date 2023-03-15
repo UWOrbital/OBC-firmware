@@ -11,7 +11,7 @@ obc_error_code_t changeStateOBC(obc_state_t newState) {
     
     // TODO: Get current time instead of 0
     currStateOBC = newState;
-    telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = 0, .obcState = (uint8_t)currStateOBC};
+    telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = 0, .obcState = currStateOBC};
     
     RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
     return OBC_ERR_CODE_SUCCESS;

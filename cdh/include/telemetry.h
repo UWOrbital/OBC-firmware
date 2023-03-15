@@ -2,6 +2,7 @@
 #define CDH_INCLUDE_TELEMETRY_H_
 
 #include "obc_errors.h"
+#include "obc_states.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -54,8 +55,6 @@ typedef enum {
 } telemetry_data_id_t;
 
 typedef struct {
-    telemetry_data_id_t id;
-    uint32_t timestamp; // seconds since epoch
     union {
         // Temperature values
         float cc1120Temp;
@@ -85,12 +84,15 @@ typedef struct {
         float epsAdcs3v3Voltage;
         float epsObc3v3Voltage;
 
-        uint8_t obcState;
+        obc_state_t obcState;
         uint8_t epsState;
 
         uint32_t numCspPacketsRcvd;
     };
 
+    telemetry_data_id_t id;
+    uint32_t timestamp; // seconds since epoch
+    
 } telemetry_data_t;
 
 /**
