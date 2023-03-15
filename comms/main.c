@@ -12,6 +12,30 @@
 #include <sci.h>
 #include <spi.h>
 
+
+static TaskHandle_t testTaskHandle = NULL;
+static StaticTask_t testTaskBuffer;
+static StackType_t testTaskStack[1024U];
+
+void initTestTask(void);
+static void vTestTask(void * pvParameters);
+
+void initTestTask(void) {
+    ASSERT( (testTaskStack != NULL) && (&testTaskBuffer != NULL) );
+    if (testTaskHandle == NULL) {
+        testTaskHandle = xTaskCreateStatic(vTestTask, "test task", 1024U, NULL, 1U, testTaskStack, &testTaskBuffer);
+    }
+}
+
+static void vTestTask(void * pvParameters) {
+    // Run the E2E SPI read test
+    cc1120_test_spi_read();
+    
+    while(1) {
+
+    }
+}
+
 int main(void) {
     gioInit();
     sciInit();
@@ -25,8 +49,7 @@ int main(void) {
     initSciMutex();
     initSpiMutex();
 
-    // Run the E2E SPI read test
-    cc1120_test_spi_read();
+    initTestTask();
 
     vTaskStartScheduler();
 }

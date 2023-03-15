@@ -71,6 +71,7 @@ obc_error_code_t cc1120_test_spi_read(void) {
     obc_error_code_t errCode;
     uint8_t addr = 0x00U;
     uint8_t data;
+    
     uint8_t burstData[CC1120_REGS_EXT_ADDR];
     errCode = cc1120_read_spi(addr, burstData, CC1120_REGS_EXT_ADDR);
 
