@@ -55,7 +55,7 @@
 #include "spi.h"
 #include "i2c.h"
 #include "sys_dma.h"
-#include "cc1120txrx.h"
+#include "cc1120_txrx.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
