@@ -29,8 +29,7 @@
  * @param overTempThreshold Overtemperature shutdown threshold, in degrees Celsius
  * @param hysteresisThreshold Hysteresis threshold, in degrees Celsius
  */
-typedef struct
-{
+typedef struct {
     uint8_t devAddr;
     uint8_t osFaultQueueSize;
     uint8_t osPolarity;
