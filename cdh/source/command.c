@@ -50,7 +50,7 @@ QueueHandle_t command_queue;
 
 void push_command(commandTemplate cmdTmp) {
 
-    BaseType_t xTask; //why does there need to be an x in front of names of type BaseType_t?
+    BaseType_t xTask;
 
     // Check if the command has a time tag
     if (cmdTmp.timeTag > 0) {
@@ -78,7 +78,7 @@ void push_command(commandTemplate cmdTmp) {
 
 void execute_command(commandTemplate cmdTmp) {
     //print the values of each variable in the unique command
-    printf("Executing command: commandName = %s\n, timeTag=%d\n, inclination=%d\n, RAAN=%d\n, eccentricity=%d\n, argPerigee=%d\n, meanAnomaly=%d\n, meanMotion=%d\n, numRevolution=%d\n", commandTemplate.commandName, commandTemplate.timeTag, commandTemplate.inclination, commandTemplate.RAAN, commandTemplate.eccentricity, commandTemplate.argPerigee, commandTemplate.meanAnomaly, commandTemplate.meanMotion, commandTemplate.numRevolution);
+    printf("Executing command: commandName = %s\n, timeTag=%d\n, inclination=%d\n, RAAN=%d\n, eccentricity=%d\n, argPerigee=%d\n, meanAnomaly=%d\n, meanMotion=%d\n, numRevolution=%d\n", commandTemplate.commandName, commandTemplate.timeTag, commandTemplate.inclination, commandTemplate.RAAN, commandTemplate.eccentricity, commandTemplate.argPerigee, commandTemplate.meanAnomaly, commandTemplate.meanMotion, commandTemplate.numRevolution); //is this necessary?
 }
 
 void handle_command(void *pvParameters) {
@@ -89,7 +89,7 @@ void handle_command(void *pvParameters) {
         
         //get current time from getCurrentTime
         int current_time = getCurrentTime;
-        xQueueReceive(command_queue, &cmdTmp, portMAX_DELAY);
+        xQueueReceive(command_queue, &cmdTmp, portMAX_DELAY); //shoud the time the task can be blocked be portMAX_DELAY?
 
         if (cmdTmp.timeTag > 0) {
 
@@ -114,25 +114,20 @@ void handle_command(void *pvParameters) {
 
 int main(void) {
     
-    // Create the command queue
+    //creating the command queue
     command_queue = xQueueCreate(COMMAND_QUEUE_LENGTH, sizeof(Command));
 
-    if (command_queue == NULL) {
-        printf("Error: could not create command queue\n");
-        return 1;
-    }
-
-    // Create the command task
+    //creating the command task
     xTaskCreate(handle_command, "commandTemplate Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL); //what should stack size be. who handles the task, as it is set to NULL right now. what should the task priority be? Should we set priority as: (tskIDLE_PRIORITY)? check tskIDLE_PRIORITY and see if it needs +1
 
-    // Some dummy placeholder commands for now
+    //some dummy placeholder commands for now
     commandTemplate cmd1 = {"Rotate", 0, 20, 0, 0, 0, 0, 0, 0}; //no time tag
     push_command(cmd1);
 
     commandTemplate cmd2 = {"Bound", pdMS_TO_TICKS(5000), 20, 0, 0, 0, 0, 0, 0}; //should I use pdMS_TO_TICKS(5000), or just provide a seconds value. what should be passed in the commandTemplate
     push_command(cmd2);
 
-    // Start the FreeRTOS scheduler
+    //FreeRTOS scheduler
     vTaskStartScheduler();
 
     return 0;
