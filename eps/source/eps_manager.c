@@ -27,12 +27,9 @@ void initEPSManager(void) {
     ASSERT( (epsTaskStack != NULL) && (&epsTaskBuffer != NULL) );
     if (epsTaskHandle == NULL) {
         epsTaskHandle = xTaskCreateStatic(vEPSManagerTask, EPS_MANAGER_NAME, EPS_MANAGER_STACK_SIZE, NULL, EPS_MANAGER_PRIORITY, epsTaskStack, &epsTaskBuffer);
+        LOG_INFO("Task has been created- <EPS Manager task> \n");
     }
-    if (epsTaskStack != NULL) {
-        LOG_INFO("Task has started - <EPS Manager task> \n");
-    } else {
-        LOG_ERROR("Task has not started - <EPS Manager task>\n");
-    }
+    
 
     ASSERT( (epsQueueStack != NULL) && (&epsQueue != NULL) );
     if (epsQueueHandle == NULL) {

@@ -28,12 +28,9 @@ void initCommsManager(void) {
     ASSERT( (commsTaskStack != NULL) && (&commsTaskBuffer != NULL) );
     if (commsTaskHandle == NULL) {
         commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, NULL, COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
+        LOG_INFO("Task has been created - <Comms Manager task> \n");
     }
-    if (commsTaskHandle != NULL) {
-        LOG_INFO("Task has started - <Comms Manager task> \n");
-    } else {
-        LOG_ERROR("Task has not started - <Comms Manager task>\n");
-    }
+    
 
     ASSERT( (commsQueueStack != NULL) && (&commsQueue != NULL) );
     if (commsQueueHandle == NULL) {

@@ -37,11 +37,7 @@ void initTelemetry(void) {
     ASSERT( (telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL) );
     if (telemetryTaskHandle == NULL) {
         telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
-    }
-    if (telemetryTaskStack != NULL) {
-        LOG_INFO("Task has started - <Telemetry task> \n");
-    } else {
-        LOG_ERROR("Task has not started - <Telemetry task>\n");
+        LOG_INFO("Task has been created- <Telemetry task> \n");
     }
 
     ASSERT( (telemetryQueueStack != NULL) && (&telemetryQueue != NULL) );
