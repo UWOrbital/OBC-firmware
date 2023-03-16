@@ -8,7 +8,7 @@
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U
 #define ADCS_MANAGER_NAME         "adcs_manager"
-#define ADCS_MANAGER_PRIORITY     1U
+#define ADCS_MANAGER_PRIORITY   tskIDLE_PRIORITY + 1
 
 /**
  * @enum	adcs_event_id_t

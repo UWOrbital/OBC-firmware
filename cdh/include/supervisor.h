@@ -8,7 +8,7 @@
 /* Supervisor task config */
 #define SUPERVISOR_STACK_SIZE   1024U
 #define SUPERVISOR_NAME         "supervisor"
-#define SUPERVISOR_PRIORITY     1U
+#define SUPERVISOR_PRIORITY     tskIDLE_PRIORITY + 1
 #define SUPERVISOR_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**

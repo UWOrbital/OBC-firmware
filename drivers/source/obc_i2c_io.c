@@ -1,4 +1,4 @@
-#include "obc_i2c_io.h"
+#include "obc_i2c_io.h"portMAX_DELAY
 #include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_logging.h"
