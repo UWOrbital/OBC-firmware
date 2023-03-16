@@ -5,7 +5,7 @@
 #include "eps_manager.h"
 #include "payload_manager.h"
 #include "obc_errors.h"
-#include "logging.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

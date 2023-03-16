@@ -3,43 +3,70 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include "obc_errors.h"
 
-//FRAM OPCODES
-#define OP_WRITE_ENABLE        0x06
-#define OP_WRITE_RESET         0x04
-#define OP_READ_STAT_REG       0x05
-#define OP_WRITE_STAT_REG      0x01
+//FRAM LIMITS
+#define FRAM_MAX_ADDRESS        0x3FFFFU
+#define FRAM_ID_LEN             9
 
-#define OP_READ                0x03
-#define OP_FREAD               0x0B
-#define OP_WRITE               0x02
+/**
+ * @brief Read FRAM status register.
+ * @param status 1 byte buffer to store read data.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful. 
+ */
+obc_error_code_t framReadStatusReg(uint8_t *status);
 
-#define OP_SLEEP               0xB9
-#define OP_GET_ID              0x9F
+/**
+ * @brief Write to FRAM status register.
+ * @param status 1 byte value written to FRAM.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t framWriteStatusReg(uint8_t status);
 
-typedef enum cmdType{
-    rCmd,
-    wCmd,
-    sCmd
-}cmdType;
+/**
+ * @brief Read nBytes starting from given address. Note this is used for serial flash compatibility not to read data fast!
+ * @param addr Starting address of read.
+ * @param buffer Buffer to hold read data.
+ * @param nBytes Size of buffer.
+ * @return Error code. OBC_ERR_CODE_SUCCESS of successful. 
+ */
+obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
 
-typedef enum readCmd{
-    RDSR,           //Read Status Register
-    READ,           //Normal read
-    FSTRD,          //Fast read, Note this is used for serial flash compatibility not to read data fast!
-    RDID            //Get Device ID
-}readCmd;
+/**
+ * @brief Read nBytes starting from given address.
+ * @param addr Starting address of read.
+ * @param buffer Buffer to hold read data.
+ * @param nBytes Size of buffer.
+ * @return Error code. OBC_ERR_CODE_SUCCESS of successful. 
+ */
+obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
 
-typedef enum writeCmd{
-    WREN,           //Set Write EN
-    WRDI,           //Reset Write EN
-    WRSR,           //Write to Status Register
-    WRITE           //Write memory data
-}writeCmd;
+/**
+ * @brief Write nBytes starting from given address.
+ * @param addr Starting address of write.
+ * @param buffer Buffer of data to write.
+ * @param nBytes Size of buffer.
+ * @return Error code. OBC_ERR_CODE_SUCCESS of successful. 
+ */
+obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes);
 
-static uint8_t framTransmitOpCode(int cmd, cmdType cmdType);
-static uint8_t framTransmitAddress(void* addr);
-uint8_t framRead(void* addr, uint8_t *buffer, size_t nBytes, readCmd cmd);
-uint8_t framWrite(uint8_t *addr, uint8_t *data, size_t nBytes, writeCmd cmd);
-uint8_t framSleep();
+/**
+ * @brief Send sleep command to FRAM
+ * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ */
+obc_error_code_t framSleep(void);
+
+/**
+ * @brief Wake FRAM from sleep
+ * @return Error code. OBC_ERR_CODE_SUCCESS of successful. 
+ */
+obc_error_code_t framWakeUp(void);
+
+/**
+ * @brief Read FRAM manufacture ID.
+ * @param id Buffer to hold read ID.
+ * @param nBytes Size of Buffer. ID is max 9 bytes long
+ * @return Error code. OBC_ERR_CODE_SUCCESS of successful. 
+ */
+obc_error_code_t framReadID(uint8_t *id, size_t nBytes);
 #endif

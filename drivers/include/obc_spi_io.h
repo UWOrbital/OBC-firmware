@@ -8,18 +8,14 @@
 #include <spi.h>
 #include <gio.h>
 
-// This includes SPI2 which isn't available on the RM46 PGE package
-#define NUM_SPI_PORTS 5
-
-// SPIFLG Errors
-#define SPI_FLAG_ERR_MASK 0xFFU // All errors are shwon in the LSB of SPIFLG
-#define SPI_FLAG_SUCCESS 0x00U // No errors
-#define SPI_FLAG_DLENERR 0x01U // Data length error
-#define SPI_FLAG_TIMEOUT 0x02U // Timeout error
-#define SPI_FLAG_PARERR 0x04U // Parity error
-#define SPI_FLAG_DESYNC 0x08U // Desynchronization error
-#define SPI_FLAG_BITERR 0x10U // Bit error
-#define SPI_FLAG_RXOVRNINT 0x40U // Receive overrun interrupt flag
+#define DEASSERT_RETURN_IF_ERROR_CODE(_spiPort, _csNum, _ret)   do {                                                                    \
+                                                                    errCode = _ret;                                                     \
+                                                                    if (errCode != OBC_ERR_CODE_SUCCESS) {                              \
+                                                                        RETURN_IF_ERROR_CODE(deassertChipSelect(_spiPort, _csNum));     \
+                                                                        LOG_ERROR_CODE(errCode);                                        \
+                                                                        return errCode;                                                 \
+                                                                    }                                                                   \
+                                                                } while (0)
 
 /**
  * @brief Initialize mutexes protecting SPI ports.
@@ -45,11 +41,12 @@ obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
 /**
  * @brief Send and receive a byte via SPI.
  * @param spiReg The SPI register to use.
+ * @param spiDataFormat The SPI data format options.
  * @param outb The byte to send.
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint8_t *inb);
+obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb, uint8_t *inb);
 
 /**
  * @brief Send a byte via SPI.
@@ -58,7 +55,7 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, uint8_t outb, uint
  * @param outb The byte to send.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
+obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t outb);
 
 /**
  * @brief Receive a byte via SPI.
@@ -67,6 +64,6 @@ obc_error_code_t spiTransmitByte(spiBASE_t *spiReg, uint8_t outb);
  * @param inb Buffer to store the received byte.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, uint8_t *inb);
+obc_error_code_t spiReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *inb);
 
 #endif // DRIVERS_INCLUDE_OBC_SPI_IO_H_
