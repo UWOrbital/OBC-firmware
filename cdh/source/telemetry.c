@@ -19,26 +19,51 @@
 #include <stdbool.h>
 #include <string.h>
 
-/* Telemetry task config */
-#define TELEMETRY_STACK_SIZE   1024U
-#define TELEMETRY_NAME         "telemetry"
-#define TELEMETRY_PRIORITY     1U
-#define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
-
 /* Telemetry data queue config */
 #define TELEMETRY_DATA_QUEUE_LENGTH 128U
 #define TELEMETRY_DATA_QUEUE_ITEM_SIZE sizeof(telemetry_data_t)
 #define TELEMETRY_DATA_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(1000)
 
-STATIC_ASSERT(sizeof(telemetry_data_t) <= INT32_MAX, "Telemetry data size is too large");
+#define STARTING_TELEMETRY_BATCH_ID 0UL
 
+/**
+ * @brief Telemetry Manager task.
+ */
 static void vTelemetryTask(void * pvParameters);
+
+/**
+ * @brief Write telemetry data to file.
+ * 
+ * @param telFileId File descriptor given by Reliance Edge
+ * @param telemetryData Telemetry data to write to file
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
 static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData);
+
+/**
+ * @brief Open a new telemetry file.
+ * 
+ * @param telemBatchId The telemetry batch ID; used to create the file name
+ * @param telemFileId Pointer to the file descriptor to be set by Reliance Edge
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
 static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId);
+
+/**
+ * @brief Close a telemetry file.
+ * 
+ * @param telemFileId File descriptor given by Reliance Edge
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
 static obc_error_code_t closeTelemetryFile(int32_t telemFileId);
 
+/**
+ * @brief Check if it's time to downlink telemetry.
+ * @return bool True if it's time to downlink telemetry, false otherwise 
+ */
 static bool checkDownlinkAlarm(void);
 
+// Telemetry Manager Task
 static TaskHandle_t telemetryTaskHandle = NULL;
 static StaticTask_t telemetryTaskBuffer;
 static StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
@@ -48,19 +73,12 @@ static QueueHandle_t telemetryDataQueueHandle = NULL;
 static StaticQueue_t telemetryDataQueue;
 static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH*TELEMETRY_DATA_QUEUE_ITEM_SIZE];
 
-// Current telemetry file ID
-static int32_t telemetryFileId;
-static uint32_t telemetryBatchId;
-
 void initTelemetry(void) {
     memset(&telemetryTaskBuffer, 0, sizeof(telemetryTaskBuffer));
     memset(&telemetryTaskStack, 0, sizeof(telemetryTaskStack));
 
     memset(&telemetryDataQueue, 0, sizeof(telemetryDataQueue));
     memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
-
-    memset(&telemetryFileId, 0, sizeof(telemetryFileId));
-    memset(&telemetryBatchId, 0, sizeof(telemetryBatchId));
 
     ASSERT( (telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL) );
     telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
@@ -130,6 +148,9 @@ obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemDa
 
 static void vTelemetryTask(void * pvParameters) {
     obc_error_code_t errCode;
+
+    uint32_t telemetryBatchId = STARTING_TELEMETRY_BATCH_ID; 
+    int32_t telemetryFileId = -1;
 
     LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
