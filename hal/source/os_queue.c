@@ -67,6 +67,9 @@
     1 tab == 4 spaces!
 */
 
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -2553,8 +2556,7 @@ BaseType_t xReturn;
 
 #endif /* configUSE_QUEUE_SETS */
 
-
-
+#pragma GCC pop_options
 
 
 

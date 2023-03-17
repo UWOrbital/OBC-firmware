@@ -67,6 +67,9 @@
     1 tab == 4 spaces!
 */
 
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+
 /* Standard includes. */
 #include <stdlib.h>
 
@@ -1088,6 +1091,4 @@ to include software timer functionality.  If you want to include software timer
 functionality then ensure configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
 #endif /* configUSE_TIMERS == 1 */
 
-
-
-
+#pragma GCC pop_options

@@ -67,6 +67,8 @@
     1 tab == 4 spaces!
 */
 /* USER CODE BEGIN (0) */
+#pragma GCC push_options
+#pragma GCC optimize("O0")
 /* USER CODE END */
 
 #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
@@ -464,3 +466,4 @@ void vPortEndScheduler(void)
 
 /*-----------------------------------------------------------*/
 
+#pragma GCC pop_options

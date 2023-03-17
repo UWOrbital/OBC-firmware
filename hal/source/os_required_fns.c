@@ -1,3 +1,7 @@
+
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+
 #include <FreeRTOS.h>
 #include <os_task.h>
 #include <os_timer.h>
@@ -60,3 +64,5 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
      * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
+
+#pragma GCC pop_options
