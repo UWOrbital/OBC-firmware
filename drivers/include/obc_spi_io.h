@@ -8,6 +8,15 @@
 #include <spi.h>
 #include <gio.h>
 
+#define DEASSERT_RETURN_IF_ERROR_CODE(_spiPort, _csNum, _ret)   do {                                                                    \
+                                                                    errCode = _ret;                                                     \
+                                                                    if (errCode != OBC_ERR_CODE_SUCCESS) {                              \
+                                                                        RETURN_IF_ERROR_CODE(deassertChipSelect(_spiPort, _csNum));     \
+                                                                        LOG_ERROR_CODE(errCode);                                        \
+                                                                        return errCode;                                                 \
+                                                                    }                                                                   \
+                                                                } while (0)
+
 /**
  * @brief Initialize mutexes protecting SPI ports.
  */
