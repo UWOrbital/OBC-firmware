@@ -5,10 +5,13 @@
 
 #include <sys_common.h>
 
+<<<<<<< HEAD
 /* Supervisor task config */
 #define SUPERVISOR_STACK_SIZE   1024U
 #define SUPERVISOR_NAME         "supervisor"
 #define SUPERVISOR_PRIORITY     tskIDLE_PRIORITY + 1
+=======
+>>>>>>> main
 #define SUPERVISOR_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**

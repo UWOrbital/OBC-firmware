@@ -5,10 +5,13 @@
 
 #include <sys_common.h>
 
+<<<<<<< HEAD
 /* Telemetry task config */
 #define TELEMETRY_STACK_SIZE   1024U
 #define TELEMETRY_NAME         "telemetry"
 #define TELEMETRY_PRIORITY      tskIDLE_PRIORITY + 1
+=======
+>>>>>>> main
 #define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
 
 /**
