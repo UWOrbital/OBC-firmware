@@ -47,6 +47,12 @@ static int8_t spiRegToIndex(spiBASE_t *spiReg);
  */
 static bool isValidCSNum(gioPORT_t *spiPort, uint8_t csNum);
 
+/**
+ * @brief Log Spi Tx/Rx Errors.
+ * @param spiErr Spi error flag.
+ */
+static void spiLogErrors(uint32_t spiErr);
+
 static SemaphoreHandle_t spiMutexes[NUM_SPI_PORTS];
 static StaticSemaphore_t spiMutexBuffers[NUM_SPI_PORTS];
 static const uint8_t numCSPins[NUM_SPI_PORTS] = { 6, 0, 6, 1, 4 }; // Number of chip select pins for each SPI port
@@ -135,20 +141,7 @@ obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, u
 
             if (spiErr != SPI_FLAG_SUCCESS) {
                 xSemaphoreGive(spiMutexes[spiRegIndex]);
-
-                if (spiErr & SPI_FLAG_DLENERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DLENERR);
-                if (spiErr & SPI_FLAG_TIMEOUT)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_TIMEOUT);
-                if (spiErr & SPI_FLAG_PARERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_PARERR);
-                if (spiErr & SPI_FLAG_DESYNC)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DESYNC);
-                if (spiErr & SPI_FLAG_BITERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_BITERR);
-                if (spiErr & SPI_FLAG_RXOVRNINT)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_RXOVRNINT);
-                
+                spiLogErrors(spiErr);
                 return OBC_ERR_CODE_SPI_FAILURE;
             }
         }
@@ -183,20 +176,7 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
 
             if (spiErr != SPI_FLAG_SUCCESS) {
                 xSemaphoreGive(spiMutexes[spiRegIndex]);
-
-                if (spiErr & SPI_FLAG_DLENERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DLENERR);
-                if (spiErr & SPI_FLAG_TIMEOUT)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_TIMEOUT);
-                if (spiErr & SPI_FLAG_PARERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_PARERR);
-                if (spiErr & SPI_FLAG_DESYNC)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DESYNC);
-                if (spiErr & SPI_FLAG_BITERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_BITERR);
-                if (spiErr & SPI_FLAG_RXOVRNINT)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_RXOVRNINT);
-                
+                spiLogErrors(spiErr);
                 return OBC_ERR_CODE_SPI_FAILURE;
             } else {
                 inBytes[i] = (uint8_t)spiWordIn;
@@ -238,20 +218,7 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDat
 
             if (spiErr != SPI_FLAG_SUCCESS) {
                 xSemaphoreGive(spiMutexes[spiRegIndex]);
-
-                if (spiErr & SPI_FLAG_DLENERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DLENERR);
-                if (spiErr & SPI_FLAG_TIMEOUT)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_TIMEOUT);
-                if (spiErr & SPI_FLAG_PARERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_PARERR);
-                if (spiErr & SPI_FLAG_DESYNC)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DESYNC);
-                if (spiErr & SPI_FLAG_BITERR)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_BITERR);
-                if (spiErr & SPI_FLAG_RXOVRNINT)
-                    LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_RXOVRNINT);
-                
+                spiLogErrors(spiErr);
                 return OBC_ERR_CODE_SPI_FAILURE;
             } else {
                 inBytes[i] = (uint8_t)spiWordIn;
@@ -304,4 +271,19 @@ static bool isValidCSNum(gioPORT_t *spiPort, uint8_t csNum) {
         return true;
 
     return false;
+}
+
+static void spiLogErrors(uint32_t spiErr) {
+    if (spiErr & SPI_FLAG_DLENERR)
+        LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DLENERR);
+    if (spiErr & SPI_FLAG_TIMEOUT)
+        LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_TIMEOUT);
+    if (spiErr & SPI_FLAG_PARERR)
+        LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_PARERR);
+    if (spiErr & SPI_FLAG_DESYNC)
+        LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_DESYNC);
+    if (spiErr & SPI_FLAG_BITERR)
+        LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_BITERR);
+    if (spiErr & SPI_FLAG_RXOVRNINT)
+        LOG_ERROR("SPI Error Flag: %lu", SPI_FLAG_RXOVRNINT);
 }
