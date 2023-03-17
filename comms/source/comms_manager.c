@@ -86,8 +86,6 @@ static void handleTelemetry(uint32_t telemetryBatchId) {
 }
 
 static void vCommsManagerTask(void * pvParameters) {
-    obc_error_code_t errCode;
-
     while (1) {
         comms_event_t queueMsg;
         
