@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* Telemetry file config */
+/* Telemetry file path config */
 #define TELEMETRY_FILE_DIRECTORY "/telemetry/"
 #define TELEMETRY_FILE_PREFIX "t_"
 #define TELEMETRY_FILE_EXTENSION ".tlm"
@@ -100,10 +100,30 @@ typedef struct {
  */
 void initTelemetry(void);
 
+/**
+ * @brief	Adds a telemetry data point to the telemetry queue
+ * @param	data Pointer to the telemetry data point to add
+ * @return  obc_error_code_t OBC_ERR_CODE_SUCCESS if the data was added to the queue, error code otherwise
+ */
 obc_error_code_t addTelemetryData(telemetry_data_t *data);
 
+/**
+ * @brief Get the telemetry file name for the given telemetry batch ID
+ * 
+ * @param telemBatchId The telemetry batch ID
+ * @param buff Buffer to store the file name in (should be at least TELEMETRY_FILE_PATH_MAX_LENGTH bytes)
+ * @param buffSize Size of the buffer (>= TELEMETRY_FILE_PATH_MAX_LENGTH)
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the file name was successfully obtained, error code otherwise
+ */
 obc_error_code_t getTelemetryFileName(uint32_t telemBatchId, char *buff, size_t buffSize);
 
+/**
+ * @brief Get the next telemetry data point from the given telemetry file
+ * 
+ * @param telemFileId The telemetry file descriptor
+ * @param telemData Buffer to store the telemetry data point in
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise
+ */
 obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemData);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */
