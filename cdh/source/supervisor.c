@@ -17,6 +17,12 @@
 #include <sys_common.h>
 #include <gio.h>
 
+/* Supervisor queue config */
+#define SUPERVISOR_QUEUE_LENGTH 10U
+#define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_t)
+#define SUPERVISOR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define SUPERVISOR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
 static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
@@ -46,8 +52,6 @@ void initSupervisor(void) {
     if (supervisorQueueHandle == NULL) {
         supervisorQueueHandle = xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE, supervisorQueueStack, &supervisorQueue);
     }
-
-    changeStateOBC(OBC_STATE_INITIALIZING);
 }
 
 obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
@@ -77,16 +81,20 @@ static void vSupervisorTask(void * pvParameters) {
     initEPSManager();
     initPayloadManager();
 
+    changeStateOBC(OBC_STATE_INITIALIZING);
+
     /* Send initial messages to system queues */
     sendStartupMessages();    
 
+    // TODO: Only enter normal state after initial checks are complete
     changeStateOBC(OBC_STATE_NORMAL);
     
     while(1) {
         supervisor_event_t inMsg;
         
-        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS)
-            inMsg.eventID = SUPERVISOR_NULL_EVENT_ID;
+        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+            continue;
+        }
 
         switch (inMsg.eventID) {
             default:

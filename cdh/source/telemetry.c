@@ -103,6 +103,8 @@ obc_error_code_t getTelemetryFileName(uint32_t telemBatchId, char *buff, size_t 
 }
 
 obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemData) {
+    // Assume file is open and valid
+    
     if (telemData == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -117,6 +119,8 @@ obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemDa
         return OBC_ERR_CODE_REACHED_EOF;
     }
 
+    // Since we only write the telemetry data struct, the number of bytes in the file
+    // should be a multiple of the size of the struct. TODO: Deal with incomplete writes
     if (bytesRead != sizeof(telemetry_data_t)) {
         return OBC_ERR_CODE_FAILED_FILE_READ;
     }
@@ -127,9 +131,10 @@ obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemDa
 static void vTelemetryTask(void * pvParameters) {
     obc_error_code_t errCode;
 
-    // TODO: Use new file for each batch of telemetry data
-    // TODO: Deal with this possibly failing
     LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+        // TODO: Handle this error
+    }
 
     while (1) {
         telemetry_data_t telemData;
@@ -137,30 +142,46 @@ static void vTelemetryTask(void * pvParameters) {
             writeTelemetryToFile(telemetryFileId, telemData);
         }
 
-        // TODO: Make this more efficient instead of basically polling with a delay
-        if ((checkDownlinkAlarm())) {
-            LOG_IF_ERROR_CODE(closeTelemetryFile(telemetryFileId));
+        // Check if we need to downlink telemetry
+        if (!checkDownlinkAlarm()) {
+            continue;
+        }
 
-            comms_event_t downlinkEvent = {0};
-            downlinkEvent.eventID = DOWNLINK_TELEMETRY;
-            downlinkEvent.telemetryBatchId = telemetryBatchId;
+        // Important to close the file before sending it to the comms task
+        LOG_IF_ERROR_CODE(closeTelemetryFile(telemetryFileId));
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            // TODO: Handle this error
+        }
 
-            // TODO: Deal with this possibly failing
-            LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY, .telemetryBatchId = telemetryBatchId};
 
-            // TODO: We don't want to just reset this
-            if (telemetryBatchId == UINT32_MAX) {
-                telemetryBatchId = 0;
-            } else {
-                telemetryBatchId++;
-            }
+        LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            // TODO: Handle this error, specifically if the queue is full. Other
+            // errors should be caught during testing.
+        }
 
-            LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
+        // The lifetime of the CubeSat should not allow for this to overflow.
+        // However, if it does, it'd be at a point where we can overwrite the
+        // old telemetry files, so it's not a concern.
+        if (telemetryBatchId == UINT32_MAX) {
+            LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+            telemetryBatchId = 0;
+        } else {
+            telemetryBatchId++;
+        }
+
+        LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            // TODO: Handle this error. Testing will ensure most possible errors won't
+            // occur in orbit, but file system errors could occur.
         }
     }
 }
 
 static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData) {
+    // Assume file is open and valid
+
     if (telFileId < 0) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -173,6 +194,11 @@ static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t
         return OBC_ERR_CODE_SUCCESS;
     }
     
+    if (red_errno == RED_EFBIG) {
+        // TODO: Handle this error; probably need to close the file and open a new one
+        return OBC_ERR_CODE_MAX_FILE_SIZE_REACHED;
+    }
+
     return OBC_ERR_CODE_FAILED_FILE_WRITE;
 }
 
