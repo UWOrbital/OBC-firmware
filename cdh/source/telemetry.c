@@ -149,6 +149,7 @@ obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemDa
 static void vTelemetryTask(void * pvParameters) {
     obc_error_code_t errCode;
 
+    // TODO: Get batch ID from the FRAM
     uint32_t telemetryBatchId = STARTING_TELEMETRY_BATCH_ID; 
     int32_t telemetryFileId = -1;
 
@@ -183,14 +184,10 @@ static void vTelemetryTask(void * pvParameters) {
         }
 
         // The lifetime of the CubeSat should not allow for this to overflow.
-        // However, if it does, it'd be at a point where we can overwrite the
-        // old telemetry files, so it's not a concern.
-        if (telemetryBatchId == UINT32_MAX) {
-            LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
-            telemetryBatchId = 0;
-        } else {
-            telemetryBatchId++;
-        }
+        // However, if it does, we can wrap around to 0 and start overwriting old files.
+        telemetryBatchId++;
+        
+        // TODO: Save batch ID to FRAM
 
         LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
         if (errCode != OBC_ERR_CODE_SUCCESS) {
@@ -233,7 +230,10 @@ static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemF
     unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
     RETURN_IF_ERROR_CODE(getTelemetryFileName(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
 
-    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDWR | RED_O_CREAT);
+    // TODO: If we overflowed the batch ID, we should delete the duplicate file
+    // However, don't delete the file if an overflow hasn't occurred (like if a system reset occurred).
+
+    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDWR | RED_O_APPEND | RED_O_CREAT);
     if (telFile < 0) {
         return OBC_ERR_CODE_FAILED_FILE_OPEN;
     }
