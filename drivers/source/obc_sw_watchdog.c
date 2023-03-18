@@ -2,6 +2,7 @@
 #include "obc_sw_watchdog.h"
 #include "obc_assert.h"
 #include "reg_rti.h"
+#include "obc_privilege.h"
 #include "obc_task_config.h"
 
 #define RESET_DWD_CMD1 0x53C8       //Timer is reset by wrting RESET_DWD_CMD1
