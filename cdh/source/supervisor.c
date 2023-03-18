@@ -16,6 +16,7 @@
 
 #include <sys_common.h>
 #include <gio.h>
+#include <redposix.h>
 
 /* Supervisor queue config */
 #define SUPERVISOR_QUEUE_LENGTH 10U
@@ -74,6 +75,29 @@ static void sendStartupMessages(void) {
 static void vSupervisorTask(void * pvParameters) {
     ASSERT(supervisorQueueHandle != NULL);
 
+    int32_t ret;
+
+    ret = red_init();
+    if (ret == 0) {
+        LOG_DEBUG("microSD initialization succeeded");
+    } else {
+        LOG_DEBUG("red_init failed with error: %d", red_errno);
+    }
+
+    ret = red_format("");
+    if (ret == 0) {
+        LOG_DEBUG("microSD formatted successfully");
+    } else {
+        LOG_DEBUG("red_format failed with error: %d", red_errno);
+    }
+
+    ret = red_mount("");
+    if (ret == 0) {
+        LOG_DEBUG("FS volume mounted successfully");
+    } else {
+        LOG_DEBUG("red_mount failed with error: %d", red_errno);
+    }
+
     /* Initialize other tasks */
     initTelemetry();
     initADCSManager();
@@ -100,5 +124,8 @@ static void vSupervisorTask(void * pvParameters) {
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
+
+        gioToggleBit(gioPORTB, 1);
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

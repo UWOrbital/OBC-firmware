@@ -153,6 +153,13 @@ static void telemetryManager(void * pvParameters) {
     uint32_t telemetryBatchId = STARTING_TELEMETRY_BATCH_ID; 
     int32_t telemetryFileId = -1;
 
+    int32_t ret = red_mkdir(TELEMETRY_FILE_DIRECTORY);
+    if (ret != 0) {
+        LOG_DEBUG("Failed to create telemetry directory: %d", ret);
+    } else {
+        LOG_DEBUG("Created telemetry directory");
+    }
+
     LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
         // TODO: Handle this error
@@ -257,6 +264,13 @@ static obc_error_code_t closeTelemetryFile(int32_t telemFileId) {
 }
 
 static bool checkDownlinkAlarm(void) {
-    // TODO: Check if it's time to downlink telemetry data
-    return false;
+    // TODO: Check if it's time to downlink telemetry data. This is currently a mock implementation
+    static uint32_t downlinkCounter = 0;
+    downlinkCounter++;
+
+    if (downlinkCounter % 10 != 0) {
+        return false;
+    }
+
+    return true;
 }
