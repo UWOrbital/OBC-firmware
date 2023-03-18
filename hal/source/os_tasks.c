@@ -67,8 +67,6 @@
     1 tab == 4 spaces!
 */
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
 
 /* Standard includes. */
 #include <stdlib.h>
@@ -4808,4 +4806,3 @@ const TickType_t xConstTickCount = xTickCount;
 	#include "tasks_test_access_functions.h"
 #endif
 
-#pragma GCC pop_options

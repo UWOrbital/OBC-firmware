@@ -67,8 +67,6 @@
     1 tab == 4 spaces!
 */
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
 
 /* Standard includes. */
 #include <stdlib.h>
@@ -753,4 +751,3 @@ BaseType_t xWaitConditionMet = pdFALSE;
 
 #endif
 
-#pragma GCC pop_options

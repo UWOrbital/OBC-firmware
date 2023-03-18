@@ -67,8 +67,6 @@
     1 tab == 4 spaces!
 */
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
 
 #include <stdlib.h>
 #include "FreeRTOS.h"
@@ -240,4 +238,3 @@ List_t * const pxList = ( List_t * ) pxItemToRemove->pvContainer;
 }
 /*-----------------------------------------------------------*/
 
-#pragma GCC pop_options

@@ -63,8 +63,6 @@
     1 tab == 4 spaces!
 */
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
 
 /*
  * A sample implementation of pvPortMalloc() and vPortFree() that combines
@@ -469,4 +467,3 @@ uint8_t *puc;
 	}
 }
 
-#pragma GCC pop_options
