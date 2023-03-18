@@ -27,8 +27,10 @@ static TaskHandle_t watchdogTaskHandle = NULL;
 static void swWatcdogFeeder(void * pvParameters);
 
 static feedSwWatchdog(void){
+    BaseType_t xRunningPrivileged = prvRaisePrivilege();
     rtiREG1->WDKEY ^= RESET_DWD_CMD1;
     rtiREG1->WDKEY ^= RESET_DWD_CMD2;
+    portRESET_PRIVILEGE(xRunningPrivileged);
 }
 
 void initDWWDTask(void){
@@ -50,9 +52,11 @@ void initDWWDTask(void){
 
 static void swWatcdogFeeder(void * pvParameters){
     
+    BaseType_t xRunningPrivileged = prvRaisePrivilege();
     rtiREG1->DWDPRLD = DWD_PRELOAD_VAL;
     rtiREG1->WWDSIZECTRL = DWD_FULL_SIZE_WINDOW;
-
+    
+    portRESET_PRIVILEGE(xRunningPrivileged);
     while(1){
         feedSwWatchdog();
         vTaskDelay(DWD_FEEDING_PERIOD);
