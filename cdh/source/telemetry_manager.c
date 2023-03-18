@@ -58,6 +58,13 @@ static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemF
 static obc_error_code_t closeTelemetryFile(int32_t telemFileId);
 
 /**
+ * @brief Create the telemetry directory.
+ * 
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
+static obc_error_code_t mkTelemetryDir(void);
+
+/**
  * @brief Check if it's time to downlink telemetry.
  * @return bool True if it's time to downlink telemetry, false otherwise 
  */
@@ -153,12 +160,7 @@ static void telemetryManager(void * pvParameters) {
     uint32_t telemetryBatchId = STARTING_TELEMETRY_BATCH_ID; 
     int32_t telemetryFileId = -1;
 
-    int32_t ret = red_mkdir(TELEMETRY_FILE_DIRECTORY);
-    if (ret != 0) {
-        LOG_DEBUG("Failed to create telemetry directory: %d", ret);
-    } else {
-        LOG_DEBUG("Created telemetry directory");
-    }
+    mkTelemetryDir();
 
     LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
@@ -202,6 +204,16 @@ static void telemetryManager(void * pvParameters) {
             // occur in orbit, but file system errors could occur.
         }
     }
+}
+
+static obc_error_code_t mkTelemetryDir(void) {
+    int32_t ret = red_mkdir(TELEMETRY_FILE_DIRECTORY);
+    if (ret != 0) {
+        LOG_DEBUG("Failed to create telemetry directory: %d", red_errno);
+        return OBC_ERR_CODE_MKDIR_FAILED;
+    }
+
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData) {
