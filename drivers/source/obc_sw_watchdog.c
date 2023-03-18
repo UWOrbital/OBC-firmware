@@ -2,6 +2,7 @@
 #include "obc_sw_watchdog.h"
 #include "obc_assert.h"
 #include "reg_rti.h"
+#include "obc_task_config.h"
 
 #define RESET_DWD_CMD1 0x53C8       //Timer is reset by wrting RESET_DWD_CMD1
 #define RESET_DWD_CMD2 0x190D       // and RESET_DWD_CMD2 as a sequence
@@ -12,9 +13,6 @@
 #define DWD_FULL_SIZE_WINDOW 0x5    //Window size 100%; This watchdog is timeout-only
 #define DWD_FEEDING_PERIOD pdMS_TO_TICKS(300)
 #define DWWD_NAME "Digital Windowed Watchdog"
-#define DWWD_STACK_SIZE 128
-#define DWWD_PRIORITY 0xFF
-#define DWD_PRELOAD_VAL 0xFBB // set tExp as 0.3 Seconds
 
 STATIC_ASSERT(MIN_DWD_PRELOAD_VAL<=DWD_PRELOAD_VAL && DWD_PRELOAD_VAL<=MAX_DWD_PRELOAD_VAL,
                 "Watchdog requires the preload value to be within minimum and maximum value.");
