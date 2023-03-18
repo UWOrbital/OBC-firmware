@@ -77,7 +77,11 @@ static void handleTelemetry(uint32_t telemetryBatchId) {
     
     // Read 1 telemetry data point
     telemetry_data_t telemetryData;
-    LOG_IF_ERROR_CODE(getNextTelemetry(fd, &telemetryData));
+    while ((errCode = getNextTelemetry(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
+        LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
+    }
+
+    LOG_ERROR_CODE(errCode);
 
     if (errCode == OBC_ERR_CODE_SUCCESS) {
         LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
