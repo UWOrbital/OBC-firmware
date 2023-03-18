@@ -63,7 +63,6 @@
     1 tab == 4 spaces!
 */
 
-
 /*
  * A sample implementation of pvPortMalloc() and vPortFree() that combines
  * (coalescences) adjacent memory blocks as they are freed, and in so doing

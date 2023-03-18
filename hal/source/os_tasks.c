@@ -67,7 +67,6 @@
     1 tab == 4 spaces!
 */
 
-
 /* Standard includes. */
 #include <stdlib.h>
 #include <string.h>
@@ -4805,4 +4804,3 @@ const TickType_t xConstTickCount = xTickCount;
 #ifdef FREERTOS_MODULE_TEST
 	#include "tasks_test_access_functions.h"
 #endif
-

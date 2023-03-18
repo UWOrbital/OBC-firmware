@@ -67,7 +67,6 @@
     1 tab == 4 spaces!
 */
 
-
 /* Standard includes. */
 #include <stdlib.h>
 

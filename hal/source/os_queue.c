@@ -67,7 +67,6 @@
     1 tab == 4 spaces!
 */
 
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -2553,6 +2552,7 @@ BaseType_t xReturn;
 	}
 
 #endif /* configUSE_QUEUE_SETS */
+
 
 
 

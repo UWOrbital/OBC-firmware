@@ -219,7 +219,6 @@ obc_error_code_t framSleep(void){
 obc_error_code_t framWakeUp(void){
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-
     for(volatile unsigned int i=0; i<FRAM_WAKE_BUSY_WAIT; i++){ //Volatile to prevent optimiser from removing wait loop
         //Do Nothing
     }
