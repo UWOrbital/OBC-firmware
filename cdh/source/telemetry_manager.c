@@ -1,4 +1,4 @@
-#include "telemetry.h"
+#include "telemetry_manager.h"
 #include "comms_manager.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
@@ -29,7 +29,7 @@
 /**
  * @brief Telemetry Manager task.
  */
-static void vTelemetryTask(void * pvParameters);
+static void telemetryManager(void * pvParameters);
 
 /**
  * @brief Write telemetry data to file.
@@ -81,7 +81,7 @@ void initTelemetry(void) {
     memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
 
     ASSERT( (telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL) );
-    telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
+    telemetryTaskHandle = xTaskCreateStatic(telemetryManager, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
 
     ASSERT( (telemetryDataQueueStack != NULL) && (&telemetryDataQueue != NULL) );
     telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE, telemetryDataQueueStack, &telemetryDataQueue);
@@ -146,7 +146,7 @@ obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemDa
     return OBC_ERR_CODE_SUCCESS;
 }
 
-static void vTelemetryTask(void * pvParameters) {
+static void telemetryManager(void * pvParameters) {
     obc_error_code_t errCode;
 
     // TODO: Get batch ID from the FRAM

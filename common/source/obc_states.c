@@ -2,7 +2,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_assert.h"
-#include "telemetry.h"
+#include "telemetry_manager.h"
 
 static obc_state_t currStateOBC;
 

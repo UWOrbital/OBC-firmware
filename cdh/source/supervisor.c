@@ -1,5 +1,5 @@
 #include "supervisor.h"
-#include "telemetry.h"
+#include "telemetry_manager.h"
 #include "adcs_manager.h"
 #include "comms_manager.h"
 #include "eps_manager.h"
