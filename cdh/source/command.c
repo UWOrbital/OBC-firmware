@@ -11,29 +11,31 @@
 
 #include <timekeeper_sg.h>
 
-//#include<ds3232_mz.c> //file for the RTC alarm functions
-
-
-//COMMS creates a function that sets x to a command, and returns x, of data type they choose called maybe commandDataType
-//Now i can access x, and find x.timeTag, then store and sort
-
-//check message buffer instead of making a queue everytime executing command with time tag
-
-//need if statement for looking through stored tasks and setting an alarm for most recent task and when the task is up, set the case in swtich as that task
-//implement command priority?
-//if time tagged command, we expect a time value for when it should be run.
-//time tag will be a value, if time tag value is zero, then do immediately, if any other number, then that number
-//if statement to find if there is a value != 0 in the time tag from the struct command. 
-//store in FRAM and RTC alarm system. Talk to daniel
-//maybe have a global array where we can store the commands to spoo
-//function getTimeTag that passes in the function
-
-//have one task that deals with alarms, maybe even before finishing this up
-//time service is able to set an alarm. Talk to shourrya about this
-
+/*command IDs*/
+#define NUM_CMDS 14
+#define CMD_TLE_DATA_UPLINK (uint8_t) 1 //based on the google sheets, first command starts as ID = 1. Should it be 0 instead?
+#define CMD_ARO_DATA_UPLINK (uint8_t) 2
+#define CMD_SECONDARY_PAYLOAD_ACTIVATION (uint8_t) 3
+#define CMD_RTC_SYNC (uint8_t) 4
+#define CMD_SECONDARY_PAYLOAD_ACTIVATION_TIME (uint8_t) 5
+#define CMD_CALL_EPS_MCU_RESET (uint8_t) 6
+#define CMD_CALL_CDH_MCU_RESET (uint8_t) 7
+#define CMD_TIME_DELAY_IMG_CAPTURE_AND_DOWNLINK (uint8_t) 8
+#define CMD_DIRECT_EPS_POWER_RAIL_CONTROL (uint8_t) 9
+#define CMD_COMMS_ECHO_BACK (uint8_t) 10
+#define CMD_CHANGE_VALUE_PARAM_MNGER (uint8_t) 11
+#define CMD_ECHO_PARM_MNGER_VALUE (uint8_t) 12
+#define CMD_MANUALLY_ACTIVATE_EMERGENCY_MODE_SPECIFIED_TIME (uint8_t) 13
+#define CMD_DOWNLINK_FULL_SYS_LOGS_NEXT_PASS (uint8_t) 14
 
 #define COMMAND_QUEUE_LENGTH 10
 #define COMMAND_QUEUE_SIZE sizeof(commandTemplate)
+
+//#include<ds3232_mz.c> //file for the RTC alarm functions
+//check message buffer instead of making a queue everytime executing command with time tag
+//store in FRAM and RTC alarm system. Talk to daniel
+
+/*data structs*/
 
 typedef struct {
     char commandName[30];
@@ -46,6 +48,129 @@ typedef struct {
 	double meanMotion;
 	int numRevolution;
 } commandTemplate;
+
+// CMD_TLE_DATA_UPLINK
+typedef struct {
+	float inclination;
+	float raan;
+	float eccentricity;
+	float argOfPedigree;
+	float meanAnomaly;
+	double meanMotion;
+	uint32_t revolution;
+} tle_data_uplink_t; //need to ask why the best practice is to put a "_t" at the end
+
+//CMD_ARO_DATA_UPLINK
+typedef struct {
+    uint32_t timeTag;
+    float rollAngle; //why is there "off nadir" in the google sheets?
+    //ARO Callsign?
+    char passcorde;
+} aro_data_uplink_t;
+
+//CMD_SECONDARY_PAYLOAD_ACTIVATION
+typedef struct{
+
+} secondary_payload_activation_t;
+
+// CMD_RTC_SYNC 
+typedef struct {
+	uint32_t time;
+} rtc_sync_t;
+
+//CMD_SECONDARY_PAYLOAD_ACTIVATION_TIME
+typedef struct {
+    uint32_t timeTag;
+} secondary_payload_activation_time_t;
+
+//CMD_CALL_EPS_MCU_RESET
+typedef struct {
+
+} call_eps_mcu_reset_t;
+
+//CMD_CALL_CDH_MCU_RESET
+typedef struct {
+
+} call_cdh_mcu_reset_t;
+
+//CMD_TIME_DELAY_IMG_CAPTURE_AND_DOWNLINK
+typedef struct {
+    uint32_t timeTag;
+    float rollAngle;
+} time_delay_img_capture_and_downlink_t;
+
+//CMD_DIRECT_EPS_POWER_RAIL_CONTROL
+typedef struct {
+    int powerRailID;
+} direct_eps_power_rail_control_t;
+
+//CMD_COMMS_ECHO_BACK
+typedef struct {
+    uint32_t intEchoBack;
+} comms_echo_back_t;
+
+//CMD_CHANGE_VALUE_PARAM_MNGER
+typedef struct {
+    int newAddress;
+} change_value_parm_mnger_t;
+
+//CMD_ECHO_PARM_MNGER_VALUE
+typedef struct {
+    int address;
+} echo_parm_mnger_value_t;
+
+//CMD_MANUALLY_ACTIVATE_EMERGENCY_MODE_SPECIFIED_TIME
+typedef struct {
+    int emergModeNum;
+    uint32_t timeTag;
+} manually_activate_emergency_mode_specified_time_t;
+
+//CMD_DOWNLINK_FULL_SYS_LOGS_NEXT_PASS
+typedef struct {
+    enum logLevel;
+} downlink_full_sys_logs_next_pass_t;
+
+/*data structs*/
+
+/*command struct*/
+typedef struct {
+	union {
+		tle_data_uplink_t tleDataUplink;
+		aro_data_uplink_t aroDataUplink;
+        secondary_payload_activation_t secondayPayloadActivation;
+        rtc_sync_t rtcSync;
+        secondary_payload_activation_time_t secondaryPayloadActivationTime;
+        call_eps_mcu_reset_t callEPSMCUReset;
+        call_cdh_mcu_reset_t callCDHMCUReset;
+		time_delay_img_capture_and_downlink_t timeDelayImgCaptureAndDownlink;
+        direct_eps_power_rail_control_t directEPSPowerRailControl;
+        comms_echo_back_t commsEchoBack;
+        change_value_parm_mnger_t changeValueParmMnger;
+        echo_parm_mnger_value_t echoParmMngerValue;
+        manually_activate_emergency_mode_specified_time_t manuallyActivateEmergencyModeSpecifiedTime;
+        downlink_full_sys_logs_next_pass_t downlinkFullSysLogsNextPass;
+	};
+	uint32_t timestamp;
+	uint8_t id;
+	bool isTimeTagged;
+} cmd_msg_t;
+/*command struct*/
+
+// Callback functions (Will probably be implemented in other files)
+void tleDataUplinkCmdCallback(tle_data_uplink_t tleDataUplink) {
+	// This is just an example of what the callback could be used for
+	sendToADCSQueue(tleDataUplink);
+}
+
+void aroDataUplinkCmdCallback(aro_data_uplink_t aroDataUplink) {
+    sendToADCSQueue(aroDataUplink);
+	...
+}
+
+void secondaryPayloadActivationCmdCallback(...) {
+	...
+}
+
 
 QueueHandle_t command_queue;
 
@@ -79,6 +204,9 @@ void push_command(commandTemplate cmdTmp) {
 
 void execute_command(commandTemplate cmdTmp) {
     //print the values of each variable in the unique command
+    //send event to whichever sub team needs it, and the struct in it too. 
+    //will who I send the event to be based on the command ID? 
+    //What does it means to send an event to another subteam?
     printf("Executing command: commandName = %s\n, timeTag=%d\n, inclination=%d\n, RAAN=%d\n, eccentricity=%d\n, argPerigee=%d\n, meanAnomaly=%d\n, meanMotion=%d\n, numRevolution=%d\n", commandTemplate.commandName, commandTemplate.timeTag, commandTemplate.inclination, commandTemplate.RAAN, commandTemplate.eccentricity, commandTemplate.argPerigee, commandTemplate.meanAnomaly, commandTemplate.meanMotion, commandTemplate.numRevolution); //is this necessary?
 }
 
@@ -97,7 +225,7 @@ void handle_command(void *pvParameters) {
             if (current_time >= cmdTmp.timeTag) {
                 // if current time is greater or equal than the time in the timetag, execute the command.
                 //should the > be included? how should we handle commands that were set at a time before the current time. Is there any case where somehow commands are being taken in later than when they're sent, and also is there any case/protocol where we don't want to take in any commands that were set to execute earlier than current time.
-                printf("Timetag of %s\n is smaller than current time of %d\n. Executing command: %s\n", cmdTmp.commandName, current_time, cmdTmp.commandName);
+                printf("Timetag of %s\n is smaller than current time of %d\n. Executing command: %s\n", cmdTmp.commandName, current_time, cmdTmp.commandName); //fix this based on if timetag is before current time
 
 
             else { //if (current_time < cmdTmp.timeTag) 
