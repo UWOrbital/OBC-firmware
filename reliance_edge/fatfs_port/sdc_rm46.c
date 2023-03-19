@@ -13,21 +13,8 @@
 #include "obc_spi_io.h"
 #include "obc_logging.h"
 #include "obc_assert.h"
+#include "obc_board_config.h"
 
-/* SD Card SPI Config */
-#ifdef RM46_LAUNCHPAD
-    #define SDC_SPI_PORT         spiPORT3
-    #define SDC_SPI_REG          spiREG3
-    #define SDC_SPI_CS           1UL
-    #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
-#elif defined(OBC_REVISION_1)
-    #define SDC_SPI_PORT         spiPORT1
-    #define SDC_SPI_REG          spiREG1
-    #define SDC_SPI_CS           0UL
-    #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
-#else
-    #error Board configuration not defined yet
-#endif
 
 /*---------------------------------------------*/
 /* SD Card Definitions                         */
