@@ -160,7 +160,7 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
         
         // Set packet length to mod(len, 256) so that the correct number of bits
         // are sent when fixed packet mode gets reactivated
-        temp = len % 100;
+        temp = len % TXRX_INTERRUPT_THRESHOLD;
         RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1));
         
         largePacketFlag = true;
@@ -186,10 +186,10 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
     RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_STX));
     
     uint32_t i;
-    for (i = 0; i < (len - CC1120_TX_FIFO_SIZE) / 100; i++)
+    for (i = 0; i < (len - CC1120_TX_FIFO_SIZE) / TXRX_INTERRUPT_THRESHOLD; i++)
     {
         if (xSemaphoreTake(txSemaphore, portMAX_DELAY) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120_write_fifo(data + CC1120_TX_FIFO_SIZE + i*100, 100));
+            RETURN_IF_ERROR_CODE(cc1120_write_fifo(data + CC1120_TX_FIFO_SIZE + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
         }
         RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_STX));
     }
@@ -200,7 +200,7 @@ obc_error_code_t cc1120_send(uint8_t *data, uint32_t len)
 
     if (len > 99){
         if (xSemaphoreTake(txSemaphore, portMAX_DELAY) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120_write_fifo(data + CC1120_TX_FIFO_SIZE + i*100, len - CC1120_TX_FIFO_SIZE - 100*i));
+            RETURN_IF_ERROR_CODE(cc1120_write_fifo(data + CC1120_TX_FIFO_SIZE + i*TXRX_INTERRUPT_THRESHOLD, len - CC1120_TX_FIFO_SIZE - TXRX_INTERRUPT_THRESHOLD*i));
         }
         RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_STX));
     }
@@ -237,16 +237,17 @@ obc_error_code_t cc1120_receive(uint8_t data[])
     
     // Set packet length to 78 so that the correct number of bits
     // are received when fixed packet mode gets reactivated after receiving 200 bytes
-    temp = 78;
+    temp = RX_EXPECTED_PACKET_SIZE%TXRX_INTERRUPT_THRESHOLD;
 
     RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1));
     
     RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_SRX));
     
     if(rxSemaphore != NULL) {
-        for (int i = 0; i < 2; ++i){
+        uint32_t i;
+        for (i = 0; i < (RX_EXPECTED_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD); ++i){
             if(xSemaphoreTake(rxSemaphore, portMAX_DELAY) == pdTRUE){
-                RETURN_IF_ERROR_CODE(cc1120_read_fifo(data + 100*i, 100));
+                RETURN_IF_ERROR_CODE(cc1120_read_fifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
             }
         }
         // Set to variable packet length mode
@@ -254,7 +255,7 @@ obc_error_code_t cc1120_receive(uint8_t data[])
         RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
         
         if(xSemaphoreTake(rxSemaphore, portMAX_DELAY) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120_read_fifo(data + 200, 78));
+            RETURN_IF_ERROR_CODE(cc1120_read_fifo(data + i*TXRX_INTERRUPT_THRESHOLD, RX_EXPECTED_PACKET_SIZE - i*TXRX_INTERRUPT_THRESHOLD));
         }
     }
     return errCode;

@@ -11,8 +11,9 @@
 #define CC1120_MAX_PACKET_LEN 255
 #define CC1120_TX_FIFO_SIZE 128
 #define RX_EXPECTED_PACKET_SIZE 278
+#define TXRX_INTERRUPT_THRESHOLD 100
 
-#define min(a, b) (a < b ? a : b)
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 typedef struct
 {
