@@ -164,7 +164,7 @@ void tleDataUplinkCmdCallback(tle_data_uplink_t tleDataUplink) {
 
 void aroDataUplinkCmdCallback(aro_data_uplink_t aroDataUplink) {
     sendToADCSQueue(aroDataUplink);
-	...
+	
 }
 
 void secondaryPayloadActivationCmdCallback(...) {
