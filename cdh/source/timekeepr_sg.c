@@ -16,6 +16,7 @@
 #include <os_task.h>
 #include "ds3232_mz.h"
 #include "timekeeper_sg.h"
+#include "time.h"
 
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode) {
     return setAlarm1RTC(alarmMode, alarmTime);
@@ -34,6 +35,36 @@ obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime) {
 rtc_time_t getCurrentTime(rtc_time_t getTime) {
     getCurrentTimeRTC(&getTime);
     return getTime;
+}
+
+void alarmQueue(rtc_alarm_time_t alarmTime) {
+    
+}
+
+// look into difftime() maybe which makes use of time_t
+int compare(rtc_alarm_time_t a, rtc_alarm_time_t b) {
+    if(a.date > b.date)
+        return 1;
+    else if(a.date == b.date) {
+        if(a.time.hours > b.time.hours)
+            return 1;
+        else if(a.time.hours == b.time.hours) {
+            if(a.time.minutes > b.time.minutes)
+                return 1;
+            else if(a.time.minutes == b.time.minutes) {
+                if(a.time.seconds > b.time.seconds)
+                    return 1;
+                else 
+                    return -1;
+            }
+            else    
+                return -1;
+        }
+        else
+            return -1;
+    }
+    else
+        return -1;
 }
 
 

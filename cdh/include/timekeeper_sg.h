@@ -5,6 +5,8 @@
 #include <gio.h>
 #include "ds3232_mz.h"
 
+rtc_alarm_time_t queue[10];   // dummy size for now, get better clarity on queuing
+
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode);
 
 obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMode);
