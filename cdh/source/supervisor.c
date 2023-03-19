@@ -76,7 +76,6 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 }
 
 static void sendStartupMessages(void) {
-    /* Send startup message to telemetry task as example */
     /* TODO: Add startup messages to other tasks */
 }
 

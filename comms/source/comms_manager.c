@@ -83,10 +83,6 @@ static void handleTelemetry(uint32_t telemetryBatchId) {
 
     LOG_ERROR_CODE(errCode);
 
-    if (errCode == OBC_ERR_CODE_SUCCESS) {
-        LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
-    }
-
     // Close telemetry file
     red_close(fd);
 }
