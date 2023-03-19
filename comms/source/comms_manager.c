@@ -61,6 +61,7 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
 }
 
 // Example function to show how to handle telemetry data
+// This isn't meant to be the final implementation
 static void handleTelemetry(uint32_t telemetryBatchId) {
     obc_error_code_t errCode;
 
@@ -73,15 +74,21 @@ static void handleTelemetry(uint32_t telemetryBatchId) {
     int32_t fd = red_open(filename, RED_O_RDONLY);
     if (fd < 0) {
         LOG_ERROR("Failed to open telemetry file: %s", filename);
+        return;
     }
-    
+
     // Read 1 telemetry data point
     telemetry_data_t telemetryData;
     while ((errCode = getNextTelemetry(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
         LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
     }
 
-    LOG_ERROR_CODE(errCode);
+    if (errCode == OBC_ERR_CODE_REACHED_EOF) {
+        LOG_DEBUG("Reached end of telemetry file");
+        errCode = OBC_ERR_CODE_SUCCESS;
+    }
+
+    LOG_IF_ERROR_CODE(errCode);
 
     // Close telemetry file
     red_close(fd);

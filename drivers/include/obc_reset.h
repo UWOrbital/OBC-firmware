@@ -6,7 +6,7 @@
  */
 typedef enum {
     RESET_REASON_TESTING = 0, // For testing purposes
-    RESET_REASON_FS_INIT_FAILURE = 1, // File system initialization failed
+    RESET_REASON_FS_FAILURE = 1, // File system operation failed
 }obc_reset_reason_t;
 
 /**

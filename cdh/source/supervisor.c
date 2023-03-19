@@ -84,10 +84,8 @@ static void vSupervisorTask(void * pvParameters) {
 
     ASSERT(supervisorQueueHandle != NULL);
 
+    // TODO: Deal with errors
     LOG_IF_ERROR_CODE(setupFileSystem());
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-        resetSystem(RESET_REASON_FS_INIT_FAILURE);
-    }
 
     /* Initialize other tasks */
     initTelemetry();

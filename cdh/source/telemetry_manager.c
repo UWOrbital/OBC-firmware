@@ -160,17 +160,17 @@ static void telemetryManager(void * pvParameters) {
     uint32_t telemetryBatchId = STARTING_TELEMETRY_BATCH_ID; 
     int32_t telemetryFileId = -1;
 
-    mkTelemetryDir();
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(mkTelemetryDir());
 
+    // TODO: Deal with errors
     LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-        // TODO: Handle this error
-    }
 
     while (1) {
         telemetry_data_t telemData;
         if (xQueueReceive(telemetryDataQueueHandle, &telemData, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
-            writeTelemetryToFile(telemetryFileId, telemData);
+            // TODO: Deal with errors
+            LOG_IF_ERROR_CODE(writeTelemetryToFile(telemetryFileId, telemData));
         }
 
         // Check if we need to downlink telemetry
@@ -200,8 +200,7 @@ static void telemetryManager(void * pvParameters) {
 
         LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
         if (errCode != OBC_ERR_CODE_SUCCESS) {
-            // TODO: Handle this error. Testing will ensure most possible errors won't
-            // occur in orbit, but file system errors could occur.
+            // TODO: Deal with errors
         }
     }
 }
