@@ -94,13 +94,15 @@ static void vSupervisorTask(void * pvParameters) {
     initEPSManager();
     initPayloadManager();
 
-    changeStateOBC(OBC_STATE_INITIALIZING);
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
 
     /* Send initial messages to system queues */
     sendStartupMessages();    
 
     // TODO: Only enter normal state after initial checks are complete
-    changeStateOBC(OBC_STATE_NORMAL);
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
     
     while(1) {
         supervisor_event_t inMsg;
