@@ -55,7 +55,6 @@
 #include "spi.h"
 #include "i2c.h"
 #include "sys_dma.h"
-#include "lm75bd.h"
 
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
@@ -99,7 +98,6 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (19) */
-osHandlerLM75BD(LM75BD_OBC_I2C_ADDR);
 /* USER CODE END */
 }
 
