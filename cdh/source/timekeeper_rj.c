@@ -19,9 +19,10 @@
 #include <timekeeper_sg.h>
 #include "ds3232_mz.h"
 
-void currentTimekeepingTask(void *pvParameters)
+time_t currentTimekeepingTask(void *pvParameters)
 {
-    time_t rtc_time = getCurrentTime; // The current time from the RTC. (CHECK IF THIS IS IN SECONDS)
+    //time_t rtc_time = getCurrentTime; // The current time from the RTC. (CHECK IF THIS IS IN SECONDS)
+    time_t rtc_time = time(NULL);
     time_t local_time = 0; // The current time in seconds
     uint32_t last_update_time = 0; // The time when we last updated the RTC time
     
