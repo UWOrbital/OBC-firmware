@@ -52,12 +52,13 @@ endif
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"drivers/cc1120/include"
+
+# Drivers
 INCLUDE_DIRS += -I"drivers/common/include"
 INCLUDE_DIRS += -I"drivers/ds3232/include"
 INCLUDE_DIRS += -I"drivers/fram/include"
 INCLUDE_DIRS += -I"drivers/lm75bd/include"
-INCLUDE_DIRS += -I"drivers/micro_sd/include"
+
 INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"adcs/include"
 INCLUDE_DIRS += -I"cdh/include"
