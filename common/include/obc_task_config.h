@@ -1,4 +1,7 @@
-//include macros for task name, priority, stack size, etc.
+#ifndef COMMON_INCLUDE_OBC_TASK_CONFIG_H_
+#define COMMON_INCLUDE_OBC_TASK_CONFIG_H_
+
+#include <os_task.h>
 
 /* Supervisor task config */
 #define SUPERVISOR_STACK_SIZE   1024U
@@ -29,3 +32,5 @@
 #define PAYLOAD_MANAGER_STACK_SIZE   1024U
 #define PAYLOAD_MANAGER_NAME         "payload_manager"
 #define PAYLOAD_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
+
+#endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */
