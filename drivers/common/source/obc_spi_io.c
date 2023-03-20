@@ -178,9 +178,9 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
                 xSemaphoreGive(spiMutexes[spiRegIndex]);
                 spiLogErrors(spiErr);
                 return OBC_ERR_CODE_SPI_FAILURE;
-            } else {
-                inBytes[i] = (uint8_t)spiWordIn;
             }
+
+            inBytes[i] = (uint8_t)spiWordIn;
         }
         xSemaphoreGive(spiMutexes[spiRegIndex]);
         return OBC_ERR_CODE_SUCCESS;
@@ -220,9 +220,9 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDat
                 xSemaphoreGive(spiMutexes[spiRegIndex]);
                 spiLogErrors(spiErr);
                 return OBC_ERR_CODE_SPI_FAILURE;
-            } else {
-                inBytes[i] = (uint8_t)spiWordIn;
             }
+            
+            inBytes[i] = (uint8_t)spiWordIn;
         }
         xSemaphoreGive(spiMutexes[spiRegIndex]);
         return OBC_ERR_CODE_SUCCESS;
