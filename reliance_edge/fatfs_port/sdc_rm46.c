@@ -81,6 +81,8 @@ STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255, "SDC_ACTION_NUM_ATTEMPTS_D
 
 #define SDC_DELAY_1MS pdMS_TO_TICKS(1)
 
+#define SDC_MOSI_HIGH 0xFFU // Keep MOSI high during read operations
+
 /*---------------------------------------------*/
 /* Global Variables                            */
 /*---------------------------------------------*/
@@ -113,7 +115,7 @@ static bool isCardReady(void) {
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
         uint8_t res;
         
-        LOG_IF_ERROR_CODE(spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &res));
+        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res));
         
         if (res == 0xFF)
             return true;
@@ -179,7 +181,7 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
     /* Wait for a data packet */
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &token);
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &token);
         if (token != 0xFF)
             break;
         vTaskDelay(SDC_DELAY_1MS);
@@ -190,15 +192,15 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
     /* Receive the data block into buffer */
     while (btr) {
-        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, buff++);
-        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, buff++);
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++);
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++);
         btr -= 2;
     }
     
     /* Discard CRC */
     unsigned char crc;
-    spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &crc); 
-    spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &crc);
+    spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc); 
+    spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc);
 
     return true;
 }
@@ -227,7 +229,7 @@ static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
         spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
         
         uint8_t resp;
-        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &resp); /* Receive data response */
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &resp); /* Receive data response */
         if ((resp & SD_DATA_RESPONSE_MASK) != SD_DATA_RESPONSE_ACCEPTED) return false;
     }
 
@@ -260,12 +262,12 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
 
     /* Skip a uint8_t after "stop reading" cmd is sent */
     unsigned char tmp;
-    if (cmd == SDC_CMD12) spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &tmp);
+    if (cmd == SDC_CMD12) spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &tmp);
     
     /* Receive command response */
     uint8_t res;
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &res);
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res);
         if (!(res & SDC_CMD_RESP_MASK)) break;
         vTaskDelay(SDC_DELAY_1MS);
     }
@@ -289,14 +291,14 @@ static uint8_t stopTransmission(void) {
 
     /* Data transfer stops 2 bytes after 6-uint8_t SDC_CMD12 */
     uint8_t val;
-    spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &val); spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &val);
+    spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val); spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val);
 
     /* SDC should now send 2-6 0xFF bytes, the response uint8_t, and then another 0xFF */
     /* Some cards don't send the 2-6 0xFF bytes */
     uint8_t res;
     const uint8_t numBytesRcv = 8U;
     for(unsigned int n = 0; n < numBytesRcv; n++) {
-        spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &val);
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val);
         if(val != 0xFF)
             res = val;
     }
@@ -340,7 +342,8 @@ DSTATUS disk_initialize(uint8_t drv){
         // Card is SDC Ver2+
         const uint8_t ocrSize = 4U;
         uint8_t ocr[ocrSize];
-        for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &ocr[i]);
+        
+        for (uint8_t i = 0; i < ocrSize; i++) spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]);
         
         // Check if the lower 12 bits in the response are 0x1AA
         if (ocr[2] == 0x01 && ocr[3] == 0xAA) {
@@ -352,7 +355,7 @@ DSTATUS disk_initialize(uint8_t drv){
                     // Read ocr with CMD58
                     if (sendCMD(SDC_CMD58, 0) == 0) {    
                         // Check bit 6 of response to determine if card is SDHC or standard SD card
-                        for (unsigned int i = 0; i < ocrSize; i++) spiReceiveByte(SDC_SPI_REG, &sdcSpiConfig, &ocr[i]);
+                        for (unsigned int i = 0; i < ocrSize; i++) spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]);
                         ty = (ocr[0] & CARD_CAPACITY_OCR_MASK) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK) : (CARD_TYPE_SDC_MASK);
                     }
                 }
