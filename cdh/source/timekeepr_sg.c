@@ -14,6 +14,7 @@
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
+#include<stdlib.h>
 #include "ds3232_mz.h"
 #include "timekeeper_sg.h"
 #include "time.h"
@@ -38,7 +39,11 @@ rtc_time_t getCurrentTime(rtc_time_t getTime) {
 }
 
 void alarmQueue(rtc_alarm_time_t alarmTime) {
-    
+    /*
+        add enque and deque functionalities depending on what daneil says about queuing and how to do it with a limited known array size.
+        Or does freertos have something like a limit less list in python that can be used
+    */
+    qsort(queue, 10, sizeof(rtc_alarm_time_t), compare);
 }
 
 // look into difftime() maybe which makes use of time_t
