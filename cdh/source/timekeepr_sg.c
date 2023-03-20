@@ -43,7 +43,7 @@ void alarmQueue(rtc_alarm_time_t alarmTime) {
         add enque and deque functionalities depending on what daneil says about queuing and how to do it with a limited known array size.
         Or does freertos have something like a limit less list in python that can be used
     */
-    qsort(queue, 10, sizeof(rtc_alarm_time_t), compare);
+    qsort(taskQueue, 10, sizeof(rtc_alarm_time_t), compare);
 }
 
 // look into difftime() maybe which makes use of time_t
