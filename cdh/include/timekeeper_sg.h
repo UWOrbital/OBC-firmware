@@ -20,4 +20,8 @@ obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
 
 rtc_time_t getCurrentTime(rtc_time_t getTime);
 
+void alarmQueue(rtc_alarm_time_t alarmTime);
+
+int compare(rtc_alarm_time_t a, rtc_alarm_time_t b);
+
 #endif /*CDH_INCLUDE_TIMEKEEPER_SG_H_*/
