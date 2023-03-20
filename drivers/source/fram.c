@@ -225,6 +225,7 @@ obc_error_code_t framWakeUp(void){
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
     return OBC_ERR_CODE_SUCCESS;
 }
+
 obc_error_code_t framReadID(uint8_t *id, size_t nBytes){
     obc_error_code_t errCode;
     if(id == NULL){
