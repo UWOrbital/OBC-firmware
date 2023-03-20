@@ -29,7 +29,6 @@ static feedSwWatchdog(void){
     BaseType_t xRunningPrivileged = prvRaisePrivilege();
     rtiREG1->WDKEY ^= RESET_DWD_CMD1;
     rtiREG1->WDKEY ^= RESET_DWD_CMD2;
-    portRESET_PRIVILEGE(xRunningPrivileged);
 }
 
 void initDWWDTask(void){
