@@ -1,17 +1,13 @@
 #include "supervisor.h"
-
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
 #include <os_timer.h>
-
 #include <sys_common.h>
 #include <gio.h>
-
 #include <command.h>
-
-//#include <timekeeper_sg.h>
+#include <timekeeper_sg.h>
 
 QueueHandle_t command_queue;
 
@@ -22,27 +18,15 @@ void push_command(cmd_msg_t cmd) {
     // Check if the command has a time tag
     if (cmd.timestamp > 0) {
         // If it does, add it to the command queue and execute it later
-        xTask = xQueueSend(command_queue, &cmd, 0); //should this be &cmdTmp or just cmdTmp
+        xTask = xQueueSend(command_queue, &cmd, 0);
         if (xTask != pdPASS) {
             printf("Error: command queue full\n");
         }
     } 
     else {
         // If it doesn't, execute it immediately
-        //if i leave an else statement here will it move onto handle_command
-        //handle_command()
         printf("Executing command: %s\n", cmd.id);
     }
-
-    /*
-    BaseType_t result = xQueueSend(command_queue, &cmdTmp, 0);
-    
-    if (result == pdPASS) {
-        printf("Command added to queue\n");
-    } else {
-        printf("Failed to add command to queue: error %ld\n", result);
-    }
-    */
 }
 
 void execute_command(cmd_msg_t cmd) {
@@ -135,24 +119,6 @@ void handle_command(void *pvParameters) {
                     break;
 
                 //should I add all these switch cases into execute_command?
-
-        /*
-         if (cmdTmp.timeTag > 0) {
-
-            if (current_time >= cmdTmp.timeTag) {
-                // if current time is greater or equal than the time in the timetag, execute the command.
-                //should the > be included? how should we handle commands that were set at a time before the current time. Is there any case where somehow commands are being taken in later than when they're sent, and also is there any case/protocol where we don't want to take in any commands that were set to execute earlier than current time.
-                printf("Timetag of %s\n is smaller than current time of %d\n. Executing command: %s\n", cmdTmp.commandName, current_time, cmdTmp.commandName); //fix this based on if timetag is before current time
-
-            }
-            else { //if (current_time < cmdTmp.timeTag) 
-                // Put the command back into the queue if the time tag has not been reached
-                xQueueSendToFront(command_queue, &cmdTmp, 0);
-                vTaskDelayUntil(&current_time, pdMS_TO_TICKS(1000));
-                continue;
-            }
-        }
-        */
                     
         }
 
