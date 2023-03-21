@@ -33,9 +33,9 @@
 #define PAYLOAD_MANAGER_NAME         "payload_manager"
 #define PAYLOAD_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
-#endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */
-
 /* OBC Watchdog task conofig */
 #define DWWD_STACK_SIZE 128
 #define DWWD_PRIORITY 0xFF
 #define DWD_PRELOAD_VAL 0xFBB // set tExp as 0.3 Seconds
+
+#endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */
