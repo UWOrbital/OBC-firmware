@@ -26,7 +26,6 @@ static TaskHandle_t watchdogTaskHandle = NULL;
 static void swWatcdogFeeder(void * pvParameters);
 
 static feedSwWatchdog(void){
-    BaseType_t xRunningPrivileged = prvRaisePrivilege();
     rtiREG1->WDKEY ^= RESET_DWD_CMD1;
     rtiREG1->WDKEY ^= RESET_DWD_CMD2;
 }
