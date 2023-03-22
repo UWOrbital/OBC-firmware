@@ -2,6 +2,10 @@
 #define DRIVERS_CC1120_INCLUDE_CC1120_REGS_H_
 #include <stdint.h>
 
+/* Constants */
+#define CC1120_RX_FIFO_SIZE             128U
+#define CC1120_TX_FIFO_SIZE             128U
+
 /* Standard address space registers */
 #define CC1120_REGS_IOCFG3              0x00U
 #define CC1120_REGS_IOCFG2              0x01U

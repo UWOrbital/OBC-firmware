@@ -20,7 +20,7 @@
  * @param inb - Buffer to store the received byte.
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcuCC1120SpiTransfer(uint8_t data, uint8_t *inb);
+obc_error_code_t mcuCC1120SpiTransfer(uint8_t outb, uint8_t *inb);
 
 /**
  * @brief Calls the correct CS assert function based on the MCU selected.

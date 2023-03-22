@@ -183,7 +183,7 @@ obc_error_code_t cc1120StrobeSpi(uint8_t addr) {
 }
 
 /**
- * @brief - Reads consecutive registers from the FIFO memory.
+ * @brief - Reads consecutive registers from the RX FIFO memory.
  * 
  * @param data - The array to store the read data, or a pointer to a single uint8_t if len=1.
  * @param len - The number of registers to read.
@@ -196,7 +196,7 @@ obc_error_code_t cc1120ReadFifo(uint8_t data[], uint8_t len) {
     if (data == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (len < 1)
+    if (len < 1 || len > CC1120_TX_FIFO_SIZE)
         return OBC_ERR_CODE_INVALID_ARG;
 
     uint8_t header = (len > 1) ? (READ_BIT | BURST_BIT | CC1120_REGS_FIFO_ACCESS_STD) :
@@ -214,7 +214,7 @@ obc_error_code_t cc1120ReadFifo(uint8_t data[], uint8_t len) {
 }
 
 /**
- * @brief - Writes consecutive registers to the FIFO memory.
+ * @brief - Writes consecutive registers to the TX FIFO memory.
  * 
  * @param data - The array of data to write to the registers, or a pointer to a single uint8_t if len=1.
  * @param len - The number of registers to write.
@@ -227,7 +227,7 @@ obc_error_code_t cc1120WriteFifo(uint8_t data[], uint8_t len) {
     if (data == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (len < 1)
+    if (len < 1 || len > CC1120_TX_FIFO_SIZE)
         return OBC_ERR_CODE_INVALID_ARG;
 
     uint8_t header = (len > 1) ? (BURST_BIT | CC1120_REGS_FIFO_ACCESS_STD) :
