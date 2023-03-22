@@ -1,6 +1,7 @@
 #ifndef COMMON_INCLUDE_OBC_TASK_CONFIG_H_
 #define COMMON_INCLUDE_OBC_TASK_CONFIG_H_
 
+#include <FreeRTOS.h>
 #include <os_task.h>
 
 /* Supervisor task config */
