@@ -94,6 +94,8 @@ static void commandManagerTask(void *pvParameters) {
 
     while (1) {
         if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
+            LOG_DEBUG("Received command %u", cmd.id);
+
             if (!cmd.isTimeTagged) {
                 // TODO: Deal with error code
                 LOG_IF_ERROR_CODE(execCommandCallback(&cmd));
