@@ -37,7 +37,7 @@
     #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
 
 #elif defined(OBC_REVISION_2)
-    #error Serial port or Fram SPI module not chosen for OBC_REVISION_2
+    #error Board configuration not defined for OBC_REVISION_2
 
 #else
     #error Board configuration not defined
