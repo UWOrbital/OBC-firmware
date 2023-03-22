@@ -9,6 +9,11 @@
 #include "obc_board_config.h"
 #include <sys_common.h>
 
+//SPI values
+static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0,
+                                    .CSNR = SPI_CS_NONE, 
+                                    .DFSEL = FRAM_spiFMT, 
+                                    .WDEL = 0};
 
 //FRAM OPCODES
 #define OP_WRITE_ENABLE         0x06U
