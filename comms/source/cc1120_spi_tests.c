@@ -4,8 +4,6 @@
 #include "cc1120_mcu.h"
 #include <string.h>
 
-union cc_st ccstatus;
-
 uint8_t CC1120_REGS_DEFAULTS[CC1120_REGS_STD_SPACE_SIZE] = {
     CC1120_DEFAULTS_IOCFG3,
     CC1120_DEFAULTS_IOCFG2,
