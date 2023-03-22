@@ -5,19 +5,11 @@
 #include <stdbool.h>
 #include "obc_errors.h"
 
-#define R_BIT 1 << 7
+#define READ_BIT 1 << 7
 #define BURST_BIT 1 << 6
 
-struct cc_status {
-  uint8_t res : 4;
-  uint8_t state : 3;
-  uint8_t chip_ready : 1;
-};
-
-union cc_st {
-  struct cc_status ccst;
-  uint8_t data;
-};
+#define CHIP_READY 1 << 7
+#define CHIP_STATE 0b1110000
 
 /**
  * @brief - Reads from consecutive registers from the CC1120.
