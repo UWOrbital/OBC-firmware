@@ -10,6 +10,7 @@ typedef enum {
     OBC_ERR_CODE_MUTEX_TIMEOUT = 4,
     OBC_ERR_CODE_BUFF_TOO_SMALL = 5,
     OBC_ERR_CODE_LOG_MSG_SILENCED = 6,
+    OBC_ERR_CODE_INVALID_STATE = 7,
 
     /* Driver Errors 100 - 199*/
     OBC_ERR_CODE_SPI_FAILURE = 100,
@@ -18,7 +19,7 @@ typedef enum {
     OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE = 103,
 
     /* CDH errors 200 - 299 */
-
+    OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
 
     /* ADCS errors 300 - 399 */
 

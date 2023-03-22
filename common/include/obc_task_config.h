@@ -1,6 +1,7 @@
 #ifndef COMMON_INCLUDE_OBC_TASK_CONFIG_H_
 #define COMMON_INCLUDE_OBC_TASK_CONFIG_H_
 
+#include <FreeRTOS.h>
 #include <os_task.h>
 
 /* Supervisor task config */
@@ -12,6 +13,11 @@
 #define TELEMETRY_STACK_SIZE   1024U
 #define TELEMETRY_NAME         "telemetry"
 #define TELEMETRY_PRIORITY     tskIDLE_PRIORITY + 1U
+
+/* Command Manager task config */
+#define CMD_MANAGER_TASK_STACK_SIZE 1024U
+#define CMD_MANAGER_TASK_PRIORITY   1U
+#define CMD_MANAGER_TASK_NAME       "cmdManager"
 
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U
