@@ -10,7 +10,7 @@
     // Fram SPI config
     #define FRAM_spiREG     spiREG3
     #define FRAM_spiPORT    spiPORT3
-    #define FRAM_CS         1
+    #define FRAM_CS         1UL
     #define FRAM_spiFMT     SPI_FMT_1
 
     // SD Card SPI config
@@ -27,7 +27,7 @@
     // Fram SPI config
     #define FRAM_spiREG     spiREG1
     #define FRAM_spiPORT    spiPORT1
-    #define FRAM_CS         1
+    #define FRAM_CS         1UL
     #define FRAM_spiFMT     SPI_FMT_1
     
     // SD Card SPI config
