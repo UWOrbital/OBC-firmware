@@ -1,5 +1,5 @@
-#ifndef CC1120_MCU_H
-#define CC1120_MCU_H
+#ifndef DRIVERS_CC1120_INCLUDE_CC1120_MCU_H_
+#define DRIVERS_CC1120_INCLUDE_CC1120_MCU_H_
 
 #include "obc_errors.h"
 #include <stdarg.h>
@@ -12,20 +12,20 @@
  * @param inb - Buffer to store the received byte.
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcu_cc1120_spi_transfer(uint8_t data, uint8_t *inb);
+obc_error_code_t mcuCC1120SpiTransfer(uint8_t data, uint8_t *inb);
 
 /**
  * @brief Calls the correct CS assert function based on the MCU selected.
  * 
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcu_cc1120_cs_assert();
+obc_error_code_t mcuCC1120CSAssert(void);
 
 /**
  * @brief Calls the correct CS deassert function based on the MCU selected.
  * 
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcu_cc1120_cs_deassert();
+obc_error_code_t mcuCC1120CSDeassert(void);
 
-#endif /* CC1120_MCU_H */
+#endif /* DRIVERS_CC1120_INCLUDE_CC1120_MCU_H_ */

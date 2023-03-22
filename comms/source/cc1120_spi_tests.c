@@ -73,7 +73,7 @@ obc_error_code_t cc1120_test_spi_read(void) {
     uint8_t data;
     
     uint8_t burstData[CC1120_REGS_EXT_ADDR];
-    errCode = cc1120_read_spi(addr, burstData, CC1120_REGS_EXT_ADDR);
+    errCode = cc1120ReadSpi(addr, burstData, CC1120_REGS_EXT_ADDR);
 
     LOG_IF_ERROR_CODE(errCode);
     RETURN_IF_ERROR_CODE(errCode);
@@ -85,7 +85,7 @@ obc_error_code_t cc1120_test_spi_read(void) {
     }
     
     if (errCode == OBC_ERR_CODE_SUCCESS) {
-        errCode = cc1120_read_ext_addr_spi(CC1120_REGS_EXT_MARCSTATE, &data, 1);
+        errCode = cc1120ReadExtAddrSpi(CC1120_REGS_EXT_MARCSTATE, &data, 1);
         
         LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
@@ -101,7 +101,7 @@ obc_error_code_t cc1120_test_spi_read(void) {
     if (errCode == OBC_ERR_CODE_SUCCESS) {
         uint8_t extBurstData[3];
         uint8_t expected[3] = {0x00U, 0x00U, 0x00U};
-        errCode = cc1120_read_ext_addr_spi(CC1120_REGS_EXT_FREQ2, extBurstData, 3);
+        errCode = cc1120ReadExtAddrSpi(CC1120_REGS_EXT_FREQ2, extBurstData, 3);
 
         if (errCode != OBC_ERR_CODE_SUCCESS) {
             errCode = CC1120_ERR_CODE_TEST_FAILURE;

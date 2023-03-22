@@ -9,7 +9,7 @@
  * @param inb - Buffer to store the received byte.
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcu_cc1120_spi_transfer(uint8_t outb, uint8_t *inb) {
+obc_error_code_t mcuCC1120SpiTransfer(uint8_t outb, uint8_t *inb) {
     spiDAT1_t spiConfig;
     spiConfig.CS_HOLD = false;
     spiConfig.WDEL = false;
@@ -23,7 +23,7 @@ obc_error_code_t mcu_cc1120_spi_transfer(uint8_t outb, uint8_t *inb) {
  * 
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcu_cc1120_cs_assert() {
+obc_error_code_t mcuCC1120CSAssert(void) {
     return assertChipSelect(spiPORT4, 0);
 }
 
@@ -32,6 +32,6 @@ obc_error_code_t mcu_cc1120_cs_assert() {
  * 
  * @return error code - An error code from obc_errors.h
  */
-obc_error_code_t mcu_cc1120_cs_deassert() {
+obc_error_code_t mcuCC1120CSDeassert(void) {
     return deassertChipSelect(spiPORT4, 0);
 }

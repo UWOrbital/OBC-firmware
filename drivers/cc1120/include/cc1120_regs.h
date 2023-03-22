@@ -1,5 +1,5 @@
-#ifndef CC1120_REGS_H
-#define CC1120_REGS_H
+#ifndef DRIVERS_CC1120_INCLUDE_CC1120_REGS_H_
+#define DRIVERS_CC1120_INCLUDE_CC1120_REGS_H_
 #include <stdint.h>
 
 /* Standard address space registers */
@@ -398,4 +398,4 @@
 #define CC1120_EXT_DEFAULTS_FIFO_NUM_TXBYTES    0x0FU
 #define CC1120_EXT_DEFAULTS_FIFO_NUM_RXBYTES    0x00U
 
-#endif /* CC1120_REGS_H */
+#endif /* DRIVERS_CC1120_INCLUDE_CC1120_REGS_H_ */
