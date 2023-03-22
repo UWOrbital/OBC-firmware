@@ -38,7 +38,6 @@ obc_error_code_t cc1120ReadSpi(uint8_t addr, uint8_t data[], uint8_t len) {
 
     for(uint8_t i = 0; i < len; i++) {
         errCode = mcuCC1120SpiTransfer(0x00, data+i);
-        LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
     }
 
@@ -92,7 +91,6 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len)
 
     for(uint8_t i = 0; i < len; i++) {
         errCode = mcuCC1120SpiTransfer(0x00, data+i);
-        LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
     }
 
@@ -242,7 +240,6 @@ obc_error_code_t cc1120ReadFifo(uint8_t data[], uint8_t len) {
 
     for(uint8_t i = 0; i < len; i++) {
         errCode = mcuCC1120SpiTransfer(0x00, data+i);
-        LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
     }
 
@@ -278,7 +275,6 @@ obc_error_code_t cc1120WriteFifo(uint8_t data[], uint8_t len) {
 
     for(uint8_t i = 0; i < len; i++) {
         errCode = mcuCC1120SpiTransfer(0x00, data+i);
-        LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
     }
 
@@ -326,7 +322,6 @@ obc_error_code_t cc1120ReadFifoDirect(uint8_t addr, uint8_t data[], uint8_t len)
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
     for(uint8_t i = 0; i < len; i++) {
         errCode = mcuCC1120SpiTransfer(0x00, data+i);
-        LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
     }
 
@@ -375,7 +370,6 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
     for(uint8_t i = 0; i < len; i++) {
         errCode = mcuCC1120SpiTransfer(0x00, data+i);
-        LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
     }
     

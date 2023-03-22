@@ -1,5 +1,6 @@
 #include "cc1120_mcu.h"
 #include "obc_spi_io.h"
+#include "obc_logging.h"
 #include <stdio.h>
 
 /**
@@ -10,12 +11,14 @@
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcuCC1120SpiTransfer(uint8_t outb, uint8_t *inb) {
+    obc_error_code_t errCode;
     spiDAT1_t spiConfig;
     spiConfig.CS_HOLD = false;
     spiConfig.WDEL = false;
     spiConfig.DFSEL = 0;
     spiConfig.CSNR = SPI_CS_NONE;
-    return spiTransmitAndReceiveByte(spiREG4, &spiConfig, outb, inb);
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(spiREG4, &spiConfig, outb, inb));
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -24,7 +27,9 @@ obc_error_code_t mcuCC1120SpiTransfer(uint8_t outb, uint8_t *inb) {
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcuCC1120CSAssert(void) {
-    return assertChipSelect(spiPORT4, 0);
+    obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(assertChipSelect(spiPORT4, 0));
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -33,5 +38,7 @@ obc_error_code_t mcuCC1120CSAssert(void) {
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcuCC1120CSDeassert(void) {
-    return deassertChipSelect(spiPORT4, 0);
+    obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(deassertChipSelect(spiPORT4, 0));
+    return OBC_ERR_CODE_SUCCESS;
 }
