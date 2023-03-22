@@ -3,13 +3,23 @@
 
 #include "obc_logging.h"
 
-typedef unsigned char aes_block_t[128];
+#include <stdbool.h>
+
+#define DECODE_DATA_QUEUE_LENGTH 255U // fill in kater
+#define DECODE_DATA_QUEUE_ITEM_SIZE 278
+#define DECODE_DATA_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(1000)
+
+#define DECODE_TASK_NAME "decode"
+#define DECODE_STACK_SIZE 278
+#define DECODE_PRIORITY 1
+
+typedef uint8_t aes_block_t[128];
 
 //placeholder until command manager pr gets merged in since it will have this type defined already
 /*PLACEHOLDER*/
 typedef struct {
+    /*
 	union {
-        /*
 		tle_data_uplink_t tleDataUplink;
 		aro_data_uplink_t aroDataUplink;
         secondary_payload_activation_t secondayPayloadActivation;
@@ -24,8 +34,8 @@ typedef struct {
         echo_parm_mnger_value_t echoParmMngerValue;
         manually_activate_emergency_mode_specified_time_t manuallyActivateEmergencyModeSpecifiedTime;
         downlink_full_sys_logs_next_pass_t downlinkFullSysLogsNextPass;
-        */
 	};
+    */
 	uint32_t timestamp;
 	uint8_t id;
 	bool isTimeTagged;
@@ -40,6 +50,6 @@ obc_error_code_t aes128Decrypt(aes_block_t in, cmd_msg_t out);
 
 obc_error_code_t tabulateCommands(cmd_msg_t command);
 
-void initDecodeDataTask(void);
+void initDecodeTask(void);
 
 #endif /* COMMS_INCLUDE_CC1120_DECODE_H */
