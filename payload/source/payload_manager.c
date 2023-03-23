@@ -28,7 +28,7 @@ void initPayloadManager(void) {
     ASSERT( (payloadTaskStack != NULL) && (&payloadTaskBuffer != NULL) );
     if (payloadTaskHandle == NULL) {
         payloadTaskHandle = xTaskCreateStatic(vPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL, PAYLOAD_MANAGER_PRIORITY, payloadTaskStack, &payloadTaskBuffer);
-        LOG_INFO("Task has been created - <Payload Manager task> \n");
+        LOG_INFO("Task has been created - <%s> \n", PAYLOAD_MANAGER_TASK);
     }
 
 

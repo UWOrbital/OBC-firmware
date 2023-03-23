@@ -9,7 +9,7 @@
 #define PAYLOAD_MANAGER_STACK_SIZE   1024U
 #define PAYLOAD_MANAGER_NAME         "payload_manager"
 #define PAYLOAD_MANAGER_PRIORITY     1U
-
+#define PAYLOAD_MANAGER_TASK        "payload_manager task"
 /**
  * @enum	payload_event_id_t
  * @brief	payload event ID enum.
