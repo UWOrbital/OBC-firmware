@@ -152,7 +152,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
     if(txSemaphore == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-    
+
     if (len < 1)
     {
         return OBC_ERR_CODE_INVALID_ARG;
@@ -242,8 +242,9 @@ obc_error_code_t cc1120Receive(uint8_t data[])
     uint8_t temp = 0x40;
     RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
     
-    // Set packet length to 78 so that the correct number of bits
-    // are received when fixed packet mode gets reactivated after receiving 200 bytes
+    // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
+    // fixed packet mode gets reactivated after receiving 
+    // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
     temp = RX_EXPECTED_PACKET_SIZE % 256;
 
     RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1));
