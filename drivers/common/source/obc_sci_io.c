@@ -1,6 +1,7 @@
 #include "obc_sci_io.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
+#include "obc_board_config.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -12,18 +13,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-
-#ifdef RM46_LAUNCHPAD
-	#define UART_PRINT_REG scilinREG
-	#define UART_READ_REG scilinREG 
-#elif defined(OBC_REVISION_1)
-	#define UART_PRINT_REG sciREG 
-	#define UART_READ_REG sciREG
-#elif defined(OBC_REVISION_2)
-	#error Serial port not yet chosen for OBC_REVISION_2
-#else
-	#error Board not defined
-#endif
 
 #define MAX_PRINTF_SIZE 128U
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
