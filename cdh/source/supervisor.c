@@ -70,8 +70,6 @@ static void sendStartupMessages(void) {
     /* TODO: Add startup messages to other tasks */
 }
 
-#include "command_id.h"
-
 static void vSupervisorTask(void * pvParameters) {
     ASSERT(supervisorQueueHandle != NULL);
 
@@ -84,8 +82,8 @@ static void vSupervisorTask(void * pvParameters) {
     initPayloadManager();
 
     /* Send initial messages to system queues */
-    sendStartupMessages();    
-    
+    sendStartupMessages();
+
     while(1) {
         supervisor_event_t inMsg;
         telemetry_event_t outMsgTelemetry;
