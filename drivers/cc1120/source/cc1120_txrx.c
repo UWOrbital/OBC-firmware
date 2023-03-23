@@ -95,7 +95,7 @@ obc_error_code_t cc1120GetBytesInTxFifo(uint8_t *numBytes)
     if(numBytes == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-    return cc1120_read_ext_addr_spi(CC1120_REGS_EXT_NUM_TXBYTES, numBytes, 1);
+    return cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_TXBYTES, numBytes, 1);
 }
 
 /**
@@ -109,7 +109,7 @@ obc_error_code_t cc1120GetState(uint8_t *stateNum)
     if(stateNum == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-    obc_error_code_t errCode = cc1120_read_ext_addr_spi(CC1120_REGS_EXT_MARCSTATE, stateNum, 1);
+    obc_error_code_t errCode = cc1120ReadExtAddrSpi(CC1120_REGS_EXT_MARCSTATE, stateNum, 1);
     *stateNum &= 0b11111;
     return errCode;
 }
@@ -125,17 +125,17 @@ obc_error_code_t cc1120Init(void)
 
     for (uint8_t i = 0; i < sizeof(cc1120SettingsStd) / sizeof(register_setting_t); i++)
     {
-        RETURN_IF_ERROR_CODE(cc1120_write_spi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1));        
+        RETURN_IF_ERROR_CODE(cc1120WriteSpi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1));        
     }
 
     for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++)
     {
-        RETURN_IF_ERROR_CODE(cc1120_write_ext_addr_spi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
+        RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
     }
 
     initTxRxSemaphores();
 
-    return cc1120_strobe_spi(CC1120_STROBE_SFSTXON);
+    return cc1120StrobeSpi(CC1120_STROBE_SFSTXON);
 }
 
 /**
@@ -165,12 +165,12 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
     {
         // Temporarily set packet size to infinite
         uint8_t temp = 0x40;
-        RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
+        RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
         
         // Set packet length to mod(len, 256) so that the correct number of bits
         // are sent when fixed packet mode gets reactivated
         temp = len % 256;
-        RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1));
+        RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &temp, 1));
         
         largePacketFlag = true;
     }
@@ -178,15 +178,15 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
     { // If packet size < 255, use variable packet length mode
         // Set to variable packet length mode
         uint8_t temp = 0x20;
-        RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
+        RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
         
         // Set max packet size
         temp = CC1120_MAX_PACKET_LEN;
-        RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1));
+        RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &temp, 1));
         
         // Write current packet size
         uint8_t variableDataLen = (uint8_t)len;
-        RETURN_IF_ERROR_CODE(cc1120_write_fifo(&variableDataLen, 1)); // Write packet size
+        RETURN_IF_ERROR_CODE(cc1120WriteFifo(&variableDataLen, 1)); // Write packet size
     }
 
 // Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD more bytes
@@ -194,21 +194,21 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
     for (i = 0; i < len / TXRX_INTERRUPT_THRESHOLD; i++)
     {
         if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120_write_fifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
         }
-        RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_STX));
+        RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
     }
     if (largePacketFlag){
         // If we had len > 255 then switch back to fixed packet length mode
         uint8_t temp = 0;
-        RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
+        RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
     }
 
     // send the remaing mod(len, TXRX_INTERRUPT_THRESHOLD) bytes
     if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120_write_fifo(data + i*TXRX_INTERRUPT_THRESHOLD, len - i*TXRX_INTERRUPT_THRESHOLD));
+            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*TXRX_INTERRUPT_THRESHOLD, len - i*TXRX_INTERRUPT_THRESHOLD));
     }
-    RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_STX));
+    RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
     return errCode;
 }
@@ -223,7 +223,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
  */
 obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes)
 {
-    return cc1120_read_ext_addr_spi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1);
+    return cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1);
 }
 
 /**
@@ -240,31 +240,31 @@ obc_error_code_t cc1120Receive(uint8_t data[])
     }
     // Temporarily set packet size to infinite
     uint8_t temp = 0x40;
-    RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
     
     // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
     // fixed packet mode gets reactivated after receiving 
     // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
     temp = RX_EXPECTED_PACKET_SIZE % 256;
 
-    RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_LEN, &temp, 1));
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &temp, 1));
     
-    RETURN_IF_ERROR_CODE(cc1120_strobe_spi(CC1120_STROBE_SRX));
+    RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRX));
 
     uint32_t i;
     // See chapters 8.1, 8.4, 8.5
     for (i = 0; i < (RX_EXPECTED_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD); ++i){
         if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120_read_fifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+            RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
         }
     }
 
     // Set to fixed packet length mode
     temp = 0x00;
-    RETURN_IF_ERROR_CODE(cc1120_write_spi(CC1120_REGS_PKT_CFG0, &temp, 1));
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
         
     if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) == pdTRUE){
-        RETURN_IF_ERROR_CODE(cc1120_read_fifo(data + i*TXRX_INTERRUPT_THRESHOLD, RX_EXPECTED_PACKET_SIZE - i*TXRX_INTERRUPT_THRESHOLD));
+        RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, RX_EXPECTED_PACKET_SIZE - i*TXRX_INTERRUPT_THRESHOLD));
     }
 
     return errCode;

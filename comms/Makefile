@@ -8,9 +8,24 @@ include $(ROOT_DIR)/global_vars.mk
 
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += drivers/source
+
+# Drivers
+SRC_DIRS += drivers/common/source
+SRC_DIRS += drivers/cc1120/source
+
+# Modules
 SRC_DIRS += common/source
 SRC_DIRS += comms/source
+
+# Reliance Edge File System
+SRC_DIRS += reliance_edge/fatfs_port
+SRC_DIRS += reliance_edge/bdev
+SRC_DIRS += reliance_edge/core/driver
+SRC_DIRS += reliance_edge/fse
+SRC_DIRS += reliance_edge/os/freertos/services
+SRC_DIRS += reliance_edge/posix
+SRC_DIRS += reliance_edge/util
+SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.s))
