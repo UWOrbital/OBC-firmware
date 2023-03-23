@@ -2,6 +2,9 @@
 #define CC1120_REGS_H
 #include <stdint.h>
 
+#define CC1120_MAX_PACKET_LEN 255
+#define CC1120_TX_FIFO_SIZE 128
+
 /* Standard address space registers */
 #define CC1120_REGS_IOCFG3              0x00U
 #define CC1120_REGS_IOCFG2              0x01U
