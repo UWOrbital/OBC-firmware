@@ -6,30 +6,14 @@
 #include "obc_spi_io.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
+#include "obc_board_config.h"
 #include <sys_common.h>
 
-//SPI Values
-#ifdef RM46_LAUNCHPAD
-    #define FRAM_spiREG     spiREG3
-    #define FRAM_spiPORT    spiPORT3
-    #define FRAM_CS         1
-    static spiDAT1_t framSPIDataFmt = {.CS_HOLD=0,
-                                        .CSNR = SPI_CS_NONE, 
-                                        .DFSEL = SPI_FMT_1, 
-                                        .WDEL = 0};
-#elif defined(OBC_REVISION_1)
-    #define FRAM_spiREG     spiREG1
-    #define FRAM_spiPORT    spiPORT1
-    #define FRAM_CS         1
-    static spiDAT1_t framSPIDataFmt = {.CS_HOLD=0,
-                                        .CSNR = SPI_CS_NONE, 
-                                        .DFSEL = SPI_FMT_1, 
-                                        .WDEL = 0};
-#elif defined(OBC_REVISION_2)
-  #error FRAM SPI module not yet chosen for OBC_REVISION_2
-#else
-  #error Board not defined
-#endif
+//SPI values
+static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0,
+                                    .CSNR = SPI_CS_NONE, 
+                                    .DFSEL = FRAM_spiFMT, 
+                                    .WDEL = 0};
 
 //FRAM OPCODES
 #define OP_WRITE_ENABLE         0x06U
