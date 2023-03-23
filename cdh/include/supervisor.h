@@ -5,10 +5,6 @@
 
 #include <sys_common.h>
 
-/* Supervisor task config */
-#define SUPERVISOR_STACK_SIZE   1024U
-#define SUPERVISOR_NAME         "supervisor"
-#define SUPERVISOR_PRIORITY     1U
 #define SUPERVISOR_DELAY_TICKS  pdMS_TO_TICKS(1000)
 #define SUPERVISOR_TASK        "supervisor task"
 

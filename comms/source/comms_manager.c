@@ -1,6 +1,10 @@
 #include "comms_manager.h"
 #include "obc_errors.h"
+
 #include "obc_logging.h"
+
+#include "obc_task_config.h"
+
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

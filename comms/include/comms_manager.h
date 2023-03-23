@@ -5,11 +5,13 @@
 
 #include <sys_common.h>
 
+
 /* Comms Manager task config */
 #define COMMS_MANAGER_STACK_SIZE   1024U
 #define COMMS_MANAGER_NAME         "comms_manager"
 #define COMMS_MANAGER_PRIORITY     1U
 #define COMMS_MANAGER_TASK         "comms_manager task"
+
 
 /**
  * @enum	comms_event_id_t

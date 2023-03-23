@@ -5,10 +5,6 @@
 
 #include <sys_common.h>
 
-/* Telemetry task config */
-#define TELEMETRY_STACK_SIZE   1024U
-#define TELEMETRY_NAME         "telemetry"
-#define TELEMETRY_PRIORITY     1U
 #define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
 #define TELEMETRY_TASK         "telemetry task"
 

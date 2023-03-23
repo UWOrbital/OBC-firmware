@@ -5,11 +5,13 @@
 
 #include <sys_common.h>
 
+
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U
 #define ADCS_MANAGER_NAME         "adcs_manager"
 #define ADCS_MANAGER_TASK        "adcs_manager task"
 #define ADCS_MANAGER_PRIORITY     1U
+
 
 /**
  * @enum	adcs_event_id_t
