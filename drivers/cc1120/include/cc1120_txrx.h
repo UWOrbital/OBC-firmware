@@ -20,7 +20,6 @@
 #define TX_SEMAPHORE_TIMEOUT (TickType_t) 5000
 #define RX_SEMAPHORE_TIMEOUT (TickType_t) 30000
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
 
 typedef struct
 {
