@@ -150,7 +150,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
     if(txSemaphore == NULL){
-        return OBC_ERR_CODE_INVALID_ARG;
+        return OBC_ERR_CODE_INVALID_STATE;
     }
 
     if (len < 1)
@@ -236,7 +236,7 @@ obc_error_code_t cc1120Receive(uint8_t data[])
 {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     if(rxSemaphore == NULL){
-        return OBC_ERR_CODE_INVALID_ARG;
+        return OBC_ERR_CODE_INVALID_STATE;
     }
     // Temporarily set packet size to infinite
     uint8_t temp = 0x40;
