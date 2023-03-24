@@ -99,7 +99,7 @@ void spiInit(void)
                   | (uint32)((uint32)0U << 22U)  /* parity enable */
                   | (uint32)((uint32)0U << 21U)  /* wait on enable */
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
-                  | (uint32)((uint32)1U << 17U)  /* clock polarity */
+                  | (uint32)((uint32)0U << 17U)  /* clock polarity */
                   | (uint32)((uint32)0U << 16U)  /* clock phase */
                   | (uint32)((uint32)243U << 8U) /* baudrate prescale */
                   | (uint32)((uint32)8U << 0U);  /* data word length */
@@ -452,7 +452,7 @@ void spiInit(void)
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
                   | (uint32)((uint32)0U << 17U)  /* clock polarity */
                   | (uint32)((uint32)0U << 16U)  /* clock phase */
-                  | (uint32)((uint32)19U << 8U) /* baudrate prescale */
+                  | (uint32)((uint32)12U << 8U) /* baudrate prescale */
                   | (uint32)((uint32)8U << 0U);  /* data word length */
 
     /** - Data Format 1 */
@@ -463,7 +463,7 @@ void spiInit(void)
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
                   | (uint32)((uint32)0U << 17U)  /* clock polarity */
                   | (uint32)((uint32)0U << 16U)  /* clock phase */
-                  | (uint32)((uint32)109U << 8U) /* baudrate prescale */
+                  | (uint32)((uint32)72U << 8U) /* baudrate prescale */
                   | (uint32)((uint32)16U << 0U);  /* data word length */
 
     /** - Data Format 2 */
@@ -474,7 +474,7 @@ void spiInit(void)
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
                   | (uint32)((uint32)0U << 17U)  /* clock polarity */
                   | (uint32)((uint32)0U << 16U)  /* clock phase */
-                  | (uint32)((uint32)109U << 8U) /* baudrate prescale */
+                  | (uint32)((uint32)72U << 8U) /* baudrate prescale */
                   | (uint32)((uint32)16U << 0U);  /* data word length */
 
     /** - Data Format 3 */
@@ -485,7 +485,7 @@ void spiInit(void)
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
                   | (uint32)((uint32)0U << 17U)  /* clock polarity */
                   | (uint32)((uint32)0U << 16U)  /* clock phase */
-                  | (uint32)((uint32)109U << 8U) /* baudrate prescale */
+                  | (uint32)((uint32)72U << 8U) /* baudrate prescale */
                   | (uint32)((uint32)16U << 0U);  /* data word length */
 
     /** - set interrupt levels */
@@ -1188,3 +1188,15 @@ void spi4GetConfigValue(spi_config_reg_t *config_reg, config_value_type_t type)
         config_reg->CONFIG_FMT3  = spiREG4->FMT3;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
