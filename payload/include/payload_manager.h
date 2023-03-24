@@ -5,10 +5,16 @@
 
 #include <sys_common.h>
 
+
 /* Payload Manager task config */
 #define PAYLOAD_MANAGER_STACK_SIZE   1024U
 #define PAYLOAD_MANAGER_NAME         "payload_manager"
 #define PAYLOAD_MANAGER_PRIORITY     1U
+<<<<<<< HEAD
+=======
+#define PAYLOAD_MANAGER_TASK        "payload_manager task"
+
+>>>>>>> bcd4eab84f09e920788929e447cfd35ba4079690
 /**
  * @enum	payload_event_id_t
  * @brief	payload event ID enum.
