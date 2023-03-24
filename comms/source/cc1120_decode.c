@@ -36,13 +36,13 @@ obc_error_code_t rsDecode(uint8_t *in, aes_block_t *out){
     return errCode;
 }
 
-obc_error_code_t aes128Decrypt(aes_block_t in, cmd_msg_t out){
+obc_error_code_t aes128Decrypt(aes_block_t in, uint8_t *cmdBytes){
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     /* Fill in later */
     return errCode;
 }
 
-obc_error_code_t tabulateCommands(cmd_msg_t command){
+obc_error_code_t tabulateCommands(uint8_t *cmdBytes, uint8_t *residualBytes){
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     /* Fill in later */
     return errCode;
@@ -67,15 +67,26 @@ static void vDecodeTask(void * pvParameters){
         uint8_t data[278];
         if(xQueueReceive(decodeDataQueueHandle, data, DECODE_DATA_QUEUE_WAIT_PERIOD) == pdPASS){
             uint8_t axPacket[255];
+
             RETURN_IF_ERROR_CODE(ax25Recv(data, axPacket));
+
             aes_block_t aesBlocks[2];
+            
             RETURN_IF_ERROR_CODE(rsDecode(data, aesBlocks[0]));
+
             RETURN_IF_ERROR_CODE(rsDecode(data+128, aesBlocks[1]));
-            cmd_msg_t commands[2];
-            RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], commands[0]));
-            RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], commands[1]));
-            RETURN_IF_ERROR_CODE(tabulateCommands(commands[0]));
-            RETURN_IF_ERROR_CODE(tabulateCommands(commands[1]));
+
+            uint8_t commands[128];
+            uint8_t residual[LARGEST_COMMAND_SIZE - 1];
+            memset(residual, 0, sizeof(residual));
+
+            RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], commands));
+
+            RETURN_IF_ERROR_CODE(tabulateCommands(commands, residual));
+
+            RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], commands));
+
+            RETURN_IF_ERROR_CODE(tabulateCommands(commands, residual));
         }
 
     }

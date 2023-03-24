@@ -13,7 +13,10 @@
 #define DECODE_STACK_SIZE 278
 #define DECODE_PRIORITY 1
 
-typedef uint8_t aes_block_t[128];
+#define LARGEST_COMMAND_SIZE 45
+#define AES_BLOCK_SIZE 128
+
+typedef uint8_t aes_block_t[AES_BLOCK_SIZE];
 
 //placeholder until command manager pr gets merged in since it will have this type defined already
 /*PLACEHOLDER*/
@@ -46,9 +49,9 @@ obc_error_code_t ax25Recv(uint8_t *in, uint8_t *out);
 
 obc_error_code_t rsDecode(uint8_t *in, aes_block_t *out);
 
-obc_error_code_t aes128Decrypt(aes_block_t in, cmd_msg_t out);
+obc_error_code_t aes128Decrypt(aes_block_t in, uint8_t *cmdBytes);
 
-obc_error_code_t tabulateCommands(cmd_msg_t command);
+obc_error_code_t tabulateCommands(uint8_t *cmdBytes, uint8_t *residualBytes);
 
 void initDecodeTask(void);
 
