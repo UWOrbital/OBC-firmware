@@ -38,7 +38,7 @@ void initSupervisor(void) {
     ASSERT( (supervisorTaskStack != NULL) && (&supervisorTaskBuffer != NULL) );
     if (supervisorTaskHandle == NULL) {
         supervisorTaskHandle = xTaskCreateStatic(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL, SUPERVISOR_PRIORITY, supervisorTaskStack, &supervisorTaskBuffer);
-        LOG_INFO("Task has been created - <%s> \n", SUPERVISOR_TASK);
+        LOG_INFO("Task has been created - <%s task> \n", SUPERVISOR_NAME);
     }
 
 

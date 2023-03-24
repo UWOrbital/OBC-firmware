@@ -10,7 +10,7 @@
 #define SUPERVISOR_NAME         "supervisor"
 #define SUPERVISOR_PRIORITY     1U
 #define SUPERVISOR_DELAY_TICKS  pdMS_TO_TICKS(1000)
-#define SUPERVISOR_TASK        "supervisor task"
+
 
 /**
  * @enum	supervisor_event_id_t

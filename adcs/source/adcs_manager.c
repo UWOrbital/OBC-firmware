@@ -28,7 +28,7 @@ void initADCSManager(void) {
     ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
     if (adcsTaskHandle == NULL) {
         adcsTaskHandle = xTaskCreateStatic(vADCSManagerTask, ADCS_MANAGER_NAME, ADCS_MANAGER_STACK_SIZE, NULL, ADCS_MANAGER_PRIORITY, adcsTaskStack, &adcsTaskBuffer);
-        LOG_INFO("Task has been created - <%s> \n", ADCS_MANAGER_TASK );
+        LOG_INFO("Task has been created - <%s task> \n", ADCS_MANAGER_NAME );
     }
 
     ASSERT( (adcsQueueStack != NULL) && (&adcsQueue != NULL) );

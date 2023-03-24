@@ -10,7 +10,6 @@
 #define TELEMETRY_NAME         "telemetry"
 #define TELEMETRY_PRIORITY     1U
 #define TELEMETRY_DELAY_TICKS  pdMS_TO_TICKS(1000)
-#define TELEMETRY_TASK         "telemetry task"
 
 /**
  * @enum	telemetry_event_id_t

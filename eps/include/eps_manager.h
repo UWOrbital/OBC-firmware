@@ -9,7 +9,6 @@
 #define EPS_MANAGER_STACK_SIZE   1024U
 #define EPS_MANAGER_NAME         "eps_manager"
 #define EPS_MANAGER_PRIORITY     1U
-#define EPS_MANAGER_TASK         "eps_manager task"
 
 /**
  * @enum	eps_event_id_t
