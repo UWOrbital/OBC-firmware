@@ -6,10 +6,7 @@
 #include <sys_common.h>
 
 
-/* EPS Manager task config */
-#define EPS_MANAGER_STACK_SIZE   1024U
-#define EPS_MANAGER_NAME         "eps_manager"
-#define EPS_MANAGER_PRIORITY     1U
+
 
 
 /**

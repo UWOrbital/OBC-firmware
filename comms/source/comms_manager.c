@@ -32,7 +32,7 @@ void initCommsManager(void) {
     ASSERT( (commsTaskStack != NULL) && (&commsTaskBuffer != NULL) );
     if (commsTaskHandle == NULL) {
         commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, NULL, COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
-        LOG_INFO("Task has been created - <%s task> \n", COMMS_MANAGER_NAME);
+        LOG_DEBUG(COMMS_MANAGER_NAME " was created.");
     }
     
 

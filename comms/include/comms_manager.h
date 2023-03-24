@@ -6,10 +6,6 @@
 #include <sys_common.h>
 
 
-/* Comms Manager task config */
-#define COMMS_MANAGER_STACK_SIZE   1024U
-#define COMMS_MANAGER_NAME         "comms_manager"
-#define COMMS_MANAGER_PRIORITY     1U
 
 
 /**
