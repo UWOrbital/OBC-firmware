@@ -1,5 +1,5 @@
-#ifndef COMMS_INCLUDE_CC1120_DECODE_H
-#define COMMS_INCLUDE_CC1120_DECODE_H
+#ifndef COMMS_INCLUDE_CC1120_RECV_TASK_H
+#define COMMS_INCLUDE_CC1120_RECV_TASK_H
 
 #include "obc_logging.h"
 
@@ -9,7 +9,7 @@
 #define DECODE_DATA_QUEUE_ITEM_SIZE 278
 #define DECODE_DATA_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(1000)
 
-#define DECODE_TASK_NAME "decode_task"
+#define RECV_TASK_NAME "cc1120_receive_task"
 #define DECODE_STACK_SIZE 278
 #define DECODE_PRIORITY 1
 
@@ -55,4 +55,4 @@ obc_error_code_t tabulateCommands(uint8_t *cmdBytes, uint8_t *residualBytes);
 
 void initDecodeTask(void);
 
-#endif /* COMMS_INCLUDE_CC1120_DECODE_H */
+#endif /* COMMS_INCLUDE_CC1120_RECV_TASK_H */
