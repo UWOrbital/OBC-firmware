@@ -53,22 +53,20 @@ endif
 
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/hal/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/cc1120/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/common/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/adcs/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/cdh/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/comms/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/eps/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/payload/include"
+INCLUDE_DIRS += -I"hal/include"
 
-# Reliance Edge File System
-INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
-INCLUDE_DIRS += -I"reliance_edge/include"
-INCLUDE_DIRS += -I"reliance_edge/core/include"
-INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
-INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
+# Drivers
+INCLUDE_DIRS += -I"drivers/common/include"
+INCLUDE_DIRS += -I"drivers/ds3232/include"
+INCLUDE_DIRS += -I"drivers/fram/include"
+INCLUDE_DIRS += -I"drivers/lm75bd/include"
+
+INCLUDE_DIRS += -I"common/include"
+INCLUDE_DIRS += -I"adcs/include"
+INCLUDE_DIRS += -I"cdh/include"
+INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"eps/include"
+INCLUDE_DIRS += -I"payload/include"
 
 # Reliance Edge File System
 INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
