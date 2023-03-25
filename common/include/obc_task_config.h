@@ -15,9 +15,9 @@
 #define TELEMETRY_PRIORITY     tskIDLE_PRIORITY + 1U
 
 /* Command Manager task config */
-#define CMD_MANAGER_TASK_STACK_SIZE 1024U
-#define CMD_MANAGER_TASK_PRIORITY   1U
-#define CMD_MANAGER_TASK_NAME       "cmd_manager"
+#define CMD_MANAGER_STACK_SIZE 1024U
+#define CMD_MANAGER_NAME       "cmd_manager"
+#define CMD_MANAGER_PRIORITY   tskIDLE_PRIORITY + 1U
 
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U

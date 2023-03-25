@@ -15,7 +15,7 @@
 
 static TaskHandle_t cmdManagerTaskHandle;
 static StaticTask_t cmdManagerTaskBuffer;
-static StackType_t cmdManagerTaskStack[CMD_MANAGER_TASK_STACK_SIZE];
+static StackType_t cmdManagerTaskStack[CMD_MANAGER_STACK_SIZE];
 
 static QueueHandle_t commandQueueHandle;
 static StaticQueue_t commandQueue;
@@ -37,10 +37,10 @@ void initCommandManager(void) {
     if (cmdManagerTaskHandle == NULL) {
         cmdManagerTaskHandle = xTaskCreateStatic(
             commandManagerTask,
-            CMD_MANAGER_TASK_NAME,
-            CMD_MANAGER_TASK_STACK_SIZE,
+            CMD_MANAGER_NAME,
+            CMD_MANAGER_STACK_SIZE,
             NULL,
-            CMD_MANAGER_TASK_PRIORITY,
+            CMD_MANAGER_PRIORITY,
             cmdManagerTaskStack,
             &cmdManagerTaskBuffer
         );
