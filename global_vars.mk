@@ -56,6 +56,7 @@ INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 
 # Drivers
+INCLUDE_DIRS += -I"drivers/cc1120/include"
 INCLUDE_DIRS += -I"drivers/common/include"
 INCLUDE_DIRS += -I"drivers/ds3232/include"
 INCLUDE_DIRS += -I"drivers/fram/include"
