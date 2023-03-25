@@ -21,11 +21,15 @@ static QueueHandle_t commandQueueHandle;
 static StaticQueue_t commandQueue;
 static uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH*COMMAND_QUEUE_ITEM_SIZE];
 
-static const cmd_callback_t cmdCallbacks[NUM_CMDS] = {
+static const cmd_callback_t cmdCallbacks[] = {
     [CMD_EXEC_OBC_RESET] = execObcResetCmdCallback,
     [CMD_RTC_SYNC] = rtcSyncCmdCallback,
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = downlinkLogsNextPassCmdCallback
 };
+
+static const size_t cmdArraySize = sizeof(cmdCallbacks) / sizeof(cmd_callback_t);
+
+STATIC_ASSERT(sizeof(cmdCallbacks)/sizeof(cmd_callback_t) <= UINT8_MAX, "There are too many commands!");
 
 /**
  * @brief Task that manages the command queue and executes commands
@@ -80,25 +84,33 @@ static uint32_t getCurrentTime(void) {
 
 static void commandManagerTask(void *pvParameters) {
     obc_error_code_t errCode;
-    cmd_msg_t cmd;
 
     while (1) {
+        cmd_msg_t cmd;
         if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
             LOG_DEBUG("Received command %u", cmd.id);
 
-            if (cmd.id >= NUM_CMDS) {
+            // Check if the ID is a valid index
+            if (cmd.id >= cmdArraySize) {
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
                 continue;
             }
 
+            // Check if the ID has a callback
+            if (cmdCallbacks[cmd.id] == NULL) {
+                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
+                continue;
+            }
+
+            // If the command is not time-tagged, execute it immediately
             if (!cmd.isTimeTagged) {
                 // TODO: Deal with error code
                 LOG_IF_ERROR_CODE(cmdCallbacks[cmd.id](&cmd));
                 continue;
             }
 
+            // If the timetag is in the past, throw away the command
             if (cmd.timestamp < getCurrentTime()) {
-                // Throw away command
                 continue;
             }
 
