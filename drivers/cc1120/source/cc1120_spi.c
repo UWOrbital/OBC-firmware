@@ -334,7 +334,7 @@ obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
     // TODO: This is a hacky way to do this. We should implement a mutex + timeout.
     for (uint8_t i = 1; i <= 5; i++) {
         RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
-        if (!(ccStatus & CHIP_READY)) {
+        if ((ccStatus & CHIP_READY_MASK) == CHIP_READY) {
             errCode = OBC_ERR_CODE_SUCCESS;
             break;
         }

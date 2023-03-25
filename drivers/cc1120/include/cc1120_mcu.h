@@ -4,14 +4,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_spi_io.h"
-#include <stdarg.h>
 #include <stdint.h>
-
-#define CC1120_SPI_REG spiREG4
-#define CC1120_SPI_PORT spiPORT4
-#define CC1120_SPI_CS SPI_CS_NONE
-#define CC1120_SPI_FMT 0
-#define CC1120_DEASSERT_RETURN_IF_ERROR_CODE(errCode) DEASSERT_RETURN_IF_ERROR_CODE(CC1120_SPI_PORT, CC1120_SPI_CS, errCode)
 
 /**
  * @brief Simultaneously sends and receives a byte over CC1120 SPI interface
