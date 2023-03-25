@@ -4,7 +4,7 @@
 #include "obc_errors.h"
 #include "command_data.h"
 
-typedef obc_error_code_t (*cmd_callback_t)(cmd_msg_t *cmd);
+typedef obc_error_code_t (*cmd_callback_t)(cmd_msg_t *);
 
 /* Declare all command callbacks below */
 
