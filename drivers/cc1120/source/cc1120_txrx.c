@@ -3,6 +3,7 @@
 #include "cc1120_mcu.h"
 #include "cc1120_spi.h"
 #include "cc1120_regs.h"
+#include "obc_math.h"
 
 
 #include <FreeRTOS.h>
@@ -162,6 +163,10 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
+    if (data == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
     bool largePacketFlag = false;
 
     // See section 8.1.5
@@ -173,7 +178,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         
         // Set packet length to mod(len, 256) so that the correct number of bits
         // are sent when fixed packet mode gets reactivated
-        temp = len % 256;
+        temp = len % (CC1120_MAX_PACKET_LEN + 1);
         RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &temp, 1));
         
         largePacketFlag = true;
@@ -193,14 +198,19 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         RETURN_IF_ERROR_CODE(cc1120WriteFifo(&variableDataLen, 1)); // Write packet size
     }
 
+    //Write TXRX_INTERRUPT_THRESHOLD bytes to TX fifo and activate TX mode
+    if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
+        RETURN_IF_ERROR_CODE(cc1120WriteFifo(data, min_uint32(len, (uint32_t) TXRX_INTERRUPT_THRESHOLD)));
+    }
+    RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
+
 // Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD more bytes
     uint32_t i;
-    for (i = 0; i < len / TXRX_INTERRUPT_THRESHOLD; i++)
+    for (i = 0; i < (len - TXRX_INTERRUPT_THRESHOLD) / TXRX_INTERRUPT_THRESHOLD; i++)
     {
         if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + (i+1)*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
         }
-        RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
     }
     if (largePacketFlag){
         // If we had len > 255 then switch back to fixed packet length mode
@@ -208,13 +218,17 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
     }
 
-    // send the remaing mod(len, TXRX_INTERRUPT_THRESHOLD) bytes
-    if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*TXRX_INTERRUPT_THRESHOLD, len - i*TXRX_INTERRUPT_THRESHOLD));
-    }
-    RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
+    // send the remaing mod(len, TXRX_INTERRUPT_THRESHOLD) bytes if we did not send them all before the for loop if 
+    // we had len > TXRX_INTERRUPT_THRESHOLD
+    // Also make sure we did not send all of bytes already due to len being a multiple of TXRX_INTERRUPT_THRESHOLD
 
-    return errCode;
+    if( (len > TXRX_INTERRUPT_THRESHOLD) && (len % TXRX_INTERRUPT_THRESHOLD != 0)){
+        if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
+            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + (i+1)*TXRX_INTERRUPT_THRESHOLD, len - (i+1)*TXRX_INTERRUPT_THRESHOLD));
+        }
+    }
+
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 /* RX functions */
@@ -234,13 +248,17 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes)
  * @brief Switches the cc1120 to RX mode to receive 278 bytes
  *
  * @param data - an array of 8-bit data with size of atleast 278 where received data is stored
+ * @param len - the length of the provided array
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Receive(uint8_t data[])
+obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
 {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     if(rxSemaphore == NULL){
         return OBC_ERR_CODE_INVALID_STATE;
+    }
+    if (len < 278){
+        return OBC_ERR_CODE_INVALID_ARG;
     }
     // Temporarily set packet size to infinite
     uint8_t temp = 0x40;
@@ -249,7 +267,7 @@ obc_error_code_t cc1120Receive(uint8_t data[])
     // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
     // fixed packet mode gets reactivated after receiving 
     // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
-    temp = RX_EXPECTED_PACKET_SIZE % 256;
+    temp = RX_EXPECTED_PACKET_SIZE % (CC1120_MAX_PACKET_LEN + 1);
 
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &temp, 1));
     
