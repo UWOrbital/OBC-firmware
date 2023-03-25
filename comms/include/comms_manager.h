@@ -13,7 +13,8 @@
  * Enum containing all possible event IDs passed to the comms event queue.
 */
 typedef enum {
-    COMMS_MANAGER_NULL_EVENT_ID
+    COMMS_MANAGER_NULL_EVENT_ID,
+    COMMS_MANAGER_BEGIN_DOWNLINK_EVENT_ID
 } comms_event_id_t;
 
 /**

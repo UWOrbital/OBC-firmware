@@ -2,8 +2,7 @@
 #include "obc_logging.h"
 #include "cc1120_mcu.h"
 #include "cc1120_spi.h"
-#include "cc1120_regs.h"
-
+#include "cc1120_defs.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
@@ -11,7 +10,6 @@
 #include <FreeRTOSConfig.h>
 
 #include <stdbool.h>
-
 
 static SemaphoreHandle_t rxSemaphore = NULL;
 static StaticSemaphore_t rxSemaphoreBuffer;
@@ -193,12 +191,12 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         RETURN_IF_ERROR_CODE(cc1120WriteFifo(&variableDataLen, 1)); // Write packet size
     }
 
-// Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD more bytes
+// Continously wait for the tx fifo to drop below (128 - CC1120_TXRX_INTERRUPT_THRESHOLD) bytes before writing CC1120_TXRX_INTERRUPT_THRESHOLD more bytes
     uint32_t i;
-    for (i = 0; i < len / TXRX_INTERRUPT_THRESHOLD; i++)
+    for (i = 0; i < len / CC1120_TXRX_INTERRUPT_THRESHOLD; i++)
     {
-        if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+        if (xSemaphoreTake(txSemaphore, CC1120_TX_SEMAPHORE_TIMEOUT) == pdTRUE){
+            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*CC1120_TXRX_INTERRUPT_THRESHOLD, CC1120_TXRX_INTERRUPT_THRESHOLD));
         }
         RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
     }
@@ -208,9 +206,9 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
     }
 
-    // send the remaing mod(len, TXRX_INTERRUPT_THRESHOLD) bytes
-    if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*TXRX_INTERRUPT_THRESHOLD, len - i*TXRX_INTERRUPT_THRESHOLD));
+    // send the remaing mod(len, CC1120_TXRX_INTERRUPT_THRESHOLD) bytes
+    if (xSemaphoreTake(txSemaphore, CC1120_TX_SEMAPHORE_TIMEOUT) == pdTRUE){
+            RETURN_IF_ERROR_CODE(cc1120WriteFifo(data + i*CC1120_TXRX_INTERRUPT_THRESHOLD, len - i*CC1120_TXRX_INTERRUPT_THRESHOLD));
     }
     RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
@@ -246,10 +244,10 @@ obc_error_code_t cc1120Receive(uint8_t data[])
     uint8_t temp = 0x40;
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
     
-    // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
+    // Set packet length to CC1120_TX_RX_PKT_SIZE % 256 so that the correct number of bits are received when
     // fixed packet mode gets reactivated after receiving 
-    // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
-    temp = RX_EXPECTED_PACKET_SIZE % 256;
+    // (CC1120_TX_RX_PKT_SIZE - (CC1120_TX_RX_PKT_SIZE % CC1120_TXRX_INTERRUPT_THRESHOLD)) bytes
+    temp = CC1120_TX_RX_PKT_SIZE % 256;
 
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &temp, 1));
     
@@ -257,9 +255,9 @@ obc_error_code_t cc1120Receive(uint8_t data[])
 
     uint32_t i;
     // See chapters 8.1, 8.4, 8.5
-    for (i = 0; i < (RX_EXPECTED_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD); ++i){
-        if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) == pdTRUE){
-            RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+    for (i = 0; i < (CC1120_TX_RX_PKT_SIZE/CC1120_TXRX_INTERRUPT_THRESHOLD); ++i){
+        if(xSemaphoreTake(rxSemaphore, CC1120_RX_SEMAPHORE_TIMEOUT) == pdTRUE){
+            RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*CC1120_TXRX_INTERRUPT_THRESHOLD, CC1120_TXRX_INTERRUPT_THRESHOLD));
         }
     }
 
@@ -267,8 +265,8 @@ obc_error_code_t cc1120Receive(uint8_t data[])
     temp = 0x00;
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &temp, 1));
         
-    if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) == pdTRUE){
-        RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, RX_EXPECTED_PACKET_SIZE - i*TXRX_INTERRUPT_THRESHOLD));
+    if(xSemaphoreTake(rxSemaphore, CC1120_RX_SEMAPHORE_TIMEOUT) == pdTRUE){
+        RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*CC1120_TXRX_INTERRUPT_THRESHOLD, CC1120_TX_RX_PKT_SIZE - i*CC1120_TXRX_INTERRUPT_THRESHOLD));
     }
 
     return errCode;
