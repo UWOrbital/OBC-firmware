@@ -107,3 +107,7 @@ obc_error_code_t SendToDecodeDataQueue(uint8_t *data) {
 
     return OBC_ERR_CODE_QUEUE_FULL;
 }
+
+QueueHandle_t getDecodeQueueHandle(void){
+    return decodeDataQueueHandle;
+}
