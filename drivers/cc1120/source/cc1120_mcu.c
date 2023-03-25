@@ -1,12 +1,6 @@
 #include "cc1120_mcu.h"
 #include "obc_spi_io.h"
 
-#define CC1120_SPI_REG spiREG4
-#define CC1120_SPI_PORT spiPORT4
-#define CC1120_SPI_CS SPI_CS_NONE
-#define CC1120_SPI_FMT SPI_FMT_0
-#define CC1120_DEASSERT_RETURN_IF_ERROR_CODE(errCode) DEASSERT_RETURN_IF_ERROR_CODE(CC1120_SPI_PORT, CC1120_SPI_CS, errCode)
-
 static const spiDAT1_t spiConfig = {
     .CS_HOLD = false,
     .WDEL = false,
