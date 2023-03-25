@@ -2,7 +2,6 @@
 #define DRIVERS_CC1120_INCLUDE_CC1120_SPI_H_
 
 #include <stdint.h>
-#include <stdbool.h>
 #include "obc_errors.h"
 
 #define READ_BIT 1 << 7

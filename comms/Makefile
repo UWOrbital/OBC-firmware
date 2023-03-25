@@ -16,6 +16,7 @@ SRC_DIRS += drivers/cc1120/source
 # Modules
 SRC_DIRS += common/source
 SRC_DIRS += comms/source
+SRC_DIRS += comms/tests
 
 # Reliance Edge File System
 SRC_DIRS += reliance_edge/fatfs_port

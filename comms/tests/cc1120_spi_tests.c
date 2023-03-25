@@ -1,6 +1,6 @@
 #include "cc1120_spi_tests.h"
 #include "cc1120_spi.h"
-#include "cc1120_regs.h"
+#include "cc1120_defs.h"
 #include "cc1120_mcu.h"
 #include <string.h>
 

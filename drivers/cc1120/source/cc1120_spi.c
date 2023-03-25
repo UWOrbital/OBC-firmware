@@ -1,5 +1,5 @@
 #include "cc1120_spi.h"
-#include "cc1120_regs.h"
+#include "cc1120_defs.h"
 #include "cc1120_mcu.h"
 #include "obc_logging.h"
 
@@ -31,7 +31,7 @@ obc_error_code_t cc1120ReadSpi(uint8_t addr, uint8_t data[], uint8_t len) {
     
 
     for(uint8_t i = 0; i < len; i++)
-        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, data+i));
+        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
     RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
     
@@ -53,9 +53,13 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len)
     if (data == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if ((addr > CC1120_REGS_EXT_PA_CFG3 && addr < CC1120_REGS_EXT_WOR_TIME1) ||
-        (addr > CC1120_REGS_EXT_XOSC_TEST0 && addr < CC1120_REGS_EXT_RXFIRST) ||
-        (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES))
+    if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_1_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_1_END))
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_2_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_2_END))
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES)
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (len < 1)
@@ -76,7 +80,7 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len)
     }
 
     for(uint8_t i = 0; i < len; i++)
-        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, data+i));
+        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
     RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
     
@@ -132,9 +136,13 @@ obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len
     if (data == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if ((addr > CC1120_REGS_EXT_PA_CFG3 && addr < CC1120_REGS_EXT_WOR_TIME1) ||
-        (addr > CC1120_REGS_EXT_XOSC_TEST0 && addr < CC1120_REGS_EXT_RXFIRST) ||
-        (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES))
+    if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_1_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_1_END))
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_2_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_2_END))
+        return OBC_ERR_CODE_INVALID_ARG;
+    
+    if (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES)
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (len < 1)
@@ -206,7 +214,7 @@ obc_error_code_t cc1120ReadFifo(uint8_t data[], uint8_t len) {
     CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
     for(uint8_t i = 0; i < len; i++)
-        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, data+i));
+        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
     RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -237,7 +245,7 @@ obc_error_code_t cc1120WriteFifo(uint8_t data[], uint8_t len) {
     CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
     for(uint8_t i = 0; i < len; i++)
-        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, data+i));
+        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
     RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -259,15 +267,6 @@ obc_error_code_t cc1120ReadFifoDirect(uint8_t addr, uint8_t data[], uint8_t len)
     if (data == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    /*
-    // Always true, since addr is uint8_t:
-    if (addr < CC1120_FIFO_TX_START || addr > CC1120_FIFO_RX_END) {
-        errCode = OBC_ERR_CODE_INVALID_ARG;
-        LOG_ERROR_CODE(errCode);
-        return errCode;
-    }
-    */
-
     if (len < 1)
         return OBC_ERR_CODE_INVALID_ARG;
 
@@ -280,7 +279,7 @@ obc_error_code_t cc1120ReadFifoDirect(uint8_t addr, uint8_t data[], uint8_t len)
     uint8_t ignore;
     CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
     for(uint8_t i = 0; i < len; i++)
-        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, data+i));
+        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
     RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -302,15 +301,6 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
     if (data == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    /*
-    // Always true, since addr is uint8_t:
-    if (addr < CC1120_FIFO_TX_START || addr > CC1120_FIFO_RX_END) {
-        errCode = OBC_ERR_CODE_INVALID_ARG;
-        LOG_ERROR_CODE(errCode);
-        return errCode;
-    }
-    */
-
     if (len < 1)
         return OBC_ERR_CODE_INVALID_ARG;
     
@@ -324,7 +314,7 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
     uint8_t ignore;
     CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
     for(uint8_t i = 0; i < len; i++)
-        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, data+i));
+        CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
     
     RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
     return OBC_ERR_CODE_SUCCESS;
