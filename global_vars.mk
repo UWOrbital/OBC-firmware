@@ -20,7 +20,6 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -Og
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -55,14 +54,27 @@ endif
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/hal/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/include"
+
+# Drivers
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/common/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/ds3232/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/fram/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/lm75bd/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/cc1120/include"
+
 INCLUDE_DIRS += -I"$(ROOT_DIR)/common/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/adcs/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/cdh/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/comms/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/eps/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/payload/include"
+
+# Reliance Edge File System
+INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/fatfs_port"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/core/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
 
 LIBS := 
 

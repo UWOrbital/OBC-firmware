@@ -7,11 +7,27 @@
 
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += drivers/source
+
+# Drivers
+SRC_DIRS += drivers/common/source
+SRC_DIRS += drivers/ds3232/source
+SRC_DIRS += drivers/fram/source
+SRC_DIRS += drivers/lm75bd/source
 SRC_DIRS += drivers/cc1120/source
+
 SRC_DIRS += common/source
 SRC_DIRS += adcs/source
 SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
 SRC_DIRS += eps/source
 SRC_DIRS += payload/source
+
+# Reliance Edge File System
+SRC_DIRS += reliance_edge/fatfs_port
+SRC_DIRS += reliance_edge/bdev
+SRC_DIRS += reliance_edge/core/driver
+SRC_DIRS += reliance_edge/fse
+SRC_DIRS += reliance_edge/os/freertos/services
+SRC_DIRS += reliance_edge/posix
+SRC_DIRS += reliance_edge/util
+SRC_DIRS += reliance_edge/projects/freertos_rm46/host
