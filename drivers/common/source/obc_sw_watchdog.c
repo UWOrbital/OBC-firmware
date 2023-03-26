@@ -18,21 +18,20 @@
 STATIC_ASSERT(MIN_DWD_PRELOAD_VAL<=DWD_PRELOAD_VAL && DWD_PRELOAD_VAL<=MAX_DWD_PRELOAD_VAL,
                 "Watchdog requires the preload value to be within minimum and maximum value.");
 
-static watchdogStack[DWWD_STACK_SIZE];
-static xWatchdogTaskBuffer;
+static StackType_t watchdogStack[DWWD_STACK_SIZE];
+static StaticTask_t xWatchdogTaskBuffer;
 
 static TaskHandle_t watchdogTaskHandle = NULL;
 
 static void swWatcdogFeeder(void * pvParameters);
 
-static feedSwWatchdog(void){
+static void feedSwWatchdog(void){
     rtiREG1->WDKEY ^= RESET_DWD_CMD1;
     rtiREG1->WDKEY ^= RESET_DWD_CMD2;
 }
 
 void initDWWDTask(void){
 
-    ASSERT(watchdogStack && &xWatchdogTaskBuffer);
     if(watchdogTaskHandle == NULL){
 
         watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder,
