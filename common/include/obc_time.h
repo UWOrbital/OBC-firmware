@@ -43,13 +43,5 @@ obc_error_code_t syncUnixTime(void);
  */
 obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, unix_time_t *unixTime);
 
-/**
- * @brief Fetch the current time from the RTC and convert it to unix time.
- * 
- * @param unixTime Buffer to store the unix time.
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
- */
-obc_error_code_t fetchCurrentTimeUnix(unix_time_t *unixTime);
-
 
 #endif /* COMMON_INCLUDE_OBC_TIME_H_ */

@@ -11,16 +11,6 @@
 
 static unix_time_t currUnixTime;
 
-obc_error_code_t syncUnixTime(void) {
-    obc_error_code_t errCode;
-
-    unix_time_t unixTime;
-    RETURN_IF_ERROR_CODE(fetchCurrentTimeUnix(&unixTime));
-
-    setCurrentUnixTime(unixTime);
-    return OBC_ERR_CODE_SUCCESS;
-}
-
 unix_time_t getCurrentUnixTime(void) {
     // TODO: Implement sequence lock
     return currUnixTime;
@@ -38,17 +28,17 @@ void incrementCurrentUnixTime(void) {
     currUnixTime++;
 }
 
-obc_error_code_t fetchCurrentTimeUnix(unix_time_t *unixTime) {
+obc_error_code_t syncUnixTime(void) {
     obc_error_code_t errCode;
-
-    if (unixTime == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
 
     rtc_date_time_t datetime;
     RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
 
-    RETURN_IF_ERROR_CODE(datetimeToUnix(&datetime, unixTime));
+    unix_time_t unixTime;
+    RETURN_IF_ERROR_CODE(datetimeToUnix(&datetime, &unixTime));
+
+    setCurrentUnixTime(unixTime);
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
