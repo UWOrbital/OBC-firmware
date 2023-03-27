@@ -105,10 +105,16 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (19) */
+
 if(port == gioPORTB){
+    // See section 3.4.1.1
+    // Triggered on rising edge so RX FIFO can be read once the signal that RX FIFO is above TXRX_INTERRUPT_THRESHOLD
+    // is asserted to avoid a FIFO overflow
     if (bit & (1 << 2)){
         xSemaphoreGiveFromISR(getRxSemaphore(), NULL);
     }
+    // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
+    // is deasserted to avoid a FIFO underflow
     if (bit & (1 << 3)){
         xSemaphoreGiveFromISR(getTxSemaphore(), NULL);
     }

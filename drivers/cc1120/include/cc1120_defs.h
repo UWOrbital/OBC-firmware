@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 /* Constants */
+#define CC1120_MAX_PACKET_LEN           255U
 #define CC1120_RX_FIFO_SIZE             128U
 #define CC1120_TX_FIFO_SIZE             128U
 
