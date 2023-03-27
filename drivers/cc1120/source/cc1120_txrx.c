@@ -200,7 +200,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
 
     //Write TXRX_INTERRUPT_THRESHOLD bytes to TX fifo and activate TX mode
     if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) == pdTRUE){
-        RETURN_IF_ERROR_CODE(cc1120WriteFifo(data, min_uint32(len, (uint32_t) TXRX_INTERRUPT_THRESHOLD)));
+        RETURN_IF_ERROR_CODE(cc1120WriteFifo(data, uint32Min(len, (uint32_t) TXRX_INTERRUPT_THRESHOLD)));
     }
     RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
