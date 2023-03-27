@@ -1,10 +1,8 @@
 #include "cc1120_spi_tests.h"
 #include "cc1120_spi.h"
-#include "cc1120_regs.h"
+#include "cc1120_defs.h"
 #include "cc1120_mcu.h"
 #include <string.h>
-
-union cc_st ccstatus;
 
 uint8_t CC1120_REGS_DEFAULTS[CC1120_REGS_STD_SPACE_SIZE] = {
     CC1120_DEFAULTS_IOCFG3,
@@ -73,25 +71,25 @@ obc_error_code_t cc1120_test_spi_read(void) {
     uint8_t data;
     
     uint8_t burstData[CC1120_REGS_EXT_ADDR];
-    errCode = cc1120_read_spi(addr, burstData, CC1120_REGS_EXT_ADDR);
+    errCode = cc1120ReadSpi(addr, burstData, CC1120_REGS_EXT_ADDR);
 
     LOG_IF_ERROR_CODE(errCode);
     RETURN_IF_ERROR_CODE(errCode);
 
     if (memcmp(CC1120_REGS_DEFAULTS, burstData, CC1120_REGS_EXT_ADDR)) {
-        errCode = CC1120_ERR_CODE_TEST_FAILURE;
+        errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
         LOG_ERROR("CC1120 burst read test failed.\n");
         return errCode;
     }
     
     if (errCode == OBC_ERR_CODE_SUCCESS) {
-        errCode = cc1120_read_ext_addr_spi(CC1120_REGS_EXT_MARCSTATE, &data, 1);
+        errCode = cc1120ReadExtAddrSpi(CC1120_REGS_EXT_MARCSTATE, &data, 1);
         
         LOG_IF_ERROR_CODE(errCode);
         RETURN_IF_ERROR_CODE(errCode);
             
         if (data != 0x41U) {
-            errCode = CC1120_ERR_CODE_TEST_FAILURE;
+            errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
             LOG_ERROR_CODE(errCode);
             LOG_ERROR("MARCSTATE read 0x%02X, expected 0x%02X\n", data, 0x41U);
             return errCode;
@@ -101,16 +99,16 @@ obc_error_code_t cc1120_test_spi_read(void) {
     if (errCode == OBC_ERR_CODE_SUCCESS) {
         uint8_t extBurstData[3];
         uint8_t expected[3] = {0x00U, 0x00U, 0x00U};
-        errCode = cc1120_read_ext_addr_spi(CC1120_REGS_EXT_FREQ2, extBurstData, 3);
+        errCode = cc1120ReadExtAddrSpi(CC1120_REGS_EXT_FREQ2, extBurstData, 3);
 
         if (errCode != OBC_ERR_CODE_SUCCESS) {
-            errCode = CC1120_ERR_CODE_TEST_FAILURE;
+            errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
             LOG_ERROR_CODE(errCode);
             return errCode;            
         }
 
         if (memcmp(extBurstData, expected, 3)) {
-            errCode = CC1120_ERR_CODE_TEST_FAILURE;
+            errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
             LOG_ERROR_CODE(errCode);
             return errCode;
         }
