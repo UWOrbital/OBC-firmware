@@ -28,8 +28,8 @@ static const register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_IOCFG2, 0x01U},
     // Set GPIO 1 to HighZ
     {CC1120_REGS_IOCFG1, 0x30U},
-    // Set GPIO 0 to EXT_OSC_EN (Not used in our case, so it can be changed in the future if needed)
-    {CC1120_REGS_IOCFG0, 0x3CU},
+    // Set GPIO 0 to PKT_SYNC_RXTX
+    {CC1120_REGS_IOCFG0, 0x06U},
     // Set the sync word as 16 bits and allow for < 2 bit error on sync word
     {CC1120_REGS_SYNC_CFG0, 0x09U},
     // Set sync word qualifier value threshold similar to the one talked about for preamble in section 6.8
