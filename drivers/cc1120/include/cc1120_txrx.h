@@ -4,19 +4,13 @@
 #include <stdint.h>
 #include "obc_logging.h"
 #include "obc_math.h"
+#include "ax25.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
 
-#define AX25_TOTAL_FLAG_BYTES 2
-#define AX25_ADDRESS_BYTES 16
-#define AX25_CONTROL_BYTES 2
-#define AX25_PID_BYTES 1
-#define AX25_FCS_BYTES 2
-#define AX25_INFO_BYTES 255
-#define AX25_PKT_LEN (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + AX25_INFO_BYTES)
 #define CC1120_TX_RX_PKT_SIZE AX25_PKT_LEN
 #define CC1120_TXRX_INTERRUPT_THRESHOLD 100
 #define CC1120_TX_SEMAPHORE_TIMEOUT (TickType_t) 5000

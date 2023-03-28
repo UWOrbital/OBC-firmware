@@ -24,6 +24,11 @@
 #define COMMS_MANAGER_NAME         "comms_manager"
 #define COMMS_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
+/* Comms transceiver transmit task config */
+#define CC1120_TRANSMIT_STACK_SIZE 512U
+#define CC1120_TRANSMIT_TASK_NAME "comms_transmit"
+#define CC1120_TRANSMIT_TASK_PRIORITY tskIDLE_PRIORITY + 1U
+
 /* EPS Manager task config */
 #define EPS_MANAGER_STACK_SIZE   1024U
 #define EPS_MANAGER_NAME         "eps_manager"

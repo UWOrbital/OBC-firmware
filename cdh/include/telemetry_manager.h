@@ -18,6 +18,20 @@
             sizeof(TELEMETRY_FILE_EXTENSION) + \
             TELEMETRY_FILE_NAME_MAX_LENGTH - 3 + 1 // -3 for the 3 %s in the format string, +1 for the null terminator
 
+#define TELEM_ID_SIZE_BYTES sizeof(telemetry_data_id_t)
+#define TELEM_TIMESTAMP_SIZE_BYTES sizeof(uint32_t)
+#define MAX_TELEM_PARAM_SIZE_BYTES sizeof(telemetry_param_t)
+#define MAX_SINGLE_TELEM_SIZE_BYTES (TELEM_ID_SIZE_BYTES + TELEM_TIMESTAMP_SIZE_BYTES + MAX_TELEM_PARAM_SIZE_BYTES)
+
+#define RETURN_CLOSE_FILE_IF_ERROR_CODE(_ret)  do {                                         \
+                                                    errCode = _ret;                         \
+                                                    if (errCode != OBC_ERR_CODE_SUCCESS) {  \
+                                                        LOG_ERROR_CODE(errCode);            \
+                                                        /* closeTelemetryFile(telemFileId); */ \
+                                                        return errCode;                     \
+                                                    }                                       \
+                                                } while (0)
+
 typedef enum {
     // Temperature values
     TELEM_CC1120_TEMP,
@@ -54,45 +68,46 @@ typedef enum {
     TELEM_NUM_CSP_PACKETS_RCVD,  
 } telemetry_data_id_t;
 
+typedef union {
+    // Temperature values
+    float cc1120Temp;
+    float commsCustomTransceiverTemp;
+    float obcTemp;
+    float adcsMagBoardTemp;
+    float adcsSensorBoardTemp;
+    float epsBoardTemp;
+    float solarPanel1Temp;
+    float solarPanel2Temp;
+    float solarPanel3Temp;
+    float solarPanel4Temp;
+
+    // Current values
+    float epsComms5vCurrent;
+    float epsComms3v3Current;
+    float epsMagnetorquer8vCurrent;
+    float epsAdcs5vCurrent;
+    float epsAdcs3v3Current;
+    float epsObc3v3Current;
+
+    // Voltage values
+    float epsComms5vVoltage;
+    float epsComms3v3Voltage;
+    float epsMagnetorquer8vVoltage;
+    float epsAdcs5vVoltage;
+    float epsAdcs3v3Voltage;
+    float epsObc3v3Voltage;
+
+    obc_state_t obcState;
+    uint8_t epsState;
+
+    uint32_t numCspPacketsRcvd;
+} telemetry_param_t;
+
+
 typedef struct {
-    union {
-        // Temperature values
-        float cc1120Temp;
-        float commsCustomTransceiverTemp;
-        float obcTemp;
-        float adcsMagBoardTemp;
-        float adcsSensorBoardTemp;
-        float epsBoardTemp;
-        float solarPanel1Temp;
-        float solarPanel2Temp;
-        float solarPanel3Temp;
-        float solarPanel4Temp;
-
-        // Current values
-        float epsComms5vCurrent;
-        float epsComms3v3Current;
-        float epsMagnetorquer8vCurrent;
-        float epsAdcs5vCurrent;
-        float epsAdcs3v3Current;
-        float epsObc3v3Current;
-
-        // Voltage values
-        float epsComms5vVoltage;
-        float epsComms3v3Voltage;
-        float epsMagnetorquer8vVoltage;
-        float epsAdcs5vVoltage;
-        float epsAdcs3v3Voltage;
-        float epsObc3v3Voltage;
-
-        obc_state_t obcState;
-        uint8_t epsState;
-
-        uint32_t numCspPacketsRcvd;
-    };
-
+    telemetry_param_t param;
     telemetry_data_id_t id;
     uint32_t timestamp; // seconds since epoch
-    
 } telemetry_data_t;
 
 /**
