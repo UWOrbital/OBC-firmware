@@ -2,7 +2,7 @@
 #include "obc_logging.h"
 #include "cc1120_mcu.h"
 #include "cc1120_spi.h"
-#include "cc1120_regs.h"
+#include "cc1120_defs.h"
 #include "obc_math.h"
 
 
