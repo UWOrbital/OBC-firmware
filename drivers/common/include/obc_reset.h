@@ -4,10 +4,9 @@
 /**
  * @brief Reasons for resetting the system
  */
-typedef enum{
-    
-    RESET_REASON_TESTING = 0
-
+typedef enum {
+    RESET_REASON_TESTING = 0, // For testing purposes
+    RESET_REASON_FS_FAILURE = 1, // File system operation failed
 }obc_reset_reason_t;
 
 /**
