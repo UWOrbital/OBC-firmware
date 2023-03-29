@@ -29,8 +29,8 @@ CPP_FLAGS += -D$(BOARD_TYPE)
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"drivers/include"
 INCLUDE_DIRS += -I"common/include"
+INCLUDE_DIRS += -I"drivers/common/include"
 INCLUDE_DIRS += -I"examples/sd_reliance_edge_demo"
 
 # Reliance Edge File System
@@ -44,7 +44,7 @@ LIBS :=
 	
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += drivers/source
+SRC_DIRS += drivers/common/source
 SRC_DIRS += common/source
 SRC_DIRS += examples/sd_reliance_edge_demo
 
