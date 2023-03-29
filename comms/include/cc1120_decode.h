@@ -53,7 +53,7 @@ obc_error_code_t rsDecode(uint8_t *in, aes_block_t *out);
 obc_error_code_t aes128Decrypt(aes_block_t in, uint8_t *cmdBytes);
 
 /**
- * @brief parses the completely decoded data and sends it to the command manager
+ * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  * 
  * @param cmdBytes 128 byte storing the completely decoded data
  * @param residualBytes (LARGEST_COMMAND_SIZE - 1) byte array with decoded data from previous function call or to store data for next function call if NULL

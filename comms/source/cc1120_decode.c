@@ -67,7 +67,7 @@ obc_error_code_t aes128Decrypt(aes_block_t in, uint8_t *cmdBytes){
 }
 
 /**
- * @brief parses the completely decoded data and sends it to the command manager
+ * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  * 
  * @param cmdBytes 128 byte storing the completely decoded data
  * @param residualBytes (LARGEST_COMMAND_SIZE - 1) byte array with decoded data from previous function call or to store data for next function call if NULL
@@ -84,6 +84,14 @@ obc_error_code_t tabulateCommands(uint8_t *cmdBytes, uint8_t *residualBytes, uin
     - parse cmdBytes and store the data in cmd_msg_t structs
     - if a command is cut off, store those bytes in residualBytes to be parsed in the next function call and store
     - the number of bytes in residualBytes in residualBytesLen
+    */
+
+    /* check if we have reached the end of transmission and then have cc1120Receive unblock and return
+
+    if(parsedByte == END_OF_TRANSMISSION_COMMAND_ID){
+        isStillUplink = FALSE;
+        xSemaphoreGive(getRxSemaphore(), NULL);
+    }
     */
     return errCode;
 }

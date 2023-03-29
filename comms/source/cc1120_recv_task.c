@@ -2,6 +2,7 @@
 #include "obc_logging.h"
 #include "cc1120_recv_task.h"
 #include "comms_manager.h"
+#include "cc1120_txrx.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -57,10 +58,13 @@ static void vRecvTask(void * pvParameters){
             case COMMS_MANAGER_NULL_EVENT_ID:
                 break;
             case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
-                uint8_t recvData[RX_EXPECTED_PACKET_SIZE];
-                uint8_t recvDataLen = RX_EXPECTED_PACKET_SIZE;
-                cc1120Receive(recvData, recvDataLen);
-                LOG_IF_ERROR_CODE(sendToDecodeDataQueue(recvData));
+                bool isStillUplinking = TRUE;
+                while(isStillUplinking){
+                    uint8_t recvData[RX_EXPECTED_PACKET_SIZE];
+                    uint8_t recvDataLen = RX_EXPECTED_PACKET_SIZE;
+                    cc1120Receive(recvData, recvDataLen);
+                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(recvData));
+                }
                 break;
         }
 
