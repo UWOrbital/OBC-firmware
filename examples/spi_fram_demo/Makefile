@@ -29,14 +29,16 @@ CPP_FLAGS += -D$(BOARD_TYPE)
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"drivers/include"
+INCLUDE_DIRS += -I"drivers/common/include"
+INCLUDE_DIRS += -I"drivers/fram/include"
 INCLUDE_DIRS += -I"common/include"
 
 LIBS := 
 	
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += drivers/source
+SRC_DIRS += drivers/common/source
+SRC_DIRS += drivers/fram/source
 SRC_DIRS += common/source
 SRC_DIRS += examples/spi_fram_demo
 
