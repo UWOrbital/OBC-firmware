@@ -2,13 +2,13 @@
 #define DRIVERS_CC1120_INCLUDE_CC1120_SPI_H_
 
 #include <stdint.h>
-#include <stdbool.h>
 #include "obc_errors.h"
 
 #define READ_BIT 1 << 7
 #define BURST_BIT 1 << 6
 
-#define CHIP_READY 1 << 7
+#define CHIP_READY_MASK 1 << 7
+#define CHIP_READY 0
 #define CHIP_STATE 0b1110000
 
 /**
