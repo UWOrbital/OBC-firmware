@@ -113,12 +113,14 @@ obc_error_code_t packTelemetry(telemetry_data_t *singleTelem,
     if (bytesFilled == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
+    // TODO: need a getTelemParamSize() function from telemetry manager
     uint8_t sizeOfTelem = /* getTelemParamSize(singleTelem) + */ TELEM_TIMESTAMP_SIZE_BYTES + TELEM_ID_SIZE_BYTES;
     uint8_t totalBytesAfterWrite = *bytesFilled + sizeOfTelem;
 
     uint8_t serializedSingleParam[MAX_SINGLE_TELEM_SIZE_BYTES];
     memcpy(serializedSingleParam, singleTelem->id, TELEM_ID_SIZE_BYTES);
     memcpy(serializedSingleParam + TELEM_ID_SIZE_BYTES, singleTelem->timestamp, TELEM_TIMESTAMP_SIZE_BYTES);
+    // TODOD: need a getTelemParam() function from telemetry manager
     // memcpy(serializedSingleParam + TELEM_ID_SIZE_BYTES + TELEM_TIMESTAMP_SIZE_BYTES, getTelemParam(singleTelem), getTelemParamSize(singleTelem));
 
     if (totalBytesAfterWrite > PACKED_TELEM_PACKET_SIZE) {
