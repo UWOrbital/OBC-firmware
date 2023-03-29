@@ -48,7 +48,6 @@ void initRecvTask(void){
 */
 static void vRecvTask(void * pvParameters){
     obc_error_code_t errCode;
-    bool isStillUplinking;
     while (1) {
         comms_event_t queueMsg;
         if(xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS){

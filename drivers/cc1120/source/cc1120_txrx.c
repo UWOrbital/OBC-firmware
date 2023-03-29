@@ -21,6 +21,8 @@ static StaticSemaphore_t txSemaphoreBuffer;
 static SemaphoreHandle_t transmissionFinishedSemaphore = NULL;
 static StaticSemaphore_t transmissionFinishedSemaphoreBuffer;
 
+bool isStillUplinking = FALSE;
+
 static const register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 3 to TXFIFO_THR_PKT
     {CC1120_REGS_IOCFG3, 0x03U},
