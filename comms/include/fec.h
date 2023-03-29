@@ -5,7 +5,7 @@
 #include "send_telemetry.h"
 #include "obc_errors.h"
 
-#define REED_SOLOMON_DECODED_BYTES 233U
+#define REED_SOLOMON_DECODED_BYTES 223U
 #define REED_SOLOMON_ENCODED_BYTES 255U
 
 typedef struct {

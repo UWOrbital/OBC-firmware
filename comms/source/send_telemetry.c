@@ -152,7 +152,7 @@ void sendTelemetry(uint32_t telemFileId) {
     // RETURN_IF_ERROR_CODE(openTelemetryFile(uint32_t telemFileId));
     
     telemetry_data_t singleTelem; // Holds a single piece of telemetry from getNextTelemetry()
-    packed_telem_t packedTelem; // Holds 233B of telemetry
+    packed_telem_t packedTelem; // Holds 223B of telemetry
     packed_telem_t residualData; // Holds any residual telemetry information to write to a new RS packet
     uint8_t bytesFilled; // Number of bytes filled in packedTelem
     
@@ -163,7 +163,7 @@ void sendTelemetry(uint32_t telemFileId) {
     while ((errCode = getNextTelemetry(telemFileId, &singleTelem)) == OBC_ERR_CODE_SUCCESS) {
         LOG_DEBUG("Sending telemetry: %u", singleTelem.id);
 
-        // Pack telemetry continuously into 233B packets for FEC
+        // Pack telemetry continuously into 223B packets for FEC
         packTelemetry(&singleTelem, &packedTelem, &residualData, &bytesFilled);
         if (bytesFilled > PACKED_TELEM_PACKET_SIZE) {
             // Apply Reed Solomon FEC
