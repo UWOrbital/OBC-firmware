@@ -23,7 +23,7 @@
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
 #define TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
-extern bool IsStillUplinking;
+extern bool isStillUplinking;
 
 
 typedef struct

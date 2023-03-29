@@ -278,6 +278,9 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     // See chapters 8.1, 8.4, 8.5
     for (i = 0; i < (RX_EXPECTED_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD); ++i){
         RETURN_IF_SEMAPHORE_NOT_ACQUIRED(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT));
+        if(!isStillUplinking){
+            return OBC_ERR_CODE_SUCCESS;
+        }
         RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
     }
 
