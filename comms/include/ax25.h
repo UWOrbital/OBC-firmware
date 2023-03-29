@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "obc_errors.h"
+#include "fec.h"
 #include "ax25.h"
 
 #define AX25_TOTAL_FLAG_BYTES 2

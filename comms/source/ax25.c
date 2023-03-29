@@ -1,5 +1,4 @@
 #include "ax25.h"
-#include "fec.h"
 
 obc_error_code_t ax25Frame(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data) {
     if (rsData) {

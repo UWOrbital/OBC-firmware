@@ -1,5 +1,4 @@
 #include "fec.h"
-#include "send_telemetry.h"
 
 obc_error_code_t rsEncode(packed_telem_t *telemData, packed_rs_packet_t *rsData) {
     if (telemData)
