@@ -9,6 +9,7 @@
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
+#include <stdbool.h>
 
 #define AX25_TOTAL_FLAG_BYTES 2
 #define AX25_ADDRESS_BYTES 16
@@ -20,6 +21,8 @@
 #define TXRX_INTERRUPT_THRESHOLD 100U
 #define TX_SEMAPHORE_TIMEOUT (TickType_t) 5000
 #define RX_SEMAPHORE_TIMEOUT (TickType_t) 30000
+
+extern bool IsStillUplinking;
 
 
 typedef struct
