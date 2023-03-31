@@ -24,6 +24,7 @@ obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
     
+    // TODO: Implement handling for this command
     LOG_DEBUG("Executing RTC sync command - time %lu", cmd->rtcSync.unixTime);
     return OBC_ERR_CODE_SUCCESS;
 }
@@ -33,6 +34,7 @@ obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
+    // TODO: Implement handling for this command
     LOG_DEBUG("Executing log downlink command - log level %u", cmd->downlinkLogsNextPass.logLevel);
     return OBC_ERR_CODE_SUCCESS;
 }
