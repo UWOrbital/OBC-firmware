@@ -2,6 +2,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "telemetry_manager.h"
+#include "telemetry_fs_utils.h"
 #include "obc_task_config.h"
 
 #include <FreeRTOS.h>
@@ -62,24 +63,16 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
 
 // Example function to show how to handle telemetry data
 // This isn't meant to be the final implementation
-static void handleTelemetry(uint32_t telemetryBatchId) {
+static obc_error_code_t handleTelemetry(uint32_t telemetryBatchId) {
     obc_error_code_t errCode;
 
-    char filename[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
-
-    // Get telemetry file name from batch ID
-    LOG_IF_ERROR_CODE(getTelemetryFileName(telemetryBatchId, filename, TELEMETRY_FILE_PATH_MAX_LENGTH));
-
     // Open telemetry file
-    int32_t fd = red_open(filename, RED_O_RDONLY);
-    if (fd < 0) {
-        LOG_ERROR("Failed to open telemetry file: %s", filename);
-        return;
-    }
+    int32_t fd;
+    RETURN_IF_ERROR_CODE(openTelemetryFileRO(telemetryBatchId, &fd));
 
     // Read 1 telemetry data point
     telemetry_data_t telemetryData;
-    while ((errCode = getNextTelemetry(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
+    while ((errCode = readNextTelemetryFromFile(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
         LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
     }
 
@@ -91,10 +84,13 @@ static void handleTelemetry(uint32_t telemetryBatchId) {
     LOG_IF_ERROR_CODE(errCode);
 
     // Close telemetry file
-    red_close(fd);
+    RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 static void vCommsManagerTask(void * pvParameters) {
+    obc_error_code_t errCode;
+    
     while (1) {
         comms_event_t queueMsg;
         
@@ -104,7 +100,7 @@ static void vCommsManagerTask(void * pvParameters) {
         
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY:
-                handleTelemetry(queueMsg.telemetryBatchId);
+                LOG_IF_ERROR_CODE(handleTelemetry(queueMsg.telemetryBatchId));
                 break;
         }
     }

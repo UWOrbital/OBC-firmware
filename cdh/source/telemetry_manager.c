@@ -1,4 +1,5 @@
 #include "telemetry_manager.h"
+#include "telemetry_fs_utils.h"
 #include "comms_manager.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
@@ -32,39 +33,6 @@
 static void telemetryManager(void * pvParameters);
 
 /**
- * @brief Write telemetry data to file.
- * 
- * @param telFileId File descriptor given by Reliance Edge
- * @param telemetryData Telemetry data to write to file
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
- */
-static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData);
-
-/**
- * @brief Open a new telemetry file.
- * 
- * @param telemBatchId The telemetry batch ID; used to create the file name
- * @param telemFileId Pointer to the file descriptor to be set by Reliance Edge
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
- */
-static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId);
-
-/**
- * @brief Close a telemetry file.
- * 
- * @param telemFileId File descriptor given by Reliance Edge
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
- */
-static obc_error_code_t closeTelemetryFile(int32_t telemFileId);
-
-/**
- * @brief Create the telemetry directory.
- * 
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
- */
-static obc_error_code_t mkTelemetryDir(void);
-
-/**
  * @brief Check if it's time to downlink telemetry.
  * @return bool True if it's time to downlink telemetry, false otherwise 
  */
@@ -94,65 +62,6 @@ void initTelemetry(void) {
     telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE, telemetryDataQueueStack, &telemetryDataQueue);
 }
 
-obc_error_code_t addTelemetryData(telemetry_data_t *data) {
-    if (telemetryDataQueueHandle == NULL) {
-        return OBC_ERR_CODE_INVALID_STATE;
-    }
-
-    if (data == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    if (xQueueSend(telemetryDataQueueHandle, (void *) data, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
-        return OBC_ERR_CODE_SUCCESS;
-    }
-    
-    return OBC_ERR_CODE_QUEUE_FULL;
-}
-
-obc_error_code_t getTelemetryFileName(uint32_t telemBatchId, char *buff, size_t buffSize) {
-    if (buff == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    if (buffSize < TELEMETRY_FILE_PATH_MAX_LENGTH) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    int ret = snprintf(buff, buffSize, "%s%s%lu%s", TELEMETRY_FILE_DIRECTORY, TELEMETRY_FILE_PREFIX, telemBatchId, TELEMETRY_FILE_EXTENSION);
-    if (ret < 0) {
-        return OBC_ERR_CODE_INVALID_FILE_NAME;
-    }
-
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemData) {
-    // Assume file is open and valid
-    
-    if (telemData == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    if (telemFileId < 0) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-    
-    int32_t bytesRead = red_read(telemFileId, (void *) telemData, sizeof(telemetry_data_t));
-
-    if (bytesRead == 0) {
-        return OBC_ERR_CODE_REACHED_EOF;
-    }
-
-    // Since we only write the telemetry data struct, the number of bytes in the file
-    // should be a multiple of the size of the struct. TODO: Deal with incomplete writes
-    if (bytesRead != sizeof(telemetry_data_t)) {
-        return OBC_ERR_CODE_FAILED_FILE_READ;
-    }
-
-    return OBC_ERR_CODE_SUCCESS;
-}
-
 static void telemetryManager(void * pvParameters) {
     obc_error_code_t errCode;
 
@@ -164,7 +73,7 @@ static void telemetryManager(void * pvParameters) {
     LOG_IF_ERROR_CODE(mkTelemetryDir());
 
     // TODO: Deal with errors
-    LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
+    LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
 
     while (1) {
         telemetry_data_t telemData;
@@ -174,6 +83,7 @@ static void telemetryManager(void * pvParameters) {
         }
 
         // Check if we need to downlink telemetry
+        // TODO: This is a mock implementation. We need to implement a proper alarm system
         if (!checkDownlinkAlarm()) {
             continue;
         }
@@ -198,80 +108,27 @@ static void telemetryManager(void * pvParameters) {
         
         // TODO: Save batch ID to FRAM
 
-        LOG_IF_ERROR_CODE(openTelemetryFile(telemetryBatchId, &telemetryFileId));
+        LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
         if (errCode != OBC_ERR_CODE_SUCCESS) {
             // TODO: Deal with errors
         }
     }
 }
 
-static obc_error_code_t mkTelemetryDir(void) {
-    int32_t ret = red_mkdir(TELEMETRY_FILE_DIRECTORY);
-    if (ret != 0) {
-        LOG_DEBUG("Failed to create telemetry directory: %d", red_errno);
-        return OBC_ERR_CODE_MKDIR_FAILED;
+obc_error_code_t addTelemetryData(telemetry_data_t *data) {
+    if (telemetryDataQueueHandle == NULL) {
+        return OBC_ERR_CODE_INVALID_STATE;
     }
 
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData) {
-    // Assume file is open and valid
-
-    if (telFileId < 0) {
+    if (data == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    // TODO: Handle power resets during read/write (i.e partial data)
-    // Idea: Add header and footer to each file, and check for them on read (investigate checksum feasability)
-    int32_t ret = red_write(telFileId, &telemetryData, sizeof(telemetry_data_t));
-
-    if(ret == sizeof(telemetry_data_t)) {
+    if (xQueueSend(telemetryDataQueueHandle, (void *) data, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
         return OBC_ERR_CODE_SUCCESS;
     }
     
-    if (red_errno == RED_EFBIG) {
-        // TODO: Handle this error; probably need to close the file and open a new one
-        return OBC_ERR_CODE_MAX_FILE_SIZE_REACHED;
-    }
-
-    return OBC_ERR_CODE_FAILED_FILE_WRITE;
-}
-
-static obc_error_code_t openTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId) {
-    obc_error_code_t errCode;
-
-    if (telemFileId == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
-    RETURN_IF_ERROR_CODE(getTelemetryFileName(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
-
-    // TODO: If we overflowed the batch ID, we should delete the duplicate file
-    // However, don't delete the file if an overflow hasn't occurred (like if a system reset occurred).
-
-    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDWR | RED_O_APPEND | RED_O_CREAT);
-    if (telFile < 0) {
-        return OBC_ERR_CODE_FAILED_FILE_OPEN;
-    }
-
-    *telemFileId = telFile;
-
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t closeTelemetryFile(int32_t telemFileId) {
-    if (telemFileId < 0) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    int32_t ret = red_close(telemFileId);
-    if (ret < 0) {
-        return OBC_ERR_CODE_FAILED_FILE_CLOSE;
-    }
-
-    return OBC_ERR_CODE_SUCCESS;
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static bool checkDownlinkAlarm(void) {
