@@ -5,6 +5,54 @@
 #include <stddef.h>
 #include <stdint.h>
 
+static const telemetry_pack_func_t telemPackFns[] = {
+    [TELEM_CC1120_TEMP] = packCC1120Temp,
+    [TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP] = packCommsCustomTransceiverTemp,
+    [TELEM_OBC_TEMP] = packObcTemp,
+    [TELEM_ADCS_MAG_BOARD_TEMP] = packAdcsMagBoardTemp,
+    [TELEM_ADCS_SENSOR_BOARD_TEMP] = packAdcsSensorBoardTemp,
+    [TELEM_EPS_BOARD_TEMP] = packEpsBoardTemp,
+    [TELEM_SOLAR_PANEL_1_TEMP] = packSolarPanel1Temp,
+    [TELEM_SOLAR_PANEL_2_TEMP] = packSolarPanel2Temp,
+    [TELEM_SOLAR_PANEL_3_TEMP] = packSolarPanel3Temp,
+    [TELEM_SOLAR_PANEL_4_TEMP] = packSolarPanel4Temp,
+    [TELEM_EPS_COMMS_5V_CURRENT] = packEpsComms5vCurrent,
+    [TELEM_EPS_COMMS_3V3_CURRENT] = packEpsComms3v3Current,
+    [TELEM_EPS_MAGNETORQUER_8V_CURRENT] = packEpsMagnetorquer8vCurrent,
+    [TELEM_EPS_ADCS_5V_CURRENT] = packEpsAdcs5vCurrent,
+    [TELEM_EPS_ADCS_3V3_CURRENT] = packEpsAdcs3v3Current,
+    [TELEM_EPS_OBC_3V3_CURRENT] = packEpsObc3v3Current,
+    [TELEM_EPS_COMMS_5V_VOLTAGE] = packEpsComms5vVoltage,
+    [TELEM_EPS_COMMS_3V3_VOLTAGE] = packEpsComms3v3Voltage,
+    [TELEM_EPS_MAGNETORQUER_8V_VOLTAGE] = packEpsMagnetorquer8vVoltage,
+    [TELEM_EPS_ADCS_5V_VOLTAGE] = packEpsAdcs5vVoltage,
+    [TELEM_EPS_ADCS_3V3_VOLTAGE] = packEpsAdcs3v3Voltage,
+    [TELEM_EPS_OBC_3V3_VOLTAGE] = packEpsObc3v3Voltage,
+    [TELEM_OBC_STATE] = packObcState,
+    [TELEM_EPS_STATE] = packEpsState,
+    [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
+};
+
+obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, size_t *numBytesPacked) {
+    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    if (buffLen < MAX_TELEMETRY_DATA_SIZE) {
+        // Enforce that the buffer is large enough to hold the maximum amount of telemetry data
+        // This is to prevent the possibility of a buffer overflow
+        return OBC_ERR_CODE_BUFF_TOO_SMALL;
+    }
+    
+    if (telemPackFns[data->id] == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    *numBytesPacked = telemPackFns[data->id](data, buffer);
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+
 size_t packCC1120Temp(telemetry_data_t *data, uint8_t *buffer) {
     size_t offset = 0;
     packFloat(data->cc1120Temp, buffer, &offset);
@@ -153,52 +201,4 @@ size_t packNumCspPacketsRcvd(telemetry_data_t *data, uint8_t *buffer) {
     size_t offset = 0;
     packUint32(data->numCspPacketsRcvd, buffer, &offset);
     return offset;
-}
-
-obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, size_t *numBytesPacked) {
-    static const telemetry_pack_func_t telemPackFns[] = {
-        [TELEM_CC1120_TEMP] = packCC1120Temp,
-        [TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP] = packCommsCustomTransceiverTemp,
-        [TELEM_OBC_TEMP] = packObcTemp,
-        [TELEM_ADCS_MAG_BOARD_TEMP] = packAdcsMagBoardTemp,
-        [TELEM_ADCS_SENSOR_BOARD_TEMP] = packAdcsSensorBoardTemp,
-        [TELEM_EPS_BOARD_TEMP] = packEpsBoardTemp,
-        [TELEM_SOLAR_PANEL_1_TEMP] = packSolarPanel1Temp,
-        [TELEM_SOLAR_PANEL_2_TEMP] = packSolarPanel2Temp,
-        [TELEM_SOLAR_PANEL_3_TEMP] = packSolarPanel3Temp,
-        [TELEM_SOLAR_PANEL_4_TEMP] = packSolarPanel4Temp,
-        [TELEM_EPS_COMMS_5V_CURRENT] = packEpsComms5vCurrent,
-        [TELEM_EPS_COMMS_3V3_CURRENT] = packEpsComms3v3Current,
-        [TELEM_EPS_MAGNETORQUER_8V_CURRENT] = packEpsMagnetorquer8vCurrent,
-        [TELEM_EPS_ADCS_5V_CURRENT] = packEpsAdcs5vCurrent,
-        [TELEM_EPS_ADCS_3V3_CURRENT] = packEpsAdcs3v3Current,
-        [TELEM_EPS_OBC_3V3_CURRENT] = packEpsObc3v3Current,
-        [TELEM_EPS_COMMS_5V_VOLTAGE] = packEpsComms5vVoltage,
-        [TELEM_EPS_COMMS_3V3_VOLTAGE] = packEpsComms3v3Voltage,
-        [TELEM_EPS_MAGNETORQUER_8V_VOLTAGE] = packEpsMagnetorquer8vVoltage,
-        [TELEM_EPS_ADCS_5V_VOLTAGE] = packEpsAdcs5vVoltage,
-        [TELEM_EPS_ADCS_3V3_VOLTAGE] = packEpsAdcs3v3Voltage,
-        [TELEM_EPS_OBC_3V3_VOLTAGE] = packEpsObc3v3Voltage,
-        [TELEM_OBC_STATE] = packObcState,
-        [TELEM_EPS_STATE] = packEpsState,
-        [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
-    };
-
-
-    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    if (buffLen < MAX_TELEMETRY_DATA_SIZE) {
-        // Enforce that the buffer is large enough to hold the maximum amount of telemetry data
-        // This is to prevent the possibility of a buffer overflow
-        return OBC_ERR_CODE_BUFF_TOO_SMALL;
-    }
-    
-    if (telemPackFns[data->id] == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    *numBytesPacked = telemPackFns[data->id](data, buffer);
-    return OBC_ERR_CODE_SUCCESS;
 }
