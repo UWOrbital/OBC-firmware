@@ -6,6 +6,8 @@
 
 STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
 
+// TODO: Check if endianness is correct
+
 void packUint8(uint8_t value, uint8_t* buffer, size_t* offset) {
     buffer[*offset] = value;
     (*offset)++;
