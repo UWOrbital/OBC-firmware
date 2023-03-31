@@ -29,7 +29,7 @@ static const cmd_callback_t cmdCallbacks[] = {
 
 static const size_t cmdArraySize = sizeof(cmdCallbacks) / sizeof(cmd_callback_t);
 
-STATIC_ASSERT(sizeof(cmdCallbacks)/sizeof(cmd_callback_t) <= UINT8_MAX, "There are too many commands!");
+STATIC_ASSERT(sizeof(cmdCallbacks)/sizeof(cmd_callback_t) <= UINT8_MAX, "Max command ID must be less than 256");
 
 /**
  * @brief Task that manages the command queue and executes commands
