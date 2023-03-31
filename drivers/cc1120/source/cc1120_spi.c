@@ -3,6 +3,13 @@
 #include "cc1120_mcu.h"
 #include "obc_logging.h"
 
+#define READ_BIT 1 << 7
+#define BURST_BIT 1 << 6
+
+#define CHIP_READY_MASK 1 << 7
+#define CHIP_READY 0
+#define CHIP_STATE 0b1110000
+
 /**
  * @brief - Reads from consecutive registers from the CC1120.
  * 
@@ -328,17 +335,16 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
  * @return OBC_ERR_CODE_CC1120_INVALID_STATUS_BYTE - If the status byte is invalid.
  */
 obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
-    obc_error_code_t errCode = OBC_ERR_CODE_CC1120_INVALID_STATUS_BYTE;
+    obc_error_code_t errCode;
     uint8_t ccStatus;
-
+    
     // TODO: This is a hacky way to do this. We should implement a mutex + timeout.
     for (uint8_t i = 1; i <= 5; i++) {
         RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
         if ((ccStatus & CHIP_READY_MASK) == CHIP_READY) {
-            errCode = OBC_ERR_CODE_SUCCESS;
-            break;
+            return OBC_ERR_CODE_SUCCESS;
         }
     }
 
-    return errCode;
+    return OBC_ERR_CODE_CC1120_INVALID_STATUS_BYTE;
 }

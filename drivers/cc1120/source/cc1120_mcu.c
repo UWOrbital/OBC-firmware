@@ -17,7 +17,7 @@ static const spiDAT1_t spiConfig = {
  */
 obc_error_code_t mcuCC1120SpiTransfer(uint8_t outb, uint8_t *inb) {
     obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(CC1120_SPI_REG, &spiConfig, outb, inb));
+    RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(CC1120_SPI_REG, (spiDAT1_t *)&spiConfig, outb, inb));
     return OBC_ERR_CODE_SUCCESS;
 }
 
