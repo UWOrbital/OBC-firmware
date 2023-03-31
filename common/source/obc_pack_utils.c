@@ -1,7 +1,10 @@
 #include "obc_pack_utils.h"
+#include "obc_assert.h"
 
 #include <stdint.h>
 #include <stddef.h>
+
+STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
 
 void packUint8(uint8_t value, uint8_t* buffer, size_t* offset) {
     buffer[*offset] = value;
