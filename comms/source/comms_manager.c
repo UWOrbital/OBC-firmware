@@ -3,6 +3,7 @@
 #include "obc_logging.h"
 #include "telemetry_manager.h"
 #include "telemetry_fs_utils.h"
+#include "telemetry_pack.h"
 #include "obc_task_config.h"
 
 #include <FreeRTOS.h>
@@ -74,6 +75,14 @@ static obc_error_code_t handleTelemetry(uint32_t telemetryBatchId) {
     telemetry_data_t telemetryData;
     while ((errCode = readNextTelemetryFromFile(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
         LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
+
+        uint8_t telemParamBuf[MAX_TELEMETRY_DATA_SIZE] = {0};
+        size_t telemSize;
+        LOG_IF_ERROR_CODE(packTelemetryParameters(&telemetryData, telemParamBuf, MAX_TELEMETRY_DATA_SIZE, &telemSize));
+        LOG_DEBUG("Telemetry size: %u", telemSize);
+        for (size_t i = 0; i < telemSize; i++) {
+            LOG_DEBUG("Telemetry data %lu: %u", i, telemParamBuf[i]);
+        }
     }
 
     if (errCode == OBC_ERR_CODE_REACHED_EOF) {

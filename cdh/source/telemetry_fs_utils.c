@@ -30,7 +30,9 @@ obc_error_code_t createTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId
     unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
     RETURN_IF_ERROR_CODE(getTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
 
-    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_CREAT);
+    // One of RED_O_RDONLY, RED_O_WRONLY, or RED_O_RDWR must be specified.
+    // We're closing the file immediately anyways, so doesn't matter which one we use.
+    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDONLY | RED_O_CREAT);
     if (telFile < 0) {
         return OBC_ERR_CODE_FAILED_FILE_OPEN;
     }
