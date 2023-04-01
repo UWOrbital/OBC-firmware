@@ -20,6 +20,7 @@
 #define TXRX_INTERRUPT_THRESHOLD 100U
 #define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
+#define TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
 
 typedef struct
@@ -30,10 +31,10 @@ typedef struct
 
 
 /**
- * @brief Initializes the semaphores that will be used by cc1120_send and cc1120_receive
+ * @brief Initializes all of the semaphores that will be used by cc1120Send and cc1120Receive
  * 
 */
-void initTxRxSemaphores(void);
+void initAllTxRxSemaphores(void);
 
 /**
  * @brief Gets the number of bytes queued in the TX FIFO
@@ -99,4 +100,10 @@ SemaphoreHandle_t getRxSemaphore(void);
  */
 SemaphoreHandle_t getTxSemaphore(void);
 
+/**
+ * @brief Gets the handle of the transmission finished semaphore
+ *
+ * @return SemaphoreHandle_t - The handle of the transmission finished Semaphore
+ */
+SemaphoreHandle_t getTransmissionFinishedSemaphore(void);
 #endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */
