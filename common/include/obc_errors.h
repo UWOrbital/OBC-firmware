@@ -19,7 +19,7 @@ typedef enum {
     OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE = 103,
 
     /* CDH errors 200 - 299 */
-
+    OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
 
     /* ADCS errors 300 - 399 */
 
@@ -28,7 +28,10 @@ typedef enum {
 
 
     /* COMMS errors 500 - 599 */
-
+    OBC_ERR_CODE_CC1120_READ_EXT_ADDR_SPI_FAILED = 500,
+    OBC_ERR_CODE_CC1120_WRITE_EXT_ADDR_SPI_FAILED,
+    OBC_ERR_CODE_CC1120_INVALID_STATUS_BYTE,
+    OBC_ERR_CODE_CC1120_TEST_FAILURE = 599,
 
     /* Payload errors 600 - 699 */
 
