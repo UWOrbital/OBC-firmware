@@ -56,13 +56,6 @@
 #include "i2c.h"
 #include "sys_dma.h"
 
-#include "cc1120_txrx.h"
-
-#include <FreeRTOS.h>
-#include <os_semphr.h>
-#include <sys_common.h>
-#include <FreeRTOSConfig.h>
-
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
