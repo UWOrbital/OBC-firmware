@@ -119,6 +119,13 @@ if(port == gioPORTB){
         xSemaphoreGiveFromISR(getTxSemaphore(), NULL);
     }
 }
+else if (port == gioPORTA){
+    // See section 3.4.1.1
+    // triggered on falling edge once TX FIFO has been completely emptied
+    if (bit & (1 << 7)){
+        xSemaphoreGiveFromISR(getTransmissionFinishedSemaphore(), NULL);
+    }
+}
 /* USER CODE END */
 }
 
