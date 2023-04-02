@@ -33,7 +33,7 @@ void initI2CMutex(void) {
     ASSERT(i2cMutex != NULL);
 }
 
-obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, void *buf) {
+obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf) {
     ASSERT(i2cMutex != NULL);
 
     if (buf == NULL || size < 1)
@@ -69,7 +69,7 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, void *buf) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
-obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, void *buf) {
+obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf) {
     ASSERT(i2cMutex != NULL);
 
     if (buf == NULL || size < 1)
