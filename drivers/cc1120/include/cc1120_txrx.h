@@ -59,7 +59,7 @@ typedef enum {
     CC1120_STATE_RXTX_SWITCH,
     CC1120_STATE_TX_FIFO_ERR,
     CC1120_STATE_IFADCON_TXRX
-} stateNum_t;
+} cc1120_state_t;
 
 /**
  * @brief Initializes all of the semaphores that will be used by cc1120Send and cc1120Receive
@@ -81,7 +81,7 @@ obc_error_code_t cc1120GetBytesInTxFifo(uint8_t *numBytes);
  * @param stateNum - A pointer to an 8-bit integer to store the state in
  * @return obc_error_code_t - Whether or not the register read was successful
  */
-obc_error_code_t cc1120GetState(stateNum_t *stateNum);
+obc_error_code_t cc1120GetState(cc1120_state_t *stateNum);
 
 /**
  * @brief Resets CC1120 & initializes transmit mode
