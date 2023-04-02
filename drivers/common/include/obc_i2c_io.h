@@ -31,7 +31,7 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf);
  * @return OBC_ERR_CODE_SUCCESS if the bytes were sent, OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out, 
  * OBC_ERR_CODE_INVALID_ARG if the buffer is NULL or the size is 0
  */
-obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, void *buf);
+obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf);
 
 /**
  * @brief Read byte(s) from a device's register(s).
