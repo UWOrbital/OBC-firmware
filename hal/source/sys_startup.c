@@ -49,8 +49,6 @@
 
 
 /* USER CODE BEGIN (0) */
-#pragma GCC push_options
-#pragma GCC optimize("O0")
 /* USER CODE END */
 
 
@@ -683,5 +681,4 @@ void handlePLLLockFail(void)
 /* USER CODE END */
 }
 /* USER CODE BEGIN (81) */
-#pragma GCC pop_options
 /* USER CODE END */
