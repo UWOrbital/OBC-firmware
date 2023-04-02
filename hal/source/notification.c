@@ -56,6 +56,12 @@
 #include "i2c.h"
 #include "sys_dma.h"
 
+#include "cc1120_txrx.h"
+
+#define CC1120_RX_THR_PKT_PIN 2U
+#define CC1120_TX_THR_PKT_PIN 3U
+#define CC1120_PKT_SYNC_RXTX_PIN 7U
+
 /* USER CODE BEGIN (0) */
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
@@ -99,26 +105,28 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (19) */
 
-if(port == gioPORTB){
-    // See section 3.4.1.1
-    // Triggered on rising edge so RX FIFO can be read once the signal that RX FIFO is above TXRX_INTERRUPT_THRESHOLD
-    // is asserted to avoid a FIFO overflow
-    if (bit & (1 << 2)){
-        xSemaphoreGiveFromISR(getRxSemaphore(), NULL);
+    if(port == gioPORTB){
+        switch (bit){
+            // See section 3.4.1.1
+            // Triggered on rising edge so RX FIFO can be read once the signal that RX FIFO is above TXRX_INTERRUPT_THRESHOLD
+            // is asserted to avoid a FIFO overflow
+            case CC1120_RX_THR_PKT_PIN:
+                rxFifoReadyCallback();
+        
+            // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
+            // is deasserted to avoid a FIFO
+            case CC1120_TX_THR_PKT_PIN:
+                txFifoReadyCallback(); 
+        }
     }
-    // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
-    // is deasserted to avoid a FIFO underflow
-    if (bit & (1 << 3)){
-        xSemaphoreGiveFromISR(getTxSemaphore(), NULL);
+    else if (port == gioPORTA){
+        switch (bit){
+            // See section 3.4.1.1
+            // triggered on falling edge once TX FIFO has been completely emptied
+            case CC1120_PKT_SYNC_RXTX_PIN:
+                transmissionFinishedCallback();
+        }
     }
-}
-else if (port == gioPORTA){
-    // See section 3.4.1.1
-    // triggered on falling edge once TX FIFO has been completely emptied
-    if (bit & (1 << 7)){
-        xSemaphoreGiveFromISR(getTransmissionFinishedSemaphore(), NULL);
-    }
-}
 /* USER CODE END */
 }
 
