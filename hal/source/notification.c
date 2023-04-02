@@ -56,13 +56,12 @@
 #include "i2c.h"
 #include "sys_dma.h"
 
+/* USER CODE BEGIN (0) */
 #include "cc1120_txrx.h"
 
 #define CC1120_RX_THR_PKT_PIN 2U
 #define CC1120_TX_THR_PKT_PIN 3U
 #define CC1120_PKT_SYNC_RXTX_PIN 7U
-
-/* USER CODE BEGIN (0) */
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
 {
