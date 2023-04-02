@@ -67,9 +67,6 @@
     1 tab == 4 spaces!
 */
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
-
 /*----------------------------------------------------------------------------*/
 /* Include Files                                                              */
 
@@ -999,4 +996,3 @@ void MPU_vEventGroupDelete( EventGroupHandle_t xEventGroup )
 	portRESET_PRIVILEGE( xRunningPrivileged );
 }
 
-#pragma GCC pop_options
