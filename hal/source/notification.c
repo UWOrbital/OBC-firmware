@@ -111,11 +111,13 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // is asserted to avoid a FIFO overflow
             case CC1120_RX_THR_PKT_PIN:
                 rxFifoReadyCallback();
+                break;
         
             // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
             // is deasserted to avoid a FIFO
             case CC1120_TX_THR_PKT_PIN:
                 txFifoReadyCallback(); 
+                break;
         }
     }
     else if (port == gioPORTA){
@@ -124,6 +126,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // triggered on falling edge once TX FIFO has been completely emptied
             case CC1120_PKT_SYNC_RXTX_PIN:
                 transmissionFinishedCallback();
+                break;
         }
     }
 /* USER CODE END */

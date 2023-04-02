@@ -378,18 +378,18 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
 
 void txFifoReadyCallback(void){
   if(xSemaphoreGiveFromISR(txSemaphore, pdTRUE) != pdPASS){
-    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+    /* TODO: figure out how to log from ISR */
   }
 }
 
 void rxFifoReadyCallback(void){
   if(xSemaphoreGiveFromISR(rxSemaphore, pdTRUE) != pdPASS){
-    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+    /* TODO: figure out how to log from ISR */
   }
 }
 
 void transmissionFinishedCallback(void){
   if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, pdTRUE) != pdPASS){
-    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+    /* TODO: figure out how to log from ISR */
   }
 }
