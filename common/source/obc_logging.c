@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <redposix.h>
 
 #define MAX_MSG_SIZE 128U
 #define MAX_FNAME_LINENUM_SIZE 128U
@@ -72,7 +73,55 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 		obc_error_code_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf));
 		return retSci;
 	} else if (outputLocation == LOG_TO_SDCARD) {
-		// implement when SD card driver is written
+		const char * fname = *file;
+		
+		int32_t ret = red_init();
+		if (ret != 0) {
+			sciPrintf("red_init() returned %d with ERRNO %d\r\n", ret, red_errno);
+			while (1);
+		}
+
+		ret = red_format("");
+		if (ret != 0) {
+			if (red_errno != 16) {
+				sciPrintf("red_format() returned %d with ERRNO %d\r\n", ret, red_errno);
+
+				while (1);
+			}
+		}
+
+		ret = red_mount("");
+		if (ret != 0) {
+			if (red_errno != 16) {
+				sciPrintf("red_format() returned %d with ERRNO %d\r\n", ret, red_errno);
+
+				while (1);
+			}
+		}
+
+		int32_t fdescriptor = red_open(fname, RED_O_RDWR | RED_O_APPEND);
+		if (fdescriptor < 0) {
+			if (red_errno != 2) {
+				sciPrintf("red_open() returned %d with ERRNO %d\r\n", fdescriptor, red_errno);
+
+				while (1);
+			}
+			else {
+				fdescriptor = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
+			}
+		}
+
+		ret = red_write(fdescriptor, (unsigned char *)buf, sizeof(buf));
+		if (ret < 0) {
+			sciPrintf("red_write() returned %d with ERRNO %d\r\n", ret, red_errno);
+			while (1);
+		}
+
+		ret = red_close(fdescriptor);
+		if (ret < 0) {
+			sciPrintf("red_close() returned %d with ERRNO %d\r\n", ret, red_errno);
+			while (1);
+		}
 	}
 
 	return OBC_ERR_CODE_UNKNOWN;
