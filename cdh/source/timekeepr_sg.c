@@ -129,7 +129,6 @@ void swap(rtc_alarm_time_t *a1, rtc_alarm_time_t *a2) {
 // }
 
 //https://www.geeksforgeeks.org/sort-m-elements-of-given-circular-array-starting-from-index-k/
-
 void bubbleSort() {
     int8_t n = numOfActiveAlarms;
     int8_t numOfOuterIterations = 0;
