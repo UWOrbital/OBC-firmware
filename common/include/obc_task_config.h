@@ -37,6 +37,6 @@
 /* Timekeeper task config */
 #define TIMEKEEPER_STACK_SIZE   1024U
 #define TIMEKEEPER_NAME         "timekeeper"
-#define TIMEKEEPER_PRIORITY     tskIDLE_PRIORITY + 1U
+#define TIMEKEEPER_PRIORITY     tskIDLE_PRIORITY + 100U
 
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */

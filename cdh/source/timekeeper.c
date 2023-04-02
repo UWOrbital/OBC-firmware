@@ -11,29 +11,22 @@
 #include <os_timer.h>
 #include <sys_common.h>
 
-#define LOCAL_TIME_INC_PERIOD_TICKS     pdMS_TO_TICKS(1000)
-#define LOCAL_TIME_UPDATE_TIMER_NAME    "local_time_update_timer"
+#define LOCAL_TIME_UPDATE_PERIOD_TICKS  pdMS_TO_TICKS(1000)
 #define LOCAL_TIME_SYNC_PERIOD_S        60UL
 
-STATIC_ASSERT(LOCAL_TIME_INC_PERIOD_TICKS == pdMS_TO_TICKS(1000), 
-    "Global time update period must be 1 second. Otherwise, update the time sync period.");
+STATIC_ASSERT(
+    LOCAL_TIME_UPDATE_PERIOD_TICKS == pdMS_TO_TICKS(1000), 
+    "Global time update period must be 1 second. Otherwise, update the time sync period."
+);
 
 /**
  * @brief Timekeeper task.
  */
 static void timekeeperTask(void *pvParameters);
 
-/**
- * @brief Callback for the global time update timer.
- */
-static void globalTimeUpdateCallback(TimerHandle_t xTimer);
-
 static TaskHandle_t timekeeperTaskHandle;
 static StaticTask_t timekeeperTaskBuffer;
 static StackType_t timekeeperTaskStack[TIMEKEEPER_STACK_SIZE];
-
-static TimerHandle_t globalTimeUpdateHandle;
-static StaticTimer_t globalTimeUpdateBuffer;
 
 void initTimekeeper(void) {
     memset(&timekeeperTaskBuffer, 0, sizeof(timekeeperTaskBuffer));
@@ -50,44 +43,36 @@ void initTimekeeper(void) {
         &timekeeperTaskBuffer
     );
 
-    ASSERT(&globalTimeUpdateBuffer != NULL);
-    globalTimeUpdateHandle = xTimerCreateStatic(
-        LOCAL_TIME_UPDATE_TIMER_NAME,
-        LOCAL_TIME_INC_PERIOD_TICKS,
-        pdTRUE,
-        (void *) 0,
-        globalTimeUpdateCallback,
-        &globalTimeUpdateBuffer
-    );
+    initTime();
 }
 
 static void timekeeperTask(void *pvParameters) {
+    /* 
+     * The timekeeper is a task instead of a FreeRTOS timer because we have more control
+     * over its priority relative to other tasks (inc. the time service daemon). The sync period is
+     * often enough (and the MCU clock speed is high enough) that we don't need to 
+     * worry about significant drift.
+     * 
+     * The I2C clock speed is high enough that, if another task is completing an I2C transaction
+     * when the timekeeper task is performing a local RTC sync, the timekeeper task should not have to 
+     * wait a significant amount of time.
+     */
+
     obc_error_code_t errCode;
 
-    // TODO: Deal with error code
-    LOG_IF_ERROR_CODE(syncUnixTime());
+    uint8_t syncPeriodCounter = 0;  // Sync whenever this counter is 0
 
-    xTimerStart(globalTimeUpdateHandle, LOCAL_TIME_INC_PERIOD_TICKS);
+    while (1) {
+        if (syncPeriodCounter == 0) {
+            // Sync the local time with the RTC every LOCAL_TIME_SYNC_PERIOD_S seconds.
+            // TODO: Deal with errors
+            LOG_IF_ERROR_CODE(syncUnixTime());
+        } else {
+            incrementCurrentUnixTime();
+        }
 
-    while (1);
-}
+        syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
 
-static void globalTimeUpdateCallback(TimerHandle_t xTimer) {
-    obc_error_code_t errCode;
-
-    uint32_t callCount = (uint32_t) pvTimerGetTimerID(xTimer);
-
-    // Sync the local time with the RTC every LOCAL_TIME_SYNC_PERIOD_S seconds.
-    if (callCount == 0) {
-        LOG_IF_ERROR_CODE(syncUnixTime());
-
-        // TODO: If we failed to sync, increment local time and the 
-        // number of times we've failed to sync.
-    } else {
-        incrementCurrentUnixTime();
+        vTaskDelay(LOCAL_TIME_UPDATE_PERIOD_TICKS);
     }
-
-    callCount = (callCount + 1) % LOCAL_TIME_SYNC_PERIOD_S;
-
-    vTimerSetTimerID(xTimer, (void *) callCount);
 }

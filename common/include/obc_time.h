@@ -9,6 +9,11 @@
 typedef uint32_t unix_time_t;
 
 /**
+ * @brief Initialize the time module.
+ */
+void initTime(void);
+
+/**
  * @brief Get the current unix time.
  * 
  * @return unix_time_t The current unix time.
