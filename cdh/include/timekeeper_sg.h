@@ -5,7 +5,9 @@
 #include <gio.h>
 #include "ds3232_mz.h"
 
-rtc_alarm_time_t taskQueue[10];   // dummy size for now, get better clarity on queuing
+const uint8_t taskQueueSize = 10;
+
+rtc_alarm_time_t taskQueue[taskQueueSize];   // dummy size for now, get better clarity on queuing
 
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode);
 
@@ -20,8 +22,8 @@ obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
 
 rtc_time_t getCurrentTime(rtc_time_t getTime);
 
-void alarmQueue(rtc_alarm_time_t alarmTime);
+void addAlarm(rtc_alarm_time_t alarmTime);
 
-int compare(rtc_alarm_time_t a, rtc_alarm_time_t b);
+void executeAlarm();
 
 #endif /*CDH_INCLUDE_TIMEKEEPER_SG_H_*/
