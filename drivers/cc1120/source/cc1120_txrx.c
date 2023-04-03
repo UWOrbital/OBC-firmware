@@ -18,15 +18,15 @@
 
 #define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
-#define TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
+#define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
 
 static SemaphoreHandle_t rxSemaphore = NULL;
 static StaticSemaphore_t rxSemaphoreBuffer;
 static SemaphoreHandle_t txSemaphore = NULL;
 static StaticSemaphore_t txSemaphoreBuffer;
-static SemaphoreHandle_t transmissionFinishedSemaphore = NULL;
-static StaticSemaphore_t transmissionFinishedSemaphoreBuffer;
+static SemaphoreHandle_t txFifoEmptySemaphore = NULL;
+static StaticSemaphore_t txFifoEmptySemaphoreBuffer;
 
 static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len);
 
@@ -102,8 +102,8 @@ void initAllTxRxSemaphores(void){
     if(rxSemaphore == NULL) {
         rxSemaphore = xSemaphoreCreateBinaryStatic(&rxSemaphoreBuffer);
     }
-    if(transmissionFinishedSemaphore == NULL){
-        transmissionFinishedSemaphore = xSemaphoreCreateBinaryStatic(&transmissionFinishedSemaphoreBuffer);
+    if(txFifoEmptySemaphore == NULL){
+        txFifoEmptySemaphore = xSemaphoreCreateBinaryStatic(&txFifoEmptySemaphoreBuffer);
     }
 }
 
@@ -188,6 +188,12 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
+    // wait on the semaphore to make sure tx fifo is empty
+    if(xSemaphoreTake(txFifoEmptySemaphore, TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT) != pdPASS){
+        LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
+        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+    }
+
     // See section 8.1.5
     if (len > CC1120_MAX_PACKET_LEN){
         RETURN_IF_ERROR_CODE(cc1120SendInifinitePktMode(data, len));
@@ -210,12 +216,12 @@ static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len){
     obc_error_code_t errCode;
 
     // Set to variable packet length mode
-    uint8_t spiTrasnferData = VARIABLE_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    uint8_t spiTransferData = VARIABLE_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     // Set max packet size
-    spiTrasnferData = CC1120_MAX_PACKET_LEN;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTrasnferData, 1));
+    spiTransferData = CC1120_MAX_PACKET_LEN;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
         
     // Write current packet size
     uint8_t variableDataLen = (uint8_t)len;
@@ -237,10 +243,6 @@ static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len){
     if (bytesSent < len) {
         RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, len - groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD));
     }
-    if(xSemaphoreTake(transmissionFinishedSemaphore, TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT) != pdPASS){
-        LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
-        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
-    }
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -255,13 +257,13 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len){
     obc_error_code_t errCode;
 
     // temporarily set packet size to infinite
-    uint8_t spiTrasnferData = INFINITE_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    uint8_t spiTransferData = INFINITE_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     // Set packet length to mod(len, 256) so that the correct number of bits
     // are sent when fixed packet mode gets reactivated
-    spiTrasnferData = len % (CC1120_MAX_PACKET_LEN + 1);
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTrasnferData, 1));
+    spiTransferData = len % (CC1120_MAX_PACKET_LEN + 1);
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
 
     //Write TXRX_INTERRUPT_THRESHOLD bytes to TX fifo and activate TX mode
     RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data, TXRX_INTERRUPT_THRESHOLD));
@@ -277,17 +279,12 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len){
     }
 
     // switch back to fixed packet length mode so that transmission is able to properly end once the remaining bytes are sent
-    spiTrasnferData = FIXED_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    spiTransferData = FIXED_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
 
     // write the remaining bytes to TX FIFO
     RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, len - groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD));
 
-    // Wait for transmission to finish before returning
-    if(xSemaphoreTake(transmissionFinishedSemaphore, TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT) != pdPASS){
-        LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
-        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
-    }
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -304,7 +301,12 @@ static obc_error_code_t takeTxSemaphoreWriteFifo(uint8_t *data, uint32_t len){
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
     }
-    RETURN_IF_ERROR_CODE(cc1120WriteFifo(data, len));
+    errCode = cc1120WriteFifo(data, len);
+    if(errCode != OBC_ERR_CODE_SUCCESS){
+        LOG_ERROR_CODE(errCode);
+        xSemaphoreGive(txSemaphore);
+        return errCode;
+    }
     return OBC_ERR_CODE_SUCCESS;
 }
 /* RX functions */
@@ -342,15 +344,15 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
         return OBC_ERR_CODE_INVALID_ARG;
     }
     // Temporarily set packet size to infinite
-    uint8_t spiTrasnferData = INFINITE_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    uint8_t spiTransferData = INFINITE_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
     
     // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
     // fixed packet mode gets reactivated after receiving 
     // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
-    spiTrasnferData = RX_EXPECTED_PACKET_SIZE % (CC1120_MAX_PACKET_LEN + 1);
+    spiTransferData = RX_EXPECTED_PACKET_SIZE % (CC1120_MAX_PACKET_LEN + 1);
 
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTrasnferData, 1));
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
     
     RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRX));
 
@@ -365,8 +367,8 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     }
 
     // Set to fixed packet length mode
-    spiTrasnferData = FIXED_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    spiTransferData = FIXED_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
@@ -379,18 +381,18 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
 
 void txFifoReadyCallback(void){
   if(xSemaphoreGiveFromISR(txSemaphore, pdTRUE) != pdPASS){
-    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+    /* TODO: figure out how to log from ISR */
   }
 }
 
 void rxFifoReadyCallback(void){
   if(xSemaphoreGiveFromISR(rxSemaphore, pdTRUE) != pdPASS){
-    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+    /* TODO: figure out how to log from ISR */
   }
 }
 
-void transmissionFinishedCallback(void){
-  if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, pdTRUE) != pdPASS){
-    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+void txFifoEmptyCallback(void){
+  if(xSemaphoreGiveFromISR(txFifoEmptySemaphore, pdTRUE) != pdPASS){
+    /* TODO: figure out how to log from ISR */
   }
 }
