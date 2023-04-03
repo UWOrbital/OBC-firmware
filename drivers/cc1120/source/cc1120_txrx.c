@@ -347,10 +347,10 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     uint8_t spiTransferData = INFINITE_PACKET_LENGTH_MODE;
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
     
-    // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
+    // Set packet length to len % 256 so that the correct number of bits are received when
     // fixed packet mode gets reactivated after receiving 
-    // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
-    spiTransferData = RX_EXPECTED_PACKET_SIZE % (CC1120_MAX_PACKET_LEN + 1);
+    // (len - (len % TXRX_INTERRUPT_THRESHOLD)) bytes
+    spiTransferData = len % (CC1120_MAX_PACKET_LEN + 1);
 
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
     
@@ -358,7 +358,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
 
     uint32_t i;
     // See chapters 8.1, 8.4, 8.5
-    for (i = 0; i < (RX_EXPECTED_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD); ++i){
+    for (i = 0; i < (len - 1)/TXRX_INTERRUPT_THRESHOLD; ++i){
         if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
             LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
             return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
@@ -374,7 +374,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
     }
-    RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, RX_EXPECTED_PACKET_SIZE - i*TXRX_INTERRUPT_THRESHOLD));
+    RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, len - i*TXRX_INTERRUPT_THRESHOLD));
 
     return OBC_ERR_CODE_SUCCESS;
 }
