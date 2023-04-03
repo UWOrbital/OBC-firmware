@@ -26,6 +26,4 @@ uint8_t canSendMessage(canBASE_t *canReg, uint32_t messageBox, const uint8_t *da
 */
 uint8_t canGetMessage(canBASE_t *canReg, uint32_t messageBox, const uint8_t *data);
 
-
-
 #endif
