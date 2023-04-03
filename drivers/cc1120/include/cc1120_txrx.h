@@ -21,14 +21,6 @@
 // Total bytes we will be receiving in each packet (sum of the sizes of each ax.25 frame section)
 #define RX_EXPECTED_PACKET_SIZE (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + AX25_INFO_BYTES)
 
-// See FIFO_THR in the datasheet
-#define TXRX_INTERRUPT_THRESHOLD 100U
-
-#define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
-#define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
-#define TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
-
-
 typedef struct
 {
     uint8_t addr;
