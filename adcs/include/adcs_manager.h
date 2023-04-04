@@ -5,9 +5,6 @@
 
 #include <sys_common.h>
 
-
-
-
 /**
  * @enum	adcs_event_id_t
  * @brief	adcs event ID enum.

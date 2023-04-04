@@ -7,8 +7,6 @@
 
 
 
-
-
 /**
  * @enum	eps_event_id_t
  * @brief	eps event ID enum.
