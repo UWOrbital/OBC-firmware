@@ -50,6 +50,7 @@
 
 #include "esm.h"
 #include "sys_selftest.h"
+#include "can.h"
 #include "gio.h"
 #include "sci.h"
 #include "spi.h"
@@ -93,6 +94,29 @@ void memoryPort1TestFailNotification(uint32 groupSelect, uint32 dataSelect, uint
 }
 
 /* USER CODE BEGIN (8) */
+/* USER CODE END */
+void canErrorNotification(canBASE_t *node, uint32 notification)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (13) */
+/* USER CODE END */
+}
+
+void canStatusChangeNotification(canBASE_t *node, uint32 notification)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (14) */
+/* USER CODE END */
+}
+
+void canMessageNotification(canBASE_t *node, uint32 messageBox)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (15) */
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (16) */
 /* USER CODE END */
 void gioNotification(gioPORT_t *port, uint32 bit)
 {
