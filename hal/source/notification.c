@@ -50,6 +50,7 @@
 
 #include "esm.h"
 #include "sys_selftest.h"
+#include "can.h"
 #include "gio.h"
 #include "sci.h"
 #include "spi.h"
@@ -93,6 +94,87 @@ void memoryPort1TestFailNotification(uint32 groupSelect, uint32 dataSelect, uint
 }
 
 /* USER CODE BEGIN (8) */
+#include "cdh_eps_protocol.h"
+#include "obc_can_io.h"
+
+static void populateCmdMsg(uint8_t *rxData, cdh_eps_cmd_msg_t *cmd) {
+    cmd->id = rxData[0];
+    for(uint8_t i = 1; i < 8; i++) {
+        cmd->param[i-1] = rxData[i];
+    }
+}
+
+static void populateTleMesg(uint8_t *rxData, cdh_eps_tle_msg_t *tle) {
+    tle->id = rxData[0];
+    for(uint8_t i = 1; i < 5; i++) {
+        tle->reserved[i-1] = rxData[i];
+    }
+    for(uint8_t i = 6; i < 8; i++) {
+        tle->data[i-6] = rxData[i];
+    }
+}
+
+static void populateRespMsg(uint8_t *rxData, cdh_eps_resp_msg_t *resp) {
+    resp->id = rxData[0];
+    for(uint8_t i = 1; i < 7; i++) {
+        resp->reserved[i-1] = rxData[i];
+    }
+    resp->request = rxData[7];
+}
+
+/* USER CODE END */
+void canErrorNotification(canBASE_t *node, uint32 notification)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (13) */
+/* USER CODE END */
+}
+
+void canStatusChangeNotification(canBASE_t *node, uint32 notification)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (14) */
+/* USER CODE END */
+}
+
+void canMessageNotification(canBASE_t *node, uint32 messageBox)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (15) */
+    if(node == canREG1) {
+        uint8_t rxData[8] = {0};
+        canGetMessage(canREG1, messageBox, rxData);
+
+        uint8_t id = rxData[0];
+
+        if(id == 0x00) { /* Subsystem shutdown request */
+            cdh_eps_cmd_msg_t cmd;
+            populateCmdMsg(rxData, &cmd);
+
+            /* Send command message to CDH-EPS queue */
+            sendToCDHEPSCmdRxQueue(&cmd);
+        }
+        else if(id == 0x01) { /* Heartbeat ACK */
+            cdh_eps_resp_msg_t resp;
+            populateRespMsg(rxData, &resp);
+            
+            sendToCDHEPSRespRxQueue(&resp);
+        }
+        else if((id > 0x02) && (id < 0x14)) { /* Telemetry packet */
+            cdh_eps_tle_msg_t tle;
+            populateTleMesg(rxData, &tle);
+
+            // Send telemetry somewhere
+        }
+        else {
+
+        }
+    }
+    
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (16) */
 /* USER CODE END */
 void gioNotification(gioPORT_t *port, uint32 bit)
 {

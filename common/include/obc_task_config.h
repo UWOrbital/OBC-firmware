@@ -19,6 +19,11 @@
 #define CMD_MANAGER_NAME       "cmd_manager"
 #define CMD_MANAGER_PRIORITY   tskIDLE_PRIORITY + 1U
 
+/* CDH-EPS task config */
+#define CDH_EPS_STACK_SIZE 1024U
+#define CDH_EPS_NAME       "cdh_eps"
+#define CDH_EPS_PRIORITY   tskIDLE_PRIORITY + 1U
+
 /* ADCS Manager task config */
 #define ADCS_MANAGER_STACK_SIZE   1024U
 #define ADCS_MANAGER_NAME         "adcs_manager"
