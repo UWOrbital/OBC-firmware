@@ -34,7 +34,7 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len);
 
 static obc_error_code_t takeTxSemaphoreWriteFifo(uint8_t *data, uint32_t len);
 
-static const register_setting_t cc1120SettingsStd[] = {
+static register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 3 to TXFIFO_THR_PKT
     {CC1120_REGS_IOCFG3, 0x03U},
     // Set GPIO 2 to RXFIFO_THR_PKT
@@ -73,7 +73,7 @@ static const register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_PA_CFG0, 0x7DU},
     {CC1120_REGS_PKT_LEN, 0x0CU}};
 
-static const register_setting_t cc1120SettingsExt[] = {
+static register_setting_t cc1120SettingsExt[] = {
     {CC1120_REGS_EXT_IF_MIX_CFG, 0x00U},
     {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U},
     {CC1120_REGS_EXT_FREQ2, 0x6CU},
@@ -378,19 +378,19 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
 }
 
 void txFifoReadyCallback(void){
-  if(xSemaphoreGiveFromISR(txSemaphore, pdTRUE) != pdPASS){
+  if(xSemaphoreGiveFromISR(txSemaphore, (BaseType_t *) pdTRUE) != pdPASS){
     /* TODO: figure out how to log from ISR */
   }
 }
 
 void rxFifoReadyCallback(void){
-  if(xSemaphoreGiveFromISR(rxSemaphore, pdTRUE) != pdPASS){
+  if(xSemaphoreGiveFromISR(rxSemaphore, (BaseType_t *) pdTRUE) != pdPASS){
     /* TODO: figure out how to log from ISR */
   }
 }
 
 void transmissionFinishedCallback(void){
-  if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, pdTRUE) != pdPASS){
+  if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, (BaseType_t *) pdTRUE) != pdPASS){
     /* TODO: figure out how to log from ISR */
   }
 }
