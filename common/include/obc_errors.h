@@ -21,7 +21,7 @@ typedef enum {
     OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE = 103,
 
     /* CDH errors 200 - 299 */
-
+    OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
 
     /* ADCS errors 300 - 399 */
 
