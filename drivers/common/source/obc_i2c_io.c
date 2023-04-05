@@ -131,6 +131,6 @@ obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t 
         dataBuf[i + 1] = data[i];
     }
 
-    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, numBytes + 1, &dataBuf));
+    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, numBytes + 1, dataBuf));
     return OBC_ERR_CODE_SUCCESS;
 }
