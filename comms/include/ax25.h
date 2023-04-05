@@ -53,4 +53,5 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
 */
 obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData);
+
 #endif /* COMMS_INCLUDE_AX25_H_ */
