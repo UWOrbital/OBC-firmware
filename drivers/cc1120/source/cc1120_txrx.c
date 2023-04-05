@@ -377,20 +377,31 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     return OBC_ERR_CODE_SUCCESS;
 }
 
-void txFifoReadyCallback(void){
-  if(xSemaphoreGiveFromISR(txSemaphore, (BaseType_t *) pdTRUE) != pdPASS){
-    /* TODO: figure out how to log from ISR */
-  }
+void txFifoReadyCallback(){
+    BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
+    // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
+    if(xSemaphoreGiveFromISR(txSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
+        /* TODO: figure out how to log from ISR */
+    }
+    // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
+    portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
-void rxFifoReadyCallback(void){
-  if(xSemaphoreGiveFromISR(rxSemaphore, (BaseType_t *) pdTRUE) != pdPASS){
-    /* TODO: figure out how to log from ISR */
-  }
+void rxFifoReadyCallback(){
+    BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
+    // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
+    if(xSemaphoreGiveFromISR(rxSemaphore,& xHigherPriorityTaskAwoken) != pdPASS){
+        /* TODO: figure out how to log from ISR */
+    }
+    // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
+    portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
-void transmissionFinishedCallback(void){
-  if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, (BaseType_t *) pdTRUE) != pdPASS){
-    /* TODO: figure out how to log from ISR */
-  }
+void transmissionFinishedCallback(){
+    BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
+    // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
+    if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
+        /* TODO: figure out how to log from ISR */
+    }
+    portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
