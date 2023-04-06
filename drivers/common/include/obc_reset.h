@@ -4,11 +4,10 @@
 /**
  * @brief Reasons for resetting the system
  */
-typedef enum{
-    
-    RESET_REASON_TESTING = 0
-
-}obc_reset_reason_t;
+typedef enum {
+    RESET_REASON_TESTING,
+    RESET_REASON_CMD_EXEC_OBC_RESET, // Reset due to command execution 
+} obc_reset_reason_t;
 
 /**
  * @brief reset the systems

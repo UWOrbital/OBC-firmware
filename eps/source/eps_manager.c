@@ -30,7 +30,6 @@ void initEPSManager(void) {
         epsTaskHandle = xTaskCreateStatic(vEPSManagerTask, EPS_MANAGER_NAME, EPS_MANAGER_STACK_SIZE, NULL, EPS_MANAGER_PRIORITY, epsTaskStack, &epsTaskBuffer);
         LOG_DEBUG(EPS_MANAGER_NAME " was created.");
     }
-    
 
     ASSERT( (epsQueueStack != NULL) && (&epsQueue != NULL) );
     if (epsQueueHandle == NULL) {

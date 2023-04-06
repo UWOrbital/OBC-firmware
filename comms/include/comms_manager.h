@@ -6,8 +6,6 @@
 #include <sys_common.h>
 
 
-
-
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.

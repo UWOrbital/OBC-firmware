@@ -46,7 +46,6 @@ void initTelemetry(void) {
         telemetryQueueHandle = xQueueCreateStatic(TELEMETRY_QUEUE_LENGTH, TELEMETRY_QUEUE_ITEM_SIZE, telemetryQueueStack, &telemetryQueue);
     }
     
-
     ASSERT(&ledTimerBuffer != NULL);
     if (ledTimerHandle == NULL) {
         ledTimerHandle = xTimerCreateStatic("ledTimer", pdMS_TO_TICKS(1000), false, NULL, timerCallback, &ledTimerBuffer);

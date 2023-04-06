@@ -42,7 +42,6 @@ void initSupervisor(void) {
         LOG_DEBUG(SUPERVISOR_NAME " was created.");
     }
 
-
     ASSERT( (supervisorQueueStack != NULL) && (&supervisorQueue != NULL) );
     if (supervisorQueueHandle == NULL) {
         supervisorQueueHandle = xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE, supervisorQueueStack, &supervisorQueue);
