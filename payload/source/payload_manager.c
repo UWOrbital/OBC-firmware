@@ -1,5 +1,6 @@
 #include "payload_manager.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
 #include "obc_task_config.h"
 
 #include <FreeRTOS.h>
@@ -28,6 +29,7 @@ void initPayloadManager(void) {
     ASSERT( (payloadTaskStack != NULL) && (&payloadTaskBuffer != NULL) );
     if (payloadTaskHandle == NULL) {
         payloadTaskHandle = xTaskCreateStatic(vPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL, PAYLOAD_MANAGER_PRIORITY, payloadTaskStack, &payloadTaskBuffer);
+        LOG_DEBUG(PAYLOAD_MANAGER_NAME " was created.");
     }
 
     ASSERT( (payloadQueueStack != NULL) && (&payloadQueue != NULL) );
