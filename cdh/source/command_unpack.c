@@ -17,7 +17,7 @@ static const unpack_func_t unpackFns[] = {
     // Add more functions for other commands as needed
 };
 
-#define MAX_CMD_ID (sizeof(unpackFns) / sizeof(unpack_func_t))
+#define MAX_CMD_ID ((sizeof(unpackFns) / sizeof(unpack_func_t)) - 1)
 
 // Unpack the command message
 obc_error_code_t unpackCmdMsg(const uint8_t* buffer, size_t *offset, cmd_msg_t* cmdMsg) {
@@ -33,7 +33,7 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, size_t *offset, cmd_msg_t* 
     // Mask out the MSB
     id = id & 0x7F;
 
-    if (id >= MAX_CMD_ID) {
+    if (id > MAX_CMD_ID) {
         return OBC_ERR_CODE_UNSUPPORTED_CMD;
     }
 
