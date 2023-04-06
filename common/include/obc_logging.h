@@ -65,8 +65,7 @@ typedef enum {
                                         LOG_ERROR_CODE(errCode);            \
                                     }                                       \
                                 } while (0)
-                        
-
+                                                          
 /**
  * @brief Initialize the logger
  */

@@ -1,6 +1,7 @@
 #include "supervisor.h"
 #include "telemetry.h"
 #include "adcs_manager.h"
+#include "command_manager.h"
 #include "comms_manager.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
@@ -75,14 +76,15 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Initialize other tasks */
     initTelemetry();
+    initCommandManager();
     initADCSManager();
     initCommsManager();
     initEPSManager();
     initPayloadManager();
 
     /* Send initial messages to system queues */
-    sendStartupMessages();    
-    
+    sendStartupMessages();
+
     while(1) {
         supervisor_event_t inMsg;
         telemetry_event_t outMsgTelemetry;
