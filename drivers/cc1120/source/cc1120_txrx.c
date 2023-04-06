@@ -18,21 +18,21 @@
 
 #define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
-#define TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
+#define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
 
 static SemaphoreHandle_t rxSemaphore = NULL;
 static StaticSemaphore_t rxSemaphoreBuffer;
 static SemaphoreHandle_t txSemaphore = NULL;
 static StaticSemaphore_t txSemaphoreBuffer;
-static SemaphoreHandle_t transmissionFinishedSemaphore = NULL;
-static StaticSemaphore_t transmissionFinishedSemaphoreBuffer;
+static SemaphoreHandle_t txFifoEmptySemaphore = NULL;
+static StaticSemaphore_t txFifoEmptySemaphoreBuffer;
 
 static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len);
 
 static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len);
 
-static obc_error_code_t takeTxSemaphoreWriteFifo(uint8_t *data, uint32_t len);
+static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len);
 
 static register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 3 to TXFIFO_THR_PKT
@@ -102,8 +102,8 @@ void initAllTxRxSemaphores(void){
     if(rxSemaphore == NULL) {
         rxSemaphore = xSemaphoreCreateBinaryStatic(&rxSemaphoreBuffer);
     }
-    if(transmissionFinishedSemaphore == NULL){
-        transmissionFinishedSemaphore = xSemaphoreCreateBinaryStatic(&transmissionFinishedSemaphoreBuffer);
+    if(txFifoEmptySemaphore == NULL){
+        txFifoEmptySemaphore = xSemaphoreCreateBinaryStatic(&txFifoEmptySemaphoreBuffer);
     }
 }
 
@@ -188,6 +188,12 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len)
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
+    // wait on the semaphore to make sure tx fifo is empty
+    if(xSemaphoreTake(txFifoEmptySemaphore, TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT) != pdPASS){
+        LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
+        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+    }
+
     // See section 8.1.5
     if (len > CC1120_MAX_PACKET_LEN){
         RETURN_IF_ERROR_CODE(cc1120SendInifinitePktMode(data, len));
@@ -210,36 +216,32 @@ static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len){
     obc_error_code_t errCode;
 
     // Set to variable packet length mode
-    uint8_t spiTrasnferData = VARIABLE_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    uint8_t spiTransferData = VARIABLE_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     // Set max packet size
-    spiTrasnferData = CC1120_MAX_PACKET_LEN;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTrasnferData, 1));
+    spiTransferData = CC1120_MAX_PACKET_LEN;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
         
     // Write current packet size
     uint8_t variableDataLen = (uint8_t)len;
     RETURN_IF_ERROR_CODE(cc1120WriteFifo(&variableDataLen, 1)); // Write packet size
 
     //Write TXRX_INTERRUPT_THRESHOLD bytes to TX fifo and activate TX mode
-    RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data, uint32Min(len, (uint32_t) TXRX_INTERRUPT_THRESHOLD)));
+    RETURN_IF_ERROR_CODE(writeFifoBlocking(data, uint32Min(len, (uint32_t) TXRX_INTERRUPT_THRESHOLD)));
     RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
     // Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD more bytes
     uint32_t groupsOfBytesWritten;
     for (groupsOfBytesWritten = 1; groupsOfBytesWritten < len / TXRX_INTERRUPT_THRESHOLD; groupsOfBytesWritten++)
     {
-        RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+        RETURN_IF_ERROR_CODE(writeFifoBlocking(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
     }
 
     //If not all bytes have been sent, write the remaining bytes to TX FIFO
     uint32_t bytesSent = (groupsOfBytesWritten - 1)*TXRX_INTERRUPT_THRESHOLD + uint32Min(len, TXRX_INTERRUPT_THRESHOLD);
     if (bytesSent < len) {
-        RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, len - groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD));
-    }
-    if(xSemaphoreTake(transmissionFinishedSemaphore, TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT) != pdPASS){
-        LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
-        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+        RETURN_IF_ERROR_CODE(writeFifoBlocking(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, len - groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD));
     }
     return OBC_ERR_CODE_SUCCESS;
 }
@@ -255,16 +257,16 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len){
     obc_error_code_t errCode;
 
     // temporarily set packet size to infinite
-    uint8_t spiTrasnferData = INFINITE_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    uint8_t spiTransferData = INFINITE_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     // Set packet length to mod(len, 256) so that the correct number of bits
     // are sent when fixed packet mode gets reactivated
-    spiTrasnferData = len % (CC1120_MAX_PACKET_LEN + 1);
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTrasnferData, 1));
+    spiTransferData = len % (CC1120_MAX_PACKET_LEN + 1);
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
 
     //Write TXRX_INTERRUPT_THRESHOLD bytes to TX fifo and activate TX mode
-    RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data, TXRX_INTERRUPT_THRESHOLD));
+    RETURN_IF_ERROR_CODE(writeFifoBlocking(data, TXRX_INTERRUPT_THRESHOLD));
     RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
     // Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD more bytes
@@ -273,21 +275,16 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len){
     uint32_t groupsOfBytesWritten;
     for (groupsOfBytesWritten = 1; groupsOfBytesWritten < (len - 1) / TXRX_INTERRUPT_THRESHOLD; groupsOfBytesWritten++)
     {
-        RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+        RETURN_IF_ERROR_CODE(writeFifoBlocking(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
     }
 
     // switch back to fixed packet length mode so that transmission is able to properly end once the remaining bytes are sent
-    spiTrasnferData = FIXED_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    spiTransferData = FIXED_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
 
     // write the remaining bytes to TX FIFO
-    RETURN_IF_ERROR_CODE(takeTxSemaphoreWriteFifo(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, len - groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD));
+    RETURN_IF_ERROR_CODE(writeFifoBlocking(data + groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD, len - groupsOfBytesWritten*TXRX_INTERRUPT_THRESHOLD));
 
-    // Wait for transmission to finish before returning
-    if(xSemaphoreTake(transmissionFinishedSemaphore, TRANSMISSION_FINISHED_SEMAPHORE_TIMEOUT) != pdPASS){
-        LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
-        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
-    }
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -298,13 +295,18 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len){
  * @param len - The size of the provided packet in bytes
  * @return obc_error_code_t
 */
-static obc_error_code_t takeTxSemaphoreWriteFifo(uint8_t *data, uint32_t len){
+static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len){
     obc_error_code_t errCode;
     if(xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) != pdPASS){
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
     }
-    RETURN_IF_ERROR_CODE(cc1120WriteFifo(data, len));
+    errCode = cc1120WriteFifo(data, len);
+    if(errCode != OBC_ERR_CODE_SUCCESS){
+        LOG_ERROR_CODE(errCode);
+        xSemaphoreGive(txSemaphore);
+        return errCode;
+    }
     return OBC_ERR_CODE_SUCCESS;
 }
 /* RX functions */
@@ -342,21 +344,21 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
         return OBC_ERR_CODE_INVALID_ARG;
     }
     // Temporarily set packet size to infinite
-    uint8_t spiTrasnferData = INFINITE_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    uint8_t spiTransferData = INFINITE_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
     
-    // Set packet length to RX_EXPECTED_PACKET_SIZE % 256 so that the correct number of bits are received when
+    // Set packet length to len % 256 so that the correct number of bits are received when
     // fixed packet mode gets reactivated after receiving 
-    // (RX_EXPECTED_PACKET_SIZE - (RX_EXPECTED_PACKET_SIZE % TXRX_INTERRUPT_THRESHOLD)) bytes
-    spiTrasnferData = RX_EXPECTED_PACKET_SIZE % (CC1120_MAX_PACKET_LEN + 1);
+    // (len - (len % TXRX_INTERRUPT_THRESHOLD)) bytes
+    spiTransferData = len % (CC1120_MAX_PACKET_LEN + 1);
 
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTrasnferData, 1));
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_LEN, &spiTransferData, 1));
     
     RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRX));
 
     uint32_t i;
     // See chapters 8.1, 8.4, 8.5
-    for (i = 0; i < (RX_EXPECTED_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD); ++i){
+    for (i = 0; i < (len - 1)/TXRX_INTERRUPT_THRESHOLD; ++i){
         if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
             LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
             return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
@@ -365,14 +367,14 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     }
 
     // Set to fixed packet length mode
-    spiTrasnferData = FIXED_PACKET_LENGTH_MODE;
-    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTrasnferData, 1));
+    spiTransferData = FIXED_PACKET_LENGTH_MODE;
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
     }
-    RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, RX_EXPECTED_PACKET_SIZE - i*TXRX_INTERRUPT_THRESHOLD));
+    RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, len - i*TXRX_INTERRUPT_THRESHOLD));
 
     return OBC_ERR_CODE_SUCCESS;
 }
@@ -397,10 +399,10 @@ void rxFifoReadyCallback(){
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
-void transmissionFinishedCallback(){
+void txFifoEmptyCallback(){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
-    if(xSemaphoreGiveFromISR(transmissionFinishedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
+    if(xSemaphoreGiveFromISR(txFifoEmptySemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
         /* TODO: figure out how to log from ISR */
     }
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);

@@ -125,7 +125,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // See section 3.4.1.1
             // triggered on falling edge once TX FIFO has been completely emptied
             case CC1120_PKT_SYNC_RXTX_PIN:
-                transmissionFinishedCallback();
+                txFifoEmptyCallback();
                 break;
         }
     }
