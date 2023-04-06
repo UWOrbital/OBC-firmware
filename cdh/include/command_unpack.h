@@ -4,7 +4,7 @@
 #include "command_data.h"
 #include <stdint.h>
 
-obc_error_code_t unpackCmdMsg(const uint8_t* buffer, cmd_msg_t* cmdMsg);
+obc_error_code_t unpackCmdMsg(const uint8_t* buffer, size_t *offset, cmd_msg_t* cmdMsg);
 
 /* Unpack functions for each command */
 

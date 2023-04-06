@@ -20,10 +20,18 @@ static const unpack_func_t unpackFns[] = {
 #define MAX_CMD_ID (sizeof(unpackFns) / sizeof(unpack_func_t))
 
 // Unpack the command message
-obc_error_code_t unpackCmdMsg(const uint8_t* buffer, cmd_msg_t* cmdMsg) {
-    uint32_t offset = 0;
+obc_error_code_t unpackCmdMsg(const uint8_t* buffer, size_t *offset, cmd_msg_t* cmdMsg) {
+    if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
 
-    uint8_t id = unpackUint8(buffer, &offset);
+    uint8_t id = unpackUint8(buffer, offset);
+
+    // MSB is 0 if the command is time tagged    
+    bool isTimeTagged = (id & 0x80) ? false : true;
+
+    // Mask out the MSB
+    id = id & 0x7F;
 
     if (id >= MAX_CMD_ID) {
         return OBC_ERR_CODE_UNSUPPORTED_CMD;
@@ -33,14 +41,13 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, cmd_msg_t* cmdMsg) {
         return OBC_ERR_CODE_UNSUPPORTED_CMD;
     }
 
-    uint32_t timestamp = unpackUint32(buffer, &offset);
-    bool isTimeTagged = (bool)unpackUint8(buffer, &offset);
+    uint32_t timestamp = unpackUint32(buffer, offset);
 
     cmdMsg->id = id;
     cmdMsg->timestamp = timestamp;
     cmdMsg->isTimeTagged = isTimeTagged;
 
-    unpackFns[id](buffer, &offset, cmdMsg);
+    unpackFns[id](buffer, offset, cmdMsg);
 
     return OBC_ERR_CODE_SUCCESS;
 }
