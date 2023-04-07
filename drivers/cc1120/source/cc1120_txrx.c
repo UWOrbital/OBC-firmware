@@ -392,7 +392,7 @@ void txFifoReadyCallback(){
 void rxFifoReadyCallback(){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
-    if(xSemaphoreGiveFromISR(rxSemaphore,& xHigherPriorityTaskAwoken) != pdPASS){
+    if(xSemaphoreGiveFromISR(rxSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
         /* TODO: figure out how to log from ISR */
     }
     // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
@@ -405,5 +405,6 @@ void txFifoEmptyCallback(){
     if(xSemaphoreGiveFromISR(txFifoEmptySemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
         /* TODO: figure out how to log from ISR */
     }
+    // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
