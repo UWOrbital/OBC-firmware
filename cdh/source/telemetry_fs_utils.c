@@ -3,6 +3,7 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
+#include "obc_fs_utils.h"
 
 #include <redposix.h>
 
@@ -11,12 +12,10 @@
 #include <stddef.h>
 
 obc_error_code_t mkTelemetryDir(void) {
-    int32_t ret = red_mkdir(TELEMETRY_FILE_DIRECTORY);
-    if (ret != 0) {
-        LOG_DEBUG("Failed to create telemetry directory: %d", red_errno);
-        return OBC_ERR_CODE_MKDIR_FAILED;
-    }
+    obc_error_code_t errCode;
 
+    RETURN_IF_ERROR_CODE(mkDir(TELEMETRY_FILE_DIRECTORY));
+    
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -28,18 +27,9 @@ obc_error_code_t createTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId
     }
 
     unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
-    RETURN_IF_ERROR_CODE(getTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
+    RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
 
-    // One of RED_O_RDONLY, RED_O_WRONLY, or RED_O_RDWR must be specified.
-    // We're closing the file immediately anyways, so doesn't matter which one we use.
-    int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDONLY | RED_O_CREAT);
-    if (telFile < 0) {
-        return OBC_ERR_CODE_FAILED_FILE_OPEN;
-    }
-
-    *telemFileId = telFile;
-
-    RETURN_IF_ERROR_CODE(closeTelemetryFile(telFile));
+    RETURN_IF_ERROR_CODE(createFile((char *)telemFilePathBuffer, telemFileId));
 
     return OBC_ERR_CODE_SUCCESS;
 }
@@ -52,7 +42,7 @@ obc_error_code_t openTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId
     }
 
     unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
-    RETURN_IF_ERROR_CODE(getTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
+    RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
 
     // TODO: If we overflowed the batch ID, we should delete the duplicate file
     // However, don't delete the file if an overflow hasn't occurred (like if a system reset occurred).
@@ -75,7 +65,7 @@ obc_error_code_t openTelemetryFileRO(uint32_t telemBatchId, int32_t *telemFileId
     }
 
     unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
-    RETURN_IF_ERROR_CODE(getTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
+    RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
 
     int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDONLY);
     if (telFile < 0) {
@@ -88,14 +78,9 @@ obc_error_code_t openTelemetryFileRO(uint32_t telemBatchId, int32_t *telemFileId
 }
 
 obc_error_code_t closeTelemetryFile(int32_t telemFileId) {
-    if (telemFileId < 0) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
+    obc_error_code_t errCode;
 
-    int32_t ret = red_close(telemFileId);
-    if (ret < 0) {
-        return OBC_ERR_CODE_FAILED_FILE_CLOSE;
-    }
+    RETURN_IF_ERROR_CODE(closeFile(telemFileId));
 
     return OBC_ERR_CODE_SUCCESS;
 }
@@ -114,7 +99,7 @@ obc_error_code_t createAndOpenTelemetryFileRW(uint32_t telemBatchId, int32_t *te
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getTelemetryFilePath(uint32_t telemBatchId, char *buff, size_t buffSize) {
+obc_error_code_t constructTelemetryFilePath(uint32_t telemBatchId, char *buff, size_t buffSize) {
     if (buff == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -133,46 +118,30 @@ obc_error_code_t getTelemetryFilePath(uint32_t telemBatchId, char *buff, size_t 
 
 obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData) {
     // Assume file is open and valid
+    obc_error_code_t errCode;
 
-    if (telFileId < 0) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
+    RETURN_IF_ERROR_CODE(writeFile(telFileId, &telemetryData, sizeof(telemetry_data_t)));
 
-    // TODO: Handle power resets during read/write (i.e partial data)
-    // Idea: Add header and footer to each file, and check for them on read (investigate checksum feasability)
-    int32_t ret = red_write(telFileId, &telemetryData, sizeof(telemetry_data_t));
-
-    if(ret == sizeof(telemetry_data_t)) {
-        return OBC_ERR_CODE_SUCCESS;
-    }
-    
-    if (red_errno == RED_EFBIG) {
-        // TODO: Handle this error; probably need to close the file and open a new one
-        return OBC_ERR_CODE_MAX_FILE_SIZE_REACHED;
-    }
-
-    return OBC_ERR_CODE_FAILED_FILE_WRITE;
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t *telemData) {
     // Assume file is open and valid
-    
-    if (telemData == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
+    obc_error_code_t errCode;
 
-    if (telemFileId < 0) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-    
-    int32_t bytesRead = red_read(telemFileId, (void *) telemData, sizeof(telemetry_data_t));
+    // TODO: Read the file in reverse and filter out excess state data
+    // We're only sending X past states per downlink, so we should only need to read 
+    // the last X states
+
+    size_t bytesRead = 0;
+    RETURN_IF_ERROR_CODE(readFile(telemFileId, telemData, sizeof(telemetry_data_t), &bytesRead));
 
     if (bytesRead == 0) {
         return OBC_ERR_CODE_REACHED_EOF;
     }
 
     // Since we only write the telemetry data struct, the number of bytes in the file
-    // should be a multiple of the size of the struct. TODO: Deal with incomplete writes
+    // should be a multiple of the size of the struct.
     if (bytesRead != sizeof(telemetry_data_t)) {
         return OBC_ERR_CODE_FAILED_FILE_READ;
     }

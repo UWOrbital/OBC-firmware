@@ -61,14 +61,14 @@ obc_error_code_t openTelemetryFileRO(uint32_t telemBatchId, int32_t *telemFileId
 obc_error_code_t closeTelemetryFile(int32_t telemFileId);
 
 /**
- * @brief Get the telemetry file name for the given telemetry batch ID
+ * @brief Construct the telemetry file path for the given telemetry batch ID
  * 
  * @param telemBatchId The telemetry batch ID
- * @param buff Buffer to store the file name in (should be at least TELEMETRY_FILE_PATH_MAX_LENGTH bytes)
+ * @param buff Buffer to store the file path in (should be at least TELEMETRY_FILE_PATH_MAX_LENGTH bytes)
  * @param buffSize Size of the buffer (>= TELEMETRY_FILE_PATH_MAX_LENGTH)
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the file name was successfully obtained, error code otherwise
  */
-obc_error_code_t getTelemetryFilePath(uint32_t telemBatchId, char *buff, size_t buffSize);
+obc_error_code_t constructTelemetryFilePath(uint32_t telemBatchId, char *buff, size_t buffSize);
 
 /**
  * @brief Write telemetry data to file.

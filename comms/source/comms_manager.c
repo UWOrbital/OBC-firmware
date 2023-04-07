@@ -2,6 +2,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "telemetry_manager.h"
+#include "obc_fs_utils.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_pack.h"
 #include "obc_task_config.h"
@@ -71,6 +72,15 @@ static obc_error_code_t handleTelemetry(uint32_t telemetryBatchId) {
     int32_t fd;
     RETURN_IF_ERROR_CODE(openTelemetryFileRO(telemetryBatchId, &fd));
 
+    size_t fileSize;
+    RETURN_IF_ERROR_CODE(getFileSize(fd, &fileSize));
+    LOG_INFO("Telemetry file size: %lu", fileSize);
+
+    // Print telemetry file name
+    char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
+    RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH));
+    LOG_INFO("Telemetry file name: %s", fileName);
+    
     // Read 1 telemetry data point
     telemetry_data_t telemetryData;
     while ((errCode = readNextTelemetryFromFile(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
