@@ -4,7 +4,6 @@
 
 void testGIO(void) {
     sciPrintf("Testing GIO...\r\n");
-    gioInit();
     for(int i = 0; i < 8; i++){
         gioSetBit(gioPORTA, i, 1);
         gioSetBit(gioPORTB, i, 1);
