@@ -122,6 +122,6 @@ void rxFifoReadyCallback(void);
 /**
  * @brief callback function to be used in an ISR when the TX FIFO has become empty
  */
-void txFifoEmptyCallback(void);
+void transmissionFinishedCallback(void);
 
 #endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */
