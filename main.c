@@ -12,6 +12,7 @@
 #include <sci.h>
 #include <i2c.h>
 #include <spi.h>
+#include <can.h>
 
 int main(void) {
 
@@ -20,6 +21,7 @@ int main(void) {
     sciInit();
     i2cInit();
     spiInit();
+    canInit();
 
     // Initialize logger
     initLogger();

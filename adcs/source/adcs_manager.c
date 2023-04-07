@@ -1,5 +1,6 @@
 #include "adcs_manager.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
 #include "obc_task_config.h"
 
 #include <FreeRTOS.h>
@@ -28,6 +29,7 @@ void initADCSManager(void) {
     ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
     if (adcsTaskHandle == NULL) {
         adcsTaskHandle = xTaskCreateStatic(vADCSManagerTask, ADCS_MANAGER_NAME, ADCS_MANAGER_STACK_SIZE, NULL, ADCS_MANAGER_PRIORITY, adcsTaskStack, &adcsTaskBuffer);
+        LOG_DEBUG(ADCS_MANAGER_NAME " was created.");
     }
 
     ASSERT( (adcsQueueStack != NULL) && (&adcsQueue != NULL) );
