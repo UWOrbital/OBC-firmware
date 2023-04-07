@@ -38,14 +38,13 @@ void initTelemetry(void) {
     ASSERT( (telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL) );
     if (telemetryTaskHandle == NULL) {
         telemetryTaskHandle = xTaskCreateStatic(vTelemetryTask, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
-        LOG_DEBUG(TELEMETRY_NAME " was created.");
     }
 
     ASSERT( (telemetryQueueStack != NULL) && (&telemetryQueue != NULL) );
     if (telemetryQueueHandle == NULL) {
         telemetryQueueHandle = xQueueCreateStatic(TELEMETRY_QUEUE_LENGTH, TELEMETRY_QUEUE_ITEM_SIZE, telemetryQueueStack, &telemetryQueue);
     }
-    
+
     ASSERT(&ledTimerBuffer != NULL);
     if (ledTimerHandle == NULL) {
         ledTimerHandle = xTimerCreateStatic("ledTimer", pdMS_TO_TICKS(1000), false, NULL, timerCallback, &ledTimerBuffer);
