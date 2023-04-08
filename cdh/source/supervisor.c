@@ -100,8 +100,12 @@ static void vSupervisorTask(void * pvParameters) {
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
 
     /* Send initial messages to system queues */
-    sendStartupMessages();
+    sendStartupMessages();    
 
+    // TODO: Only enter normal state after initial checks are complete
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
+    
     while(1) {
         supervisor_event_t inMsg;
         
@@ -109,6 +113,10 @@ static void vSupervisorTask(void * pvParameters) {
             #ifdef DEBUG
             vTaskDelay(pdMS_TO_TICKS(100));
             gioToggleBit(gioPORTB, 1);
+
+            // TODO: Remove this. This is just for testing
+            telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = 0, .obcState = OBC_STATE_NORMAL};
+            LOG_IF_ERROR_CODE(addTelemetryData(&telemData));
             #endif
             continue;
         }
@@ -129,11 +137,12 @@ static obc_error_code_t setupFileSystem(void) {
         return OBC_ERR_CODE_FS_INIT_FAILED;
     }
 
-    ret = red_format("");
-    if (ret != 0) {
-        LOG_DEBUG("red_format failed with error: %d", red_errno);
-        return OBC_ERR_CODE_FS_FORMAT_FAILED;
-    }
+    // TODO: FS formatting doesn't need to be done every time
+    // ret = red_format("");
+    // if (ret != 0) {
+    //     LOG_DEBUG("red_format failed with error: %d", red_errno);
+    //     return OBC_ERR_CODE_FS_FORMAT_FAILED;
+    // }
 
     ret = red_mount("");
     if (ret != 0) {

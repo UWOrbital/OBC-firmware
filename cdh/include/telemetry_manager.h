@@ -7,31 +7,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* Telemetry file path config */
-#define TELEMETRY_FILE_DIRECTORY "/telemetry/"
-#define TELEMETRY_FILE_PREFIX "t_"
-#define TELEMETRY_FILE_EXTENSION ".tlm"
-#define TELEMETRY_FILE_NAME_MAX_LENGTH 10 // uint32_t max length
-#define TELEMETRY_FILE_PATH_MAX_LENGTH \
-            sizeof(TELEMETRY_FILE_DIRECTORY) + \
-            sizeof(TELEMETRY_FILE_PREFIX) + \
-            sizeof(TELEMETRY_FILE_EXTENSION) + \
-            TELEMETRY_FILE_NAME_MAX_LENGTH - 3 + 1 // -3 for the 3 %s in the format string, +1 for the null terminator
-
-#define TELEM_ID_SIZE_BYTES sizeof(telemetry_data_id_t)
-#define TELEM_TIMESTAMP_SIZE_BYTES sizeof(uint32_t)
-#define MAX_TELEM_PARAM_SIZE_BYTES sizeof(telemetry_param_t)
-#define MAX_SINGLE_TELEM_SIZE_BYTES (TELEM_ID_SIZE_BYTES + TELEM_TIMESTAMP_SIZE_BYTES + MAX_TELEM_PARAM_SIZE_BYTES)
-
-#define RETURN_CLOSE_FILE_IF_ERROR_CODE(_ret)  do {                                         \
-                                                    errCode = _ret;                         \
-                                                    if (errCode != OBC_ERR_CODE_SUCCESS) {  \
-                                                        LOG_ERROR_CODE(errCode);            \
-                                                        /* closeTelemetryFile(telemFileId); */ \
-                                                        return errCode;                     \
-                                                    }                                       \
-                                                } while (0)
-
 typedef enum {
     // Temperature values
     TELEM_CC1120_TEMP,
@@ -64,7 +39,6 @@ typedef enum {
     TELEM_OBC_STATE,
     TELEM_EPS_STATE,
 
-    TELEM_LOG_FILE_NUMBER,
     TELEM_NUM_CSP_PACKETS_RCVD,  
 } telemetry_data_id_t;
 
@@ -110,6 +84,8 @@ typedef struct {
     uint32_t timestamp; // seconds since epoch
 } telemetry_data_t;
 
+#define MAX_TELEMETRY_DATA_SIZE sizeof(telemetry_data_t)
+
 /**
  * @brief	Initialize the telemetry task and associated FreeRTOS constructs (queues, timers, etc.)
  */
@@ -121,24 +97,5 @@ void initTelemetry(void);
  * @return  obc_error_code_t OBC_ERR_CODE_SUCCESS if the data was added to the queue, error code otherwise
  */
 obc_error_code_t addTelemetryData(telemetry_data_t *data);
-
-/**
- * @brief Get the telemetry file name for the given telemetry batch ID
- * 
- * @param telemBatchId The telemetry batch ID
- * @param buff Buffer to store the file name in (should be at least TELEMETRY_FILE_PATH_MAX_LENGTH bytes)
- * @param buffSize Size of the buffer (>= TELEMETRY_FILE_PATH_MAX_LENGTH)
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the file name was successfully obtained, error code otherwise
- */
-obc_error_code_t getTelemetryFileName(uint32_t telemBatchId, char *buff, size_t buffSize);
-
-/**
- * @brief Get the next telemetry data point from the given telemetry file
- * 
- * @param telemFileId The telemetry file descriptor
- * @param telemData Buffer to store the telemetry data point in
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise
- */
-obc_error_code_t getNextTelemetry(int32_t telemFileId, telemetry_data_t *telemData);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */
