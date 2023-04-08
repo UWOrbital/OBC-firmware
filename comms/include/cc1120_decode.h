@@ -13,10 +13,6 @@
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY 
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
-#define DECODE_TASK_NAME "decode_task"
-#define DECODE_STACK_SIZE 1024U
-#define DECODE_PRIORITY tskIDLE_PRIORITY + 1U
-
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  * 

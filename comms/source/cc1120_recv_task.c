@@ -4,6 +4,7 @@
 #include "comms_manager.h"
 #include "cc1120_txrx.h"
 #include "ax25.h"
+#include "obc_task_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -60,10 +61,13 @@ static void vRecvTask(void * pvParameters){
                 break;
             case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
                 isStillUplinking = TRUE;
+                // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
                 while(isStillUplinking){
                     packed_ax25_packet_t recvData;
                     uint8_t recvDataLen = AX25_PKT_LEN;
+                    // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
                     cc1120Receive(recvData.data, recvDataLen);
+                    // Send the received bytes to decode data queue to be decoded and sent to command manager
                     LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
                 }
                 break;

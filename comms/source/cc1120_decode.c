@@ -7,6 +7,7 @@
 #include "command_unpack.h"
 #include "command_data.h"
 #include "command_manager.h"
+#include "obc_task_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

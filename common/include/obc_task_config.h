@@ -29,6 +29,16 @@
 #define COMMS_MANAGER_NAME         "comms_manager"
 #define COMMS_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
+/* Comms Recv task config */
+#define RECV_TASK_NAME  "cc1120_receive_task"
+#define RECV_STACK_SIZE 1024U
+#define RECV_PRIORITY   tskIDLE_PRIORITY + 1U
+
+/* Comms Decode task config */
+#define DECODE_TASK_NAME    "decode_task"
+#define DECODE_STACK_SIZE   1024U
+#define DECODE_PRIORITY     tskIDLE_PRIORITY + 1U
+
 /* EPS Manager task config */
 #define EPS_MANAGER_STACK_SIZE   1024U
 #define EPS_MANAGER_NAME         "eps_manager"
