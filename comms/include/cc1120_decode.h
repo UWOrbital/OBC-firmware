@@ -18,39 +18,6 @@
 #define DECODE_PRIORITY tskIDLE_PRIORITY + 1U
 
 #define LARGEST_COMMAND_SIZE 45U
-#define AES_BLOCK_SIZE 128U
-
-typedef uint8_t aes_block_t[AES_BLOCK_SIZE];
-
-/**
- * @brief strips away the ax.25 headers from a received packet
- * 
- * @param in the received ax.25 frame
- * @param out 255 byte array to store the packet
- * 
- * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
-*/
-obc_error_code_t ax25Recv(uint8_t *in, uint8_t *out);
-
-/**
- * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
- * 
- * @param in 255 byte array that has encoded reed solomon data
- * @param out 128 byte array to store the AES block
- * 
- * @return obc_error_code_t - whether or not the data was successfully decoded
-*/
-obc_error_code_t rsDecode(uint8_t *in, aes_block_t *out);
-
-/**
- * @brief decrypts the AES blocks
- * 
- * @param in 128 byte AES block that needs to be decrypted
- * @param cmdBytes 128 byte array to store the decrypted data
- * 
- * @return obc_error_code_t - whether or not the data was successfully decrypted
-*/
-obc_error_code_t aes128Decrypt(aes_block_t in, uint8_t *cmdBytes);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission

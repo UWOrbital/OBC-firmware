@@ -1,5 +1,8 @@
 #include "cc1120_decode.h"
 #include "obc_logging.h"
+#include "aes128.h"
+#include "ax25.h"
+#include "fec.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -23,48 +26,6 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH*DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void * pvParameters);
-
-/**
- * @brief strips away the ax.25 headers from a received packet
- * 
- * @param in the received ax.25 frame
- * @param out 255 byte array to store the packet
- * 
- * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
-*/
-obc_error_code_t ax25Recv(uint8_t *in, uint8_t *out){
-    obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
-    /* Fill in later */
-    return errCode;
-}
-
-/**
- * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
- * 
- * @param in 255 byte array that has encoded reed solomon data
- * @param out 128 byte array to store the AES block
- * 
- * @return obc_error_code_t - whether or not the data was successfully decoded
-*/
-obc_error_code_t rsDecode(uint8_t *in, aes_block_t *out){
-    obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
-    /* Fill in later */
-    return errCode;
-}
-
-/**
- * @brief decrypts the AES blocks
- * 
- * @param in 128 byte AES block that needs to be decrypted
- * @param cmdBytes 128 byte array to store the decrypted data
- * 
- * @return obc_error_code_t - whether or not the data was successfully decrypted
-*/
-obc_error_code_t aes128Decrypt(aes_block_t in, uint8_t *cmdBytes){
-    obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
-    /* Fill in later */
-    return errCode;
-}
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -124,27 +85,27 @@ static void vDecodeTask(void * pvParameters){
     while (1) {
         uint8_t data[278];
         if(xQueueReceive(decodeDataQueueHandle, data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            uint8_t axPacket[255];
+            // uint8_t axPacket[255];
 
-            LOG_IF_ERROR_CODE(ax25Recv(data, axPacket));
+            // LOG_IF_ERROR_CODE(ax25Recv(data, axPacket));
 
-            aes_block_t aesBlocks[2];
+            // aes_block_t aesBlocks[2];
             
-            LOG_IF_ERROR_CODE(rsDecode(data, aesBlocks[0]));
+            // LOG_IF_ERROR_CODE(rsDecode(data, aesBlocks[0]));
 
-            LOG_IF_ERROR_CODE(rsDecode(data+128, aesBlocks[1]));
+            // LOG_IF_ERROR_CODE(rsDecode(data+128, aesBlocks[1]));
 
-            uint8_t commands[128];
-            uint8_t residual[LARGEST_COMMAND_SIZE - 1];
-            uint8_t residualLen;
+            // uint8_t commands[128];
+            // uint8_t residual[LARGEST_COMMAND_SIZE - 1];
+            // uint8_t residualLen;
 
-            LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], commands));
+            // LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], commands));
 
-            LOG_IF_ERROR_CODE(tabulateCommands(commands, residual, &residualLen));
+            // LOG_IF_ERROR_CODE(tabulateCommands(commands, residual, &residualLen));
 
-            LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], commands));
+            // LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], commands));
 
-            LOG_IF_ERROR_CODE(tabulateCommands(commands, residual, &residualLen));
+            // LOG_IF_ERROR_CODE(tabulateCommands(commands, residual, &residualLen));
         }
 
     }

@@ -1,6 +1,7 @@
 #include "comms_manager.h"
 #include "obc_errors.h"
 #include "obc_task_config.h"
+#include "cc1120_recv_task.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -59,6 +60,8 @@ static void vCommsManagerTask(void * pvParameters) {
         switch (queueMsg.eventID) {
             case COMMS_MANAGER_NULL_EVENT_ID:
                 break;
+            case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
+                sendToRecvDataQueue(&queueMsg);
         }
     }
 }
