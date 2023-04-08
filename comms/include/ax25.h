@@ -1,10 +1,10 @@
 #ifndef COMMS_INCLUDE_AX25_H_
 #define COMMS_INCLUDE_AX25_H_
 
-#include <stdint.h>
 #include "obc_errors.h"
 #include "fec.h"
-#include "ax25.h"
+
+#include <stdint.h>
 
 #define AX25_TOTAL_FLAG_BYTES 2
 #define AX25_ADDRESS_BYTES 16
@@ -20,7 +20,8 @@
                       AX25_INFO_BYTES)
 
 typedef struct {
-    uint8_t flag;
+    uint8_t flag_start;
+    uint8_t flag_end;
     uint8_t destination[AX25_ADDRESS_BYTES];
     uint8_t source[AX25_ADDRESS_BYTES];
     uint8_t control;
@@ -33,6 +34,24 @@ typedef union {
     uint8_t data[AX25_PKT_LEN];
 } packed_ax25_packet_t;
 
-obc_error_code_t ax25Frame(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data);
+/**
+ * @brief adds ax.25 headers onto telemtry being downlinked
+ * 
+ * @param rsData reed solomon data that needs ax.25 headers added onto it
+ * @param out array to store the ax.25 frame
+ * 
+ * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
+*/
+obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data);
+
+/**
+ * @brief strips away the ax.25 headers from a received packet
+ * 
+ * @param ax25Data the received ax.25 frame
+ * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * 
+ * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
+*/
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */

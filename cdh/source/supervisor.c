@@ -1,6 +1,7 @@
 #include "supervisor.h"
 #include "telemetry_manager.h"
 #include "adcs_manager.h"
+#include "command_manager.h"
 #include "comms_manager.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
@@ -89,6 +90,7 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Initialize other tasks */
     initTelemetry();
+    initCommandManager();
     initADCSManager();
     initCommsManager();
     initEPSManager();
@@ -98,12 +100,8 @@ static void vSupervisorTask(void * pvParameters) {
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
 
     /* Send initial messages to system queues */
-    sendStartupMessages();    
+    sendStartupMessages();
 
-    // TODO: Only enter normal state after initial checks are complete
-    // TODO: Deal with errors
-    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
-    
     while(1) {
         supervisor_event_t inMsg;
         

@@ -65,14 +65,7 @@ typedef enum {
                                         LOG_ERROR_CODE(errCode);            \
                                     }                                       \
                                 } while (0)
-                        
-#define RETURN_IF_NOT_ACQUIRED(_ret) do {                                                           \
-                                         if(_ret != pdPASS) {                                       \
-                                            /* TODO: signal to supervisor to handle error */        \
-                                            LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_SEMAPHORE_TIMEOUT);  \
-                                            return OBC_ERR_CODE_CC1120_SEMAPHORE_TIMEOUT;           \
-                                            }                                                       \
-                                        } while (0)
+                                                          
 /**
  * @brief Initialize the logger
  */
