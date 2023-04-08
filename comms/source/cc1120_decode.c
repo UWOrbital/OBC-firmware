@@ -43,10 +43,12 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
     if(cmdBytes == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-    uint32_t bytesRead = 0;
-    while(bytesRead < CC1120_MAX_PACKET_LEN){
+    uint32_t bytesUnpacked = 0;
+    // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
+    // If the command id is the id for end of transmission, command manager should set isStillUplinking to FALSE
+    while(bytesUnpacked < CC1120_MAX_PACKET_LEN){
         cmd_msg_t command;
-        RETURN_IF_ERROR_CODE(unpackCmdMsg(cmdBytes, &bytesRead, &command));
+        RETURN_IF_ERROR_CODE(unpackCmdMsg(cmdBytes, &bytesUnpacked, &command));
         RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
     }
     return OBC_ERR_CODE_SUCCESS;
