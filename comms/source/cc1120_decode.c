@@ -3,6 +3,10 @@
 #include "aes128.h"
 #include "ax25.h"
 #include "fec.h"
+#include "cc1120_defs.h"
+#include "command_unpack.h"
+#include "command_data.h"
+#include "command_manager.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -30,31 +34,22 @@ static void vDecodeTask(void * pvParameters);
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  * 
- * @param cmdBytes 128 byte storing the completely decoded data
- * @param residualBytes (LARGEST_COMMAND_SIZE - 1) byte array with decoded data from previous function call or to store data for next function call if NULL
- * @param residualBytesLen the number of bytes with command information in residualBytes
+ * @param cmdBytes 256 byte array storing the completely decoded data
  * 
  * @return obc_error_code_t - whether or not the data was successfullysent to the command manager
 */
-obc_error_code_t tabulateCommands(uint8_t *cmdBytes, uint8_t *residualBytes, uint8_t *residualBytesLen){
+obc_error_code_t handleCommands(uint8_t *cmdBytes){
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
-    /* Fill in later */
-    /*
-    - if residualBytesLen != 0, then parse the first (residualBytesLen) Bytes of residualBytes for commands 
-    - and store them in cmd_msg_t structs
-    - parse cmdBytes and store the data in cmd_msg_t structs
-    - if a command is cut off, store those bytes in residualBytes to be parsed in the next function call and store
-    - the number of bytes in residualBytes in residualBytesLen
-    */
-
-    /* check if we have reached the end of transmission and then have cc1120Receive unblock and return
-
-    if(parsedByte == END_OF_TRANSMISSION_COMMAND_ID){
-        isStillUplink = FALSE;
-        xSemaphoreGive(getRxSemaphore(), NULL);
+    if(cmdBytes == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
     }
-    */
-    return errCode;
+    uint32_t bytesRead = 0;
+    while(bytesRead < CC1120_MAX_PACKET_LEN){
+        cmd_msg_t command;
+        RETURN_IF_ERROR_CODE(unpackCmdMsg(cmdBytes, &bytesRead, &command));
+        RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
+    }
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -82,30 +77,22 @@ void initDecodeTask(void){
 */
 static void vDecodeTask(void * pvParameters){
     obc_error_code_t errCode;
+    packed_ax25_packet_t data;
+    packed_rs_packet_t rsData;
+    aes_block_t *aesBlocks[2];
+    uint8_t serializedDecryptedData[2*AES_BLOCK_SIZE];
     while (1) {
-        uint8_t data[278];
-        if(xQueueReceive(decodeDataQueueHandle, data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            // uint8_t axPacket[255];
-
-            // LOG_IF_ERROR_CODE(ax25Recv(data, axPacket));
-
-            // aes_block_t aesBlocks[2];
-            
-            // LOG_IF_ERROR_CODE(rsDecode(data, aesBlocks[0]));
-
-            // LOG_IF_ERROR_CODE(rsDecode(data+128, aesBlocks[1]));
-
-            // uint8_t commands[128];
-            // uint8_t residual[LARGEST_COMMAND_SIZE - 1];
-            // uint8_t residualLen;
-
-            // LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], commands));
-
-            // LOG_IF_ERROR_CODE(tabulateCommands(commands, residual, &residualLen));
-
-            // LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], commands));
-
-            // LOG_IF_ERROR_CODE(tabulateCommands(commands, residual, &residualLen));
+        if(xQueueReceive(decodeDataQueueHandle, &data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
+            // Strip away the ax.25 headers from the data and store the encode reed solomon data in rsData
+            LOG_IF_ERROR_CODE(ax25Recv(&data, &rsData));
+            // Decode the reed solomon data and store it in aesBlocks
+            LOG_IF_ERROR_CODE(rsDecode(rsData.data, aesBlocks));
+            // Decrypt the first aes128 block and store it in the first AES_BLOCK_SIZE bytes of serializedDecryptedData
+            LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], serializedDecryptedData));
+            // Decrypt the second aes128 block and store it in the second half of serializedDecryptedData
+            LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], serializedDecryptedData + AES_BLOCK_SIZE));
+            // Parse the serializedDecryptedData into cmd_msg_t structs and send them to command manager
+            LOG_IF_ERROR_CODE(handleCommands(serializedDecryptedData));
         }
 
     }
@@ -118,7 +105,7 @@ static void vDecodeTask(void * pvParameters){
  * 
  * @return obc_error_code_t - whether or not the packet was successfully sent to the queue
 */
-obc_error_code_t sendToDecodeDataQueue(uint8_t *data) {
+obc_error_code_t sendToDecodeDataQueue(packed_ax25_packet_t *data) {
     if (decodeDataQueueHandle == NULL) {
         return OBC_ERR_CODE_INVALID_STATE;
     }

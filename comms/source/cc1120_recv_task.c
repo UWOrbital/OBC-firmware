@@ -3,6 +3,7 @@
 #include "cc1120_recv_task.h"
 #include "comms_manager.h"
 #include "cc1120_txrx.h"
+#include "ax25.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -60,10 +61,10 @@ static void vRecvTask(void * pvParameters){
             case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
                 isStillUplinking = TRUE;
                 while(isStillUplinking){
-                    uint8_t recvData[RX_EXPECTED_PACKET_SIZE];
-                    uint8_t recvDataLen = RX_EXPECTED_PACKET_SIZE;
-                    cc1120Receive(recvData, recvDataLen);
-                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(recvData));
+                    packed_ax25_packet_t recvData;
+                    uint8_t recvDataLen = AX25_PKT_LEN;
+                    cc1120Receive(recvData.data, recvDataLen);
+                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
                 }
                 break;
         }

@@ -28,11 +28,11 @@ obc_error_code_t rsEncode(packed_telem_t *telemData, packed_rs_packet_t *rsData)
  * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
  * 
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param aesData 128 byte array to store the AES block
+ * @param aesData an array of 2 pointers to aes_block_t structs to store the decoded reed solomon data
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, aes_block_t *aesData){
+obc_error_code_t rsDecode(uint8_t *rsData, aes_block_t *aesData[]){
     if (rsData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 

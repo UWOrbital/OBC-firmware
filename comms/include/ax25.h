@@ -30,7 +30,7 @@ typedef struct {
     uint16_t fcs;
 } ax25_packet_t;
 
-typedef union {
+typedef struct {
     uint8_t data[AX25_PKT_LEN];
 } packed_ax25_packet_t;
 
