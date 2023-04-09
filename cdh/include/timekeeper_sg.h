@@ -5,32 +5,81 @@
 #include <gio.h>
 #include "ds3232_mz.h"
 
-#define TIMEKEEPER_SG_QUEUE_LENGTH 10U
+const uint8_t alarmQueueSize = 10;
+timekeeper_sg_rtc_alarm alarmQueue[alarmQueueSize];   // dummy size for now, get better clarity on queuings
 
-const uint8_t taskQueueSize = 10;
+/**
+ * @enum	timekeeper_sg_event_id_t
+ * @brief	Timekeeper_sg event ID enum.
+ *
+ * Enum containing all possible event IDs passed to the supervisor event queue.
+*/
+typedef enum {
+    TIMEKEEPER_SG_NULL_EVENT_ID,
+    ADD_ALARM_EVENT_ID,
+    SET_ALARM1_EVENT_ID,
+    SET_ALARM2_EVENT_ID,
+    EXECUTE_ALARM_EVENT_ID,
+} timekeeper_sg_event_id_t;
+
+/**
+ * @union	timekeeper_sg_alarm_mode_t
+ * @brief	union of alarm modes for alarm 1 and 2 on RTC.
+*/
+typedef union {
+    rtc_alarm1_mode_t alarm1Mode;
+    rtc_alarm2_mode_t alarm2Mode;
+} timekeeper_sg_alarm_mode_t;
+
+typedef struct {
+    timekeeper_sg_alarm_mode_t mode;
+    rtc_alarm_time_t alarmVal;
+} timekeeper_sg_rtc_alarm;
+
+/**
+ * @union	timekeeper_sg_event_data_t
+ * @brief	Timekeeper_sg event data union
+*/
+//making it a union for now since there might be other data types needed
+typedef union {
+    timekeeper_sg_rtc_alarm alarm;
+} timekeeper_sg_event_data_t;
+
+/**
+ * @struct	timekeeper_sg_event_t
+ * @brief	Timekeeper_sg event struct
+ *
+ * Holds the message data for each event sent/received by the timekeeper_sg manager queue.
+*/
+typedef struct {
+    timekeeper_sg_event_id_t eventID;
+    timekeeper_sg_event_data_t data;
+} timekeeper_sg_event_t;
+
+/* Timekeeper_sg queue config */
+#define TIMEKEEPER_SG_QUEUE_LENGTH 10U
+#define TIMEKEEPER_SG_QUEUE_ITEM_SIZE sizeof(timekeeper_sg_event_t)
+#define TIMEKEEPER_SG_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define TIMEKEEPER_SG_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the timekeeper_sg task and associated FreeRTOS constructs (queues, timers, etc.)
  */
 void initSupervisor(void);
 
-rtc_alarm_time_t taskQueue[taskQueueSize];   // dummy size for now, get better clarity on queuing
-
-obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode);
-
-obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMode);
-
-/*An idea is to also have a generic alarm function which can take any mode from alarm 1 or alarm 2. A seperate enum will be made for that in this file which combines
-both the alarm enums from the rtc driver, based on the mode the function will choose which alarm to set and if a mode is available in both alarms maybe choose based on
-which alarm is available? If we go with this, then setalar1 and setAlarm2 functions should not be declared in the header file as it is not part of the interface we
-want the other seubteams to see*/
+/**
+ * @brief	Send an event to the timekeeper_sg queue.
+ * @param	event	Event to send.
+ * @return The error code
+ */
+obc_error_code_t sendToTimekeeperSgQueue(timekeeper_sg_event_t *event);
 
 obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
 
+// should this be event based as well?
 rtc_time_t getCurrentTime(rtc_time_t getTime);
 
-void addAlarm(rtc_alarm_time_t alarmTime);
-
-void executeAlarm();
+// TBD what to do with this, local interrupt or use RTC alarm, for now just dequeing from alarm queue
+//  void executeAlarm();
 
 #endif /*CDH_INCLUDE_TIMEKEEPER_SG_H_*/

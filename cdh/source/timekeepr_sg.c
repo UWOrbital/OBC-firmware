@@ -27,7 +27,7 @@ static TaskHandle_t timekeeprSgTaskHandle = NULL;
 static StaticTask_t timekeeprSgTaskBuffer;
 static StackType_t timekeeprSgTaskStack[TIMEKEEPER_SG_STACK_SIZE];
 
-static QueueHandle_t timekeeprSgQueueHandle = NULL;
+static QueueHandle_t timekeeperSgQueueHandle = NULL;
 static StaticQueue_t timekeeperSgQueue;
 static uint8_t timekeeperSgQueueStack[TIMEKEEPER_SG_QUEUE_LENGTH * sizeof(rtc_alarm_time_t)];
 
@@ -38,16 +38,27 @@ void initTimekeeperSg(void) {
     }
 
     ASSERT( (timekeeperSgQueueStack != NULL) && (&timekeeperSgQueue != NULL) );
-    if (timekeeprSgQueueHandle == NULL) {
-        timekeeprSgQueueHandle = xQueueCreateStatic(TIMEKEEPER_SG_QUEUE_LENGTH, sizeof(rtc_alarm_time_t), timekeeperSgQueueStack, &timekeeperSgQueue);
+    if (timekeeperSgQueueHandle == NULL) {
+        timekeeperSgQueueHandle = xQueueCreateStatic(TIMEKEEPER_SG_QUEUE_LENGTH, sizeof(rtc_alarm_time_t), timekeeperSgQueueStack, &timekeeperSgQueue);
     }
+}
+
+obc_error_code_t sendToTimekeeperSgQueue(timekeeper_sg_event_t *event) {
+    ASSERT(timekeeperSgQueueHandle != NULL);
+
+    if(event == NULL)
+        return OBC_ERR_CODE_INVALID_ARG;
+
+    if(xQueueSend(timekeeperSgQueueHandle, (void *) event, TIMEKEEPER_SG_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+        return OBC_ERR_CODE_SUCCESS;
+    
+    return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode) {
     return setAlarm1RTC(alarmMode, alarmTime);
 }
 
-// change this to send an event to the freeRtosqueue instead of direct access.
 obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMode) {
     return setAlarm2RTC(alarmMode, alarmTime);
 }
@@ -77,7 +88,7 @@ void exectureAlarm() {
 }
 
 uint8_t isFull() {
-    if((rear == front - 1) || (front == 0 && rear == taskQueueSize - 1))
+    if((rear == front - 1) || (front == 0 && rear == alarmQueueSize - 1))
         return 1;
     return 0;
 }
@@ -95,8 +106,8 @@ obc_error_code_t enQueue(rtc_alarm_time_t alarmTime) {
     {
         if(front == -1)
             front = 0;
-        rear = (rear + 1) % taskQueueSize;
-        taskQueue[rear] = alarmTime;
+        rear = (rear + 1) % alarmQueueSize;
+        alarmQueue[rear] = alarmTime;
         numOfActiveAlarms++;
     }
 }
@@ -106,14 +117,14 @@ obc_error_code_t deQueue() {
         return OBC_ERR_CODE_UNKNOWN;
     else {
         if(front == rear) {
-            taskQueue[front] = {0};
+            alarmQueue[front] = NULL;
             front = -1;
             rear = -1;
             numOfActiveAlarms--;
         }
         else {
-            taskQueue[front] = {0};
-            front = (front + 1) % taskQueueSize;
+            alarmQueue[front] = NULL;
+            front = (front + 1) % alarmQueueSize;
             numOfActiveAlarms--;
         }
     }
@@ -157,8 +168,8 @@ void bubbleSort() {
     int8_t numOfInnerIterations = 0;
     for(int8_t i = 0; i < n; i++) {
         for(int8_t j = front; j < front + numOfActiveAlarms - 1; j++) {
-            if(taskQueue[j % taskQueueSize] > taskQueue[(j + 1) % taskQueueSize]) {
-                swap(&taskQueue[j % taskQueueSize], &taskQueue[(j + 1) % taskQueueSize]);
+            if(alarmQueue[j % alarmQueueSize] > alarmQueue[(j + 1) % alarmQueueSize]) {
+                swap(&alarmQueue[j % alarmQueueSize], &alarmQueue[(j + 1) % alarmQueueSize]);
             }
         }
     }
@@ -171,6 +182,26 @@ static void vTimekeeperSgTask(void * pvParameters) {
     sendStartupMessages();
 
     while(1) {
+        timekeeper_sg_event_t inMsg;
+
+        if(xQueueReceive(timekeeperSgQueueHandle, &inMsg, TIMEKEEPER_SG_QUEUE_RX_WAIT_PERIOD) != pdPASS)
+            inMsg.eventID = TIMEKEEPER_SG_NULL_EVENT_ID;
         
+        switch (inMsg.eventID) {
+            case ADD_ALARM_EVENT_ID:
+                addAlarm(inMsg.data.alarm.alarmVal);
+                break;
+            case SET_ALARM1_EVENT_ID:
+                setAlarm1(inMsg.data.alarm.alarmVal, inMsg.data.alarm.mode.alarm1Mode);
+                break;
+            case SET_ALARM2_EVENT_ID:
+                setAlarm2(inMsg.data.alarm.alarmVal, inMsg.data.alarm.mode.alarm2Mode);
+                break;
+            case EXECUTE_ALARM_EVENT_ID:
+                exectureAlarm();
+                break;
+            default:
+                ;
+        }
     }
 }
