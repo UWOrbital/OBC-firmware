@@ -74,12 +74,12 @@ rtc_time_t getCurrentTime(rtc_time_t getTime) {
     return getTime;
 }
 
-void addAlarm(rtc_alarm_time_t alarmTime) {
+void addAlarm(timekeeper_sg_rtc_alarm alarm) {
     /*
         Following Figure 5.6: Adding new alarms 
         https://ntnuopen.ntnu.no/ntnu-xmlui/bitstream/handle/11250/2413318/14533_FULLTEXT.pdf?sequence=1#page=54&zoom=100,94,101
     */
-   enQueue(alarmTime);
+   enQueue(alarm);
    bubbleSort();
 }
 
@@ -99,7 +99,7 @@ uint8_t isEmpty() {
     return 0;
 }
 
-obc_error_code_t enQueue(rtc_alarm_time_t alarmTime) {
+obc_error_code_t enQueue(timekeeper_sg_rtc_alarm alarm) {
     if(isFull())
         return OBC_ERR_CODE_UNKNOWN;
     else
@@ -107,7 +107,7 @@ obc_error_code_t enQueue(rtc_alarm_time_t alarmTime) {
         if(front == -1)
             front = 0;
         rear = (rear + 1) % alarmQueueSize;
-        alarmQueue[rear] = alarmTime;
+        alarmQueue[rear] = alarm;
         numOfActiveAlarms++;
     }
 }
@@ -117,13 +117,13 @@ obc_error_code_t deQueue() {
         return OBC_ERR_CODE_UNKNOWN;
     else {
         if(front == rear) {
-            alarmQueue[front] = NULL;
+            alarmQueue[front] = dummyAlarm;
             front = -1;
             rear = -1;
             numOfActiveAlarms--;
         }
         else {
-            alarmQueue[front] = NULL;
+            alarmQueue[front] = dummyAlarm;
             front = (front + 1) % alarmQueueSize;
             numOfActiveAlarms--;
         }
@@ -135,31 +135,6 @@ void swap(rtc_alarm_time_t *a1, rtc_alarm_time_t *a2) {
     *a1 = *a2;
     *a2 = temp;
 }
-// look into difftime() maybe which makes use of time_t
-// int compare(rtc_alarm_time_t a, rtc_alarm_time_t b) {
-//     if(a.date > b.date)
-//         return 1;
-//     else if(a.date == b.date) {
-//         if(a.time.hours > b.time.hours)
-//             return 1;
-//         else if(a.time.hours == b.time.hours) {
-//             if(a.time.minutes > b.time.minutes)
-//                 return 1;
-//             else if(a.time.minutes == b.time.minutes) {
-//                 if(a.time.seconds > b.time.seconds)
-//                     return 1;
-//                 else 
-//                     return -1;
-//             }
-//             else    
-//                 return -1;
-//         }
-//         else
-//             return -1;
-//     }
-//     else
-//         return -1;
-// }
 
 //https://www.geeksforgeeks.org/sort-m-elements-of-given-circular-array-starting-from-index-k/
 void bubbleSort() {
@@ -168,6 +143,7 @@ void bubbleSort() {
     int8_t numOfInnerIterations = 0;
     for(int8_t i = 0; i < n; i++) {
         for(int8_t j = front; j < front + numOfActiveAlarms - 1; j++) {
+            // waiting on daniel's unix time PR to get merged to fix expression must have arithmetic pointer error below
             if(alarmQueue[j % alarmQueueSize] > alarmQueue[(j + 1) % alarmQueueSize]) {
                 swap(&alarmQueue[j % alarmQueueSize], &alarmQueue[(j + 1) % alarmQueueSize]);
             }
@@ -189,7 +165,7 @@ static void vTimekeeperSgTask(void * pvParameters) {
         
         switch (inMsg.eventID) {
             case ADD_ALARM_EVENT_ID:
-                addAlarm(inMsg.data.alarm.alarmVal);
+                addAlarm(inMsg.data.alarm);
                 break;
             case SET_ALARM1_EVENT_ID:
                 setAlarm1(inMsg.data.alarm.alarmVal, inMsg.data.alarm.mode.alarm1Mode);

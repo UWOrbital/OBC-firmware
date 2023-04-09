@@ -5,9 +5,6 @@
 #include <gio.h>
 #include "ds3232_mz.h"
 
-const uint8_t alarmQueueSize = 10;
-timekeeper_sg_rtc_alarm alarmQueue[alarmQueueSize];   // dummy size for now, get better clarity on queuings
-
 /**
  * @enum	timekeeper_sg_event_id_t
  * @brief	Timekeeper_sg event ID enum.
@@ -31,10 +28,18 @@ typedef union {
     rtc_alarm2_mode_t alarm2Mode;
 } timekeeper_sg_alarm_mode_t;
 
+/**
+ * @struct	timekeeper_sg_rtc_alarm
+ * @brief	atruct for RTC alarm containing both mode and alarm value
+ */
 typedef struct {
     timekeeper_sg_alarm_mode_t mode;
     rtc_alarm_time_t alarmVal;
 } timekeeper_sg_rtc_alarm;
+
+timekeeper_sg_rtc_alarm dummyAlarm = {.mode.alarm1Mode = RTC_ALARM1_ONCE_PER_SECOND,
+                                      .alarmVal = {1, {1, 1, 1}},
+                                    };
 
 /**
  * @union	timekeeper_sg_event_data_t
@@ -55,6 +60,9 @@ typedef struct {
     timekeeper_sg_event_id_t eventID;
     timekeeper_sg_event_data_t data;
 } timekeeper_sg_event_t;
+
+const uint8_t alarmQueueSize = 10;
+timekeeper_sg_rtc_alarm alarmQueue[alarmQueueSize];   // dummy size for now, get better clarity on queuings
 
 /* Timekeeper_sg queue config */
 #define TIMEKEEPER_SG_QUEUE_LENGTH 10U
