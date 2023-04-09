@@ -82,6 +82,12 @@ void initSupervisor(void);
  */
 obc_error_code_t sendToTimekeeperSgQueue(timekeeper_sg_event_t *event);
 
+/**
+ * @brief	Timekeeper_sg task.
+ * @param	pvParameters	Task parameters.
+ */
+static void vTimekeeperSgTask(void * pvParameters);
+
 obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
 
 // should this be event based as well?
