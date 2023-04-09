@@ -29,7 +29,7 @@ obc_error_code_t canSendMessage(canBASE_t *canReg, uint32_t messageBox, const ui
 
     obc_error_code_t status = OBC_ERR_CODE_UNKNOWN;
 
-    if(sizeof(*txData) > 0x08) { /* Check that tx data is within 8 bytes (assuming standard CAN packet) */
+    if(sizeof(*txData) > 8) { /* Check that tx data is within 8 bytes */
         return OBC_ERR_CODE_CAN_TX_DATA_OVERSIZE;
     }
     if(txData == NULL) {

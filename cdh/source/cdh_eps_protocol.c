@@ -181,61 +181,93 @@ static void populateRespTxData(uint8_t *txData, cdh_eps_resp_msg_t *resp) {
     txData[7] = resp->request;
 }
 
+/* Process queued messages to transmit to EPS*/
+static void processTxMessages(void) {
+    cdh_eps_cmd_msg_t cmd;
+    cdh_eps_resp_msg_t resp;
+
+    if(xQueueReceive(cdhepsCmdTxQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
+        LOG_DEBUG("Command for EPS %u", cmd.id);
+        uint32_t txMessageBox; 
+
+        switch (cmd.id) {
+            case CMD_SUBSYS_SHUTDDOWN: /* Subsystem shutdown command */
+                txMessageBox = canMESSAGE_BOX1;
+                break;
+            case CMD_HEARTBEAT: /* Heartbeat command */
+                txMessageBox = canMESSAGE_BOX3;
+                break;
+            case CMD_GET_TELEMETRY: /* Get telemetry command */
+                txMessageBox = canMESSAGE_BOX4;
+                break;
+            default:
+                // Invalid cmd id recieved -> Don't send to EPS
+                break;
+        }
+
+        uint8_t txData[8]; /* 8 byte tx data buffer to send to EPS over CAN */
+        populateCmdTxData(txData, &cmd);
+
+        canSendMessage(canREG1, txMessageBox, txData); /* Send command to eps over CAN */
+    }
+
+    if(xQueueReceive(cdhepsRespTxQueueHandle, &resp, portMAX_DELAY) == pdPASS) {
+        LOG_DEBUG("Response for EPS %u", resp.id);
+        uint32_t txMessageBox;
+
+        switch (resp.id) {
+            case RESP_SUBSYS_SHUTDDOWN_ACK: /* Subsystem shutdown ACK */
+                txMessageBox = canMESSAGE_BOX6;
+                break;
+            case RESP_HEARTBEAT_ACK:
+                txMessageBox = canMESSAGE_BOX7;
+                break;
+            default:
+                // Invalid resp id -> Don't send to EPS
+                break;
+        }
+
+        uint8_t txData[8]; /* 8 byte tx data buffer to send to EPS over CAN */
+        populateRespTxData(txData, &resp);
+
+        canSendMessage(canREG1, txMessageBox, txData); /* Send command to eps over CAN */
+    }
+}
+
+/* Process recieved messages from EPS */
+static void processRxMessages(void) {
+    cdh_eps_cmd_msg_t cmd;
+    cdh_eps_resp_msg_t resp;
+    /* Process recieved messages from EPS */
+    if(xQueueReceive(cdhepsCmdRxQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
+        switch (cmd.id) {
+            case CMD_SUBSYS_SHUTDDOWN:
+                break;
+            case CMD_HEARTBEAT:
+                break;
+            case CMD_GET_TELEMETRY:
+                break;
+            default:
+                break;
+        }
+    }
+
+    if(xQueueReceive(cdhepsRespRxQueueHandle, &resp, portMAX_DELAY) == pdPASS) {
+        switch (resp.id) {
+            case RESP_SUBSYS_SHUTDDOWN_ACK:
+                break;
+            case RESP_HEARTBEAT_ACK:
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 static void cdhepsProtocolTask(void *pvParameters) {
-    obc_error_code_t errCode;
 
     while(1) {
-        cdh_eps_cmd_msg_t cmd;
-        cdh_eps_resp_msg_t resp;
-
-        /* Process queues messages to transmit to EPS*/
-        if(xQueueReceive(cdhepsCmdTxQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
-            uint32_t txMessageBox; 
-
-            switch (cmd.id) {
-                case 0x00: /* Subsystem shutdown command */
-                    txMessageBox = canMESSAGE_BOX1;
-                    break;
-                case 0x01: /* Heartbeat command */
-                    txMessageBox = canMESSAGE_BOX3;
-                    break;
-                case 0x02: /* Get telemetry command */
-                    txMessageBox = canMESSAGE_BOX4;
-                    break;
-                default:
-                    break;
-            }
-
-            uint8_t txData[8]; /* 8 byte tx data buffer to send to EPS over CAN */
-            populateCmdTxData(txData, &cmd);
-
-            canSendMessage(canREG1, txMessageBox, txData); /* Send command to eps over CAN */
-        }
-
-        if(xQueueReceive(cdhepsRespTxQueueHandle, &resp, portMAX_DELAY) == pdPASS) {
-            uint32_t txMessageBox;
-
-            switch (resp.id) {
-                case 0x00: /* Subsystem shutdown ACK */
-                    txMessageBox = canMESSAGE_BOX6;
-                    break;
-                default:
-                    break;
-            }
-
-            uint8_t txData[8]; /* 8 byte tx data buffer to send to EPS over CAN */
-            populateRespTxData(txData, &resp);
-
-            canSendMessage(canREG1, txMessageBox, txData); /* Send command to eps over CAN */
-        }
-
-        /* Process recieved messages from EPS */
-        if(xQueueReceive(cdhepsCmdRxQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
-            
-        }
-
-        if(xQueueReceive(cdhepsRespRxQueueHandle, &resp, portMAX_DELAY) == pdPASS) {
-
-        }
+        processTxMessages();
+        processRxMessages();
     }
 }

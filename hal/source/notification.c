@@ -94,6 +94,7 @@ void memoryPort1TestFailNotification(uint32 groupSelect, uint32 dataSelect, uint
 }
 
 /* USER CODE BEGIN (8) */
+#include "cdh_eps_protocol_id.h"
 #include "cdh_eps_protocol.h"
 #include "obc_can_io.h"
 
@@ -144,30 +145,35 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
     if(node == canREG1) {
         uint8_t rxData[8] = {0};
         canGetMessage(canREG1, messageBox, rxData);
-
         uint8_t id = rxData[0];
 
-        if(id == 0x00) { /* Subsystem shutdown request */
+        if(id == CMD_SUBSYS_SHUTDDOWN) { /* Subsystem shutdown request */
             cdh_eps_cmd_msg_t cmd;
             populateCmdMsg(rxData, &cmd);
 
             /* Send command message to CDH-EPS queue */
             sendToCDHEPSCmdRxQueue(&cmd);
         }
-        else if(id == 0x01) { /* Heartbeat ACK */
+        else if(id == RESP_HEARTBEAT_ACK) { /* Heartbeat ACK */
             cdh_eps_resp_msg_t resp;
             populateRespMsg(rxData, &resp);
             
             sendToCDHEPSRespRxQueue(&resp);
         }
-        else if((id > 0x02) && (id < 0x14)) { /* Telemetry packet */
+        else if(id == RESP_SUBSYS_SHUTDDOWN_ACK) {
+            cdh_eps_resp_msg_t resp;
+            populateRespMsg(rxData, &resp);
+            
+            sendToCDHEPSRespRxQueue(&resp);
+        }
+        else if((id >= TLE_EPS_BOARD_TEMP) && (id <= TLE_OBC_3V3_VOLTAGE)) { /* Telemetry packet */
             cdh_eps_tle_msg_t tle;
             populateTleMesg(rxData, &tle);
 
             // Send telemetry somewhere
         }
         else {
-
+            // Invalid id recieved
         }
     }
     
