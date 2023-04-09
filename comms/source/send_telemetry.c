@@ -22,8 +22,8 @@ static StackType_t cc1120TransmitTaskStack[CC1120_TRANSMIT_STACK_SIZE];
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
-QueueHandle_t cc1120TransmitQueueHandle = NULL;
-static StaticQueue_t cc1120TransmitQueue = NULL;
+static QueueHandle_t cc1120TransmitQueueHandle = NULL;
+static StaticQueue_t cc1120TransmitQueue;
 static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH*CC1120_TRANSMIT_QUEUE_ITEM_SIZE];
 
 /**

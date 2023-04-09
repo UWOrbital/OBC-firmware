@@ -21,12 +21,6 @@ typedef size_t (*telemetry_pack_func_t)(telemetry_data_t *, uint8_t *);
  */
 obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, size_t *numBytesPacked);
 
-obc_error_code_t packTelemetryId(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked);
-
-obc_error_code_t packTelemetryTimestamp(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked);
-
-obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked);
-
 /* Declare all pack functions for telemetry data */
 size_t packCC1120Temp(telemetry_data_t *data, uint8_t *buffer);
 size_t packCommsCustomTransceiverTemp(telemetry_data_t *data, uint8_t *buffer);

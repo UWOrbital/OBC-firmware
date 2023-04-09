@@ -1,15 +1,8 @@
 #ifndef COMMS_INCLUDE_ENCODE_TELEMETRY_H_
 #define COMMS_INCLUDE_ENCODE_TELEMETRY_H_
 
-#include "fec.h"
 #include <stdint.h>
 #include <stdbool.h>
-
-#define PACKED_TELEM_PACKET_SIZE REED_SOLOMON_DECODED_BYTES
-
-typedef struct {
-    uint8_t data[PACKED_TELEM_PACKET_SIZE];
-} packed_telem_packet_t;
 
 /**
  * @brief Initializes the telemetry encoding task and queue

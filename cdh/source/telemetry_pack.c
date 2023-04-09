@@ -35,6 +35,10 @@ static const telemetry_pack_func_t telemPackFns[] = {
     [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
 };
 
+static obc_error_code_t packTelemetryId(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked);
+static obc_error_code_t packTelemetryTimestamp(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked);
+static obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked);
+
 /**
  * @brief Packs/serializes a telemetry struct into a buffer
  * 
@@ -59,7 +63,7 @@ obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t b
 
     size_t bytesWritten = 0;
 
-    RETURN_IF_ERROR_CODE(packTelemetryId(data, buffer, buffLen, &bytesWritten));
+    RETURN_IF_ERROR_CODE(packTelemetryId(data, buffer, &bytesWritten));
     (*numBytesPacked) += bytesWritten;
     RETURN_IF_ERROR_CODE(packTelemetryTimestamp(data, buffer + bytesWritten, &bytesWritten));
     (*numBytesPacked) += bytesWritten;

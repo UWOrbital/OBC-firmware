@@ -30,8 +30,8 @@ static StackType_t telemEncodeTaskStack[COMMS_TELEM_ENCODE_STACK_SIZE];
 #define COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
-QueueHandle_t telemEncodeQueueHandle = NULL;
-static StaticQueue_t telemEncodeQueue = NULL;
+static QueueHandle_t telemEncodeQueueHandle = NULL;
+static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH*COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
 
 /**
@@ -96,8 +96,6 @@ obc_error_code_t sendToTelemEncodeQueue(uint32_t *telemetryBatchId) {
 static void vTelemEncodeTask(void *pvParameters) {
     obc_error_code_t errCode;
 
-    ASSERT (CC1120_TRANSMIT_QUEUE_ITEM_SIZE == AX25_PKT_LEN);
-
     while (1) {
         uint32_t telemetryBatchId;
 
@@ -154,7 +152,7 @@ static obc_error_code_t sendTelemetry(uint32_t telemetryBatchId) {
 
         // Pack the single telemetry into a uint8_t array
         RETURN_IF_ERROR_CODE(packTelemetry(&singleTelem,
-                             &packedSingleTelem,
+                             packedSingleTelem,
                              sizeof(packedSingleTelem)/sizeof(uint8_t),
                              &packedSingleTelemSize));
         

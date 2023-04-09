@@ -1,7 +1,7 @@
 #ifndef COMMS_INCLUDE_SEND_TELEMETRY_H_
 #define COMMS_INCLUDE_SEND_TELEMETRY_H_
 
-#include "fec.h"
+#include "ax25.h"
 
 /**
  * @brief Initialize the CC1120 transmit task and queue
