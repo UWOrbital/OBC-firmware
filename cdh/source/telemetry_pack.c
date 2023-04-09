@@ -1,6 +1,8 @@
 #include "telemetry_pack.h"
 #include "telemetry_manager.h"
 #include "obc_pack_utils.h"
+#include "obc_logging.h"
+#include "encode_telemetry.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -33,7 +35,18 @@ static const telemetry_pack_func_t telemPackFns[] = {
     [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
 };
 
-obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, size_t *numBytesPacked) {
+/**
+ * @brief Packs/serializes a telemetry struct into a buffer
+ * 
+ * @param data - Pointer to the telemetry struct to pack
+ * @param buffer - Pointer to the buffer to pack the telemetry struct into
+ * @param buffLen - Length of the buffer
+ * @param numBytesPacked - Pointer to the number of bytes packed into the buffer at the end of the function
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all bytes were packed successfully
+ */
+obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, size_t *numBytesPacked) {
+    obc_error_code_t errCode;
+    
     if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -43,7 +56,44 @@ obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer
         // This is to prevent the possibility of a buffer overflow
         return OBC_ERR_CODE_BUFF_TOO_SMALL;
     }
+
+    size_t bytesWritten = 0;
+
+    RETURN_IF_ERROR_CODE(packTelemetryId(data, buffer, buffLen, &bytesWritten));
+    (*numBytesPacked) += bytesWritten;
+    RETURN_IF_ERROR_CODE(packTelemetryTimestamp(data, buffer + bytesWritten, &bytesWritten));
+    (*numBytesPacked) += bytesWritten;
+    RETURN_IF_ERROR_CODE(packTelemetryParameters(data, buffer + bytesWritten, &bytesWritten));
+    (*numBytesPacked) += bytesWritten;
     
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t packTelemetryId(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked) {
+    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    size_t offset = 0;
+    packUint8(data->id, buffer, &offset);
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t packTelemetryTimestamp(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked) {
+    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    size_t offset = 0;
+    packUint32(data->timestamp, buffer, &offset);
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked) {
+    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
     if (telemPackFns[data->id] == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }

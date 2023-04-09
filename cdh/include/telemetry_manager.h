@@ -7,6 +7,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define TELEM_ID_SIZE_BYTES 1
+#define TELEM_TIMESTAMP_SIZE_BYTES 4
+#define TELEM_PARAM_MAX_SIZE_BYTES (sizeof(telemetry_data_t) - \
+                                   (sizeof(((telemetry_data_t *)0)->id) + \
+                                    sizeof(((telemetry_data_t *)0)->timestamp)))
+
 typedef enum {
     // Temperature values
     TELEM_CC1120_TEMP,
@@ -42,46 +48,43 @@ typedef enum {
     TELEM_NUM_CSP_PACKETS_RCVD,  
 } telemetry_data_id_t;
 
-typedef union {
-    // Temperature values
-    float cc1120Temp;
-    float commsCustomTransceiverTemp;
-    float obcTemp;
-    float adcsMagBoardTemp;
-    float adcsSensorBoardTemp;
-    float epsBoardTemp;
-    float solarPanel1Temp;
-    float solarPanel2Temp;
-    float solarPanel3Temp;
-    float solarPanel4Temp;
-
-    // Current values
-    float epsComms5vCurrent;
-    float epsComms3v3Current;
-    float epsMagnetorquer8vCurrent;
-    float epsAdcs5vCurrent;
-    float epsAdcs3v3Current;
-    float epsObc3v3Current;
-
-    // Voltage values
-    float epsComms5vVoltage;
-    float epsComms3v3Voltage;
-    float epsMagnetorquer8vVoltage;
-    float epsAdcs5vVoltage;
-    float epsAdcs3v3Voltage;
-    float epsObc3v3Voltage;
-
-    obc_state_t obcState;
-    uint8_t epsState;
-
-    uint32_t numCspPacketsRcvd;
-} telemetry_param_t;
-
-
 typedef struct {
-    telemetry_param_t param;
     telemetry_data_id_t id;
     uint32_t timestamp; // seconds since epoch
+    union {
+        // Temperature values
+        float cc1120Temp;
+        float commsCustomTransceiverTemp;
+        float obcTemp;
+        float adcsMagBoardTemp;
+        float adcsSensorBoardTemp;
+        float epsBoardTemp;
+        float solarPanel1Temp;
+        float solarPanel2Temp;
+        float solarPanel3Temp;
+        float solarPanel4Temp;
+
+        // Current values
+        float epsComms5vCurrent;
+        float epsComms3v3Current;
+        float epsMagnetorquer8vCurrent;
+        float epsAdcs5vCurrent;
+        float epsAdcs3v3Current;
+        float epsObc3v3Current;
+
+        // Voltage values
+        float epsComms5vVoltage;
+        float epsComms3v3Voltage;
+        float epsMagnetorquer8vVoltage;
+        float epsAdcs5vVoltage;
+        float epsAdcs3v3Voltage;
+        float epsObc3v3Voltage;
+
+        obc_state_t obcState;
+        uint8_t epsState;
+
+        uint32_t numCspPacketsRcvd;
+    };
 } telemetry_data_t;
 
 #define MAX_TELEMETRY_DATA_SIZE sizeof(telemetry_data_t)

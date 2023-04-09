@@ -34,6 +34,11 @@
 #define CC1120_TRANSMIT_TASK_NAME "comms_transmit"
 #define CC1120_TRANSMIT_TASK_PRIORITY tskIDLE_PRIORITY + 1U
 
+/* Comms telemetry encode task config */
+#define COMMS_TELEM_ENCODE_STACK_SIZE 512U
+#define COMMS_TELEM_ENCODE_TASK_NAME "comms_telemetry_encode"
+#define COMMS_TELEM_ENCODE_TASK_PRIORITY tskIDLE_PRIORITY + 1U
+
 /* EPS Manager task config */
 #define EPS_MANAGER_STACK_SIZE   1024U
 #define EPS_MANAGER_NAME         "eps_manager"
