@@ -119,4 +119,11 @@ void rxFifoReadyCallback(void);
  */
 void txFifoEmptyCallback(void);
 
+/**
+ * @brief allows other files to access the cc1120 RX semaphore handle
+ * 
+ * @return SemaphoreHandle_t - handle of the cc1120 RX semaphore
+*/
+SemaphoreHandle_t getCC1120RxSemaphoreHandle(void);
+
 #endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */

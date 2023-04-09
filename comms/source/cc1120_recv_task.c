@@ -1,4 +1,4 @@
-#include "cc1120_decode.h"
+#include "decode_telemetry.h"
 #include "obc_logging.h"
 #include "cc1120_recv_task.h"
 #include "comms_manager.h"
@@ -17,6 +17,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+
+#define RECV_DATA_QUEUE_LENGTH 10U 
+#define RECV_DATA_QUEUE_ITEM_SIZE sizeof(comms_event_t)
+#define RECV_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
+#define RECV_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
 // Recv task
 static TaskHandle_t recvTaskHandle = NULL;
@@ -53,18 +58,16 @@ static void vRecvTask(void * pvParameters){
     while (1) {
         comms_event_t queueMsg;
         if(xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS){
-            queueMsg.eventID = COMMS_MANAGER_NULL_EVENT_ID;
             LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECV_QUEUE_TIMEOUT);
+            continue;
         }
         switch (queueMsg.eventID) {
-            case COMMS_MANAGER_NULL_EVENT_ID:
-                break;
             case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
                 isStillUplinking = TRUE;
                 // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
                 while(isStillUplinking){
                     packed_ax25_packet_t recvData;
-                    uint8_t recvDataLen = AX25_PKT_LEN;
+                    uint32_t recvDataLen = AX25_PKT_LEN;
                     // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
                     cc1120Receive(recvData.data, recvDataLen);
                     // Send the received bytes to decode data queue to be decoded and sent to command manager

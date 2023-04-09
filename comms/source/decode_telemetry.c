@@ -1,4 +1,4 @@
-#include "cc1120_decode.h"
+#include "decode_telemetry.h"
 #include "obc_logging.h"
 #include "aes128.h"
 #include "ax25.h"
@@ -8,17 +8,25 @@
 #include "command_data.h"
 #include "command_manager.h"
 #include "obc_task_config.h"
+#include "cc1120_txrx.h"
+#include "command_id.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
+#include <os_semphr.h>
 
 #include <sys_common.h>
 #include <gio.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+
+#define DECODE_DATA_QUEUE_LENGTH 10U
+#define DECODE_DATA_QUEUE_ITEM_SIZE AX25_PKT_LEN
+#define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY 
+#define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
 // Decode Data task
 static TaskHandle_t decodeTaskHandle = NULL;
@@ -47,7 +55,17 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
     uint32_t bytesUnpacked = 0;
     // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
     // If the command id is the id for end of transmission, command manager should set isStillUplinking to FALSE
-    while(bytesUnpacked < CC1120_MAX_PACKET_LEN){
+    while(bytesUnpacked < AES_BLOCK_SIZE){
+        // Check if we have reached
+        if(cmdBytes[bytesUnpacked] == CMD_END_OF_TRANSMISSION){
+            isStillUplinking = FALSE;
+            // give RX semaphore so that the cc1120Receive can unblock and return
+            if(xSemaphoreGive(getCC1120RxSemaphoreHandle()) != pdPASS){
+                LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
+                return OBC_ERR_CODE_SEMAPHORE_FULL;
+            }
+            return OBC_ERR_CODE_SUCCESS;
+        }
         cmd_msg_t command;
         RETURN_IF_ERROR_CODE(unpackCmdMsg(cmdBytes, &bytesUnpacked, &command));
         RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
@@ -82,20 +100,18 @@ static void vDecodeTask(void * pvParameters){
     obc_error_code_t errCode;
     packed_ax25_packet_t data;
     packed_rs_packet_t rsData;
-    aes_block_t *aesBlocks[2];
-    uint8_t serializedDecryptedData[2*AES_BLOCK_SIZE];
+    aes_block_t aesBlocks;
+    uint8_t decryptedData[AES_BLOCK_SIZE];
     while (1) {
         if(xQueueReceive(decodeDataQueueHandle, &data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
             // Strip away the ax.25 headers from the data and store the encode reed solomon data in rsData
             LOG_IF_ERROR_CODE(ax25Recv(&data, &rsData));
             // Decode the reed solomon data and store it in aesBlocks
-            LOG_IF_ERROR_CODE(rsDecode(rsData.data, aesBlocks));
-            // Decrypt the first aes128 block and store it in the first AES_BLOCK_SIZE bytes of serializedDecryptedData
-            LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[0], serializedDecryptedData));
-            // Decrypt the second aes128 block and store it in the second half of serializedDecryptedData
-            LOG_IF_ERROR_CODE(aes128Decrypt(aesBlocks[1], serializedDecryptedData + AES_BLOCK_SIZE));
-            // Parse the serializedDecryptedData into cmd_msg_t structs and send them to command manager
-            LOG_IF_ERROR_CODE(handleCommands(serializedDecryptedData));
+            LOG_IF_ERROR_CODE(rsDecode(&rsData, &aesBlocks));
+            // Decrypt the aes128 block and store it in decryptedData
+            LOG_IF_ERROR_CODE(aes128Decrypt(&aesBlocks, decryptedData));
+            // Parse the decryptedData into cmd_msg_t structs and send them to command manager
+            LOG_IF_ERROR_CODE(handleCommands(decryptedData));
         }
 
     }

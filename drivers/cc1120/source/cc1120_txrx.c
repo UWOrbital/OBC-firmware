@@ -364,6 +364,9 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
             LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
             return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
         }
+        if(!isStillUplinking){
+            return OBC_ERR_CODE_SUCCESS;
+        }
         RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
     }
 
@@ -408,4 +411,8 @@ void txFifoEmptyCallback(){
     }
     // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
+}
+
+SemaphoreHandle_t getCC1120RxSemaphoreHandle(void){
+    return rxSemaphore;
 }

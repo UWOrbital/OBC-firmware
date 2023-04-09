@@ -8,11 +8,6 @@
 
 #include <stdbool.h>
 
-#define RECV_DATA_QUEUE_LENGTH 10U 
-#define RECV_DATA_QUEUE_ITEM_SIZE sizeof(comms_event_t)
-#define RECV_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
-#define RECV_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
-
 /**
  * @brief initializes the receive task for uplink
  * 

@@ -1,17 +1,12 @@
-#ifndef COMMS_INCLUDE_CC1120_DECODE_H
-#define COMMS_INCLUDE_CC1120_DECODE_H
+#ifndef COMMS_INCLUDE_DECODE_TELEMETRY_H
+#define COMMS_INCLUDE_DECODE_TELEMETRY_H
 
 #include "obc_logging.h"
-#include "cc1120_txrx.h"
+#include "ax25.h"
 
 #include <os_portmacro.h>
 
 #include <stdbool.h>
-
-#define DECODE_DATA_QUEUE_LENGTH 10U
-#define DECODE_DATA_QUEUE_ITEM_SIZE RX_EXPECTED_PACKET_SIZE
-#define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY 
-#define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -38,4 +33,4 @@ void initDecodeTask(void);
 */
 obc_error_code_t sendToDecodeDataQueue(packed_ax25_packet_t *data);
 
-#endif /* COMMS_INCLUDE_CC1120_DECODE_H */
+#endif /* COMMS_INCLUDE_DECODE_TELEMETRY_H */

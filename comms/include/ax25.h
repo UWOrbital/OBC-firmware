@@ -6,13 +6,13 @@
 
 #include <stdint.h>
 
-#define AX25_TOTAL_FLAG_BYTES (uint8_t) 2
-#define AX25_ADDRESS_BYTES (uint8_t) 16
-#define AX25_CONTROL_BYTES (uint8_t) 2
-#define AX25_PID_BYTES (uint8_t) 1
-#define AX25_FCS_BYTES (uint8_t) 2
-#define AX25_INFO_BYTES (uint8_t) 255
-#define AX25_PKT_LEN (uint8_t) (AX25_TOTAL_FLAG_BYTES + \
+#define AX25_TOTAL_FLAG_BYTES 2U
+#define AX25_ADDRESS_BYTES 16U
+#define AX25_CONTROL_BYTES 2U
+#define AX25_PID_BYTES 1U
+#define AX25_FCS_BYTES 2U
+#define AX25_INFO_BYTES 255U
+#define AX25_PKT_LEN (AX25_TOTAL_FLAG_BYTES + \
                       AX25_ADDRESS_BYTES +  \
                       AX25_CONTROL_BYTES +  \
                       AX25_PID_BYTES +  \
