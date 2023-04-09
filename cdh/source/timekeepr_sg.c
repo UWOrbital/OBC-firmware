@@ -88,7 +88,7 @@ void exectureAlarm() {
 }
 
 uint8_t isFull() {
-    if((rear == front - 1) || (front == 0 && rear == alarmQueueSize - 1))
+    if((rear == front - 1) || (front == 0 && rear == ALARM_QUEUE_SIZE - 1))
         return 1;
     return 0;
 }
@@ -106,7 +106,7 @@ obc_error_code_t enQueue(timekeeper_sg_rtc_alarm alarm) {
     {
         if(front == -1)
             front = 0;
-        rear = (rear + 1) % alarmQueueSize;
+        rear = (rear + 1) % ALARM_QUEUE_SIZE;
         alarmQueue[rear] = alarm;
         numOfActiveAlarms++;
     }
@@ -124,7 +124,7 @@ obc_error_code_t deQueue() {
         }
         else {
             alarmQueue[front] = dummyAlarm;
-            front = (front + 1) % alarmQueueSize;
+            front = (front + 1) % ALARM_QUEUE_SIZE;
             numOfActiveAlarms--;
         }
     }
@@ -144,8 +144,8 @@ void bubbleSort() {
     for(int8_t i = 0; i < n; i++) {
         for(int8_t j = front; j < front + numOfActiveAlarms - 1; j++) {
             // waiting on daniel's unix time PR to get merged to fix expression must have arithmetic pointer error below
-            if(alarmQueue[j % alarmQueueSize] > alarmQueue[(j + 1) % alarmQueueSize]) {
-                swap(&alarmQueue[j % alarmQueueSize], &alarmQueue[(j + 1) % alarmQueueSize]);
+            if(alarmQueue[j % ALARM_QUEUE_SIZE] > alarmQueue[(j + 1) % ALARM_QUEUE_SIZE]) {
+                swap(&alarmQueue[j % ALARM_QUEUE_SIZE], &alarmQueue[(j + 1) % ALARM_QUEUE_SIZE]);
             }
         }
     }

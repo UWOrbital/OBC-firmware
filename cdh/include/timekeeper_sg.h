@@ -61,8 +61,8 @@ typedef struct {
     timekeeper_sg_event_data_t data;
 } timekeeper_sg_event_t;
 
-const uint8_t alarmQueueSize = 10;
-timekeeper_sg_rtc_alarm alarmQueue[alarmQueueSize];   // dummy size for now, get better clarity on queuings
+#define ALARM_QUEUE_SIZE 10U
+timekeeper_sg_rtc_alarm alarmQueue[ALARM_QUEUE_SIZE];   // dummy size for now, get better clarity on queuings
 
 /* Timekeeper_sg queue config */
 #define TIMEKEEPER_SG_QUEUE_LENGTH 10U
