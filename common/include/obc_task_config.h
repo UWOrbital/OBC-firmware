@@ -39,4 +39,9 @@
 #define PAYLOAD_MANAGER_NAME         "payload_manager"
 #define PAYLOAD_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
+/* TimekeeperSG task config */
+#define TIMEKEEPER_SG_STACK_SIZE   1024U
+#define TIMEKEEPER_SG_NAME         "timekeeper"
+#define TIMEKEEPER_SG_PRIORITY     tskIDLE_PRIORITY + 1U
+
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */

@@ -5,7 +5,14 @@
 #include <gio.h>
 #include "ds3232_mz.h"
 
+#define TIMEKEEPER_SG_QUEUE_LENGTH 10U
+
 const uint8_t taskQueueSize = 10;
+
+/**
+ * @brief	Initialize the timekeeper_sg task and associated FreeRTOS constructs (queues, timers, etc.)
+ */
+void initSupervisor(void);
 
 rtc_alarm_time_t taskQueue[taskQueueSize];   // dummy size for now, get better clarity on queuing
 

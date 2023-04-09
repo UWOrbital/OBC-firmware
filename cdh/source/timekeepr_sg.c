@@ -18,14 +18,36 @@
 #include "ds3232_mz.h"
 #include "timekeeper_sg.h"
 #include "time.h"
+#include "obc_task_config.h"
 
 int8_t front = -1, rear = -1;
 int8_t numOfActiveAlarms = 0;
+
+static TaskHandle_t timekeeprSgTaskHandle = NULL;
+static StaticTask_t timekeeprSgTaskBuffer;
+static StackType_t timekeeprSgTaskStack[TIMEKEEPER_SG_STACK_SIZE];
+
+static QueueHandle_t timekeeprSgQueueHandle = NULL;
+static StaticQueue_t timekeeperSgQueue;
+static uint8_t timekeeperSgQueueStack[TIMEKEEPER_SG_QUEUE_LENGTH * sizeof(rtc_alarm_time_t)];
+
+void initTimekeeperSg(void) {
+    ASSERT((timekeeperSgTaskStack != NULL) && (timekeeprSgTaskBuffer != NULL));
+    if(timekeeprSgTaskHandle == NULL) {
+        timekeeprSgTaskHandle = xTaskCreateStatic(vTimekeeperSgTask, TIMEKEEPER_SG_NAME, TIMEKEEPER_SG_STACK_SIZE, NULL, TIMEKEEPER_SG_PRIORITY, timekeeprSgTaskStack, &timekeeprSgTaskBuffer);
+    }
+
+    ASSERT( (timekeeperSgQueueStack != NULL) && (&timekeeperSgQueue != NULL) );
+    if (timekeeprSgQueueHandle == NULL) {
+        timekeeprSgQueueHandle = xQueueCreateStatic(TIMEKEEPER_SG_QUEUE_LENGTH, sizeof(rtc_alarm_time_t), timekeeperSgQueueStack, &timekeeperSgQueue);
+    }
+}
 
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode) {
     return setAlarm1RTC(alarmMode, alarmTime);
 }
 
+// change this to send an event to the freeRtosqueue instead of direct access.
 obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMode) {
     return setAlarm2RTC(alarmMode, alarmTime);
 }
@@ -142,3 +164,13 @@ void bubbleSort() {
     }
 }
 
+static void vTimekeeperSgTask(void * pvParameters) {
+    ASSERT(timekeeperSgQueueHandle != NULL);
+
+    /* Send initial messages to system queues */
+    sendStartupMessages();
+
+    while(1) {
+        
+    }
+}
