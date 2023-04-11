@@ -144,9 +144,9 @@ void bubbleSort() {
     for(int8_t i = 0; i < n; i++) {
         for(int8_t j = front; j < front + numOfActiveAlarms - 1; j++) {
             // waiting on daniel's unix time PR to get merged to fix expression must have arithmetic pointer error below
-            if(alarmQueue[j % ALARM_QUEUE_SIZE] > alarmQueue[(j + 1) % ALARM_QUEUE_SIZE]) {
+            /*if(alarmQueue[j % ALARM_QUEUE_SIZE] > alarmQueue[(j + 1) % ALARM_QUEUE_SIZE]) {
                 swap(&alarmQueue[j % ALARM_QUEUE_SIZE], &alarmQueue[(j + 1) % ALARM_QUEUE_SIZE]);
-            }
+            }*/
         }
     }
 }
