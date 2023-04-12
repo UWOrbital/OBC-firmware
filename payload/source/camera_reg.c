@@ -19,6 +19,7 @@ spiDAT1_t spi_config = {
     .CSNR = SPI_CS_NONE
 };
 
+
 void write_reg(uint16_t addr, uint16_t data) {
     // gioSetBit(gioPORTA, 0, 0);
     // addr = addr | 0x80;
@@ -30,15 +31,15 @@ void write_reg(uint16_t addr, uint16_t data) {
     // }
     // gioSetBit(gioPORTA, 0, 1);
 
-    gioSetBit(gioPORTA, 0, 0);
+    assertChipSelect(gioPORTA, 0);
     addr = addr | 0x80;
-    spiTransmitData(SPI_REG, &spi_config, 1, &addr);
-    spiTransmitData(SPI_REG, &spi_config, 1, &data);
+    spiTransmitByte(SPI_REG, &spi_config, addr);
+    spiTransmitByte(SPI_REG, &spi_config, data);
     // Simple delay.
     for (int i = 0; i < 25; i++) {
         // Do nothing.
     }
-    gioSetBit(gioPORTA, 0, 1);
+    deassertChipSelect(gioPORTA, 0);
 }
 
 void read_reg(uint16_t addr, uint16_t *rx_data) {
@@ -52,15 +53,21 @@ void read_reg(uint16_t addr, uint16_t *rx_data) {
     // }
     // gioSetBit(gioPORTA, 0, 1);
 
-    gioSetBit(gioPORTA, 0, 0);
+    //implement deassert and assert
+
+    assertChipSelect(gioPORTA, 0); //ask abt cs pin
     addr = addr & 0x7F;
-    spiTransmitData(SPI_REG, &spi_config, 1, &addr);
-    spiReceiveData(SPI_REG, &spi_config, 1, rx_data);
+    spiTransmitByte(SPI_REG, &spi_config, addr);
+    spiReceiveByte(SPI_REG, &spi_config, rx_data);
     // Simple delay.
     for (int i = 0; i < 25; i++) {
         // Do nothing.
     }
-    gioSetBit(gioPORTA, 0, 1);
+    deassertChipSelect(gioPORTA, 0);
+}
+
+void setup(){
+
 }
 
 void wrSensorReg16_8(int regID, int regDat) {
