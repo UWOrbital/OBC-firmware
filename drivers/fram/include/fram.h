@@ -10,6 +10,11 @@
 #define FRAM_ID_LEN             9
 
 /**
+ * @brief Initializes FRAM sleep status mutex
+ */
+void initFRAMMutex(void);
+
+/**
  * @brief Read FRAM status register.
  * @param status 1 byte buffer to store read data.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful. 

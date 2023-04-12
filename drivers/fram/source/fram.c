@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "fram.h"
 #include <FreeRTOS.h>
+#include <os_semphr.h>
 
 #include "spi.h"
 #include "obc_spi_io.h"
@@ -14,6 +15,12 @@ static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0,
                                     .CSNR = SPI_CS_NONE, 
                                     .DFSEL = FRAM_spiFMT, 
                                     .WDEL = 0};
+
+//Sleep Status
+static volatile bool isAsleep = false;
+
+static SemaphoreHandle_t sleepMutex;
+static StaticSemaphore_t sleepMutexBuffer;
 
 //FRAM OPCODES
 #define OP_WRITE_ENABLE         0x06U
@@ -31,6 +38,21 @@ static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0,
 
 #define FRAM_WAKE_BUSY_WAIT     99000U      //Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay
 
+#define RETURN_IF_ASLEEP()  do {                                                                    \
+                                if (xSemaphoreTake(sleepMutex, portMAX_DELAY) == pdTRUE) {          \
+                                    if (isAsleep) {                                                 \
+                                        xSemaphoreGive(sleepMutex);                                 \
+                                        return OBC_ERR_CODE_FRAM_IS_ASLEEP;                         \
+                                    }                                                               \
+                                } else {                                                            \
+                                    return OBC_ERR_CODE_MUTEX_TIMEOUT;                              \
+                                }                                                                   \
+                            } while (0)
+
+//Mutex should return success; or-ing to make sure mutex released after chip select regardless of errors.
+//Negate pdtrue return to match OBC_ERR_CODE_SUCCESS
+#define ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(_spiPort, _csNum, _mutex) RETURN_IF_ERROR_CODE(assertChipSelect(_spiPort, _csNum) |       \ 
+                                                                                        !xSemaphoreGive(_mutex))
 typedef enum cmd{
     FRAM_READ_STATUS_REG,               //Read Status Register
     FRAM_READ,                          //Normal read
@@ -48,7 +70,7 @@ typedef enum cmd{
 static obc_error_code_t framTransmitOpCode(cmd_t cmd);
 static obc_error_code_t framTransmitAddress(uint32_t addr);
 
-//CS assumed to be asserted
+//CS assumed to be asserted and FRAM is awake
 static obc_error_code_t framTransmitOpCode(cmd_t cmd){
     switch (cmd) {
         case FRAM_READ:
@@ -74,7 +96,7 @@ static obc_error_code_t framTransmitOpCode(cmd_t cmd){
     return OBC_ERR_CODE_INVALID_ARG;
 }
 
-//CS assumed to be asserted
+//CS assumed to be asserted and FRAM is awake
 static obc_error_code_t framTransmitAddress(uint32_t addr) {
     if(addr > FRAM_MAX_ADDRESS){
         return OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE;
@@ -91,13 +113,19 @@ static obc_error_code_t framTransmitAddress(uint32_t addr) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
+void initFRAMMutex(void){
+    sleepMutex = xSemaphoreCreateMutexStatic(&sleepMutexBuffer);
+    configASSERT(sleepMutex);
+    isAsleep = false;
+}
+
 obc_error_code_t framReadStatusReg(uint8_t *status){
     obc_error_code_t errCode;
     if(status == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    RETURN_IF_ASLEEP();
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);  
 
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ_STATUS_REG));
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, status));
@@ -109,12 +137,15 @@ obc_error_code_t framReadStatusReg(uint8_t *status){
 
 obc_error_code_t framWriteStatusReg(uint8_t status){
     obc_error_code_t errCode;
+    RETURN_IF_ASLEEP();
     //Send WREN
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE_EN));
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
     
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    //Check FRAM went to sleep in between
+    RETURN_IF_ASLEEP();
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE_STATUS_REG));
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, status));
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT,  FRAM_CS));
@@ -127,8 +158,8 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes){
     if(buffer == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    RETURN_IF_ASLEEP();
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);    
 
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_FAST_READ));
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitAddress(addr));
@@ -151,8 +182,8 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes){
     if(buffer == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    RETURN_IF_ASLEEP();
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);    
 
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ));
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitAddress(addr));
@@ -172,13 +203,16 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes){
     if(data == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
+    RETURN_IF_ASLEEP();
 
     //Send WREN
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE_EN));
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
 
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    //Check FRAM went to sleep in between
+    RETURN_IF_ASLEEP();
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);
 
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE));
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitAddress(addr));
@@ -194,19 +228,24 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes){
 
 obc_error_code_t framSleep(void){
     obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    RETURN_IF_ASLEEP();
+    isAsleep = true;
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_SLEEP));
+    
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+    
     return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t framWakeUp(void){
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-    for(uint32_t i = 0; i < FRAM_WAKE_BUSY_WAIT; i++) {
+    for(volatile uint32_t i = 0; i < FRAM_WAKE_BUSY_WAIT; i++) {    //volatile to prevent from being optimized away
         //Do Nothing
     }
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+    isAsleep = true;
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -215,7 +254,9 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes){
     if(id == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+    RETURN_IF_ASLEEP();
+    ASSERT_RETURN_IF_ERROR_GIVE_MUTEX(FRAM_spiPORT, FRAM_CS, sleepMutex);
+
     DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ_ID));
 
     for(uint32_t i=0; i<nBytes && i < FRAM_ID_LEN; i++){
