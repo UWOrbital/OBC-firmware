@@ -28,6 +28,7 @@ timekeeper_sg_rtc_alarm dummyAlarm;
 #define ALARM_QUEUE_SIZE 10U
 timekeeper_sg_rtc_alarm alarmQueue[];
 
+//test
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode);
 
 obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMode);
