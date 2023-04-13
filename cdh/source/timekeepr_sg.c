@@ -17,6 +17,12 @@ static QueueHandle_t timekeeperSgQueueHandle = NULL;
 static StaticQueue_t timekeeperSgQueue;
 static uint8_t timekeeperSgQueueStack[TIMEKEEPER_SG_QUEUE_LENGTH * sizeof(rtc_alarm_time_t)];
 
+/**
+ * @brief	Timekeeper_sg task.
+ * @param	pvParameters	Task parameters.
+ */
+static void vTimekeeperSgTask(void * pvParameters);
+
 void initTimekeeperSg(void) {
     ASSERT((timekeeperSgTaskStack != NULL) && (timekeeprSgTaskBuffer != NULL));
     if(timekeeprSgTaskHandle == NULL) {
@@ -43,9 +49,6 @@ obc_error_code_t sendToTimekeeperSgQueue(timekeeper_sg_event_t *event) {
 
 static void vTimekeeperSgTask(void * pvParameters) {
     ASSERT(timekeeperSgQueueHandle != NULL);
-
-    /* Send initial messages to system queues */
-    sendStartupMessages();
 
     while(1) {
         timekeeper_sg_event_t inMsg;
