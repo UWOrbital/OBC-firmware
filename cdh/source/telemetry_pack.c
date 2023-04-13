@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef void (*telemetry_pack_func_t)(telemetry_data_t *, uint8_t *, size_t *);
+
 static const telemetry_pack_func_t telemPackFns[] = {
     [TELEM_CC1120_TEMP] = packCC1120Temp,
     [TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP] = packCommsCustomTransceiverTemp,
@@ -33,14 +35,12 @@ static const telemetry_pack_func_t telemPackFns[] = {
     [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
 };
 
-obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, size_t *numBytesPacked) {
-    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
+obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t len, size_t *numPacked) {
+    if (data == NULL || buffer == NULL || numPacked == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    if (buffLen < MAX_TELEMETRY_DATA_SIZE) {
-        // Enforce that the buffer is large enough to hold the maximum amount of telemetry data
-        // This is to prevent the possibility of a buffer overflow
+    if (len < MAX_TELEMETRY_DATA_SIZE) {
         return OBC_ERR_CODE_BUFF_TOO_SMALL;
     }
     
@@ -48,157 +48,119 @@ obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    *numBytesPacked = telemPackFns[data->id](data, buffer);
+    size_t offset = 0;
+
+    // Pack the telemetry ID
+    packUint8(data->id, buffer, &offset);
+
+    // Pack the timestamp
+    packUint32(data->timestamp, buffer, &offset);
+
+    // Pack the telemetry parameters
+    telemPackFns[data->id](data, buffer, &offset);
+
+    *numPacked = offset;
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
 
-size_t packCC1120Temp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->cc1120Temp, buffer, &offset);
-    return offset;
+void packCC1120Temp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->cc1120Temp, buffer, offset);
 }
 
-size_t packCommsCustomTransceiverTemp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->commsCustomTransceiverTemp, buffer, &offset);
-    return offset;
+void packCommsCustomTransceiverTemp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->commsCustomTransceiverTemp, buffer, offset);
 }
 
-size_t packObcTemp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->obcTemp, buffer, &offset);
-    return offset;
+void packObcTemp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->obcTemp, buffer, offset);
 }
 
-size_t packAdcsMagBoardTemp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->adcsMagBoardTemp, buffer, &offset);
-    return offset;
+void packAdcsMagBoardTemp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->adcsMagBoardTemp, buffer, offset);
 }
 
-size_t packAdcsSensorBoardTemp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->adcsSensorBoardTemp, buffer, &offset);
-    return offset;
+void packAdcsSensorBoardTemp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->adcsSensorBoardTemp, buffer, offset);
 }
 
-size_t packEpsBoardTemp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsBoardTemp, buffer, &offset);
-    return offset;
+void packEpsBoardTemp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsBoardTemp, buffer, offset);
 }
 
-size_t packSolarPanel1Temp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->solarPanel1Temp, buffer, &offset);
-    return offset;
+void packSolarPanel1Temp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->solarPanel1Temp, buffer, offset);
 }
 
-size_t packSolarPanel2Temp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->solarPanel2Temp, buffer, &offset);
-    return offset;
+void packSolarPanel2Temp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->solarPanel2Temp, buffer, offset);
 }
 
-size_t packSolarPanel3Temp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->solarPanel3Temp, buffer, &offset);
-    return offset;
+void packSolarPanel3Temp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->solarPanel3Temp, buffer, offset);
 }
 
-size_t packSolarPanel4Temp(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->solarPanel4Temp, buffer, &offset);
-    return offset;
+void packSolarPanel4Temp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->solarPanel4Temp, buffer, offset);
 }
 
-size_t packEpsComms5vCurrent(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsComms5vCurrent, buffer, &offset);
-    return offset;
+void packEpsComms5vCurrent(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsComms5vCurrent, buffer, offset);
 }
 
-size_t packEpsComms3v3Current(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsComms3v3Current, buffer, &offset);
-    return offset;
+void packEpsComms3v3Current(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsComms3v3Current, buffer, offset);
 }
 
-size_t packEpsMagnetorquer8vCurrent(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsMagnetorquer8vCurrent, buffer, &offset);
-    return offset;
+void packEpsMagnetorquer8vCurrent(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsMagnetorquer8vCurrent, buffer, offset);
 }
 
-size_t packEpsAdcs5vCurrent(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsAdcs5vCurrent, buffer, &offset);
-    return offset;
+void packEpsAdcs5vCurrent(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsAdcs5vCurrent, buffer, offset);
 }
 
-size_t packEpsAdcs3v3Current(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsAdcs3v3Current, buffer, &offset);
-    return offset;
+void packEpsAdcs3v3Current(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsAdcs3v3Current, buffer, offset);
 }
 
-size_t packEpsObc3v3Current(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsObc3v3Current, buffer, &offset);
-    return offset;
+void packEpsObc3v3Current(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsObc3v3Current, buffer, offset);
 }
 
-size_t packEpsComms5vVoltage(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsComms5vVoltage, buffer, &offset);
-    return offset;
+void packEpsComms5vVoltage(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsComms5vVoltage, buffer, offset);
 }
 
-size_t packEpsComms3v3Voltage(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsComms3v3Voltage, buffer, &offset);
-    return offset;
+void packEpsComms3v3Voltage(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsComms3v3Voltage, buffer, offset);
 }
 
-size_t packEpsMagnetorquer8vVoltage(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsMagnetorquer8vVoltage, buffer, &offset);
-    return offset;
+void packEpsMagnetorquer8vVoltage(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsMagnetorquer8vVoltage, buffer, offset);
 }
 
-size_t packEpsAdcs5vVoltage(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsAdcs5vVoltage, buffer, &offset);
-    return offset;
+void packEpsAdcs5vVoltage(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsAdcs5vVoltage, buffer, offset);
 }
 
-size_t packEpsAdcs3v3Voltage(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsAdcs3v3Voltage, buffer, &offset);
-    return offset;
+void packEpsAdcs3v3Voltage(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsAdcs3v3Voltage, buffer, offset);
 }
 
-size_t packEpsObc3v3Voltage(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packFloat(data->epsObc3v3Voltage, buffer, &offset);
-    return offset;
+void packEpsObc3v3Voltage(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packFloat(data->epsObc3v3Voltage, buffer, offset);
 }
 
-size_t packObcState(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packUint8(data->obcState, buffer, &offset);
-    return offset;
+void packObcState(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packUint8(data->obcState, buffer, offset);
 }
 
-size_t packEpsState(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packUint8(data->epsState, buffer, &offset);
-    return offset;
+void packEpsState(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packUint8(data->epsState, buffer, offset);
 }
 
-size_t packNumCspPacketsRcvd(telemetry_data_t *data, uint8_t *buffer) {
-    size_t offset = 0;
-    packUint32(data->numCspPacketsRcvd, buffer, &offset);
-    return offset;
+void packNumCspPacketsRcvd(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    packUint32(data->numCspPacketsRcvd, buffer, offset);
 }

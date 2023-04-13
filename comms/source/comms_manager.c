@@ -87,8 +87,8 @@ static obc_error_code_t handleTelemetry(uint32_t telemetryBatchId) {
         LOG_DEBUG("Sending telemetry: %u", telemetryData.id);
 
         uint8_t telemParamBuf[MAX_TELEMETRY_DATA_SIZE] = {0};
-        size_t telemSize;
-        LOG_IF_ERROR_CODE(packTelemetryParameters(&telemetryData, telemParamBuf, MAX_TELEMETRY_DATA_SIZE, &telemSize));
+        size_t telemSize = 0;
+        LOG_IF_ERROR_CODE(packTelemetry(&telemetryData, telemParamBuf, MAX_TELEMETRY_DATA_SIZE, &telemSize));
         LOG_DEBUG("Telemetry size: %u", telemSize);
         for (size_t i = 0; i < telemSize; i++) {
             LOG_DEBUG("Telemetry data %lu: %u", i, telemParamBuf[i]);
