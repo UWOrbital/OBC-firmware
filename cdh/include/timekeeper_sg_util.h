@@ -23,12 +23,10 @@ typedef struct {
     rtc_alarm_time_t alarmVal;
 } timekeeper_sg_rtc_alarm;
 
-timekeeper_sg_rtc_alarm dummyAlarm = {.mode.alarm1Mode = RTC_ALARM1_ONCE_PER_SECOND,
-                                      .alarmVal = {1, {1, 1, 1}},
-                                    };
+timekeeper_sg_rtc_alarm dummyAlarm;
 
 #define ALARM_QUEUE_SIZE 10U
-timekeeper_sg_rtc_alarm alarmQueue[ALARM_QUEUE_SIZE];   // dummy size for now, get better clarity on queuings
+timekeeper_sg_rtc_alarm alarmQueue[];
 
 obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode);
 
