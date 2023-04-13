@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <gio.h>
 #include "ds3232_mz.h"
+#include "timekeeper_sg_util.h"
 
 /**
  * @enum	timekeeper_sg_event_id_t
@@ -39,9 +40,6 @@ typedef struct {
     timekeeper_sg_event_data_t data;
 } timekeeper_sg_event_t;
 
-#define ALARM_QUEUE_SIZE 10U
-timekeeper_sg_rtc_alarm alarmQueue[ALARM_QUEUE_SIZE];   // dummy size for now, get better clarity on queuings
-
 /* Timekeeper_sg queue config */
 #define TIMEKEEPER_SG_QUEUE_LENGTH 10U
 #define TIMEKEEPER_SG_QUEUE_ITEM_SIZE sizeof(timekeeper_sg_event_t)
@@ -59,11 +57,5 @@ void initSupervisor(void);
  * @return The error code
  */
 obc_error_code_t sendToTimekeeperSgQueue(timekeeper_sg_event_t *event);
-
-/**
- * @brief	Timekeeper_sg task.
- * @param	pvParameters	Task parameters.
- */
-static void vTimekeeperSgTask(void * pvParameters);
 
 #endif /*CDH_INCLUDE_TIMEKEEPER_SG_H_*/
