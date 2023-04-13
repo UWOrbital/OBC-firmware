@@ -20,28 +20,6 @@ typedef enum {
 } timekeeper_sg_event_id_t;
 
 /**
- * @union	timekeeper_sg_alarm_mode_t
- * @brief	union of alarm modes for alarm 1 and 2 on RTC.
-*/
-typedef union {
-    rtc_alarm1_mode_t alarm1Mode;
-    rtc_alarm2_mode_t alarm2Mode;
-} timekeeper_sg_alarm_mode_t;
-
-/**
- * @struct	timekeeper_sg_rtc_alarm
- * @brief	atruct for RTC alarm containing both mode and alarm value
- */
-typedef struct {
-    timekeeper_sg_alarm_mode_t mode;
-    rtc_alarm_time_t alarmVal;
-} timekeeper_sg_rtc_alarm;
-
-timekeeper_sg_rtc_alarm dummyAlarm = {.mode.alarm1Mode = RTC_ALARM1_ONCE_PER_SECOND,
-                                      .alarmVal = {1, {1, 1, 1}},
-                                    };
-
-/**
  * @union	timekeeper_sg_event_data_t
  * @brief	Timekeeper_sg event data union
 */
@@ -87,13 +65,5 @@ obc_error_code_t sendToTimekeeperSgQueue(timekeeper_sg_event_t *event);
  * @param	pvParameters	Task parameters.
  */
 static void vTimekeeperSgTask(void * pvParameters);
-
-obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime);
-
-// should this be event based as well?
-rtc_time_t getCurrentTime(rtc_time_t getTime);
-
-// TBD what to do with this, local interrupt or use RTC alarm, for now just dequeing from alarm queue
-//  void executeAlarm();
 
 #endif /*CDH_INCLUDE_TIMEKEEPER_SG_H_*/
