@@ -6,8 +6,6 @@
 
 #include <stdint.h>
 
-typedef uint32_t unix_time_t;
-
 /**
  * @brief Initialize the time module.
  */
@@ -16,19 +14,21 @@ void initTime(void);
 /**
  * @brief Get the current unix time.
  * 
- * @return unix_time_t The current unix time.
+ * @return uint32_t The current unix time.
  */
-unix_time_t getCurrentUnixTime(void);
+uint32_t getCurrentUnixTime(void);
 
 /**
  * @brief Set the current unix time.
  * 
  * @param unixTime The unix time to set.
+ * @warning This function should not be called from an ISR.
  */
-void setCurrentUnixTime(unix_time_t unixTime);
+void setCurrentUnixTime(uint32_t unixTime);
 
 /**
  * @brief Increment the current unix time by 1 second.
+ * @warning This function should not be called from an ISR.
  */
 void incrementCurrentUnixTime(void);
 
@@ -46,7 +46,7 @@ obc_error_code_t syncUnixTime(void);
  * @param unixTime Buffer to store the unix time.
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
  */
-obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, unix_time_t *unixTime);
+obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime);
 
 
 #endif /* COMMON_INCLUDE_OBC_TIME_H_ */

@@ -11,13 +11,7 @@
 #include <os_timer.h>
 #include <sys_common.h>
 
-#define LOCAL_TIME_UPDATE_PERIOD_TICKS  pdMS_TO_TICKS(1000)
 #define LOCAL_TIME_SYNC_PERIOD_S        60UL
-
-STATIC_ASSERT(
-    LOCAL_TIME_UPDATE_PERIOD_TICKS == pdMS_TO_TICKS(1000), 
-    "Global time update period must be 1 second. Otherwise, update the time sync period."
-);
 
 /**
  * @brief Timekeeper task.
@@ -70,9 +64,10 @@ static void timekeeperTask(void *pvParameters) {
         } else {
             incrementCurrentUnixTime();
         }
+        
+        LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
 
         syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
-
-        vTaskDelay(LOCAL_TIME_UPDATE_PERIOD_TICKS);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

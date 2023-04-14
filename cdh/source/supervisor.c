@@ -1,5 +1,6 @@
 #include "supervisor.h"
 #include "telemetry.h"
+#include "timekeeper.h"
 #include "adcs_manager.h"
 #include "command_manager.h"
 #include "comms_manager.h"
@@ -74,6 +75,7 @@ static void vSupervisorTask(void * pvParameters) {
     ASSERT(supervisorQueueHandle != NULL);
 
     /* Initialize other tasks */
+    initTimekeeper();
     initTelemetry();
     initCommandManager();
     initADCSManager();
