@@ -1,8 +1,6 @@
 #include "telemetry_pack.h"
 #include "telemetry_manager.h"
 #include "obc_pack_utils.h"
-#include "obc_logging.h"
-#include "encode_telemetry.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -45,44 +43,7 @@ obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t l
     if (len < MAX_TELEMETRY_DATA_SIZE) {
         return OBC_ERR_CODE_BUFF_TOO_SMALL;
     }
-
-    size_t bytesWritten = 0;
-
-    RETURN_IF_ERROR_CODE(packTelemetryId(data, buffer, &bytesWritten));
-    (*numBytesPacked) += bytesWritten;
-    RETURN_IF_ERROR_CODE(packTelemetryTimestamp(data, buffer + bytesWritten, &bytesWritten));
-    (*numBytesPacked) += bytesWritten;
-    RETURN_IF_ERROR_CODE(packTelemetryParameters(data, buffer + bytesWritten, &bytesWritten));
-    (*numBytesPacked) += bytesWritten;
     
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t packTelemetryId(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked) {
-    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    size_t offset = 0;
-    packUint8(data->id, buffer, &offset);
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t packTelemetryTimestamp(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked) {
-    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    size_t offset = 0;
-    packUint32(data->timestamp, buffer, &offset);
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t packTelemetryParameters(telemetry_data_t *data, uint8_t *buffer, size_t *numBytesPacked) {
-    if (data == NULL || buffer == NULL || numBytesPacked == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
     if (telemPackFns[data->id] == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
