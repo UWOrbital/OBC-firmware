@@ -4,10 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
-
-// TODO: Check if endianness is correct
-
 void packUint8(uint8_t value, uint8_t* buffer, size_t* offset) {
     buffer[*offset] = value;
     (*offset)++;
@@ -40,6 +36,8 @@ void packInt32(int32_t value, uint8_t* buffer, size_t* offset) {
 }
 
 void packFloat(float value, uint8_t* buffer, size_t* offset) {
+    STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
+
     uint32_t tmp = *((uint32_t*)&value);
     packUint32(tmp, buffer, offset);
 }
