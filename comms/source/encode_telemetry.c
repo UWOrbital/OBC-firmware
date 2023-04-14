@@ -127,12 +127,12 @@ static obc_error_code_t sendTelemetry(uint32_t telemetryBatchId) {
     // Print the telemetry file size for debugging
     size_t fileSize;
     RETURN_IF_ERROR_CODE(getFileSize(fd, &fileSize));
-    LOG_INFO("Telemetry file size: %lu", fileSize);
+    LOG_INFO("Sending telemetry file with size: %lu", fileSize);
 
     // Print telemetry file name
     char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
     RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH));
-    LOG_INFO("Telemetry file name: %s", fileName);
+    LOG_INFO("Sending telemetry file with name: %s", fileName);
     
     // Initialize important variables related to packing and queueing the telemetry to be sent
     telemetry_data_t singleTelem; // Holds a single piece of telemetry from getNextTelemetry()
