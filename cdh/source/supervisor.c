@@ -4,6 +4,7 @@
 #include "comms_manager.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
+#include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_task_config.h"
@@ -74,6 +75,7 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Initialize other tasks */
     initTelemetry();
+    initSwWatchdog();
     initADCSManager();
     initCommsManager();
     initEPSManager();

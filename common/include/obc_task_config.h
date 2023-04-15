@@ -34,8 +34,8 @@
 #define PAYLOAD_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
 /* OBC Watchdog task conofig */
-#define DWWD_STACK_SIZE 128
-#define DWWD_PRIORITY 0xFF
-#define DWD_PRELOAD_VAL 0xFBB // set tExp as 0.3 Seconds
+#define SW_WATCHDOG_STACK_SIZE  128
+#define SW_WATCHDOG_NAME        "sw_watchdog"
+#define SW_WATCHDOG_PRIORITY    tskIDLE_PRIORITY + 0xFF
 
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */

@@ -4,6 +4,6 @@
 /**
  * @brief Initialize Digital Windowed Watchdog
 */
-void initDWWD(void);
+void initSwWatchdog(void);
 
 #endif //_DRIVERS_INCLUDE_OBC_SW_WATCHDOG_H_
