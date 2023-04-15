@@ -35,6 +35,9 @@ static const telemetry_pack_func_t telemPackFns[] = {
     [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
 };
 
+static void packTelemetryId(telemetry_data_id_t id, uint8_t *buffer, size_t *offset);
+static void packTelemetryTimestamp(uint32_t timestamp, uint8_t *buffer, size_t *offset);
+
 obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t len, size_t *numPacked) {
     if (data == NULL || buffer == NULL || numPacked == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
@@ -51,10 +54,10 @@ obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t l
     size_t offset = 0;
 
     // Pack the telemetry ID
-    packUint8(data->id, buffer, &offset);
+    packTelemetryId(data->id, buffer, &offset);
 
     // Pack the timestamp
-    packUint32(data->timestamp, buffer, &offset);
+    packTelemetryTimestamp(data->timestamp, buffer, &offset);
 
     // Pack the telemetry parameters
     telemPackFns[data->id](data, buffer, &offset);
@@ -64,6 +67,13 @@ obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t l
     return OBC_ERR_CODE_SUCCESS;
 }
 
+static void packTelemetryId(telemetry_data_id_t id, uint8_t *buffer, size_t *offset) {
+    packUint8(id, buffer, offset);
+}
+
+static void packTelemetryTimestamp(uint32_t timestamp, uint8_t *buffer, size_t *offset) {
+    packUint32(timestamp, buffer, offset);
+}
 
 void packCC1120Temp(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
     packFloat(data->cc1120Temp, buffer, offset);
