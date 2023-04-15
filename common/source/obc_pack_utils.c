@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 void packUint8(uint8_t value, uint8_t* buffer, size_t* offset) {
     buffer[*offset] = value;
@@ -24,20 +25,27 @@ void packUint32(uint32_t value, uint8_t* buffer, size_t* offset) {
 }
 
 void packInt8(int8_t value, uint8_t* buffer, size_t* offset) {
-    packUint8((uint8_t)value, buffer, offset);
+    uint8_t tmp;
+    memcpy(&tmp, &value, sizeof(tmp));
+    packUint8(tmp, buffer, offset);
 }
 
 void packInt16(int16_t value, uint8_t* buffer, size_t* offset) {
-    packUint16((uint16_t)value, buffer, offset);
+    uint16_t tmp;
+    memcpy(&tmp, &value, sizeof(tmp));
+    packUint16(tmp, buffer, offset);
 }
 
 void packInt32(int32_t value, uint8_t* buffer, size_t* offset) {
-    packUint32((uint32_t)value, buffer, offset);
+    uint32_t tmp;
+    memcpy(&tmp, &value, sizeof(tmp));
+    packUint32(tmp, buffer, offset);
 }
 
 void packFloat(float value, uint8_t* buffer, size_t* offset) {
     STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
 
-    uint32_t tmp = *((uint32_t*)&value);
+    uint32_t tmp;
+    memcpy(&tmp, &value, sizeof(tmp));
     packUint32(tmp, buffer, offset);
 }

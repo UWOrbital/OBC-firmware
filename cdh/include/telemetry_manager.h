@@ -9,9 +9,6 @@
 
 #define TELEM_ID_SIZE_BYTES 1
 #define TELEM_TIMESTAMP_SIZE_BYTES 4
-#define TELEM_PARAM_MAX_SIZE_BYTES (sizeof(telemetry_data_t) - \
-                                   (sizeof(((telemetry_data_t *)0)->id) + \
-                                    sizeof(((telemetry_data_t *)0)->timestamp)))
 
 typedef enum {
     // Temperature values
@@ -49,8 +46,6 @@ typedef enum {
 } telemetry_data_id_t;
 
 typedef struct {
-    telemetry_data_id_t id;
-    uint32_t timestamp; // seconds since epoch
     union {
         // Temperature values
         float cc1120Temp;
@@ -85,6 +80,10 @@ typedef struct {
 
         uint32_t numCspPacketsRcvd;
     };
+
+    telemetry_data_id_t id;
+    uint32_t timestamp; // seconds since epoch
+    
 } telemetry_data_t;
 
 #define MAX_TELEMETRY_DATA_SIZE sizeof(telemetry_data_t)
