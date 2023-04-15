@@ -55,29 +55,25 @@ int main(void) {
 
         // Toggle the LED.
         gioToggleBit(gioPORTB, 1);
-        
-        // /* START OF I2C SEND */
-        // i2cSetSlaveAdd(I2C_REG, 0x3C);
-        // i2cSetDirection(I2C_REG, I2C_TRANSMITTER);
-        // i2cSetCount(I2C_REG, 1);
-        // i2cSetMode(I2C_REG, I2C_MASTER);
-        // i2cSetStop(I2C_REG);
-        // i2cSetStart(I2C_REG);
-        // i2cSend(I2C_REG, 1, &tx_data);
 
-        // while(i2cIsBusBusy(I2C_REG));
-
-        // // while(!i2cIsStopDetected(I2C_REG));
-
-        // i2cClearSCD(I2C_REG);
-        // /* END OF I2C */
-
-        // i2cSendTo(0x3C, 1, &tx_data);
-        // for (int i = 0; i < 4000000; i++) {
-        //     // Do nothing.
-        // }
         // i2cSendTo(0x3C, 2, &reg_data);
         // i2cReceiveFrom(0x3C, 2, &rx_reg);
+
+
+        wrSensorReg16_8(0x3818, 0xa8);
+        for (int i = 0; i < 4000; i++) { }
+        rdSensorReg16_8(0x1838, &rx_reg);
+        for (int i = 0; i < 4000; i++) { }
+
+        wrSensorReg16_8(0x3818, 0x80);
+        for (int i = 0; i < 4000; i++) { }
+        rdSensorReg16_8(0x1838, &rx_reg);
+        for (int i = 0; i < 4000; i++) { }
+
+
+        char i2cbuffer[50];
+        uint8_t i2clen = sprintf(i2cbuffer, "\r\ni2crx_data: %d", rx_reg);
+        sciPrintText((unsigned char *)i2cbuffer, i2clen);
 
         write_reg(TEST_REG, tx_data);
         for (int i = 0; i < 4000000; i++) {

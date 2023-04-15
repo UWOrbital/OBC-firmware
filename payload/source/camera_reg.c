@@ -9,8 +9,8 @@
 #define SPI_REG spiREG3
 #define CS_NUM 1
 
-#define CAM_I2C_WR_ADDR 0x78
-#define CAM_I2C_RD_ADDR 0x79
+#define CAM_I2C_WR_ADDR 0x3C
+#define CAM_I2C_RD_ADDR 0x3C
 
 spiDAT1_t spi_config = {
     .CS_HOLD = FALSE,
@@ -64,9 +64,13 @@ void read_reg(uint16_t addr, uint16_t *rx_data) {
 }
 
 void wrSensorReg16_8(int regID, int regDat) {
-  i2cSendTo(CAM_I2C_WR_ADDR, 1, regID >> 8); // sends instruction byte, MSB first
-  i2cSendTo(CAM_I2C_WR_ADDR, 1, regID & 0x00FF);
-  i2cSendTo(CAM_I2C_WR_ADDR, 1, regDat & 0x00FF);
+    uint8_t reg_tx_data[3] = { (regID >> 8), (regID & 0x00FF), (regDat & 0x00FF)};
+	i2cSendTo(CAM_I2C_WR_ADDR, 3, reg_tx_data);
+}
+
+void rdSensorReg16_8(uint16_t regID, uint8_t* regDat) {
+	i2cSendTo(0x3C, 2, &regID);
+	i2cReceiveFrom(0x3C, 2, &regDat);
 }
 
 void wrSensorRegs16_8(const struct sensor_reg reglist[]) {

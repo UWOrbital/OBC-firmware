@@ -365,6 +365,8 @@ void i2cSendByte(i2cBASE_t *i2c, uint8 byte)
 /* SourceId : I2C_SourceId_010 */
 /* DesignId : I2C_DesignId_007 */
 /* Requirements : HL_SR285 */
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 void i2cSend(i2cBASE_t *i2c, uint32 length, uint8 * data)
 {
 
@@ -404,11 +406,14 @@ void i2cSend(i2cBASE_t *i2c, uint32 length, uint8 * data)
             /*SAFETYMCUSW 567 S MR:17.1,17.4 <APPROVED> "Pointer increment needed" */
             data++;
             length--;
+            volatile int i = 0;
+            for(; i < 25; i ++) { asm(" nop"); }
         }
     }
 /* USER CODE BEGIN (18) */
 /* USER CODE END */
 }
+#pragma GCC pop_options
 
 /** @fn uint32 i2cIsRxReady(i2cBASE_t *i2c)
 *   @brief Check if Rx buffer full
