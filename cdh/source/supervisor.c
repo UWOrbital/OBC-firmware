@@ -1,13 +1,16 @@
 #include "supervisor.h"
-#include "telemetry.h"
+#include "telemetry_manager.h"
 #include "adcs_manager.h"
+#include "command_manager.h"
 #include "comms_manager.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_states.h"
 #include "obc_task_config.h"
+#include "obc_reset.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -16,6 +19,13 @@
 
 #include <sys_common.h>
 #include <gio.h>
+#include <redposix.h>
+
+/* Supervisor queue config */
+#define SUPERVISOR_QUEUE_LENGTH 10U
+#define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_t)
+#define SUPERVISOR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define SUPERVISOR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
@@ -35,6 +45,13 @@ static void vSupervisorTask(void * pvParameters);
  * @brief Send all startup messages from the supervisor task to other tasks.
  */
 static void sendStartupMessages(void);
+
+/**
+ * @brief Setup the file system.
+ * 
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
+ */
+static obc_error_code_t setupFileSystem(void);
 
 void initSupervisor(void) {
     ASSERT( (supervisorTaskStack != NULL) && (&supervisorTaskBuffer != NULL) );
@@ -61,48 +78,75 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 }
 
 static void sendStartupMessages(void) {
-    /* Send startup message to telemetry task as example */
-    telemetry_event_t newMsg;
-    newMsg.eventID = TURN_ON_LED_EVENT_ID;
-    newMsg.data.i = TELEMETRY_DELAY_TICKS;
-    sendToTelemetryQueue(&newMsg);
-
     /* TODO: Add startup messages to other tasks */
 }
 
 static void vSupervisorTask(void * pvParameters) {
+    obc_error_code_t errCode;
+
     ASSERT(supervisorQueueHandle != NULL);
 
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(setupFileSystem());
+
     /* Initialize other tasks */
-    initTelemetry();
     initSwWatchdog();
+    initTelemetry();
+    initCommandManager();
     initADCSManager();
     initCommsManager();
     initEPSManager();
     initPayloadManager();
 
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
+
     /* Send initial messages to system queues */
     sendStartupMessages();    
+
+    // TODO: Only enter normal state after initial checks are complete
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
     
     while(1) {
         supervisor_event_t inMsg;
-        telemetry_event_t outMsgTelemetry;
-
-        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS)
-            inMsg.eventID = SUPERVISOR_NULL_EVENT_ID;
+        
+        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+            #ifdef DEBUG
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            gioToggleBit(gioPORTB, 1);
+            #endif
+            continue;
+        }
 
         switch (inMsg.eventID) {
-            case TURN_OFF_LED_EVENT_ID:
-                gioSetBit(gioPORTB, 1, 0);
-                LOG_INFO("Turning off LED");
-                outMsgTelemetry.eventID = TURN_ON_LED_EVENT_ID;
-                outMsgTelemetry.data.i = TELEMETRY_DELAY_TICKS;
-                sendToTelemetryQueue(&outMsgTelemetry);
-                break;
-            case SUPERVISOR_NULL_EVENT_ID:
-                break;
             default:
-                ;
+                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
     }
+}
+
+static obc_error_code_t setupFileSystem(void) {
+    int32_t ret;
+
+    ret = red_init();
+    if (ret != 0) {
+        LOG_DEBUG("red_init failed with error: %d", red_errno);
+        return OBC_ERR_CODE_FS_INIT_FAILED;
+    }
+
+    // TODO: FS formatting doesn't need to be done every time
+    ret = red_format("");
+    if (ret != 0) {
+        LOG_DEBUG("red_format failed with error: %d", red_errno);
+        return OBC_ERR_CODE_FS_FORMAT_FAILED;
+    }
+
+    ret = red_mount("");
+    if (ret != 0) {
+        LOG_DEBUG("red_mount failed with error: %d", red_errno);
+        return OBC_ERR_CODE_FS_MOUNT_FAILED;
+    }
+
+    return OBC_ERR_CODE_SUCCESS;
 }
