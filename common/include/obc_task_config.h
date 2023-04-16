@@ -39,4 +39,9 @@
 #define PAYLOAD_MANAGER_NAME         "payload_manager"
 #define PAYLOAD_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
+/* OBC Watchdog task conofig */
+#define SW_WATCHDOG_STACK_SIZE  128
+#define SW_WATCHDOG_NAME        "sw_watchdog"
+#define SW_WATCHDOG_PRIORITY    tskIDLE_PRIORITY + 0xFF
+
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */
