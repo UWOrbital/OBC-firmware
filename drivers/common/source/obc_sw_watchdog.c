@@ -1,17 +1,15 @@
-#include <system.h>
 #include "obc_sw_watchdog.h"
 #include "obc_assert.h"
-#include "reg_rti.h"
 #include "obc_privilege.h"
 #include "obc_task_config.h"
+
+#include <system.h>
+#include <reg_rti.h>
+#include <rti.h>
 
 // Watchdog is fed by writing these two values to the WDKEY register
 #define RESET_DWD_CMD1 0xE51AUL
 #define RESET_DWD_CMD2 0xA35CUL
-
-// Possible reset actions
-#define DWD_RXN_CTRL_RESET 0x5UL
-#define DWD_RXN_CTRL_NMI   0xAUL
 
 #define DWD_CTRL_ENABLE 0xA98559DAUL
 
@@ -31,9 +29,6 @@
 // This check does not explicitly check for 73.333 MHz, but it will fail if the RTI frequency changed too much
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73 , "RTI frequency is not 73.333 MHz");
 STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
-
-// Window size 100%; This watchdog is timeout-only
-#define FULL_SIZE_WINDOW 0x5UL
 
 static StackType_t watchdogStack[SW_WATCHDOG_STACK_SIZE];
 static StaticTask_t watchdogTaskBuffer;
@@ -66,8 +61,8 @@ static void swWatcdogFeeder(void * pvParameters){
     BaseType_t xRunningPrivileged = prvRaisePrivilege();
 
     rtiREG1->DWDPRLD = PRELOAD_VAL;
-    rtiREG1->WWDSIZECTRL = FULL_SIZE_WINDOW;
-    rtiREG1->WWDRXNCTRL = DWD_RXN_CTRL_RESET;
+    rtiREG1->WWDSIZECTRL = Size_100_Percent;
+    rtiREG1->WWDRXNCTRL = Generate_Reset;
     rtiREG1->DWDCTRL = DWD_CTRL_ENABLE;
     
     portRESET_PRIVILEGE(xRunningPrivileged);
