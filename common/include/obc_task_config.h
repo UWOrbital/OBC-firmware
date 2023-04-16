@@ -44,4 +44,9 @@
 #define TIMEKEEPER_NAME         "timekeeper"
 #define TIMEKEEPER_PRIORITY     tskIDLE_PRIORITY + 100U
 
+/* OBC Sw Watchdog task config */
+#define SW_WATCHDOG_STACK_SIZE  128U
+#define SW_WATCHDOG_NAME        "sw_watchdog"
+#define SW_WATCHDOG_PRIORITY    tskIDLE_PRIORITY + 200U
+
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */
