@@ -67,3 +67,86 @@ obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime) {
 
     return OBC_ERR_CODE_SUCCESS;
 }
+
+/* 2000-03-01 (mod 400 year, immediately after Feb 29 */
+#define LEAPOCH (946684800LL + 86400 * (31 + 29))
+
+// To be a leap year, the year number must be divisible by four 
+// except for end-of-century years, which must be divisible by 400.
+#define DAYS_PER_400Y   (365 * 400 + 97)
+#define DAYS_PER_100Y   (365 * 100 + 24)
+#define DAYS_PER_4Y     (365 * 4   + 1)
+
+#define SECS_PER_MIN    60
+#define SECS_PER_HOUR   (SECS_PER_MIN * 60)
+#define SECS_PER_DAY    (SECS_PER_HOUR * 24)
+
+obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
+    /*
+        This function is based on the implementation of __secs_to_tm in the
+        musl C library. The original implementation can be found here:
+        https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c
+    */
+
+    // TODO: Try to clean this up a bit (I don't even fully understand it)
+
+    if (dt == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    // Since LEAPOCH starts in March, the first month is March
+    static const char days_in_month[] = {31,30,31,30,31,31,30,31,30,31,31,29};
+
+    uint32_t years, months, days, secs;
+    uint32_t remDays, remSecs, remYears;
+    uint32_t qcCycles, cCycles, qCycles;
+
+    if (ts < LEAPOCH) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    secs = ts - LEAPOCH;
+    days = secs / SECS_PER_DAY;
+    remSecs = secs % SECS_PER_DAY;
+
+    qcCycles = days / DAYS_PER_400Y;
+    remDays = days % DAYS_PER_400Y;
+
+    cCycles = remDays / DAYS_PER_100Y;
+    if (cCycles == 4)  {
+        cCycles--;
+    }
+    remDays -= cCycles * DAYS_PER_100Y;
+
+    qCycles = remDays / DAYS_PER_4Y;
+    if (qCycles == 25) {
+        qCycles--;
+    }
+    remDays -= qCycles * DAYS_PER_4Y;
+
+    remYears = remDays / 365;
+    if (remYears == 4) {
+        remYears--;
+    }
+    remDays -= remYears * 365;
+
+    years = remYears + 4*qCycles + 100*cCycles + 400*qcCycles;
+
+    for (months=0; days_in_month[months] <= remDays; months++) {
+        remDays -= days_in_month[months];
+    }
+
+    dt->date.year = years + 100 + 1900 - 2000; // RTC expects 0-99
+    dt->date.month = months + 2 + 1; // Convert 0 to 1 indexed
+    if (dt->date.month >= 12) {
+        dt->date.month -=12;
+        dt->date.year++;
+    }
+    dt->date.date = remDays + 1; // Day of month
+
+    dt->time.hours = remSecs / 3600;
+    dt->time.minutes = (remSecs / 60) % 60;
+    dt->time.seconds = remSecs % 60;
+
+    return OBC_ERR_CODE_SUCCESS;
+}
