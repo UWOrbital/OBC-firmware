@@ -16,12 +16,12 @@ void set_format(uint8_t fmt) {
 void InitCAM() {
   wrSensorReg16_8(0x3008, 0x80);
   wrSensorRegs16_8(OV5642_QVGA_Preview);
-  // delay(100);
+  for (int i = 0; i < 250; i++) { }
   if (m_fmt == JPEG) {
-    // delay(100);
+    for (int i = 0; i < 250; i++) { }
     wrSensorRegs16_8(OV5642_JPEG_Capture_QSXGA);
     wrSensorRegs16_8(ov5642_320x240);
-    // delay(100);
+    for (int i = 0; i < 250; i++) { }
     wrSensorReg16_8(0x3818, 0xa8);
     wrSensorReg16_8(0x3621, 0x10);
     wrSensorReg16_8(0x3801, 0xb0);

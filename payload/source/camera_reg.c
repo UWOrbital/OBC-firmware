@@ -68,21 +68,22 @@ void wrSensorReg16_8(int regID, int regDat) {
 	i2cSendTo(CAM_I2C_WR_ADDR, 3, reg_tx_data);
 }
 
-void rdSensorReg16_8(uint16_t regID, uint8_t* regDat) {
+void rdSensorReg16_8(int regID, int* regDat) {
 	i2cSendTo(0x3C, 2, &regID);
 	i2cReceiveFrom(0x3C, 2, &regDat);
 }
 
 void wrSensorRegs16_8(const struct sensor_reg reglist[]) {
     int err = 0;
-    unsigned int reg_addr;
-    unsigned char reg_val;
+    int reg_addr = 0;
+    int reg_val = 0;
     const struct sensor_reg *next = reglist;
 
     while ((reg_addr != 0xffff) | (reg_val != 0xff)) {
-        reg_addr = &next->reg;
-        reg_val = &next->val;
+        reg_addr = next->reg;
+        reg_val = next->val;
         wrSensorReg16_8(reg_addr, reg_val);
+        // for (int i = 0; i < 250; i++) { }
         next++;
     }
 	return 1;

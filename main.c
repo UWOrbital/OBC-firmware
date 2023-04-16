@@ -40,16 +40,15 @@ int main(void) {
     gioSetDirection(gioPORTA, 0xFFFF); // set all Port A pins as output
     gioSetBit(gioPORTA, 0, 1); // set bit 2 on Port A to high
 
-    uint16_t tmp = 0;
-    rdSensorReg16_8(0x3007, &tmp);
-    for (int i = 0; i < 4000; i++) { }
-    wrSensorReg16_8(0x3007, tmp | 0x80);
-    for (int i = 0; i < 4000000; i++) {
+    wrSensorReg16_8(0x3007, 0x80);
+    set_format(JPEG);
+    InitCAM();
+
+    // Simple delay.
+    for (int i = 0; i < 10000000; i++) {
         // Do nothing.
     }
 
-    // set_format(JPEG);
-    // InitCAM();
 
     // write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);   //VSYNC is active HIGH
     // OV5642_set_JPEG_size(OV5642_320x240);

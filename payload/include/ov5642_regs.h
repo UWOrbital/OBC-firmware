@@ -4,8 +4,8 @@
 #include "stdint.h"
 
 struct sensor_reg {
-	uint16_t reg;
-	uint16_t val;
+	int reg;
+	int val;
 };
 
 extern const struct sensor_reg OV5642_QVGA_Preview[];
