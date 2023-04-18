@@ -1,4 +1,5 @@
 #include "supervisor.h"
+#include "timekeeper.h"
 #include "telemetry_manager.h"
 #include "adcs_manager.h"
 #include "command_manager.h"
@@ -91,6 +92,7 @@ static void vSupervisorTask(void * pvParameters) {
 
     /* Initialize other tasks */
     initSwWatchdog();
+    initTimekeeper();
     initTelemetry();
     initCommandManager();
     initADCSManager();
