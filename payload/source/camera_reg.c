@@ -88,3 +88,11 @@ void wrSensorRegs16_8(const struct sensor_reg reglist[]) {
     }
 	return 1;
 }
+
+uint8_t get_bit(uint8_t addr, uint8_t bit)
+{
+  uint8_t temp;
+  read_reg(addr, &temp);
+  temp = temp & bit;
+  return temp;
+}

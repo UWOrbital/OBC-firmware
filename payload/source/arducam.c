@@ -1,8 +1,16 @@
 #include "arducam.h"
 #include "camera_reg.h"
 #include "ov5642_regs.h"
+#include "obc_spi_io.h"
 
 static uint8_t m_fmt;
+
+spiDAT1_t spi_config = {
+    .CS_HOLD = FALSE,
+    .WDEL = FALSE,
+    .DFSEL = SPI_FMT_0,
+    .CSNR = SPI_CS_NONE
+};
 
 void set_format(uint8_t fmt) {
   if (fmt == BMP)
@@ -62,4 +70,89 @@ void OV5642_set_JPEG_size(uint8_t size)
       wrSensorRegs16_8(ov5642_320x240);
       break;
   }
+}
+
+void flush_fifo() {
+  write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+}
+
+void start_capture() {
+	write_reg(ARDUCHIP_FIFO, FIFO_START_MASK);
+}
+
+void clear_fifo_flag() {
+	write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+}
+
+void capture_image() {
+  flush_fifo();
+  start_capture();
+  clear_fifo_flag();
+}
+
+bool is_capture_done() {
+  return (bool)get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK);
+}
+
+uint32_t read_fifo_length(void) {
+	uint32_t len1, len2, len3, length = 0;
+  uint8_t rx_data = 0;
+
+	read_reg(FIFO_SIZE1, &rx_data);
+  len1 = rx_data;
+  read_reg(FIFO_SIZE2, &rx_data);
+  len1 = rx_data;
+  read_reg(FIFO_SIZE3, &rx_data);
+  len1 = (rx_data & 0x7f);
+
+  length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
+	return length;	
+}
+
+void read_fifo_burst() {
+  uint32_t length = 0;
+  length = read_fifo_length();
+
+  if (length >= MAX_FIFO_SIZE) { // 512 kb
+    char buffer[50];
+    uint8_t print_len = sprintf(buffer, "ACK CMD Over size. END");
+    sciPrintText((unsigned char *)buffer, print_len);
+    // return 0;
+  } else if (length == 0 ) { // 0 kb
+    char buffer[50];
+    uint8_t print_len = sprintf(buffer, "ACK CMD Size is 0. END");
+    sciPrintText((unsigned char *)buffer, print_len);
+    // return 0;
+  }
+
+  assertChipSelect(spiREG3, 1);
+
+  uint8_t temp = 0, temp_last = 0;
+  uint8_t outb = 0;
+  bool is_header = false;
+  set_fifo_burst();
+  spiTransmitAndReceiveByte(spiREG3, &spi_config, outb, &temp);
+  length--;
+  while (length--)
+  {
+    temp_last = temp;
+    spiTransmitAndReceiveByte(spiREG3, &spi_config, outb, &temp);
+    if (is_header == true)
+    {
+      // Write temp to buffer or SD card
+    }
+    else if ((temp == 0xD8) & (temp_last == 0xFF))
+    {
+      is_header = true;
+      // END OF IMAGE
+      // Write temp_last to buffer or SD card
+      // Write temp to buffer or SD card
+    }
+    if ( (temp == 0xD9) && (temp_last == 0xFF) ) //If find the end ,break while,
+    break;
+    delayMicroseconds(15);
+  }
+  
+  deassertChipSelect(spiREG3, 1);
+  is_header = false;
 }

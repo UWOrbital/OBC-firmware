@@ -100,6 +100,23 @@ int main(void) {
         for (int i = 0; i < 10000000; i++) {
             // Do nothing.
         }
+
+        capture_image();
+
+        // Simple delay.
+        for (int i = 0; i < 10000000; i++) {
+            // Do nothing.
+        }
+
+        while (1)
+        {
+            is_capture_done();
+            // Simple delay.
+            for (int i = 0; i < 1000000; i++) {
+                // Do nothing.
+            }
+        }
+        
     }
 
 }

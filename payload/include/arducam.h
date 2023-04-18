@@ -13,10 +13,23 @@
 #define OV5642_2592x1944	6	// 2592x1944
 #define OV5642_1920x1080  7
 
-#define ARDUCHIP_TIM       		0x03  // Timming control
+#define ARDUCHIP_TRIG      		0x41  // Trigger source
+#define ARDUCHIP_TIM       		0x03  // Timing control
 #define VSYNC_LEVEL_MASK   		0x02  // 0 = High active , 		1 = Low active
 #define ARDUCHIP_FRAMES			  0x01  // FRAME control register, Bit[2:0] = Number of frames to be captured  //  On 5MP_Plus platforms bit[2:0] = 7 means continuous capture until frame buffer is full
+#define CAP_DONE_MASK      		0x08
+
+#define ARDUCHIP_FIFO      		0x04  // FIFO and I2C control
+#define FIFO_CLEAR_MASK    		0x01
+#define FIFO_START_MASK    		0x02
+#define MAX_FIFO_SIZE		0x7FFFFF		// 8MByte
+
+#define FIFO_SIZE1				0x42  // Camera write FIFO size[7:0] for burst to read
+#define FIFO_SIZE2				0x43  // Camera write FIFO size[15:8]
+#define FIFO_SIZE3				0x44  // Camera write FIFO size[18:16]
 
 void set_format(uint8_t fmt);
 void InitCAM();
 void OV5642_set_JPEG_size(uint8_t size);
+void capture_image();
+bool is_capture_done();
