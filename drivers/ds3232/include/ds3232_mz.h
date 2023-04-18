@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// RTC year is 0-99, so we need to add this offset to get the actual year
+#define RTC_YEAR_OFFSET 2000
+
 /**
  * @struct rtc_time_t
  * @brief DS3232 time structure definition

@@ -11,14 +11,33 @@
 #include <stddef.h>
 #include <string.h>
 
-static uint32_t currTime; // current Unix time
+/**
+ * @brief Checks if a given year is a leap year.
+ * 
+ * @param year Year to check
+ * @return true if the year is a leap year, false otherwise
+ */
+static bool isLeapYear(uint16_t year);
+
+/**
+ * @brief Calculates the day of the year given a month, day, and year.
+ * 
+ * @param month The month (1-12)
+ * @param day The day (1-31)
+ * @param year The year
+ * @return uint16_t 
+ */
+static uint16_t calcDayOfYear(uint8_t month, uint8_t day, uint16_t year);
+
+// Global Unix time
+static uint32_t currTime;
 
 void initTime(void) {
+    memset(&currTime, 0, sizeof(currTime));
     syncUnixTime();
 }
 
 uint32_t getCurrentUnixTime(void) {
-    // Since the value is a uint32_t, the read is atomic
     return currTime;
 }
 
@@ -37,8 +56,22 @@ void incrementCurrentUnixTime(void) {
 obc_error_code_t syncUnixTime(void) {
     obc_error_code_t errCode;
 
-    rtc_date_time_t datetime;
-    RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
+    rtc_date_time_t datetime = {
+        .date = {
+            .date = 1,
+            .month = 4,
+            .year = 23
+        },
+        .time = {
+            .hours = 12,
+            .minutes = 30,
+            .seconds = 30
+        }
+    };
+
+    // TODO: Uncomment this once the I2C infinite loop bug is fixed
+    // For now, always sync to the same date/time
+    // RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
 
     uint32_t unixTime;
     RETURN_IF_ERROR_CODE(datetimeToUnix(&datetime, &unixTime));
@@ -57,8 +90,10 @@ obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime) {
     uint32_t tmMin = datetime->time.minutes;
     uint32_t tmHour = datetime->time.hours;
 
-    uint32_t tmYday = datetime->date.date - 1; // Formula assumes 0-indexed date
-    uint32_t tmYear = (2000 + datetime->date.year) - 1900;
+    uint32_t tmYday = (uint32_t)calcDayOfYear(datetime->date.month, datetime->date.date, RTC_YEAR_OFFSET + datetime->date.year);
+    
+    // Get year since 1900
+    uint32_t tmYear = (RTC_YEAR_OFFSET + datetime->date.year) - 1900;
 
     // See https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html
     *unixTime = tmSec + tmMin*60 + tmHour*3600 + tmYday*86400 + 
@@ -136,8 +171,12 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
         remDays -= days_in_month[months];
     }
 
-    dt->date.year = years + 100 + 1900 - 2000; // RTC expects 0-99
-    dt->date.month = months + 2 + 1; // Convert 0 to 1 indexed
+    dt->date.year = years; // RTC expects 0-99 so we don't need to offset
+    
+    // Shift required since LEAPOCH starts in March
+    // Convert to 1-indexed from 0-indexed
+    dt->date.month = (months + 2) + 1;
+
     if (dt->date.month >= 12) {
         dt->date.month -=12;
         dt->date.year++;
@@ -149,4 +188,25 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
     dt->time.seconds = remSecs % 60;
 
     return OBC_ERR_CODE_SUCCESS;
+}
+
+static bool isLeapYear(uint16_t year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+static uint16_t calcDayOfYear(uint8_t month, uint8_t day, uint16_t year) {
+    // Cumulative days in a year up to the start of each month
+    static const uint16_t days[2][12] = {
+        {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
+        {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}
+    };
+
+    // Row 0 is for non-leap years, row 1 is for leap years
+    uint8_t leap = (uint8_t)isLeapYear(year);
+
+    // Convert 1-indexed month to 0-indexed
+    month--;
+    day--;
+
+    return days[leap][month] + day;
 }
