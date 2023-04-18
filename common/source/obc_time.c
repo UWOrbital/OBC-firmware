@@ -6,6 +6,7 @@
 
 #include <FreeRTOS.h>
 #include <os_task.h>
+#include <os_atomic.h>
 
 #include <stdint.h>
 #include <stddef.h>
@@ -42,15 +43,11 @@ uint32_t getCurrentUnixTime(void) {
 }
 
 void setCurrentUnixTime(uint32_t unixTime) {
-    taskENTER_CRITICAL();
     currTime = unixTime;
-    taskEXIT_CRITICAL();
 }
 
 void incrementCurrentUnixTime(void) {
-    taskENTER_CRITICAL();
-    currTime++;
-    taskEXIT_CRITICAL();
+    Atomic_Increment_u32(&currTime);
 }
 
 obc_error_code_t syncUnixTime(void) {
