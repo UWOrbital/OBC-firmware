@@ -2,6 +2,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_assert.h"
+#include "obc_time.h"
 #include "telemetry_manager.h"
 
 static obc_state_t currStateOBC;
@@ -12,7 +13,7 @@ obc_error_code_t changeStateOBC(obc_state_t newState) {
     
     // TODO: Get current time instead of 0
     currStateOBC = newState;
-    telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = 0, .obcState = currStateOBC};
+    telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
     
     RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
     return OBC_ERR_CODE_SUCCESS;
