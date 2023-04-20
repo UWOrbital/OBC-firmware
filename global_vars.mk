@@ -25,6 +25,7 @@ CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
 CC_FLAGS += -Wall
 CC_FLAGS += -Wextra
+CC_FLAGS += -fstack-protector-strong
 CC_FLAGS += -Wno-unused-parameter
 # CC_FLAGS += -Werror TODO: Enable this if we solve all hal warnings
 
