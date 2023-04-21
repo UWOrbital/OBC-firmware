@@ -7,9 +7,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define TELEM_ID_SIZE_BYTES 1
-#define TELEM_TIMESTAMP_SIZE_BYTES 4
-
 typedef enum {
     // Temperature values
     TELEM_CC1120_TEMP,

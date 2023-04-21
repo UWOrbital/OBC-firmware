@@ -47,7 +47,7 @@ static void vTelemEncodeTask(void *pvParameters);
  * @param telemetryBatchId - ID of the telemetry batch to send
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all telemetry data was sent successfully
  */
-static obc_error_code_t sendTelemetry(uint32_t telemetryBatchId);
+static obc_error_code_t sendTelemetry(int32_t telemetryBatchId);
 
 /**
  * @brief Initializes the telemetry encoding task and queue
@@ -74,14 +74,10 @@ void initTelemEncodeTask(void) {
  * @param telemetryBatchId - ID of the telemetry batch to send
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
-obc_error_code_t sendToTelemEncodeQueue(uint32_t *telemetryBatchId) {
+obc_error_code_t sendToTelemEncodeQueue(uint32_t telemetryBatchId) {
     ASSERT(telemEncodeQueueHandle != NULL);
-    
-    if (telemetryBatchId == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-    
-    if (xQueueSend(telemEncodeQueueHandle, (void *) telemetryBatchId, COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+        
+    if (xQueueSend(telemEncodeQueueHandle, (void *) &telemetryBatchId, COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
         return OBC_ERR_CODE_SUCCESS;
     }
     
@@ -106,33 +102,38 @@ static void vTelemEncodeTask(void *pvParameters) {
             continue;
         }
 
+        // Open the telemetry file
+        int32_t fd;
+        LOG_IF_ERROR_CODE(openTelemetryFileRO(telemetryBatchId, &fd));
+        
+        // Print the telemetry file size for debugging
+        size_t fileSize;
+        LOG_IF_ERROR_CODE(getFileSize(fd, &fileSize));
+        LOG_DEBUG("Sending telemetry file with size: %lu", fileSize);
+
+        // Print telemetry file name
+        char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
+        LOG_IF_ERROR_CODE(constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH));
+        LOG_DEBUG("Sending telemetry file with name: %s", fileName);
+
         // Send the telemetry
-        LOG_IF_ERROR_CODE(sendTelemetry(telemetryBatchId));
+        errCode = sendTelemetry(fd);
+
+        LOG_IF_ERROR_CODE(errCode);
+
+        // Close telemetry file
+        LOG_IF_ERROR_CODE(closeTelemetryFile(fd));
     }
 }
 
 /**
  * @brief Reads chunks of telemetry out of a file and sends it into the CC1120 transmit queue
  * 
- * @param telemetryBatchId - ID of the telemetry batch to send
+ * @param fd - File descriptor of the telemetry file to send
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all telemetry data was sent successfully
  */
-static obc_error_code_t sendTelemetry(uint32_t telemetryBatchId) {
+static obc_error_code_t sendTelemetry(int32_t fd) {
     obc_error_code_t errCode;
-
-    // Open the telemetry file
-    int32_t fd;
-    RETURN_IF_ERROR_CODE(openTelemetryFileRO(telemetryBatchId, &fd));
-    
-    // Print the telemetry file size for debugging
-    size_t fileSize;
-    RETURN_IF_ERROR_CODE(getFileSize(fd, &fileSize));
-    LOG_INFO("Sending telemetry file with size: %lu", fileSize);
-
-    // Print telemetry file name
-    char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
-    RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH));
-    LOG_INFO("Sending telemetry file with name: %s", fileName);
     
     // Initialize important variables related to packing and queueing the telemetry to be sent
     telemetry_data_t singleTelem; // Holds a single piece of telemetry from getNextTelemetry()
@@ -156,16 +157,18 @@ static obc_error_code_t sendTelemetry(uint32_t telemetryBatchId) {
                              sizeof(packedSingleTelem)/sizeof(uint8_t),
                              &packedSingleTelemSize));
         
+        telemPacketOffset += packedSingleTelemSize;
+
         // If the single telemetry is too large to continue adding to the telemPacket, send the telemPacket
-        if (packedSingleTelemSize + telemPacketOffset > PACKED_TELEM_PACKET_SIZE) {
+        if (telemPacketOffset > PACKED_TELEM_PACKET_SIZE) {
             // Apply Reed Solomon FEC
-            RETURN_CLOSE_FILE_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
+            RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
 
             // Perform AX.25 framing
-            RETURN_CLOSE_FILE_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
+            RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
 
             // Send into CC1120 transmit queue
-            RETURN_CLOSE_FILE_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
+            RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
 
             // Reset the packedTelem struct and offset
             telemPacket = (packed_telem_packet_t){0};
@@ -181,10 +184,8 @@ static obc_error_code_t sendTelemetry(uint32_t telemetryBatchId) {
         errCode = OBC_ERR_CODE_SUCCESS;
     }
     
-    RETURN_CLOSE_FILE_IF_ERROR_CODE(errCode); // If the error wasn't an EOF error, return
+    RETURN_IF_ERROR_CODE(errCode); // If the error wasn't an EOF error, return
 
-    // Close telemetry file
-    RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
 
     // If there's no data left to send, return
     if (telemPacketOffset == 0)

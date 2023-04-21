@@ -3,7 +3,6 @@
 
 #include "obc_errors.h"
 #include "telemetry_manager.h"
-#include "encode_telemetry.h"
 
 #include <stdint.h>
 #include <stddef.h>

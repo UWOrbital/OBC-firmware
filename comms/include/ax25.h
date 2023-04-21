@@ -22,8 +22,8 @@
                       AX25_INFO_BYTES)
 
 typedef struct {
-    uint8_t flag_start;
-    uint8_t flag_end;
+    uint8_t flagStart;
+    uint8_t flagEnd;
     uint8_t destination[AX25_DEST_ADDR_BYTES];
     uint8_t source[AX25_SRC_ADDR_BYTES];
     uint8_t control;

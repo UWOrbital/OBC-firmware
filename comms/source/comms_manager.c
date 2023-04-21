@@ -7,6 +7,7 @@
 #include "telemetry_pack.h"
 #include "obc_task_config.h"
 #include "send_telemetry.h"
+#include "encode_telemetry.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -76,7 +77,7 @@ static void vCommsManagerTask(void * pvParameters) {
         
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY:
-                sendToTelemEncodeQueue(&queueMsg.telemetryBatchId);
+                LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
                 break;
         }
     }

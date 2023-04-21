@@ -16,7 +16,6 @@ void initTelemEncodeTask(void);
  * @param telemetryBatchId - ID of the telemetry batch to send
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
-obc_error_code_t sendToTelemEncodeQueue(uint32_t *telemetryBatchId);
-
+obc_error_code_t sendToTelemEncodeQueue(uint32_t telemetryBatchId);
 
 #endif /* COMMS_INCLUDE_ENCODE_TELEMETRY_H_ */

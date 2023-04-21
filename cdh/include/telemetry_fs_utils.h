@@ -18,15 +18,6 @@
             sizeof(TELEMETRY_FILE_EXTENSION) + \
             TELEMETRY_FILE_NAME_MAX_LENGTH - 3 + 1 // -3 for the 3 %s in the format string, +1 for the null terminator
 
-#define RETURN_CLOSE_FILE_IF_ERROR_CODE(_ret) do {                              \
-                                        errCode = _ret;                         \
-                                        if (errCode != OBC_ERR_CODE_SUCCESS) {  \
-                                            LOG_ERROR_CODE(errCode);            \
-                                            closeTelemetryFile(fd);             \
-                                            return errCode;                     \
-                                        }                                       \
-                                    } while (0)
-
 /**
  * @brief Create the telemetry directory.
  * 
