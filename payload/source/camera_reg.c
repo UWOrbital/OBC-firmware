@@ -6,12 +6,6 @@
 #include "ov5642_regs.h"
 #include "camera_reg.h"
 
-#define SPI_REG spiREG3
-#define CS_NUM 1
-
-#define CAM_I2C_WR_ADDR 0x3C
-#define CAM_I2C_RD_ADDR 0x3C
-
 spiDAT1_t spi_config = {
     .CS_HOLD = FALSE,
     .WDEL = FALSE,
@@ -34,10 +28,6 @@ void write_reg(uint16_t addr, uint16_t data) {
     addr = addr | 0x80;
     spiTransmitData(SPI_REG, &spi_config, 1, &addr);
     spiTransmitData(SPI_REG, &spi_config, 1, &data);
-    // Simple delay.
-    for (int i = 0; i < 25; i++) {
-        // Do nothing.
-    }
     gioSetBit(gioPORTA, 0, 1);
 }
 
@@ -56,10 +46,6 @@ void read_reg(uint16_t addr, uint16_t *rx_data) {
     addr = addr & 0x7F;
     spiTransmitData(SPI_REG, &spi_config, 1, &addr);
     spiReceiveData(SPI_REG, &spi_config, 1, rx_data);
-    // Simple delay.
-    for (int i = 0; i < 25; i++) {
-        // Do nothing.
-    }
     gioSetBit(gioPORTA, 0, 1);
 }
 
@@ -69,8 +55,9 @@ void wrSensorReg16_8(int regID, int regDat) {
 }
 
 void rdSensorReg16_8(int regID, int* regDat) {
+    // Todo: regID is byteswapped for some reason so 0x3138 needs to be input as 0x3831
 	i2cSendTo(0x3C, 2, &regID);
-	i2cReceiveFrom(0x3C, 2, &regDat);
+	i2cReceiveFrom(0x3C, 1, &regDat);
 }
 
 void wrSensorRegs16_8(const struct sensor_reg reglist[]) {
@@ -83,10 +70,16 @@ void wrSensorRegs16_8(const struct sensor_reg reglist[]) {
         reg_addr = next->reg;
         reg_val = next->val;
         wrSensorReg16_8(reg_addr, reg_val);
-        // for (int i = 0; i < 250; i++) { }
         next++;
     }
-	return 1;
+}
+
+void tca_select(uint8_t tca) {
+    if (tca > 7) {
+        return;
+    }
+    tca = (1 << tca);
+    i2cSendTo(TCA_I2C_ADDR, 1, &tca);
 }
 
 uint8_t get_bit(uint8_t addr, uint8_t bit)

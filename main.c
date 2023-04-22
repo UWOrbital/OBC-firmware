@@ -17,7 +17,7 @@
 #include "camera_reg.h"
 
 #define TEST_REG 0x00
-#define VERSION_REG 0x40 // RM46: 96, Arduino: 128
+#define VERSION_REG 0x40
 
 #define I2C_REG i2cREG1
 
@@ -34,21 +34,19 @@ int main(void) {
     initSciMutex();
     initI2CMutex();
 
-    uint16_t tx_data = 0;
+    uint16_t tx_data = 0x55;
     uint16_t rx_data = 7;
 
     gioSetDirection(gioPORTA, 0xFFFF); // set all Port A pins as output
     gioSetBit(gioPORTA, 0, 1); // set bit 2 on Port A to high
 
-    wrSensorReg16_8(0x3007, 0x80);
-    set_format(JPEG);
-    InitCAM();
+    // set_format(JPEG);
+    // InitCAM();
 
     // Simple delay.
     for (int i = 0; i < 10000000; i++) {
         // Do nothing.
     }
-
 
     // write_reg(ARDUCHIP_TIM, VSYNC_LEVEL_MASK);   //VSYNC is active HIGH
     // OV5642_set_JPEG_size(OV5642_320x240);
@@ -86,36 +84,36 @@ int main(void) {
         for (int i = 0; i < 4000000; i++) {
             // Do nothing.
         }
-        read_reg(TEST_REG, &rx_data);
+        read_reg(VERSION_REG, &rx_data);
 
         char buffer[50];
         uint8_t len = sprintf(buffer, "\r\nrx_data: %d", rx_data);
         sciPrintText((unsigned char *)buffer, len);
 
-        if(++tx_data >= 5) {
-            tx_data = 0;
-        }
+        // if(++tx_data >= 5) {
+        //     tx_data = 0;
+        // }
 
         // Simple delay.
         for (int i = 0; i < 10000000; i++) {
             // Do nothing.
         }
 
-        capture_image();
+        // capture_image();
 
-        // Simple delay.
-        for (int i = 0; i < 10000000; i++) {
-            // Do nothing.
-        }
+        // // Simple delay.
+        // for (int i = 0; i < 10000000; i++) {
+        //     // Do nothing.
+        // }
 
-        while (1)
-        {
-            is_capture_done();
-            // Simple delay.
-            for (int i = 0; i < 1000000; i++) {
-                // Do nothing.
-            }
-        }
+        // while (1)
+        // {
+        //     is_capture_done();
+        //     // Simple delay.
+        //     for (int i = 0; i < 1000000; i++) {
+        //         // Do nothing.
+        //     }
+        // }
         
     }
 
