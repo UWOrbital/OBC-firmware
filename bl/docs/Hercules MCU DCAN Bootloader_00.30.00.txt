@@ -1,0 +1,141 @@
+<--
+Manifest template 1.0  
+
+This template is used to generate an unloadable manifest to the SRAS. 
+
+To do so, save the document as a plain text file (Save As .txt). 
+
+Do not change any options on the save which means leave the default as Windows Default Encoding UNLESS you are on a MAC in which case you must change the encoding to Windows.
+
+The SRAS will generate a nice looking HTML manifest for you.
+
+Instructions:
+
+ 1.   Text in blue should not be edited or removed. It will NOT appear on your manifest.
+ 2.   DO NOT color outside the lines in the manifest.  There are specific blocks where you enter information. Information 
+       should only be entered in the sections below and not outside of them.
+ 3.   DO NOT use the < or > symbols in your manifest table or in your footnotes.
+ 4.   Please REFRAIN from using Word specific formatting when filling in the table. Examples are things like superscripts,
+      subscripts, etc. We are unable to understand those.
+ 5.   Auto correction is not your friend in word. Please turn it off. It should be disabled already in this template.
+
+Table Instructions:
+
+Define what you are delivering by filling in the table below. Tables start with the start keyword <table> end with the end keyword, </table> and may also contain footnotes specific to that table.  
+
+You can have as many “Public” tables as you like in your manifest and can name them.  You can have one and only one “Private” table. To create additional tables copy everything starting with <table> down to </table> and then paste it after the table below.
+
+The field “attribute =” can be set to Public (the default) or Private to define the type of table it is. If the table is Public then everything in the table will appear on your manifest. If the table is Private then none of the entries will appear on your manifest but they will be stored in the SRAS. Private tables are useful for documenting third party code, that requires Legal review, but does not need to be acknowledged on the manifest you ship; e.g. it may be covered by our TI license.
+
+The field “name = “ is used to put a heading over the table on the manifest you ship.
+
+The field “description =” is used to put a description under the Table name on the manifest you ship.
+
+To learn how to document software in the table read the instructions here. A brief explanation of the table columns follows.
+License Type - If its an SPDX defined license use their short name identifier. You can see a list here: http://spdx.org/licenses/ . If it’s not on the list and not a commercial or TSPA  license then use the application name as the license.
+
+Delivered As - This field will either be “Source”, “Binary” or “Source and Binary” and is the form the content of the Software is delivered in.  If the Software is delivered in an archive format, this field applies to the contents of the archive. If the word Limited is used with Source, as in “Limited Source” or “Limited Source and Binary” then only portions of the Source for the application are provided.
+
+Modified by TI - This field will either be “Yes” or “No”. A “Yes” means TI has made changes to the Software. A “No” means TI has not made any changes. Note: This field is not applicable for Software “Obtained from” TI.
+
+Location - The directory name and path on the media, e.g. drive, (or in an archive) where the Software is located after installing or extracting. 
+
+Obtained From - This field specifies from where or from whom TI obtained the Software. It may be a URL to an Open Source site, a 3rd party licensor, or TI (if TI developed the software). If this field contains a link to Open Source software, the date TI downloaded the Software is also recorded. See Links Disclaimer in the Disclaimers Section.
+-->
+
+<directives>
+Version = “1.0”
+Sep = “|”
+Tool=”Hand”
+</directives>
+
+<-- ** Do not edit or remove anything above this line **   
+-->
+
+<--  
+Instructions: DO NOT Alter the column headings below. This is now a single row table as opposed to the older manifests which used merged rows. The order is extremely important; if you change the order or add or remove a column the upload will not work.
+--> 
+
+<table>
+<thead>
+attribute = “Public”
+name = “Hercules Microcontroller DCAN Bootloader Manifest Table”
+description = “See the Legend above for a description of these columns.”
+</thead>
+
+<tbody>
+<!-- Software NameVersionLicense TypeDelivered As Modified by TI LocationObtained from -->| Hercules Microcontroller DCAN Bootloader | 00.30.00 | BSD-3-Clause | Source | N/A | [as installed]/* | Texas Instruments
+</tbody>
+
+<Footnotes>
+
+<--   Instructions: Use this section to place footnotes you may have for the table above or just any notes in general. To do a footnote DO NOT use the Microsoft word footnote capability. Instead use an old fashioned (number), e.g. (1) in the table above.  All notes must between the Footnotes … footnotes block. Anything outside of this will not work.  Do not remove this text. It will not appear on your manifest..-->
+
+
+</footnotes>
+</table>
+
+
+
+
+<Credits>
+
+<--  Instructions: Some open source licenses may require a specific credit or attribution in product documentation. Those credits should be listed here and all credits should fit between the Credits … credit block. Anything outside of this will not work.  Do not remove this text. It will not appear on your manifest. -->
+ 
+
+
+
+</credits>
+
+
+<Licenses>
+
+BSD-3-Clause License
+
+/*
+ *
+ * Copyright (C) 2012-2019 Texas Instruments Incorporated - http://www.ti.com/ 
+ * 
+ * 
+ *  Redistribution and use in source and binary forms, with or without 
+ *  modification, are permitted provided that the following conditions 
+ *  are met:
+ *
+ *    Redistributions of source code must retain the above copyright 
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ *    Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the 
+ *    documentation and/or other materials provided with the   
+ *    distribution.
+ *
+ *    Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+ *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+*/
+
+
+<-- Instructions: Place a unique copy of each Open Source license referenced in the table above here and any OSS licenses that require attribution. All license text should fit between the Licenses …licenses block. Anything outside of this will not work.  Do not remove this text. It will not appear on your manifest. -->
+
+
+
+
+
+</licenses>
+
+
+				
+
