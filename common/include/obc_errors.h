@@ -38,6 +38,7 @@ typedef enum {
     OBC_ERR_CODE_CC1120_TEST_FAILURE = 599,
 
     /* Payload errors 600 - 699 */
+    OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE = 600,
 
     /* File System errors 700 - 799 */
     OBC_ERR_CODE_INVALID_FILE_NAME = 700,

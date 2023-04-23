@@ -3,7 +3,10 @@
 #include "ov5642_regs.h"
 #include "obc_spi_io.h"
 
+#include <redposix.h>
+
 static uint8_t m_fmt;
+static const char fname[] = "/captures/imageX";
 
 void set_format(uint8_t fmt) {
   if (fmt == BMP)
@@ -14,32 +17,35 @@ void set_format(uint8_t fmt) {
     m_fmt = JPEG;
 }
 
-void InitCAM() {
-  wrSensorReg16_8(0x3007, 0x80);
-  wrSensorReg16_8(0x3008, 0x80);
-  wrSensorRegs16_8(OV5642_QVGA_Preview);
-  for (int i = 0; i < 250; i++) { }
+obc_error_code_t InitCAM(void) {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3007, 0x80));
+  RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3008, 0x80));
+  RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_QVGA_Preview));
+  vTaskDelay(pdMS_TO_TICKS(1));
   if (m_fmt == JPEG) {
-    for (int i = 0; i < 250; i++) { }
-    wrSensorRegs16_8(OV5642_JPEG_Capture_QSXGA);
-    wrSensorRegs16_8(ov5642_320x240);
-    for (int i = 0; i < 250; i++) { }
-    wrSensorReg16_8(0x3818, 0xa8);
-    wrSensorReg16_8(0x3621, 0x10);
-    wrSensorReg16_8(0x3801, 0xb0);
-    wrSensorReg16_8(0x4407, 0x08);
-    wrSensorReg16_8(0x5888, 0x00);
-    wrSensorReg16_8(0x5000, 0xFF); 
+    vTaskDelay(pdMS_TO_TICKS(1));
+    RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_JPEG_Capture_QSXGA));
+    RETURN_IF_ERROR_CODE(wrSensorRegs16_8(ov5642_320x240));
+    vTaskDelay(pdMS_TO_TICKS(1));
+    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3818, 0xa8));
+    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3621, 0x10));
+    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3801, 0xb0));
+    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x4407, 0x08));
+    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x5888, 0x00));
+    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x5000, 0xFF)); 
   }
+  return errCode;
 }
 
-void OV5642_set_JPEG_size(uint8_t size)
+obc_error_code_t OV5642_set_JPEG_size(uint8_t size)
 {
+  obc_error_code_t errCode;
   switch (size)
   {
     // Todo: all other resolutions are unimplemented
     case OV5642_320x240:
-      wrSensorRegs16_8(ov5642_320x240);
+      errCode = wrSensorRegs16_8(ov5642_320x240);
       break;
     case OV5642_640x480:
       // wrSensorRegs16_8(ov5642_640x480);
@@ -60,82 +66,96 @@ void OV5642_set_JPEG_size(uint8_t size)
       // wrSensorRegs16_8(ov5642_2592x1944);
       break;
     default:
-      wrSensorRegs16_8(ov5642_320x240);
+      errCode = wrSensorRegs16_8(ov5642_320x240);
       break;
   }
+  return errCode;
 }
 
-void flush_fifo() {
-  write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+obc_error_code_t flush_fifo(void) {
+  return write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
 }
 
-void start_capture() {
-	write_reg(ARDUCHIP_FIFO, FIFO_START_MASK);
+obc_error_code_t start_capture(void) {
+	return write_reg(ARDUCHIP_FIFO, FIFO_START_MASK);
 }
 
-void clear_fifo_flag() {
-	write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+obc_error_code_t clear_fifo_flag(void) {
+	return write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
 }
 
-void set_fifo_burst(){
-  spiTransmitByte(SPI_REG, &spi_config, BURST_FIFO_READ);
+obc_error_code_t set_fifo_burst(void){
+  return spiTransmitByte(SPI_REG, &spi_config, BURST_FIFO_READ);
 }
 
-void capture_image() {
-  flush_fifo();
-  start_capture();
-  clear_fifo_flag();
+obc_error_code_t capture_image(void) {
+  obc_error_code_t errCode;
+  errCode = flush_fifo();
+  if(!errCode) {
+   errCode = start_capture(); 
+  }
+  if(!errCode) {
+    errCode = clear_fifo_flag();
+  }
+  return errCode;
 }
 
-bool is_capture_done() {
+bool is_capture_done(void) {
   return (bool)get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK);
 }
 
-uint32_t read_fifo_length(void) {
-	uint32_t len1, len2, len3, length = 0;
+obc_error_code_t read_fifo_length(uint32_t length) {
+  obc_error_code_t errCode;
+	uint32_t len1, len2, len3 = 0;
   uint16_t rx_data = 0;
 
-	read_reg(FIFO_SIZE1, &rx_data);
+	RETURN_IF_ERROR_CODE(read_reg(FIFO_SIZE1, &rx_data));
   len1 = rx_data;
-  read_reg(FIFO_SIZE2, &rx_data);
+  RETURN_IF_ERROR_CODE(read_reg(FIFO_SIZE2, &rx_data));
   len1 = rx_data;
-  read_reg(FIFO_SIZE3, &rx_data);
+  RETURN_IF_ERROR_CODE(read_reg(FIFO_SIZE3, &rx_data));
   len1 = (rx_data & 0x7f);
 
   length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
-	return length;	
 }
 
-// Todo: Not hardware tested, dependant on SPI reg reads/writes should work fine
-void read_fifo_burst() {
+// Todo: Not hardware tested
+obc_error_code_t read_fifo_burst(void) {
+  obc_error_code_t errCode;
   uint32_t length = 0;
-  length = read_fifo_length();
+  uint8_t temp = 0, temp_last = 0;
+  bool is_header = false;
 
-  if (length >= MAX_FIFO_SIZE) { // 512 kb
-    // Todo: Handle error
-  } else if (length == 0 ) { // 0 kb
-    // Todo: Handle error
+  // Open new image file
+  int32_t file = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
+
+  read_fifo_length(&length);
+  if (length >= MAX_FIFO_SIZE) {
+    // 512 kb
+    errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
+  } else if (length == 0 ) {
+    // 0 kb
+    errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
   }
 
-  assertChipSelect(SPI_PORT, 1);
+  RETURN_IF_ERROR_CODE(errCode);
+  RETURN_IF_ERROR_CODE(assertChipSelect(SPI_PORT, 1));
 
-  uint8_t temp = 0, temp_last = 0;
-  uint8_t outb = 0;
-  bool is_header = false;
+  // Set fifo to burst mode, receive continuous data until EOF
   set_fifo_burst();
-  spiTransmitAndReceiveByte(SPI_REG, &spi_config, outb, &temp);
+  spiReceiveByte(SPI_REG, &spi_config, &temp);
   length--;
-  while (length--) {
+  while (length-- && errCode) {
     temp_last = temp;
-    spiTransmitAndReceiveByte(SPI_REG, &spi_config, outb, &temp);
+    errCode = spiReceiveByte(SPI_REG, &spi_config, &temp);
     if (is_header == true) {
-      // Todo: Write temp to buffer or SD card
+      // Write data to file
+      red_write(file, temp, 1);
     }
     else if ((temp == 0xD8) & (temp_last == 0xFF)) {
       is_header = true;
-      // END OF IMAGE
-      // Todo: Write temp_last to buffer or SD card
-      // Todo: Write temp to buffer or SD card
+      red_write(file, temp_last, 1);
+      red_write(file, temp, 1);
     }
     if ( (temp == 0xD9) && (temp_last == 0xFF) ) {
       break;
@@ -144,6 +164,8 @@ void read_fifo_burst() {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
   
-  deassertChipSelect(SPI_PORT, 1);
-  is_header = false;
+  if(!errCode) {
+    errCode = deassertChipSelect(SPI_PORT, 1);
+  }
+  return errCode;
 }
