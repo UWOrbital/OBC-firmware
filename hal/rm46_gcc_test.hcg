@@ -329,7 +329,9 @@
       <HDRCAN>
         <NAME>can.h</NAME>
       </HDRCAN>
-      <SRCCAN/>
+      <SRCCAN>
+        <NAME>can.c</NAME>
+      </SRCCAN>
       <HDRADC_R>
         <NAME>reg_adc.h</NAME>
       </HDRADC_R>
@@ -737,7 +739,7 @@
         <PATH>include\can.h</PATH>
       </HDRCAN>
       <SRCCAN>
-        <PATH/>
+        <PATH>source\can.c</PATH>
       </SRCCAN>
     </FILENAMES>
   </CAN>

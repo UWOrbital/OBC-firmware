@@ -20,6 +20,7 @@
 #define VERSION_REG 0x40
 
 #define I2C_REG i2cREG1
+#include <can.h>
 
 int main(void) {
 
@@ -28,6 +29,10 @@ int main(void) {
     sciInit();
     i2cInit();
     spiInit();
+    canInit();
+
+    // Initialize logger
+    initLogger();
 
     // Initialize bus mutexes
     initSpiMutex();
