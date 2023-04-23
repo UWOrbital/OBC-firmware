@@ -666,9 +666,6 @@ const struct sensor_reg OV5642_JPEG_Capture_QSXGA[] = {
 	{0x3002 ,0x0c},	//Reset for Individual Block, Reset SFIFO/compression
 	{0x3002 ,0x00},	//Reset for Individual Block
 	{0x3503 ,0x00},	//AEC Manual Mode Control, Auto enable
-	//{0x3818, 0xa8},
-	//{0x3621, 0x17},
-	//{0x3801, 0xb0},
 	{0x5025, 0x80},
 	{0x3a0f, 0x48},
 	{0x3a10, 0x40},

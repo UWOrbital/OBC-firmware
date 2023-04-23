@@ -6,6 +6,7 @@
 #include <redposix.h>
 
 static uint8_t m_fmt;
+// Todo: support multiple image captures in different files
 static const char fname[] = "/captures/imageX";
 
 void set_format(uint8_t fmt) {
@@ -19,20 +20,30 @@ void set_format(uint8_t fmt) {
 
 obc_error_code_t InitCAM(void) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3007, 0x80));
+  // Reset camera
   RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3008, 0x80));
+  // Setup at 320x420 resolution
   RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_QVGA_Preview));
   vTaskDelay(pdMS_TO_TICKS(1));
   if (m_fmt == JPEG) {
     vTaskDelay(pdMS_TO_TICKS(1));
+    // Switch to JPEG capture
     RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_JPEG_Capture_QSXGA));
+    // Switch to lowest JPEG resolution
     RETURN_IF_ERROR_CODE(wrSensorRegs16_8(ov5642_320x240));
+    
     vTaskDelay(pdMS_TO_TICKS(1));
+    // Vertical flip
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3818, 0xa8));
+    // Pixel binning
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3621, 0x10));
+    // Image horizontal control
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3801, 0xb0));
+    // Image compression
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x4407, 0x08));
+    // Lens correction
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x5888, 0x00));
+    // Image processor setup
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x5000, 0xFF)); 
   }
   return errCode;
@@ -128,6 +139,9 @@ obc_error_code_t read_fifo_burst(void) {
 
   // Open new image file
   int32_t file = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
+  if(file < 0) {
+    return OBC_ERR_CODE_FAILED_FILE_OPEN;
+  }
 
   read_fifo_length(&length);
   if (length >= MAX_FIFO_SIZE) {
@@ -142,30 +156,44 @@ obc_error_code_t read_fifo_burst(void) {
   RETURN_IF_ERROR_CODE(assertChipSelect(SPI_PORT, 1));
 
   // Set fifo to burst mode, receive continuous data until EOF
-  set_fifo_burst();
+  RETURN_IF_ERROR_CODE(set_fifo_burst());
   spiReceiveByte(SPI_REG, &spi_config, &temp);
   length--;
-  while (length-- && errCode) {
+  while(length-- && !errCode) {
     temp_last = temp;
     errCode = spiReceiveByte(SPI_REG, &spi_config, &temp);
-    if (is_header == true) {
-      // Write data to file
-      red_write(file, temp, 1);
+    if(!errCode) {
+
+      if(is_header == true) {
+        if(red_write(file, temp, 1) < 0) {
+          errCode = OBC_ERR_CODE_FAILED_FILE_WRITE;
+        }
+      }
+      else if((temp == 0xD8) & (temp_last == 0xFF)) {
+        is_header = true;
+        if(red_write(file, temp_last, 1) < 0) {
+          errCode = OBC_ERR_CODE_FAILED_FILE_WRITE;
+        }
+        if(!errCode && (red_write(file, temp, 1) < 0)) {
+          errCode = OBC_ERR_CODE_FAILED_FILE_WRITE;
+        }
+      }
+      if((temp == 0xD9) && (temp_last == 0xFF)) {
+        break;
+      }
     }
-    else if ((temp == 0xD8) & (temp_last == 0xFF)) {
-      is_header = true;
-      red_write(file, temp_last, 1);
-      red_write(file, temp, 1);
-    }
-    if ( (temp == 0xD9) && (temp_last == 0xFF) ) {
-      break;
-    }
+
     // Todo: Can this be changed to ~15us instead?
     vTaskDelay(pdMS_TO_TICKS(1));
   }
   
+  if(errCode != OBC_ERR_CODE_FAILED_FILE_WRITE) {
+    errCode = red_close(file);
+  }
+
   if(!errCode) {
     errCode = deassertChipSelect(SPI_PORT, 1);
   }
+  
   return errCode;
 }
