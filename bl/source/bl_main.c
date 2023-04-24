@@ -115,7 +115,7 @@ uint32_t g_ulTransferAddress;
 * This is the data buffer used during transfers to the boot loader.
 *
 ******************************************************************************/
-uint32_t g_pulDataBuffer[BUFFER_SIZE];
+uint32_t g_pulDataBuffer[BL_DATA_BUFF_SIZE];
 
 /*****************************************************************************
 *

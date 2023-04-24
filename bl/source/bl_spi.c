@@ -85,7 +85,7 @@ extern uint32_t g_ulTransferSize;
 //
 //*****************************************************************************
 extern uint8_t *g_pucDataBuffer;
-extern uint32_t g_pulDataBuffer[BUFFER_SIZE];
+extern uint32_t g_pulDataBuffer[BL_DATA_BUFF_SIZE];
 extern uint32_t g_pulUpdateSuccess[8];
 extern uint32_t g_ulUpdateStatusAddr;
 extern uint32_t g_ulUpdateBufferSize;  //32 bytes or 8 32-bit words

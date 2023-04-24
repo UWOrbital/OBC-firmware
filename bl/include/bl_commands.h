@@ -156,7 +156,7 @@
 // COMMAND_SEND_DATA command, if more data is needed.  Consecutive send data
 // commands automatically increment the address and continue programming from
 // the previous location.  The transfer size is limited by the size of the
-// receive buffer in the boot loader (as configured by the BUFFER_SIZE
+// receive buffer in the boot loader (as configured by the BL_DATA_BUFF_SIZE
 // parameter).  The command terminates programming once the number of bytes
 // indicated by the COMMAND_DOWNLOAD command has been received.  Each time this
 // function is called, it should be followed by a COMMAND_GET_STATUS command to
