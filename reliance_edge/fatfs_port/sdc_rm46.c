@@ -20,7 +20,10 @@
 // For now, only log microSD errors to UART if we're in debug mode.
 #if !defined(DEBUG) || LOG_DEFAULT_OUTPUT_LOCATION != LOG_TO_UART
 #undef LOG_IF_ERROR_CODE
+#define LOG_IF_ERROR_CODE
+
 #undef RETURN_IF_ERROR_CODE
+#define RETURN_IF_ERROR_CODE
 #endif
 
 /*---------------------------------------------*/
