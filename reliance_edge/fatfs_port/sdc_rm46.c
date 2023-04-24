@@ -15,16 +15,13 @@
 #include "obc_assert.h"
 #include "obc_board_config.h"
 
-// If we're set to log to the microSD, we can't log microSD-related
-// errors. Otherwise, we'll get stuck in an infinite loop.
-// For now, only log microSD errors to UART if we're in debug mode.
-#if !defined(DEBUG) || LOG_DEFAULT_OUTPUT_LOCATION != LOG_TO_UART
-#undef LOG_IF_ERROR_CODE
-#define LOG_IF_ERROR_CODE
-
-#undef RETURN_IF_ERROR_CODE
-#define RETURN_IF_ERROR_CODE
-#endif
+/* Error codes aren't logged from this driver.
+ * If we're logging to the microSD card, then it's dangerous
+ * to log any microSD card errors since it could cause an infinite loop.
+ * microSD error -> log error -> microSD error -> log error -> ...
+ * 
+ * TODO: Enable logging from this driver for development purposes.
+*/
 
 /*---------------------------------------------*/
 /* SD Card Definitions                         */
@@ -108,12 +105,11 @@ static sdc_power_t powerFlag = POWER_OFF;    /* indicates if "power" is on */
  */
 static bool isCardReady(void) {
     // Assume CS is already asserted
-    obc_error_code_t errCode;
 
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
         uint8_t res;
         
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res);
         
         if (res == 0xFF)
             return true;
@@ -130,17 +126,16 @@ static bool isCardReady(void) {
  * required after card power up to get it into SPI mode.
  */
 static void sendClockTrain(void) { 
-    obc_error_code_t errCode;
 
     // If this fails since we don't have the mutex, we don't care
     // because that means we're already in the right state
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    LOG_IF_ERROR_CODE(spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
     for (uint8_t i = 0; i < SDC_CLOCK_TRANSITION_BYTES; i++) {
-        LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
     }
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
 }
 
 /**
@@ -179,7 +174,6 @@ static sdc_power_t checkPower(void) {
  */
 static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
     // Assume CS is already asserted
-    obc_error_code_t errCode;
 
     if (btr % 2 != 0) // Must be an even number
         return false;
@@ -188,7 +182,7 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
     /* Wait for a data packet */
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &token));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &token);
         if (token != 0xFF)
             break;
         vTaskDelay(SDC_DELAY_1MS);
@@ -199,15 +193,15 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
     /* Receive the data block into buffer */
     while (btr) {
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++));
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++);
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++);
         btr -= 2;
     }
     
     /* Discard CRC */
     unsigned char crc;
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc)); 
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc));
+    spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc); 
+    spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc);
 
     return true;
 }
@@ -223,24 +217,23 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
     // Assume CS is already asserted
 
-    obc_error_code_t errCode;
     
     if (!isCardReady()) return false;
 
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, token)); // Send token
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, token); // Send token
 
     if (token != SD_STOP_TRANSMISSION) { 
         for (unsigned int wc = 0; wc < SD_SECTOR_SIZE; wc++) { 
             // Send the data block
-            LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, *buff++));
+            spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, *buff++);
         }
         
         // Send dummy CRC
-        LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
-        LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
         
         uint8_t resp;
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &resp)); /* Receive data response */
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &resp); /* Receive data response */
         if ((resp & SD_DATA_RESPONSE_MASK) != SD_DATA_RESPONSE_ACCEPTED) return false;
     }
 
@@ -257,16 +250,15 @@ static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
  */
 static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {    
     // Assume CS is already asserted
-    obc_error_code_t errCode;
 
     if (!isCardReady()) return 0xFFU;
 
     /* Send command packet */
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, cmd));                      /* Command */
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 24)));        /* Argument[31..24] */
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 16)));        /* Argument[23..16] */
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 8)));         /* Argument[15..8] */
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)arg));                /* Argument[7..0] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, cmd);                      /* Command */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 24));        /* Argument[31..24] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 16));        /* Argument[23..16] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 8));         /* Argument[15..8] */
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)arg);                /* Argument[7..0] */
 
     /* Some commands require a CRC to be sent */
     uint8_t crc = 0xFFU;
@@ -276,18 +268,18 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
         crc = SDC_CMD8_CHECK_VOLTAGE_CRC;
     }
     
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, crc));
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, crc);
 
     /* Skip a uint8_t after "stop reading" cmd is sent */
     unsigned char tmp;
     if (cmd == SDC_CMD12) {
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &tmp));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &tmp);
     }
     
     /* Receive command response */
     uint8_t res;
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res);
         if (!(res & SDC_CMD_RESP_MASK)) break;
         vTaskDelay(SDC_DELAY_1MS);
     }
@@ -302,20 +294,19 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
  */
 static uint8_t stopTransmission(void) {
     // Assume CS is already asserted
-    obc_error_code_t errCode;
 
     /* Send command packet - the argument for SDC_CMD12 is ignored. */
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, SDC_CMD12));
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0));
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0));
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0));
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0));
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0));
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, SDC_CMD12);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0);
 
     /* Data transfer stops 2 bytes after 6-uint8_t SDC_CMD12 */
     uint8_t val;
     for (uint8_t i = 0; i < 2; i++) {
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val);
     }
 
     /* SDC should now send 2-6 0xFF bytes, the response uint8_t, and then another 0xFF */
@@ -323,7 +314,7 @@ static uint8_t stopTransmission(void) {
     uint8_t res;
     const uint8_t numBytesRcv = 8U;
     for(unsigned int n = 0; n < numBytesRcv; n++) {
-        LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val));
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val);
         if(val != 0xFF)
             res = val;
     }
@@ -342,7 +333,6 @@ static uint8_t stopTransmission(void) {
  * @return DSTATUS Status
  */
 DSTATUS disk_initialize(uint8_t drv){
-    obc_error_code_t errCode;
 
     // Re-initialize static variables
     stat = STA_NOINIT;
@@ -354,8 +344,7 @@ DSTATUS disk_initialize(uint8_t drv){
 
     turnOnSDC();
 
-    LOG_IF_ERROR_CODE(assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
+    if (assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) != OBC_ERR_CODE_SUCCESS) {
         return stat;
     }
 
@@ -375,9 +364,7 @@ DSTATUS disk_initialize(uint8_t drv){
         uint8_t ocr[ocrSize];
         
         for (uint8_t i = 0; i < ocrSize; i++) {
-            LOG_IF_ERROR_CODE(
-                spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i])
-            );
+            spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]);
         }
         
         // Check if the lower 12 bits in the response are 0x1AA
@@ -391,7 +378,7 @@ DSTATUS disk_initialize(uint8_t drv){
                     if (sendCMD(SDC_CMD58, 0) == 0) {    
                         // Check bit 6 of response to determine if card is SDHC or standard SD card
                         for (unsigned int i = 0; i < ocrSize; i++) {
-                            LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]));
+                            spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]);
                         }
                         ty = (ocr[0] & CARD_CAPACITY_OCR_MASK) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK) : (CARD_TYPE_SDC_MASK);
                     }
@@ -434,13 +421,13 @@ DSTATUS disk_initialize(uint8_t drv){
     // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
     // taken before we ensure that the SDC releases the MISO line.
     // If the microSD doesn't share its SPI bus, this is unnecessary.
-    LOG_IF_ERROR_CODE(deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-    LOG_IF_ERROR_CODE(spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
     taskEXIT_CRITICAL();
 
     // Ensure SDC releases MISO line by sending a dummy uint8_t
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
 
     if (ty) {            
         stat &= ~STA_NOINIT;    // Clear STA_NOINIT
@@ -470,13 +457,12 @@ DSTATUS disk_status(uint8_t pdrv) {
  * @return DRESULT Result
  */
 DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) {
-    obc_error_code_t errCode;
     if (pdrv || !count) return RES_PARERR;
     if (stat & STA_NOINIT) return RES_NOTRDY;
 
     if (!(cardType & CARD_TYPE_BLOCK_ADDR_MASK)) sector *= SD_SECTOR_SIZE;    /* Convert to uint8_t address if needed */
 
-    LOG_IF_ERROR_CODE(assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
+    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
     if (count == 1) {    
         /* Single block read */
         if ((sendCMD(SDC_CMD17, sector) == 0)
@@ -496,13 +482,13 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
     taskENTER_CRITICAL();
     // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
     // taken before we ensure that the SDC releases the MISO line.
-    LOG_IF_ERROR_CODE(deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-    LOG_IF_ERROR_CODE(spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
     taskEXIT_CRITICAL();
 
     // Ensure SDC releases MISO line by sending a dummy uint8_t
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -517,14 +503,13 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
  * @return DRESULT Result
  */
 DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t count) {
-    obc_error_code_t errCode;
     if (pdrv || !count) return RES_PARERR;
     if (stat & STA_NOINIT) return RES_NOTRDY;
     if (stat & STA_PROTECT) return RES_WRPRT;
 
     if (!(cardType & (CARD_TYPE_BLOCK_ADDR_MASK))) sector *= SD_SECTOR_SIZE;    /* Convert to uint8_t address if needed */
 
-    LOG_IF_ERROR_CODE(assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
+    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
     if (count == 1) {    
         /* Single block write */
@@ -552,13 +537,13 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t 
     taskENTER_CRITICAL();
     // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
     // taken before we ensure that the SDC releases the MISO line.
-    LOG_IF_ERROR_CODE(deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-    LOG_IF_ERROR_CODE(spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
     taskEXIT_CRITICAL();
 
     // Ensure SDC releases MISO line by sending a dummy uint8_t
-    LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -573,7 +558,6 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t 
  * @warning buff must have a size of at least 2 bytes.
  */
 DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
-    obc_error_code_t errCode;
     if (pdrv) return RES_PARERR;
 
     DRESULT res = RES_ERROR;
@@ -603,7 +587,7 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
     } else {
         if (stat & STA_NOINIT) return RES_NOTRDY;
         
-        LOG_IF_ERROR_CODE(assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
+        assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
         const uint8_t csdSize = 16U; // Size of buffer to hold CSD register data
         uint8_t csd[csdSize]; // Card-specific data (CSD); Note the index numbers are opposite to the bit numbers in the CSD register
@@ -648,13 +632,13 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
         taskENTER_CRITICAL();
         // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
         // taken before we ensure that the SDC releases the MISO line.
-        LOG_IF_ERROR_CODE(deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-        LOG_IF_ERROR_CODE(spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+        deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+        spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
         taskEXIT_CRITICAL();
 
         // Ensure SDC releases MISO line by sending a dummy uint8_t
-        LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
-        LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS));
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+        spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
     }
 
     return res;
