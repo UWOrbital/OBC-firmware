@@ -143,8 +143,6 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
     // Since LEAPOCH starts in March, the first month is March
     static const uint8_t daysInMonth[] = {31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29};
 
-    uint32_t years, months, days, secs;
-
     // Track remainders
     uint32_t remDays, remSecs, remYears;
     
@@ -157,12 +155,12 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
     
-    secs = ts - LEAPOCH;
+    uint32_t secs = ts - LEAPOCH;
 
     // Break the number of seconds since LEAPOCH into days and the remaining seconds
     // The remaining seconds determine the time of day (HH:MM:SS)
 
-    days = secs / SECS_PER_DAY;
+    uint32_t days = secs / SECS_PER_DAY;
 
     remSecs = secs % SECS_PER_DAY;
 
@@ -201,12 +199,22 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
     remDays -= remYears * 365;
 
     // Calculate the years since 2000
-    years = remYears + 4 * qCycles + 100 * cCycles + 400 * qcCycles;
+    uint8_t years = remYears + 4 * qCycles + 100 * cCycles + 400 * qcCycles;
 
     // Figure out which month we're in and how many days into the month we are
+    uint8_t months = 0;
     while (remDays >= daysInMonth[months]) {
         remDays -= daysInMonth[months];
         months++;
+    }
+
+    // Checks before casting uint32_t to uint8_t
+    if (remDays >= 31) {
+        return OBC_ERR_CODE_UNKNOWN;
+    }
+
+    if (remSecs >= SECS_PER_DAY) {
+        return OBC_ERR_CODE_UNKNOWN;
     }
 
     // RTC expects 0-99 so we don't need to offset
@@ -218,7 +226,7 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
 
     // Ex: If it's February, months = 11 and dt->date.month = 14
     // because LEAPOCH starts in March. So we need to subtract 12
-    // to get the correct month
+    // to get the correct month (1-indexed)
     if (dt->date.month >= 12) {
         dt->date.month -= 12;
         dt->date.year++;
