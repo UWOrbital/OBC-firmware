@@ -9,7 +9,7 @@
 
 typedef enum {
     /* Used to indicate that the telemetry data is invalid.
-       It should not have an pack function. */
+       It should not have a pack function. */
     TELEM_NONE = 0,
 
     // Temperature values
