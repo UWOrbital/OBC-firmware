@@ -72,7 +72,7 @@ static const uint8_t numCSPins[NUM_SPI_PORTS] = { 6, 0, 6, 1, 4 }; // Number of 
 void initSpiMutex(void) {
     for (int i = 0; i < NUM_SPI_PORTS; i++) {
         spiMutexes[i] = xSemaphoreCreateMutexStatic(&spiMutexBuffers[i]);
-        ASSERT(spiMutexes[i]);
+        configASSERT(spiMutexes[i]);
     }
 }
 
