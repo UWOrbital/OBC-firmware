@@ -11,7 +11,6 @@ static obc_state_t currStateOBC;
 obc_error_code_t changeStateOBC(obc_state_t newState) {
     obc_error_code_t errCode;
     
-    // TODO: Get current time instead of 0
     currStateOBC = newState;
     telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
     
