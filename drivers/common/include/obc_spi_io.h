@@ -39,6 +39,32 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
 obc_error_code_t assertChipSelect(gioPORT_t *spiPort, uint8_t csNum);
 
 /**
+ * @brief Take the mutex for the specified SPI port and chip select pin.
+ * 
+ * @param spiPort The SPI port to use.
+ * @param csNum The chip select pin
+ * 
+ * @note This will not assert the CS pin. This function is intended to be used
+ * to send data to a device that requires the CS pin to be deasserted.
+ * 
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t spiTakeBusMutex(gioPORT_t *spiPort, uint8_t csNum);
+
+/**
+ * @brief Release the mutex for the specified SPI port and chip select pin.
+ * 
+ * @param spiPort The SPI port to use.
+ * @param csNum The chip select pin
+ * 
+ * @note This will not deassert the CS pin. This function is intended to be used
+ * to send data to a device that requires the CS pin to be deasserted.
+ * 
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t spiReleaseBusMutex(gioPORT_t *spiPort, uint8_t csNum);
+
+/**
  * @brief Send a byte via SPI.
  * @param spiReg The SPI register to use.
  * @param spiDataFormat The SPI data format options.
