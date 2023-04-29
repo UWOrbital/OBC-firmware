@@ -69,11 +69,15 @@ static void vRecvTask(void * pvParameters){
                     packed_ax25_packet_t recvData;
                     uint32_t recvDataLen = AX25_PKT_LEN;
                     // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
-                    cc1120Receive(recvData.data, recvDataLen);
+                    LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, recvDataLen));
                     // Send the received bytes to decode data queue to be decoded and sent to command manager
-                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
+                    if(errCode == OBC_ERR_CODE_SUCCESS){
+                        LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
+                    }
                 }
                 break;
+            default:
+                LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
         }
 
     }

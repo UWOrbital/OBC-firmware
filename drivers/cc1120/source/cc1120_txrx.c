@@ -365,6 +365,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
             return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
         }
         if(!isStillUplinking){
+            RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
             return OBC_ERR_CODE_SUCCESS;
         }
         RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));

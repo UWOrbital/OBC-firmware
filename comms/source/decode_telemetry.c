@@ -66,6 +66,10 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
             }
             return OBC_ERR_CODE_SUCCESS;
         }
+        if(cmdBytes[bytesUnpacked] == 0){
+            // means we have reached the end of the packet and rest can be ignored
+            return OBC_ERR_CODE_SUCCESS;
+        }
         cmd_msg_t command;
         RETURN_IF_ERROR_CODE(unpackCmdMsg(cmdBytes, &bytesUnpacked, &command));
         RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
@@ -100,16 +104,16 @@ static void vDecodeTask(void * pvParameters){
     obc_error_code_t errCode;
     packed_ax25_packet_t data;
     packed_rs_packet_t rsData;
-    aes_block_t aesBlocks;
+    aes_block_t aesBlock;
     uint8_t decryptedData[AES_BLOCK_SIZE];
     while (1) {
         if(xQueueReceive(decodeDataQueueHandle, &data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
             // Strip away the ax.25 headers from the data and store the encode reed solomon data in rsData
             LOG_IF_ERROR_CODE(ax25Recv(&data, &rsData));
-            // Decode the reed solomon data and store it in aesBlocks
-            LOG_IF_ERROR_CODE(rsDecode(&rsData, &aesBlocks));
+            // Decode the reed solomon data and store it in aesBlock
+            LOG_IF_ERROR_CODE(rsDecode(&rsData, &aesBlock));
             // Decrypt the aes128 block and store it in decryptedData
-            LOG_IF_ERROR_CODE(aes128Decrypt(&aesBlocks, decryptedData));
+            LOG_IF_ERROR_CODE(aes128Decrypt(&aesBlock, decryptedData));
             // Parse the decryptedData into cmd_msg_t structs and send them to command manager
             LOG_IF_ERROR_CODE(handleCommands(decryptedData));
         }
