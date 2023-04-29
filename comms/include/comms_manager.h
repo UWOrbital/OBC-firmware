@@ -14,17 +14,8 @@
 */
 typedef enum {
     COMMS_MANAGER_NULL_EVENT_ID,
-    COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID
+    COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID,
 } comms_event_id_t;
-
-/**
- * @union	comms_event_data_t
- * @brief	comms event data union
-*/
-typedef union {
-    int i;
-    float f;
-} comms_event_data_t;
 
 /**
  * @struct	comms_event_t
@@ -34,14 +25,10 @@ typedef union {
 */
 typedef struct {
     comms_event_id_t eventID;
-    comms_event_data_t data;
+    union {
+        uint32_t telemetryBatchId;
+    };
 } comms_event_t;
-
-/* Comms Manager event queue config */
-#define COMMS_MANAGER_QUEUE_LENGTH 10U
-#define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
-#define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-#define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)
