@@ -85,8 +85,7 @@ static void vCC1120TransmitTask(void *pvParameters) {
         // Wait for CC1120 transmit queue
         packed_ax25_packet_t ax25_pkt;
         if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-            errCode = OBC_ERR_CODE_QUEUE_RX_TIMEOUT;
-            LOG_ERROR_CODE(errCode);
+            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_RX_TIMEOUT);
             continue;
         }
         

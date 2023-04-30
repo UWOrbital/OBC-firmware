@@ -97,8 +97,7 @@ static void vTelemEncodeTask(void *pvParameters) {
 
         // Wait for a telemetry downlink event
         if (xQueueReceive(telemEncodeQueueHandle, &telemetryBatchId, COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-            errCode = OBC_ERR_CODE_QUEUE_RX_TIMEOUT;
-            LOG_ERROR_CODE(errCode);
+            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_RX_TIMEOUT);
             continue;
         }
 
