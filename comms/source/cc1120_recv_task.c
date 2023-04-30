@@ -58,11 +58,11 @@ static void vRecvTask(void * pvParameters){
     while (1) {
         comms_event_t queueMsg;
         if(xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS){
-            LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECV_QUEUE_TIMEOUT);
+            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_RX_TIMEOUT);
             continue;
         }
         switch (queueMsg.eventID) {
-            case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
+            case BEGIN_UPLINK:
                 isStillUplinking = TRUE;
                 // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
                 while(isStillUplinking){

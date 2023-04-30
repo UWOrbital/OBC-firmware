@@ -122,7 +122,7 @@ static void vCommsManagerTask(void * pvParameters) {
             case DOWNLINK_TELEMETRY:
                 LOG_IF_ERROR_CODE(handleTelemetry(queueMsg.telemetryBatchId));
                 break;
-            case COMMS_MANAGER_BEGIN_UPLINK_EVENT_ID:
+            case BEGIN_UPLINK:
                 sendToRecvDataQueue(&queueMsg);
         }
     }
