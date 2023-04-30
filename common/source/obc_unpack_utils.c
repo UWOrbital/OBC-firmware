@@ -1,6 +1,7 @@
 #include "obc_unpack_utils.h"
 
 #include <stdint.h>
+#include <string.h>
 
 uint8_t unpackUint8(const uint8_t* buffer, uint32_t* offset) {
     uint8_t value = buffer[*offset];
@@ -37,7 +38,10 @@ int32_t unpackInt32(const uint8_t* buffer, uint32_t* offset) {
 }
 
 float unpackFloat(const uint8_t* buffer, uint32_t* offset) {
-    uint32_t tmp = unpackUint32(buffer, offset);
-    return *((float*)&tmp);
-}
+    float val;
 
+    uint32_t tmp = unpackUint32(buffer, offset);
+    memcpy(&val, &tmp, sizeof(val));
+
+    return val;
+}
