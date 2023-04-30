@@ -8,6 +8,10 @@
 #include <stddef.h>
 
 typedef enum {
+    /* Used to indicate that the telemetry data is invalid.
+       It should not have a pack function. */
+    TELEM_NONE = 0,
+
     // Temperature values
     TELEM_CC1120_TEMP,
     TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP,
