@@ -117,9 +117,7 @@ static void vTelemEncodeTask(void *pvParameters) {
         LOG_DEBUG("Sending telemetry file with name: %s", fileName);
 
         // Send the telemetry
-        errCode = sendTelemetry(fd);
-
-        LOG_IF_ERROR_CODE(errCode);
+        LOG_IF_ERROR_CODE(sendTelemetry(fd));
 
         // Close telemetry file
         LOG_IF_ERROR_CODE(closeTelemetryFile(fd));
@@ -138,7 +136,6 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
     // Initialize important variables related to packing and queueing the telemetry to be sent
     telemetry_data_t singleTelem; // Holds a single piece of telemetry from getNextTelemetry()
     uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE]; // Holds a serialized version of the current piece of telemetry
-    size_t packedSingleTelemSize = 0; // Size of the packed single telemetry
 
     packed_telem_packet_t telemPacket = {0}; // Holds 223B of "raw" telemetry data.
                                              // Zero initialized because telem IDs of 0 are ignored at the ground station
@@ -151,16 +148,15 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
     while ((errCode = readNextTelemetryFromFile(fd, &singleTelem)) == OBC_ERR_CODE_SUCCESS) {
         LOG_DEBUG("Sending telemetry: %u", singleTelem.id);
 
+        size_t packedSingleTelemSize = 0; // Size of the packed single telemetry
         // Pack the single telemetry into a uint8_t array
         RETURN_IF_ERROR_CODE(packTelemetry(&singleTelem,
                              packedSingleTelem,
                              sizeof(packedSingleTelem)/sizeof(uint8_t),
                              &packedSingleTelemSize));
         
-        telemPacketOffset += packedSingleTelemSize;
-
         // If the single telemetry is too large to continue adding to the telemPacket, send the telemPacket
-        if (telemPacketOffset > PACKED_TELEM_PACKET_SIZE) {
+        if (telemPacketOffset + packedSingleTelemSize > PACKED_TELEM_PACKET_SIZE) {
             // Apply Reed Solomon FEC
             RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
 
@@ -177,6 +173,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
 
         // Copy the telemetry data into the packedTelem struct
         memcpy(&telemPacket.data[telemPacketOffset], packedSingleTelem, packedSingleTelemSize);
+        telemPacketOffset += packedSingleTelemSize;
     }
 
     if (errCode == OBC_ERR_CODE_REACHED_EOF) {
