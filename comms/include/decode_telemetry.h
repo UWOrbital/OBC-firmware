@@ -1,10 +1,8 @@
 #ifndef COMMS_INCLUDE_DECODE_TELEMETRY_H
 #define COMMS_INCLUDE_DECODE_TELEMETRY_H
 
-#include "obc_logging.h"
+#include "obc_errors.h"
 #include "ax25.h"
-
-#include <os_portmacro.h>
 
 #include <stdbool.h>
 

@@ -22,6 +22,6 @@ void initRecvTask(void);
  * 
  * @return obc_error_code_t - whether or not the packet was successfully sent to the queue
 */
-obc_error_code_t sendToRecvDataQueue(comms_event_t *event);
+obc_error_code_t startUplink(void);
 
 #endif /* COMMS_INCLUDE_CC1120_RECV_TASK_H */

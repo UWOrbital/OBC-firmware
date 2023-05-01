@@ -52,6 +52,8 @@ static register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_SYNC0, 0x55U},
     // Set next 8 bits of the sync word to 0x57U (arbitrary value)
     {CC1120_REGS_SYNC1, 0x57U},
+    // Set cc1120 to switch to FSTXON state after a packet is received
+    {CC1120_REGS_RFEND_CFG1, 0x1F},
     {CC1120_REGS_DEVIATION_M, 0x3AU},
     {CC1120_REGS_MODCFG_DEV_E, 0x0AU},
     {CC1120_REGS_DCFILT_CFG, 0x1CU},

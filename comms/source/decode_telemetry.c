@@ -31,7 +31,7 @@
 // Decode Data task
 static TaskHandle_t decodeTaskHandle = NULL;
 static StaticTask_t decodeTaskBuffer;
-static StackType_t decodeTaskStack[DECODE_STACK_SIZE];
+static StackType_t decodeTaskStack[COMMS_DECODE_STACK_SIZE];
 
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
@@ -39,6 +39,7 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH*DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void * pvParameters);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlock, uint8_t *decryptedData);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -54,11 +55,11 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
     }
     uint32_t bytesUnpacked = 0;
     // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
-    // If the command id is the id for end of transmission, command manager should set isStillUplinking to FALSE
+    // If the command id is the id for end of transmission, isStillUplinking should be set to false
     while(bytesUnpacked < AES_BLOCK_SIZE){
         // Check if we have reached
         if(cmdBytes[bytesUnpacked] == CMD_END_OF_TRANSMISSION){
-            isStillUplinking = FALSE;
+            isStillUplinking = false;
             // give RX semaphore so that the cc1120Receive can unblock and return
             if(xSemaphoreGive(getCC1120RxSemaphoreHandle()) != pdPASS){
                 LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
@@ -85,7 +86,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
 void initDecodeTask(void){
     ASSERT( (decodeTaskStack != NULL) && (&decodeTaskBuffer != NULL) );
     if(decodeTaskHandle == NULL){
-        decodeTaskHandle = xTaskCreateStatic(vDecodeTask, DECODE_TASK_NAME, DECODE_STACK_SIZE, NULL, DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
+        decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_DECODE_TASK_NAME, COMMS_DECODE_STACK_SIZE, NULL, COMMS_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
     }
     ASSERT( (decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL) );
     if(decodeDataQueueHandle == NULL){
@@ -108,18 +109,30 @@ static void vDecodeTask(void * pvParameters){
     uint8_t decryptedData[AES_BLOCK_SIZE];
     while (1) {
         if(xQueueReceive(decodeDataQueueHandle, &data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            // Strip away the ax.25 headers from the data and store the encode reed solomon data in rsData
-            LOG_IF_ERROR_CODE(ax25Recv(&data, &rsData));
-            // Decode the reed solomon data and store it in aesBlock
-            LOG_IF_ERROR_CODE(rsDecode(&rsData, &aesBlock));
-            // Decrypt the aes128 block and store it in decryptedData
-            LOG_IF_ERROR_CODE(aes128Decrypt(&aesBlock, decryptedData));
-            // Parse the decryptedData into cmd_msg_t structs and send them to command manager
-            LOG_IF_ERROR_CODE(handleCommands(decryptedData));
+            LOG_IF_ERROR_CODE(decodePacket(&data, &rsData, &aesBlock, decryptedData));
         }
 
     }
 } 
+
+/**
+ * @brief completely decode a recieved packet
+ * 
+ * @param data - packed ax25 packet with received data
+ * @param rsData - holds packed reed solomon data
+ * @param aesBlock - holds an aesBlock that needs to be decrypted
+ * @param decryptedData - holds the decrypted data from the aesBlock
+ * 
+ * @return obc_error_code_t - whether or not the data was completely decoded successfully 
+*/
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlock, uint8_t *decryptedData) {
+    obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesBlock));
+    RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlock, decryptedData));
+    RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
+    return OBC_ERR_CODE_SUCCESS;
+}
 
 /**
  * @brief send a received packet to the decode data pipeline to be sent to command manager

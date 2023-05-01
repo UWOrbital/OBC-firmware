@@ -26,7 +26,7 @@
 // Recv task
 static TaskHandle_t recvTaskHandle = NULL;
 static StaticTask_t recvTaskBuffer;
-static StackType_t recvTaskStack[RECV_STACK_SIZE];
+static StackType_t recvTaskStack[COMMS_RECV_STACK_SIZE];
 
 // Recv Data Queue
 static QueueHandle_t recvDataQueueHandle = NULL;
@@ -38,7 +38,7 @@ static void vRecvTask(void * pvParameters);
 void initRecvTask(void){
     ASSERT( (recvTaskStack != NULL) && (&recvTaskBuffer != NULL) );
     if(recvTaskHandle == NULL){
-        recvTaskHandle = xTaskCreateStatic(vRecvTask, RECV_TASK_NAME, RECV_STACK_SIZE, NULL, RECV_PRIORITY, recvTaskStack, &recvTaskBuffer);
+        recvTaskHandle = xTaskCreateStatic(vRecvTask, COMMS_RECV_TASK_NAME, COMMS_RECV_STACK_SIZE, NULL, COMMS_RECV_PRIORITY, recvTaskStack, &recvTaskBuffer);
     }
     ASSERT( (recvDataQueueStack != NULL) && (&recvDataQueue != NULL) );
     if(recvDataQueueHandle == NULL){
@@ -58,12 +58,11 @@ static void vRecvTask(void * pvParameters){
     while (1) {
         comms_event_t queueMsg;
         if(xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS){
-            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_RX_TIMEOUT);
             continue;
         }
         switch (queueMsg.eventID) {
             case BEGIN_UPLINK:
-                isStillUplinking = TRUE;
+                isStillUplinking = true;
                 // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
                 while(isStillUplinking){
                     packed_ax25_packet_t recvData;
@@ -77,22 +76,19 @@ static void vRecvTask(void * pvParameters){
                 }
                 break;
             default:
-                LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
 
     }
 } 
 
-obc_error_code_t sendToRecvDataQueue(comms_event_t *event){
+obc_error_code_t startUplink(void){
     if (recvDataQueueHandle == NULL) {
         return OBC_ERR_CODE_INVALID_STATE;
     }
-
-    if (event == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    if (xQueueSend(recvDataQueueHandle, (void *) event, RECV_DATA_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+    comms_event_t event;
+    event.eventID = BEGIN_UPLINK;
+    if (xQueueSend(recvDataQueueHandle, (void *) &event, RECV_DATA_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
         return OBC_ERR_CODE_SUCCESS;
     }
 
