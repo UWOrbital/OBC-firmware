@@ -77,7 +77,7 @@ static void vCommsManagerTask(void * pvParameters) {
         
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY:
-                LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
+                // LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
                 break;
         }
     }

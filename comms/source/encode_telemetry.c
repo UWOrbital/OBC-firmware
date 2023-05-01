@@ -97,26 +97,42 @@ static void vTelemEncodeTask(void *pvParameters) {
 
         // Wait for a telemetry downlink event
         if (xQueueReceive(telemEncodeQueueHandle, &telemetryBatchId, COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_RX_TIMEOUT);
+            // TODO: Handle this if necessary
             continue;
         }
 
         // Open the telemetry file
         int32_t fd;
-        LOG_IF_ERROR_CODE(openTelemetryFileRO(telemetryBatchId, &fd));
-        
+        errCode = openTelemetryFileRO(telemetryBatchId, &fd);
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            LOG_ERROR_CODE(errCode);
+            continue;
+        }
+
         // Print the telemetry file size for debugging
         size_t fileSize;
-        LOG_IF_ERROR_CODE(getFileSize(fd, &fileSize));
+        errCode = getFileSize(fd, &fileSize);
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            LOG_ERROR_CODE(errCode);
+            continue;
+        }
         LOG_DEBUG("Sending telemetry file with size: %lu", fileSize);
 
         // Print telemetry file name
         char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
-        LOG_IF_ERROR_CODE(constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH));
+        errCode = constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH);
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            LOG_ERROR_CODE(errCode);
+            continue;
+        }
         LOG_DEBUG("Sending telemetry file with name: %s", fileName);
 
         // Send the telemetry
-        LOG_IF_ERROR_CODE(sendTelemetry(fd));
+        errCode = sendTelemetry(fd);
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+            LOG_ERROR_CODE(errCode);
+            continue;
+        }
 
         // Close telemetry file
         LOG_IF_ERROR_CODE(closeTelemetryFile(fd));
@@ -181,7 +197,6 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
     }
     
     RETURN_IF_ERROR_CODE(errCode); // If the error wasn't an EOF error, return
-
 
     // If there's no data left to send, return
     if (telemPacketOffset == 0)
