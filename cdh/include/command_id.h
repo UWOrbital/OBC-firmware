@@ -15,9 +15,9 @@ typedef enum {
 } cmd_policy_t;
 
 typedef enum {
-    CMD_TYPE_NORMAL     = 0x0, // Normal command
-    CMD_TYPE_CRITICAL   = 0x1, // Critical command
-    CMD_TYPE_AROUND     = 0x2, // ARO command
+    CMD_TYPE_NORMAL     = 0x1, // Normal command
+    CMD_TYPE_CRITICAL   = 0x2, // Critical command
+    CMD_TYPE_ARO        = 0x4, // ARO command
 } cmd_opt_t;
 
 /* 
