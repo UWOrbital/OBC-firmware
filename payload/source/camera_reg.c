@@ -8,6 +8,11 @@
 #include "ov5642_regs.h"
 #include "camera_reg.h"
 
+#define CAM_I2C_WR_ADDR 0x3C
+#define CAM_I2C_RD_ADDR 0x3C
+
+#define TCA_I2C_ADDR 0x70
+
 spiDAT1_t spi_config = {
     .CS_HOLD = FALSE,
     .WDEL = FALSE,
@@ -15,7 +20,7 @@ spiDAT1_t spi_config = {
     .CSNR = SPI_CS_NONE
 };
 
-obc_error_code_t write_reg(uint16_t addr, uint16_t data) {
+obc_error_code_t writeReg(uint16_t addr, uint16_t data) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(assertChipSelect(SPI_PORT, 1));
     addr = addr | 0x80;
@@ -24,7 +29,7 @@ obc_error_code_t write_reg(uint16_t addr, uint16_t data) {
     RETURN_IF_ERROR_CODE(deassertChipSelect(SPI_PORT, 1));
 }
 
-obc_error_code_t read_reg(uint16_t addr, uint16_t *rx_data) {
+obc_error_code_t readReg(uint16_t addr, uint16_t *rx_data) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(assertChipSelect(SPI_PORT, 1));
     addr = addr & 0x7F;
@@ -59,7 +64,7 @@ obc_error_code_t wrSensorRegs16_8(const struct sensor_reg reglist[]) {
     }
 }
 
-obc_error_code_t tca_select(uint8_t tca) {
+obc_error_code_t tcaSelect(uint8_t tca) {
     if (tca > 7) {
         return;
     }
@@ -67,10 +72,10 @@ obc_error_code_t tca_select(uint8_t tca) {
     i2cSendTo(TCA_I2C_ADDR, 1, &tca);
 }
 
-uint8_t get_bit(uint8_t addr, uint8_t bit)
+uint8_t getBit(uint8_t addr, uint8_t bit)
 {
   uint8_t temp;
-  read_reg(addr, &temp);
+  readReg(addr, &temp);
   temp = temp & (1 << bit);
   return temp;
 }

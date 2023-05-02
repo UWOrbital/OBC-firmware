@@ -4,17 +4,7 @@
 #include "stdint.h"
 #include "obc_spi_io.h"
 #include "ov5642_regs.h"
-
-#define SPI_REG spiREG3
-#define SPI_PORT spiPORT3
-#define CS_NUM 1
-
-#define CAM_I2C_WR_ADDR 0x3C
-#define CAM_I2C_RD_ADDR 0x3C
-
-#define TCA_I2C_ADDR 0x70
-
-extern spiDAT1_t spi_config;
+#include "obc_board_config.h"
 
 /**
  * @brief Write to a camera register over SPI
@@ -22,7 +12,7 @@ extern spiDAT1_t spi_config;
  * @param data Data to send
  * @return Error code indicating if the write was successful
  */
-obc_error_code_t write_reg(uint16_t addr, uint16_t data);
+obc_error_code_t writeReg(uint16_t addr, uint16_t data);
 
 /**
  * @brief Read a camera register over SPI
@@ -30,7 +20,7 @@ obc_error_code_t write_reg(uint16_t addr, uint16_t data);
  * @param rx_data Buffer to store received data
  * @return Error code indicating if the read was successful
  */
-obc_error_code_t read_reg(uint16_t addr, uint16_t *rx_data);
+obc_error_code_t readReg(uint16_t addr, uint16_t *rx_data);
 
 /**
  * @brief Read 8 bits from a 16 bit register over I2C
@@ -60,13 +50,13 @@ obc_error_code_t wrSensorRegs16_8(const struct sensor_reg reglist[]);
  * @param tca Port number to select
  * @return Error code indicating if an ACK was received
  */
-obc_error_code_t tca_select(uint8_t tca);
+obc_error_code_t tcaSelect(uint8_t tca);
 
 /**
  * @brief Read one bit from a register over SPI
  * @param addr Address to read from
  * @param bit Bit to read
  */
-uint8_t get_bit(uint8_t addr, uint8_t bit);
+uint8_t getBit(uint8_t addr, uint8_t bit);
 
 #endif /* PAYLOAD_INCLUDE_CAMERA_REG_H_ */

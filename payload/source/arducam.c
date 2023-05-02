@@ -2,14 +2,33 @@
 #include "camera_reg.h"
 #include "ov5642_regs.h"
 #include "obc_spi_io.h"
+#include "obc_fs_utils.h"
+#include "obc_board_config.h"
 
 #include <redposix.h>
+
+// Camera control
+#define ARDUCHIP_TRIG      		0x41  // Trigger source
+#define ARDUCHIP_TIM       		0x03  // Timing control
+#define VSYNC_LEVEL_MASK   		0x02  // 0 = High active , 		1 = Low active
+#define ARDUCHIP_FRAMES			  0x01  // FRAME control register, Bit[2:0] = Number of frames to be captured  //  On 5MP_Plus platforms bit[2:0] = 7 means continuous capture until frame buffer is full
+#define CAP_DONE_MASK      		0x04
+#define BURST_FIFO_READ			  0x3C  //Burst FIFO read operation
+
+#define ARDUCHIP_FIFO      		0x04  // FIFO and I2C control
+#define FIFO_CLEAR_MASK    		0x01
+#define FIFO_START_MASK    		0x02
+#define MAX_FIFO_SIZE		      0x7FFFFF  // 8MByte
+
+#define FIFO_SIZE1				0x42  // Camera write FIFO size[7:0] for burst to read
+#define FIFO_SIZE2				0x43  // Camera write FIFO size[15:8]
+#define FIFO_SIZE3				0x44  // Camera write FIFO size[18:16]
 
 static uint8_t m_fmt;
 // Todo: support multiple image captures in different files
 static const char fname[] = "/captures/imageX";
 
-void set_format(uint8_t fmt) {
+void setFormat(image_format_t fmt) {
   if (fmt == BMP)
     m_fmt = BMP;
   else if(fmt == RAW)
@@ -18,7 +37,7 @@ void set_format(uint8_t fmt) {
     m_fmt = JPEG;
 }
 
-obc_error_code_t InitCAM(void) {
+obc_error_code_t initCam(void) {
   obc_error_code_t errCode;
   // Reset camera
   RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3008, 0x80));
@@ -31,7 +50,7 @@ obc_error_code_t InitCAM(void) {
     RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_JPEG_Capture_QSXGA));
     // Switch to lowest JPEG resolution
     RETURN_IF_ERROR_CODE(wrSensorRegs16_8(ov5642_320x240));
-    
+
     vTaskDelay(pdMS_TO_TICKS(1));
     // Vertical flip
     RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3818, 0xa8));
@@ -49,7 +68,7 @@ obc_error_code_t InitCAM(void) {
   return errCode;
 }
 
-obc_error_code_t OV5642_set_JPEG_size(uint8_t size)
+obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
 {
   obc_error_code_t errCode;
   switch (size)
@@ -84,22 +103,22 @@ obc_error_code_t OV5642_set_JPEG_size(uint8_t size)
 }
 
 obc_error_code_t flush_fifo(void) {
-  return write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+  return writeReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
 }
 
 obc_error_code_t start_capture(void) {
-	return write_reg(ARDUCHIP_FIFO, FIFO_START_MASK);
+	return writeReg(ARDUCHIP_FIFO, FIFO_START_MASK);
 }
 
 obc_error_code_t clear_fifo_flag(void) {
-	return write_reg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+	return writeReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
 }
 
 obc_error_code_t set_fifo_burst(void){
-  return spiTransmitByte(SPI_REG, &spi_config, BURST_FIFO_READ);
+  return spiTransmitByte(CAM_SPI_REG, &spi_config, BURST_FIFO_READ);
 }
 
-obc_error_code_t capture_image(void) {
+obc_error_code_t captureImage(void) {
   obc_error_code_t errCode;
   errCode = flush_fifo();
   if(!errCode) {
@@ -111,8 +130,8 @@ obc_error_code_t capture_image(void) {
   return errCode;
 }
 
-bool is_capture_done(void) {
-  return (bool)get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK);
+bool isCaptureDone(void) {
+  return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK);
 }
 
 obc_error_code_t read_fifo_length(uint32_t length) {
@@ -120,11 +139,11 @@ obc_error_code_t read_fifo_length(uint32_t length) {
 	uint32_t len1, len2, len3 = 0;
   uint16_t rx_data = 0;
 
-	RETURN_IF_ERROR_CODE(read_reg(FIFO_SIZE1, &rx_data));
+	RETURN_IF_ERROR_CODE(readReg(FIFO_SIZE1, &rx_data));
   len1 = rx_data;
-  RETURN_IF_ERROR_CODE(read_reg(FIFO_SIZE2, &rx_data));
+  RETURN_IF_ERROR_CODE(readReg(FIFO_SIZE2, &rx_data));
   len1 = rx_data;
-  RETURN_IF_ERROR_CODE(read_reg(FIFO_SIZE3, &rx_data));
+  RETURN_IF_ERROR_CODE(readReg(FIFO_SIZE3, &rx_data));
   len1 = (rx_data & 0x7f);
 
   length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
@@ -133,15 +152,13 @@ obc_error_code_t read_fifo_length(uint32_t length) {
 // Todo: Not hardware tested
 obc_error_code_t read_fifo_burst(void) {
   obc_error_code_t errCode;
+  int32_t file = 0;
   uint32_t length = 0;
   uint8_t temp = 0, temp_last = 0;
   bool is_header = false;
 
-  // Open new image file
-  int32_t file = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
-  if(file < 0) {
-    return OBC_ERR_CODE_FAILED_FILE_OPEN;
-  }
+  // Open a new image file  
+  RETURN_IF_ERROR_CODE(createFile(fname, &file));
 
   read_fifo_length(&length);
   if (length >= MAX_FIFO_SIZE) {
@@ -153,30 +170,24 @@ obc_error_code_t read_fifo_burst(void) {
   }
 
   RETURN_IF_ERROR_CODE(errCode);
-  RETURN_IF_ERROR_CODE(assertChipSelect(SPI_PORT, 1));
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, 1));
 
   // Set fifo to burst mode, receive continuous data until EOF
   RETURN_IF_ERROR_CODE(set_fifo_burst());
-  spiReceiveByte(SPI_REG, &spi_config, &temp);
+  spiReceiveByte(CAM_SPI_REG, &spi_config, &temp);
   length--;
   while(length-- && !errCode) {
     temp_last = temp;
-    errCode = spiReceiveByte(SPI_REG, &spi_config, &temp);
+    errCode = spiReceiveByte(CAM_SPI_REG, &spi_config, &temp);
     if(!errCode) {
 
       if(is_header == true) {
-        if(red_write(file, temp, 1) < 0) {
-          errCode = OBC_ERR_CODE_FAILED_FILE_WRITE;
-        }
+        RETURN_IF_ERROR_CODE(writeFile(file, &temp, 1));
       }
       else if((temp == 0xD8) & (temp_last == 0xFF)) {
         is_header = true;
-        if(red_write(file, temp_last, 1) < 0) {
-          errCode = OBC_ERR_CODE_FAILED_FILE_WRITE;
-        }
-        if(!errCode && (red_write(file, temp, 1) < 0)) {
-          errCode = OBC_ERR_CODE_FAILED_FILE_WRITE;
-        }
+        RETURN_IF_ERROR_CODE(writeFile(file, &temp_last, 1));
+        RETURN_IF_ERROR_CODE(writeFile(file, &temp, 1));
       }
       if((temp == 0xD9) && (temp_last == 0xFF)) {
         break;
@@ -187,12 +198,10 @@ obc_error_code_t read_fifo_burst(void) {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
   
-  if(errCode != OBC_ERR_CODE_FAILED_FILE_WRITE) {
-    errCode = red_close(file);
-  }
+  RETURN_IF_ERROR_CODE(closeFile(file));
 
   if(!errCode) {
-    errCode = deassertChipSelect(SPI_PORT, 1);
+    errCode = deassertChipSelect(CAM_SPI_PORT, 1);
   }
   
   return errCode;
