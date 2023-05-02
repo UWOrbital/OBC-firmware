@@ -32,4 +32,13 @@ typedef struct {
     uint8_t request; /* Request granted or denied */
 } cdh_eps_resp_msg_t;
 
+/* -------------------------- */
+/*      Union for Queue       */
+/* -------------------------- */
+typedef union {
+    cdh_eps_cmd_msg_t cmd;
+    cdh_eps_tle_msg_t tle;
+    cdh_eps_resp_msg_t resp;
+} cdh_eps_queue_msg_t;
+
 #endif /* CDH_INCLUDE_CDH_EPS_PROTOCOL_DATA_H_ */
