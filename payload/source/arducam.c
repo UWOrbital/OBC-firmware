@@ -1,5 +1,4 @@
 #include "arducam.h"
-#include "camera_reg.h"
 #include "ov5642_regs.h"
 #include "obc_spi_io.h"
 #include "obc_fs_utils.h"
@@ -40,30 +39,30 @@ void setFormat(image_format_t fmt) {
 obc_error_code_t initCam(void) {
   obc_error_code_t errCode;
   // Reset camera
-  RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3008, 0x80));
+  RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
   // Setup at 320x420 resolution
-  RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_QVGA_Preview));
+  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(OV5642_QVGA_Preview));
   vTaskDelay(pdMS_TO_TICKS(1));
   if (m_fmt == JPEG) {
     vTaskDelay(pdMS_TO_TICKS(1));
     // Switch to JPEG capture
-    RETURN_IF_ERROR_CODE(wrSensorRegs16_8(OV5642_JPEG_Capture_QSXGA));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(OV5642_JPEG_Capture_QSXGA));
     // Switch to lowest JPEG resolution
-    RETURN_IF_ERROR_CODE(wrSensorRegs16_8(ov5642_320x240));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(ov5642_320x240));
 
     vTaskDelay(pdMS_TO_TICKS(1));
     // Vertical flip
-    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3818, 0xa8));
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3818, 0xa8));
     // Pixel binning
-    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3621, 0x10));
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3621, 0x10));
     // Image horizontal control
-    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x3801, 0xb0));
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3801, 0xb0));
     // Image compression
-    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x4407, 0x08));
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x4407, 0x08));
     // Lens correction
-    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x5888, 0x00));
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5888, 0x00));
     // Image processor setup
-    RETURN_IF_ERROR_CODE(wrSensorReg16_8(0x5000, 0xFF)); 
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5000, 0xFF)); 
   }
   return errCode;
 }
@@ -75,82 +74,83 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
   {
     // Todo: all other resolutions are unimplemented
     case OV5642_320x240:
-      errCode = wrSensorRegs16_8(ov5642_320x240);
+      errCode = camWriteSensorRegs16_8(ov5642_320x240);
       break;
     case OV5642_640x480:
-      // wrSensorRegs16_8(ov5642_640x480);
+      // camWriteSensorRegs16_8(ov5642_640x480);
       break;
     case OV5642_1024x768:
-      // wrSensorRegs16_8(ov5642_1024x768);
+      // camWriteSensorRegs16_8(ov5642_1024x768);
       break;
     case OV5642_1280x960:
-      // wrSensorRegs16_8(ov5642_1280x960);
+      // camWriteSensorRegs16_8(ov5642_1280x960);
       break;
     case OV5642_1600x1200:
-      // wrSensorRegs16_8(ov5642_1600x1200);
+      // camWriteSensorRegs16_8(ov5642_1600x1200);
       break;
     case OV5642_2048x1536:
-      // wrSensorRegs16_8(ov5642_2048x1536);
+      // camWriteSensorRegs16_8(ov5642_2048x1536);
       break;
     case OV5642_2592x1944:
-      // wrSensorRegs16_8(ov5642_2592x1944);
+      // camWriteSensorRegs16_8(ov5642_2592x1944);
       break;
     default:
-      errCode = wrSensorRegs16_8(ov5642_320x240);
+      errCode = camWriteSensorRegs16_8(ov5642_320x240);
       break;
   }
   return errCode;
 }
 
-obc_error_code_t flush_fifo(void) {
-  return writeReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+obc_error_code_t flush_fifo(camera_t cam) {
+  return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
 }
 
-obc_error_code_t start_capture(void) {
-	return writeReg(ARDUCHIP_FIFO, FIFO_START_MASK);
+obc_error_code_t start_capture(camera_t cam) {
+	return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam);
 }
 
-obc_error_code_t clear_fifo_flag(void) {
-	return writeReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK);
+obc_error_code_t clear_fifo_flag(camera_t cam) {
+	return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
 }
 
-obc_error_code_t set_fifo_burst(void){
-  return spiTransmitByte(CAM_SPI_REG, &spi_config, BURST_FIFO_READ);
+obc_error_code_t set_fifo_burst(camera_t cam){
+  return camWriteByte(BURST_FIFO_READ, cam);
 }
 
-obc_error_code_t captureImage(void) {
+obc_error_code_t captureImage(camera_t cam) {
   obc_error_code_t errCode;
-  errCode = flush_fifo();
+  errCode = flush_fifo(cam);
   if(!errCode) {
-   errCode = start_capture(); 
+   errCode = start_capture(cam); 
   }
   if(!errCode) {
-    errCode = clear_fifo_flag();
+    errCode = clear_fifo_flag(cam);
   }
   return errCode;
 }
 
-bool isCaptureDone(void) {
-  return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK);
+bool isCaptureDone(camera_t cam) {
+  return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam);
 }
 
-obc_error_code_t read_fifo_length(uint32_t length) {
+obc_error_code_t read_fifo_length(uint32_t *length, camera_t cam) {
   obc_error_code_t errCode;
-	uint32_t len1, len2, len3 = 0;
-  uint16_t rx_data = 0;
+	uint32_t len1 = 0, len2 = 0, len3 = 0;
+  uint8_t rx_data = 0;
 
-	RETURN_IF_ERROR_CODE(readReg(FIFO_SIZE1, &rx_data));
+	RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE1, &rx_data, cam));
   len1 = rx_data;
-  RETURN_IF_ERROR_CODE(readReg(FIFO_SIZE2, &rx_data));
+  RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE2, &rx_data, cam));
   len1 = rx_data;
-  RETURN_IF_ERROR_CODE(readReg(FIFO_SIZE3, &rx_data));
+  RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE3, &rx_data, cam));
   len1 = (rx_data & 0x7f);
 
-  length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
+  *length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
+  return errCode;
 }
 
 // Todo: Not hardware tested
-obc_error_code_t read_fifo_burst(void) {
+obc_error_code_t read_fifo_burst(camera_t cam) {
   obc_error_code_t errCode;
   int32_t file = 0;
   uint32_t length = 0;
@@ -160,7 +160,7 @@ obc_error_code_t read_fifo_burst(void) {
   // Open a new image file  
   RETURN_IF_ERROR_CODE(createFile(fname, &file));
 
-  read_fifo_length(&length);
+  read_fifo_length(&length, cam);
   if (length >= MAX_FIFO_SIZE) {
     // 512 kb
     errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
@@ -173,12 +173,12 @@ obc_error_code_t read_fifo_burst(void) {
   RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, 1));
 
   // Set fifo to burst mode, receive continuous data until EOF
-  RETURN_IF_ERROR_CODE(set_fifo_burst());
-  spiReceiveByte(CAM_SPI_REG, &spi_config, &temp);
+  RETURN_IF_ERROR_CODE(set_fifo_burst(cam));
+  camReadByte(&temp, cam);
   length--;
   while(length-- && !errCode) {
     temp_last = temp;
-    errCode = spiReceiveByte(CAM_SPI_REG, &spi_config, &temp);
+    errCode = camReadByte(&temp, cam);
     if(!errCode) {
 
       if(is_header == true) {

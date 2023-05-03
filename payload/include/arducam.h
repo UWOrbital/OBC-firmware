@@ -7,6 +7,8 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 
+#include "camera_reg.h"
+
 /**
  * @enum	image_format_t
  * @brief	OV5642 supported image formats.
@@ -43,7 +45,7 @@ typedef enum {
 void setFormat(image_format_t fmt);
 
 /**
- * @brief Initialize camera
+ * @brief Initialize camera selected by tcaSelect()
  */
 obc_error_code_t initCam(void);
 
@@ -56,12 +58,12 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size);
 /**
  * @brief Trigger an image capture
  */
-obc_error_code_t captureImage(void);
+obc_error_code_t captureImage(camera_t cam);
 
 /**
  * @brief Checks if image capture has been completed
  * @return Returns true if capture is complete
  */
-bool isCaptureDone(void);
+bool isCaptureDone(camera_t cam);
 
 #endif /* PAYLOAD_INCLUDE_ARDUCAM_H_ */
