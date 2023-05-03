@@ -27,20 +27,16 @@ typedef struct {
     cmd_opt_t opts; // Mask of command options
 } cmd_info_t;
 
-static const cmd_info_t cmdInfo[] = {
+static const cmd_info_t cmdsConfig[] = {
     [CMD_NONE] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
 };
 
-// Used to track whether a safety-critical command is currently being executed
-// This is inefficient space-wise, but simplifies the code
-static bool cmdProgressTracker[sizeof(cmdInfo) / sizeof(cmd_info_t)] = {false};
+#define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))
 
-static const size_t cmdInfoSize = sizeof(cmdInfo) / sizeof(cmd_info_t);
-
-STATIC_ASSERT(sizeof(cmdInfo)/sizeof(cmd_info_t) <= UINT8_MAX, "Max command ID must be less than 256");
+STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
 /**
  * @brief Task that manages the command queue and executes commands
@@ -96,18 +92,22 @@ static uint32_t getCurrentTime(void) {
 static void commandManagerTask(void *pvParameters) {
     obc_error_code_t errCode;
 
+    // Used to track whether a safety-critical command is currently being executed
+    // This is inefficient space-wise, but simplifies the code. We can optimize later if needed.
+    static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {false};
+    
     while (1) {
         cmd_msg_t cmd;
         if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
             LOG_DEBUG("Received command %u", cmd.id);
 
             // Check if the ID is a valid index
-            if (cmd.id >= cmdInfoSize) {
+            if (cmd.id >= CMDS_CONFIG_SIZE) {
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
                 continue;
             }
 
-            cmd_info_t currCmdInfo = cmdInfo[cmd.id];
+            cmd_info_t currCmdInfo = cmdsConfig[cmd.id];
 
             // Check if the ID has a callback
             if (currCmdInfo.callback == NULL) {
@@ -116,7 +116,7 @@ static void commandManagerTask(void *pvParameters) {
             }
 
             // Check if the command is allowed to be executed
-            if (!(currCmdInfo.policy != OBC_ACTIVE_POLICY)) {
+            if (!(currCmdInfo.policy & OBC_ACTIVE_POLICY)) {
                 LOG_ERROR_CODE(OBC_ERR_CODE_CMD_NOT_ALLOWED);
                 continue;
             }

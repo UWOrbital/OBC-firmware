@@ -9,11 +9,13 @@
 #define OBC_ACTIVE_POLICY CMD_POLICY_RND
 #endif
 
+// Policy is defined by a mask of the following flags
 typedef enum {
-    CMD_POLICY_RND      = 0, // R&D policy
-    CMD_POLICY_PROD     = 1, // Production policy
+    CMD_POLICY_RND      = 0x1, // R&D policy
+    CMD_POLICY_PROD     = 0x2, // Production policy
 } cmd_policy_t;
 
+// Command options are defined by a mask of the following flags
 typedef enum {
     CMD_TYPE_NORMAL     = 0x1, // Normal command
     CMD_TYPE_CRITICAL   = 0x2, // Critical command
@@ -24,7 +26,7 @@ typedef enum {
  * Command IDs
  * 
  * - The command IDs are used to identify the command in the command message.
- * - All command IDs must be unique.
+ * - All command IDs must be unique and fit in a uint8_t.
 */
 
 /* Used to indicate that the command is invalid.
