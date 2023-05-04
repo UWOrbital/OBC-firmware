@@ -363,6 +363,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     // See chapters 8.1, 8.4, 8.5
     for (i = 0; i < (len - 1)/TXRX_INTERRUPT_THRESHOLD; ++i){
         if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
+            isStillUplinking = false;
             LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
             return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
         }
@@ -378,6 +379,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
+        isStillUplinking = false;
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
     }
