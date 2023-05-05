@@ -49,7 +49,7 @@
 #define SW_WATCHDOG_NAME        "sw_watchdog"
 #define SW_WATCHDOG_PRIORITY    tskIDLE_PRIORITY + 200U
 
-/* TimekeeperSG task config */
+/* rtc_alarm_handler task config */
 #define RTC_ALARM_HANDLER_STACK_SIZE   1024U
 #define RTC_ALARM_HANDLER_NAME         "RTC_ALARM_HANDLER"
 #define RTC_ALARM_HANDLER_PRIORITY     tskIDLE_PRIORITY + 1U
