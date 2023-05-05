@@ -1,49 +1,14 @@
-#include <FreeRTOS.h>
-#include <os_portmacro.h>
-#include <os_queue.h>
-#include <os_task.h>
 #include <stdlib.h>
 #include "ds3232_mz.h"
-#include "timekeeper_sg_util.h"
+#include "obc_queue.h"
+#include "rtc_alarm_handler_util.h"
 
 int8_t front = -1, rear = -1;
 int8_t numOfActiveAlarms = 0;
-timekeeper_sg_rtc_alarm alarmQueue[ALARM_QUEUE_SIZE];
-timekeeper_sg_rtc_alarm dummyAlarm = {.mode.alarm1Mode = RTC_ALARM1_ONCE_PER_SECOND,
+rtc_alarm_handler_rtc_alarm alarmQueue[ALARM_QUEUE_SIZE];
+rtc_alarm_handler_rtc_alarm dummyAlarm = {.mode.alarm1Mode = RTC_ALARM1_ONCE_PER_SECOND,
                                       .alarmVal = {1, {1, 1, 1}},
                                     };
-
-obc_error_code_t setAlarm1(rtc_alarm_time_t alarmTime, rtc_alarm1_mode_t alarmMode) {
-    return setAlarm1RTC(alarmMode, alarmTime);
-}
-
-obc_error_code_t setAlarm2(rtc_alarm_time_t alarmTime, rtc_alarm2_mode_t alarmMode) {
-    return setAlarm2RTC(alarmMode, alarmTime);
-}
-
-obc_error_code_t setCurrentDateTime(rtc_date_time_t currentTime) {
-    return setCurrentDateTimeRTC(&currentTime);
-}
-
-rtc_time_t getCurrentTime(rtc_time_t getTime) {
-    getCurrentTimeRTC(&getTime);
-    return getTime;
-}
-
-void addAlarm(timekeeper_sg_rtc_alarm alarm) {
-    /*
-        Following Figure 5.6: Adding new alarms 
-        https://ntnuopen.ntnu.no/ntnu-xmlui/bitstream/handle/11250/2413318/14533_FULLTEXT.pdf?sequence=1#page=54&zoom=100,94,101
-    */
-   enQueue(alarm);
-   bubbleSort();
-}
-
-void exectureAlarm() {
-
-    // TBD what to do with this, local interrupt or use RTC alarm, for now just dequeing from alarm queue
-    deQueue();
-}
 
 uint8_t isFull() {
     if((rear == front - 1) || (front == 0 && rear == ALARM_QUEUE_SIZE - 1))
@@ -57,7 +22,7 @@ uint8_t isEmpty() {
     return 0;
 }
 
-obc_error_code_t enQueue(timekeeper_sg_rtc_alarm alarm) {
+obc_error_code_t enQueue(rtc_alarm_handler_rtc_alarm alarm) {
     if(isFull())
         return OBC_ERR_CODE_UNKNOWN;
     else
