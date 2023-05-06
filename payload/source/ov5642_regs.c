@@ -1,6 +1,8 @@
+#include <stdlib.h>
 #include "ov5642_regs.h"
 
-const struct sensor_reg OV5642_QVGA_Preview[] = {
+// Configuration for the host preview
+static const sensor_reg_t OV5642_QVGA_Preview[] = {
 	{0x3103 ,0x93},
 	{0x3008 ,0x82},
 	{0x3017 ,0x7f},
@@ -597,7 +599,8 @@ const struct sensor_reg OV5642_QVGA_Preview[] = {
 	{0xffff,0xff},
 };        
 
-const struct sensor_reg OV5642_JPEG_Capture_QSXGA[] = {
+// Switch to JPEG
+static const sensor_reg_t OV5642_JPEG_Capture_QSXGA[] = {
 	// OV5642_ QSXGA _YUV7.5 fps
 	// 24 MHz input clock, 24Mhz pclk
 	// jpeg mode 7.5fps
@@ -677,7 +680,8 @@ const struct sensor_reg OV5642_JPEG_Capture_QSXGA[] = {
 
 };
 
-const struct sensor_reg ov5642_320x240[] = {
+// Switch to lowest resolution
+static const sensor_reg_t OV5642_320x240[] = {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xa8},
 	{0x3802 ,0x0 },
@@ -706,3 +710,16 @@ const struct sensor_reg ov5642_320x240[] = {
 	{0x3801, 0xb0},
 	{0xffff, 0xff},
 };
+
+sensor_reg_t* getCamConfig(cam_config_t config) {
+	switch (config) {
+		case OV5642_QVGA_Preview_Config:
+			return OV5642_QVGA_Preview;
+		case OV5642_JPEG_Capture_QSXGA_Config:
+			return OV5642_JPEG_Capture_QSXGA;
+		case OV5642_320x240_Config:
+			return OV5642_320x240;
+		default:
+			return NULL; // Invalid Config
+	}
+}

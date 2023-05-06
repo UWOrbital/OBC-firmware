@@ -41,14 +41,14 @@ obc_error_code_t initCam(void) {
   // Reset camera
   RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
   // Setup at 320x420 resolution
-  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(OV5642_QVGA_Preview));
+  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_QVGA_Preview_Config)));
   vTaskDelay(pdMS_TO_TICKS(1));
   if (m_fmt == JPEG) {
     vTaskDelay(pdMS_TO_TICKS(1));
     // Switch to JPEG capture
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(OV5642_JPEG_Capture_QSXGA));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_JPEG_Capture_QSXGA_Config)));
     // Switch to lowest JPEG resolution
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(ov5642_320x240));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config)));
 
     vTaskDelay(pdMS_TO_TICKS(1));
     // Vertical flip
@@ -74,7 +74,7 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
   {
     // Todo: all other resolutions are unimplemented
     case OV5642_320x240:
-      errCode = camWriteSensorRegs16_8(ov5642_320x240);
+      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config));
       break;
     case OV5642_640x480:
       // camWriteSensorRegs16_8(ov5642_640x480);
@@ -95,7 +95,7 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
       // camWriteSensorRegs16_8(ov5642_2592x1944);
       break;
     default:
-      errCode = camWriteSensorRegs16_8(ov5642_320x240);
+      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config));
       break;
   }
   return errCode;

@@ -74,11 +74,11 @@ obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat) {
     return errCode;
 }
 
-obc_error_code_t camWriteSensorRegs16_8(const struct sensor_reg reglist[]) {
+obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[]) {
     obc_error_code_t errCode;
     int reg_addr = 0;
     int reg_val = 0;
-    const struct sensor_reg *next = reglist;
+    const sensor_reg_t *next = reglist;
 
     while (!errCode && ((reg_addr != 0xffff) || (reg_val != 0xff))) {
         reg_addr = next->reg;

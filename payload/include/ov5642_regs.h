@@ -4,16 +4,31 @@
 #include "stdint.h"
 
 /**
- * @struct sensor_reg
+ * @struct sensor_reg_t
  * @brief	Sensor reg struct, reg is the address to write to and val is the value to write
 */
-struct sensor_reg {
+typedef struct {
 	int reg;
 	int val;
-};
+} sensor_reg_t;
 
-extern const struct sensor_reg OV5642_QVGA_Preview[];
-extern const struct sensor_reg OV5642_JPEG_Capture_QSXGA[];
-extern const struct sensor_reg ov5642_320x240[];
+/**
+ * @enum	cam_config_t
+ * @brief	Configuration array names to be called with getCamConfig().
+ *
+ * Configuration array names.
+*/
+typedef enum {
+  OV5642_QVGA_Preview_Config,
+  OV5642_JPEG_Capture_QSXGA_Config,
+	OV5642_320x240_Config
+} cam_config_t;
+
+/**
+ * @brief Access camera configuration arrays
+ * @param config  Camera config array name
+ * @return Pointer to config array
+ */
+sensor_reg_t* getCamConfig(cam_config_t config);
 
 #endif /* PAYLOAD_INCLUDE_OV5642_REGS_H_ */
