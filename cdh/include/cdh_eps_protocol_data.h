@@ -1,6 +1,7 @@
 #ifndef CDH_INCLUDE_CDH_EPS_PROTOCOL_DATA_H_
 #define CDH_INCLUDE_CDH_EPS_PROTOCOL_DATA_H_
 
+#include "obc_assert.h"
 #include "obc_logging.h"
 
 #include <stdint.h>
@@ -40,5 +41,9 @@ typedef union {
     cdh_eps_tle_msg_t tle;
     cdh_eps_resp_msg_t resp;
 } cdh_eps_queue_msg_t;
+
+STATIC_ASSERT_EQ((int)sizeof(cdh_eps_cmd_msg_t), (int)8);
+STATIC_ASSERT_EQ((int)sizeof(cdh_eps_tle_msg_t), (int)8);
+STATIC_ASSERT_EQ((int)sizeof(cdh_eps_resp_msg_t), (int)8);
 
 #endif /* CDH_INCLUDE_CDH_EPS_PROTOCOL_DATA_H_ */

@@ -1,5 +1,6 @@
 #include "cdh_eps_protocol.h"
 #include "cdh_eps_protocol_id.h"
+#include "cdh_eps_callbacks.h"
 #include "obc_can_io.h"
 #include "obc_task_config.h"
 #include "obc_errors.h"
@@ -25,6 +26,13 @@ static QueueHandle_t cdhepsRxQueueHandle;
 static StaticQueue_t cdhepsRxQueue;
 static uint8_t cdhepsRxQueueStack[CDH_EPS_QUEUE_LENGTH*CDH_EPS_QUEUE_ITEM_SIZE];
 
+static const rx_callback_t rxCallbacks[] = {
+    [CMD_SUBSYS_SHUTDDOWN] = subsysShutdownCmdCallback,
+    [CMD_HEARTBEAT] = heartbeatCmdCallback,
+    [CMD_GET_TELEMETRY] = getTelemetryCmdCallback,
+    [RESP_SUBSYS_SHUTDDOWN_ACK] = respSubsysShutdownAckCallback,
+    [RESP_HEARTBEAT_ACK] = respHeartbeatAckCallback
+};
 /**
  * @brief Task that manages the CAN TX and RX between CDH and EPS
  */
@@ -137,14 +145,19 @@ static void processRxMessages(void) {
     if(xQueueReceive(cdhepsRxQueueHandle, &msg, portMAX_DELAY) == pdPASS) {
         switch (msg.cmd.id) {
            case CMD_SUBSYS_SHUTDDOWN:
+                subsysShutdownCmdCallback(&msg);
                 break;
             case CMD_HEARTBEAT:
+                heartbeatCmdCallback(&msg);
                 break;
             case CMD_GET_TELEMETRY:
+                getTelemetryCmdCallback(&msg);
                 break;
            case RESP_SUBSYS_SHUTDDOWN_ACK:
+                respSubsysShutdownAckCallback(&msg);
                 break;
             case RESP_HEARTBEAT_ACK:
+                respHeartbeatAckCallback(&msg);
                 break;
         default:
             break;
