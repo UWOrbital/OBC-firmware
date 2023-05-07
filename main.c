@@ -8,6 +8,7 @@
 #include <os_task.h>
 
 #include <sys_common.h>
+#include <sys_core.h>
 #include <gio.h>
 #include <sci.h>
 #include <i2c.h>
@@ -16,12 +17,14 @@
 
 int main(void) {
 
-    // Run hardware initialization code (TODO: refactor all this into one function call)
+    // Run hardware initialization code
     gioInit();
     sciInit();
     i2cInit();
     spiInit();
     canInit();
+
+    _enable_interrupt_();
 
     // Initialize logger
     initLogger();
