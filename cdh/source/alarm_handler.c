@@ -60,6 +60,13 @@ void initAlarmHandler(void) {
 static void alarmHandler(void * pvParameters) {
     obc_error_code_t errCode;
 
+    // TODO: Move this to a separate init function. Probably to where rtcInit() is called.
+    rtc_control_t rtcControl = {0};
+    LOG_IF_ERROR_CODE(getControlRTC(&rtcControl));
+    rtcControl.A1IE = 1;
+    rtcControl.INTCN = 1;
+    LOG_IF_ERROR_CODE(setControlRTC(&rtcControl));
+
     while(1) {
         alarm_handler_event_t event;
 
@@ -94,6 +101,12 @@ static void alarmHandler(void * pvParameters) {
             }
 
             case ALARM_HANDLER_ALARM_TRIGGERED: {
+                // Reset alarm flag
+                LOG_IF_ERROR_CODE(clearAlarm1RTC());
+                if (errCode != OBC_ERR_CODE_SUCCESS) {
+                    break;
+                }
+
                 alarm_handler_alarm_info_t alarm;
                 LOG_IF_ERROR_CODE(peekEarliestAlarm(&alarm));
                 if (errCode != OBC_ERR_CODE_SUCCESS) {
