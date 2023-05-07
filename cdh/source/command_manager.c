@@ -10,7 +10,7 @@
 #include <os_task.h>
 #include <os_queue.h>
 
-#define COMMAND_QUEUE_LENGTH    25
+#define COMMAND_QUEUE_LENGTH    25UL
 #define COMMAND_QUEUE_ITEM_SIZE sizeof(cmd_msg_t)
 
 static TaskHandle_t cmdManagerTaskHandle;
@@ -21,15 +21,22 @@ static QueueHandle_t commandQueueHandle;
 static StaticQueue_t commandQueue;
 static uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH*COMMAND_QUEUE_ITEM_SIZE];
 
-static const cmd_callback_t cmdCallbacks[] = {
-    [CMD_EXEC_OBC_RESET] = execObcResetCmdCallback,
-    [CMD_RTC_SYNC] = rtcSyncCmdCallback,
-    [CMD_DOWNLINK_LOGS_NEXT_PASS] = downlinkLogsNextPassCmdCallback
+typedef struct {
+    cmd_callback_t callback;
+    cmd_policy_t policy;
+    cmd_opt_t opts; // Mask of command options
+} cmd_info_t;
+
+static const cmd_info_t cmdsConfig[] = {
+    [CMD_NONE] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
 };
 
-static const size_t cmdArraySize = sizeof(cmdCallbacks) / sizeof(cmd_callback_t);
+#define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))
 
-STATIC_ASSERT(sizeof(cmdCallbacks)/sizeof(cmd_callback_t) <= UINT8_MAX, "Max command ID must be less than 256");
+STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
 /**
  * @brief Task that manages the command queue and executes commands
@@ -85,27 +92,53 @@ static uint32_t getCurrentTime(void) {
 static void commandManagerTask(void *pvParameters) {
     obc_error_code_t errCode;
 
+    // Used to track whether a safety-critical command is currently being executed
+    // This is inefficient space-wise, but simplifies the code. We can optimize later if needed.
+    static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {false};
+    
     while (1) {
         cmd_msg_t cmd;
         if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
             LOG_DEBUG("Received command %u", cmd.id);
 
             // Check if the ID is a valid index
-            if (cmd.id >= cmdArraySize) {
+            if (cmd.id >= CMDS_CONFIG_SIZE) {
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
                 continue;
             }
 
+            cmd_info_t currCmdInfo = cmdsConfig[cmd.id];
+
             // Check if the ID has a callback
-            if (cmdCallbacks[cmd.id] == NULL) {
+            if (currCmdInfo.callback == NULL) {
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
                 continue;
+            }
+
+            // Check if the command is allowed to be executed
+            if (!(currCmdInfo.policy & OBC_ACTIVE_POLICY)) {
+                LOG_ERROR_CODE(OBC_ERR_CODE_CMD_NOT_ALLOWED);
+                continue;
+            }
+
+            // Check if the command is safety-critical
+            if (currCmdInfo.opts & CMD_TYPE_CRITICAL) {
+                // TODO: Make this persistent across resets
+                if (!cmdProgressTracker[cmd.id]) {
+                    // Begin the two-step process of executing a safety-critical command
+                    LOG_DEBUG("Process started to execute safety-critical command %u", cmd.id);
+                    cmdProgressTracker[cmd.id] = true;
+                    continue;
+                }
+
+                // Reset the progress tracker
+                cmdProgressTracker[cmd.id] = false;
             }
 
             // If the command is not time-tagged, execute it immediately
             if (!cmd.isTimeTagged) {
-                // TODO: Deal with error code
-                LOG_IF_ERROR_CODE(cmdCallbacks[cmd.id](&cmd));
+                // TODO: Handle safety-critical command failures
+                LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
                 continue;
             }
 
