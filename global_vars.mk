@@ -79,6 +79,8 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/core/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
 
+INCLUDE_DIRS += -I"$(ROOT_DIR)/tiny-aes-c"
+
 LIBS := 
 
 $(BUILD_DIR)/%.o : $(ROOT_DIR)/%.c
