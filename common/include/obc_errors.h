@@ -54,6 +54,9 @@ typedef enum {
     OBC_ERR_CODE_FAILED_FILE_DELETE = 711,
     OBC_ERR_CODE_FAILED_FILE_SEEK = 712,
 
+    /* CLI errors 800 - 899 */
+    OBC_ERR_CODE_CLI_CMD_NOT_FOUND = 800,
+
 } obc_error_code_t;
 
 

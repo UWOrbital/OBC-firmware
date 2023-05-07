@@ -12,6 +12,7 @@
 #include "obc_states.h"
 #include "obc_task_config.h"
 #include "obc_reset.h"
+#include "uart_console.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -99,6 +100,10 @@ static void vSupervisorTask(void * pvParameters) {
     initCommsManager();
     initEPSManager();
     initPayloadManager();
+
+    #ifdef USE_CLI
+    initUartConsole();
+    #endif
 
     // TODO: Deal with errors
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));

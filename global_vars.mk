@@ -51,6 +51,11 @@ ifeq ($(DEBUG), 1)
 	CPP_FLAGS += -DDEBUG
 endif
 
+USE_CLI ?= 0
+ifeq ($(USE_CLI), 1)
+	CPP_FLAGS += -DUSE_CLI
+endif
+
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/hal/include"
@@ -75,6 +80,10 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/core/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
+
+ifeq ($(USE_CLI), 1)
+	INCLUDE_DIRS += -I"$(ROOT_DIR)/cli/include"
+endif
 
 LIBS := 
 

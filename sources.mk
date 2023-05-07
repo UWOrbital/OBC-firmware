@@ -31,3 +31,7 @@ SRC_DIRS += reliance_edge/os/freertos/services
 SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+
+ifeq ($(USE_CLI), 1)
+	SRC_DIRS += cli/source
+endif

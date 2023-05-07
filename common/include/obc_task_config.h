@@ -49,4 +49,9 @@
 #define SW_WATCHDOG_NAME        "sw_watchdog"
 #define SW_WATCHDOG_PRIORITY    tskIDLE_PRIORITY + 200U
 
+/* UART CLI task config */
+#define UART_CLI_TASK_STACK_SIZE  512U
+#define UART_CLI_TASK_NAME        "uart_cli"
+#define UART_CLI_TASK_PRIORITY    tskIDLE_PRIORITY + 2U
+
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */
