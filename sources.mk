@@ -32,4 +32,5 @@ SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 
+# Tiny AES
 SRC_DIRS += tiny-aes-c
