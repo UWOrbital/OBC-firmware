@@ -147,7 +147,8 @@ static void alarmHandler(void * pvParameters) {
                         break;
                     }
 
-                    LOG_IF_ERROR_CODE(alarm.callbackDef());
+                    // TODO: Select callback based on alarm type
+                    LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
                 }
 
                 break;
