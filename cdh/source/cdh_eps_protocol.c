@@ -143,24 +143,15 @@ static void processRxMessages(void) {
     
     /* Process recieved messages from EPS */
     if(xQueueReceive(cdhepsRxQueueHandle, &msg, portMAX_DELAY) == pdPASS) {
-        switch (msg.cmd.id) {
-           case CMD_SUBSYS_SHUTDDOWN:
-                subsysShutdownCmdCallback(&msg);
-                break;
-            case CMD_HEARTBEAT:
-                heartbeatCmdCallback(&msg);
-                break;
-            case CMD_GET_TELEMETRY:
-                getTelemetryCmdCallback(&msg);
-                break;
-           case RESP_SUBSYS_SHUTDDOWN_ACK:
-                respSubsysShutdownAckCallback(&msg);
-                break;
-            case RESP_HEARTBEAT_ACK:
-                respHeartbeatAckCallback(&msg);
-                break;
-        default:
-            break;
+
+        // Check if the ID is a valid index
+
+        // Check if the ID has a callback, if it does, execute
+        if(rxCallbacks[msg.cmd.id] == NULL) {
+
+        }
+        else {
+            rxCallbacks[msg.cmd.id](&msg);
         }
     }
 }
