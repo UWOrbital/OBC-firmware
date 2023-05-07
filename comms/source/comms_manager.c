@@ -66,7 +66,7 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
 }
 
 static void vCommsManagerTask(void * pvParameters) {
-    obc_error_code_t errCode;
+    //obc_error_code_t errCode;
     
     while (1) {
         comms_event_t queueMsg;
