@@ -19,7 +19,10 @@ obc_error_code_t rsEncode(packed_telem_t *telemData, packed_rs_packet_t *rsData)
     if (rsData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    // TODO: Implement Reed-Solomon encoding
+    // Create RS encryption
+    correct_reed_solomon* rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
+
+    uint8_t encodedLength = correct_reed_solomon_encode(rs, telemData->data, REED_SOLOMON_DECODED_BYTES, rsData->data);
 
     return OBC_ERR_CODE_SUCCESS;
 }
@@ -28,7 +31,7 @@ obc_error_code_t rsEncode(packed_telem_t *telemData, packed_rs_packet_t *rsData)
  * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
  * 
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param aesData 128 byte array to store the AES block
+ * @param aesData pointer to aes_block_t struct to store the decoded aes block
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
@@ -39,7 +42,14 @@ obc_error_code_t rsDecode(packed_rs_packet_t *rsData, aes_block_t *aesData){
     if (aesData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    // TODO: Implement Reed-Solomon decoding
+    // Create RS encryption
+    correct_reed_solomon* rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
+
+    uint8_t decodedLength = correct_reed_solomon_decode(rs, telemData->data, REED_SOLOMON_DECODED_BYTES, rsData->data);
+
+    if(decodedLength == -1){
+        return OBC_ERR_CODE_CORRUPTED_MSG;
+    }
 
     return OBC_ERR_CODE_SUCCESS;
 }
