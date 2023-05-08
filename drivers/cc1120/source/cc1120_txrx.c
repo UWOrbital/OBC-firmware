@@ -17,7 +17,7 @@
 #define TXRX_INTERRUPT_THRESHOLD 100U
 
 #define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
-#define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
+#define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(1000)
 #define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
 
@@ -366,7 +366,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
         LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECEIVE_FAILURE);
         return OBC_ERR_CODE_CC1120_RECEIVE_FAILURE;
     }
-    
+
     uint8_t numBytesInRxFifo;
 
     // check the number of bytes remaining in the RX FIFO
