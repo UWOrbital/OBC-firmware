@@ -340,7 +340,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     if(rxSemaphore == NULL){
         return OBC_ERR_CODE_INVALID_STATE;
     }
-    if (len < RX_EXPECTED_PACKET_SIZE){
+    if (len < RX_EXPECTED_MINIMUM_PACKET_SIZE){
         return OBC_ERR_CODE_INVALID_ARG;
     }
     // Temporarily set packet size to infinite
