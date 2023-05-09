@@ -6,6 +6,8 @@
 #include "telemetry_fs_utils.h"
 #include "telemetry_pack.h"
 #include "obc_task_config.h"
+#include "send_telemetry.h"
+#include "encode_telemetry.h"
 #include "cc1120_recv_task.h"
 
 #include <FreeRTOS.h>
@@ -64,52 +66,8 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
     return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-// Example function to show how to handle telemetry data
-// This isn't meant to be the final implementation
-static obc_error_code_t handleTelemetry(uint32_t telemetryBatchId) {
-    obc_error_code_t errCode;
-
-    // Open telemetry file
-    int32_t fd;
-    RETURN_IF_ERROR_CODE(openTelemetryFileRO(telemetryBatchId, &fd));
-
-    size_t fileSize;
-    RETURN_IF_ERROR_CODE(getFileSize(fd, &fileSize));
-    LOG_INFO("Telemetry file size: %lu", fileSize);
-
-    // Print telemetry file name
-    char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
-    RETURN_IF_ERROR_CODE(constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH));
-    LOG_INFO("Telemetry file name: %s", fileName);
-    
-    // Read 1 telemetry data point
-    telemetry_data_t telemetryData;
-    while ((errCode = readNextTelemetryFromFile(fd, &telemetryData)) == OBC_ERR_CODE_SUCCESS) {
-        LOG_DEBUG("Sending telemetry with ID %u", telemetryData.id);
-
-        uint8_t telemParamBuf[MAX_TELEMETRY_DATA_SIZE] = {0};
-        size_t telemSize = 0;
-        LOG_IF_ERROR_CODE(packTelemetry(&telemetryData, telemParamBuf, MAX_TELEMETRY_DATA_SIZE, &telemSize));
-        LOG_DEBUG("Packed telemetry size: %u", telemSize);
-        for (size_t i = 0; i < telemSize; i++) {
-            LOG_DEBUG("Packed telemetry data byte %lu: %u", i, telemParamBuf[i]);
-        }
-    }
-
-    if (errCode == OBC_ERR_CODE_REACHED_EOF) {
-        LOG_DEBUG("Reached end of telemetry file");
-        errCode = OBC_ERR_CODE_SUCCESS;
-    }
-
-    LOG_IF_ERROR_CODE(errCode);
-
-    // Close telemetry file
-    RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
-    return OBC_ERR_CODE_SUCCESS;
-}
-
 static void vCommsManagerTask(void * pvParameters) {
-    obc_error_code_t errCode;
+    //obc_error_code_t errCode;
     
     while (1) {
         comms_event_t queueMsg;
@@ -120,7 +78,7 @@ static void vCommsManagerTask(void * pvParameters) {
         
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY:
-                LOG_IF_ERROR_CODE(handleTelemetry(queueMsg.telemetryBatchId));
+                // LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
                 break;
             case BEGIN_UPLINK:
                 // startUplink();

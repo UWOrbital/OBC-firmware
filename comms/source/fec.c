@@ -12,7 +12,7 @@
  * 
  * @return obc_error_code_t - whether or not the data was successfully encoded
 */
-obc_error_code_t rsEncode(packed_telem_t *telemData, packed_rs_packet_t *rsData) {
+obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData) {
     if (telemData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 

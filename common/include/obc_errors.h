@@ -25,6 +25,7 @@ typedef enum {
 
     /* CDH errors 200 - 299 */
     OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
+    OBC_ERR_CODE_CMD_NOT_ALLOWED = 201,
 
     /* ADCS errors 300 - 399 */
 

@@ -29,6 +29,16 @@
 #define COMMS_MANAGER_NAME         "comms_manager"
 #define COMMS_MANAGER_PRIORITY     tskIDLE_PRIORITY + 1U
 
+/* Comms transceiver transmit task config */
+#define CC1120_TRANSMIT_STACK_SIZE 512U
+#define CC1120_TRANSMIT_TASK_NAME "comms_transmit"
+#define CC1120_TRANSMIT_TASK_PRIORITY tskIDLE_PRIORITY + 1U
+
+/* Comms telemetry encode task config */
+#define COMMS_TELEM_ENCODE_STACK_SIZE 512U
+#define COMMS_TELEM_ENCODE_TASK_NAME "comms_telemetry_encode"
+#define COMMS_TELEM_ENCODE_TASK_PRIORITY tskIDLE_PRIORITY + 1U
+
 /* Comms Recv task config */
 #define COMMS_RECV_TASK_NAME  "cc1120_receive_task"
 #define COMMS_RECV_STACK_SIZE 1024U
