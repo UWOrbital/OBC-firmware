@@ -6,7 +6,8 @@
 
 #include <stdint.h>
 
-#define AES_BLOCK_SIZE 128U
+#define AES_BLOCK_SIZE 16U
+#define IV_BYTES_PER_TRANSMISSION 16U
 
 typedef struct{
     uint8_t data[AES_BLOCK_SIZE];
