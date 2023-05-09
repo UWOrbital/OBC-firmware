@@ -5,7 +5,6 @@
 #include "cc1120_defs.h"
 #include "obc_math.h"
 
-
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 #include <sys_common.h>
