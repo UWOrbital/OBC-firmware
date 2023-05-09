@@ -4,22 +4,15 @@
 #include <stdint.h>
 #include "obc_logging.h"
 #include "obc_math.h"
+#include "ax25.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
 
-// Total number of bytes used for each section of an AX.25 I frame (See online for more information about each section)
-#define AX25_TOTAL_FLAG_BYTES 2
-#define AX25_ADDRESS_BYTES 16
-#define AX25_CONTROL_BYTES 2
-#define AX25_PID_BYTES 1
-#define AX25_FCS_BYTES 2
-#define AX25_INFO_BYTES 255
-
 // Total bytes we will be receiving in each packet (sum of the sizes of each ax.25 frame section)
-#define RX_EXPECTED_PACKET_SIZE (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + AX25_INFO_BYTES)
+#define RX_EXPECTED_PACKET_SIZE AX25_PKT_LEN
 
 typedef struct
 {
