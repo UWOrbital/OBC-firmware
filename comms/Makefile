@@ -34,7 +34,7 @@ SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 
 # Tiny AES
-SRC_DIRS += tiny-aes-c
+SRC_DIRS += tiny_aes
 
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.c))
