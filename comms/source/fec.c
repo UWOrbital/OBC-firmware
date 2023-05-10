@@ -61,3 +61,4 @@ obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData
 
     return OBC_ERR_CODE_SUCCESS;
 }
+

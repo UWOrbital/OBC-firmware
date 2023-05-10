@@ -32,5 +32,8 @@ SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 
+# Tiny AES
+SRC_DIRS += tiny_aes
+
 # libcorrect for reed solomon forward error correction
 SRC_DIRS += libcorrect/src/reed-solomon

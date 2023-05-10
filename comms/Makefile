@@ -11,12 +11,17 @@ SRC_DIRS += hal/source
 
 # Drivers
 SRC_DIRS += drivers/common/source
+SRC_DIRS += drivers/ds3232/source
+SRC_DIRS += drivers/fram/source
+SRC_DIRS += drivers/lm75bd/source
 SRC_DIRS += drivers/cc1120/source
 
-# Modules
 SRC_DIRS += common/source
+SRC_DIRS += adcs/source
+SRC_DIRS += cdh/source
 SRC_DIRS += comms/source
-SRC_DIRS += comms/tests
+SRC_DIRS += eps/source
+SRC_DIRS += payload/source
 
 # Reliance Edge File System
 SRC_DIRS += reliance_edge/fatfs_port
@@ -27,6 +32,10 @@ SRC_DIRS += reliance_edge/os/freertos/services
 SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+
+# Tiny AES
+SRC_DIRS += tiny_aes
+
 
 # libcorrect for Reed Solomon error correction
 SRC_DIRS += libcorrect/include
