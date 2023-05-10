@@ -39,6 +39,16 @@
 #define COMMS_TELEM_ENCODE_TASK_NAME "comms_telemetry_encode"
 #define COMMS_TELEM_ENCODE_TASK_PRIORITY tskIDLE_PRIORITY + 1U
 
+/* Comms Recv task config */
+#define COMMS_RECV_TASK_NAME  "cc1120_receive_task"
+#define COMMS_RECV_STACK_SIZE 1024U
+#define COMMS_RECV_PRIORITY   tskIDLE_PRIORITY + 1U
+
+/* Comms Decode task config */
+#define COMMS_DECODE_TASK_NAME    "decode_task"
+#define COMMS_DECODE_STACK_SIZE   1024U
+#define COMMS_DECODE_PRIORITY     tskIDLE_PRIORITY + 1U
+
 /* EPS Manager task config */
 #define EPS_MANAGER_STACK_SIZE   1024U
 #define EPS_MANAGER_NAME         "eps_manager"
