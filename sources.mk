@@ -31,3 +31,6 @@ SRC_DIRS += reliance_edge/os/freertos/services
 SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+
+# libcorrect for reed solomon forward error correction
+SRC_DIRS += libcorrect/src/reed-solomon

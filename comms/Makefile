@@ -28,6 +28,9 @@ SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 
+# libcorrect for Reed Solomon error correction
+SRC_DIRS += libcorrect/include
+
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.s))
 
