@@ -26,6 +26,8 @@ obc_error_code_t rsEncode(packed_telem_t *telemData, packed_rs_packet_t *rsData)
 
     correct_reed_solomon_encode(rs, telemData->data, REED_SOLOMON_DECODED_BYTES, rsData->data);
 
+    correct_reed_solomon_destroy(rs);
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -51,6 +53,8 @@ obc_error_code_t rsDecode(packed_rs_packet_t *rsData, aes_block_t *aesData[]){
 
     int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, REED_SOLOMON_DECODED_BYTES, rsDecodedData);
 
+    correct_reed_solomon_destroy(rs);
+    
     if(decodedLength == -1){
         return OBC_ERR_CODE_CORRUPTED_MSG;
     }
