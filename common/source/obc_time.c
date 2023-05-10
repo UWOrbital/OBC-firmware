@@ -56,22 +56,8 @@ void incrementCurrentUnixTime(void) {
 obc_error_code_t syncUnixTime(void) {
     obc_error_code_t errCode;
 
-    rtc_date_time_t datetime = {
-        .date = {
-            .date = 1,
-            .month = 4,
-            .year = 23
-        },
-        .time = {
-            .hours = 12,
-            .minutes = 30,
-            .seconds = 30
-        }
-    };
-
-    // TODO: Uncomment this once the I2C infinite loop bug is fixed
-    // For now, always sync to the same date/time
-    // RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
+    rtc_date_time_t datetime;
+    RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
 
     uint32_t unixTime;
     RETURN_IF_ERROR_CODE(datetimeToUnix(&datetime, &unixTime));

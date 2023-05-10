@@ -4,6 +4,7 @@
 #include "obc_assert.h"
 #include "obc_logging.h"
 #include "obc_task_config.h"
+#include "obc_persist.h"
 #include "ds3232_mz.h"
 
 #include <FreeRTOS.h>
@@ -23,6 +24,8 @@ static StaticTask_t timekeeperTaskBuffer;
 static StackType_t timekeeperTaskStack[TIMEKEEPER_STACK_SIZE];
 
 void initTimekeeper(void) {
+    obc_error_code_t errCode;
+
     memset(&timekeeperTaskBuffer, 0, sizeof(timekeeperTaskBuffer));
     memset(&timekeeperTaskStack, 0, sizeof(timekeeperTaskStack));
 
@@ -36,6 +39,25 @@ void initTimekeeper(void) {
         timekeeperTaskStack,
         &timekeeperTaskBuffer
     );
+
+    fram_data_timekeeper_t persist;
+    LOG_IF_ERROR_CODE(getPersistTimekeeper(&persist));
+    
+    rtc_date_time_t datetime;
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+        LOG_IF_ERROR_CODE(unixToDatetime(persist.unixTime, &datetime));
+        LOG_IF_ERROR_CODE(setCurrentDateTimeRTC(&datetime));
+    } else {
+        // TODO: If time in FRAM invalid, figure out what to do
+        LOG_IF_ERROR_CODE(setCurrentDateTimeRTC(&(rtc_date_time_t) {
+            .date.year = 23,
+            .date.month = 4,
+            .date.date = 1,
+            .time.hours = 12,
+            .time.minutes = 30,
+            .time.seconds = 30
+        }));
+    }
 
     initTime();
 }
@@ -65,7 +87,16 @@ static void timekeeperTask(void *pvParameters) {
             incrementCurrentUnixTime();
         }
         
-        LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
+        uint32_t currTime = getCurrentUnixTime();
+        LOG_DEBUG("Current time: %lu", currTime);
+
+        LOG_IF_ERROR_CODE(setPersistTimekeeper(&(fram_data_timekeeper_t) {
+            .unixTime = currTime
+        }));
+
+        fram_data_timekeeper_t persist;
+        LOG_IF_ERROR_CODE(getPersistTimekeeper(&persist));
+        LOG_DEBUG("Persisted time: %lu", persist.unixTime);
 
         syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
         vTaskDelay(pdMS_TO_TICKS(1000));

@@ -56,6 +56,10 @@ typedef enum {
     OBC_ERR_CODE_FAILED_FILE_DELETE = 711,
     OBC_ERR_CODE_FAILED_FILE_SEEK = 712,
 
+    /* Persistent Storage errors 800 - 899 */
+    OBC_ERR_CODE_PERSIST_LENGTH_CHECK_FAILED = 800,
+    OBC_ERR_CODE_PERSIST_CRC_CHECK_FAILED = 801,
+
 } obc_error_code_t;
 
 
