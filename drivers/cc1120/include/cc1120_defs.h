@@ -3,8 +3,12 @@
 #include <stdint.h>
 
 /* Constants */
+#define CC1120_MAX_PACKET_LEN           255U
 #define CC1120_RX_FIFO_SIZE             128U
 #define CC1120_TX_FIFO_SIZE             128U
+#define INFINITE_PACKET_LENGTH_MODE     0x40U
+#define VARIABLE_PACKET_LENGTH_MODE     0x20U
+#define FIXED_PACKET_LENGTH_MODE        0x00U
 
 /* Standard address space registers */
 #define CC1120_REGS_IOCFG3              0x00U

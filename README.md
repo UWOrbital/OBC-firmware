@@ -100,7 +100,7 @@ Variable and function names should be descriptive enough to understand even with
 
 #### Function Comments
 
-Function comments should exist in both the .h and .c files optimally, but at minimum they should be available in the .h files. Comments should follow the format shown below:
+Function comments should exist in the .h file. For static functions, they should exist in the .c file. Function comments should follow the format shown below:
 ```c
 /**
  * @brief Adds two numbers together
@@ -109,7 +109,7 @@ Function comments should exist in both the .h and .c files optimally, but at min
  * @param num2 - The second number to add.
  * @return uint8_t - Returns the sum of of the two numbers.
  */
-uint8_t add_numbers(uint8_t num1, uint8_t num2);
+uint8_t addNumbers(uint8_t num1, uint8_t num2);
 ```
 
 #### File Header Comments
@@ -132,7 +132,7 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
 
 -   `variableNames` in camelCase
 -   `functionNames()` in camelCase
--   `CONSTANT_NAMES` in CAPITAL_SNAKE_CASE
+-   `#define MACRO_NAME` in CAPITAL_SNAKE_CASE
 -   `file_names` in snake_case
 -   `type_defs` in snake_case with _t suffix
     -   Ex: 
@@ -142,15 +142,11 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
             int b;
         } struct_name_t
         ```
--   4 spaces per level of indentation
+-   4 spaces per level of indentation (NOT TABS)
 -   Use spaces after opening brackets for conditionals and loops (e.g. `if ()` and `while ()`), but not for function calls (i.e. `my_func()`).
--   Operators:
-    -   No spaces around `*`, `/`, `%`, `!`
-    -   One space on either side of `=`, `==`, `+`, `-`, `+=`, `-=`, etc
-    -   One space after every comma `my_func(var1, var2, var3)`
 -   Import statments should be grouped in the following order:
     1.  Local imports (e.g. `#include "cc1120_driver.h`)
-    2.  External library imports (e.g. `#include <semphr.h>`)
+    2.  External library imports (e.g. `#include <os_semphr.h>`)
     3.  Standard library imports (e.g. `#include <stdint.h>`)
 -   160 character limit per line (not a hard limit, use common sense)
 -   Hanging indents should be aligned to delimeter:
@@ -161,6 +157,7 @@ myFunction(hasToo,
 ```
 
 ### ****General Rules****
+Some of these rules don't apply in certain cases. Use your better judgement.
 
 1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)).
 2. All loops must have fixed bounds. This prevents runaway code.

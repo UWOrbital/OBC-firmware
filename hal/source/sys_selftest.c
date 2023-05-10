@@ -43,8 +43,6 @@
 
 
 /* USER CODE BEGIN (0) */
-#pragma GCC push_options
-#pragma GCC optimize("O0")
 /* USER CODE END */
 
 #include "sys_selftest.h"
@@ -2982,5 +2980,3 @@ void disableParity(void)
     hetREG2->PCR = 0x5U;                   /* Disable HET2 RAM parity */
     htuREG2->PCR = 0x5U;                   /* Disable HTU2 RAM parity */
 }
-
-#pragma GCC pop_options
