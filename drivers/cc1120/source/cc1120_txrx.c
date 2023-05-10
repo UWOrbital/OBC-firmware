@@ -5,7 +5,6 @@
 #include "cc1120_defs.h"
 #include "obc_math.h"
 
-
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 #include <sys_common.h>
@@ -20,6 +19,7 @@
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(1000)
 #define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
+bool isStillUplinking = FALSE;
 
 static SemaphoreHandle_t rxSemaphore = NULL;
 static StaticSemaphore_t rxSemaphoreBuffer;
@@ -51,6 +51,8 @@ static register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_SYNC0, 0x55U},
     // Set next 8 bits of the sync word to 0x57U (arbitrary value)
     {CC1120_REGS_SYNC1, 0x57U},
+    // Set cc1120 to switch to FSTXON state after a packet is received
+    {CC1120_REGS_RFEND_CFG1, 0x1F},
     {CC1120_REGS_DEVIATION_M, 0x3AU},
     {CC1120_REGS_MODCFG_DEV_E, 0x0AU},
     {CC1120_REGS_DCFILT_CFG, 0x1CU},
@@ -363,6 +365,10 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     
     // check if we have received less than the minimum number of bytes we would expect
     if(i < RX_EXPECTED_MINIMUM_PACKET_SIZE/TXRX_INTERRUPT_THRESHOLD){
+        if(!isStillUplinking){
+            return OBC_ERR_CODE_SUCCESS;
+        }
+        isStillUplinking = false;
         LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECEIVE_FAILURE);
         return OBC_ERR_CODE_CC1120_RECEIVE_FAILURE;
     }
@@ -370,7 +376,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     uint8_t numBytesInRxFifo;
 
     // check the number of bytes remaining in the RX FIFO
-    cc1120GetBytesInRxFifo(&numBytesInRxFifo);
+    RETURN_IF_ERROR_CODE(cc1120GetBytesInRxFifo(&numBytesInRxFifo));
 
     if(numBytesInRxFifo != 0){
         // if there are still bytes in the RX FIFO, read them out
@@ -408,4 +414,8 @@ void txFifoEmptyCallback(){
     }
     // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
+}
+
+SemaphoreHandle_t getCC1120RxSemaphoreHandle(void){
+    return rxSemaphore;
 }
