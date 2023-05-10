@@ -101,30 +101,30 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
   return errCode;
 }
 
-obc_error_code_t flush_fifo(camera_t cam) {
+obc_error_code_t flushFifo(camera_t cam) {
   return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
 }
 
-obc_error_code_t start_capture(camera_t cam) {
+obc_error_code_t startCapture(camera_t cam) {
 	return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam);
 }
 
-obc_error_code_t clear_fifo_flag(camera_t cam) {
+obc_error_code_t clearFifoFlag(camera_t cam) {
 	return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
 }
 
-obc_error_code_t set_fifo_burst(camera_t cam){
+obc_error_code_t setFifoBurst(camera_t cam){
   return camWriteByte(BURST_FIFO_READ, cam);
 }
 
 obc_error_code_t captureImage(camera_t cam) {
   obc_error_code_t errCode;
-  errCode = flush_fifo(cam);
+  errCode = flushFifo(cam);
   if(!errCode) {
-   errCode = start_capture(cam); 
+   errCode = startCapture(cam); 
   }
   if(!errCode) {
-    errCode = clear_fifo_flag(cam);
+    errCode = clearFifoFlag(cam);
   }
   return errCode;
 }
@@ -133,7 +133,7 @@ bool isCaptureDone(camera_t cam) {
   return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam);
 }
 
-obc_error_code_t read_fifo_length(uint32_t *length, camera_t cam) {
+obc_error_code_t readFifoLength(uint32_t *length, camera_t cam) {
   obc_error_code_t errCode;
 	uint32_t len1 = 0, len2 = 0, len3 = 0;
   uint8_t rx_data = 0;
@@ -150,7 +150,7 @@ obc_error_code_t read_fifo_length(uint32_t *length, camera_t cam) {
 }
 
 // Todo: Not hardware tested
-obc_error_code_t read_fifo_burst(camera_t cam) {
+obc_error_code_t readFifoBurst(camera_t cam) {
   obc_error_code_t errCode;
   int32_t file = 0;
   uint32_t length = 0;
@@ -160,7 +160,7 @@ obc_error_code_t read_fifo_burst(camera_t cam) {
   // Open a new image file  
   RETURN_IF_ERROR_CODE(createFile(fname, &file));
 
-  read_fifo_length(&length, cam);
+  readFifoLength(&length, cam);
   if (length >= MAX_FIFO_SIZE) {
     // 512 kb
     errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
@@ -173,7 +173,7 @@ obc_error_code_t read_fifo_burst(camera_t cam) {
   RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, 1));
 
   // Set fifo to burst mode, receive continuous data until EOF
-  RETURN_IF_ERROR_CODE(set_fifo_burst(cam));
+  RETURN_IF_ERROR_CODE(setFifoBurst(cam));
   camReadByte(&temp, cam);
   length--;
   while(length-- && !errCode) {

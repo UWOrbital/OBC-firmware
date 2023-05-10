@@ -57,11 +57,19 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size);
 
 /**
  * @brief Trigger an image capture
+ * @param cam The camera to trigger a capture on
  */
 obc_error_code_t captureImage(camera_t cam);
 
 /**
+ * @brief Read back image data
+ * @param cam The camera to read from
+ */
+obc_error_code_t readFifoBurst(camera_t cam);
+
+/**
  * @brief Checks if image capture has been completed
+ * @param cam The camera to check
  * @return Returns true if capture is complete
  */
 bool isCaptureDone(camera_t cam);
