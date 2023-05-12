@@ -16,6 +16,7 @@ typedef enum {
     OBC_ERR_CODE_SEMAPHORE_TIMEOUT = 10,
     OBC_ERR_CODE_SEMAPHORE_FULL = 11,
     OBC_ERR_CODE_NOT_MUTEX_OWNER = 12,
+    OBC_ERR_CODE_QUEUE_RX_TIMEOUT = 13,
 
     /* Driver Errors 100 - 199*/
     OBC_ERR_CODE_SPI_FAILURE = 100,
@@ -25,6 +26,7 @@ typedef enum {
 
     /* CDH errors 200 - 299 */
     OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
+    OBC_ERR_CODE_CMD_NOT_ALLOWED = 201,
 
     /* ADCS errors 300 - 399 */
 
