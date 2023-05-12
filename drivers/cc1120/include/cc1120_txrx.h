@@ -13,6 +13,7 @@
 
 // Total bytes we will be receiving in each packet (sum of the sizes of each ax.25 frame section)
 #define RX_EXPECTED_PACKET_SIZE AX25_PKT_LEN
+#define RX_MAX_PACKET_SIZE 332U
 
 extern bool isStillUplinking;
 
