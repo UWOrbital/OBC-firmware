@@ -14,12 +14,15 @@
 #define AX25_PID_BYTES 1
 #define AX25_FCS_BYTES 2
 #define AX25_INFO_BYTES 255
-#define AX25_PKT_LEN (AX25_TOTAL_FLAG_BYTES + \
+#define AX25_MINIMUM_PKT_LEN (AX25_TOTAL_FLAG_BYTES + \
                       AX25_ADDRESS_BYTES +  \
                       AX25_CONTROL_BYTES +  \
                       AX25_PID_BYTES +  \
                       AX25_FCS_BYTES +  \
                       AX25_INFO_BYTES)
+#define AX25_MAXIMUM_PKT_LEN AX25_MINIMUM_PKT_LEN*6/5
+
+#define AX25_FLAG 0x7E
 
 typedef struct {
     uint8_t flagStart;
@@ -33,7 +36,7 @@ typedef struct {
 } ax25_packet_t;
 
 typedef struct {
-    uint8_t data[AX25_PKT_LEN];
+    uint8_t data[AX25_MAXIMUM_PKT_LEN];
 } packed_ax25_packet_t;
 
 /**
@@ -50,10 +53,11 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
  * @brief strips away the ax.25 headers from a received packet
  * 
  * @param ax25Data the received ax.25 frame
+ * @param ax25DataLen the length of the received ax.25 frame
  * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
- * 
+ *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
 */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData);
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint16_t ax25DataLen, packed_rs_packet_t *rsData);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */

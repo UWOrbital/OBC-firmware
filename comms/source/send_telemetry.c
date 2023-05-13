@@ -18,7 +18,7 @@ static StaticTask_t cc1120TransmitTaskBuffer;
 static StackType_t cc1120TransmitTaskStack[CC1120_TRANSMIT_STACK_SIZE];
 
 #define CC1120_TRANSMIT_QUEUE_LENGTH 3U
-#define CC1120_TRANSMIT_QUEUE_ITEM_SIZE AX25_PKT_LEN
+#define CC1120_TRANSMIT_QUEUE_ITEM_SIZE AX25_MAXIMUM_PKT_LEN
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
@@ -90,6 +90,6 @@ static void vCC1120TransmitTask(void *pvParameters) {
         }
         
         // Write to CC1120 FIFO
-        LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, AX25_PKT_LEN));
+        LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, AX25_MAXIMUM_PKT_LEN));
     }
 }

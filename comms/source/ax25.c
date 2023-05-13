@@ -30,11 +30,12 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
  * @brief strips away the ax.25 headers from a received packet
  * 
  * @param ax25Data the received ax.25 frame
+ * @param ax25DataLen the length of the received ax.25 frame
  * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
- * 
+ *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
 */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData){
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint16_t ax25DataLen, packed_rs_packet_t *rsData){
     if (rsData == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
