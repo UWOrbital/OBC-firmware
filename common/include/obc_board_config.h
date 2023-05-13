@@ -23,8 +23,8 @@
     #define CAM_SPI_PORT         spiPORT3
     #define CAM_SPI_REG          spiREG3
     #define CAM_SPI_DATA_FORMAT  SPI_FMT_0
-    #define CAM_CS_1             0UL
-    #define CAM_CS_2             1UL
+    #define CAM_CS_1             1UL
+    #define CAM_CS_2             2UL
 
 #elif defined(OBC_REVISION_1)
     // Serial config
@@ -47,8 +47,8 @@
     #define CAM_SPI_PORT         spiPORT3
     #define CAM_SPI_REG          spiREG3
     #define CAM_SPI_DATA_FORMAT  SPI_FMT_0
-    #define CAM_CS_1             0UL
-    #define CAM_CS_2             1UL
+    #define CAM_CS_1             1UL
+    #define CAM_CS_2             2UL
 
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2
