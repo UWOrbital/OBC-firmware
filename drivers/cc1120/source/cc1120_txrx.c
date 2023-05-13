@@ -19,6 +19,7 @@
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
 #define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 
+bool isStillUplinking = FALSE;
 
 static SemaphoreHandle_t rxSemaphore = NULL;
 static StaticSemaphore_t rxSemaphoreBuffer;
@@ -50,6 +51,8 @@ static register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_SYNC0, 0x55U},
     // Set next 8 bits of the sync word to 0x57U (arbitrary value)
     {CC1120_REGS_SYNC1, 0x57U},
+    // Set cc1120 to switch to FSTXON state after a packet is received
+    {CC1120_REGS_RFEND_CFG1, 0x1F},
     {CC1120_REGS_DEVIATION_M, 0x3AU},
     {CC1120_REGS_MODCFG_DEV_E, 0x0AU},
     {CC1120_REGS_DCFILT_CFG, 0x1CU},
@@ -359,8 +362,13 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     // See chapters 8.1, 8.4, 8.5
     for (i = 0; i < (len - 1)/TXRX_INTERRUPT_THRESHOLD; ++i){
         if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
+            isStillUplinking = false;
             LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
             return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+        }
+        if(!isStillUplinking){
+            RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+            return OBC_ERR_CODE_SUCCESS;
         }
         RETURN_IF_ERROR_CODE(cc1120ReadFifo(data + i*TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
     }
@@ -370,6 +378,7 @@ obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len)
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
         
     if(xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS){
+        isStillUplinking = false;
         LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
     }
@@ -406,4 +415,8 @@ void txFifoEmptyCallback(){
     }
     // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
+}
+
+SemaphoreHandle_t getCC1120RxSemaphoreHandle(void){
+    return rxSemaphore;
 }

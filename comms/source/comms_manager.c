@@ -8,6 +8,7 @@
 #include "obc_task_config.h"
 #include "send_telemetry.h"
 #include "encode_telemetry.h"
+#include "cc1120_recv_task.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -79,6 +80,8 @@ static void vCommsManagerTask(void * pvParameters) {
             case DOWNLINK_TELEMETRY:
                 // LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
                 break;
+            case BEGIN_UPLINK:
+                // startUplink();
         }
     }
 }

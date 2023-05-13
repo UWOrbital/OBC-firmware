@@ -14,6 +14,8 @@
 // Total bytes we will be receiving in each packet (sum of the sizes of each ax.25 frame section)
 #define RX_EXPECTED_PACKET_SIZE AX25_PKT_LEN
 
+extern bool isStillUplinking;
+
 typedef struct
 {
     uint8_t addr;
@@ -116,5 +118,12 @@ void rxFifoReadyCallback(void);
  * @brief callback function to be used in an ISR when the TX FIFO has become empty
  */
 void txFifoEmptyCallback(void);
+
+/**
+ * @brief allows other files to access the cc1120 RX semaphore handle
+ * 
+ * @return SemaphoreHandle_t - handle of the cc1120 RX semaphore
+*/
+SemaphoreHandle_t getCC1120RxSemaphoreHandle(void);
 
 #endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */
