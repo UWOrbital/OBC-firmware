@@ -107,12 +107,12 @@ static void vDecodeTask(void * pvParameters){
             if((byte == AX25_FLAG) && (axDataIndex > 1)){
                 // If the size is smaller than the minimum ax25 packet size but we have reached a second flag,
                 // log the error and ignore the data
-                if(axDataIndex <= AX25_MINIMUM_PKT_LEN){
+                if(axDataIndex < AX25_MINIMUM_PKT_LEN){
                     LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECEIVE_FAILURE);
                     axDataIndex = 0;
                 }
                 else{
-                    LOG_IF_ERROR_CODE(decodePacket(&axData, axDataIndex - 1, &rsData, aesBlocks));
+                    LOG_IF_ERROR_CODE(decodePacket(&axData, axDataIndex, &rsData, aesBlocks));
                     axDataIndex = 0;
                 }
             }
