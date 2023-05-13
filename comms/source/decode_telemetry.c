@@ -24,7 +24,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define DECODE_DATA_QUEUE_LENGTH TXRX_INTERRUPT_THRESHOLD
+// decode data queue length should be double TXRX_INTERRUPT_THRESHOLD for safety to avoid cc1120 getting blocked
+// can be reduced later depending on memory limitations
+#define DECODE_DATA_QUEUE_LENGTH 2*TXRX_INTERRUPT_THRESHOLD
 #define DECODE_DATA_QUEUE_ITEM_SIZE sizeof(uint8_t)
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY 
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
@@ -109,8 +111,10 @@ static void vDecodeTask(void * pvParameters){
                     LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECEIVE_FAILURE);
                     axDataIndex = 0;
                 }
-                LOG_IF_ERROR_CODE(decodePacket(&axData, axDataIndex - 1, &rsData, aesBlocks));
-                axDataIndex = 0;
+                else{
+                    LOG_IF_ERROR_CODE(decodePacket(&axData, axDataIndex - 1, &rsData, aesBlocks));
+                    axDataIndex = 0;
+                }
             }
         }
     }
