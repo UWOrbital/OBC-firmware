@@ -99,6 +99,8 @@ void memoryPort1TestFailNotification(uint32 groupSelect, uint32 dataSelect, uint
 }
 
 /* USER CODE BEGIN (8) */
+#include "cdh_eps_protocol.h"
+#include "obc_can_io.h"
 /* USER CODE END */
 void canErrorNotification(canBASE_t *node, uint32 notification)
 {
@@ -118,6 +120,12 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (15) */
+    if(node == canREG1) {
+        uint8_t rxData[8] = {0};
+        canGetMessage(canREG1, messageBox, rxData);
+
+        sendToCDHEPSRxQueue((cdh_eps_queue_msg_t *) rxData);
+    }
 /* USER CODE END */
 }
 
