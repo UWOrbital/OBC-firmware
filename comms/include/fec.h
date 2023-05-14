@@ -6,12 +6,12 @@
 
 #include <stdint.h>
 
-#define REED_SOLOMON_DECODED_BYTES 223U
-#define REED_SOLOMON_ENCODED_BYTES 255U
-#define PACKED_TELEM_PACKET_SIZE REED_SOLOMON_DECODED_BYTES
+#define RS_DECODED_SIZE 223U
+#define RS_ENCODED_SIZE 255U
+#define PACKED_TELEM_PACKET_SIZE RS_DECODED_SIZE
 
 typedef struct {
-    uint8_t data[REED_SOLOMON_ENCODED_BYTES];
+    uint8_t data[RS_ENCODED_SIZE];
 } packed_rs_packet_t;
 
 typedef struct {
@@ -29,13 +29,13 @@ typedef struct {
 obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData);
 
 /**
- * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
+ * @brief Decodes the reed solomon data
  * 
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param aesData pointer to an array of aes_block_t structs to store the decoded aes block
+ * @param aesData pointer to a uint8_t array of size 223B
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, aes_block_t *aesData[]);
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 #endif /* COMMS_INCLUDE_FEC_H_ */

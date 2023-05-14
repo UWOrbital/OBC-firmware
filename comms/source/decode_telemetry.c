@@ -39,7 +39,7 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH*DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void * pvParameters);
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlock[]);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -105,10 +105,10 @@ static void vDecodeTask(void * pvParameters){
     obc_error_code_t errCode;
     packed_ax25_packet_t data;
     packed_rs_packet_t rsData;
-    aes_block_t *aesBlocks[(REED_SOLOMON_DECODED_BYTES - IV_BYTES_PER_TRANSMISSION) / AES_BLOCK_SIZE];
+    aes_data_t aesData;
     while (1) {
         if(xQueueReceive(decodeDataQueueHandle, &data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            LOG_IF_ERROR_CODE(decodePacket(&data, &rsData, aesBlocks));
+            LOG_IF_ERROR_CODE(decodePacket(&data, &rsData, &aesData));
         }
     }
 } 
@@ -118,20 +118,18 @@ static void vDecodeTask(void * pvParameters){
  * 
  * @param data - packed ax25 packet with received data
  * @param rsData - holds packed reed solomon data
- * @param aesBlock - pointer to an array of aesBlocks that need to be decrypted
+ * @param aesData - pointer to an aesData type, which holds the data to decrypt & the IV
  * @param decryptedData - holds the decrypted data from the aesBlock
  * 
  * @return obc_error_code_t - whether or not the data was completely decoded successfully 
 */
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]) {
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
-    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesBlocks));
-    for(uint8_t i = 0; i < ((REED_SOLOMON_DECODED_BYTES - IV_BYTES_PER_TRANSMISSION) / AES_BLOCK_SIZE); ++i){
-        uint8_t decryptedData[AES_BLOCK_SIZE];
-        RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlocks[i], decryptedData));
-        RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
-    }
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData));
+    uint8_t decryptedData[AES_BLOCK_SIZE];
+    RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, (size_t) RS_DECODED_SIZE, decryptedData));
+    RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
     return OBC_ERR_CODE_SUCCESS;
 }
 
