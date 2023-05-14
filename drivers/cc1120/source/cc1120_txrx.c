@@ -153,6 +153,8 @@ obc_error_code_t cc1120Init(void)
 {
     obc_error_code_t errCode;
 
+    // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
+    // see chapter 3.4 in the datasheet for more info
     gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_PIN);
     gioDisableNotification(gioPORTB, CC1120_TX_THR_PKT_PIN);
     gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_PIN);
@@ -162,6 +164,7 @@ obc_error_code_t cc1120Init(void)
         RETURN_IF_ERROR_CODE(cc1120WriteSpi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1));        
     }
 
+    // enable interrupts again now that the gpio signals are set
     gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_PIN);
     gioEnableNotification(gioPORTB, CC1120_TX_THR_PKT_PIN);
     gioEnableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_PIN);
@@ -343,7 +346,7 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes)
  *
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Receive()
+obc_error_code_t cc1120Receive(void)
 {
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     if(rxSemaphore == NULL){
@@ -353,12 +356,15 @@ obc_error_code_t cc1120Receive()
     // poll the semaphore to clear whatever value it has (do not block and wait on it)
     xSemaphoreTake(syncReceivedSemaphore, (TickType_t) 0);
 
+    // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
+    // see chapter 3.4 in the datasheet for more info
     gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_PIN);
 
     // switch gpio 2 to be a SYNC_EVENT signal instead of CC1120_PKT_SYNC_RXTX_PIN
-    uint8_t spiTransferData = 0x29;
+    uint8_t spiTransferData = SYNC_EVENT_SIGNAL_NUM;
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG2, &spiTransferData, 1));
 
+    // enable interrupts again now that the gpio signals are set
     gioEnableNotification(gioPORTA, (uint32_t) CC1120_SYNC_EVENT_PIN);
 
     // Temporarily set packet size to infinite

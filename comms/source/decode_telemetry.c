@@ -42,7 +42,7 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH*DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void * pvParameters);
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, uint16_t dataLen, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -101,20 +101,25 @@ static void vDecodeTask(void * pvParameters){
     packed_rs_packet_t rsData;
     aes_block_t *aesBlocks[(REED_SOLOMON_DECODED_BYTES - IV_BYTES_PER_TRANSMISSION) / AES_BLOCK_SIZE];
     uint16_t axDataIndex = 0;
+    bool startFlagReceived = false;
     while (1) {
         if(xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
             axData.data[axDataIndex++] = byte;
-            if((byte == AX25_FLAG) && (axDataIndex > 1)){
+            if(byte == AX25_FLAG){
                 // If the size is smaller than the minimum ax25 packet size but we have reached a second flag,
                 // log the error and ignore the data
-                if(axDataIndex < AX25_MINIMUM_PKT_LEN){
-                    LOG_ERROR_CODE(OBC_ERR_CODE_CC1120_RECEIVE_FAILURE);
+                if(axDataIndex > 2){
+                    axData.length = axDataIndex;
+                    LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, aesBlocks));
                     axDataIndex = 0;
                 }
                 else{
-                    LOG_IF_ERROR_CODE(decodePacket(&axData, axDataIndex, &rsData, aesBlocks));
-                    axDataIndex = 0;
+                    startFlagReceived = true;
+                    axDataIndex = 1;
                 }
+            }
+            if(!startFlagReceived) {
+                axDataIndex = 0;
             }
         }
     }
@@ -124,15 +129,14 @@ static void vDecodeTask(void * pvParameters){
  * @brief completely decode a recieved packet
  * 
  * @param data - packed ax25 packet with received data
- * @param dataLen - length of the packed ax25 packet with receied data
  * @param rsData - holds packed reed solomon data
  * @param aesBlock - pointer to an array of aesBlocks that need to be decrypted
  * 
  * @return obc_error_code_t - whether or not the data was completely decoded successfully 
 */
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, uint16_t dataLen, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]) {
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]) {
     obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(ax25Recv(data, dataLen, rsData));
+    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
     RETURN_IF_ERROR_CODE(rsDecode(rsData, aesBlocks));
     for(uint8_t i = 0; i < ((REED_SOLOMON_DECODED_BYTES - IV_BYTES_PER_TRANSMISSION) / AES_BLOCK_SIZE); ++i){
         uint8_t decryptedData[AES_BLOCK_SIZE];

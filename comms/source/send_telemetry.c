@@ -90,6 +90,6 @@ static void vCC1120TransmitTask(void *pvParameters) {
         }
         
         // Write to CC1120 FIFO
-        LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, AX25_MAXIMUM_PKT_LEN));
+        LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, ax25_pkt.length));
     }
 }

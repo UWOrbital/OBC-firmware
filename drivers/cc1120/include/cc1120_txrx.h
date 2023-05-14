@@ -11,7 +11,7 @@
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
 
-// See FIFO_THR in the datasheet
+// See chapter 8.5 in the datasheet
 #define TXRX_INTERRUPT_THRESHOLD 100U
 
 #define CC1120_RX_THR_PKT_PIN 2U
