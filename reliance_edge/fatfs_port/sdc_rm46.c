@@ -131,11 +131,11 @@ static void sendClockTrain(void) {
     // because that means we're already in the right state
     deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
 
-    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
+    spiTakeBusMutex(SDC_SPI_REG);
     for (uint8_t i = 0; i < SDC_CLOCK_TRANSITION_BYTES; i++) {
         spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
     }
-    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
+    spiReleaseBusMutex(SDC_SPI_REG);
 }
 
 /**
@@ -344,6 +344,11 @@ DSTATUS disk_initialize(uint8_t drv){
 
     turnOnSDC();
 
+    // Recursive take done so we can send byte when CS is high at the end of transaction
+    if (spiTakeBusMutex(SDC_SPI_REG) != OBC_ERR_CODE_SUCCESS) {
+        return stat;
+    }
+
     if (assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) != OBC_ERR_CODE_SUCCESS) {
         return stat;
     }
@@ -417,17 +422,12 @@ DSTATUS disk_initialize(uint8_t drv){
 
     cardType = ty;
 
-    taskENTER_CRITICAL();
-    // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
-    // taken before we ensure that the SDC releases the MISO line.
-    // If the microSD doesn't share its SPI bus, this is unnecessary.
-    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
-    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
-    taskEXIT_CRITICAL();
+    if (deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) == OBC_ERR_CODE_SUCCESS) {
+        // Ensure SDC releases MISO line by sending a dummy uint8_t
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+    }
 
-    // Ensure SDC releases MISO line by sending a dummy uint8_t
-    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
-    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
+    spiReleaseBusMutex(SDC_SPI_REG);
 
     if (ty) {            
         stat &= ~STA_NOINIT;    // Clear STA_NOINIT
@@ -462,7 +462,15 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
 
     if (!(cardType & CARD_TYPE_BLOCK_ADDR_MASK)) sector *= SD_SECTOR_SIZE;    /* Convert to uint8_t address if needed */
 
-    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+    // Recursive take done so we can send byte when CS is high at the end of transaction
+    if (spiTakeBusMutex(SDC_SPI_REG) != OBC_ERR_CODE_SUCCESS) {
+        return RES_ERROR;
+    }
+
+    if (assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) != OBC_ERR_CODE_SUCCESS) {
+        return RES_ERROR;
+    }
+
     if (count == 1) {    
         /* Single block read */
         if ((sendCMD(SDC_CMD17, sector) == 0)
@@ -479,17 +487,12 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
         }
     }
 
-    taskENTER_CRITICAL();
-    // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
-    // taken before we ensure that the SDC releases the MISO line.
-    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
-    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
-    taskEXIT_CRITICAL();
-
-    // Ensure SDC releases MISO line by sending a dummy uint8_t
-    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
-    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
-
+    if (deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) == OBC_ERR_CODE_SUCCESS) {
+        // Ensure SDC releases MISO line by sending a dummy uint8_t
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+    }
+    spiReleaseBusMutex(SDC_SPI_REG);
+    
     return count ? RES_ERROR : RES_OK;
 }
 
@@ -509,7 +512,14 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t 
 
     if (!(cardType & (CARD_TYPE_BLOCK_ADDR_MASK))) sector *= SD_SECTOR_SIZE;    /* Convert to uint8_t address if needed */
 
-    assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+    // Recursive take done so we can send byte when CS is high at the end of transaction
+    if (spiTakeBusMutex(SDC_SPI_REG) != OBC_ERR_CODE_SUCCESS) {
+        return RES_ERROR;
+    }
+
+    if (assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) != OBC_ERR_CODE_SUCCESS) {
+        return RES_ERROR;
+    }
 
     if (count == 1) {    
         /* Single block write */
@@ -534,16 +544,11 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t 
         }
     }
 
-    taskENTER_CRITICAL();
-    // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
-    // taken before we ensure that the SDC releases the MISO line.
-    deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
-    spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
-    taskEXIT_CRITICAL();
-
-    // Ensure SDC releases MISO line by sending a dummy uint8_t
-    spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
-    spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
+    if (deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) == OBC_ERR_CODE_SUCCESS) {
+        // Ensure SDC releases MISO line by sending a dummy uint8_t
+        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+    }
+    spiReleaseBusMutex(SDC_SPI_REG);
 
     return count ? RES_ERROR : RES_OK;
 }
@@ -587,7 +592,14 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
     } else {
         if (stat & STA_NOINIT) return RES_NOTRDY;
         
-        assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
+        // Recursive take done so we can send byte when CS is high at the end of transaction
+        if (spiTakeBusMutex(SDC_SPI_REG) != OBC_ERR_CODE_SUCCESS) {
+            return RES_ERROR;
+        }
+
+        if (assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) != OBC_ERR_CODE_SUCCESS) {
+            return RES_ERROR;
+        }
 
         const uint8_t csdSize = 16U; // Size of buffer to hold CSD register data
         uint8_t csd[csdSize]; // Card-specific data (CSD); Note the index numbers are opposite to the bit numbers in the CSD register
@@ -629,16 +641,11 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
                 res = RES_PARERR;
         }
         
-        taskENTER_CRITICAL();
-        // TODO: Do this a better way. This is a hack to ensure that the SPI bus is not
-        // taken before we ensure that the SDC releases the MISO line.
-        deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS);
-        spiTakeBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
-        taskEXIT_CRITICAL();
-
-        // Ensure SDC releases MISO line by sending a dummy uint8_t
-        spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
-        spiReleaseBusMutex(SDC_SPI_PORT, SDC_SPI_CS);
+        if (deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS) == OBC_ERR_CODE_SUCCESS) {
+            // Ensure SDC releases MISO line by sending a dummy uint8_t
+            spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF);
+        }
+        spiReleaseBusMutex(SDC_SPI_REG);
     }
 
     return res;
