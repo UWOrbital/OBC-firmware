@@ -1,4 +1,5 @@
 #include "cdh_eps_handlers.h"
+#include "cdh_eps_protocol_id.h"
 #include "command_data.h"
 #include "telemetry_manager.h"
 
@@ -8,6 +9,27 @@
 #include "obc_unpack_utils.h"
 
 #include <stddef.h>
+
+static const uint8_t tleIdMap[] = {
+    [TLE_EPS_BOARD_TEMP] = TELEM_EPS_BOARD_TEMP,
+    [TLE_SOLAR_PANEL_1_TEMP] = TELEM_SOLAR_PANEL_1_TEMP,
+    [TLE_SOLAR_PANEL_2_TEMP] = TELEM_SOLAR_PANEL_2_TEMP,
+    [TLE_SOLAR_PANEL_3_TEMP] = TELEM_SOLAR_PANEL_3_TEMP,
+    [TLE_SOLAR_PANEL_4_TEMP] = TELEM_SOLAR_PANEL_4_TEMP,
+    [TLE_COMMS_5V_CURRENT] = TELEM_EPS_COMMS_5V_CURRENT,
+    [TLE_COMMS_3V3_CURRENT] = TELEM_EPS_COMMS_3V3_CURRENT,
+    [TLE_MAG_8V_CURRENT] = TELEM_EPS_MAGNETORQUER_8V_CURRENT,
+    [TLE_ADCS_5V_CURRENT] = TELEM_EPS_ADCS_5V_CURRENT,
+    [TLE_ADCS_3V3_CURRENT] = TELEM_EPS_ADCS_3V3_CURRENT,
+    [TLE_OBC_CURRENT] = TELEM_EPS_OBC_3V3_CURRENT,
+    [TLE_COMMS_5V_VOLTAGE] = TELEM_EPS_COMMS_5V_VOLTAGE,
+    [TLE_COMMS_3V3_VOLTAGE] = TELEM_EPS_COMMS_3V3_VOLTAGE,
+    [TLE_MAG_8V_VOLTAGE] = TELEM_EPS_MAGNETORQUER_8V_VOLTAGE,
+    [TLE_ADCS_5V_VOLTAGE] = TELEM_EPS_ADCS_5V_VOLTAGE,
+    [TLE_ADCS_3V3_VOLTAGE] = TELEM_EPS_ADCS_3V3_VOLTAGE,
+    [TLE_OBC_3V3_VOLTAGE] = TELEM_EPS_OBC_3V3_VOLTAGE 
+};
+
 
 obc_error_code_t subsysShutdownCmdHandler(cdh_eps_queue_msg_t *msg) {
     if(msg == NULL) {
@@ -20,28 +42,6 @@ obc_error_code_t subsysShutdownCmdHandler(cdh_eps_queue_msg_t *msg) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-// This handler is not needed since cdh will never recieve a heartbeat command
-obc_error_code_t heartbeatCmdHandler(cdh_eps_queue_msg_t *msg) {
-    if(msg == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    LOG_DEBUG("Handling heartbeat command");
-
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-// This handler is not needed since the get telemetry cmd should never be recieved by CDH
-obc_error_code_t getTelemetryCmdHandler(cdh_eps_queue_msg_t *msg) {
-    if(msg == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    LOG_DEBUG("Sending get ");
-
-    return OBC_ERR_CODE_SUCCESS;
-}
-
 obc_error_code_t tleMsgHandler(cdh_eps_queue_msg_t *msg) {
     if(msg == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
@@ -49,15 +49,26 @@ obc_error_code_t tleMsgHandler(cdh_eps_queue_msg_t *msg) {
 
     LOG_DEBUG("Recieved telemetry packet with ID: %d", msg->tle.id);
     
+    obc_error_code_t res;
     float data = unpackFloat(msg->tle.data, 0);
     // Initialize telemetry struct to send to telemetry manager
+
+    telemetry_data_id_t id;
+    if(tleIdMap[msg->tle.id] == NULL) {
+        LOG_DEBUG("Invalid telemetry id received");
+        return res;
+    }
+    else {
+        id = tleIdMap[msg->tle.id];
+    }
+
     telemetry_data_t tle = 
     {.cc1120Temp = data, 
-     .id = 0x00, // need way to map CDH-EPS telemetry_data_id
-     .timestamp = 0 // Use getCurrentUnixTime in obc_time.c (need to merge in)
+     .id = id, // need way to map CDH-EPS telemetry_data_id
+     .timestamp = getCurrentunixTime() // Use getCurrentUnixTime in obc_time.c (need to merge in)
     };
 
-    obc_error_code_t res = addTelemetryData(&tle);
+    res = addTelemetryData(&tle);
 
     return res;
 }

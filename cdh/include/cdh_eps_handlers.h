@@ -11,12 +11,6 @@ typedef obc_error_code_t (*rx_callback_t)(cdh_eps_queue_msg_t *);
 // CMD_SUBSYS_SHUTDDOWN
 obc_error_code_t subsysShutdownCmdHandler(cdh_eps_queue_msg_t *msg);
 
-// CMD_HEARTBEAT
-obc_error_code_t heartbeatCmdHandler(cdh_eps_queue_msg_t *msg);
-
-// CMD_GET_TELEMETRY
-obc_error_code_t getTelemetryCmdHandler(cdh_eps_queue_msg_t *msg);
-
 // TLE_
 obc_error_code_t tleMsgHandler(cdh_eps_queue_msg_t *msg);
 
@@ -26,4 +20,4 @@ obc_error_code_t respSubsysShutdownAckHandler(cdh_eps_queue_msg_t *msg);
 // RESP_HEARTBEAT_ACK
 obc_error_code_t respHeartbeatAckHandler(cdh_eps_queue_msg_t *msg);
 
-#endif
+#endif /* CDH_INCLUDE_CDH_EPS_CALLBACKS_H_ */
