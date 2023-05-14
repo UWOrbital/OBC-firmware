@@ -66,7 +66,7 @@ obc_error_code_t tleMsgHandler(cdh_eps_queue_msg_t *msg) {
     telemetry_data_t tle = 
     {.cc1120Temp = data, 
      .id = id,
-     .timestamp = getCurrentunixTime()
+     .timestamp = getCurrentUnixTime()
     };
 
     res = addTelemetryData(&tle);
