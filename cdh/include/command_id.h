@@ -37,5 +37,6 @@ typedef enum {
 #define CMD_RTC_SYNC                    (uint8_t) 2
 #define CMD_DOWNLINK_LOGS_NEXT_PASS     (uint8_t) 3
 #define CMD_PAYLOAD_CAPTURE             (uint8_t) 4
+#define CMD_END_OF_TRANSMISSION         (uint8_t) 255
 
 #endif // CDH_INCLUDE_COMMAND_ID_H_

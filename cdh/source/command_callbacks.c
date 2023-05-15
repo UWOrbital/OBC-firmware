@@ -1,9 +1,9 @@
 #include "command_callbacks.h"
 #include "command_data.h"
+#include "payload_manager.h"
 #include "obc_reset.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
-#include "payload_manager.h"
 
 #include <stddef.h>
 
@@ -52,5 +52,5 @@ obc_error_code_t payloadCaptureCmdCallback(cmd_msg_t *cmd) {
     } ;
     sendToPayloadQueue(&event);
     return OBC_ERR_CODE_SUCCESS;
-    
+
 }
