@@ -1,4 +1,5 @@
 #include "correct/reed-solomon/encode.h"
+#include "../hal/source/os_heap.c"
 
 // calculate all syndromes of the received polynomial at the roots of the generator
 // because we're evaluating at the roots of the generator, and because the transmitted
@@ -265,7 +266,7 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     rs->error_locator_log = polynomial_create(rs->min_distance);
     rs->erasure_locator = polynomial_create(rs->min_distance);
     rs->error_roots = calloc(2 * rs->min_distance, sizeof(field_element_t));
-    rs->error_vals = malloc(rs->min_distance * sizeof(field_element_t));
+    rs->error_vals = pvPortMalloc(rs->min_distance * sizeof(field_element_t));
     rs->error_locations = malloc(rs->min_distance * sizeof(field_logarithm_t));
 
     rs->last_error_locator = polynomial_create(rs->min_distance);

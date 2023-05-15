@@ -32,7 +32,7 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
  * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
  * 
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param aesData pointer to an array of bytes to hold the decoded reed solomon data
+ * @param aesSerializedData pointer to an array of bytes to hold the decoded reed solomon data
  * @param aesSerializedDataLen length of the aesSerializedData array
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
