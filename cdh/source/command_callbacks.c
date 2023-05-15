@@ -3,6 +3,7 @@
 #include "obc_reset.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "payload_manager.h"
 
 #include <stddef.h>
 
@@ -37,4 +38,19 @@ obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
     // TODO: Implement handling for this command
     LOG_DEBUG("Executing log downlink command - log level %u", cmd->downlinkLogsNextPass.logLevel);
     return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t payloadCaptureCmdCallback(cmd_msg_t *cmd) {
+    if (cmd == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+    payload_event_t event = {
+        .data = {
+            .size = 1
+        },
+        .eventID = PAYLOAD_CAPTURE_EVENT_ID
+    } ;
+    sendToPayloadQueue(&event);
+    return OBC_ERR_CODE_SUCCESS;
+    
 }

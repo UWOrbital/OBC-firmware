@@ -12,6 +12,7 @@ include $(ROOT_DIR)/.env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
 
+
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
 ARM_FLAGS += -march=armv7-r
@@ -78,8 +79,6 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/core/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
-
-INCLUDE_DIRS += -I"$(ROOT_DIR)/tiny_aes"
 
 LIBS := 
 

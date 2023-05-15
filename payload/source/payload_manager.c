@@ -1,6 +1,7 @@
 #include "payload_manager.h"
 #include "obc_errors.h"
 #include "obc_task_config.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -48,16 +49,26 @@ obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
     return OBC_ERR_CODE_QUEUE_FULL;
 }
 
+obc_error_code_t handleCapture(void){
+    
+    return OBC_ERR_CODE_SUCCESS;
+}
+
 static void vPayloadManagerTask(void * pvParameters) {
+    obc_error_code_t errCode;
     ASSERT(payloadQueueHandle != NULL);
 
     while(1){
         payload_event_t queueMsg;
-        if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
+        if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS){
             queueMsg.eventID = PAYLOAD_MANAGER_NULL_EVENT_ID;
-        
+        }
+
         switch (queueMsg.eventID) {
             case PAYLOAD_MANAGER_NULL_EVENT_ID:
+                break;
+            case PAYLOAD_CAPTURE_EVENT_ID:
+                LOG_IF_ERROR_CODE(handleCapture());
                 break;
         }
     }

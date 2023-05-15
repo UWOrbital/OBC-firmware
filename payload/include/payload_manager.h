@@ -13,16 +13,17 @@
  * Enum containing all possible event IDs passed to the payload event queue.
 */
 typedef enum {
-    PAYLOAD_MANAGER_NULL_EVENT_ID
+    PAYLOAD_MANAGER_NULL_EVENT_ID,
+    PAYLOAD_CAPTURE_EVENT_ID
 } payload_event_id_t;
+
 
 /**
  * @union	payload_event_data_t
  * @brief	payload event data union
 */
 typedef union {
-    int i;
-    float f;
+    uint8_t size;
 } payload_event_data_t;
 
 /**

@@ -21,6 +21,7 @@ typedef struct {
 } downlink_logs_next_pass_cmd_data_t;
 
 
+
 /* -------------------------- */
 /*   Command Message Struct   */
 /* -------------------------- */
@@ -29,6 +30,7 @@ typedef struct {
     union {
         rtc_sync_cmd_data_t rtcSync;
         downlink_logs_next_pass_cmd_data_t downlinkLogsNextPass;
+        
     };
     
     uint32_t timestamp; // Unix timestamp in seconds
