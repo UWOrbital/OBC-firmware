@@ -261,9 +261,9 @@ static void reed_solomon_find_modified_syndromes(correct_reed_solomon *rs, field
 void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     rs->has_init_decode = true;
     rs->syndromes = pvPortMalloc(rs->min_distance*sizeof(field_element_t));
-    memset(rs->syndromes, 0, rs->min_distance*sizeof(field_element_t))
+    memset(rs->syndromes, 0, rs->min_distance*sizeof(field_element_t));
     rs->modified_syndromes = pvPortMalloc(2 * rs->min_distance * sizeof(field_element_t));
-    memset(rs->modified_syndromes, 0, 2 * rs->min_distance * sizeof(field_element_t))
+    memset(rs->modified_syndromes, 0, 2 * rs->min_distance * sizeof(field_element_t));
     rs->received_polynomial = polynomial_create(rs->block_length - 1);
     rs->error_locator = polynomial_create(rs->min_distance);
     rs->error_locator_log = polynomial_create(rs->min_distance);
