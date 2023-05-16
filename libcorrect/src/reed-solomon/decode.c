@@ -1,5 +1,6 @@
 #include "correct/reed-solomon/encode.h"
-#include "../hal/source/os_heap.c"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
 
 // calculate all syndromes of the received polynomial at the roots of the generator
 // because we're evaluating at the roots of the generator, and because the transmitted
@@ -259,15 +260,18 @@ static void reed_solomon_find_modified_syndromes(correct_reed_solomon *rs, field
 
 void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     rs->has_init_decode = true;
-    rs->syndromes = calloc(rs->min_distance, sizeof(field_element_t));
-    rs->modified_syndromes = calloc(2 * rs->min_distance, sizeof(field_element_t));
+    rs->syndromes = pvPortMalloc(rs->min_distance*sizeof(field_element_t));
+    memset(rs->syndromes, 0, rs->min_distance*sizeof(field_element_t))
+    rs->modified_syndromes = pvPortMalloc(2 * rs->min_distance * sizeof(field_element_t));
+    memset(rs->modified_syndromes, 0, 2 * rs->min_distance * sizeof(field_element_t))
     rs->received_polynomial = polynomial_create(rs->block_length - 1);
     rs->error_locator = polynomial_create(rs->min_distance);
     rs->error_locator_log = polynomial_create(rs->min_distance);
     rs->erasure_locator = polynomial_create(rs->min_distance);
-    rs->error_roots = calloc(2 * rs->min_distance, sizeof(field_element_t));
+    rs->error_roots = pvPortMalloc(2 * rs->min_distance * sizeof(field_element_t));
+    memset(rs->error_roots, 0, 2 * rs->min_distance * sizeof(field_element_t));
     rs->error_vals = pvPortMalloc(rs->min_distance * sizeof(field_element_t));
-    rs->error_locations = malloc(rs->min_distance * sizeof(field_logarithm_t));
+    rs->error_locations = pvPortMalloc(rs->min_distance * sizeof(field_logarithm_t));
 
     rs->last_error_locator = polynomial_create(rs->min_distance);
     rs->error_evaluator = polynomial_create(rs->min_distance - 1);
@@ -277,9 +281,9 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     // we would have to do this work in order to calculate the syndromes
     // if we save it, we can prevent the need to recalculate it on subsequent calls
     // total memory usage is min_distance * block_length bytes e.g. 32 * 255 ~= 8k
-    rs->generator_root_exp = malloc(rs->min_distance * sizeof(field_logarithm_t *));
+    rs->generator_root_exp = pvPortMalloc(rs->min_distance * sizeof(field_logarithm_t *));
     for (unsigned int i = 0; i < rs->min_distance; i++) {
-        rs->generator_root_exp[i] = malloc(rs->block_length * sizeof(field_logarithm_t));
+        rs->generator_root_exp[i] = pvPortMalloc(rs->block_length * sizeof(field_logarithm_t));
         polynomial_build_exp_lut(rs->field, rs->generator_roots[i], rs->block_length - 1, rs->generator_root_exp[i]);
     }
 
@@ -287,9 +291,9 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     // we would have to do this for chien search anyway, and its size is only 256 * min_distance bytes
     // for min_distance = 32 this is 8k of memory, a pittance for the speedup we receive in exchange
     // we also get to reuse this work during error value calculation
-    rs->element_exp = malloc(256 * sizeof(field_logarithm_t *));
+    rs->element_exp = pvPortMalloc(256 * sizeof(field_logarithm_t *));
     for (field_operation_t i = 0; i < 256; i++) {
-        rs->element_exp[i] = malloc(rs->min_distance * sizeof(field_logarithm_t));
+        rs->element_exp[i] = pvPortMalloc(rs->min_distance * sizeof(field_logarithm_t));
         polynomial_build_exp_lut(rs->field, i, rs->min_distance - 1, rs->element_exp[i]);
     }
 
@@ -445,7 +449,7 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
 
     reed_solomon_find_modified_syndromes(rs, rs->syndromes, rs->erasure_locator, rs->modified_syndromes);
 
-    field_element_t *syndrome_copy = malloc(rs->min_distance * sizeof(field_element_t));
+    field_element_t *syndrome_copy = pvPortMalloc(rs->min_distance * sizeof(field_element_t));
     memcpy(syndrome_copy, rs->syndromes, rs->min_distance * sizeof(field_element_t));
 
     for (unsigned int i = erasure_length; i < rs->min_distance; i++) {

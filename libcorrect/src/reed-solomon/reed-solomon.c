@@ -1,4 +1,6 @@
 #include "correct/reed-solomon/reed-solomon.h"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
 
 // coeff must be of size nroots + 1
 // e.g. 2 roots (x + alpha)(x + alpha^2) yields a poly with 3 terms x^2 + g0*x + g1
@@ -12,7 +14,8 @@ static polynomial_t reed_solomon_build_generator(field_t field, unsigned int nro
 }
 
 correct_reed_solomon *correct_reed_solomon_create(field_operation_t primitive_polynomial, field_logarithm_t first_consecutive_root, field_logarithm_t generator_root_gap, size_t num_roots) {
-    correct_reed_solomon *rs = calloc(1, sizeof(correct_reed_solomon));
+    correct_reed_solomon *rs = pvPortMalloc(sizeof(correct_reed_solomon));
+    memset(rs, 0, sizeof(correct_reed_solomon));
     rs->field = field_create(primitive_polynomial);
 
     rs->block_length = 255;
@@ -22,7 +25,7 @@ correct_reed_solomon *correct_reed_solomon_create(field_operation_t primitive_po
     rs->first_consecutive_root = first_consecutive_root;
     rs->generator_root_gap = generator_root_gap;
 
-    rs->generator_roots = malloc(rs->min_distance * sizeof(field_element_t));
+    rs->generator_roots = pvPortMalloc(rs->min_distance * sizeof(field_element_t));
 
     rs->generator = reed_solomon_build_generator(rs->field, rs->min_distance, rs->first_consecutive_root, rs->generator_root_gap, rs->generator, rs->generator_roots);
 

@@ -2,6 +2,8 @@
 #include <string.h>
 
 #include "fec_shim.h"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
 
 typedef struct {
     correct_reed_solomon *rs;
@@ -20,7 +22,7 @@ void *init_rs_char(int symbol_size, int primitive_polynomial,
         return NULL;
     }
 
-    reed_solomon_shim *shim = malloc(sizeof(reed_solomon_shim));
+    reed_solomon_shim *shim = pvPortMalloc(sizeof(reed_solomon_shim));
 
     shim->pad = pad;
     shim->block_length = 255 - pad;
@@ -28,8 +30,8 @@ void *init_rs_char(int symbol_size, int primitive_polynomial,
     shim->msg_length = shim->block_length - number_roots;
     shim->rs = correct_reed_solomon_create(primitive_polynomial,
                                            first_consecutive_root, root_gap, number_roots);
-    shim->msg_out = malloc(shim->block_length);
-    shim->erasures = malloc(number_roots);
+    shim->msg_out = pvPortMalloc(shim->block_length);
+    shim->erasures = pvPortMalloc(number_roots);
 
     return shim;
 }
@@ -83,7 +85,7 @@ static correct_convolutional_polynomial_t r16k15[] = {
 static void *create_viterbi(unsigned int num_decoded_bits, unsigned int rate,
                             unsigned int order,
                             correct_convolutional_polynomial_t *poly) {
-    convolutional_shim *shim = malloc(sizeof(convolutional_shim));
+    convolutional_shim *shim = pvPortMalloc(sizeof(convolutional_shim));
 
     size_t num_decoded_bytes = (num_decoded_bits % 8)
                                    ? (num_decoded_bits / 8 + 1)
@@ -91,7 +93,7 @@ static void *create_viterbi(unsigned int num_decoded_bits, unsigned int rate,
 
     shim->rate = rate;
     shim->order = order;
-    shim->buf = malloc(num_decoded_bytes);
+    shim->buf = pvPortMalloc(num_decoded_bytes);
     shim->buf_len = num_decoded_bytes;
     shim->conv = correct_convolutional_create(rate, order, poly);
     shim->read_iter = shim->buf;

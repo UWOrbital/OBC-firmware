@@ -1,4 +1,7 @@
 #include "rs_tester_fec_shim.h"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
+
 void rs_fec_encode(void *encoder, uint8_t *msg, size_t msg_length,
                    uint8_t *msg_out) {
     // XXX make sure that pad length used to build encoder corresponds to this
@@ -13,7 +16,7 @@ void rs_fec_decode(void *decoder, uint8_t *encoded, size_t encoded_length,
     // XXX make sure that pad length used to build decoder corresponds to this
     // encoded_length
     if (erasure_length) {
-        int *locations = malloc(erasure_length * sizeof(int));
+        int *locations = pvPortMalloc(erasure_length * sizeof(int));
         for (size_t i = 0; i < erasure_length; i++) {
             locations[i] = (unsigned int)(erasure_locations[i]) + pad_length;
         }

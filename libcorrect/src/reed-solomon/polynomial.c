@@ -1,8 +1,10 @@
 #include "correct/reed-solomon/polynomial.h"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
 
 polynomial_t polynomial_create(unsigned int order) {
     polynomial_t polynomial;
-    polynomial.coeff = malloc(sizeof(field_element_t) * (order + 1));
+    polynomial.coeff = pvPortMalloc(sizeof(field_element_t) * (order + 1));
     polynomial.order = order;
     return polynomial;
 }
@@ -215,14 +217,17 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
     unsigned int order = nroots;
     polynomial_t l;
     l.order = 1;
-    l.coeff = calloc(2, sizeof(field_element_t));
+    l.coeff = pvPortMalloc(2 * sizeof(field_element_t));
+    memset(l.coeff, 0, 2 * sizeof(field_element_t));
 
     polynomial_t r[2];
     // we'll keep two temporary stores of rightside polynomial
     // each time through the loop, we take the previous result and use it as new rightside
     // swap back and forth (prevents the need for a copy)
-    r[0].coeff = calloc(order + 1, sizeof(field_element_t));
-    r[1].coeff = calloc(order + 1, sizeof(field_element_t));
+    r[0].coeff = pvPortMalloc((order + 1) * sizeof(field_element_t));
+    memset(r[0].coeff, 0, (order + 1) * sizeof(field_element_t));
+    r[1].coeff = pvPortMalloc((order + 1) * sizeof(field_element_t));
+    memset(r[1].coeff, 0, (order + 1) * sizeof(field_element_t));
     unsigned int rcoeffres = 0;
 
     // initialize the result with x + roots[0]

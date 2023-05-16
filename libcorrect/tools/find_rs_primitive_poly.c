@@ -1,4 +1,6 @@
 #include "correct/reed-solomon.h"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
 
 size_t block_size = 255;
 int power_max = 8;
@@ -20,7 +22,7 @@ bool trypoly(field_operation_t poly, field_logarithm_t *log) {
 }
 
 int main() {
-    field_logarithm_t *log = malloc((block_size + 1) * sizeof(field_logarithm_t));
+    field_logarithm_t *log = pvPortMalloc((block_size + 1) * sizeof(field_logarithm_t));
     for (field_operation_t i = (block_size + 1); i < (block_size + 1) << 1; i++) {
         if (trypoly(i, log)) {
             printf("0x%x valid: ", i);

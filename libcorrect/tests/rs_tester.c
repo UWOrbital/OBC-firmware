@@ -1,4 +1,6 @@
 #include "rs_tester.h"
+#include "../hal/include/FreeRTOS.h"
+#include "../hal/include/os_portable.h"
 
 void shuffle(int *a, size_t len) {
     for (size_t i = 0; i < len - 2; i++) {
@@ -24,21 +26,23 @@ void rs_correct_decode(void *decoder, uint8_t *encoded, size_t encoded_length,
 }
 
 rs_testbench *rs_testbench_create(size_t block_length, size_t min_distance) {
-    rs_testbench *testbench = calloc(1, sizeof(rs_testbench));
+    rs_testbench *testbench = pvPortMalloc(sizeof(rs_testbench));
+    memset(testbench, 0, sizeof(rs_testbench));
 
     size_t message_length = block_length - min_distance;
     testbench->message_length = message_length;
     testbench->block_length = block_length;
     testbench->min_distance = min_distance;
 
-    testbench->msg = calloc(message_length, sizeof(unsigned char));
-    testbench->encoded = malloc(block_length * sizeof(uint8_t));
+    testbench->msg = pvPortMalloc(message_length * sizeof(unsigned char));
+    memset(testbench->msg, 0, message_length * sizeof(unsigned char));
+    testbench->encoded = pvPortMalloc(block_length * sizeof(uint8_t));
 
-    testbench->indices = malloc(block_length * sizeof(int));
+    testbench->indices = pvPortMalloc(block_length * sizeof(int));
 
-    testbench->corrupted_encoded = malloc(block_length * sizeof(uint8_t));
-    testbench->erasure_locations = malloc(min_distance * sizeof(uint8_t));
-    testbench->recvmsg = malloc(sizeof(unsigned char) * message_length);
+    testbench->corrupted_encoded = pvPortMalloc(block_length * sizeof(uint8_t));
+    testbench->erasure_locations = pvPortMalloc(min_distance * sizeof(uint8_t));
+    testbench->recvmsg = pvPortMalloc(sizeof(unsigned char) * message_length);
 
     return testbench;
 }
