@@ -5,6 +5,7 @@
 #include "cc1120_defs.h"
 #include "obc_math.h"
 #include "decode_telemetry.h"
+#include "obc_board_config.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
@@ -412,7 +413,7 @@ obc_error_code_t cc1120Receive(void)
     return OBC_ERR_CODE_SUCCESS;
 }
 
-void txFifoReadyCallback(){
+void txFifoReadyCallback(void){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
     if(xSemaphoreGiveFromISR(txSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
@@ -422,7 +423,7 @@ void txFifoReadyCallback(){
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
-void rxFifoReadyCallback(){
+void rxFifoReadyCallback(void){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
     if(xSemaphoreGiveFromISR(rxSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
@@ -432,7 +433,7 @@ void rxFifoReadyCallback(){
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
-void txFifoEmptyCallback(){
+void txFifoEmptyCallback(void){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
     if(xSemaphoreGiveFromISR(txFifoEmptySemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
@@ -442,7 +443,7 @@ void txFifoEmptyCallback(){
     portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
-void syncEventCallback(){
+void syncEventCallback(void){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
     if(xSemaphoreGiveFromISR(syncReceivedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){

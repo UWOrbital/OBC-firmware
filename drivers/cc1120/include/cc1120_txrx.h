@@ -14,11 +14,6 @@
 // See chapter 8.5 in the datasheet
 #define TXRX_INTERRUPT_THRESHOLD 100U
 
-#define CC1120_RX_THR_PKT_PIN 2U
-#define CC1120_TX_THR_PKT_PIN 3U
-#define CC1120_PKT_SYNC_RXTX_PIN 7U
-#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_PIN
-
 typedef struct
 {
     uint8_t addr;
