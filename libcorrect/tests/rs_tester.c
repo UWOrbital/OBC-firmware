@@ -48,13 +48,13 @@ rs_testbench *rs_testbench_create(size_t block_length, size_t min_distance) {
 }
 
 void rs_testbench_destroy(rs_testbench *testbench) {
-    free(testbench->msg);
-    free(testbench->encoded);
-    free(testbench->indices);
-    free(testbench->corrupted_encoded);
-    free(testbench->erasure_locations);
-    free(testbench->recvmsg);
-    free(testbench);
+    vPortFree(testbench->msg);
+    vPortFree(testbench->encoded);
+    vPortFree(testbench->indices);
+    vPortFree(testbench->corrupted_encoded);
+    vPortFree(testbench->erasure_locations);
+    vPortFree(testbench->recvmsg);
+    vPortFree(testbench);
 }
 
 rs_test_run test_rs_errors(rs_test *test, rs_testbench *testbench, size_t msg_length,

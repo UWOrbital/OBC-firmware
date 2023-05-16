@@ -10,7 +10,7 @@ polynomial_t polynomial_create(unsigned int order) {
 }
 
 void polynomial_destroy(polynomial_t polynomial) {
-    free(polynomial.coeff);
+    vPortFree(polynomial.coeff);
 }
 
 // if you want a full multiplication, then make res.order = l.order + r.order
@@ -252,9 +252,9 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
     memcpy(poly.coeff, r[rcoeffres].coeff, (order + 1) * sizeof(field_element_t));
     poly.order = order;
 
-    free(l.coeff);
-    free(r[0].coeff);
-    free(r[1].coeff);
+    vPortFree(l.coeff);
+    vPortFree(r[0].coeff);
+    vPortFree(r[1].coeff);
 
     return poly;
 }

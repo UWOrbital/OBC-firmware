@@ -21,7 +21,7 @@ void rs_fec_decode(void *decoder, uint8_t *encoded, size_t encoded_length,
             locations[i] = (unsigned int)(erasure_locations[i]) + pad_length;
         }
         decode_rs_char(decoder, encoded, locations, erasure_length);
-        free(locations);
+        vPortFree(locations);
     } else {
         decode_rs_char(decoder, encoded, NULL, 0);
     }

@@ -48,6 +48,6 @@ int main() {
             printf("\n");
         }
     }
-    free(log);
+    vPortFree(log);
     return 0;
 }

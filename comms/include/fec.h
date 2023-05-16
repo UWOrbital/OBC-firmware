@@ -3,6 +3,7 @@
 
 #include "obc_errors.h"
 #include "aes128.h"
+#include "correct.h"
 
 #include <stdint.h>
 
@@ -23,10 +24,11 @@ typedef struct {
  * 
  * @param telemData packed telemtry data array that needs to be encoded
  * @param rsData 255 byte array with the reed solomon encoded data
+ * @param rs reed solomon encryption used to encode the reed solomon data
  * 
  * @return obc_error_code_t - whether or not the data was successfully encoded
 */
-obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData);
+obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData, correct_reed_solomon* rs);
 
 /**
  * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
@@ -34,9 +36,10 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
  * @param rsData 255 byte array that has encoded reed solomon data
  * @param aesSerializedData pointer to an array of bytes to hold the decoded reed solomon data
  * @param aesSerializedDataLen length of the aesSerializedData array
+ * @param rs reed solomon decryption used to decode the reed solomon data
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData, uint8_t aesSerializedDataLen);
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData, uint8_t aesSerializedDataLen, correct_reed_solomon* rs);
 
 #endif /* COMMS_INCLUDE_FEC_H_ */

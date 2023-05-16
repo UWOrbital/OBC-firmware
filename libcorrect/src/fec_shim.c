@@ -39,9 +39,9 @@ void *init_rs_char(int symbol_size, int primitive_polynomial,
 void free_rs_char(void *rs) {
     reed_solomon_shim *shim = (reed_solomon_shim *)rs;
     correct_reed_solomon_destroy(shim->rs);
-    free(shim->msg_out);
-    free(shim->erasures);
-    free(shim);
+    vPortFree(shim->msg_out);
+    vPortFree(shim->erasures);
+    vPortFree(shim);
 }
 
 void encode_rs_char(void *rs, const unsigned char *msg, unsigned char *parity) {
@@ -104,9 +104,9 @@ static void *create_viterbi(unsigned int num_decoded_bits, unsigned int rate,
 
 static void delete_viterbi(void *vit) {
     convolutional_shim *shim = (convolutional_shim *)vit;
-    free(shim->buf);
+    vPortFree(shim->buf);
     correct_convolutional_destroy(shim->conv);
-    free(shim);
+    vPortFree(shim);
 }
 
 static void init_viterbi(void *vit) {

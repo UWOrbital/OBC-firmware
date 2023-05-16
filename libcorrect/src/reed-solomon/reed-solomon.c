@@ -40,34 +40,34 @@ correct_reed_solomon *correct_reed_solomon_create(field_operation_t primitive_po
 void correct_reed_solomon_destroy(correct_reed_solomon *rs) {
     field_destroy(rs->field);
     polynomial_destroy(rs->generator);
-    free(rs->generator_roots);
+    vPortFree(rs->generator_roots);
     polynomial_destroy(rs->encoded_polynomial);
     polynomial_destroy(rs->encoded_remainder);
     if (rs->has_init_decode) {
-        free(rs->syndromes);
-        free(rs->modified_syndromes);
+        vPortFree(rs->syndromes);
+        vPortFree(rs->modified_syndromes);
         polynomial_destroy(rs->received_polynomial);
         polynomial_destroy(rs->error_locator);
         polynomial_destroy(rs->error_locator_log);
         polynomial_destroy(rs->erasure_locator);
-        free(rs->error_roots);
-        free(rs->error_vals);
-        free(rs->error_locations);
+        vPortFree(rs->error_roots);
+        vPortFree(rs->error_vals);
+        vPortFree(rs->error_locations);
         polynomial_destroy(rs->last_error_locator);
         polynomial_destroy(rs->error_evaluator);
         polynomial_destroy(rs->error_locator_derivative);
         for (unsigned int i = 0; i < rs->min_distance; i++) {
-            free(rs->generator_root_exp[i]);
+            vPortFree(rs->generator_root_exp[i]);
         }
-        free(rs->generator_root_exp);
+        vPortFree(rs->generator_root_exp);
         for (field_operation_t i = 0; i < 256; i++) {
-            free(rs->element_exp[i]);
+            vPortFree(rs->element_exp[i]);
         }
-        free(rs->element_exp);
+        vPortFree(rs->element_exp);
         polynomial_destroy(rs->init_from_roots_scratch[0]);
         polynomial_destroy(rs->init_from_roots_scratch[1]);
     }
-    free(rs);
+    vPortFree(rs);
 }
 
 void correct_reed_solomon_debug_print(correct_reed_solomon *rs) {
