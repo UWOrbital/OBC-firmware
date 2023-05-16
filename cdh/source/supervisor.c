@@ -12,6 +12,7 @@
 #include "obc_states.h"
 #include "obc_task_config.h"
 #include "obc_reset.h"
+#include "obc_board_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -114,9 +115,9 @@ static void vSupervisorTask(void * pvParameters) {
         supervisor_event_t inMsg;
         
         if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-            #ifdef DEBUG
+            #if defined(DEBUG) && !defined(OBC_REVISION_2)
             vTaskDelay(pdMS_TO_TICKS(1000));
-            gioToggleBit(gioPORTB, 1);
+            gioToggleBit(SUPERVISOR_DEBUG_LED_GIO_PORT, SUPERVISOR_DEBUG_LED_GIO_BIT);
             #endif
             continue;
         }
