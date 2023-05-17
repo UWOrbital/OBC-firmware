@@ -27,6 +27,8 @@ static SemaphoreHandle_t txSemaphore = NULL;
 static StaticSemaphore_t txSemaphoreBuffer;
 static SemaphoreHandle_t txFifoEmptySemaphore = NULL;
 static StaticSemaphore_t txFifoEmptySemaphoreBuffer;
+static SemaphoreHandle_t syncReceivedSemaphore = NULL;
+static StaticSemaphore_t syncReceivedSemaphoreBuffer;
 
 static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len);
 
@@ -106,6 +108,9 @@ void initAllTxRxSemaphores(void){
     }
     if(txFifoEmptySemaphore == NULL){
         txFifoEmptySemaphore = xSemaphoreCreateBinaryStatic(&txFifoEmptySemaphoreBuffer);
+    }
+    if(syncReceivedSemaphore == NULL){
+        syncReceivedSemaphore = xSemaphoreCreateBinaryStatic(&syncReceivedSemaphoreBuffer);
     }
 }
 
@@ -411,6 +416,16 @@ void txFifoEmptyCallback(){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
     if(xSemaphoreGiveFromISR(txFifoEmptySemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
+        /* TODO: figure out how to log from ISR */
+    }
+    // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked
+    portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
+}
+
+void syncEventCallback(void){
+    BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
+    // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one
+    if(xSemaphoreGiveFromISR(syncReceivedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS){
         /* TODO: figure out how to log from ISR */
     }
     // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has been unblocked

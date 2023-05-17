@@ -23,6 +23,11 @@
     #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTB
     #define SUPERVISOR_DEBUG_LED_GIO_BIT    1
 
+    // Comms pin numbers for ISR
+    #define CC1120_RX_THR_PKT_PIN 3U
+    #define CC1120_TX_THR_PKT_PIN 30U
+    #define CC1120_PKT_SYNC_RXTX_PIN 28U
+
 #elif defined(OBC_REVISION_1)
     // Serial config
     #define UART_PRINT_REG  sciREG 
@@ -43,6 +48,11 @@
     // Supervisor DEBUG LED
     #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTA
     #define SUPERVISOR_DEBUG_LED_GIO_BIT    5
+
+    // Comms pin numbers for ISR
+    #define CC1120_RX_THR_PKT_PIN 3U
+    #define CC1120_TX_THR_PKT_PIN 30U
+    #define CC1120_PKT_SYNC_RXTX_PIN 28U
     
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2

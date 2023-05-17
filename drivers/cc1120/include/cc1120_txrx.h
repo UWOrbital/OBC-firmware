@@ -120,6 +120,11 @@ void rxFifoReadyCallback(void);
 void txFifoEmptyCallback(void);
 
 /**
+ * @brief callback function to be used in an ISR when the sync word has been received
+ */
+void syncEventCallback(void);
+
+/**
  * @brief allows other files to access the cc1120 RX semaphore handle
  * 
  * @return SemaphoreHandle_t - handle of the cc1120 RX semaphore
