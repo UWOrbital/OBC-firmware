@@ -31,12 +31,10 @@ static cam_settings_t cam_config[] = {
 
 obc_error_code_t camWriteReg(uint8_t addr, uint8_t data, camera_t cam) {
     obc_error_code_t errCode;
-    uint8_t datas[2] = {0x80, 0x55};
     RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     addr = addr | 0x80;
-    spiTransmitBytes(CAM_SPI_REG, &cam_config[cam].spi_config, datas, 2);
-    // RETURN_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, addr));
-    // RETURN_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, data));
+    uint8_t tx[2] = {addr, data};
+    spiTransmitBytes(CAM_SPI_REG, &cam_config[cam].spi_config, tx, 2);
     RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     return errCode;
 }

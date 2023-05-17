@@ -43,7 +43,7 @@ int main(void) {
             camWriteReg(0x00, send, PRIMARY);
             for (int i = 0; i < 10000000; i++) { }
             send++;
-            if(send < 5) {
+            if(send > 5) {
                 send = 0;
             }
         }
