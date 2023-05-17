@@ -18,13 +18,13 @@ static cam_settings_t cam_config[] = {
     [PRIMARY] = {   .spi_config = {
                         .CS_HOLD = FALSE,
                         .WDEL = FALSE,
-                        .DFSEL = SPI_FMT_0,
+                        .DFSEL = CAM_SPI_DATA_FORMAT,
                         .CSNR = SPI_CS_NONE },
                     .cs_num = CAM_CS_1 },
     [SECONDARY] = {   .spi_config = {
                         .CS_HOLD = FALSE,
                         .WDEL = FALSE,
-                        .DFSEL = SPI_FMT_0,
+                        .DFSEL = CAM_SPI_DATA_FORMAT,
                         .CSNR = SPI_CS_NONE },
                     .cs_num = CAM_CS_2 },
 };

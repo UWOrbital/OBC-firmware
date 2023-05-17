@@ -22,7 +22,7 @@
     // Camera SPI configs
     #define CAM_SPI_PORT         spiPORT3
     #define CAM_SPI_REG          spiREG3
-    #define CAM_SPI_DATA_FORMAT  SPI_FMT_0
+    #define CAM_SPI_DATA_FORMAT  SPI_FMT_2
     #define CAM_CS_1             1UL
     #define CAM_CS_2             2UL
 
