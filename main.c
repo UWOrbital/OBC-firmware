@@ -14,6 +14,9 @@
 #include <spi.h>
 #include <can.h>
 
+#include "camera_reg.h"
+#include "arducam.h"
+
 int main(void) {
 
     // Run hardware initialization code (TODO: refactor all this into one function call)
@@ -31,8 +34,19 @@ int main(void) {
     initI2CMutex();
     initSpiMutex();
 
-    // The supervisor is the only task running initially.
-    initSupervisor();
+    uint8_t recv_data = 0;
+    uint8_t send = 0;
+    while(1) {
+        for(int i = 0; i < 5; i++) {
+            camReadReg(0x00, &recv_data, PRIMARY);
+            for (int i = 0; i < 10000000; i++) { }
+            camWriteReg(0x00, send, PRIMARY);
+            for (int i = 0; i < 10000000; i++) { }
+            send++;
+            if(send < 5) {
+                send = 0;
+            }
+        }
 
-    vTaskStartScheduler();
+    }
 }
