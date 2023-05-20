@@ -121,6 +121,24 @@ obc_error_code_t sciReadByte(unsigned char *character) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
 
+obc_error_code_t sciReadBytes(size_t numBytes, uint8_t *buf) {
+    SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
+    configASSERT(mutex != NULL);
+
+    if (buf == NULL || numBytes < 1) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) != pdTRUE) {
+        return OBC_ERR_CODE_MUTEX_TIMEOUT;
+    }
+
+    sciReceive(UART_READ_REG, numBytes, buf);
+
+    xSemaphoreGive(mutex);
+    return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
     configASSERT(mutex != NULL);

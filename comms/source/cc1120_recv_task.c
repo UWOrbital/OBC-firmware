@@ -5,6 +5,7 @@
 #include "cc1120_txrx.h"
 #include "ax25.h"
 #include "obc_task_config.h"
+#include "obc_sci_io.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -68,7 +69,8 @@ static void vRecvTask(void * pvParameters){
                     packed_ax25_packet_t recvData;
                     uint32_t recvDataLen = AX25_PKT_LEN;
                     // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
-                    LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, recvDataLen));
+                    // LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, recvDataLen));
+                    LOG_IF_ERROR_CODE(sciReadBytes(AX25_PKT_LEN, recvData.data));
                     // Send the received bytes to decode data queue to be decoded and sent to command manager
                     if(errCode == OBC_ERR_CODE_SUCCESS){
                         LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));

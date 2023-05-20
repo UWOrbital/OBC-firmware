@@ -81,7 +81,7 @@ static void vCommsManagerTask(void * pvParameters) {
                 // LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
                 break;
             case BEGIN_UPLINK:
-                // startUplink();
+                startUplink();
         }
     }
 }

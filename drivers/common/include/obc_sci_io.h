@@ -38,6 +38,15 @@ obc_error_code_t sciPrintf(const char *s, ...);
 obc_error_code_t sciReadByte(unsigned char *character);
 
 /**
+ * @brief Read raw bytes from UART_READ_REG by polling.
+ * 
+ * @param numBytes Number of bytes to read
+ * @param buf Buffer to store the bytes read
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t sciReadBytes(size_t numBytes, uint8_t *buf);
+
+/**
  * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.
  * 
  * @param text The text that stores the characters read
