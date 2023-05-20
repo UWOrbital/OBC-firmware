@@ -8,6 +8,7 @@
 #include "obc_task_config.h"
 #include "send_telemetry.h"
 #include "encode_telemetry.h"
+#include "decode_telemetry.h"
 #include "cc1120_recv_task.h"
 
 #include <FreeRTOS.h>
@@ -50,6 +51,9 @@ void initCommsManager(void) {
     if (commsQueueHandle == NULL) {
         commsQueueHandle = xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH, COMMS_MANAGER_QUEUE_ITEM_SIZE, commsQueueStack, &commsQueue);
     }
+
+    initRecvTask();
+    initDecodeTask();
 }
 
 obc_error_code_t sendToCommsQueue(comms_event_t *event) {
