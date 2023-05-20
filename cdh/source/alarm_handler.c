@@ -23,7 +23,7 @@ static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
 static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER_QUEUE_ITEM_SIZE];
 
-#define ALARM_QUEUE_SIZE 64U
+#define ALARM_QUEUE_SIZE 24U
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
 
@@ -59,13 +59,6 @@ void initAlarmHandler(void) {
 
 static void alarmHandler(void * pvParameters) {
     obc_error_code_t errCode;
-
-    // TODO: Move this to a separate init function. Probably to where rtcInit() is called.
-    rtc_control_t rtcControl = {0};
-    LOG_IF_ERROR_CODE(getControlRTC(&rtcControl));
-    rtcControl.A1IE = 1;
-    rtcControl.INTCN = 1;
-    LOG_IF_ERROR_CODE(setControlRTC(&rtcControl));
 
     while(1) {
         alarm_handler_event_t event;
@@ -113,19 +106,11 @@ static void alarmHandler(void * pvParameters) {
                     break;
                 }
 
-                // TODO: Maybe fetch current time from the RTC instead of the local time
-                if (getCurrentUnixTime() < alarm.unixTime) {
-                    // The alarm interrupt fired before the alarm time for some reason
-                    // Reset the alarm to the correct time
-                    rtc_date_time_t alarmDateTime;
-                    LOG_IF_ERROR_CODE(unixToDatetime(alarm.unixTime, &alarmDateTime));
-                    if (errCode != OBC_ERR_CODE_SUCCESS) {
-                        break;
-                    }
-
-                    rtc_alarm_time_t alarmTime;
-                    datetimeToAlarmTime(&alarmDateTime, &alarmTime);
-                    LOG_IF_ERROR_CODE(setAlarm1RTC(RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS, alarmTime));
+                // Local time incremented since timekeeper might
+                // not have updated the local time yet
+                static const uint32_t tol = 1; // tolerance of 1 second
+                if (getCurrentUnixTime() + tol < alarm.unixTime) {
+                    LOG_ERROR_CODE(OBC_ERR_CODE_RTC_ALARM_EARLY);
                     break;
                 }
 
@@ -147,10 +132,18 @@ static void alarmHandler(void * pvParameters) {
                         break;
                     }
 
-                    // TODO: Select callback based on alarm type
-                    LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
+                    switch (alarm.type) {
+                        case ALARM_TYPE_DEFAULT:
+                            LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
+                            break;
+                        case ALARM_TYPE_TIME_TAGGED_CMD:
+                            LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg));
+                            break;
+                        default:
+                            LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);
+                            break;
+                    }
                 }
-
                 break;
             }
 

@@ -33,9 +33,37 @@ static uint16_t calcDayOfYear(uint8_t month, uint8_t day, uint16_t year);
 // Global Unix time
 static volatile uint32_t currTime;
 
-void initTime(void) {
+obc_error_code_t initTime(void) {
+    obc_error_code_t errCode;
+
     memset((void *)&currTime, 0, sizeof(currTime));
-    syncUnixTime();
+
+    // Initialize the RTC
+    
+    // TODO: Replace hardcoded datetime with fetch from FRAM
+    // or synch with ground station
+    rtc_date_time_t rtcDateTime;
+    rtcDateTime.date.year = 23; // 2023
+    rtcDateTime.date.month = 1;
+    rtcDateTime.date.date = 1;
+    rtcDateTime.time.hours = 0;
+    rtcDateTime.time.minutes = 0;
+    rtcDateTime.time.seconds = 0;
+    
+    // Set current date and time
+    RETURN_IF_ERROR_CODE(rtcInit(&rtcDateTime));
+
+    // Enable alarm 1 interrupt
+    rtc_control_t rtcControl = {0};
+    RETURN_IF_ERROR_CODE(getControlRTC(&rtcControl));
+    rtcControl.A1IE = 1;
+    rtcControl.INTCN = 1;
+    RETURN_IF_ERROR_CODE(setControlRTC(&rtcControl));
+
+    // Synch the local Unix time with the RTC
+    RETURN_IF_ERROR_CODE(syncUnixTime());
+
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 uint32_t getCurrentUnixTime(void) {
@@ -61,22 +89,10 @@ void incrementCurrentUnixTime(void) {
 obc_error_code_t syncUnixTime(void) {
     obc_error_code_t errCode;
 
-    rtc_date_time_t datetime = {
-        .date = {
-            .date = 1,
-            .month = 4,
-            .year = 23
-        },
-        .time = {
-            .hours = 12,
-            .minutes = 30,
-            .seconds = 30
-        }
-    };
+    rtc_date_time_t datetime;
 
-    // TODO: Uncomment this once the I2C infinite loop bug is fixed
-    // For now, always sync to the same date/time
-    // RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
+    // Possible Bug: Infinite loop if no RTC is connected
+    RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
 
     uint32_t unixTime;
     RETURN_IF_ERROR_CODE(datetimeToUnix(&datetime, &unixTime));

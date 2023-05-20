@@ -16,12 +16,24 @@ typedef enum {
 // Alarm handler callback definition
 typedef union {
     obc_error_code_t (*defaultCallback)(void);
+    obc_error_code_t (*cmdCallback)(cmd_msg_t *);
 } alarm_handler_callback_def_t;
+
+typedef enum {
+    ALARM_TYPE_DEFAULT,
+    ALARM_TYPE_TIME_TAGGED_CMD,
+} alarm_type_t;
 
 // All required information for an alarm
 typedef struct {
     uint32_t unixTime;
+    alarm_type_t type;
     alarm_handler_callback_def_t callbackDef;
+    
+    // Store any additional information here
+    union {
+        cmd_msg_t cmdMsg;
+    };
 } alarm_handler_alarm_info_t;
 
 // Alarm handler event struct
