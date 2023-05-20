@@ -13,11 +13,9 @@ typedef enum {
     ALARM_HANDLER_ALARM_TRIGGERED, // RTC alarm triggered
 } alarm_handler_event_id_t;
 
-typedef obc_error_code_t (*alarm_handler_default_callback_t)(void);
-
 // Alarm handler callback definition
 typedef union {
-    alarm_handler_default_callback_t defaultCallback;
+    obc_error_code_t (*defaultCallback)(void);
 } alarm_handler_callback_def_t;
 
 // All required information for an alarm
