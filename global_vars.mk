@@ -46,6 +46,9 @@ CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT)
 LOG_LEVEL ?= LOG_TRACE
 CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
+CMD_POLICY ?= CMD_POLICY_RND
+CPP_FLAGS += -DOBC_ACTIVE_POLICY=$(CMD_POLICY) 
+
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
 	CPP_FLAGS += -DDEBUG
@@ -75,6 +78,8 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/core/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
+
+INCLUDE_DIRS += -I"$(ROOT_DIR)/tiny_aes"
 
 LIBS := 
 
