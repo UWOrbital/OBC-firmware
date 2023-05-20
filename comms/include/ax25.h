@@ -7,7 +7,9 @@
 #include <stdint.h>
 
 #define AX25_TOTAL_FLAG_BYTES 2
-#define AX25_ADDRESS_BYTES 16
+#define AX25_SRC_ADDR_BYTES 7
+#define AX25_DEST_ADDR_BYTES 7
+#define AX25_ADDRESS_BYTES (AX25_SRC_ADDR_BYTES + AX25_DEST_ADDR_BYTES)
 #define AX25_CONTROL_BYTES 2
 #define AX25_PID_BYTES 1
 #define AX25_FCS_BYTES 2
@@ -20,17 +22,17 @@
                       AX25_INFO_BYTES)
 
 typedef struct {
-    uint8_t flag_start;
-    uint8_t flag_end;
-    uint8_t destination[AX25_ADDRESS_BYTES];
-    uint8_t source[AX25_ADDRESS_BYTES];
+    uint8_t flagStart;
+    uint8_t flagEnd;
+    uint8_t destination[AX25_DEST_ADDR_BYTES];
+    uint8_t source[AX25_SRC_ADDR_BYTES];
     uint8_t control;
     uint8_t pid;
     uint8_t data[AX25_INFO_BYTES];
     uint16_t fcs;
 } ax25_packet_t;
 
-typedef union {
+typedef struct {
     uint8_t data[AX25_PKT_LEN];
 } packed_ax25_packet_t;
 

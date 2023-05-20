@@ -1,7 +1,8 @@
 #ifndef COMMON_INCLUDE_OBC_PRIVILEGE_H_
 #define COMMON_INCLUDE_OBC_PRIVILEGE_H_
 
-#include "os_portmacro.h"
+#include <FreeRTOS.h>
+#include <os_portmacro.h>
 
 /**
  * @brief Set processor to privileged mode
