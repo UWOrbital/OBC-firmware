@@ -38,4 +38,10 @@ typedef struct {
     uint32_t data3;
 } fram_eps_data_t;
 
+typedef struct {
+    uint32_t data1;
+    uint32_t data2;
+    uint32_t data3;
+} fram_payload_data_t;
+
 #endif  //COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_

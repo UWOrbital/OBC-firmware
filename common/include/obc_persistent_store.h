@@ -19,4 +19,7 @@ obc_error_code_t setPersistentCDHData(fram_cdh_data_t data);
 obc_error_code_t getPersistentEPSData(fram_eps_data_t *buffer);
 obc_error_code_t setPersistentEPSData(fram_eps_data_t data);
 
+obc_error_code_t getPersistentPayloadData(fram_payload_data_t *buffer);
+obc_error_code_t setPersistentPayloadData(fram_payload_data_t data);
+
 #endif //COMMON_INCLUDE_OBC_PERSISTENT_STORE_H_
