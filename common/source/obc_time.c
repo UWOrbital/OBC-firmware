@@ -42,7 +42,7 @@ obc_error_code_t initTime(void) {
     
     // TODO: Replace hardcoded datetime with fetch from FRAM
     // or synch with ground station
-    rtc_date_time_t rtcDateTime;
+    rtc_date_time_t rtcDateTime = {0};
     rtcDateTime.date.year = 23; // 2023
     rtcDateTime.date.month = 1;
     rtcDateTime.date.date = 1;
@@ -89,9 +89,8 @@ void incrementCurrentUnixTime(void) {
 obc_error_code_t syncUnixTime(void) {
     obc_error_code_t errCode;
 
-    rtc_date_time_t datetime;
+    rtc_date_time_t datetime = {0};
 
-    // Possible Bug: Infinite loop if no RTC is connected
     RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
 
     uint32_t unixTime;

@@ -82,13 +82,15 @@ static void vSupervisorTask(void * pvParameters) {
     obc_error_code_t errCode;
 
     ASSERT(supervisorQueueHandle != NULL);
-    
+
     /* Initialize critical peripherals */
     LOG_IF_ERROR_CODE(setupFileSystem()); // microSD card
     LOG_IF_ERROR_CODE(initTime()); // RTC
 
     /* Initialize other tasks */
-    initSwWatchdog();
+    // Don't start running any tasks until all tasks are initialized
+    taskENTER_CRITICAL();
+    
     initTimekeeper();
     initAlarmHandler();
 
@@ -98,6 +100,10 @@ static void vSupervisorTask(void * pvParameters) {
     initCommsManager();
     initEPSManager();
     initPayloadManager();
+    
+    taskEXIT_CRITICAL();
+
+    initSwWatchdog();
 
     // TODO: Deal with errors
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
@@ -105,7 +111,6 @@ static void vSupervisorTask(void * pvParameters) {
     /* Send initial messages to system queues */
     sendStartupMessages();    
 
-    // TODO: Only enter normal state after initial checks are complete
     // TODO: Deal with errors
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
     

@@ -21,7 +21,7 @@
 #define I2C_MUTEX_TIMEOUT portMAX_DELAY
 
 // Timeout to wait for a transfer to complete
-#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(1000)
+#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
 
 STATIC_ASSERT(I2C_REG == i2cREG1, "I2C_REG must be i2cREG1");
 
@@ -58,12 +58,15 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf) {
         return OBC_ERR_CODE_MUTEX_TIMEOUT;
     }
     
+    taskENTER_CRITICAL();
     i2cSetSlaveAdd(I2C_REG, sAddr);
     i2cSetDirection(I2C_REG, I2C_TRANSMITTER);
     i2cSetCount(I2C_REG, size);
     i2cSetMode(I2C_REG, I2C_MASTER);
     i2cSetStop(I2C_REG);
     i2cSetStart(I2C_REG);
+    taskEXIT_CRITICAL();
+    
     i2cSend(I2C_REG, size, buf);
 
     if (xSemaphoreTake(i2cTransferComplete, I2C_TRANSFER_TIMEOUT) != pdTRUE) {
@@ -91,12 +94,15 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf) {
         return OBC_ERR_CODE_MUTEX_TIMEOUT;
     }
 
+    taskENTER_CRITICAL();
     i2cSetSlaveAdd(I2C_REG, sAddr);
     i2cSetDirection(I2C_REG, I2C_RECEIVER);
     i2cSetCount(I2C_REG, size);
     i2cSetMode(I2C_REG, I2C_MASTER);
     i2cSetStop(I2C_REG);
     i2cSetStart(I2C_REG);
+    taskEXIT_CRITICAL();
+
     i2cReceive(I2C_REG, size, buf);
 
     if (xSemaphoreTake(i2cTransferComplete, I2C_TRANSFER_TIMEOUT) != pdTRUE) {
@@ -150,11 +156,29 @@ obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t 
 void i2cNotification(i2cBASE_t *i2c, uint32 flags) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    if (i2c == I2C_REG) {
-        if (flags & I2C_SCD_INT) {
-            xSemaphoreGiveFromISR(i2cTransferComplete, &xHigherPriorityTaskWoken);
-        }
-    }
+    if (flags & I2C_SCD_INT) {
+        xSemaphoreGiveFromISR(i2cTransferComplete, &xHigherPriorityTaskWoken);
+    } 
     
+    if (flags & I2C_NACK_INT) {
+        i2c->STR = (uint32)I2C_NACK_INT;
+        i2cSetStop(i2c);
+    } 
+    
+    if (flags & I2C_AL_INT) {
+        i2c->STR = (uint32)I2C_AL_INT;
+        i2cSetStop(i2c);
+    } 
+    
+    if (flags & I2C_ARDY_INT) {
+        i2cSetStop(i2c);
+    } 
+    
+    if (flags & I2C_AAS_INT) {
+        i2cSetStop(i2c);
+    }
+
+    i2cClearSCD(i2c);    
+
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }

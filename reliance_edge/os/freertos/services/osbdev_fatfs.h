@@ -65,7 +65,7 @@ static REDSTATUS DiskOpen(
         failure.  Empirically, this has been observed to succeed on the second
         try, so trying 10x more than that provides a margin of error.
     */
-    for(ulTries = 0U; ulTries < 20U; ulTries++)
+    for(ulTries = 0U; ulTries < 5U; ulTries++)
     {
         /*  Assuming that the volume number is also the correct drive number.
             If this is not the case in your environment, a static constant array
