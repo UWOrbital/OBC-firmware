@@ -83,14 +83,14 @@ obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat);
  * @param reglist List of registers and data to write
  * @return Error code indicating if the writes were successful
  */
-obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[]);
+obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t reglistLen);
 
 /**
  * @brief Select an I2C port on the TCA9458a multiplexer
  * @param tca Port number to select
  * @return Error code indicating if an ACK was received
  */
-obc_error_code_t tcaSelect(uint8_t tca);
+obc_error_code_t tcaSelect(camera_t cam);
 
 /**
  * @brief Read one bit from a register over SPI

@@ -16,14 +16,14 @@
 
 static cam_settings_t cam_config[] = {
     [PRIMARY] = {   .spi_config = {
-                        .CS_HOLD = FALSE,
-                        .WDEL = FALSE,
+                        .CS_HOLD = false,
+                        .WDEL = false,
                         .DFSEL = CAM_SPI_DATA_FORMAT,
                         .CSNR = SPI_CS_NONE },
                     .cs_num = CAM_CS_1 },
     [SECONDARY] = {   .spi_config = {
-                        .CS_HOLD = FALSE,
-                        .WDEL = FALSE,
+                        .CS_HOLD = false,
+                        .WDEL = false,
                         .DFSEL = CAM_SPI_DATA_FORMAT,
                         .CSNR = SPI_CS_NONE },
                     .cs_num = CAM_CS_2 },
@@ -43,8 +43,10 @@ obc_error_code_t camReadReg(uint8_t addr, uint8_t *rx_data, camera_t cam) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     addr = addr & 0x7F;
-    RETURN_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, addr));
-    RETURN_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &cam_config[cam].spi_config, rx_data));
+    errCode = spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, addr);
+    if(!errCode) {
+        errCode = spiReceiveByte(CAM_SPI_REG, &cam_config[cam].spi_config, rx_data);
+    }
     RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     return errCode;
 }
@@ -52,7 +54,7 @@ obc_error_code_t camReadReg(uint8_t addr, uint8_t *rx_data, camera_t cam) {
 obc_error_code_t camWriteByte(uint8_t byte, camera_t cam) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
-    RETURN_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, byte));
+    errCode = spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, byte);
     RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     return errCode;
 }
@@ -74,26 +76,22 @@ obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat) {
     return errCode;
 }
 
-obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[]) {
+obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t reglistLen) {
     obc_error_code_t errCode;
-    int reg_addr = 0;
-    int reg_val = 0;
-    const sensor_reg_t *next = reglist;
 
-    while (!errCode && ((reg_addr != 0xffff) || (reg_val != 0xff))) {
-        reg_addr = next->reg;
-        reg_val = next->val;
-        errCode = camWriteSensorReg16_8(reg_addr, reg_val);
-        next++;
+    for (int i = 0; i < reglistLen; i++) {
+        RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(reglist[i].reg, reglist[i].val));
     }
     return errCode;
 }
 
-obc_error_code_t tcaSelect(uint8_t tca) {
-    if (tca > 7) {
-        return OBC_ERR_CODE_INVALID_ARG;
+obc_error_code_t tcaSelect(camera_t cam) {
+    uint8_t tca = 0;
+    if (cam == PRIMARY) {
+        tca = (1 << 0);
+    } else {
+        tca = (1 << 1);
     }
-    tca = (1 << tca);
     return i2cSendTo(TCA_I2C_ADDR, 1, &tca);
 }
 

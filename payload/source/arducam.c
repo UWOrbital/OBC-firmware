@@ -25,7 +25,7 @@
 
 static uint8_t m_fmt;
 // Todo: support multiple image captures in different files
-static const char fname[] = "/captures/imageX";
+static const char fname[] = "image.jpg";
 
 void setFormat(image_format_t fmt) {
   if (fmt == BMP)
@@ -41,14 +41,14 @@ obc_error_code_t initCam(void) {
   // Reset camera
   RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
   // Setup at 320x420 resolution
-  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_QVGA_Preview_Config)));
+  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_QVGA_Preview_Config), PREVIEW_CONFIG_LEN));
   vTaskDelay(pdMS_TO_TICKS(1));
   if (m_fmt == JPEG) {
     vTaskDelay(pdMS_TO_TICKS(1));
     // Switch to JPEG capture
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_JPEG_Capture_QSXGA_Config)));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_JPEG_Capture_QSXGA_Config), JPEG_CONFIG_LEN));
     // Switch to lowest JPEG resolution
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config)));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
 
     vTaskDelay(pdMS_TO_TICKS(1));
     // Vertical flip
@@ -74,7 +74,7 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
   {
     // Todo: all other resolutions are unimplemented
     case OV5642_320x240:
-      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config));
+      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN);
       break;
     case OV5642_640x480:
       // camWriteSensorRegs16_8(ov5642_640x480);
@@ -95,7 +95,7 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
       // camWriteSensorRegs16_8(ov5642_2592x1944);
       break;
     default:
-      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config));
+      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN);
       break;
   }
   return errCode;
@@ -173,7 +173,7 @@ obc_error_code_t readFifoBurst(camera_t cam) {
   RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, 1));
 
   // Set fifo to burst mode, receive continuous data until EOF
-  RETURN_IF_ERROR_CODE(setFifoBurst(cam));
+  errCode = setFifoBurst(cam);
   camReadByte(&temp, cam);
   length--;
   while(length-- && !errCode) {
@@ -182,12 +182,14 @@ obc_error_code_t readFifoBurst(camera_t cam) {
     if(!errCode) {
 
       if(is_header == true) {
-        RETURN_IF_ERROR_CODE(writeFile(file, &temp, 1));
+        errCode = writeFile(file, &temp, 1);
       }
       else if((temp == 0xD8) & (temp_last == 0xFF)) {
         is_header = true;
-        RETURN_IF_ERROR_CODE(writeFile(file, &temp_last, 1));
-        RETURN_IF_ERROR_CODE(writeFile(file, &temp, 1));
+        errCode = writeFile(file, &temp_last, 1);
+        if (!errCode) {
+          errCode = writeFile(file, &temp, 1);
+        }
       }
       if((temp == 0xD9) && (temp_last == 0xFF)) {
         break;
@@ -198,10 +200,15 @@ obc_error_code_t readFifoBurst(camera_t cam) {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
   
-  RETURN_IF_ERROR_CODE(closeFile(file));
-
   if(!errCode) {
     errCode = deassertChipSelect(CAM_SPI_PORT, 1);
+  } else {
+    // If there was an error during capture, deassert without an error check
+    deassertChipSelect(CAM_SPI_PORT, 1);
+  }
+
+  if(!errCode) {
+    errCode = closeFile(file);
   }
   
   return errCode;
