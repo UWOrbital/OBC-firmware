@@ -5,6 +5,10 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 
+#if COMMS_PHY == COMMS_PHY_UART
+#include "obc_sci_io.h"
+#endif
+
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
@@ -90,6 +94,10 @@ static void vCC1120TransmitTask(void *pvParameters) {
         }
         
         // Write to CC1120 FIFO
+        #if COMMS_PHY == COMMS_PHY_UART
+        LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25_pkt.data, AX25_PKT_LEN));
+        #else
         LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, AX25_PKT_LEN));
+        #endif
     }
 }

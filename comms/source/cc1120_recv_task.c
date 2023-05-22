@@ -6,6 +6,10 @@
 #include "ax25.h"
 #include "obc_task_config.h"
 
+#if COMMS_PHY == COMMS_PHY_UART
+#include "obc_sci_io.h"
+#endif
+
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
@@ -66,9 +70,14 @@ static void vRecvTask(void * pvParameters){
                 // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
                 while(isStillUplinking){
                     packed_ax25_packet_t recvData;
-                    uint32_t recvDataLen = AX25_PKT_LEN;
                     // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
-                    LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, recvDataLen));
+
+                    #if COMMS_PHY == COMMS_PHY_UART
+                        LOG_IF_ERROR_CODE(sciReadBytes(recvData.data, AX25_PKT_LEN));
+                    #else
+                        LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, AX25_PKT_LEN));
+                    #endif
+
                     // Send the received bytes to decode data queue to be decoded and sent to command manager
                     if(errCode == OBC_ERR_CODE_SUCCESS){
                         LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
