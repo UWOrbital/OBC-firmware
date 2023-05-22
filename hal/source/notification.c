@@ -193,15 +193,6 @@ void edgeNotification(hetBASE_t * hetREG,uint32 edge)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (37) */
-/* USER CODE END */
-}
-
-/* USER CODE BEGIN (38) */
-/* USER CODE END */
-void hetNotification(hetBASE_t *het, uint32 offset)
-{
-/*  enter user code between the USER CODE BEGIN and USER CODE END. */
-/* USER CODE BEGIN (39) */
     if(het == hetREG1){
         switch (offset){
             // See section 3.4.1.1
@@ -217,6 +208,15 @@ void hetNotification(hetBASE_t *het, uint32 offset)
                 break;
         }
     }
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (38) */
+/* USER CODE END */
+void hetNotification(hetBASE_t *het, uint32 offset)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (39) */
 /* USER CODE END */
 }
 
