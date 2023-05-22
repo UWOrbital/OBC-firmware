@@ -2,21 +2,24 @@
 #define COMMS_INCLUDE_AES128_H_
 
 #include "obc_errors.h"
+
 #include <stdint.h>
 #include <stddef.h>
 
 #define AES_BLOCK_SIZE 16U
+#define AES_KEY_SIZE 16U
 #define AES_IV_SIZE 16U
-#define RS_DECODED_SIZE 223U
+#define RS_DECODED_SIZE 223U // Currently included in both AES and FEC
+// TODO: Fix circular includes so that this can be removed
 
 typedef struct {
     uint8_t iv[AES_IV_SIZE];
-    uint8_t data[RS_DECODED_SIZE-AES_IV_SIZE];
+    uint8_t ciphertext[RS_DECODED_SIZE-AES_IV_SIZE];
 } aes_struct_t;
 
 typedef union {
     aes_struct_t aesStruct;
-    uint8_t rawData[AES_IV_SIZE];
+    uint8_t rawData[RS_DECODED_SIZE];
 } aes_data_t;
 
 /**

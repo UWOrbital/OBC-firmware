@@ -9,6 +9,7 @@
 #include "send_telemetry.h"
 #include "encode_telemetry.h"
 #include "cc1120_recv_task.h"
+#include "aes128.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -34,6 +35,11 @@ static QueueHandle_t commsQueueHandle = NULL;
 static StaticQueue_t commsQueue;
 static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH*COMMS_MANAGER_QUEUE_ITEM_SIZE];
 
+static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03,
+                                                      0x04, 0x05, 0x06, 0x07,
+                                                      0x08, 0x09, 0x0A, 0x0B,
+                                                      0x0C, 0x0D, 0x0E, 0x0F};
+
 /**
  * @brief	Comms Manager task.
  * @param	pvParameters	Task parameters.
@@ -50,6 +56,9 @@ void initCommsManager(void) {
     if (commsQueueHandle == NULL) {
         commsQueueHandle = xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH, COMMS_MANAGER_QUEUE_ITEM_SIZE, commsQueueStack, &commsQueue);
     }
+    
+    // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
+    initializeAesCtx(TEMP_STATIC_KEY);
 }
 
 obc_error_code_t sendToCommsQueue(comms_event_t *event) {

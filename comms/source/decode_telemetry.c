@@ -44,20 +44,24 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  * 
- * @param cmdBytes 256 byte array storing the completely decoded data
+ * @param cmdBytes 223B-AES_IV_SIZE array storing the completely decoded data
+ * @param dataLen length of the data in cmdBytes
  * 
  * @return obc_error_code_t - whether or not the data was successfullysent to the command manager
 */
-obc_error_code_t handleCommands(uint8_t *cmdBytes){
+obc_error_code_t handleCommands(uint8_t *cmdBytes, uint8_t dataLen){
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     if(cmdBytes == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+    if (dataLen == 0) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
     uint32_t bytesUnpacked = 0;
     // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
     // If the command id is the id for end of transmission, isStillUplinking should be set to false
-    while(bytesUnpacked < AES_BLOCK_SIZE){
-        // Check if we have reached
+    while(bytesUnpacked < dataLen){
+        // Check if we have reached end of transmission
         if(cmdBytes[bytesUnpacked] == CMD_END_OF_TRANSMISSION){
             isStillUplinking = false;
             // give RX semaphore so that the cc1120Receive can unblock and return
@@ -67,7 +71,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
             }
             return OBC_ERR_CODE_SUCCESS;
         }
-        if(cmdBytes[bytesUnpacked] == 0){
+        if(cmdBytes[bytesUnpacked] == CMD_END_OF_FRAME){
             // means we have reached the end of the packet and rest can be ignored
             return OBC_ERR_CODE_SUCCESS;
         }
@@ -118,7 +122,7 @@ static void vDecodeTask(void * pvParameters){
  * 
  * @param data - packed ax25 packet with received data
  * @param rsData - holds packed reed solomon data
- * @param aesData - pointer to an aesData type, which holds the data to decrypt & the IV
+ * @param aesData - pointer to an aes_data_t type, which holds the data to decrypt & the IV
  * @param decryptedData - holds the decrypted data from the aesBlock
  * 
  * @return obc_error_code_t - whether or not the data was completely decoded successfully 
@@ -127,9 +131,9 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
     RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData));
-    uint8_t decryptedData[AES_BLOCK_SIZE];
+    uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE];
     RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, (size_t) RS_DECODED_SIZE, decryptedData));
-    RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
+    RETURN_IF_ERROR_CODE(handleCommands(decryptedData, (size_t) RS_DECODED_SIZE-AES_IV_SIZE));
     return OBC_ERR_CODE_SUCCESS;
 }
 

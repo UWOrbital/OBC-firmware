@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sys_common.h>
 
+// Initialize the AES context
 static struct AES_ctx ctx;
 
 /**
@@ -12,7 +13,7 @@ static struct AES_ctx ctx;
  * 
  * @param aesData Pointer to an aes_data_t union that includes a struct of the IV and data
  * @param dataLen Length of the data to be decrypted
- * @param cmdBytes 128 byte array to store the decrypted data
+ * @param cmdBytes 223B-AES_IV_SIZE array to store the decrypted data
  * 
  * @return obc_error_code_t - whether or not the data was successfully decrypted
 */
@@ -25,7 +26,7 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, size_t dataLen, uint8_t *cmd
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    memcpy(cmdBytes, aesData->aesStruct.data, dataLen-AES_IV_SIZE);
+    memcpy(cmdBytes, aesData->aesStruct.ciphertext, dataLen-AES_IV_SIZE);
     AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
     AES_CTR_xcrypt_buffer(&ctx, cmdBytes, dataLen);
 
