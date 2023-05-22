@@ -69,9 +69,14 @@
 #define SW_WATCHDOG_NAME        "sw_watchdog"
 #define SW_WATCHDOG_PRIORITY    tskIDLE_PRIORITY + 200U
 
-/* CDH-EPS task config */
-#define CDH_EPS_STACK_SIZE 1024U
-#define CDH_EPS_NAME       "cdh_eps"
-#define CDH_EPS_PRIORITY   tskIDLE_PRIORITY + 1U
+/* CDH-EPS TX task config */
+#define CDH_EPS_TX_STACK_SIZE 1024U
+#define CDH_EPS_TX_NAME       "cdh_eps_tx"
+#define CDH_EPS_TX_PRIORITY   tskIDLE_PRIORITY + 1U\
+
+/* CDH-EPS RX task config */
+#define CDH_EPS_RX_STACK_SIZE 1024U
+#define CDH_EPS_RX_NAME       "cdh_eps_rx"
+#define CDH_EPS_RX_PRIORITY   tskIDLE_PRIORITY + 1U
 
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */

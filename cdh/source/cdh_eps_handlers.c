@@ -12,25 +12,27 @@
 #include <stddef.h>
 
 static const uint8_t tleIdMap[] = {
-    [TLE_EPS_BOARD_TEMP] = TELEM_EPS_BOARD_TEMP,
-    [TLE_SOLAR_PANEL_1_TEMP] = TELEM_SOLAR_PANEL_1_TEMP,
-    [TLE_SOLAR_PANEL_2_TEMP] = TELEM_SOLAR_PANEL_2_TEMP,
-    [TLE_SOLAR_PANEL_3_TEMP] = TELEM_SOLAR_PANEL_3_TEMP,
-    [TLE_SOLAR_PANEL_4_TEMP] = TELEM_SOLAR_PANEL_4_TEMP,
-    [TLE_COMMS_5V_CURRENT] = TELEM_EPS_COMMS_5V_CURRENT,
-    [TLE_COMMS_3V3_CURRENT] = TELEM_EPS_COMMS_3V3_CURRENT,
-    [TLE_MAG_8V_CURRENT] = TELEM_EPS_MAGNETORQUER_8V_CURRENT,
-    [TLE_ADCS_5V_CURRENT] = TELEM_EPS_ADCS_5V_CURRENT,
-    [TLE_ADCS_3V3_CURRENT] = TELEM_EPS_ADCS_3V3_CURRENT,
-    [TLE_OBC_CURRENT] = TELEM_EPS_OBC_3V3_CURRENT,
-    [TLE_COMMS_5V_VOLTAGE] = TELEM_EPS_COMMS_5V_VOLTAGE,
-    [TLE_COMMS_3V3_VOLTAGE] = TELEM_EPS_COMMS_3V3_VOLTAGE,
-    [TLE_MAG_8V_VOLTAGE] = TELEM_EPS_MAGNETORQUER_8V_VOLTAGE,
-    [TLE_ADCS_5V_VOLTAGE] = TELEM_EPS_ADCS_5V_VOLTAGE,
-    [TLE_ADCS_3V3_VOLTAGE] = TELEM_EPS_ADCS_3V3_VOLTAGE,
-    [TLE_OBC_3V3_VOLTAGE] = TELEM_EPS_OBC_3V3_VOLTAGE 
+    [TLE_EPS_BOARD_TEMP]        = TELEM_EPS_BOARD_TEMP,
+    [TLE_SOLAR_PANEL_1_TEMP]    = TELEM_SOLAR_PANEL_1_TEMP,
+    [TLE_SOLAR_PANEL_2_TEMP]    = TELEM_SOLAR_PANEL_2_TEMP,
+    [TLE_SOLAR_PANEL_3_TEMP]    = TELEM_SOLAR_PANEL_3_TEMP,
+    [TLE_SOLAR_PANEL_4_TEMP]    = TELEM_SOLAR_PANEL_4_TEMP,
+    [TLE_COMMS_5V_CURRENT]      = TELEM_EPS_COMMS_5V_CURRENT,
+    [TLE_COMMS_3V3_CURRENT]     = TELEM_EPS_COMMS_3V3_CURRENT,
+    [TLE_MAG_8V_CURRENT]        = TELEM_EPS_MAGNETORQUER_8V_CURRENT,
+    [TLE_ADCS_5V_CURRENT]       = TELEM_EPS_ADCS_5V_CURRENT,
+    [TLE_ADCS_3V3_CURRENT]      = TELEM_EPS_ADCS_3V3_CURRENT,
+    [TLE_OBC_CURRENT]           = TELEM_EPS_OBC_3V3_CURRENT,
+    [TLE_COMMS_5V_VOLTAGE]      = TELEM_EPS_COMMS_5V_VOLTAGE,
+    [TLE_COMMS_3V3_VOLTAGE]     = TELEM_EPS_COMMS_3V3_VOLTAGE,
+    [TLE_MAG_8V_VOLTAGE]        = TELEM_EPS_MAGNETORQUER_8V_VOLTAGE,
+    [TLE_ADCS_5V_VOLTAGE]       = TELEM_EPS_ADCS_5V_VOLTAGE,
+    [TLE_ADCS_3V3_VOLTAGE]      = TELEM_EPS_ADCS_3V3_VOLTAGE,
+    [TLE_OBC_3V3_VOLTAGE]       = TELEM_EPS_OBC_3V3_VOLTAGE 
 };
 
+#define TLE_MAP_MIN 0x03
+#define TLE_MAP_MAX 0x13
 
 obc_error_code_t subsysShutdownCmdHandler(cdh_eps_queue_msg_t *msg) {
     if(msg == NULL) {
@@ -49,15 +51,21 @@ obc_error_code_t tleMsgHandler(cdh_eps_queue_msg_t *msg) {
     }
 
     LOG_DEBUG("Recieved telemetry packet with ID: %d", msg->tle.id);
+
+    if((msg->tle.id <= TLE_MAP_MIN) || (msg->tle.id >= TLE_MAP_MAX)) {
+        LOG_ERROR_CODE(OBC_ERR_CODE_TELEMETRY_INVALID);
+        LOG_DEBUG("Invalid telemetry id received");
+        return OBC_ERR_CODE_TELEMETRY_INVALID;
+    }
     
-    obc_error_code_t res;
     float data = unpackFloat(msg->tle.data, 0);
     // Initialize telemetry struct to send to telemetry manager
 
     telemetry_data_id_t id;
-    if(tleIdMap[msg->tle.id] == NULL) {
+    if(tleIdMap[msg->tle.id] == 0) {
+        LOG_ERROR_CODE(OBC_ERR_CODE_TELEMETRY_INVALID);
         LOG_DEBUG("Invalid telemetry id received");
-        return res;
+        return OBC_ERR_CODE_TELEMETRY_INVALID;
     }
     else {
         id = tleIdMap[msg->tle.id];
@@ -69,9 +77,7 @@ obc_error_code_t tleMsgHandler(cdh_eps_queue_msg_t *msg) {
      .timestamp = getCurrentUnixTime()
     };
 
-    res = addTelemetryData(&tle);
-
-    return res;
+    return addTelemetryData(&tle);
 }
 
 obc_error_code_t respSubsysShutdownAckHandler(cdh_eps_queue_msg_t *msg) {
@@ -85,7 +91,7 @@ obc_error_code_t respSubsysShutdownAckHandler(cdh_eps_queue_msg_t *msg) {
         LOG_DEBUG("Subsystem shut down request granted");
     }
     else {
-        LOG_DEBUG("Subsystem shut down request granted");
+        LOG_DEBUG("Subsystem shut down request denied");
     }
 
     return res;
@@ -97,7 +103,7 @@ obc_error_code_t respHeartbeatAckHandler(cdh_eps_queue_msg_t *msg) {
     }
 
     obc_error_code_t res = OBC_ERR_CODE_HEARTBEAT_INVALID;
-    if(msg->resp.request = 0) {
+    if(msg->resp.request == 0) {
         res = OBC_ERR_CODE_HEARTBEAT_VALID;
         LOG_DEBUG("Valid heartbeat connection");
     }

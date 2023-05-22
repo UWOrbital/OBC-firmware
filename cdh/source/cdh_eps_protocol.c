@@ -14,9 +14,13 @@
 #define CDH_EPS_QUEUE_LENGTH 25
 #define CDH_EPS_QUEUE_ITEM_SIZE sizeof(cdh_eps_queue_msg_t)
 
-static TaskHandle_t cdhepsProtocolTaskHandle;
-static StaticTask_t cdhepsProtocolTaskBuffer;
-static StackType_t cdhepsProtocolStack[CDH_EPS_STACK_SIZE];
+static TaskHandle_t cdhepsProtocolTxTaskHandle;
+static StaticTask_t cdhepsProtocolTxTaskBuffer;
+static StackType_t cdhepsProtocolTxStack[CDH_EPS_TX_STACK_SIZE];
+
+static TaskHandle_t cdhepsProtocolRxTaskHandle;
+static StaticTask_t cdhepsProtocolRxTaskBuffer;
+static StackType_t cdhepsProtocolRxStack[CDH_EPS_RX_STACK_SIZE];
 
 static QueueHandle_t cdhepsTxQueueHandle;
 static StaticQueue_t cdhepsTxQueue;
@@ -41,7 +45,7 @@ static const uint32_t txMessageBoxes[] = {
     [TLE_ADCS_5V_CURRENT]       = 0,
     [TLE_ADCS_3V3_CURRENT]      = 0,
     [TLE_OBC_CURRENT]           = 0,
-    [TLE_COMMS_5V_CURRENT]      = 0,
+    [TLE_COMMS_5V_VOLTAGE]      = 0,
     [TLE_COMMS_3V3_VOLTAGE]     = 0,
     [TLE_MAG_8V_VOLTAGE]        = 0,
     [TLE_ADCS_5V_VOLTAGE]       = 0,
@@ -68,7 +72,7 @@ static const rx_handler_t rxHandlers[] = {
     [TLE_ADCS_5V_CURRENT]       = tleMsgHandler,
     [TLE_ADCS_3V3_CURRENT]      = tleMsgHandler,
     [TLE_OBC_CURRENT]           = tleMsgHandler,
-    [TLE_COMMS_5V_CURRENT]      = tleMsgHandler,
+    [TLE_COMMS_5V_VOLTAGE]      = tleMsgHandler,
     [TLE_COMMS_3V3_VOLTAGE]     = tleMsgHandler,
     [TLE_MAG_8V_VOLTAGE]        = tleMsgHandler,
     [TLE_ADCS_5V_VOLTAGE]       = tleMsgHandler,
@@ -81,23 +85,38 @@ static const rx_handler_t rxHandlers[] = {
 #define RX_HANDLERS_SIZE (sizeof(rxHandlers) / sizeof(rx_handler_t))
 
 /**
- * @brief Task that manages the CAN TX and RX between CDH and EPS
+ * @brief Tasks to manage the CAN TX and RX between CDH and EPS
  */
-static void cdhepsProtocolTask(void *pvParameters);
+static void cdhepsProtocolTxTask(void *pvParameters);
+static void cdhepsProtocolRxTask(void *pvParameters);
 
 void initCDHEPSProtocol(void)
 {
-    ASSERT((cdhepsProtocolStack != NULL) && (&cdhepsProtocolTaskBuffer != NULL));
-    if (cdhepsProtocolTaskHandle == NULL)
+    ASSERT((cdhepsProtocolTxStack != NULL) && (&cdhepsProtocolTxTaskBuffer != NULL));
+    ASSERT((cdhepsProtocolRxStack != NULL) && (&cdhepsProtocolRxTaskBuffer != NULL));
+
+    if (cdhepsProtocolTxTaskHandle == NULL)
     {
-        cdhepsProtocolTaskHandle = xTaskCreateStatic(
-            cdhepsProtocolTask,
-            CDH_EPS_NAME,
-            CDH_EPS_STACK_SIZE,
+        cdhepsProtocolTxTaskHandle = xTaskCreateStatic(
+            cdhepsProtocolTxTask,
+            CDH_EPS_TX_NAME,
+            CDH_EPS_TX_STACK_SIZE,
             NULL,
-            CDH_EPS_PRIORITY,
-            cdhepsProtocolStack,
-            &cdhepsProtocolTaskBuffer);
+            CDH_EPS_TX_PRIORITY,
+            cdhepsProtocolTxStack,
+            &cdhepsProtocolTxTaskBuffer);
+    }
+
+    if (cdhepsProtocolRxTaskHandle == NULL)
+    {
+        cdhepsProtocolRxTaskHandle = xTaskCreateStatic(
+            cdhepsProtocolRxTask,
+            CDH_EPS_RX_NAME,
+            CDH_EPS_RX_STACK_SIZE,
+            NULL,
+            CDH_EPS_RX_PRIORITY,
+            cdhepsProtocolRxStack,
+            &cdhepsProtocolRxTaskBuffer);
     }
 
     ASSERT((cdhepsTxQueueStack != NULL) && (&cdhepsTxQueue != NULL));
@@ -162,7 +181,7 @@ obc_error_code_t sendToCDHEPSRxQueue(cdh_eps_queue_msg_t *msg)
 }
 
 /* Process queued messages to transmit to EPS*/
-static void processTxMessages(void)
+static void cdhepsProtocolTxTask(void *pvParameters)
 {
     cdh_eps_queue_msg_t msg;
 
@@ -196,7 +215,7 @@ static void processTxMessages(void)
 }
 
 /* Process recieved messages from EPS */
-static void processRxMessages(void)
+static void cdhepsProtocolRxTask(void *pvParameters)
 {
     cdh_eps_queue_msg_t msg;
     /* Process recieved messages from EPS */
@@ -218,14 +237,5 @@ static void processRxMessages(void)
         // Execute callback
         obc_error_code_t errCode = rxHandlers[msg.cmd.id](&msg);
         LOG_IF_ERROR_CODE(errCode);
-    }
-}
-
-static void cdhepsProtocolTask(void *pvParameters)
-{
-    while (1)
-    {
-        processTxMessages();
-        processRxMessages();
     }
 }
