@@ -5,7 +5,7 @@
 #include <sys_common.h>
 
 /**
- * @brief adds ax.25 headers onto telemtry being downlinked and stores the length of the packet in ac25Data->length
+ * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  * 
  * @param rsData reed solomon data that needs ax.25 headers added onto it
  * @param out array to store the ax.25 frame
