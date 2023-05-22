@@ -13,6 +13,7 @@
 #include <i2c.h>
 #include <spi.h>
 #include <can.h>
+#include <het.h>
 
 int main(void) {
 
@@ -22,6 +23,7 @@ int main(void) {
     i2cInit();
     spiInit();
     canInit();
+    hetInit();
 
     // Initialize logger
     initLogger();

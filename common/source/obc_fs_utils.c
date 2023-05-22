@@ -4,6 +4,30 @@
 
 #include <redposix.h>
 
+obc_error_code_t setupFileSystem(void) {
+    int32_t ret;
+
+    ret = red_init();
+    if (ret != 0) {
+        return OBC_ERR_CODE_FS_INIT_FAILED;
+    }
+
+    // TODO: FS formatting doesn't need to be done every time
+    // since it wipes the microSD card. We should only do it
+    // if the card is new or if the user requests it.
+    ret = red_format("");
+    if (ret != 0) {
+        return OBC_ERR_CODE_FS_FORMAT_FAILED;
+    }
+
+    ret = red_mount("");
+    if (ret != 0) {
+        return OBC_ERR_CODE_FS_MOUNT_FAILED;
+    }
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t mkDir(const char *dirPath) {
     int32_t ret = red_mkdir(dirPath);
     if (ret != 0) {

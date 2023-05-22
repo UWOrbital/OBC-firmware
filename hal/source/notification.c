@@ -132,7 +132,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // See section 3.4.1.1
             // Triggered on rising edge so RX FIFO can be read once the signal that RX FIFO is above TXRX_INTERRUPT_THRESHOLD
             // is asserted to avoid a FIFO overflow
-            case CC1120_RX_THR_PKT_PIN:
+            case CC1120_RX_THR_PKT_gioPORTA_PIN:
                 rxFifoReadyCallback();
                 break;
         }
@@ -207,12 +207,12 @@ void hetNotification(hetBASE_t *het, uint32 offset)
             // See section 3.4.1.1
             // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
             // is deasserted to avoid a FIFO
-            case CC1120_TX_THR_PKT_PIN:
+            case CC1120_TX_THR_PKT_hetPORT1_PIN:
                 txFifoReadyCallback();
                 break;
             // See section 3.4.1.1
             // triggered on falling edge once TX FIFO has been completely emptied
-            case CC1120_PKT_SYNC_RXTX_PIN:
+            case CC1120_PKT_SYNC_RXTX_hetPORT1_PIN:
                 txFifoEmptyCallback();
                 break;
         }
