@@ -1,6 +1,6 @@
 #include "correct/reed-solomon.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 size_t block_size = 255;
 int power_max = 8;

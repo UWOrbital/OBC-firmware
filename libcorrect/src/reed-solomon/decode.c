@@ -1,6 +1,6 @@
 #include "correct/reed-solomon/encode.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 // calculate all syndromes of the received polynomial at the roots of the generator
 // because we're evaluating at the roots of the generator, and because the transmitted

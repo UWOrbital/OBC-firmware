@@ -1,6 +1,6 @@
 #include "correct/reed-solomon/reed-solomon.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 // coeff must be of size nroots + 1
 // e.g. 2 roots (x + alpha)(x + alpha^2) yields a poly with 3 terms x^2 + g0*x + g1

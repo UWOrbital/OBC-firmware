@@ -2,8 +2,8 @@
 #include <string.h>
 
 #include "fec_shim.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 typedef struct {
     correct_reed_solomon *rs;

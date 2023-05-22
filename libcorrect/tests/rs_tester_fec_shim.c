@@ -1,6 +1,6 @@
 #include "rs_tester_fec_shim.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 void rs_fec_encode(void *encoder, uint8_t *msg, size_t msg_length,
                    uint8_t *msg_out) {

@@ -1,6 +1,6 @@
 #include "correct/reed-solomon/polynomial.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 polynomial_t polynomial_create(unsigned int order) {
     polynomial_t polynomial;

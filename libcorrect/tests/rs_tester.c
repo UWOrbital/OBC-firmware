@@ -1,6 +1,6 @@
 #include "rs_tester.h"
-#include "../hal/include/FreeRTOS.h"
-#include "../hal/include/os_portable.h"
+#include "FreeRTOS.h"
+#include "os_portable.h"
 
 void shuffle(int *a, size_t len) {
     for (size_t i = 0; i < len - 2; i++) {
