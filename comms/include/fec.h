@@ -26,7 +26,6 @@ typedef struct {
  * 
  * @param telemData packed telemtry data array that needs to be encoded
  * @param rsData 255 byte array with the reed solomon encoded data
- * @param rs reed solomon encryption used to encode the reed solomon data
  * 
  * @return obc_error_code_t - whether or not the data was successfully encoded
 */
@@ -38,7 +37,6 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
  * @param rsData 255 byte array that has encoded reed solomon data
  * @param aesSerializedData pointer to an array of bytes to hold the decoded reed solomon data
  * @param aesSerializedDataLen length of the aesSerializedData array
- * @param rs reed solomon decryption used to decode the reed solomon data
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
