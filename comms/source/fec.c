@@ -23,7 +23,7 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
     if (rsData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if((uint8_t) correct_reed_solomon_encode(rs, telemData->data, REED_SOLOMON_DECODED_BYTES, rsData->data) < REED_SOLOMON_DECODED_BYTES){
+    if((uint8_t) correct_reed_solomon_encode(rs, telemData->data, REED_SOLOMON_DECODED_BYTES, rsData->data) < REED_SOLOMON_ENCODED_BYTES){
         return OBC_ERR_CODE_CORRUPTED_MSG;
     }
 

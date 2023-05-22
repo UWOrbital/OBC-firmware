@@ -13,8 +13,6 @@
 #include "obc_errors.h"
 #include "obc_fs_utils.h"
 
-#include "correct.h"
-
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
