@@ -21,13 +21,11 @@
                       AX25_FCS_BYTES +  \
                       AX25_INFO_BYTES)
 
-const int FLAG_LENGTH = 1;
+#define FLAG_LENGTH = 1;
 const uint8_t SRC_CALLSIGN[5] = {"N7LEM"}; // callsign of ground station
 const uint8_t DEST_CALLSIGN[4] = {"NJ7P"}; // callsign of destination
-const uint8_t SPACE_CHAR = 0x40;
-const int ADDR_LEN = 7;
-const uint8_t PID_DEFAULT = 0xF0;
-const uint8_t FLAG = 0x7E;
+#define PID_DEFAULT = 0xF0;
+#define FLAG = 0x7E;
 static const uint16_t crc16_ccitt_table_reverse[256] =
   { 0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF, 0x8C48,
       0x9DC1, 0xAF5A, 0xBED3, 0xCA6C, 0xDBE5, 0xE97E, 0xF8F7, 0x1081, 0x0108,
@@ -83,6 +81,7 @@ typedef struct {
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
 */
 void bit_stuffing(const uint8_t *data, size_t data_len, uint8_t **stuffed_data, size_t *stuffed_data_len);
+void set_address(uint8_t *SRC_CALLSIGN, uint8_t *DEST_CALLSIGN, int SRC_LEN, int DEST_LEN, uint8_t SRC_SSID, uint8_t DEST_SSID, uint8_t * ax25Data, int *OFFSET);
 uint16_t ax25_fcs (uint8_t *buffer, size_t len);
 obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data);
 

@@ -12,7 +12,7 @@
  * 
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
 */
-uint8_t FR_COUNT = 0;
+uint8_t FRAME_COUNT = 0;
 
 obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data) {
     if (rsData == NULL) {
@@ -23,78 +23,68 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    if (FR_COUNT == 0){
-        //Send connection request
-        //Flip to receive mode
-        //Confirm Ack and switch back to send mode
-        //Send frame
-    }
-
-    if (FR_COUNT == 128){
-        //Send DISC request
-        //Flip to receive mode
-        //Confirm Ack and switch back to send mode
-        FR_COUNT = 0;
-        //Send frame
-
+    if (FRAME_COUNT == 128){
+        FRAME_COUNT = 0;
     }
 // Byte incrament variable
-    int i = 0;
+    int OFFSET = 0;
 
-// Starting flag
-    memset(ax25Data+i, FLAG, FLAG_LENGTH);
-    i+= FLAG_LENGTH;
+// Temporary array before bit_stuffing
+    uint8_t ax25Data_TEMP[274];
 
-// Destination callsign
-    memcpy(ax25Data+i, DEST_CALLSIGN, sizeof(DEST_CALLSIGN)) ;
-    i += sizeof(DEST_CALLSIGN);
-    if (sizeof(DEST_CALLSIGN) < ADDR_LEN){
-    memset(ax25Data+i, SPACE_CHAR, (ADDR_LEN-sizeof(DEST_CALLSIGN)));
-    i += (ADDR_LEN-sizeof(DEST_CALLSIGN));
-    }
-
-// Source callsign
-    memcpy(ax25Data+i, SRC_CALLSIGN, sizeof(DEST_CALLSIGN)) ;
-    i += sizeof(SRC_CALLSIGN);
-    if (sizeof(SRC_CALLSIGN) < ADDR_LEN){
-    memset(ax25Data+i, SPACE_CHAR, (ADDR_LEN-sizeof(SRC_CALLSIGN)));
-    i += (ADDR_LEN-sizeof(SRC_CALLSIGN));
-    }
+// Address setting
+    set_address(SRC_CALLSIGN, DEST_CALLSIGN, 5, 4, 0x80, 0x00, ax25Data_TEMP, &OFFSET)
 
 // Control field
-    uint8_t ctrl = FR_COUNT<<1;
-    memset(ax25Data+i, ctrl, 1);
-    i += 1;
+    memset(ax25Data_TEMP+OFFSET, 0, 1);
+    OFFSET += 1;
+
+    uint8_t ctrl = FRAME_COUNT<<1;
+    memset(ax25Data_TEMP+OFFSET, ctrl, 1);
+    OFFSET += 1;
 
 // PID
-    memset(ax25Data+i, PID_DEFAULT, 1);
-    i += 1;
+    memset(ax25Data_TEMP+OFFSET, PID_DEFAULT, 1);
+    OFFSET += 1;
 
 // Data
-    memcpy(ax25Data+i, rsData, 255);
-    i += 255;
+    memcpy(ax25Data_TEMP+OFFSET, rsData, 255);
+    OFFSET += 255;
 
 // fcs message
-    uint16_t fcs = ax25_fcs (ax25Data + FLAG_LENGTH, i - FLAG_LENGTH);
-    ax25Data[i++] = fcs & 0xFF;
-    ax25Data[i++] = (fcs >> 8) & 0xFF;
+    uint16_t fcs = ax25_fcs (ax25Data + FLAG_LENGTH, OFFSET - FLAG_LENGTH);
+    ax25Data_TEMP[OFFSET++] = fcs & 0xFF;
+    ax25Data_TEMP[OFFSET++] = (fcs >> 8) & 0xFF;
 
-// Ending flag
-    memset(ax25Data+i, FLAG, FLAG_LENGTH);
-    i+=1;
-
-// Stuff message
-    uint8_t *stuffed_data;
-    size_t stuffed_data_len;
-    bit_stuffing(ax25Data, i,  &stuffed_data, &stuffed_data_len);
-    ax25Data = stuffed_data;
+// Stuff message and add flags
+    bit_stuffing(ax25Data_TEMP, ax25Data);
 
 // Incrament frame cout
-    FR_COUNT+=1;
+    FRAME_COUNT+=1;
 
     return OBC_ERR_CODE_SUCCESS;
 }
 
+void set_address(uint8_t *SRC_CALLSIGN, uint8_t *DEST_CALLSIGN, int SRC_LEN, int DEST_LEN, uint8_t SRC_SSID, uint8_t DEST_SSID, uint8_t * ax25Data, int *OFFSET){
+    uint8_t SPACE_CHAR = 0x40;
+
+// Destination addressing
+    memcpy(ax25Data+*OFFSET, DEST_CALLSIGN, DEST_LEN) ;
+    *OFFSET += DEST_LEN;
+    memset(ax25Data+*OFFSET, SPACE_CHAR, (6-DEST_LEN));
+    *OFFSET += (6-DEST_LEN);
+    memset(ax25Data+*OFFSET, DEST_SSID, 1);
+    *OFFSET += 1;
+
+
+// Source addressing
+    memcpy(ax25Data+*OFFSET, SRC_CALLSIGN, DEST_LEN) ;
+    *OFFSET += DEST_LEN;
+    memset(ax25Data+*OFFSET, SPACE_CHAR, (6-DEST_LEN));
+    *OFFSET += (6-DEST_LEN);
+    memset(ax25Data+*OFFSET, SRC_SSID, 1);
+    *OFFSET += 1;
+}
 uint16_t ax25_fcs (uint8_t *buffer, size_t len){
   uint16_t fcs = 0xFFFF;
   while (len--) {
@@ -103,52 +93,33 @@ uint16_t ax25_fcs (uint8_t *buffer, size_t len){
   return fcs ^ 0xFFFF;
 }
 
-void bit_stuffing(const uint8_t *data, size_t data_len, uint8_t **stuffed_data, size_t *stuffed_data_len) {
-    size_t max_stuffed_len = data_len + (data_len / 5) + 1 + 2;
-    *stuffed_data = (uint8_t *)malloc(max_stuffed_len);
+void bit_stuffing(uint8_t *RAW_DATA, uint8_t *STUFFED_DATA) {
 
-    size_t i = 0, j = 0, bit_count = 0, one_count = 0;
+    size_t RAW_OFFSET = 0, STUFFED_OFFSET = 8, bit_count = 0, one_count = 0;
     uint8_t current_bit;
-    memset(*stuffed_data, FLAG, FLAG_LENGTH);
-    for (i = FLAG_LENGTH*8; i < (data_len-FLAG_LENGTH) * 8; ++i) {
-        current_bit = (data[i / 8] >> (7 - (i % 8))) & 1;
-        (*stuffed_data)[j / 8 + 1] |= (current_bit << (7 - (j % 8)));
-        j++;
+
+// Set starting flag
+    memset(stuffed_data, FLAG, 1);
+// Cycle through raw data to find 1s
+    for (RAW_OFFSET = 0; RAW_OFFSET < (274) * 8; ++RAW_OFFSET) {
+        current_bit = (data[RAW_OFFSET / 8] >> (7 - (RAW_OFFSET % 8))) & 1;
+        stuffed_data[STUFFED_OFFSET / 8] |= (current_bit << (7 - (STUFFED_OFFSET % 8)));
+        STUFFED_OFFSET++;
 
         if (current_bit == 1) {
             one_count++;
             if (one_count == 5) {
                 one_count = 0;
-                j++;
+                stuffed_data[STUFFED_OFFSET / 8] |= (0 << (7 - (STUFFED_OFFSET % 8)));
+                STUFFED_OFFSET++;
             }
         } else {
             one_count = 0;
         }
     }
-    memset(*stuffed_data + (j+7)/8 + 1, FLAG, FLAG_LENGTH);
-
-    *stuffed_data_len = (j + 7) / 8 + 2;
-
+// Set ending flag
+    memset(stuffed_data + (STUFFED_OFFSET/8) + 1, FLAG, 1);
 }
 
-/**
- * @brief strips away the ax.25 headers from a received packet
- * 
- * @param ax25Data the received ax.25 frame
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
- * 
- * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
-*/
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData){
-    if (rsData == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
 
-    if (ax25Data == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
 
-    // TODO: Implement AX.25 frame stripping
-
-    return OBC_ERR_CODE_SUCCESS;
-}
