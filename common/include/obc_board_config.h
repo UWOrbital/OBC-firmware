@@ -61,7 +61,7 @@
     #error Board configuration not defined
     // Comms pin numbers for ISR
     #define CC1120_RX_THR_PKT_gioPORTA_PIN 3U // cc1120 GIO0
-    #define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U // cc1120 GIO2
-    #define CC1120_TX_THR_PKT_hetPORT1_PIN 30U // cc1120 GIO3
-    
+    #define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 0U // cc1120 GIO2
+    #define CC1120_TX_THR_PKT_hetPORT1_PIN 1U // cc1120 GIO3
+
 #endif

@@ -193,8 +193,8 @@ void edgeNotification(hetBASE_t * hetREG,uint32 edge)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (37) */
-    if(het == hetREG1){
-        switch (offset){
+    if(hetREG == hetREG1){
+        switch (edge){
             // See section 3.4.1.1
             // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
             // is deasserted to avoid a FIFO
