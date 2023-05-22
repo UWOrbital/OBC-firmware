@@ -12,6 +12,8 @@
 #include "obc_states.h"
 #include "obc_task_config.h"
 #include "obc_reset.h"
+#include "obc_fs_utils.h"
+#include "obc_board_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -47,13 +49,6 @@ static void vSupervisorTask(void * pvParameters);
  */
 static void sendStartupMessages(void);
 
-/**
- * @brief Setup the file system.
- * 
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
- */
-static obc_error_code_t setupFileSystem(void);
-
 void initSupervisor(void) {
     ASSERT( (supervisorTaskStack != NULL) && (&supervisorTaskBuffer != NULL) );
     if (supervisorTaskHandle == NULL) {
@@ -88,6 +83,8 @@ static void vSupervisorTask(void * pvParameters) {
     ASSERT(supervisorQueueHandle != NULL);
 
     // TODO: Deal with errors
+    // Note: We can't log errors to the microSD if we fail
+    // to initialize the file system.
     LOG_IF_ERROR_CODE(setupFileSystem());
 
     /* Initialize other tasks */
@@ -114,9 +111,9 @@ static void vSupervisorTask(void * pvParameters) {
         supervisor_event_t inMsg;
         
         if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-            #ifdef DEBUG
+            #if defined(DEBUG) && !defined(OBC_REVISION_2)
             vTaskDelay(pdMS_TO_TICKS(1000));
-            gioToggleBit(gioPORTB, 1);
+            gioToggleBit(SUPERVISOR_DEBUG_LED_GIO_PORT, SUPERVISOR_DEBUG_LED_GIO_BIT);
             #endif
             continue;
         }
@@ -126,29 +123,4 @@ static void vSupervisorTask(void * pvParameters) {
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
     }
-}
-
-static obc_error_code_t setupFileSystem(void) {
-    int32_t ret;
-
-    ret = red_init();
-    if (ret != 0) {
-        LOG_DEBUG("red_init failed with error: %d", red_errno);
-        return OBC_ERR_CODE_FS_INIT_FAILED;
-    }
-
-    // TODO: FS formatting doesn't need to be done every time
-    ret = red_format("");
-    if (ret != 0) {
-        LOG_DEBUG("red_format failed with error: %d", red_errno);
-        return OBC_ERR_CODE_FS_FORMAT_FAILED;
-    }
-
-    ret = red_mount("");
-    if (ret != 0) {
-        LOG_DEBUG("red_mount failed with error: %d", red_errno);
-        return OBC_ERR_CODE_FS_MOUNT_FAILED;
-    }
-
-    return OBC_ERR_CODE_SUCCESS;
 }

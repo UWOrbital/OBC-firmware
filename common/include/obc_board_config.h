@@ -26,6 +26,10 @@
     #define CAM_CS_1             2UL
     #define CAM_CS_2             3UL
 
+    // Supervisor DEBUG LED
+    #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTB
+    #define SUPERVISOR_DEBUG_LED_GIO_BIT    1
+
 #elif defined(OBC_REVISION_1)
     // Serial config
     #define UART_PRINT_REG  sciREG 
@@ -50,6 +54,10 @@
     #define CAM_CS_1             1UL
     #define CAM_CS_2             2UL
 
+    // Supervisor DEBUG LED
+    #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTA
+    #define SUPERVISOR_DEBUG_LED_GIO_BIT    5
+    
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2
 
