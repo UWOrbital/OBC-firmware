@@ -39,6 +39,6 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, size_t dataLen, uint8_t *cmd
  * @param key - The key to decrypt the AES blocks with
  * @return obc_error_code_t - whether or not the context was successfully initialized
  */
-obc_error_code_t initializeAesCtx(uint8_t *key);
+obc_error_code_t initializeAesCtx(const uint8_t *key);
 
 #endif /* COMMS_INCLUDE_ AES128_H_ */
