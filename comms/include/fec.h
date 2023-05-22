@@ -11,6 +11,8 @@
 #define REED_SOLOMON_ENCODED_BYTES 255U
 #define PACKED_TELEM_PACKET_SIZE REED_SOLOMON_DECODED_BYTES
 
+extern correct_reed_solomon* rs;
+
 typedef struct {
     uint8_t data[REED_SOLOMON_ENCODED_BYTES];
 } packed_rs_packet_t;
@@ -28,7 +30,7 @@ typedef struct {
  * 
  * @return obc_error_code_t - whether or not the data was successfully encoded
 */
-obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData, correct_reed_solomon* rs);
+obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData);
 
 /**
  * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
@@ -40,6 +42,15 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData, uint8_t aesSerializedDataLen, correct_reed_solomon* rs);
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData, uint8_t aesSerializedDataLen);
 
+/**
+ * @brief initializes the rs variable to be used for rs encryption and decryption
+*/
+void initRs(void);
+
+/**
+ * @brief cleans up the memory allocated for the rs variable
+*/
+void destroyRs(void);
 #endif /* COMMS_INCLUDE_FEC_H_ */

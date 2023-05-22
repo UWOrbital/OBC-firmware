@@ -36,8 +36,6 @@ static QueueHandle_t telemEncodeQueueHandle = NULL;
 static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH*COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
 
-static correct_reed_solomon* rs;
-
 /**
  * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
  * 
@@ -69,11 +67,6 @@ void initTelemEncodeTask(void) {
     if (telemEncodeQueueHandle == NULL) {
         telemEncodeQueueHandle = xQueueCreateStatic(COMMS_TELEM_ENCODE_QUEUE_LENGTH, COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE,
                                                     telemEncodeQueueStack, &telemEncodeQueue);
-    }
-
-    if(rs == NULL){
-        // Create RS encryption
-        rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
     }
 }
 
@@ -182,7 +175,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
         // If the single telemetry is too large to continue adding to the telemPacket, send the telemPacket
         if (telemPacketOffset + packedSingleTelemSize > PACKED_TELEM_PACKET_SIZE) {
             // Apply Reed Solomon FEC
-            RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt, rs));
+            RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
 
             // Perform AX.25 framing
             RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
@@ -213,7 +206,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
 
     // If there is data left, send it
     // (any "unfilled" bytes in the telemPacket are ignored by the ground station as they have telem ID 0)
-    RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt, rs));
+    RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
     RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
     RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
 
