@@ -7,6 +7,13 @@
 #include <stddef.h>
 
 /**
+ * @brief Setup the file system.
+ * 
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
+ */
+obc_error_code_t setupFileSystem(void);
+
+/**
  * @brief Create a directory.
  * 
  * @param dirPath Path to the directory
