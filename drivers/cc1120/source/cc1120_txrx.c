@@ -37,14 +37,14 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len);
 static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len);
 
 static register_setting_t cc1120SettingsStd[] = {
-    // Set GPIO 3 to TXFIFO_THR_PKT
-    {CC1120_REGS_IOCFG3, 0x03U},
-    // Set GPIO 2 to RXFIFO_THR_PKT
-    {CC1120_REGS_IOCFG2, 0x01U},
+    // Set GPIO 0 to RXFIFO_THR_PKT
+    {CC1120_REGS_IOCFG0, 0x01U},
     // Set GPIO 1 to HighZ
     {CC1120_REGS_IOCFG1, 0x30U},
-    // Set GPIO 0 to PKT_SYNC_RXTX
-    {CC1120_REGS_IOCFG0, 0x06U},
+    // Set GPIO 2 to PKT_SYNC_RXTX
+    {CC1120_REGS_IOCFG2, 0x06U},
+    // Set GPIO 3 to TXFIFO_THR_PKT
+    {CC1120_REGS_IOCFG3, 0x03U},
     // Set the sync word as 16 bits and allow for < 2 bit error on sync word
     {CC1120_REGS_SYNC_CFG0, 0x09U},
     // Set sync word qualifier value threshold similar to the one talked about for preamble in section 6.8
