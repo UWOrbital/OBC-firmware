@@ -185,7 +185,7 @@ static void cdhepsProtocolTxTask(void *pvParameters)
 {
     cdh_eps_queue_msg_t msg;
 
-    if (xQueueReceive(cdhepsTxQueueHandle, &msg, 0) == pdPASS)
+    if (xQueueReceive(cdhepsTxQueueHandle, &msg, portMAX_DELAY) == pdPASS)
     {
         LOG_DEBUG("Message to transmit to EPS with ID: %u", msg.cmd.id);
         uint32_t txMessageBox;
@@ -219,7 +219,7 @@ static void cdhepsProtocolRxTask(void *pvParameters)
 {
     cdh_eps_queue_msg_t msg;
     /* Process recieved messages from EPS */
-    if (xQueueReceive(cdhepsRxQueueHandle, &msg, 0) == pdPASS)
+    if (xQueueReceive(cdhepsRxQueueHandle, &msg, portMAX_DELAY) == pdPASS)
     {
         LOG_DEBUG("Recieved CAN msg from EPS with ID: %u", msg.cmd.id);
         if(msg.cmd.id >= RX_HANDLERS_SIZE) {
