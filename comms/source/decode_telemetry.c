@@ -104,25 +104,24 @@ static void vDecodeTask(void * pvParameters){
     bool startFlagReceived = false;
     while (1) {
         if(xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            axData.data[axDataIndex++] = byte;
             if(byte == AX25_FLAG){
-                // if we have received a ax_25 flag and are past the second index, this means that this is the end flag
+                // if we have received a ax_25 flag and are past the first index, this means that this is the end flag
                 // this ensures that we do not count consecutive ax_25 flags used when idling as start and end flags
-                if(axDataIndex > 2){
-                    // since axDataIndex is incremented after storing each byte in axData.data, the length of axData is just
-                    // axDataIndex
-                    axData.length = axDataIndex;
+                if(axDataIndex > 1){
+                    axData.length = axDataIndex + 1;
                     LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, aesBlocks));
                     axDataIndex = 0;
                     startFlagReceived = false;
                 }
                 else{
                     startFlagReceived = true;
+                    axData.data[0] = byte;
                     axDataIndex = 1;
+                    continue;
                 }
             }
-            if(!startFlagReceived) {
-                axDataIndex = 0;
+            if(startFlagReceived) {
+                axData.data[axDataIndex++] = byte;
             }
         }
     }
