@@ -10,7 +10,6 @@
 #include "obc_task_config.h"
 #include "cc1120_txrx.h"
 #include "command_id.h"
-#include "cc1120_txrx.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -42,7 +41,7 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH*DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void * pvParameters);
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, uint8_t *aesSerializedData);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -136,13 +135,13 @@ static void vDecodeTask(void * pvParameters){
  * 
  * @return obc_error_code_t - whether or not the data was completely decoded successfully 
 */
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_block_t *aesBlocks[]) {
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, uint8_t *aesSerializedData) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
-    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesBlocks));
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesSerializedData, REED_SOLOMON_DECODED_BYTES));
     for(uint8_t i = 0; i < ((REED_SOLOMON_DECODED_BYTES - IV_BYTES_PER_TRANSMISSION) / AES_BLOCK_SIZE); ++i){
         uint8_t decryptedData[AES_BLOCK_SIZE];
-        RETURN_IF_ERROR_CODE(aes128Decrypt(aesBlocks[i], decryptedData));
+        RETURN_IF_ERROR_CODE(aes128Decrypt(aesSerializedData, decryptedData));
         RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
     }
     return OBC_ERR_CODE_SUCCESS;

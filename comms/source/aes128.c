@@ -12,8 +12,8 @@
  * 
  * @return obc_error_code_t - whether or not the data was successfully decrypted
 */
-obc_error_code_t aes128Decrypt(aes_block_t *aesData, uint8_t *cmdBytes){
-    if(aesData == NULL){
+obc_error_code_t aes128Decrypt(uint8_t *aesSerializedData, uint8_t *cmdBytes){
+    if(aesSerializedData == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
