@@ -140,7 +140,7 @@ static void vDecodeTask(void * pvParameters){
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
-    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData, (uint8_t)RS_DECODED_SIZE));
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData));
     uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE];
     RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData));
     RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
