@@ -16,7 +16,7 @@ void rs_fec_decode(void *decoder, uint8_t *encoded, size_t encoded_length,
         static size_t locations_len = 0;
         static int *locations = NULL;
         if (locations_len < erasure_length) {
-            locations = pvPortMalloc(erasure_length * sizeof(int));
+            locations = obcMalloc(erasure_length * sizeof(int));
             locations_len = erasure_length;
         }
         for (size_t i = 0; i < erasure_length; i++) {

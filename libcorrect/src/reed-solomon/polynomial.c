@@ -1,16 +1,16 @@
 #include "correct/reed-solomon/polynomial.h"
-#include "FreeRTOS.h"
-#include "os_portable.h"
+#include "obc_heap.h"
+
 
 polynomial_t polynomial_create(unsigned int order) {
     polynomial_t polynomial;
-    polynomial.coeff = pvPortMalloc(sizeof(field_element_t) * (order + 1));
+    polynomial.coeff = obcMalloc(sizeof(field_element_t) * (order + 1));
     polynomial.order = order;
     return polynomial;
 }
 
 void polynomial_destroy(polynomial_t polynomial) {
-    vPortFree(polynomial.coeff);
+    obcFree(polynomial.coeff);
 }
 
 // if you want a full multiplication, then make res.order = l.order + r.order
@@ -217,16 +217,16 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
     unsigned int order = nroots;
     polynomial_t l;
     l.order = 1;
-    l.coeff = pvPortMalloc(2 * sizeof(field_element_t));
+    l.coeff = obcMalloc(2 * sizeof(field_element_t));
     memset(l.coeff, 0, 2 * sizeof(field_element_t));
 
     polynomial_t r[2];
     // we'll keep two temporary stores of rightside polynomial
     // each time through the loop, we take the previous result and use it as new rightside
     // swap back and forth (prevents the need for a copy)
-    r[0].coeff = pvPortMalloc((order + 1) * sizeof(field_element_t));
+    r[0].coeff = obcMalloc((order + 1) * sizeof(field_element_t));
     memset(r[0].coeff, 0, (order + 1) * sizeof(field_element_t));
-    r[1].coeff = pvPortMalloc((order + 1) * sizeof(field_element_t));
+    r[1].coeff = obcMalloc((order + 1) * sizeof(field_element_t));
     memset(r[1].coeff, 0, (order + 1) * sizeof(field_element_t));
     unsigned int rcoeffres = 0;
 
@@ -252,9 +252,9 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
     memcpy(poly.coeff, r[rcoeffres].coeff, (order + 1) * sizeof(field_element_t));
     poly.order = order;
 
-    vPortFree(l.coeff);
-    vPortFree(r[0].coeff);
-    vPortFree(r[1].coeff);
+    obcFree(l.coeff);
+    obcFree(r[0].coeff);
+    obcFree(r[1].coeff);
 
     return poly;
 }

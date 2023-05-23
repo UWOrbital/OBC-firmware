@@ -1,6 +1,6 @@
 #include "rs_tester_fec_shim.h"
-#include "FreeRTOS.h"
-#include "os_portable.h"
+#include "obc_heap.h"
+
 
 void rs_fec_encode(void *encoder, uint8_t *msg, size_t msg_length,
                    uint8_t *msg_out) {
@@ -16,12 +16,12 @@ void rs_fec_decode(void *decoder, uint8_t *encoded, size_t encoded_length,
     // XXX make sure that pad length used to build decoder corresponds to this
     // encoded_length
     if (erasure_length) {
-        int *locations = pvPortMalloc(erasure_length * sizeof(int));
+        int *locations = obcMalloc(erasure_length * sizeof(int));
         for (size_t i = 0; i < erasure_length; i++) {
             locations[i] = (unsigned int)(erasure_locations[i]) + pad_length;
         }
         decode_rs_char(decoder, encoded, locations, erasure_length);
-        vPortFree(locations);
+        obcFree(locations);
     } else {
         decode_rs_char(decoder, encoded, NULL, 0);
     }

@@ -1,6 +1,6 @@
 #include "rs_tester.h"
-#include "FreeRTOS.h"
-#include "os_portable.h"
+#include "obc_heap.h"
+
 
 void shuffle(int *a, size_t len) {
     for (size_t i = 0; i < len - 2; i++) {
@@ -26,7 +26,7 @@ void rs_correct_decode(void *decoder, uint8_t *encoded, size_t encoded_length,
 }
 
 rs_testbench *rs_testbench_create(size_t block_length, size_t min_distance) {
-    rs_testbench *testbench = pvPortMalloc(sizeof(rs_testbench));
+    rs_testbench *testbench = obcMalloc(sizeof(rs_testbench));
     memset(testbench, 0, sizeof(rs_testbench));
 
     size_t message_length = block_length - min_distance;
@@ -34,27 +34,27 @@ rs_testbench *rs_testbench_create(size_t block_length, size_t min_distance) {
     testbench->block_length = block_length;
     testbench->min_distance = min_distance;
 
-    testbench->msg = pvPortMalloc(message_length * sizeof(unsigned char));
+    testbench->msg = obcMalloc(message_length * sizeof(unsigned char));
     memset(testbench->msg, 0, message_length * sizeof(unsigned char));
-    testbench->encoded = pvPortMalloc(block_length * sizeof(uint8_t));
+    testbench->encoded = obcMalloc(block_length * sizeof(uint8_t));
 
-    testbench->indices = pvPortMalloc(block_length * sizeof(int));
+    testbench->indices = obcMalloc(block_length * sizeof(int));
 
-    testbench->corrupted_encoded = pvPortMalloc(block_length * sizeof(uint8_t));
-    testbench->erasure_locations = pvPortMalloc(min_distance * sizeof(uint8_t));
-    testbench->recvmsg = pvPortMalloc(sizeof(unsigned char) * message_length);
+    testbench->corrupted_encoded = obcMalloc(block_length * sizeof(uint8_t));
+    testbench->erasure_locations = obcMalloc(min_distance * sizeof(uint8_t));
+    testbench->recvmsg = obcMalloc(sizeof(unsigned char) * message_length);
 
     return testbench;
 }
 
 void rs_testbench_destroy(rs_testbench *testbench) {
-    vPortFree(testbench->msg);
-    vPortFree(testbench->encoded);
-    vPortFree(testbench->indices);
-    vPortFree(testbench->corrupted_encoded);
-    vPortFree(testbench->erasure_locations);
-    vPortFree(testbench->recvmsg);
-    vPortFree(testbench);
+    obcFree(testbench->msg);
+    obcFree(testbench->encoded);
+    obcFree(testbench->indices);
+    obcFree(testbench->corrupted_encoded);
+    obcFree(testbench->erasure_locations);
+    obcFree(testbench->recvmsg);
+    obcFree(testbench);
 }
 
 rs_test_run test_rs_errors(rs_test *test, rs_testbench *testbench, size_t msg_length,

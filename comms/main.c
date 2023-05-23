@@ -32,7 +32,6 @@ void initTestTask(void) {
 static void vTestTask(void * pvParameters) {
     // Run the E2E SPI read test
     // cc1120TestSpiRead();
-    LOG_DEBUG("%d", xPortGetFreeHeapSize());
     testRs();
     while(1) {
 

@@ -11,16 +11,18 @@ void testRs(void) {
         telemData.data[i] = (uint8_t) testData[i];
     }
 
-    LOG_DEBUG("Original data: %s", telemData.data);
+    LOG_DEBUG("Original data: %s\r\n", telemData.data);
 
     packed_rs_packet_t rsData = { .data = {0} };
 
     rsEncode(&telemData, &rsData);
-    LOG_DEBUG("Encoded data: %s", rsData.data);
+    LOG_DEBUG("Encoded data: %s\r\n", rsData.data);
+    destroyRs();
 
+    initRs();
     uint8_t decodedData[REED_SOLOMON_DECODED_BYTES] = {0};
     rsDecode(&rsData, decodedData, (uint8_t) REED_SOLOMON_ENCODED_BYTES);
-    LOG_DEBUG("Decoded data: %s", decodedData);
+    LOG_DEBUG("Decoded data: %s\r\n", decodedData);
 
     destroyRs();
 }

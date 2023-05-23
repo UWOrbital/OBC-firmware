@@ -2,8 +2,8 @@
 #include <string.h>
 
 #include "fec_shim.h"
-#include "FreeRTOS.h"
-#include "os_portable.h"
+#include "obc_heap.h"
+
 
 typedef struct {
     correct_reed_solomon *rs;
@@ -22,7 +22,7 @@ void *init_rs_char(int symbol_size, int primitive_polynomial,
         return NULL;
     }
 
-    reed_solomon_shim *shim = pvPortMalloc(sizeof(reed_solomon_shim));
+    reed_solomon_shim *shim = obcMalloc(sizeof(reed_solomon_shim));
 
     shim->pad = pad;
     shim->block_length = 255 - pad;
@@ -30,8 +30,8 @@ void *init_rs_char(int symbol_size, int primitive_polynomial,
     shim->msg_length = shim->block_length - number_roots;
     shim->rs = correct_reed_solomon_create(primitive_polynomial,
                                            first_consecutive_root, root_gap, number_roots);
-    shim->msg_out = pvPortMalloc(shim->block_length);
-    shim->erasures = pvPortMalloc(number_roots);
+    shim->msg_out = obcMalloc(shim->block_length);
+    shim->erasures = obcMalloc(number_roots);
 
     return shim;
 }
@@ -39,9 +39,9 @@ void *init_rs_char(int symbol_size, int primitive_polynomial,
 void free_rs_char(void *rs) {
     reed_solomon_shim *shim = (reed_solomon_shim *)rs;
     correct_reed_solomon_destroy(shim->rs);
-    vPortFree(shim->msg_out);
-    vPortFree(shim->erasures);
-    vPortFree(shim);
+    obcFree(shim->msg_out);
+    obcFree(shim->erasures);
+    obcFree(shim);
 }
 
 void encode_rs_char(void *rs, const unsigned char *msg, unsigned char *parity) {
@@ -85,7 +85,7 @@ static correct_convolutional_polynomial_t r16k15[] = {
 static void *create_viterbi(unsigned int num_decoded_bits, unsigned int rate,
                             unsigned int order,
                             correct_convolutional_polynomial_t *poly) {
-    convolutional_shim *shim = pvPortMalloc(sizeof(convolutional_shim));
+    convolutional_shim *shim = obcMalloc(sizeof(convolutional_shim));
 
     size_t num_decoded_bytes = (num_decoded_bits % 8)
                                    ? (num_decoded_bits / 8 + 1)
@@ -93,7 +93,7 @@ static void *create_viterbi(unsigned int num_decoded_bits, unsigned int rate,
 
     shim->rate = rate;
     shim->order = order;
-    shim->buf = pvPortMalloc(num_decoded_bytes);
+    shim->buf = obcMalloc(num_decoded_bytes);
     shim->buf_len = num_decoded_bytes;
     shim->conv = correct_convolutional_create(rate, order, poly);
     shim->read_iter = shim->buf;
@@ -104,9 +104,9 @@ static void *create_viterbi(unsigned int num_decoded_bits, unsigned int rate,
 
 static void delete_viterbi(void *vit) {
     convolutional_shim *shim = (convolutional_shim *)vit;
-    vPortFree(shim->buf);
+    obcFree(shim->buf);
     correct_convolutional_destroy(shim->conv);
-    vPortFree(shim);
+    obcFree(shim);
 }
 
 static void init_viterbi(void *vit) {

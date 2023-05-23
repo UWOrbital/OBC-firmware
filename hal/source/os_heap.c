@@ -80,6 +80,7 @@ task.h is included from an application file. */
 
 #include "FreeRTOS.h"
 #include "os_task.h"
+#include "obc_privilege.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
