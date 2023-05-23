@@ -65,7 +65,7 @@ uint8_t CC1120_REGS_DEFAULTS[CC1120_REGS_STD_SPACE_SIZE] = {
  * @return An error code - If any register does not have the expected value,
  *                 or status byte is invalid.
  */
-obc_error_code_t cc1120_test_spi_read(void) { 
+obc_error_code_t cc1120TestSpiRead(void) { 
     obc_error_code_t errCode;
     uint8_t addr = 0x00U;
     uint8_t data;

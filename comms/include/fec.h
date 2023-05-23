@@ -3,12 +3,15 @@
 
 #include "obc_errors.h"
 #include "aes128.h"
+#include "correct.h"
 
 #include <stdint.h>
 
 #define RS_DECODED_SIZE 223U
 #define RS_ENCODED_SIZE 255U
 #define PACKED_TELEM_PACKET_SIZE RS_DECODED_SIZE
+
+extern correct_reed_solomon* rs;
 
 typedef struct {
     uint8_t data[RS_ENCODED_SIZE];
@@ -38,4 +41,8 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
 */
 obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData);
 
+/**
+ * @brief cleans up the memory allocated for the rs variable
+*/
+void destroyRs(void);
 #endif /* COMMS_INCLUDE_FEC_H_ */

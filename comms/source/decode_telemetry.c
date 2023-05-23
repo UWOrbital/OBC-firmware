@@ -10,7 +10,6 @@
 #include "obc_task_config.h"
 #include "cc1120_txrx.h"
 #include "command_id.h"
-#include "cc1120_txrx.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

@@ -10,6 +10,7 @@
 #include "encode_telemetry.h"
 #include "cc1120_recv_task.h"
 #include "aes128.h"
+#include "fec.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -59,6 +60,7 @@ void initCommsManager(void) {
     
     // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
     initializeAesCtx(TEMP_STATIC_KEY);
+    initRs();
 }
 
 obc_error_code_t sendToCommsQueue(comms_event_t *event) {
