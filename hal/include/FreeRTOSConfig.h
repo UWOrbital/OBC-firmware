@@ -125,7 +125,7 @@
 
 /* Mutexes */
 #define configUSE_MUTEXES               1
-#define configUSE_RECURSIVE_MUTEXES     0
+#define configUSE_RECURSIVE_MUTEXES     1
 
 /* Semaphores */
 #define configUSE_COUNTING_SEMAPHORES   0
@@ -168,6 +168,9 @@
 
 #undef INCLUDE_xTaskGetCurrentTaskHandle
 #define INCLUDE_xTaskGetCurrentTaskHandle 1
+
+#undef INCLUDE_xSemaphoreGetMutexHolder
+#define INCLUDE_xSemaphoreGetMutexHolder 1
 /* USER CODE END */
 
 #endif /* FREERTOS_CONFIG_H */
