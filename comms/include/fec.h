@@ -3,12 +3,15 @@
 
 #include "obc_errors.h"
 #include "aes128.h"
+#include "correct.h"
 
 #include <stdint.h>
 
 #define REED_SOLOMON_DECODED_BYTES 223U
 #define REED_SOLOMON_ENCODED_BYTES 255U
 #define PACKED_TELEM_PACKET_SIZE REED_SOLOMON_DECODED_BYTES
+
+extern correct_reed_solomon* rs;
 
 typedef struct {
     uint8_t data[REED_SOLOMON_ENCODED_BYTES];
@@ -32,10 +35,20 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
  * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
  * 
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param aesData pointer to an array of aes_block_t structs to store the decoded aes block
+ * @param aesSerializedData pointer to an array of bytes to hold the decoded reed solomon data
+ * @param aesSerializedDataLen length of the aesSerializedData array
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, aes_block_t *aesData[]);
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData, uint8_t aesSerializedDataLen);
 
+/**
+ * @brief initializes the rs variable to be used for rs encryption and decryption
+*/
+void initRs(void);
+
+/**
+ * @brief cleans up the memory allocated for the rs variable
+*/
+void destroyRs(void);
 #endif /* COMMS_INCLUDE_FEC_H_ */

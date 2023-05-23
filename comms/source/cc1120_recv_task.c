@@ -5,6 +5,8 @@
 #include "cc1120_txrx.h"
 #include "ax25.h"
 #include "obc_task_config.h"
+#include "cc1120_spi.h"
+#include "cc1120_defs.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
@@ -75,7 +77,9 @@ static void vRecvTask(void * pvParameters){
                     #if COMMS_PHY == COMMS_PHY_UART
                         LOG_IF_ERROR_CODE(sciReadBytes(recvData.data, AX25_PKT_LEN));
                     #else
-                        LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, AX25_PKT_LEN));
+                        // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+                        LOG_IF_ERROR_CODE(cc1120Receive());
+                        LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
                     #endif
 
                     // Send the received bytes to decode data queue to be decoded and sent to command manager
@@ -87,7 +91,6 @@ static void vRecvTask(void * pvParameters){
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
-
     }
 } 
 

@@ -11,10 +11,8 @@
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
 
-// Total bytes we will be receiving in each packet (sum of the sizes of each ax.25 frame section)
-#define RX_EXPECTED_PACKET_SIZE AX25_PKT_LEN
-
-extern bool isStillUplinking;
+// See chapter 8.5 in the datasheet
+#define TXRX_INTERRUPT_THRESHOLD 100U
 
 typedef struct
 {
@@ -96,13 +94,11 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len);
 obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes);
 
 /**
- * @brief Switches the cc1120 to RX mode to receive 278 bytes
+ * @brief Switches the cc1120 to RX mode to continuously receive bytes and send them to the decode task
  *
- * @param data - an array of 8-bit data with size of atleast 278 where received data is stored
- * @param len - the length of the provided array
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Receive(uint8_t data[], uint32_t len);
+obc_error_code_t cc1120Receive(void);
 
 /**
  * @brief callback function to be used in an ISR when the TX FIFO drops below (CC1120_TX_FIFO_SIZE - TXRX_INTERRUPT_THRESHOLD)
@@ -119,6 +115,10 @@ void rxFifoReadyCallback(void);
  */
 void txFifoEmptyCallback(void);
 
+/**
+ * @brief callback function to be used in an ISR when the sync word has been received
+ */
+void syncEventCallback(void);
 /**
  * @brief allows other files to access the cc1120 RX semaphore handle
  * 
