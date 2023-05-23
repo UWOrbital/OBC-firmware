@@ -6,10 +6,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#ifndef LOGGING_ENABLED
-#define LOGGING_ENABLED 1
-#endif
-
 /**
  * @enum log_output_location_t
  * @brief Log output location enum.
@@ -45,21 +41,12 @@ typedef enum {
 #define LOG_DEFAULT_LEVEL LOG_TRACE
 #endif
 
-#if LOGGING_ENABLED == 0
-#define LOG_TRACE(...)  do {} while (0)
-#define LOG_DEBUG(...)  do {} while (0)
-#define LOG_INFO(...)   do {} while (0)
-#define LOG_WARN(...)   do {} while (0)
-#define LOG_ERROR(...)  do {} while (0)
-#define LOG_FATAL(...)  do {} while (0)
-#else
 #define LOG_TRACE(...)  logLog(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_DEBUG(...)  logLog(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_INFO(...)   logLog(LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_WARN(...)   logLog(LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_ERROR(...)  logLog(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_FATAL(...)  logLog(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
-#endif
 
 #define LOG_ERROR_CODE(errCode) LOG_ERROR("Error code: %lu", (uint32_t)errCode)
 

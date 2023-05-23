@@ -1,4 +1,5 @@
 #include "spi.h"
+#include "sci.h"
 
 /* Board macros for registers, ports, CS pins, data formats, etc. */
 
@@ -46,6 +47,10 @@
     
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2
+
+    // UART connected to umbilical connector
+    #define UART_PRINT_REG sciREG
+    #define UART_READ_REG sciREG
 
 #else
     #error Board configuration not defined
