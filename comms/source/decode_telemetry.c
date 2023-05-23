@@ -52,12 +52,9 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
  * 
  * @return obc_error_code_t - whether or not the data was successfullysent to the command manager
 */
-obc_error_code_t handleCommands(uint8_t *cmdBytes, uint8_t dataLen){
+obc_error_code_t handleCommands(uint8_t *cmdBytes){
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
     if(cmdBytes == NULL){
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-    if (dataLen == 0) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
     uint32_t bytesUnpacked = 0;
@@ -147,7 +144,7 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
     RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData));
     uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE];
     RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData));
-    RETURN_IF_ERROR_CODE(handleCommands(decryptedData, (size_t) RS_DECODED_SIZE-AES_IV_SIZE));
+    RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
     return OBC_ERR_CODE_SUCCESS;
 }
 

@@ -10,11 +10,10 @@
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  * 
  * @param cmdBytes 223B-AES_IV_SIZE array storing the completely decoded data
- * @param dataLen length of the data in cmdBytes
  * 
  * @return obc_error_code_t - whether or not the data was successfullysent to the command manager
 */
-obc_error_code_t handleCommands(uint8_t *cmdBytes, uint8_t dataLen);
+obc_error_code_t handleCommands(uint8_t *cmdBytes);
 
 /**
  * @brief initializes the decode data pipeline task
