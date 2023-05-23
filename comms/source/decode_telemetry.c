@@ -10,6 +10,7 @@
 #include "obc_task_config.h"
 #include "cc1120_txrx.h"
 #include "command_id.h"
+#include "cc1120_txrx.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -23,8 +24,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define DECODE_DATA_QUEUE_LENGTH 10U
-#define DECODE_DATA_QUEUE_ITEM_SIZE AX25_PKT_LEN
+// decode data queue length should be double TXRX_INTERRUPT_THRESHOLD for safety to avoid cc1120 getting blocked
+// can be reduced later depending on memory limitations
+#define DECODE_DATA_QUEUE_LENGTH 2*TXRX_INTERRUPT_THRESHOLD
+#define DECODE_DATA_QUEUE_ITEM_SIZE sizeof(uint8_t)
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY 
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
@@ -60,17 +63,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes, uint8_t dataLen){
     uint32_t bytesUnpacked = 0;
     // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
     // If the command id is the id for end of transmission, isStillUplinking should be set to false
-    while(bytesUnpacked < dataLen){
-        // Check if we have reached end of transmission
-        if(cmdBytes[bytesUnpacked] == CMD_END_OF_TRANSMISSION){
-            isStillUplinking = false;
-            // give RX semaphore so that the cc1120Receive can unblock and return
-            if(xSemaphoreGive(getCC1120RxSemaphoreHandle()) != pdPASS){
-                LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_FULL);
-                return OBC_ERR_CODE_SEMAPHORE_FULL;
-            }
-            return OBC_ERR_CODE_SUCCESS;
-        }
+    while(bytesUnpacked < AES_BLOCK_SIZE){
         if(cmdBytes[bytesUnpacked] == CMD_END_OF_FRAME){
             // means we have reached the end of the packet and rest can be ignored
             return OBC_ERR_CODE_SUCCESS;
@@ -107,12 +100,33 @@ void initDecodeTask(void){
 */
 static void vDecodeTask(void * pvParameters){
     obc_error_code_t errCode;
-    packed_ax25_packet_t data;
+    uint8_t byte;
+    packed_ax25_packet_t axData;
     packed_rs_packet_t rsData;
     aes_data_t aesData;
+    uint16_t axDataIndex = 0;
+    bool startFlagReceived = false;
     while (1) {
-        if(xQueueReceive(decodeDataQueueHandle, &data, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            LOG_IF_ERROR_CODE(decodePacket(&data, &rsData, &aesData));
+        if(xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
+            if(byte == AX25_FLAG){
+                // if we have received a ax_25 flag and are past the first index, this means that this is the end flag
+                // this ensures that we do not count consecutive ax_25 flags used when idling as start and end flags
+                if(axDataIndex > 1){
+                    axData.length = axDataIndex + 1;
+                    LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+                    axDataIndex = 0;
+                    startFlagReceived = false;
+                }
+                else{
+                    startFlagReceived = true;
+                    axData.data[0] = byte;
+                    axDataIndex = 1;
+                    continue;
+                }
+            }
+            if(startFlagReceived) {
+                axData.data[axDataIndex++] = byte;
+            }
         }
     }
 } 
@@ -140,11 +154,11 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
 /**
  * @brief send a received packet to the decode data pipeline to be sent to command manager
  * 
- * @param data array storing the packet
+ * @param data pointer to a single byte
  * 
  * @return obc_error_code_t - whether or not the packet was successfully sent to the queue
 */
-obc_error_code_t sendToDecodeDataQueue(packed_ax25_packet_t *data) {
+obc_error_code_t sendToDecodeDataQueue(uint8_t *data) {
     if (decodeDataQueueHandle == NULL) {
         return OBC_ERR_CODE_INVALID_STATE;
     }
