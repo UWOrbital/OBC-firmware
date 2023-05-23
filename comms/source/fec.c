@@ -49,7 +49,7 @@ obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData
     if(aesSerializedDataLen < REED_SOLOMON_DECODED_BYTES)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, REED_SOLOMON_DECODED_BYTES, aesSerializedData);
+    int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, REED_SOLOMON_ENCODED_BYTES, aesSerializedData);
     
     if(decodedLength == -1)
         return OBC_ERR_CODE_CORRUPTED_MSG;

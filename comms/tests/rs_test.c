@@ -17,9 +17,9 @@ void testRs(void) {
 
     rsEncode(&telemData, &rsData);
     LOG_DEBUG("Encoded data: %s\r\n", rsData.data);
-    destroyRs();
+    rsData.data[0] = 'a'; // Simulate a bit flip
+    LOG_DEBUG("Corrupted data: %s\r\n", rsData.data);
 
-    initRs();
     uint8_t decodedData[REED_SOLOMON_DECODED_BYTES] = {0};
     rsDecode(&rsData, decodedData, (uint8_t) REED_SOLOMON_ENCODED_BYTES);
     LOG_DEBUG("Decoded data: %s\r\n", decodedData);
