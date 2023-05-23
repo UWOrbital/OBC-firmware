@@ -60,7 +60,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
     uint32_t bytesUnpacked = 0;
     // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
     // If the command id is the id for end of transmission, isStillUplinking should be set to false
-    while(bytesUnpacked < AES_BLOCK_SIZE){
+    while(bytesUnpacked < RS_DECODED_SIZE-AES_IV_SIZE){
         if(cmdBytes[bytesUnpacked] == CMD_END_OF_FRAME){
             // means we have reached the end of the packet and rest can be ignored
             return OBC_ERR_CODE_SUCCESS;
