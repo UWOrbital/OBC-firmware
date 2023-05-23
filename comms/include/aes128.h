@@ -26,12 +26,11 @@ typedef union {
  * @brief Decrypts the AES blocks
  * 
  * @param aesData Pointer to an aes_data_t union that includes a struct of the IV and data
- * @param dataLen Length of the data to be decrypted
  * @param cmdBytes 128 byte array to store the decrypted data
  * 
  * @return obc_error_code_t - whether or not the data was successfully decrypted
 */
-obc_error_code_t aes128Decrypt(aes_data_t *aesData, size_t dataLen, uint8_t *cmdBytes);
+obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes);
 
 /**
  * @brief Initializes the AES context
