@@ -59,12 +59,7 @@
 
 /* USER CODE BEGIN (0) */
 #include "cc1120_txrx.h"
-#include "alarm_handler.h"
-
-#define DS3232_INT_PIN 0U
-#define CC1120_RX_THR_PKT_PIN 2U
-#define CC1120_TX_THR_PKT_PIN 3U
-#define CC1120_PKT_SYNC_RXTX_PIN 7U
+#include "obc_board_config.h"
 
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
@@ -157,6 +152,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // triggered on falling edge once TX FIFO has been completely emptied
             case CC1120_PKT_SYNC_RXTX_PIN:
                 txFifoEmptyCallback();
+                syncEventCallback();
                 break;
         }
     }

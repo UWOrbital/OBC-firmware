@@ -21,6 +21,6 @@ typedef struct{
  * 
  * @return obc_error_code_t - whether or not the data was successfully decrypted
 */
-obc_error_code_t aes128Decrypt(aes_block_t *aesData, uint8_t *cmdBytes);
+obc_error_code_t aes128Decrypt(uint8_t *aesSerializedData, uint8_t *cmdBytes);
 
 #endif /* COMMS_INCLUDE_ AES128_H_ */
