@@ -55,6 +55,12 @@
 
     #define DS3232_INT_PORT gioPORTA
     #define DS3232_INT_PIN  0U
+    
+    // Comms cc1120 pin numbers for ISR
+    #define CC1120_RX_THR_PKT_PIN 2U
+    #define CC1120_TX_THR_PKT_PIN 3U
+    #define CC1120_PKT_SYNC_RXTX_PIN 7U
+    #define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_PIN
 
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2
