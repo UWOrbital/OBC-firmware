@@ -27,6 +27,10 @@
     #define CC1120_RX_THR_PKT_gioPORTA_PIN 3U // cc1120 GIO0
     #define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U // cc1120 GIO2
     #define CC1120_TX_THR_PKT_hetPORT1_PIN 30U // cc1120 GIO3
+    #define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
+
+    #define DS3232_INT_PORT gioPORTA
+    #define DS3232_INT_PIN  0U
 
 #elif defined(OBC_REVISION_1)
     // Serial config
@@ -49,13 +53,18 @@
     #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTA
     #define SUPERVISOR_DEBUG_LED_GIO_BIT    5
 
+    #define DS3232_INT_PORT gioPORTA
+    #define DS3232_INT_PIN  0U
+
     // Comms pin numbers for ISR
     #define CC1120_RX_THR_PKT_gioPORTA_PIN 3U // cc1120 GIO0
     #define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U // cc1120 GIO2
     #define CC1120_TX_THR_PKT_hetPORT1_PIN 30U // cc1120 GIO3
-    
+    #define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2
+    #define DS3232_INT_PORT gioPORTA
+    #define DS3232_INT_PIN  0U
 
 #else
     #error Board configuration not defined

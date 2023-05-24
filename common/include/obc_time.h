@@ -9,7 +9,7 @@
 /**
  * @brief Initialize the time module.
  */
-void initTime(void);
+obc_error_code_t initTime(void);
 
 /**
  * @brief Get the current unix time.

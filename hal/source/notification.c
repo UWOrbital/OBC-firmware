@@ -141,6 +141,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 }
 
 /* USER CODE BEGIN (20) */
+__attribute__((weak))
 /* USER CODE END */
 void i2cNotification(i2cBASE_t *i2c, uint32 flags)      
 {
