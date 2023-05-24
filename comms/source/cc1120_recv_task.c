@@ -69,16 +69,22 @@ static void vRecvTask(void * pvParameters){
         switch (queueMsg.eventID) {
             case BEGIN_UPLINK:
                 #if COMMS_PHY == COMMS_PHY_UART
-                while (1) {
-                    uint8_t rxByte;
-                    
-                    errCode = sciReadBytes(&rxByte, 1);
-                    if (errCode != OBC_ERR_CODE_SUCCESS) {
-                        LOG_ERROR_CODE(errCode);
-                        break;
-                    }
+                uint8_t rxByte;
+
+                // Read first byte
+                LOG_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(30000)));
+                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                // Read the rest of the bytes until we stop uplinking
+                while (1) {   
+                    LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(100)));
+                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
 
                     LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
                 }
                 #else
                 // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission

@@ -17,9 +17,6 @@
 #define MAX_PRINTF_SIZE 128U
 #define UART_MUTEX_BLOCK_TIME pdMS_TO_TICKS(1000)
 
-// Timeout to wait for an asynchronous read to complete
-#define I2C_RX_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
-
 static SemaphoreHandle_t sciMutex = NULL;
 static StaticSemaphore_t sciMutexBuffer;
 static SemaphoreHandle_t sciLinMutex = NULL;
@@ -138,7 +135,7 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 }
 */
 
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes) {
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks) {
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
     configASSERT(mutex != NULL);
 
@@ -157,7 +154,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes) {
     sciReceive(UART_READ_REG, numBytes, buf);
 
     // Wait for transfer to complete
-    if (xSemaphoreTake(sciTransferComplete, I2C_RX_TRANSFER_TIMEOUT) != pdTRUE) {
+    if (xSemaphoreTake(sciTransferComplete, blockTimeTicks) != pdTRUE) {
         sciRxBuff = NULL;
         sciRxBuffLen = 0;
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
