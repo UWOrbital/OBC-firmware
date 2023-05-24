@@ -20,8 +20,8 @@ void testRs(void) {
     rsData.data[0] = 'a'; // Simulate a bit flip
     LOG_DEBUG("Corrupted data: %s\r\n", rsData.data);
 
-    uint8_t decodedData[REED_SOLOMON_DECODED_BYTES] = {0};
-    rsDecode(&rsData, decodedData, (uint8_t) REED_SOLOMON_ENCODED_BYTES);
+    uint8_t decodedData[RS_DECODED_SIZE] = {0};
+    rsDecode(&rsData, decodedData, (uint8_t) RS_ENCODED_SIZE);
     LOG_DEBUG("Decoded data: %s\r\n", decodedData);
 
     destroyRs();

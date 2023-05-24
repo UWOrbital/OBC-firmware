@@ -28,7 +28,7 @@ typedef struct {
 } cmd_info_t;
 
 static const cmd_info_t cmdsConfig[] = {
-    [CMD_NONE] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
