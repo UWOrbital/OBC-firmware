@@ -108,8 +108,9 @@ static void alarmHandler(void * pvParameters) {
 
                 // Local time incremented since timekeeper might
                 // not have updated the local time yet
-                static const uint32_t tol = 1; // tolerance of 1 second
-                if (getCurrentUnixTime() + tol < alarm.unixTime) {
+                static const uint32_t tol = 2; // tolerance of 2 seconds
+                uint32_t currTime = getCurrentUnixTime();
+                if (currTime + tol < alarm.unixTime) {
                     LOG_ERROR_CODE(OBC_ERR_CODE_RTC_ALARM_EARLY);
                     break;
                 }
@@ -117,6 +118,8 @@ static void alarmHandler(void * pvParameters) {
                 uint32_t timestampThresh = alarm.unixTime;
 
                 // Execute callbacks for all alarms that have triggered
+                // I.e. any alarm with a timestamp less than or equal to the first
+                // alarm in the queue
                 for (size_t i = 0; i < numActiveAlarms; i++) {
                     LOG_IF_ERROR_CODE(peekEarliestAlarm(&alarm));
                     if (errCode != OBC_ERR_CODE_SUCCESS) {
@@ -205,6 +208,10 @@ static obc_error_code_t dequeueAlarm(alarm_handler_alarm_info_t *alarm) {
 
     // Shift all alarms after the new alarm back by one
     for (size_t j = 0; j < numActiveAlarms - 1; j++) {
+        if (j >= ALARM_QUEUE_SIZE - 1) {
+            break;
+        }
+
         alarmQueue[j] = alarmQueue[j + 1];
     }
 

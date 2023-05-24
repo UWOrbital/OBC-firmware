@@ -144,7 +144,6 @@ static void commandManagerTask(void *pvParameters) {
                 continue;
             }
 
-            // TODO: Handle time-tagged commands
             alarm_handler_event_t alarm = {
                 .id = ALARM_HANDLER_NEW_ALARM,
                 .alarmInfo = {
