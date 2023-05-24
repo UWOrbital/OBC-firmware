@@ -68,25 +68,23 @@ static void vRecvTask(void * pvParameters){
         }
         switch (queueMsg.eventID) {
             case BEGIN_UPLINK:
-                isStillUplinking = true;
-                // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
-                while(isStillUplinking){
-                    packed_ax25_packet_t recvData;
-                    // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
-
-                    #if COMMS_PHY == COMMS_PHY_UART
-                        LOG_IF_ERROR_CODE(sciReadBytes(recvData.data, AX25_PKT_LEN));
-                    #else
-                        // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
-                        LOG_IF_ERROR_CODE(cc1120Receive());
-                        LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
-                    #endif
-
-                    // Send the received bytes to decode data queue to be decoded and sent to command manager
-                    if(errCode == OBC_ERR_CODE_SUCCESS){
-                        LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
+                #if COMMS_PHY == COMMS_PHY_UART
+                while (1) {
+                    uint8_t rxByte;
+                    
+                    errCode = sciReadBytes(&rxByte, 1);
+                    if (errCode != OBC_ERR_CODE_SUCCESS) {
+                        LOG_ERROR_CODE(errCode);
+                        break;
                     }
+
+                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
                 }
+                #else
+                // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+                LOG_IF_ERROR_CODE(cc1120Receive());
+                LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+                #endif
                 break;
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);

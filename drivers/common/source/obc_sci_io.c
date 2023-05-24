@@ -29,8 +29,8 @@ static StaticSemaphore_t sciLinMutexBuffer;
 static SemaphoreHandle_t sciTransferComplete = NULL;
 static StaticSemaphore_t sciTransferCompleteBuffer;
 
-static volatile uint8_t *sciRxBuff = NULL;
-static volatile size_t sciRxBuffLen = 0;
+static uint8_t *sciRxBuff = NULL;
+static size_t sciRxBuffLen = 0;
 
 STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG), "UART_PRINT_REG must be sciREG or scilinREG");
 STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG), "UART_READ_REG must be sciREG or scilinREG");
