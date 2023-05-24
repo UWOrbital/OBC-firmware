@@ -361,4 +361,12 @@ obc_error_code_t setAlarm1RTC(rtc_alarm1_mode_t mode, rtc_alarm_time_t dt);
  */
 obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt);
 
+/**
+ * @brief Clear alarm 1 interrupt flag.
+ * 
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ * @warning This should only be called from the alarm handler.
+ */
+obc_error_code_t clearAlarm1RTC(void);
+
 #endif /* DRIVERS_INCLUDE_DS3232_MZ_H_ */

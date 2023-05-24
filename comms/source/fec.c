@@ -23,7 +23,7 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
     if (rsData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if((uint8_t) correct_reed_solomon_encode(rs, telemData->data, REED_SOLOMON_DECODED_BYTES, rsData->data) < REED_SOLOMON_ENCODED_BYTES){
+    if((uint8_t) correct_reed_solomon_encode(rs, telemData->data, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE){
         return OBC_ERR_CODE_CORRUPTED_MSG;
     }
 
@@ -31,25 +31,21 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
 }
 
 /**
- * @brief decodes the reed solomon data and splits it into 2 128B AES blocks
+ * @brief Decodes the reed solomon data
  * 
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param aesSerializedData pointer to an array of bytes to hold the decoded reed solomon data
- * @param aesSerializedDataLen length of the aesSerializedData array
+ * @param decodedData pointer to a union that includes a uint8_t array of size 223B
  * 
  * @return obc_error_code_t - whether or not the data was successfully decoded
 */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *aesSerializedData, uint8_t aesSerializedDataLen){
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData){
     if (rsData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if (aesSerializedData == NULL)
+    if (decodedData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
     
-    if(aesSerializedDataLen < REED_SOLOMON_DECODED_BYTES)
-        return OBC_ERR_CODE_INVALID_ARG;
-
-    int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, REED_SOLOMON_ENCODED_BYTES, aesSerializedData);
+    int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, RS_ENCODED_SIZE, decodedData);
     
     if(decodedLength == -1)
         return OBC_ERR_CODE_CORRUPTED_MSG;
