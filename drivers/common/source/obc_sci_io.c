@@ -15,12 +15,22 @@
 #include <stdio.h>
 
 #define MAX_PRINTF_SIZE 128U
-#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+#define UART_MUTEX_BLOCK_TIME pdMS_TO_TICKS(1000)
+
+// Timeout to wait for an asynchronous read to complete
+#define I2C_RX_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
 
 static SemaphoreHandle_t sciMutex = NULL;
 static StaticSemaphore_t sciMutexBuffer;
 static SemaphoreHandle_t sciLinMutex = NULL;
 static StaticSemaphore_t sciLinMutexBuffer;
+
+// Semaphore to signal when an async transfer is complete
+static SemaphoreHandle_t sciTransferComplete = NULL;
+static StaticSemaphore_t sciTransferCompleteBuffer;
+
+static volatile uint8_t *sciRxBuff = NULL;
+static volatile size_t sciRxBuffLen = 0;
 
 STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG), "UART_PRINT_REG must be sciREG or scilinREG");
 STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG), "UART_READ_REG must be sciREG or scilinREG");
@@ -38,12 +48,17 @@ void initSciMutex(void) {
     if (sciMutex == NULL) {
         sciMutex = xSemaphoreCreateMutexStatic(&sciMutexBuffer);
     }
+    configASSERT(sciMutex);
+
     if (sciLinMutex == NULL) {
         sciLinMutex = xSemaphoreCreateMutexStatic(&sciLinMutexBuffer);
     }
-
-    configASSERT(sciMutex);
     configASSERT(sciLinMutex);
+
+    if (sciTransferComplete == NULL) {
+        sciTransferComplete = xSemaphoreCreateBinaryStatic(&sciTransferCompleteBuffer);
+    }
+    configASSERT(sciTransferComplete);
 }
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length) {
@@ -104,6 +119,7 @@ void uartAssertFailed(char *file, int line, char *expr) {
                             expr, file, line);
 }
 
+/*
 obc_error_code_t sciReadByte(unsigned char *character) {
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
     configASSERT(mutex != NULL);
@@ -120,6 +136,7 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
 }
+*/
 
 obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes) {
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
@@ -133,7 +150,18 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes) {
         return OBC_ERR_CODE_MUTEX_TIMEOUT;
     }
 
+    sciRxBuff = buf;
+    sciRxBuffLen = numBytes;
+
+    // Start asynchronous transfer
     sciReceive(UART_READ_REG, numBytes, buf);
+
+    // Wait for transfer to complete
+    if (xSemaphoreTake(sciTransferComplete, I2C_RX_TRANSFER_TIMEOUT) != pdTRUE) {
+        sciRxBuff = NULL;
+        sciRxBuffLen = 0;
+        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+    }
 
     xSemaphoreGive(mutex);
     return OBC_ERR_CODE_SUCCESS;
@@ -157,6 +185,7 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
+/*
 obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
     configASSERT(mutex != NULL);
@@ -195,4 +224,20 @@ obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
     }
 
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
+}
+*/
+
+void sciNotification(sciBASE_t *sci, uint32 flags) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if (sci != UART_READ_REG) {
+        return;
+    }
+
+    if (flags & SCI_RX_INT) {
+        sciReceive(UART_READ_REG, sciRxBuffLen, sciRxBuff);
+        xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken);
+    }
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }

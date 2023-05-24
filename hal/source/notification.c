@@ -165,6 +165,7 @@ void i2cNotification(i2cBASE_t *i2c, uint32 flags)
 }
 
 /* USER CODE BEGIN (22) */
+__attribute__((weak))
 /* USER CODE END */
 
 void sciNotification(sciBASE_t *sci, uint32 flags)     
