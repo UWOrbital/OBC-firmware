@@ -59,6 +59,7 @@
 
 /* USER CODE BEGIN (0) */
 #include "cc1120_txrx.h"
+#include "alarm_handler.h"
 #include "obc_board_config.h"
 
 /* USER CODE END */
