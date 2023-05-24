@@ -46,6 +46,10 @@
     #define SDC_SPI_CS           0UL
     #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
 
+    // Supervisor DEBUG LED
+    #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTA
+    #define SUPERVISOR_DEBUG_LED_GIO_BIT    5
+
 #elif defined(OBC_REVISION_2)
     #error Board configuration not defined for OBC_REVISION_2
 
