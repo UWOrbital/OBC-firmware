@@ -144,6 +144,10 @@ void gioNotification(gioPORT_t *port, uint32 bit)
     }
     else if (port == gioPORTA){
         switch (bit){
+            case DS3232_INT_PIN:
+                alarmInterruptCallback();
+                break;
+            
             // See section 3.4.1.1
             // triggered on falling edge once TX FIFO has been completely emptied
             case CC1120_PKT_SYNC_RXTX_PIN:
@@ -156,6 +160,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 }
 
 /* USER CODE BEGIN (20) */
+__attribute__((weak))
 /* USER CODE END */
 void i2cNotification(i2cBASE_t *i2c, uint32 flags)      
 {

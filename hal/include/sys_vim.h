@@ -95,6 +95,7 @@ extern void vPortPreemptiveTick(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void gioHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void vPortYeildWithinAPI(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void gioLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
+extern void i2cInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 
 /* USER CODE BEGIN (3) */
 /* USER CODE END */
@@ -327,7 +328,7 @@ typedef struct vim_config_reg
                         
 #define VIM_REQMASKSET2_CONFIGVALUE ((uint32)((uint32)0U << 0U)\
                                     |(uint32)((uint32)0U << 1U)\
-                                    |(uint32)((uint32)0U << 2U)\
+                                    |(uint32)((uint32)1U << 2U)\
                                     |(uint32)((uint32)0U << 3U)\
                                     |(uint32)((uint32)0U << 4U)\
                                     |(uint32)((uint32)0U << 5U)\

@@ -135,7 +135,7 @@ static const t_isrFuncPTR s_vim_init[128U] =
     &phantomInterrupt,            /* Channel 63 */
     &phantomInterrupt,            /* Channel 64 */
     &phantomInterrupt,            /* Channel 65 */
-    &phantomInterrupt,            /* Channel 66 */
+    &i2cInterrupt,            /* Channel 66 */
     &phantomInterrupt,            /* Channel 67 */
     &phantomInterrupt,            /* Channel 68 */
     &phantomInterrupt,            /* Channel 69 */
@@ -430,7 +430,7 @@ void vimInit(void)
 
     vimREG->REQMASKSET2 = (uint32)((uint32)0U << 0U)
                         | (uint32)((uint32)0U << 1U)
-                        | (uint32)((uint32)0U << 2U)
+                        | (uint32)((uint32)1U << 2U)
                         | (uint32)((uint32)0U << 3U)
                         | (uint32)((uint32)0U << 4U)
                         | (uint32)((uint32)0U << 5U)

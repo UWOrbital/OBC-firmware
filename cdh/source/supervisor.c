@@ -6,6 +6,7 @@
 #include "comms_manager.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
+#include "alarm_handler.h"
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -82,20 +83,27 @@ static void vSupervisorTask(void * pvParameters) {
 
     ASSERT(supervisorQueueHandle != NULL);
 
-    // TODO: Deal with errors
-    // Note: We can't log errors to the microSD if we fail
-    // to initialize the file system.
-    LOG_IF_ERROR_CODE(setupFileSystem());
+    /* Initialize critical peripherals */
+    LOG_IF_ERROR_CODE(setupFileSystem()); // microSD card
+    LOG_IF_ERROR_CODE(initTime()); // RTC
 
     /* Initialize other tasks */
-    initSwWatchdog();
+    // Don't start running any tasks until all tasks are initialized
+    taskENTER_CRITICAL();
+    
     initTimekeeper();
+    initAlarmHandler();
+
     initTelemetry();
     initCommandManager();
     initADCSManager();
     initCommsManager();
     initEPSManager();
     initPayloadManager();
+    
+    taskEXIT_CRITICAL();
+
+    initSwWatchdog();
 
     // TODO: Deal with errors
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
@@ -103,7 +111,6 @@ static void vSupervisorTask(void * pvParameters) {
     /* Send initial messages to system queues */
     sendStartupMessages();    
 
-    // TODO: Only enter normal state after initial checks are complete
     // TODO: Deal with errors
     LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
     
