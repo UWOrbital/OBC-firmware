@@ -133,7 +133,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // See section 3.4.1.1
             // Triggered on rising edge so RX FIFO can be read once the signal that RX FIFO is above TXRX_INTERRUPT_THRESHOLD
             // is asserted to avoid a FIFO overflow
-            case CC1120_RX_THR_PKT_gioPORTA_PIN:
+            case CC1120_RX_THR_PKT_gioPORTB_PIN:
                 rxFifoReadyCallback();
                 break;
         }
