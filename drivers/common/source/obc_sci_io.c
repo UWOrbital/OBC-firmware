@@ -56,6 +56,10 @@ void initSciMutex(void) {
         sciTransferComplete = xSemaphoreCreateBinaryStatic(&sciTransferCompleteBuffer);
     }
     configASSERT(sciTransferComplete);
+
+    #if COMMS_PHY == COMMS_PHY_UART
+    sciSetBaudrate(UART_READ_REG, 9600);
+    #endif
 }
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length) {

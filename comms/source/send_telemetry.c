@@ -93,7 +93,6 @@ static void vCC1120TransmitTask(void *pvParameters) {
             continue;
         }
         
-        // Write to CC1120 FIFO
         #if COMMS_PHY == COMMS_PHY_UART
         LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25_pkt.data, ax25_pkt.length));
         #else

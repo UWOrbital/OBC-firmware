@@ -72,7 +72,7 @@ static void vRecvTask(void * pvParameters){
                 uint8_t rxByte;
 
                 // Read first byte
-                LOG_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(30000)));
+                LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(30000)));
                 if (errCode != OBC_ERR_CODE_SUCCESS) break;
 
                 LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
