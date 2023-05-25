@@ -156,7 +156,7 @@ obc_error_code_t cc1120Init(void)
 
     // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
     // see chapter 3.4 in the datasheet for more info
-    gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTA_PIN);
+    gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
     gioDisableNotification(gioPORTB, CC1120_TX_THR_PKT_hetPORT1_PIN);
     gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
 
@@ -166,7 +166,7 @@ obc_error_code_t cc1120Init(void)
     }
 
     // enable interrupts again now that the gpio signals are set
-    gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTA_PIN);
+    gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
     gioEnableNotification(gioPORTB, CC1120_TX_THR_PKT_hetPORT1_PIN);
     gioEnableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
     for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++)
