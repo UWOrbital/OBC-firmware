@@ -2,6 +2,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "telemetry_manager.h"
+#include "obc_sci_io.h"
 
 #include <os_projdefs.h>
 #include <FreeRTOS.h>
@@ -11,19 +12,6 @@
 
 static TimerHandle_t tempReaderTimerHandler;
 StaticTimer_t tempReaderTimerBuffer;
-
-void initTempReaderHandler(void) {
-    ASSERT(tempReaderHandler != NULL);
-    tempReaderTimerHandler = xTimerCreateStatic(
-        "temp read timer",
-        /*Read temp every minute according to notion*/
-        pdMS_TO_TICKS(60000),
-        pdTRUE,
-        (void*) 0,
-        vTimerCallback,
-        &tempReaderTimerBuffer
-    );
-}
 
 void vTimerCallback( TimerHandle_t xTimer ) {
     obc_error_code_t errCode;
@@ -54,4 +42,17 @@ void vTimerCallback( TimerHandle_t xTimer ) {
     };
 
     addTelemetryData(&obcTempVal);
+}
+
+void initTempReaderHandler(void) {
+    ASSERT(tempReaderTimerHandler != NULL);
+    tempReaderTimerHandler = xTimerCreateStatic(
+        "temp read timer",
+        /*Read temp every minute according to notion*/
+        pdMS_TO_TICKS(60000),
+        pdTRUE,
+        (void*) 0,
+        vTimerCallback,
+        &tempReaderTimerBuffer
+    );
 }
