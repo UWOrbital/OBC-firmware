@@ -4,6 +4,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 
+#include <redposix.h>
 #include <stddef.h>
 
 obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
@@ -36,5 +37,18 @@ obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
 
     // TODO: Implement handling for this command
     LOG_DEBUG("Executing log downlink command - log level %u", cmd->downlinkLogsNextPass.logLevel);
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
+    if(cmd == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    int32_t ret = red_format("");
+    if (ret != 0) {
+        LOG_DEBUG("Executing microSD format error code %u", OBC_ERR_CODE_FS_FORMAT_FAILED);
+        return OBC_ERR_CODE_FS_FORMAT_FAILED;
+    }
     return OBC_ERR_CODE_SUCCESS;
 }

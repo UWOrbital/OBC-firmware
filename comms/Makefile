@@ -36,6 +36,10 @@ SRC_DIRS += reliance_edge/projects/freertos_rm46/host
 # Tiny AES
 SRC_DIRS += tiny_aes
 
+# libcorrect for Reed Solomon error correction
+SRC_DIRS += libcorrect/src/reed-solomon
+
+SRC_DIRS += comms/tests
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(ROOT_DIR)/$(dir)/*.s))
