@@ -1,8 +1,8 @@
 include .env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
-BUILD_DIR = examples/spi_fram_demo/build
-BIN = fram_demo.out
+BUILD_DIR = examples/lm75bd_demo/build
+BIN = temp_sensor_demo.out
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -58,7 +58,7 @@ LIBS :=
 SRC_DIRS :=
 SRC_DIRS += hal/source
 
-SRC_DIRS += examples/spi_fram_demo
+SRC_DIRS += examples/lm75bd_demo
 # Drivers
 SRC_DIRS += drivers/common/source
 SRC_DIRS += drivers/ds3232/source
