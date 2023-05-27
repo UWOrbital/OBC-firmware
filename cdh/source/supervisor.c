@@ -7,6 +7,7 @@
 #include "eps_manager.h"
 #include "payload_manager.h"
 #include "alarm_handler.h"
+#include "temp_reader.h"
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -100,7 +101,8 @@ static void vSupervisorTask(void * pvParameters) {
     initCommsManager();
     initEPSManager();
     initPayloadManager();
-    
+    initTempReaderHandler();
+
     taskEXIT_CRITICAL();
 
     initSwWatchdog();
