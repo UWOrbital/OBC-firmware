@@ -1,8 +1,8 @@
 include .env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
-BUILD_DIR = examples/sd_reliance_edge_demo/build
-BIN = sd_reliance_edge_demo.out
+BUILD_DIR = examples/rtc_demo/build
+BIN = rtc_demo.out
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -23,40 +23,33 @@ CC_FLAGS += -std=gnu99
 
 CPP_FLAGS :=
 
-BOARD_TYPE ?= RM46_LAUNCHPAD
+BOARD_TYPE ?= OBC_REVISION_1
 CPP_FLAGS += -D$(BOARD_TYPE)
+
+LOG_OUTPUT ?= LOG_TO_UART
+CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT) 
+
+LOG_LEVEL ?= LOG_TRACE
+CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"common/include"
+INCLUDE_DIRS += -I"examples/rtc_demo"
 INCLUDE_DIRS += -I"drivers/common/include"
-INCLUDE_DIRS += -I"examples/sd_reliance_edge_demo"
+INCLUDE_DIRS += -I"drivers/ds3232/include"
 
-# Reliance Edge File System
-INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
-INCLUDE_DIRS += -I"reliance_edge/include"
-INCLUDE_DIRS += -I"reliance_edge/core/include"
-INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
-INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
 
 LIBS := 
 	
 SRC_DIRS :=
 SRC_DIRS += hal/source
-SRC_DIRS += drivers/common/source
+SRC_DIRS += drivers/source
 SRC_DIRS += common/source
-SRC_DIRS += examples/sd_reliance_edge_demo
-
-# Reliance Edge File System
-SRC_DIRS += reliance_edge/fatfs_port
-SRC_DIRS += reliance_edge/bdev
-SRC_DIRS += reliance_edge/core/driver
-SRC_DIRS += reliance_edge/fse
-SRC_DIRS += reliance_edge/os/freertos/services
-SRC_DIRS += reliance_edge/posix
-SRC_DIRS += reliance_edge/util
-SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+SRC_DIRS += examples/rtc_demo
+SRC_DIRS += drivers/ds3232/source
+SRC_DIRS += drivers/common/source
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))
