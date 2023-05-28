@@ -21,8 +21,14 @@ typedef struct {
 } obc_state_persist_t;
 
 typedef struct {
+    obc_persist_section_header_t header;
+    obc_config_persist_data_t data;
+} obc_config_persist_t;
+
+typedef struct {
     obc_time_persist_t obcTime;
     obc_state_persist_t obcState;
+    obc_config_persist_t obcConfig;
 } fram_persist_t;
 
 STATIC_ASSERT(sizeof(fram_persist_t) <= FRAM_MAX_ADDRESS, "fram_persist_t exceeds available FRAM space");

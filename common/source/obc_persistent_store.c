@@ -92,6 +92,26 @@ obc_error_code_t setPersistentObcState(obc_state_persist_data_t *data) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t getPersistentObcConfig(obc_config_persist_data_t *data) {
+    obc_error_code_t errCode;
+
+    uint8_t sectionBuffer[sizeof(obc_config_persist_t)] = {0};
+    RETURN_IF_ERROR_CODE(getPersistentSection(FRAM_ADDRESS_OF(obcConfig), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+    RETURN_IF_ERROR_CODE(extractDataFromSectionBuff((uint8_t*)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t setPersistentObcConfig(obc_config_persist_data_t *data) {
+    obc_error_code_t errCode;
+
+    uint8_t sectionBuffer[sizeof(obc_config_persist_t)] = {0};
+    RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t*)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+    RETURN_IF_ERROR_CODE(setPersistentSection(FRAM_ADDRESS_OF(obcConfig), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
 /*---------------------------------------------------------------------*/
 /*------------------------- Private functions -------------------------*/
 /*---------------------------------------------------------------------*/
