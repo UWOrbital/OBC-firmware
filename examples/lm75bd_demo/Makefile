@@ -1,8 +1,8 @@
 include .env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
-BUILD_DIR = examples/sd_reliance_edge_demo/build
-BIN = sd_reliance_edge_demo.out
+BUILD_DIR = examples/lm75bd_demo/build
+BIN = temp_sensor_demo.out
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -12,7 +12,7 @@ ARM_FLAGS += -marm
 ARM_FLAGS += -mfpu=vfpv3-d16
 
 CC_FLAGS :=
-CC_FLAGS += -O0
+#CC_FLAGS += -Og
 CC_FLAGS += -g
 CC_FLAGS += -gdwarf-3
 CC_FLAGS += -gstrict-dwarf
@@ -29,9 +29,19 @@ CPP_FLAGS += -D$(BOARD_TYPE)
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
 INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"common/include"
+
 INCLUDE_DIRS += -I"drivers/common/include"
-INCLUDE_DIRS += -I"examples/sd_reliance_edge_demo"
+INCLUDE_DIRS += -I"drivers/ds3232/include"
+INCLUDE_DIRS += -I"drivers/fram/include"
+INCLUDE_DIRS += -I"drivers/lm75bd/include"
+INCLUDE_DIRS += -I"drivers/cc1120/include"
+
+INCLUDE_DIRS += -I"common/include"
+INCLUDE_DIRS += -I"adcs/include"
+INCLUDE_DIRS += -I"cdh/include"
+INCLUDE_DIRS += -I"comms/include"
+INCLUDE_DIRS += -I"eps/include"
+INCLUDE_DIRS += -I"payload/include"
 
 # Reliance Edge File System
 INCLUDE_DIRS += -I"reliance_edge/fatfs_port"
@@ -40,13 +50,28 @@ INCLUDE_DIRS += -I"reliance_edge/core/include"
 INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
 
+INCLUDE_DIRS += -I"tiny_aes"
+INCLUDE_DIRS += -I"libcorrect/include"
+
 LIBS := 
 	
 SRC_DIRS :=
 SRC_DIRS += hal/source
+
+SRC_DIRS += examples/lm75bd_demo
+# Drivers
 SRC_DIRS += drivers/common/source
+SRC_DIRS += drivers/ds3232/source
+SRC_DIRS += drivers/fram/source
+SRC_DIRS += drivers/lm75bd/source
+SRC_DIRS += drivers/cc1120/source
+
 SRC_DIRS += common/source
-SRC_DIRS += examples/sd_reliance_edge_demo
+SRC_DIRS += adcs/source
+SRC_DIRS += cdh/source
+SRC_DIRS += comms/source
+SRC_DIRS += eps/source
+SRC_DIRS += payload/source
 
 # Reliance Edge File System
 SRC_DIRS += reliance_edge/fatfs_port
@@ -57,6 +82,12 @@ SRC_DIRS += reliance_edge/os/freertos/services
 SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+
+# Tiny AES
+SRC_DIRS += tiny_aes
+
+# libcorrect for reed solomon forward error correction
+SRC_DIRS += libcorrect/src/reed-solomon
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))

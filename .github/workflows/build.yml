@@ -23,13 +23,15 @@ jobs:
         
     - name: Build (Release-Launchpad)
       run: |
-        make DEBUG=0 BOARD_TYPE=RM46_LAUNCHPAD
         make clean
+        make DEBUG=0 BOARD_TYPE=RM46_LAUNCHPAD
 
     - name: Build (Release-OBC Rev1)
       run: |
-        make DEBUG=0 BOARD_TYPE=OBC_REVISION_1
         make clean
+        make DEBUG=0 BOARD_TYPE=OBC_REVISION_1
 
-    # - name: Build (Release-OBC Rev2)
-    #   run: make DEBUG=0 BOARD_TYPE=OBC_REVISION_2
+    - name: Build (Release-OBC Rev2)
+      run: |
+        make clean
+        make DEBUG=0 BOARD_TYPE=OBC_REVISION_2

@@ -8,6 +8,10 @@
 #include "cc1120_spi.h"
 #include "cc1120_defs.h"
 
+#if COMMS_PHY == COMMS_PHY_UART
+#include "obc_sci_io.h"
+#endif
+
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
@@ -64,9 +68,29 @@ static void vRecvTask(void * pvParameters){
         }
         switch (queueMsg.eventID) {
             case BEGIN_UPLINK:
+                #if COMMS_PHY == COMMS_PHY_UART
+                uint8_t rxByte;
+
+                // Read first byte
+                LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(30000)));
+                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                // Read the rest of the bytes until we stop uplinking
+                while (1) {   
+                    LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(100)));
+                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
+                }
+                #else
                 // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
                 LOG_IF_ERROR_CODE(cc1120Receive());
                 LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+                #endif
                 break;
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);

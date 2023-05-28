@@ -34,6 +34,7 @@ static const cmd_info_t cmdsConfig[] = {
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
 };
 
 #define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))

@@ -96,6 +96,8 @@ extern void gioHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")))
 extern void het1HighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void vPortYeildWithinAPI(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void gioLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
+extern void sciHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
+extern void sciLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void i2cInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 
 /* USER CODE BEGIN (3) */
@@ -327,7 +329,7 @@ typedef struct vim_config_reg
                                     |(uint32)((uint32)0U << 30U)\
                                     |(uint32)((uint32)0U << 31U))
                         
-#define VIM_REQMASKSET2_CONFIGVALUE ((uint32)((uint32)0U << 0U)\
+#define VIM_REQMASKSET2_CONFIGVALUE ((uint32)((uint32)1U << 0U)\
                                     |(uint32)((uint32)0U << 1U)\
                                     |(uint32)((uint32)1U << 2U)\
                                     |(uint32)((uint32)0U << 3U)\
@@ -337,7 +339,7 @@ typedef struct vim_config_reg
                                     |(uint32)((uint32)0U << 7U)\
                                     |(uint32)((uint32)0U << 8U)\
                                     |(uint32)((uint32)0U << 9U)\
-                                    |(uint32)((uint32)0U << 10U)\
+                                    |(uint32)((uint32)1U << 10U)\
                                     |(uint32)((uint32)0U << 11U)\
                                     |(uint32)((uint32)0U << 12U)\
                                     |(uint32)((uint32)0U << 13U)\
