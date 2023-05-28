@@ -35,6 +35,7 @@ INCLUDE_DIRS += -I"common/include"
 INCLUDE_DIRS += -I"cdh/include"
 INCLUDE_DIRS += -I"drivers/ds3232/include"
 INCLUDE_DIRS += -I"drivers/cc1120/include"
+INCLUDE_DIRS += -I"drivers/lm75bd/include"
 
 INCLUDE_DIRS +=-I"comms/include"
 INCLUDE_DIRS +=-I"eps/include"
@@ -62,6 +63,7 @@ SRC_DIRS += examples/fram_persist_demo
 SRC_DIRS += cdh/source
 SRC_DIRS += drivers/ds3232/source
 SRC_DIRS += drivers/cc1120/source
+SRC_DIRS += drivers/lm75bd/source
 
 SRC_DIRS += comms/source
 SRC_DIRS += eps/source

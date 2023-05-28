@@ -1,410 +1,183 @@
 #include "obc_persistent_store.h"
-
+#include "obc_persistent_sections.h"
 #include "fram.h"
-#include "obc_assert.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_crc.h"
 
-#include <stdbool.h>
-#include <redutils.h>
 #include <string.h>
 
-typedef struct {
-    size_t len;
-    uint32_t crc32;
-} fram_header_t;
+/**
+ * @brief Get a persistent section from FRAM and verify its header data
+ * 
+ * @param sectionStartAddr Start address of the section in FRAM
+ * @param sectionSize Size of the section in FRAM
+ * @param buff Buffer to store the section
+ * @param buffLen Length of the buffer (Must be at least sectionSize bytes long)
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
+ */
+static obc_error_code_t getPersistentSection(uint32_t sectionStartAddr, size_t sectionSize, uint8_t *buff, size_t buffLen);
 
-typedef struct {
-    fram_header_t header;
-    fram_time_data_t data;
-} fram_time_persist_t;
+/**
+ * @brief Set a persistent section in FRAM and write its header data
+ * 
+ * @param sectionStartAddr Start address of the section in FRAM
+ * @param sectionSize Size of the section in FRAM
+ * @param buff Buffer containing the section data (Layout of buffer must match the section struct; leave space for header data)
+ * @param buffLen Length of the buffer (Must be at least sectionSize bytes long)
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
+ */
+static obc_error_code_t setPersistentSection(uint32_t sectionStartAddr, size_t sectionSize, uint8_t *buff, size_t buffLen);
 
-typedef struct {
-    fram_header_t header;
-    fram_state_data_t data;
-} fram_state_persist_t;
+/**
+ * @brief Overlay data in a section buffer. Data is placed after the header part of the section buffer.
+ * 
+ * @param data The data to overlay
+ * @param dataLen Length of the data
+ * @param sectionBuff The section buffer to overlay the data in
+ * @param sectionLen Length of the section buffer
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
+ */
+static obc_error_code_t overlayDataInSectionBuff(uint8_t *data, size_t dataLen, uint8_t *sectionBuff, size_t sectionLen);
 
-// typedef struct {
-//     fram_header_t header;
-//     fram_adcs_data_t data;
-// } fram_adcs_persist_t;
+/**
+ * @brief Extract data from a section buffer. Data is extracted after the header part of the section buffer.
+ * 
+ * @param data Buffer to store the extracted data in
+ * @param dataLen Length of the data buffer
+ * @param sectionBuff The section buffer to extract the data from
+ * @param sectionLen Length of the section buffer
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
+ */
+static obc_error_code_t extractDataFromSectionBuff(uint8_t *data, size_t dataLen, uint8_t *sectionBuff, size_t sectionLen);
 
-// typedef struct {
-//     fram_header_t header;
-//     fram_comms_data_t data;
-// } fram_comms_persist_t;
-
-typedef struct {
-    fram_header_t header;
-    fram_cdh_data_t data;
-} fram_cdh_persist_t;
-
-// typedef struct {
-//     fram_header_t header;
-//     fram_eps_data_t data;
-// } fram_eps_persist_t;
-
-// typedef struct {
-//     fram_header_t header;
-//     fram_payload_data_t data;
-// } fram_payload_persist_t;
-
-typedef struct {
-    fram_time_persist_t time_data;
-    fram_state_data_t state_data;
-    //fram_adcs_persist_t adcs_data;
-    //fram_comms_persist_t comms_data;
-    fram_cdh_persist_t cdh_data;
-    //fram_eps_persist_t eps_data;
-    //fram_payload_data_t payload_data;
-} fram_persist_t;
-
-STATIC_ASSERT(sizeof(fram_persist_t) <= FRAM_MAX_ADDRESS, "Data stored too large for FRAM");
-
-#define FRAM_ADDRESS_OF(data) (0x0 + offsetof(fram_persist_t, data))
-
-obc_error_code_t getPersistentTimeData(fram_time_data_t *buffer) {
+obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *data) {
     obc_error_code_t errCode;
 
-    if (buffer == NULL) {
+    uint8_t sectionBuffer[sizeof(obc_time_persist_t)] = {0};
+    RETURN_IF_ERROR_CODE(getPersistentSection(FRAM_ADDRESS_OF(obcTime), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+    RETURN_IF_ERROR_CODE(extractDataFromSectionBuff((uint8_t*)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data) {
+    obc_error_code_t errCode;
+
+    uint8_t sectionBuffer[sizeof(obc_time_persist_t)] = {0};
+    RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t*)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+    RETURN_IF_ERROR_CODE(setPersistentSection(FRAM_ADDRESS_OF(obcTime), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t getPersistentObcState(obc_state_persist_data_t *data) {
+    obc_error_code_t errCode;
+
+    uint8_t sectionBuffer[sizeof(obc_state_persist_t)] = {0};
+    RETURN_IF_ERROR_CODE(getPersistentSection(FRAM_ADDRESS_OF(obcState), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+    RETURN_IF_ERROR_CODE(extractDataFromSectionBuff((uint8_t*)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+
+    return OBC_ERR_CODE_SUCCESS;
+
+}
+
+obc_error_code_t setPersistentObcState(obc_state_persist_data_t *data) {
+    obc_error_code_t errCode;
+
+    uint8_t sectionBuffer[sizeof(obc_state_persist_t)] = {0};
+    RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t*)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+    RETURN_IF_ERROR_CODE(setPersistentSection(FRAM_ADDRESS_OF(obcState), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+/*---------------------------------------------------------------------*/
+/*------------------------- Private functions -------------------------*/
+/*---------------------------------------------------------------------*/
+
+static obc_error_code_t getPersistentSection(uint32_t sectionStartAddr, size_t sectionSize, uint8_t *buff, size_t buffLen) {
+    obc_error_code_t errCode;
+    
+    if (buff == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    uint32_t fram_address = FRAM_ADDRESS_OF(time_data);
-
-    //Read FRAM
-    uint8_t read_buffer[sizeof(fram_time_persist_t)] = {0};
-    RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_time_persist_t)));
-
-    //Parse Stored data
-    fram_time_persist_t read_data = {0};
-    memcpy(&read_data, read_buffer, sizeof(fram_time_persist_t));
-
-    //Integrity Check
-    uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_time_data_t));
-    if (read_data.header.len != sizeof(fram_time_data_t)) {
-        // Do something
-        return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
+    if (buffLen < sectionSize) {
+        return OBC_ERR_CODE_BUFF_TOO_SMALL;
     }
 
-    if (read_data.header.crc32 != crc32) {
-        // Do something
-        return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-    }
-
-    memcpy(buffer, &read_data.data, sizeof(fram_time_data_t));
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t setPersistentTimeData(fram_time_data_t data) {
-    obc_error_code_t errCode;
-    uint32_t fram_address = FRAM_ADDRESS_OF(time_data);
-    ;
-    fram_time_persist_t write_data = {0};
-    uint8_t write_buffer[sizeof(fram_time_persist_t)] = {0};
-
-    write_data.header.len = sizeof(fram_time_data_t);
-    //Use CRC32 function from Red to calculate crc
-    write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_time_data_t));
-    write_data.data = data;
-    memcpy(write_buffer, &write_data, sizeof(fram_time_persist_t));
-
-    RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_time_persist_t)));
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-
-obc_error_code_t getPersistentStateData(fram_state_data_t *buffer) {
-    obc_error_code_t errCode;
-
-    if (buffer == NULL) {
+    if (sectionSize < sizeof(obc_persist_section_header_t)) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    uint32_t fram_address = FRAM_ADDRESS_OF(state_data);
+    RETURN_IF_ERROR_CODE(framRead(sectionStartAddr, buff, sectionSize));
 
-    //Read FRAM
-    uint8_t read_buffer[sizeof(fram_state_persist_t)] = {0};
-    RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_state_persist_t)));
+    obc_persist_section_header_t header = {0};
+    memcpy(&header, buff, sizeof(obc_persist_section_header_t));
 
-    //Parse Stored data
-    fram_state_persist_t read_data = {0};
-    memcpy(&read_data, read_buffer, sizeof(fram_state_persist_t));
-
-    //Integrity Check
-    uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_state_data_t));
-    if (read_data.header.len != sizeof(fram_state_data_t)) {
-        // Do something
+    if (header.len != sectionSize) {
         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
     }
 
-    if (read_data.header.crc32 != crc32) {
-        // Do something
+    uint8_t *data = buff + sizeof(obc_persist_section_header_t);
+    uint32_t crc32 = computeCrc32(0, data, sectionSize - sizeof(obc_persist_section_header_t));
+    if (header.crc32 != crc32) {
         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
     }
 
-    memcpy(buffer, &read_data.data, sizeof(fram_state_data_t));
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentStateData(fram_state_data_t data) {
-    obc_error_code_t errCode;
-    uint32_t fram_address = FRAM_ADDRESS_OF(state_data);
-    ;
-    fram_state_persist_t write_data = {0};
-    uint8_t write_buffer[sizeof(fram_state_persist_t)] = {0};
-
-    write_data.header.len = sizeof(fram_state_data_t);
-    //Use CRC32 function from Red to calculate crc
-    write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_state_data_t));
-    write_data.data = data;
-    memcpy(write_buffer, &write_data, sizeof(fram_state_persist_t));
-
-    RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_state_persist_t)));
-    return OBC_ERR_CODE_SUCCESS;
-}
-
-// obc_error_code_t getPersistentADCSData(fram_adcs_data_t *buffer) {
-//     obc_error_code_t errCode;
-
-//     if (buffer == NULL) {
-//         return OBC_ERR_CODE_INVALID_ARG;
-//     }
-
-//     uint32_t fram_address = FRAM_ADDRESS_OF(adcs_data);
-
-//     //Read FRAM
-//     uint8_t read_buffer[sizeof(fram_adcs_persist_t)] = {0};
-//     RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_adcs_persist_t)));
-
-//     //Parse Stored data
-//     fram_adcs_persist_t read_data = {0};
-//     memcpy(&read_data, read_buffer, sizeof(fram_adcs_persist_t));
-
-//     //Integrity Check
-//     uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_adcs_data_t));
-//     if (read_data.header.len != sizeof(fram_adcs_data_t)) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     if (read_data.header.crc32 != crc32) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     memcpy(buffer, &read_data.data, sizeof(fram_adcs_data_t));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-// obc_error_code_t setPersistentADCSData(fram_adcs_data_t data) {
-//     obc_error_code_t errCode;
-//     uint32_t fram_address = FRAM_ADDRESS_OF(adcs_data);
-//     fram_adcs_persist_t write_data = {0};
-//     uint8_t write_buffer[sizeof(fram_adcs_persist_t)] = {0};
-
-//     write_data.header.len = sizeof(fram_adcs_data_t);
-//     //Use CRC32 function from Red to calculate crc
-//     write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_adcs_data_t));
-//     write_data.data = data;
-//     memcpy(write_buffer, &write_data, sizeof(fram_adcs_persist_t));
-
-//     RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_adcs_persist_t)));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-// obc_error_code_t getPersistentCOMMSData(fram_comms_data_t *buffer) {
-//     obc_error_code_t errCode;
-
-//     if (buffer == NULL) {
-//         return OBC_ERR_CODE_INVALID_ARG;
-//     }
-
-//     uint32_t fram_address = FRAM_ADDRESS_OF(comms_data);
-
-//     //Read FRAM
-//     uint8_t read_buffer[sizeof(fram_comms_persist_t)] = {0};
-//     RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_comms_persist_t)));
-
-//     //Parse Stored data
-//     fram_comms_persist_t read_data = {0};
-//     memcpy(&read_data, read_buffer, sizeof(fram_comms_persist_t));
-
-//     //Integrity Check
-//     uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_comms_data_t));
-//     if (read_data.header.len != sizeof(fram_comms_data_t)) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     if (read_data.header.crc32 != crc32) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     memcpy(buffer, &read_data.data, sizeof(fram_comms_data_t));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-// obc_error_code_t setPersistentCOMMSData(fram_comms_data_t data) {
-//     obc_error_code_t errCode;
-//     uint32_t fram_address = FRAM_ADDRESS_OF(comms_data);
-//     fram_comms_persist_t write_data = {0};
-//     uint8_t write_buffer[sizeof(fram_comms_persist_t)] = {0};
-
-//     write_data.header.len = sizeof(fram_comms_data_t);
-//     //Use CRC32 function from Red to calculate crc
-//     write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_comms_data_t));
-//     write_data.data = data;
-//     memcpy(write_buffer, &write_data, sizeof(fram_comms_persist_t));
-
-//     RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_comms_persist_t)));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-obc_error_code_t getPersistentCDHData(fram_cdh_data_t *buffer) {
+static obc_error_code_t setPersistentSection(uint32_t sectionStartAddr, size_t sectionSize, uint8_t *buff, size_t buffLen) {
     obc_error_code_t errCode;
 
-    if (buffer == NULL) {
+    if (buff == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    uint32_t fram_address = FRAM_ADDRESS_OF(cdh_data);
-
-    //Read FRAM
-    uint8_t read_buffer[sizeof(fram_cdh_persist_t)] = {0};
-    RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_cdh_persist_t)));
-
-    //Parse Stored data
-    fram_cdh_persist_t read_data = {0};
-    memcpy(&read_data, read_buffer, sizeof(fram_cdh_persist_t));
-
-    //Integrity Check
-    uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_cdh_data_t));
-    if (read_data.header.len != sizeof(fram_cdh_data_t)) {
-        // Do something
-        return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
+    if (sectionSize < sizeof(obc_persist_section_header_t)) {
+        return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    if (read_data.header.crc32 != crc32) {
-        // Do something
-        return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
+    if (buffLen < sectionSize) {
+        return OBC_ERR_CODE_BUFF_TOO_SMALL;
     }
 
-    memcpy(buffer, &read_data.data, sizeof(fram_cdh_data_t));
+    // Assume buff is already formatted with space for header at the start
+    obc_persist_section_header_t header = {0};
+    header.len = sectionSize;
+    header.crc32 = computeCrc32(0, buff + sizeof(obc_persist_section_header_t), sectionSize - sizeof(obc_persist_section_header_t));
+
+    memcpy(buff, &header, sizeof(obc_persist_section_header_t));
+
+    RETURN_IF_ERROR_CODE(framWrite(sectionStartAddr, buff, sectionSize));
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentCDHData(fram_cdh_data_t data) {
-    obc_error_code_t errCode;
-    uint32_t fram_address = FRAM_ADDRESS_OF(cdh_data);
-    fram_cdh_persist_t write_data = {0};
-    uint8_t write_buffer[sizeof(fram_cdh_persist_t)] = {0};
+static obc_error_code_t overlayDataInSectionBuff(uint8_t *data, size_t dataLen, uint8_t *sectionBuff, size_t sectionLen) {
+    if (data == NULL || sectionBuff == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+    
+    if (dataLen > sectionLen - sizeof(obc_persist_section_header_t)) {
+        return OBC_ERR_CODE_BUFF_TOO_SMALL;
+    }
 
-    write_data.header.len = sizeof(fram_cdh_data_t);
-    //Use CRC32 function from Red to calculate crc
-    write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_cdh_data_t));
-    write_data.data = data;
-    memcpy(write_buffer, &write_data, sizeof(fram_cdh_persist_t));
-
-    RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_cdh_persist_t)));
+    memcpy(sectionBuff + sizeof(obc_persist_section_header_t), data, dataLen);
     return OBC_ERR_CODE_SUCCESS;
 }
 
-// obc_error_code_t getPersistentEPSData(fram_eps_data_t *buffer) {
-//     obc_error_code_t errCode;
+static obc_error_code_t extractDataFromSectionBuff(uint8_t *data, size_t dataLen, uint8_t *sectionBuff, size_t sectionLen) {
+    if (data == NULL || sectionBuff == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
 
-//     if (buffer == NULL) {
-//         return OBC_ERR_CODE_INVALID_ARG;
-//     }
+    if (dataLen > sectionLen - sizeof(obc_persist_section_header_t)) {
+        return OBC_ERR_CODE_BUFF_TOO_SMALL;
+    }
 
-//     uint32_t fram_address = FRAM_ADDRESS_OF(eps_data);
-
-//     //Read FRAM
-//     uint8_t read_buffer[sizeof(fram_eps_persist_t)] = {0};
-//     RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_eps_persist_t)));
-
-//     //Parse Stored data
-//     fram_eps_persist_t read_data = {0};
-//     memcpy(&read_data, read_buffer, sizeof(fram_eps_persist_t));
-
-//     //Integrity Check
-//     uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_eps_data_t));
-//     if (read_data.header.len != sizeof(fram_eps_data_t)) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     if (read_data.header.crc32 != crc32) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     memcpy(buffer, &read_data.data, sizeof(fram_eps_data_t));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-// obc_error_code_t setPersistentEPSData(fram_eps_data_t data) {
-//     obc_error_code_t errCode;
-//     uint32_t fram_address = FRAM_ADDRESS_OF(eps_data);
-//     fram_eps_persist_t write_data = {0};
-//     uint8_t write_buffer[sizeof(fram_eps_persist_t)] = {0};
-
-//     write_data.header.len = sizeof(fram_eps_data_t);
-//     //Use CRC32 function from Red to calculate crc
-//     write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_eps_data_t));
-//     write_data.data = data;
-//     memcpy(write_buffer, &write_data, sizeof(fram_eps_persist_t));
-
-//     RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_eps_persist_t)));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-// obc_error_code_t getPersistentPayloadData(fram_payload_data_t *buffer) {
-//     obc_error_code_t errCode;
-
-//     if (buffer == NULL) {
-//         return OBC_ERR_CODE_INVALID_ARG;
-//     }
-
-//     uint32_t fram_address = FRAM_ADDRESS_OF(payload_data);
-
-//     //Read FRAM
-//     uint8_t read_buffer[sizeof(fram_payload_persist_t)] = {0};
-//     RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_payload_persist_t)));
-
-//     //Parse Stored data
-//     fram_payload_persist_t read_data = {0};
-//     memcpy(&read_data, read_buffer, sizeof(fram_payload_persist_t));
-
-//     //Integrity Check
-//     uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_payload_data_t));
-//     if (read_data.header.len != sizeof(fram_payload_data_t)) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     if (read_data.header.crc32 != crc32) {
-//         // Do something
-//         return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-//     }
-
-//     memcpy(buffer, &read_data.data, sizeof(fram_payload_data_t));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
-
-// obc_error_code_t setPersistentPayloadData(fram_payload_data_t data) {
-//     obc_error_code_t errCode;
-//     uint32_t fram_address = FRAM_ADDRESS_OF(payload_data);
-//     fram_payload_persist_t write_data = {0};
-//     uint8_t write_buffer[sizeof(fram_payload_persist_t)] = {0};
-
-//     write_data.header.len = sizeof(fram_payload_data_t);
-//     //Use CRC32 function from Red to calculate crc
-//     write_data.header.crc32 = RedCrc32Update(0, &data, sizeof(fram_payload_data_t));
-//     write_data.data = data;
-//     memcpy(write_buffer, &write_data, sizeof(fram_payload_persist_t));
-
-//     RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_payload_persist_t)));
-//     return OBC_ERR_CODE_SUCCESS;
-// }
+    memcpy(data, sectionBuff + sizeof(obc_persist_section_header_t), dataLen);
+    return OBC_ERR_CODE_SUCCESS;
+}
