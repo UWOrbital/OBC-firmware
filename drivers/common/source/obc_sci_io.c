@@ -57,9 +57,7 @@ void initSciMutex(void) {
     }
     configASSERT(sciTransferComplete);
 
-    #if COMMS_PHY == COMMS_PHY_UART
-    sciSetBaudrate(UART_READ_REG, 9600);
-    #endif
+    sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
 }
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length) {
