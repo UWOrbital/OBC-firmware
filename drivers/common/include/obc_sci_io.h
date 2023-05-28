@@ -6,6 +6,10 @@
 #include <sci.h>
 #include <stdint.h>
 
+#ifndef OBC_UART_BAUD_RATE
+#define OBC_UART_BAUD_RATE 115200
+#endif
+
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
  */
