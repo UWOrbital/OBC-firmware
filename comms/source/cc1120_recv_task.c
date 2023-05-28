@@ -80,7 +80,7 @@ static void vRecvTask(void * pvParameters){
 
                 // Read the rest of the bytes until we stop uplinking
                 while (1) {   
-                    LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(100)));
+                    LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
                     if (errCode != OBC_ERR_CODE_SUCCESS) break;
 
                     LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));

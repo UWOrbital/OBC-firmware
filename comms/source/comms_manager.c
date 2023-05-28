@@ -9,6 +9,7 @@
 #include "send_telemetry.h"
 #include "encode_telemetry.h"
 #include "cc1120_recv_task.h"
+#include "decode_telemetry.h"
 #include "aes128.h"
 #include "fec.h"
 
@@ -61,6 +62,9 @@ void initCommsManager(void) {
     // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
     initializeAesCtx(TEMP_STATIC_KEY);
     initRs();
+    
+    initRecvTask();
+    initDecodeTask();
 }
 
 obc_error_code_t sendToCommsQueue(comms_event_t *event) {
@@ -78,7 +82,7 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
 }
 
 static void vCommsManagerTask(void * pvParameters) {
-    //obc_error_code_t errCode;
+    obc_error_code_t errCode;
     
     while (1) {
         comms_event_t queueMsg;
@@ -92,7 +96,8 @@ static void vCommsManagerTask(void * pvParameters) {
                 // LOG_IF_ERROR_CODE(sendToTelemEncodeQueue(queueMsg.telemetryBatchId));
                 break;
             case BEGIN_UPLINK:
-                // startUplink();
+                LOG_IF_ERROR_CODE(startUplink());
+                break;
         }
     }
 }
