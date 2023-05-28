@@ -74,4 +74,9 @@
 #define ALARM_HANDLER_NAME         "alarm_handler"
 #define ALARM_HANDLER_PRIORITY     tskIDLE_PRIORITY + 1U
 
+/* Health Collector task config */
+#define HEALTH_COLLECTOR_STACK_SIZE   256U
+#define HEALTH_COLLECTOR_NAME         "health_collector"
+#define HEALTH_COLLECTOR_PRIORITY     tskIDLE_PRIORITY + 1U
+
 #endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */

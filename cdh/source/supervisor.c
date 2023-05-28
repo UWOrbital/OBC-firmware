@@ -7,7 +7,7 @@
 #include "eps_manager.h"
 #include "payload_manager.h"
 #include "alarm_handler.h"
-#include "temp_reader.h"
+#include "health_collector.h"
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -15,6 +15,7 @@
 #include "obc_task_config.h"
 #include "obc_reset.h"
 #include "obc_fs_utils.h"
+#include "lm75bd.h"
 #include "obc_board_config.h"
 
 #include <FreeRTOS.h>
@@ -88,6 +89,18 @@ static void vSupervisorTask(void * pvParameters) {
     LOG_IF_ERROR_CODE(setupFileSystem()); // microSD card
     LOG_IF_ERROR_CODE(initTime()); // RTC
 
+    lm75bd_config_t config = {
+        .devAddr = LM75BD_OBC_I2C_ADDR,
+        .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
+        .osFaultQueueSize = 2,
+        .osPolarity = LM75BD_OS_POL_ACTIVE_LOW,
+        .osOperationMode = LM75BD_OS_OP_MODE_COMP,
+        .overTempThresholdCelsius = 125.0f,
+        .hysteresisThresholdCelsius = 75.0f,
+    };
+
+    LOG_IF_ERROR_CODE(lm75bdInit(&config)); // LM75BD temperature sensor (OBC)
+
     /* Initialize other tasks */
     // Don't start running any tasks until all tasks are initialized
     taskENTER_CRITICAL();
@@ -101,8 +114,8 @@ static void vSupervisorTask(void * pvParameters) {
     initCommsManager();
     initEPSManager();
     initPayloadManager();
-    initTempReaderHandler();
-
+    initHealthCollector();
+    
     taskEXIT_CRITICAL();
 
     initSwWatchdog();
