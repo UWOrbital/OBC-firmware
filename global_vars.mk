@@ -43,11 +43,18 @@ CPP_FLAGS += -D$(BOARD_TYPE)
 LOG_OUTPUT ?= LOG_TO_UART
 CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT) 
 
+# Set to LOG_OFF to disable all logging
 LOG_LEVEL ?= LOG_TRACE
 CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
 CMD_POLICY ?= CMD_POLICY_RND
 CPP_FLAGS += -DOBC_ACTIVE_POLICY=$(CMD_POLICY) 
+
+COMMS_PHY ?= COMMS_PHY_NONE
+CPP_FLAGS += -DCOMMS_PHY=$(COMMS_PHY)
+
+OBC_BAUD_RATE ?= 115200
+CPP_FLAGS += -DOBC_BAUD_RATE=$(OBC_BAUD_RATE)
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
@@ -80,7 +87,7 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
 
 INCLUDE_DIRS += -I"$(ROOT_DIR)/tiny_aes"
-
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libcorrect/include"
 LIBS := 
 
 $(BUILD_DIR)/%.o : $(ROOT_DIR)/%.c

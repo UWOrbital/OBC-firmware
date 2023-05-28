@@ -9,6 +9,7 @@
 #define INFINITE_PACKET_LENGTH_MODE     0x40U
 #define VARIABLE_PACKET_LENGTH_MODE     0x20U
 #define FIXED_PACKET_LENGTH_MODE        0x00U
+#define SYNC_EVENT_SIGNAL_NUM           0x29U
 
 /* Standard address space registers */
 #define CC1120_REGS_IOCFG3              0x00U

@@ -6,6 +6,10 @@
 #include <sci.h>
 #include <stdint.h>
 
+#ifndef OBC_UART_BAUD_RATE
+#define OBC_UART_BAUD_RATE 115200
+#endif
+
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
  */
@@ -36,6 +40,25 @@ obc_error_code_t sciPrintf(const char *s, ...);
  * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
  */
 obc_error_code_t sciReadByte(unsigned char *character);
+
+/**
+ * @brief Read raw bytes from UART_READ_REG (blocking).
+ * 
+ * @param numBytes Number of bytes to read
+ * @param buf Buffer to store the bytes read
+ * @param blockTimeTicks Number of ticks to wait for async transfer to complete
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks);
+
+/**
+ * @brief Send raw bytes to UART_PRINT_REG (blocking).
+ * 
+ * @param buf Buffer to send
+ * @param numBytes Number of bytes to send
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes);
 
 /**
  * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.

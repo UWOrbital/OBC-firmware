@@ -3,9 +3,11 @@
 #include "obc_spi_io.h"
 
 #include "cc1120_spi_tests.h"
+#include "rs_test.h"
 
-#include <FreeRTOS.h>
-#include <os_task.h>
+#include "FreeRTOS.h"
+#include "os_task.h"
+#include "os_portable.h"
 
 #include <sys_common.h>
 #include <gio.h>
@@ -29,8 +31,8 @@ void initTestTask(void) {
 
 static void vTestTask(void * pvParameters) {
     // Run the E2E SPI read test
-    cc1120_test_spi_read();
-    
+    // cc1120TestSpiRead();
+    testRs();
     while(1) {
 
     }

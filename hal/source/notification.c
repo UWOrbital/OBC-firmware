@@ -54,15 +54,15 @@
 #include "gio.h"
 #include "sci.h"
 #include "spi.h"
+#include "het.h"
 #include "i2c.h"
 #include "sys_dma.h"
 
 /* USER CODE BEGIN (0) */
 #include "cc1120_txrx.h"
+#include "alarm_handler.h"
+#include "obc_board_config.h"
 
-#define CC1120_RX_THR_PKT_PIN 2U
-#define CC1120_TX_THR_PKT_PIN 3U
-#define CC1120_PKT_SYNC_RXTX_PIN 7U
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
 {
@@ -133,23 +133,8 @@ void gioNotification(gioPORT_t *port, uint32 bit)
             // See section 3.4.1.1
             // Triggered on rising edge so RX FIFO can be read once the signal that RX FIFO is above TXRX_INTERRUPT_THRESHOLD
             // is asserted to avoid a FIFO overflow
-            case CC1120_RX_THR_PKT_PIN:
+            case CC1120_RX_THR_PKT_gioPORTB_PIN:
                 rxFifoReadyCallback();
-                break;
-        
-            // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
-            // is deasserted to avoid a FIFO
-            case CC1120_TX_THR_PKT_PIN:
-                txFifoReadyCallback(); 
-                break;
-        }
-    }
-    else if (port == gioPORTA){
-        switch (bit){
-            // See section 3.4.1.1
-            // triggered on falling edge once TX FIFO has been completely emptied
-            case CC1120_PKT_SYNC_RXTX_PIN:
-                txFifoEmptyCallback();
                 break;
         }
     }
@@ -157,6 +142,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 }
 
 /* USER CODE BEGIN (20) */
+__attribute__((weak))
 /* USER CODE END */
 void i2cNotification(i2cBASE_t *i2c, uint32 flags)      
 {
@@ -166,6 +152,7 @@ void i2cNotification(i2cBASE_t *i2c, uint32 flags)
 }
 
 /* USER CODE BEGIN (22) */
+__attribute__((weak))
 /* USER CODE END */
 
 void sciNotification(sciBASE_t *sci, uint32 flags)     
@@ -196,6 +183,48 @@ void spiEndNotification(spiBASE_t *spi)
 /* USER CODE BEGIN (34) */
 /* USER CODE END */
 
+void pwmNotification(hetBASE_t * hetREG,uint32 pwm, uint32 notification)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (35) */
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (36) */
+/* USER CODE END */
+void edgeNotification(hetBASE_t * hetREG,uint32 edge)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (37) */
+    if(hetREG == hetREG1){
+        switch (edge){
+            // See section 3.4.1.1
+            // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above TXRX_INTERRUPT_THRESHOLD
+            // is deasserted to avoid a FIFO
+            case CC1120_TX_THR_PKT_hetPORT1_PIN:
+                txFifoReadyCallback();
+                break;
+            // See section 3.4.1.1
+            // triggered on falling edge once TX FIFO has been completely emptied
+            case CC1120_PKT_SYNC_RXTX_hetPORT1_PIN:
+                txFifoEmptyCallback();
+                break;
+        }
+    }
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (38) */
+/* USER CODE END */
+void hetNotification(hetBASE_t *het, uint32 offset)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (39) */
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (40) */
+/* USER CODE END */
 
 
 /* USER CODE BEGIN (43) */

@@ -5,6 +5,12 @@
 #include "cc1120_txrx.h"
 #include "ax25.h"
 #include "obc_task_config.h"
+#include "cc1120_spi.h"
+#include "cc1120_defs.h"
+
+#if COMMS_PHY == COMMS_PHY_UART
+#include "obc_sci_io.h"
+#endif
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -62,23 +68,33 @@ static void vRecvTask(void * pvParameters){
         }
         switch (queueMsg.eventID) {
             case BEGIN_UPLINK:
-                isStillUplinking = true;
-                // Keep receiving packets until isStillUplinking is set to FALSE once we receive an end of transmission command
-                while(isStillUplinking){
-                    packed_ax25_packet_t recvData;
-                    uint32_t recvDataLen = AX25_PKT_LEN;
-                    // Receive AX25_PKT_LEN bytes from ground station and store them in recvData.data
-                    LOG_IF_ERROR_CODE(cc1120Receive(recvData.data, recvDataLen));
-                    // Send the received bytes to decode data queue to be decoded and sent to command manager
-                    if(errCode == OBC_ERR_CODE_SUCCESS){
-                        LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&recvData));
-                    }
+                #if COMMS_PHY == COMMS_PHY_UART
+                uint8_t rxByte;
+
+                // Read first byte
+                LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(30000)));
+                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                // Read the rest of the bytes until we stop uplinking
+                while (1) {   
+                    LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(100)));
+                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
+
+                    LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
                 }
+                #else
+                // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+                LOG_IF_ERROR_CODE(cc1120Receive());
+                LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+                #endif
                 break;
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
-
     }
 } 
 

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "obc_errors.h"
+
 /**
  * @brief Initializes the telemetry encoding task and queue
  * 
