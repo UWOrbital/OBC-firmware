@@ -34,7 +34,7 @@ obc_error_code_t camWriteReg(uint8_t addr, uint8_t data, camera_t cam) {
     RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     addr = addr | 0x80;
     uint8_t tx[2] = {addr, data};
-    spiTransmitBytes(CAM_SPI_REG, &cam_config[cam].spi_config, tx, 2);
+    errCode = spiTransmitBytes(CAM_SPI_REG, &cam_config[cam].spi_config, tx, 2);
     RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
     return errCode;
 }
