@@ -48,6 +48,8 @@ INCLUDE_DIRS += -I"reliance_edge/core/include"
 INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
 
+INCLUDE_DIRS += -I"tiny_aes"
+INCLUDE_DIRS += -I"libcorrect/include"
 
 LIBS := 
 	
@@ -75,6 +77,9 @@ SRC_DIRS += reliance_edge/os/freertos/services
 SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+
+SRC_DIRS += tiny_aes
+SRC_DIRS += libcorrect/src/reed-solomon
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 SRCS += $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.s))
