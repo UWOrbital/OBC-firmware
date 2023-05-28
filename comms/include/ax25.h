@@ -56,15 +56,21 @@ typedef struct {
     uint16_t length;
 } packed_ax25_packet_t;
 
+typedef struct {
+    uint8_t data[AX25_DEST_ADDR_BYTES];
+    uint8_t length;
+} ax25_addr_t;
+
 /**
- * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in ax25Data->length
+ * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  * 
  * @param rsData reed solomon data that needs ax.25 headers added onto it
- * @param out array to store the ax.25 frame
+ * @param ax25Data array to store the ax.25 frame
+ * @param destAddress address of the destination for the ax25 packet
  * 
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
 */
-obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data);
+obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t* destAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
