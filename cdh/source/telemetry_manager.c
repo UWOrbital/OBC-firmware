@@ -48,6 +48,12 @@ static QueueHandle_t telemetryDataQueueHandle = NULL;
 static StaticQueue_t telemetryDataQueue;
 static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH*TELEMETRY_DATA_QUEUE_ITEM_SIZE];
 
+// Telemetry Events Group
+static QueueHandle_t telemetryEventsQueueHandle = NULL;
+static StaticQueue_t telemetryEventsQueue;
+static uint8_t telemetryEventsQueueStack[TELEMETRY_DATA_QUEUE_LENGTH*TELEMETRY_DATA_QUEUE_ITEM_SIZE];
+static uint32_t BatchId;
+
 void initTelemetry(void) {
     memset(&telemetryTaskBuffer, 0, sizeof(telemetryTaskBuffer));
     memset(&telemetryTaskStack, 0, sizeof(telemetryTaskStack));
@@ -55,11 +61,17 @@ void initTelemetry(void) {
     memset(&telemetryDataQueue, 0, sizeof(telemetryDataQueue));
     memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
 
+    memset(&telemetryEventsQueue, 0, sizeof(telemetryEventsQueue));
+    memset(&telemetryEventsQueueStack, 0, sizeof(telemetryEventsQueueStack));
+
     ASSERT( (telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL) );
     telemetryTaskHandle = xTaskCreateStatic(telemetryManager, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL, TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
 
     ASSERT( (telemetryDataQueueStack != NULL) && (&telemetryDataQueue != NULL) );
     telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE, telemetryDataQueueStack, &telemetryDataQueue);
+
+    ASSERT( (telemetryEventsQueueStack != NULL) && (&telemetryEventsQueue != NULL) );
+    telemetryEventsQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE, telemetryEventsQueueStack, &telemetryEventsQueue);
 }
 
 static void telemetryManager(void * pvParameters) {
@@ -74,6 +86,7 @@ static void telemetryManager(void * pvParameters) {
 
     // TODO: Deal with errors
     LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
+    BatchId = telemetryBatchId;
 
     while (1) {
         telemetry_data_t telemData;
@@ -94,9 +107,13 @@ static void telemetryManager(void * pvParameters) {
             // TODO: Handle this error
         }
 
-        comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY, .telemetryBatchId = telemetryBatchId};
+        // Send downlink event when event is received by telemetry manager
+        comms_event_t downlinkEvent;
+        if(xQueueReceive(telemetryEventsQueueHandle, &downlinkEvent, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
+            LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        }
 
-        LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+
         if (errCode != OBC_ERR_CODE_SUCCESS) {
             // TODO: Handle this error, specifically if the queue is full. Other
             // errors should be caught during testing.
@@ -141,4 +158,13 @@ static bool checkDownlinkAlarm(void) {
     }
 
     return true;
+}
+
+obc_error_code_t sendDownlinkTelemetryEvent(void) {
+    comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY, .telemetryBatchId = BatchId};
+    if(xQueueSend(telemetryEventsQueueHandle, &downlinkEvent, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
+        return OBC_ERR_CODE_SUCCESS;
+    }
+
+    return OBC_ERR_CODE_UNKNOWN;
 }

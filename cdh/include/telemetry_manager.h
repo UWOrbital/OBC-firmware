@@ -89,6 +89,8 @@ typedef struct {
 
 #define MAX_TELEMETRY_DATA_SIZE sizeof(telemetry_data_t)
 
+#define BIT_0 (1 << 0)
+
 /**
  * @brief	Initialize the telemetry task and associated FreeRTOS constructs (queues, timers, etc.)
  */
@@ -100,5 +102,11 @@ void initTelemetry(void);
  * @return  obc_error_code_t OBC_ERR_CODE_SUCCESS if the data was added to the queue, error code otherwise
  */
 obc_error_code_t addTelemetryData(telemetry_data_t *data);
+
+/**
+ * @brief	Sends downlink telemetry event to telemetry manager by setting BIT0
+ * @return  obc_error_code_t OBC_ERR_CODE_SUCCESS if the data was added to the queue, error code otherwise
+ */
+obc_error_code_t sendDownlinkTelemetryEvent(void);
 
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */

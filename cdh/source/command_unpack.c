@@ -66,3 +66,8 @@ void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cm
 void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
     cmdMsg->downlinkLogsNextPass.logLevel = (log_level_t)unpackUint8(buffer, offset);
 }
+
+// CMD_DOWNLINK_TELEMETRY
+void unpackDownlinkTelemetryCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+    // No data to unpack
+}

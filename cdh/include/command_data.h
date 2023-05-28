@@ -2,6 +2,7 @@
 #define CDH_INCLUDE_COMMAND_DATA_H_
 
 #include "obc_logging.h"
+#include "telemetry_manager.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -19,7 +20,6 @@ typedef struct {
 typedef struct {
     log_level_t logLevel;
 } downlink_logs_next_pass_cmd_data_t;
-
 
 /* -------------------------- */
 /*   Command Message Struct   */
