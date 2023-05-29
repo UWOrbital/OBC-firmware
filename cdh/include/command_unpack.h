@@ -17,6 +17,9 @@ void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* ms
 // CMD_DOWNLINK_LOGS_NEXT_PASS
 void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
+// CMD_MICRO_SD_FORMAT
+void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg);
+
 // CMD_PAYLOAD_CAPTURE
 void unpackPayloadCaptureCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 

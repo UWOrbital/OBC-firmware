@@ -6,6 +6,7 @@
 
 #include <FreeRTOS.h>
 #include <os_task.h>
+#include <os_atomic.h>
 
 #include <stdint.h>
 #include <stddef.h>
@@ -30,48 +31,67 @@ static bool isLeapYear(uint16_t year);
 static uint16_t calcDayOfYear(uint8_t month, uint8_t day, uint16_t year);
 
 // Global Unix time
-static uint32_t currTime;
+static volatile uint32_t currTime;
 
-void initTime(void) {
-    memset(&currTime, 0, sizeof(currTime));
-    syncUnixTime();
+obc_error_code_t initTime(void) {
+    obc_error_code_t errCode;
+
+    memset((void *)&currTime, 0, sizeof(currTime));
+
+    // Initialize the RTC
+    
+    // TODO: Replace hardcoded datetime with fetch from FRAM
+    // or synch with ground station
+    rtc_date_time_t rtcDateTime = {0};
+    rtcDateTime.date.year = 23; // 2023
+    rtcDateTime.date.month = 1;
+    rtcDateTime.date.date = 1;
+    rtcDateTime.time.hours = 0;
+    rtcDateTime.time.minutes = 0;
+    rtcDateTime.time.seconds = 0;
+    
+    // Set current date and time
+    RETURN_IF_ERROR_CODE(rtcInit(&rtcDateTime));
+
+    // Enable alarm 1 interrupt
+    rtc_control_t rtcControl = {0};
+    RETURN_IF_ERROR_CODE(getControlRTC(&rtcControl));
+    rtcControl.A1IE = 1;
+    rtcControl.INTCN = 1;
+    RETURN_IF_ERROR_CODE(setControlRTC(&rtcControl));
+
+    // Synch the local Unix time with the RTC
+    RETURN_IF_ERROR_CODE(syncUnixTime());
+
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 uint32_t getCurrentUnixTime(void) {
-    return currTime;
+    uint32_t time;
+
+    vPortEnterCritical();
+    time = currTime;
+    vPortExitCritical();
+    
+    return time;
 }
 
 void setCurrentUnixTime(uint32_t unixTime) {
-    taskENTER_CRITICAL();
+    vPortEnterCritical();
     currTime = unixTime;
-    taskEXIT_CRITICAL();
+    vPortExitCritical();
 }
 
 void incrementCurrentUnixTime(void) {
-    taskENTER_CRITICAL();
-    currTime++;
-    taskEXIT_CRITICAL();
+    Atomic_Increment_u32(&currTime);
 }
 
 obc_error_code_t syncUnixTime(void) {
     obc_error_code_t errCode;
 
-    rtc_date_time_t datetime = {
-        .date = {
-            .date = 1,
-            .month = 4,
-            .year = 23
-        },
-        .time = {
-            .hours = 12,
-            .minutes = 30,
-            .seconds = 30
-        }
-    };
+    rtc_date_time_t datetime = {0};
 
-    // TODO: Uncomment this once the I2C infinite loop bug is fixed
-    // For now, always sync to the same date/time
-    // RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
+    RETURN_IF_ERROR_CODE(getCurrentDateTimeRTC(&datetime));
 
     uint32_t unixTime;
     RETURN_IF_ERROR_CODE(datetimeToUnix(&datetime, &unixTime));
@@ -80,6 +100,10 @@ obc_error_code_t syncUnixTime(void) {
 
     return OBC_ERR_CODE_SUCCESS;
 }
+
+/*------------------------------------*
+ * Unix <=> Datetime Helper Functions *
+ *------------------------------------*/
 
 obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime) {
     if (datetime == NULL || unixTime == NULL) {
@@ -103,18 +127,22 @@ obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
-/* 2000-03-01 (mod 400 year, immediately after Feb 29 */
+/* 
+ * 2000-03-01 (mod 400 year, immediately after Feb 29) 
+ * This custom epoch makes it easier to handle leap years
+ */
 #define LEAPOCH (946684800LL + 86400 * (31 + 29))
 
-// To be a leap year, the year number must be divisible by four 
-// except for end-of-century years, which must be divisible by 400.
-#define DAYS_PER_400Y   (365 * 400 + 97)
-#define DAYS_PER_100Y   (365 * 100 + 24)
-#define DAYS_PER_4Y     (365 * 4   + 1)
+/* To be a leap year, the year number must be divisible by four 
+ * except for end-of-century years, which must be divisible by 400. */
+#define DAYS_PER_400Y   (365 * 400 + 97)    // 400 years have 97 leap days
+#define DAYS_PER_100Y   (365 * 100 + 24)    // 100 years have 24 leap days
+#define DAYS_PER_4Y     (365 * 4   + 1)     // 4 years have 1 leap day
 
 #define SECS_PER_MIN    60
 #define SECS_PER_HOUR   (SECS_PER_MIN * 60)
 #define SECS_PER_DAY    (SECS_PER_HOUR * 24)
+#define MINS_PER_HOUR   60
 
 obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
     /*
@@ -123,69 +151,108 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
         https://git.musl-libc.org/cgit/musl/tree/src/time/__secs_to_tm.c
     */
 
-    // TODO: Try to clean this up a bit (I don't even fully understand it)
-
     if (dt == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
     // Since LEAPOCH starts in March, the first month is March
-    static const char days_in_month[] = {31,30,31,30,31,31,30,31,30,31,31,29};
+    static const uint8_t daysInMonth[] = {31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29};
 
-    uint32_t years, months, days, secs;
+    // Track remainders
     uint32_t remDays, remSecs, remYears;
-    uint32_t qcCycles, cCycles, qCycles;
+    
+    uint32_t qcCycles; // 400-year cycles
+    uint32_t cCycles;  // 100-year cycles
+    uint32_t qCycles;  // 4-year cycles
 
+    // We won't be handling dates before 2000-03-01
     if (ts < LEAPOCH) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
+    
+    uint32_t secs = ts - LEAPOCH;
 
-    secs = ts - LEAPOCH;
-    days = secs / SECS_PER_DAY;
+    // Break the number of seconds since LEAPOCH into days and the remaining seconds
+    // The remaining seconds determine the time of day (HH:MM:SS)
+
+    uint32_t days = secs / SECS_PER_DAY;
+
     remSecs = secs % SECS_PER_DAY;
 
+    // Break the number of days into 400-year cycles, 100-year cycles, 
+    // 4-year cycles, and years
+
+    // Get the number of 400-year cycles since LEAPOCH
     qcCycles = days / DAYS_PER_400Y;
     remDays = days % DAYS_PER_400Y;
 
+    // Get the number of 100-year cycles since end of last 400-year cycle
     cCycles = remDays / DAYS_PER_100Y;
+
     if (cCycles == 4)  {
         cCycles--;
     }
+    
     remDays -= cCycles * DAYS_PER_100Y;
 
+    // Get the number of 4-year cycles since end of last 100-year cycle
     qCycles = remDays / DAYS_PER_4Y;
+
     if (qCycles == 25) {
         qCycles--;
     }
+
     remDays -= qCycles * DAYS_PER_4Y;
 
+    // Get the number of years since end of last 4-year cycle
     remYears = remDays / 365;
+
     if (remYears == 4) {
         remYears--;
     }
+
     remDays -= remYears * 365;
 
-    years = remYears + 4*qCycles + 100*cCycles + 400*qcCycles;
+    // Calculate the years since 2000
+    uint8_t years = remYears + 4 * qCycles + 100 * cCycles + 400 * qcCycles;
 
-    for (months=0; days_in_month[months] <= remDays; months++) {
-        remDays -= days_in_month[months];
+    // Figure out which month we're in and how many days into the month we are
+    uint8_t months = 0;
+    while (remDays >= daysInMonth[months]) {
+        remDays -= daysInMonth[months];
+        months++;
     }
 
-    dt->date.year = years; // RTC expects 0-99 so we don't need to offset
+    // Checks before casting uint32_t to uint8_t
+    if (remDays >= 31) {
+        return OBC_ERR_CODE_UNKNOWN;
+    }
+
+    if (remSecs >= SECS_PER_DAY) {
+        return OBC_ERR_CODE_UNKNOWN;
+    }
+
+    // RTC expects 0-99 so we don't need to offset
+    dt->date.year = years;
     
-    // Shift required since LEAPOCH starts in March
-    // Convert to 1-indexed from 0-indexed
+    // Shift of 2 required since LEAPOCH starts in March
+    // and convert to 1-indexed from 0-indexed
     dt->date.month = (months + 2) + 1;
 
+    // Ex: If it's February, months = 11 and dt->date.month = 14
+    // because LEAPOCH starts in March. So we need to subtract 12
+    // to get the correct month (1-indexed)
     if (dt->date.month >= 12) {
-        dt->date.month -=12;
+        dt->date.month -= 12;
         dt->date.year++;
     }
-    dt->date.date = remDays + 1; // Day of month
 
-    dt->time.hours = remSecs / 3600;
-    dt->time.minutes = (remSecs / 60) % 60;
-    dt->time.seconds = remSecs % 60;
+    // Get day of month
+    dt->date.date = remDays + 1;
+
+    dt->time.hours = remSecs / SECS_PER_HOUR;
+    dt->time.minutes = (remSecs / SECS_PER_MIN) % MINS_PER_HOUR;
+    dt->time.seconds = remSecs % SECS_PER_MIN;
 
     return OBC_ERR_CODE_SUCCESS;
 }

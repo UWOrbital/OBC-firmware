@@ -17,6 +17,9 @@ obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd);
 // CMD_DOWNLINK_LOGS_NEXT_PASS
 obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd);
 
+// CMD_MICRO_SD_FORMAT
+obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd);
+
 // CMD_PAYLOAD_CAPTURE
 obc_error_code_t payloadCaptureCmdCallback(cmd_msg_t *cmd);
 

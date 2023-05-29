@@ -21,5 +21,17 @@ jobs:
         echo CC_FOLDER_ROOT="${ARM_NONE_EABI_GCC_PATH::-4}" >> .env
         cat .env
         
-    - name: Build (Release)
-      run: make DEBUG=0
+    - name: Build (Release-Launchpad)
+      run: |
+        make clean
+        make DEBUG=0 BOARD_TYPE=RM46_LAUNCHPAD
+
+    - name: Build (Release-OBC Rev1)
+      run: |
+        make clean
+        make DEBUG=0 BOARD_TYPE=OBC_REVISION_1
+
+    - name: Build (Release-OBC Rev2)
+      run: |
+        make clean
+        make DEBUG=0 BOARD_TYPE=OBC_REVISION_2

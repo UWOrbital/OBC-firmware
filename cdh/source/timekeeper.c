@@ -36,8 +36,6 @@ void initTimekeeper(void) {
         timekeeperTaskStack,
         &timekeeperTaskBuffer
     );
-
-    initTime();
 }
 
 static void timekeeperTask(void *pvParameters) {

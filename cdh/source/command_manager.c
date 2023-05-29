@@ -3,7 +3,9 @@
 #include "command_callbacks.h"
 #include "obc_task_config.h"
 #include "obc_errors.h"
+#include "obc_time.h"
 #include "obc_logging.h"
+#include "alarm_handler.h"
 
 #include <FreeRTOS.h>
 #include <sys_common.h>
@@ -28,10 +30,11 @@ typedef struct {
 } cmd_info_t;
 
 static const cmd_info_t cmdsConfig[] = {
-    [CMD_NONE] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_PAYLOAD_CAPTURE] = {payloadCaptureCmdCallback,CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL}
 };
 
@@ -83,11 +86,6 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
     }
     
     return OBC_ERR_CODE_QUEUE_FULL;
-}
-
-static uint32_t getCurrentTime(void) {
-    // Mock for testing; replace with actual implementation when available
-    return 0;
 }
 
 static void commandManagerTask(void *pvParameters) {
@@ -144,12 +142,23 @@ static void commandManagerTask(void *pvParameters) {
             }
 
             // If the timetag is in the past, throw away the command
-            if (cmd.timestamp < getCurrentTime()) {
+            if (cmd.timestamp < getCurrentUnixTime()) {
                 continue;
             }
 
-            // TODO: Handle time-tagged commands
+            alarm_handler_event_t alarm = {
+                .id = ALARM_HANDLER_NEW_ALARM,
+                .alarmInfo = {
+                    .unixTime = cmd.timestamp,
+                    .callbackDef = {
+                        .cmdCallback = currCmdInfo.callback,
+                    },
+                    .type = ALARM_TYPE_TIME_TAGGED_CMD,
+                    .cmdMsg = cmd,
+                }
+            };
 
+            LOG_IF_ERROR_CODE(sendToAlarmHandlerQueue(&alarm));
         }
     }
 }

@@ -14,6 +14,7 @@ static const unpack_func_t unpackFns[] = {
     [CMD_EXEC_OBC_RESET] = unpackExecObcResetCmdData,
     [CMD_RTC_SYNC] = unpackRtcSyncCmdData,
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = unpackDownlinkLogsNextPassCmdData,
+    [CMD_MICRO_SD_FORMAT] = unpackMicroSdFormat,
     [CMD_PAYLOAD_CAPTURE] = unpackPayloadCaptureCmdData
     // Add more functions for other commands as needed
 };
@@ -54,7 +55,7 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t *offset, cmd_msg_t
 }
 
 // CMD_EXEC_OBC_RESET
-void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
+void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
     // No data to unpack
 }
 
@@ -66,6 +67,10 @@ void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cm
 // CMD_DOWNLINK_LOGS_NEXT_PASS
 void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
     cmdMsg->downlinkLogsNextPass.logLevel = (log_level_t)unpackUint8(buffer, offset);
+}
+
+void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+    // No data to unpack
 }
 
 // CMD_PAYLOAD_CAPTURE

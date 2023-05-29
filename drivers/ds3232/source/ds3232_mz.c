@@ -650,3 +650,20 @@ obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt) {
 
     return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t clearAlarm1RTC(void) {
+    obc_error_code_t errCode;
+
+    // This is a read-modify-write operation.
+    // However, alarm flags are only cleared by the alarm handler
+    // so this should not be a problem.
+    
+    rtc_status_t status = {0};
+    RETURN_IF_ERROR_CODE(getStatusRTC(&status));
+
+    status.A1F = 0;
+
+    RETURN_IF_ERROR_CODE(setStatusRTC(&status));
+
+    return OBC_ERR_CODE_SUCCESS;
+}

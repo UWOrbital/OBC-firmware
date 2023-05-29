@@ -5,7 +5,7 @@
 #include <sys_common.h>
 
 /**
- * @brief adds ax.25 headers onto telemtry being downlinked
+ * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  * 
  * @param rsData reed solomon data that needs ax.25 headers added onto it
  * @param out array to store the ax.25 frame
@@ -31,7 +31,7 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
  * 
  * @param ax25Data the received ax.25 frame
  * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
- * 
+ *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
 */
 obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData){
