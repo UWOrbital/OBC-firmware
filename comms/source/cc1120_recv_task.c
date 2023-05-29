@@ -68,6 +68,11 @@ static void vRecvTask(void * pvParameters){
         }
         switch (queueMsg.eventID) {
             case BEGIN_UPLINK:
+                #if CSDC_DEMO_ENABLED == 1
+                // For the demo, periodically start uplink so we can send >1 packet
+                startUplink();
+                #endif
+                
                 #if COMMS_PHY == COMMS_PHY_UART
                 uint8_t rxByte;
 

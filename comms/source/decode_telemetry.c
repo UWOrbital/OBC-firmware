@@ -96,31 +96,50 @@ void initDecodeTask(void){
 */
 static void vDecodeTask(void * pvParameters){
     obc_error_code_t errCode;
-    uint8_t byte;
-    packed_ax25_packet_t axData;
-    packed_rs_packet_t rsData;
-    aes_data_t aesData;
+    uint8_t byte = 0;
+
+    packed_ax25_packet_t axData = {0};
     uint16_t axDataIndex = 0;
+
     bool startFlagReceived = false;
+
     while (1) {
-        if(xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS){
-            if(byte == AX25_FLAG){
-                // if we have received a ax_25 flag and are past the first index, this means that this is the end flag
-                // this ensures that we do not count consecutive ax_25 flags used when idling as start and end flags
-                if(axDataIndex > 1){
-                    axData.length = axDataIndex + 1;
+        if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
+            if (axDataIndex >= sizeof(axData.data)) {
+                LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+
+                // Restart the decoding process
+                memset(&axData, 0, sizeof(axData));
+                axDataIndex = 0;
+                startFlagReceived = false;
+            }
+
+            if (byte == AX25_FLAG) {
+                axData.data[axDataIndex++] = byte;
+
+                // Decode packet if we have start flag, end flag, and at least 1 byte of data
+                // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+                // axData.data[1] must be something other than AX25_FLAG
+                if (axDataIndex > 2) {
+                    axData.length = axDataIndex;
+                    
+                    packed_rs_packet_t rsData = {0};
+                    aes_data_t aesData = {0};
                     LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+                    
+                    // Restart the decoding process
+                    memset(&axData, 0, sizeof(axData));
                     axDataIndex = 0;
                     startFlagReceived = false;
-                }
-                else{
+                    continue;
+                } else {
                     startFlagReceived = true;
-                    axData.data[0] = byte;
                     axDataIndex = 1;
                     continue;
                 }
             }
-            if(startFlagReceived) {
+            
+            if (startFlagReceived) {
                 axData.data[axDataIndex++] = byte;
             }
         }
@@ -139,10 +158,13 @@ static void vDecodeTask(void * pvParameters){
 */
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
     obc_error_code_t errCode;
+    
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
     RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData));
-    uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE];
+
+    uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE] = {0};
     RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData));
+    
     RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
     return OBC_ERR_CODE_SUCCESS;
 }
