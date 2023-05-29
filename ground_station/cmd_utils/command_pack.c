@@ -26,25 +26,20 @@ obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cm
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    uint8_t id = cmdMsg->id;
-    bool isTimeTagged = cmdMsg->isTimeTagged;
-
-    if (id > MAX_CMD_ID) {
+    if (cmdMsg->id > MAX_CMD_ID) {
         return OBC_ERR_CODE_UNSUPPORTED_CMD;
     }
 
-    if (packFns[id] == NULL) {
+    if (packFns[cmdMsg->id] == NULL) {
         return OBC_ERR_CODE_UNSUPPORTED_CMD;
     }
-    
-    if (isTimeTagged) {
-        id |= 0x80;
-    }
 
-    packUint8(id, buffer, offset);
+    uint8_t uplinkedId = cmdMsg->isTimeTagged ? (cmdMsg->id | 0x80) : cmdMsg->id;
+    packUint8(uplinkedId, buffer, offset);
+
     packUint32(cmdMsg->timestamp, buffer, offset);
 
-    packFns[id](buffer, offset, cmdMsg);
+    packFns[cmdMsg->id](buffer, offset, cmdMsg);
 
     return OBC_ERR_CODE_SUCCESS;
 }

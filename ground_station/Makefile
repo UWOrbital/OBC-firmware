@@ -5,20 +5,27 @@ BIN = gs
 CFLAGS = -Wall -g
 
 INCS := 
+
+# Ground station specific headers
+INCS += -I"ground_station/cmd_utils"
+
+# Headers shared with OBC firmware
 INCS += -I"cdh/include"
 INCS += -I"common/include"
 INCS += -I"tiny_aes"
 INCS += -I"libcorrect/include"
 
+# Ground station specific source files
 SRCS := ground_station/main.c
 SRCS += ground_station/common/gs_heap.c
+SRCS += ground_station/cmd_utils/command_pack.c
+
+# Source files shared with OBC firmware
 SRCS += common/source/obc_pack_utils.c
 SRCS += common/source/obc_unpack_utils.c
 
-# tiny_aes
 SRCS += tiny_aes/aes.c
 
-# libcorrect
 SRCS += libcorrect/src/reed-solomon/decode.c
 SRCS += libcorrect/src/reed-solomon/encode.c
 SRCS += libcorrect/src/reed-solomon/polynomial.c
