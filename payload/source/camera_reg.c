@@ -63,15 +63,16 @@ obc_error_code_t camReadByte(uint8_t *byte, camera_t cam) {
     return spiReceiveByte(CAM_SPI_REG, &cam_config[cam].spi_config, byte);
 }
 
-obc_error_code_t camWriteSensorReg16_8(uint32_t regID, uint8_t regDat) {
+obc_error_code_t camWriteSensorReg16_8(uint16_t regID, uint8_t regDat) {
     uint8_t reg_tx_data[3] = { (regID >> 8), (regID & 0x00FF), regDat };
 	return i2cSendTo(CAM_I2C_WR_ADDR, 3, reg_tx_data);
 }
 
-obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat) {
+obc_error_code_t camReadSensorReg16_8(uint16_t regID, uint8_t* regDat) {
     // Todo: regID is byteswapped for some reason so 0x3138 needs to be input as 0x3831
     obc_error_code_t errCode;
-	RETURN_IF_ERROR_CODE(i2cSendTo(0x3C, 2, &regID));
+    uint8_t reg_tx_data[2] = { (regID >> 8), (regID & 0x00FF) };
+	RETURN_IF_ERROR_CODE(i2cSendTo(0x3C, 2, reg_tx_data));
 	RETURN_IF_ERROR_CODE(i2cReceiveFrom(0x3C, 1, regDat));
     return errCode;
 }

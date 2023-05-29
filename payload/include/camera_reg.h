@@ -6,6 +6,8 @@
 #include "ov5642_regs.h"
 #include "obc_board_config.h"
 
+#define CAM_TEST_REG 0x00
+
 /**
  * @enum	camera_t
  * @brief	Primary or secondary camera.
@@ -68,7 +70,7 @@ obc_error_code_t camReadByte(uint8_t *byte, camera_t cam);
  * @param regDat Data to send
  * @return Error code indicating if the write was successful
  */
-obc_error_code_t camWriteSensorReg16_8(uint32_t regID, uint8_t regDat);
+obc_error_code_t camWriteSensorReg16_8(uint16_t regID, uint8_t regDat);
 
 /**
  * @brief Write 8 bits to a 16 bit register over I2C
@@ -76,7 +78,7 @@ obc_error_code_t camWriteSensorReg16_8(uint32_t regID, uint8_t regDat);
  * @param regDat Buffer to store received data
  * @return Error code indicating if the read was successful
  */
-obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat);
+obc_error_code_t camReadSensorReg16_8(uint16_t regID, uint8_t* regDat);
 
 /**
  * @brief Write to a list of registers over I2C

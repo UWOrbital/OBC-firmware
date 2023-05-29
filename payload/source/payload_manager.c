@@ -2,6 +2,8 @@
 #include "obc_errors.h"
 #include "obc_task_config.h"
 #include "obc_logging.h"
+#include "camera_reg.h"
+#include "arducam.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -35,6 +37,9 @@ void initPayloadManager(void) {
     if (payloadQueueHandle == NULL) {
         payloadQueueHandle = xQueueCreateStatic(PAYLOAD_MANAGER_QUEUE_LENGTH, PAYLOAD_MANAGER_QUEUE_ITEM_SIZE, payloadQueueStack, &payloadQueue);
     }
+
+    tcaSelect(PRIMARY);
+    initCam();
 }
 
 obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
@@ -49,8 +54,14 @@ obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
     return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-obc_error_code_t handleCapture(void){
-    
+obc_error_code_t handleCapture(void) {
+    uint8_t recv_data = 0;
+    camWriteReg(CAM_TEST_REG, 0x55, PRIMARY);
+    camReadReg(CAM_TEST_REG, &recv_data, PRIMARY);
+
+    tcaSelect(PRIMARY);
+    camWriteSensorReg16_8(0x3831, 0x55);
+    camReadSensorReg16_8(0x3831, &recv_data);
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -60,7 +71,7 @@ static void vPayloadManagerTask(void * pvParameters) {
 
     while(1){
         payload_event_t queueMsg;
-        if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS){
+        if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
             queueMsg.eventID = PAYLOAD_MANAGER_NULL_EVENT_ID;
         }
 
