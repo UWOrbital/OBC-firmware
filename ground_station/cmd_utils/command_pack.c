@@ -15,6 +15,7 @@ static const pack_func_t packFns[] = {
     [CMD_RTC_SYNC] = packRtcSyncCmdData,
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = packDownlinkLogsNextPassCmdData,
     [CMD_MICRO_SD_FORMAT] = packMicroSdFormat,
+    [CMD_PAYLOAD_CAPTURE] = packPayloadCaptureCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -62,4 +63,9 @@ void packDownlinkLogsNextPassCmdData(uint8_t* buffer, size_t* offset, const cmd_
 // CMD_MICRO_SD_FORMAT
 void packMicroSdFormat(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
     // No data to pack
+}
+
+// CMD_PAYLOAD_CAPTURE
+void packPayloadCaptureCmdData(uint8_t* buffer, size_t* offset, cmd_msg_t* cmdMsg) {
+    packUint8((uint8_t)cmdMsg->payloadCapture.regDat1, buffer, offset);
 }

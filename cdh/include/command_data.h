@@ -20,6 +20,11 @@ typedef struct {
     log_level_t logLevel;
 } downlink_logs_next_pass_cmd_data_t;
 
+// CMD_PAYLOAD_CAPTURE
+typedef struct {
+    uint8_t regDat1;
+    uint8_t regDat2;
+} payload_capture_cmd_data_t;
 
 /* -------------------------- */
 /*   Command Message Struct   */
@@ -29,6 +34,7 @@ typedef struct {
     union {
         rtc_sync_cmd_data_t rtcSync;
         downlink_logs_next_pass_cmd_data_t downlinkLogsNextPass;
+        payload_capture_cmd_data_t payloadCapture;
     };
     
     uint32_t timestamp; // Unix timestamp in seconds

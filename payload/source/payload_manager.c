@@ -4,6 +4,7 @@
 #include "obc_logging.h"
 #include "camera_reg.h"
 #include "arducam.h"
+#include "obc_fs_utils.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -55,13 +56,22 @@ obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
 }
 
 obc_error_code_t handleCapture(void) {
-    uint8_t recv_data = 0;
+    obc_error_code_t errCode = 0;
+    uint8_t recv_data1 = 0;
+    uint8_t recv_data2 = 0;
     camWriteReg(CAM_TEST_REG, 0x55, PRIMARY);
-    camReadReg(CAM_TEST_REG, &recv_data, PRIMARY);
+    camReadReg(CAM_TEST_REG, &recv_data1, PRIMARY);
 
     tcaSelect(PRIMARY);
     camWriteSensorReg16_8(0x3831, 0x55);
-    camReadSensorReg16_8(0x3831, &recv_data);
+    camReadSensorReg16_8(0x3831, &recv_data2);
+
+    const char fname[] = "payload_data.bin";
+    int32_t file = 0;
+    RETURN_IF_ERROR_CODE(createFile(fname, &file));
+    RETURN_IF_ERROR_CODE(writeFile(file, &recv_data1, 1));
+    RETURN_IF_ERROR_CODE(writeFile(file, &recv_data2, 1));
+    RETURN_IF_ERROR_CODE(closeFile(file));
     return OBC_ERR_CODE_SUCCESS;
 }
 
