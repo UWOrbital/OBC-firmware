@@ -14,6 +14,7 @@ static const unpack_func_t unpackFns[] = {
     [CMD_EXEC_OBC_RESET] = unpackExecObcResetCmdData,
     [CMD_RTC_SYNC] = unpackRtcSyncCmdData,
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = unpackDownlinkLogsNextPassCmdData,
+    [CMD_MICRO_SD_FORMAT] = unpackMicroSdFormat,
     // Add more functions for other commands as needed
 };
 
