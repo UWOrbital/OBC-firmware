@@ -24,7 +24,6 @@ void vTask1(void *pvParameters) {
         .osFaultQueueSize = 2,
         .osPolarity = LM75BD_OS_POL_ACTIVE_LOW,
         .osOperationMode = LM75BD_OS_OP_MODE_COMP,
-        .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
         .overTempThresholdCelsius = 100.0f,
         .hysteresisThresholdCelsius = 50.0f,
     };
