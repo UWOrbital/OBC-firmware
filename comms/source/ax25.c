@@ -2,7 +2,8 @@
 #include "obc_logging.h"
 
 #include <stdint.h>
-#include <sys_common.h>
+#include <string.h>
+#include <stdbool.h>
 
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
