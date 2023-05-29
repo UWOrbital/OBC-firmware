@@ -1,5 +1,6 @@
 CC = gcc
 BUILD_DIR = ground_station/build
+BIN = gs
 
 CFLAGS = -Wall -g
 
@@ -26,17 +27,14 @@ SRCS += libcorrect/src/reed-solomon/reed-solomon.c
 # Define the object files 
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
-# Define the executable file 
-MAIN = $(BUILD_DIR)/ground_station
-
 .PHONY: all clean
 
-all: $(MAIN)
+all: $(BUILD_DIR)/$(BIN)
 	@echo  The program has been compiled
 
-$(MAIN): $(OBJS)
+$(BUILD_DIR)/$(BIN): $(OBJS)
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -o $(MAIN) $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
 $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
