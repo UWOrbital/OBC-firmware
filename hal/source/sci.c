@@ -952,6 +952,157 @@ void sciLowLevelInterrupt(void)
 /* USER CODE END */
 }
 
+/** @fn void linLowLevelInterrupt(void)
+*   @brief  Interrupt 1 for SCILIN
+*/
+
+/* SourceId : SCI_SourceId_020 */
+/* DesignId : SCI_DesignId_017 */
+/* Requirements : HL_SR245, HL_SR246 */
+void linLowLevelInterrupt(void)
+{
+    uint32 vec = scilinREG->INTVECT1;
+	uint8 byte;
+/* USER CODE BEGIN (33) */
+/* USER CODE END */
+
+    switch (vec)
+    {
+    case 1U:
+        sciNotification(scilinREG,(uint32)SCI_WAKE_INT);
+        break;
+    case 3U:
+        sciNotification(scilinREG,(uint32)SCI_PE_INT);
+        break;
+    case 6U:
+        sciNotification(scilinREG, (uint32)SCI_FE_INT);
+        break;
+    case 7U:
+        sciNotification(scilinREG, (uint32)SCI_BREAK_INT);
+        break;
+    case 9U:
+        sciNotification(scilinREG, (uint32)SCI_OE_INT);
+        break;
+
+    case 11U:
+        /* receive */
+			byte = (uint8)(scilinREG->RD & 0x000000FFU);
+
+            if (g_sciTransfer_t[1U].rx_length > 0U)
+            {
+                *g_sciTransfer_t[1U].rx_data = byte;
+                /*SAFETYMCUSW 567 S MR:17.1,17.4 <APPROVED> "Pointer increment needed" */
+				g_sciTransfer_t[1U].rx_data++;
+                g_sciTransfer_t[1U].rx_length--;
+                if (g_sciTransfer_t[1U].rx_length == 0U)
+                {
+                    sciNotification(scilinREG, (uint32)SCI_RX_INT);
+                }
+            }
+        break;
+
+    case 12U:
+        /* transmit */
+		/*SAFETYMCUSW 30 S MR:12.2,12.3 <APPROVED> "Used for data count in Transmit/Receive polling and Interrupt mode" */
+		--g_sciTransfer_t[1U].tx_length;
+        if (g_sciTransfer_t[1U].tx_length > 0U)
+        {
+			uint8 txdata = *g_sciTransfer_t[1U].tx_data;
+            scilinREG->TD = (uint32)(txdata);
+			/*SAFETYMCUSW 567 S MR:17.1,17.4 <APPROVED> "Pointer increment needed" */
+            g_sciTransfer_t[1U].tx_data++;
+        }
+        else
+        {
+            scilinREG->CLEARINT = (uint32)SCI_TX_INT;
+            sciNotification(scilinREG, (uint32)SCI_TX_INT);
+        }
+        break;
+
+    default:
+        /* phantom interrupt, clear flags and return */
+        scilinREG->FLR = scilinREG->SETINTLVL & 0x07000303U;
+         break;
+    }
+/* USER CODE BEGIN (34) */
+/* USER CODE END */
+}
+
+/** @fn void linHighLevelInterrupt(void)
+*   @brief Level 0 Interrupt for SCILIN
+*/
+
+/* SourceId : SCI_SourceId_021 */
+/* DesignId : SCI_DesignId_017 */
+/* Requirements : HL_SR245, HL_SR246 */
+void linHighLevelInterrupt(void)
+{
+    uint32 vec = scilinREG->INTVECT0;
+	uint8 byte;
+/* USER CODE BEGIN (35) */
+/* USER CODE END */
+
+    switch (vec)
+    {
+    case 1U:
+        sciNotification(scilinREG, (uint32)SCI_WAKE_INT);
+        break;
+    case 3U:
+        sciNotification(scilinREG, (uint32)SCI_PE_INT);
+        break;
+    case 6U:
+        sciNotification(scilinREG, (uint32)SCI_FE_INT);
+        break;
+    case 7U:
+        sciNotification(scilinREG, (uint32)SCI_BREAK_INT);
+        break;
+    case 9U:
+        sciNotification(scilinREG, (uint32)SCI_OE_INT);
+        break;
+
+    case 11U:
+        /* receive */
+			byte = (uint8)(scilinREG->RD & 0x000000FFU);
+
+            if (g_sciTransfer_t[1U].rx_length > 0U)
+            {
+                *g_sciTransfer_t[1U].rx_data = byte;
+                /*SAFETYMCUSW 567 S MR:17.1,17.4 <APPROVED> "Pointer increment needed" */
+				g_sciTransfer_t[1U].rx_data++;
+                g_sciTransfer_t[1U].rx_length--;
+                if (g_sciTransfer_t[1U].rx_length == 0U)
+                {
+                    sciNotification(scilinREG, (uint32)SCI_RX_INT);
+                }
+            }
+        break;
+
+    case 12U:
+        /* transmit */
+		/*SAFETYMCUSW 30 S MR:12.2,12.3 <APPROVED> "Used for data count in Transmit/Receive polling and Interrupt mode" */
+		--g_sciTransfer_t[1U].tx_length;
+        if (g_sciTransfer_t[1U].tx_length > 0U)
+        {
+			uint8 txdata = *g_sciTransfer_t[1U].tx_data;
+            scilinREG->TD = (uint32)(txdata);
+            /*SAFETYMCUSW 567 S MR:17.1,17.4 <APPROVED> "Pointer increment needed" */
+			g_sciTransfer_t[1U].tx_data++;
+        }
+        else
+        {
+            scilinREG->CLEARINT = (uint32)SCI_TX_INT;
+            sciNotification(scilinREG, (uint32)SCI_TX_INT);
+        }
+        break;
+
+    default:
+        /* phantom interrupt, clear flags and return */
+        scilinREG->FLR = ~scilinREG->SETINTLVL & 0x07000303U;
+        break;
+    }
+/* USER CODE BEGIN (36) */
+/* USER CODE END */
+}
 /* USER CODE BEGIN (37) */
 /* USER CODE END */
 
