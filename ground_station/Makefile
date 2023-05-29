@@ -10,7 +10,7 @@ INCS += -I"tiny_aes"
 INCS += -I"libcorrect/include"
 
 SRCS := ground_station/main.c
-SRCS += ground_station/gs_heap.c
+SRCS += ground_station/common/gs_heap.c
 SRCS += common/source/obc_pack_utils.c
 SRCS += common/source/obc_unpack_utils.c
 
