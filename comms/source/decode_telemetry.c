@@ -131,12 +131,12 @@ static void vDecodeTask(void * pvParameters){
                     memset(&axData, 0, sizeof(axData));
                     axDataIndex = 0;
                     startFlagReceived = false;
-                    continue;
                 } else {
                     startFlagReceived = true;
                     axDataIndex = 1;
-                    continue;
                 }
+                
+                continue;
             }
             
             if (startFlagReceived) {
