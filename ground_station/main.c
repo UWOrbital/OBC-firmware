@@ -5,16 +5,19 @@
 #include "command_data.h"
 #include "command_id.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
 
 int main(void) {
+    initLogger();
+
+    obc_error_code_t errCode;
     cmd_msg_t cmdMsg = {.id = CMD_EXEC_OBC_RESET, .isTimeTagged = true, .timestamp = 0x12345678UL};
     
     uint8_t buff[24] = {0};
     size_t offset = 0;
 
-    obc_error_code_t errCode = packCmdMsg(buff, &offset, &cmdMsg);
+    LOG_IF_ERROR_CODE(packCmdMsg(buff, &offset, &cmdMsg));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-        printf("Error: %d\n", errCode);
         return 1;
     }
 
