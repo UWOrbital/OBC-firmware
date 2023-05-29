@@ -18,8 +18,15 @@
     // SD Card SPI config
     #define SDC_SPI_PORT         spiPORT3
     #define SDC_SPI_REG          spiREG3
-    #define SDC_SPI_CS           1UL
+    #define SDC_SPI_CS           0UL
     #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
+
+    // Camera SPI configs
+    #define CAM_SPI_PORT         spiPORT3
+    #define CAM_SPI_REG          spiREG3
+    #define CAM_SPI_DATA_FORMAT  SPI_FMT_2
+    #define CAM_CS_1             2UL
+    #define CAM_CS_2             3UL
 
     // Supervisor DEBUG LED
     #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTB
@@ -51,6 +58,13 @@
     #define SDC_SPI_CS           0UL
     #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
 
+    // Camera SPI configs
+    #define CAM_SPI_PORT         spiPORT3
+    #define CAM_SPI_REG          spiREG3
+    #define CAM_SPI_DATA_FORMAT  SPI_FMT_2
+    #define CAM_CS_1             1UL
+    #define CAM_CS_2             2UL
+
     // Supervisor DEBUG LED
     #define SUPERVISOR_DEBUG_LED_GIO_PORT   gioPORTA
     #define SUPERVISOR_DEBUG_LED_GIO_BIT    5
@@ -80,6 +94,13 @@
     #define SDC_SPI_REG          spiREG3
     #define SDC_SPI_CS           0UL
     #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
+
+    // Camera SPI configs
+    #define CAM_SPI_PORT         spiPORT1
+    #define CAM_SPI_REG          spiREG1
+    #define CAM_SPI_DATA_FORMAT  SPI_FMT_2
+    #define CAM_CS_1             0UL
+    #define CAM_CS_2             1UL
 
     // DS3232 GPIO config
     #define DS3232_INT_PORT gioPORTA
