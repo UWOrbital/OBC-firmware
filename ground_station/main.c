@@ -12,14 +12,18 @@
 #define COM_PORT_NAME "\\\\.\\COM5"
 
 int main(void) {
+    obc_error_code_t errCode;
+
     initLogger();
 
-    obc_error_code_t errCode;
+    /* Construct packet */
+
     cmd_msg_t cmdMsg = {.id = CMD_EXEC_OBC_RESET, .isTimeTagged = true, .timestamp = 0x12345678UL};
     
     uint8_t buff[24] = {0};
     size_t offset = 0;
 
+    // AX25 start flag
     buff[offset++] = 0x7E;
 
     LOG_IF_ERROR_CODE(packCmdMsg(buff, &offset, &cmdMsg));
@@ -27,8 +31,10 @@ int main(void) {
         return 1;
     }
 
+    // AX25 end flag
     buff[offset++] = 0x7E;
 
+    printf("Packet: ");
     for (int i = 0; i < offset; i++) {
         printf("%02x ", buff[i]);
     }
@@ -39,7 +45,7 @@ int main(void) {
     DCB dcbSerialParams = {0};
     COMMTIMEOUTS timeouts = {0};
          
-    // Open the highest available serial port number
+    // Open the serial port
     fprintf(stderr, "Opening serial port...");
     hSerial = CreateFile(
                 COM_PORT_NAME, GENERIC_READ|GENERIC_WRITE, 0, NULL,
@@ -52,8 +58,7 @@ int main(void) {
         fprintf(stderr, "OK\n");
     }
 
-    // Set device parameters (38400 baud, 1 start bit,
-    // 1 stop bit, no parity)
+    // Set device parameters
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
     if (GetCommState(hSerial, &dcbSerialParams) == 0) {
         fprintf(stderr, "Error getting device state\n");
@@ -83,15 +88,15 @@ int main(void) {
         return 1;
     }
  
-    // Send specified text (remaining command line arguments)
-    long unsigned int bytes_written = 0;
+    // Send packet
+    long unsigned int bytesWritten = 0;
     fprintf(stderr, "Sending bytes...");
-    if (!WriteFile(hSerial, buff, offset, &bytes_written, NULL)) {
+    if (!WriteFile(hSerial, buff, offset, &bytesWritten, NULL)) {
         fprintf(stderr, "Error\n");
         CloseHandle(hSerial);
         return 1;
     }   
-    fprintf(stderr, "%lu bytes written\n", bytes_written);
+    fprintf(stderr, "%lu bytes written\n", bytesWritten);
      
     // Close serial port
     fprintf(stderr, "Closing serial port...");
