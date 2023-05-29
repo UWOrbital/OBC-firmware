@@ -97,8 +97,8 @@ extern void het1HighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ"))
 extern void vPortYeildWithinAPI(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void gioLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void sciHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
-extern void sciLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void i2cInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
+extern void sciLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 
 /* USER CODE BEGIN (3) */
 /* USER CODE END */

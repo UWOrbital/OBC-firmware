@@ -2,7 +2,7 @@
 #include "ov5642_regs.h"
 
 // Configuration for the host preview
-static const sensor_reg_t OV5642_QVGA_Preview[PREVIEW_CONFIG_LEN] = {
+static sensor_reg_t OV5642_QVGA_Preview[PREVIEW_CONFIG_LEN] = {
 	{0x3103 ,0x93},
 	{0x3008 ,0x82},
 	{0x3017 ,0x7f},
@@ -596,7 +596,7 @@ static const sensor_reg_t OV5642_QVGA_Preview[PREVIEW_CONFIG_LEN] = {
 };        
 
 // Switch to JPEG
-static const sensor_reg_t OV5642_JPEG_Capture_QSXGA[JPEG_CONFIG_LEN] = {
+static sensor_reg_t OV5642_JPEG_Capture_QSXGA[JPEG_CONFIG_LEN] = {
 	// OV5642_ QSXGA _YUV7.5 fps
 	// 24 MHz input clock, 24Mhz pclk
 	// jpeg mode 7.5fps
@@ -675,7 +675,7 @@ static const sensor_reg_t OV5642_JPEG_Capture_QSXGA[JPEG_CONFIG_LEN] = {
 };
 
 // Switch to lowest resolution
-static const sensor_reg_t OV5642_320x240[RES_320_240_CONFIG_LEN] = {
+static sensor_reg_t OV5642_320x240[RES_320_240_CONFIG_LEN] = {
 	{0x3800 ,0x1 },
 	{0x3801 ,0xa8},
 	{0x3802 ,0x0 },

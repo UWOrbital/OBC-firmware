@@ -96,11 +96,11 @@
     #define SDC_SPI_DATA_FORMAT  SPI_FMT_0
 
     // Camera SPI configs
-    #define CAM_SPI_PORT         spiPORT4
-    #define CAM_SPI_REG          spiREG4
+    #define CAM_SPI_PORT         spiPORT1
+    #define CAM_SPI_REG          spiREG1
     #define CAM_SPI_DATA_FORMAT  SPI_FMT_2
-    #define CAM_CS_1             1UL
-    #define CAM_CS_2             2UL
+    #define CAM_CS_1             0UL
+    #define CAM_CS_2             1UL
 
     // DS3232 GPIO config
     #define DS3232_INT_PORT gioPORTA
