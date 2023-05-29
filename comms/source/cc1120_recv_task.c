@@ -67,12 +67,7 @@ static void vRecvTask(void * pvParameters){
             continue;
         }
         switch (queueMsg.eventID) {
-            case BEGIN_UPLINK:
-                #if CSDC_DEMO_ENABLED == 1
-                // For the demo, periodically start uplink so we can send >1 packet
-                startUplink();
-                #endif
-                
+            case BEGIN_UPLINK:          
                 #if COMMS_PHY == COMMS_PHY_UART
                 uint8_t rxByte;
 
@@ -91,6 +86,10 @@ static void vRecvTask(void * pvParameters){
                     LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
                     if (errCode != OBC_ERR_CODE_SUCCESS) break;
                 }
+                #if CSDC_DEMO_ENABLED == 1
+                // For the demo, periodically start uplink so we can send >1 packet
+                startUplink();
+                #endif
                 #else
                 // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
                 LOG_IF_ERROR_CODE(cc1120Receive());
