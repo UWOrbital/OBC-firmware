@@ -59,6 +59,7 @@ void packDownlinkLogsNextPassCmdData(uint8_t* buffer, size_t* offset, const cmd_
     packUint8((uint8_t)cmdMsg->downlinkLogsNextPass.logLevel, buffer, offset);
 }
 
+// CMD_MICRO_SD_FORMAT
 void packMicroSdFormat(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
     // No data to unpack
 }
