@@ -18,6 +18,7 @@ INCS += -I"libcorrect/include"
 # Ground station specific source files
 SRCS := ground_station/main.c
 SRCS += ground_station/common/gs_heap.c
+SRCS += ground_station/common/gs_logging.c
 SRCS += ground_station/cmd_utils/command_pack.c
 
 # Source files shared with OBC firmware
