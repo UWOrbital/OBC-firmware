@@ -108,6 +108,7 @@ static void vDecodeTask(void * pvParameters){
                 // if we have received a ax_25 flag and are past the first index, this means that this is the end flag
                 // this ensures that we do not count consecutive ax_25 flags used when idling as start and end flags
                 if(axDataIndex > 1){
+                    axData.data[axDataIndex] = byte;
                     axData.length = axDataIndex + 1;
                     LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
                     axDataIndex = 0;
