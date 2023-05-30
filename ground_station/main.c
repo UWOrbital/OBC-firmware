@@ -19,6 +19,21 @@
 int main(int argc, char *argv[]) {
     obc_error_code_t errCode;
 
+    // Grab com port from cmd line args
+    if (argc < 2) {
+        printf("Usage: %s <com port>\n", argv[0]);
+        return 1;
+    }
+    
+    long int comPort = strtol(argv[1], NULL, 10);
+    if (comPort < 0 || comPort > 255) {
+        printf("Invalid com port: %ld\n", comPort);
+        return 1;
+    }
+
+    char comPortName[16] = {0};
+    snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX, comPort);
+
     initLogger();
 
     // Declare variables and structures
@@ -155,7 +170,14 @@ int main(int argc, char *argv[]) {
         }   
         fprintf(stderr, "%lu bytes written\n", bytesWritten);
     }
-     
+   unsigned char rxChar = '\0';
+    while (1) {
+        if (readSerialPort(hSerial, (uint8_t *)&rxChar, 1) == 0) {
+            break;
+        }
+        printf("%c", rxChar);
+    }
+    printf("\n");
     // Close serial port
     fprintf(stderr, "Closing serial port...");
     if (CloseHandle(hSerial) == 0) {

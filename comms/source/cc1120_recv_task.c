@@ -72,23 +72,24 @@ static void vRecvTask(void * pvParameters){
                 uint8_t rxByte;
 
                 // Read first byte
-                LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(30000)));
-                if (errCode != OBC_ERR_CODE_SUCCESS) break;
+                LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
 
-                LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-                if (errCode != OBC_ERR_CODE_SUCCESS) break;
-
-                // Read the rest of the bytes until we stop uplinking
-                while (1) {   
-                    LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
-                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
-
+                if (errCode == OBC_ERR_CODE_SUCCESS) {
                     LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-                    if (errCode != OBC_ERR_CODE_SUCCESS) break;
+                }
+
+                if (errCode == OBC_ERR_CODE_SUCCESS) {
+                    // Read the rest of the bytes until we stop uplinking
+                    while (1) {   
+                        LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(500)));
+
+                        if (errCode == OBC_ERR_CODE_SUCCESS) {
+                            LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+                        }
+                    }
                 }
                 #if CSDC_DEMO_ENABLED == 1
-                // For the demo, periodically start uplink so we can send >1 packet
-                startUplink();
+                LOG_IF_ERROR_CODE(startUplink());
                 #endif
                 #else
                 // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
