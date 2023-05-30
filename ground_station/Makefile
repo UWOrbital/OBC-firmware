@@ -8,6 +8,7 @@ INCS :=
 
 # Ground station specific headers
 INCS += -I"ground_station/cmd_utils"
+INCS += -I"ground_station/serial_utils"
 
 # Headers shared with OBC firmware
 INCS += -I"cdh/include"
@@ -20,6 +21,7 @@ SRCS := ground_station/main.c
 SRCS += ground_station/common/gs_heap.c
 SRCS += ground_station/common/gs_logging.c
 SRCS += ground_station/cmd_utils/command_pack.c
+SRCS += ground_station/serial_utils/win_uart.c
 
 # Source files shared with OBC firmware
 SRCS += common/source/obc_pack_utils.c
