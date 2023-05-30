@@ -143,10 +143,10 @@ static void vTelemEncodeTask(void *pvParameters) {
 
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY_FILE:
-                sendTelemetryFile(queueMsg.telemetryBatchId);
+                LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
                 break;
             case DOWNLINK_DATA_BUFFER:
-                sendTelemetryBuffer(queueMsg.telemetryDataBuffer, queueMsg.bufferSize);
+                LOG_IF_ERROR_CODE(sendTelemetryBuffer(queueMsg.telemetryDataBuffer, queueMsg.bufferSize));
                 break;
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -215,7 +215,7 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
 
     // Read a single piece of telemetry from the file
     while ((errCode = readNextTelemetryFromFile(fd, &singleTelem)) == OBC_ERR_CODE_SUCCESS) {
-        errCode = sendOrPackNextTelemetry(singleTelem, &telemPacket, telemPacketOffset);
+        errCode = sendOrPackNextTelemetry(singleTelem, &telemPacket, &telemPacketOffset);
         if (errCode) {
             LOG_ERROR_CODE(errCode);
             RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
@@ -315,7 +315,7 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t singleTelem, pa
     
     // If the single telemetry is too large to continue adding to the telemPacket, send the telemPacket
     if ((*telemPacketOffset) + packedSingleTelemSize > PACKED_TELEM_PACKET_SIZE) {
-        RETURN_IF_ERROR_CODE(sendTelemetryPacket(&telemPacket));
+        RETURN_IF_ERROR_CODE(sendTelemetryPacket(telemPacket));
         // Reset the packedTelem struct and offset
         *telemPacket = (packed_telem_packet_t){0};
         *telemPacketOffset = 0;

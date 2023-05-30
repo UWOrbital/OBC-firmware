@@ -38,6 +38,5 @@ typedef enum {
 #define CMD_DOWNLINK_LOGS_NEXT_PASS     (uint8_t) 3
 #define CMD_MICRO_SD_FORMAT             (uint8_t) 4
 #define CMD_PING                        (uint8_t) 5
-#define CMD_PING_TIME_TAGGED            (uint8_t) (5 | 0x80)
 
 #endif // CDH_INCLUDE_COMMAND_ID_H_
