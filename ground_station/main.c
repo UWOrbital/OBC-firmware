@@ -9,10 +9,25 @@
 
 #include <windows.h>
 
-#define COM_PORT_NAME "\\\\.\\COM5"
+#define COM_PORT_NAME_PREFIX "\\\\.\\COM"
 
-int main(void) {
+int main(int argc, char** argv) {
     obc_error_code_t errCode;
+
+    // Grab com port from cmd line args
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <com port>\n", argv[0]);
+        return 1;
+    }
+    
+    long int comPort = strtol(argv[1], NULL, 10);
+    if (comPort < 0 || comPort > 255) {
+        fprintf(stderr, "Invalid com port: %ld\n", comPort);
+        return 1;
+    }
+
+    char comPortName[16] = {0};
+    snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX, comPort);
 
     initLogger();
 
@@ -48,7 +63,7 @@ int main(void) {
     // Open the serial port
     fprintf(stderr, "Opening serial port...");
     hSerial = CreateFile(
-                COM_PORT_NAME, GENERIC_READ|GENERIC_WRITE, 0, NULL,
+                comPortName, GENERIC_READ|GENERIC_WRITE, 0, NULL,
                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
     
     if (hSerial == INVALID_HANDLE_VALUE) {
