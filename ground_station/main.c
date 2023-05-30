@@ -10,37 +10,14 @@
 
 #include <windows.h>
 
+#define ARGUMENTS_PER_COMMAND 3
+
 #define COM_PORT_NAME "\\\\.\\COM5"
 
-int main(void) {
+int main(int argc, char *argv[]) {
     obc_error_code_t errCode;
 
     initLogger();
-
-    /* Construct packet */
-
-    cmd_msg_t cmdMsg = {.id = CMD_EXEC_OBC_RESET, .isTimeTagged = true, .timestamp = 0x12345678UL};
-    /* do stuff to get the cmdMsgs */
-    
-    uint8_t buff[24] = {0};
-    size_t offset = 0;
-
-    // AX25 start flag
-    buff[offset++] = 0x7E;
-
-    LOG_IF_ERROR_CODE(packCmdMsg(buff, &offset, &cmdMsg));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-        return 1;
-    }
-
-    // AX25 end flag
-    buff[offset++] = 0x7E;
-
-    printf("Packet: ");
-    for (int i = 0; i < offset; i++) {
-        printf("%02x ", buff[i]);
-    }
-    printf("\n");
 
     // Declare variables and structures
     HANDLE hSerial;
@@ -89,16 +66,66 @@ int main(void) {
         CloseHandle(hSerial);
         return 1;
     }
- 
-    // Send packet
-    long unsigned int bytesWritten = 0;
-    fprintf(stderr, "Sending bytes...");
-    if (!WriteFile(hSerial, buff, offset, &bytesWritten, NULL)) {
-        fprintf(stderr, "Error\n");
-        CloseHandle(hSerial);
-        return 1;
-    }   
-    fprintf(stderr, "%lu bytes written\n", bytesWritten);
+
+    /* Construct packet */
+    cmd_msg_t cmdMsg;
+
+    // Initialize important variables related to packing and queueing the telemetry to be sent
+    uint8_t packedSingleCmd[MAX_CMD_SIZE]; // Holds a serialized version of the current command
+
+    packed_telem_packet_t cmdPacket = {0}; // Holds 223B of "raw" command data.
+                                             // Zero initialized because commands of 0 are ignored 
+    size_t cmdPacketOffset = 0; // Number of bytes filled in cmdPacket
+    u8int8_t packedSingleCmdSize;
+
+    packed_rs_packet_t fecPkt; // Holds a 255B RS packet
+    packed_ax25_packet_t ax25Pkt; // Holds an AX.25 packet
+
+    for(uint32_t i = 0; i < (argc - 1)/ARGUMENTS_PER_COMMAND; ++i){
+        /* do stuff to get the cmdMsg */
+        printf("Sending telemetry: %u", cmdMsg.id);
+
+        size_t packedSingleTelemSize = 0; // Size of the packed single telemetry
+        // Pack the single telemetry into a uint8_t array
+        RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd,
+                             &cmdPacketOffset,
+                             &cmdMsg,
+                             &packedSingleCmdSize));
+        
+        // If the single telemetry is too large to continue adding to the packet, send the packet
+        if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE) {
+            // Apply Reed Solomon FEC
+            RETURN_IF_ERROR_CODE(rsEncode(&cmdPacket, &fecPkt));
+
+            // Perform AX.25 framing
+            RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
+
+            // transmit the ax25 packet
+            printf("Packet: ");
+            for (int i = 0; i < cmdPacketOffset; i++) {
+                printf("%02x ", cmdPacket.data[i]);
+            }
+            printf("\n");
+
+            // Send packet
+            long unsigned int bytesWritten = 0;
+
+            fprintf(stderr, "Sending bytes...");
+            if (!WriteFile(hSerial, cmdPacket.data, cmdPacketOffset, &bytesWritten, NULL)) {
+                fprintf(stderr, "Error\n");
+                CloseHandle(hSerial);
+                return 1;
+            }   
+            fprintf(stderr, "%lu bytes written\n", bytesWritten);
+            // Reset the packedTelem struct and offset
+            cmdPacket = (packed_telem_packet_t){0};
+            cmdPacketOffset = 0;
+        }
+
+        // Copy the telemetry data into the packedTelem struct
+        memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
+        cmdPacketOffset += packedSingleCmdSize;
+    }
      
     // Close serial port
     fprintf(stderr, "Closing serial port...");
@@ -107,6 +134,8 @@ int main(void) {
         return 1;
     }
     fprintf(stderr, "OK\n");
+
+    // switch to receive 
 
     return 0;
 }

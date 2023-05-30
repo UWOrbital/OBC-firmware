@@ -34,6 +34,8 @@ static QueueHandle_t telemEncodeQueueHandle = NULL;
 static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH*COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
 
+ax25_addr_t groundStationAddr = {.data = {1}, .length = AX25_DEST_ADDR_BYTES}; // Mock Ground station address
+
 /**
  * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
  * 

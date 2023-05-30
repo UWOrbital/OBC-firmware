@@ -21,7 +21,7 @@ static const pack_func_t packFns[] = {
 #define MAX_CMD_ID ((sizeof(packFns) / sizeof(pack_func_t)) - 1)
 
 // Pack the command message
-obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cmdMsg) {
+obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cmdMsg, uint8_t *numPacked) {
     if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -34,6 +34,7 @@ obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cm
         return OBC_ERR_CODE_UNSUPPORTED_CMD;
     }
 
+    uint8_t oldOffset = *offset;
     uint8_t uplinkedId = cmdMsg->isTimeTagged ? (cmdMsg->id | 0x80) : cmdMsg->id;
     packUint8(uplinkedId, buffer, offset);
 
@@ -41,6 +42,7 @@ obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cm
 
     packFns[cmdMsg->id](buffer, offset, cmdMsg);
 
+    *numPacked = *offset - oldOffset; 
     return OBC_ERR_CODE_SUCCESS;
 }
 
