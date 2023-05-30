@@ -7,14 +7,9 @@
 
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
-static const ax25_addr_t cubesatCallsign = { .data = {AX25_CUBESAT_CALLSIGN_BYTE_1, \
-                                                      AX25_CUBESAT_CALLSIGN_BYTE_2, \
-                                                      AX25_CUBESAT_CALLSIGN_BYTE_3, \
-                                                      AX25_CUBESAT_CALLSIGN_BYTE_4, \
-                                                      AX25_CUBESAT_CALLSIGN_BYTE_5, \
-                                                      AX25_CUBESAT_CALLSIGN_BYTE_6, \
-                                                      AX25_CUBESAT_CALLSIGN_BYTE_7}, \
-                                                      .length = AX25_DEST_ADDR_BYTES};
+
+/* Mock CubeSat callsign */
+static const ax25_addr_t cubesatCallsign = { .data = {0xFF}, .length = AX25_DEST_ADDR_BYTES};
 
 /**
  * @brief performs bit unstuffing on a receive ax.25 packet
@@ -74,7 +69,7 @@ static obc_error_code_t fcsCheck(const uint8_t* data, uint16_t fcs);
  * 
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
 */
-static obc_error_code_t bit_stuffing(uint8_t *RAW_DATA, packed_ax25_packet_t *STUFFED_DATA);
+static obc_error_code_t bitStuffing(uint8_t *rawData, packed_ax25_packet_t *stuffedData);
 
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
@@ -98,16 +93,17 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
         return OBC_ERR_CODE_INVALID_ARG;
     }
     if (destAddress->length < AX25_DEST_ADDR_BYTES){
+        /* TODO: technically not an error, should be filled with spaces */
         return OBC_ERR_CODE_INVALID_ARG;
     }
     obc_error_code_t errCode;
 
     memset(ax25Data->data, 0, AX25_MAXIMUM_PKT_LEN);
 
-    uint8_t ax25PacketUnstuffed[AX25_MINIMUM_PKT_LEN] = {0};
+    uint8_t ax25PacketUnstuffed[AX25_MINIMUM_I_FRAME_LEN] = {0};
 
     ax25PacketUnstuffed[0] = AX25_FLAG;
-    //ax25PacketUnstuffed[AX25_MINIMUM_PKT_LEN - 1] = AX25_FLAG;
+    //ax25PacketUnstuffed[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
     memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES, destAddress->data, AX25_DEST_ADDR_BYTES);
     memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, cubesatCallsign.data, AX25_SRC_ADDR_BYTES);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] = (pktReceiveNum << 1);
@@ -118,7 +114,7 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
     RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, &fcs));
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_INFO_BYTES] = (uint8_t)(fcs >> 8);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_INFO_BYTES + 1] = (uint8_t)(fcs & 0xFF);
-    RETURN_IF_ERROR_CODE(bit_stuffing(ax25PacketUnstuffed, ax25Data));
+    RETURN_IF_ERROR_CODE(bitStuffing(ax25PacketUnstuffed, ax25Data));
     ax25Data->data[ax25Data->length - 1] = AX25_FLAG;
     ax25Data->data[0] = AX25_FLAG;
     pktSentNum++;
@@ -155,9 +151,11 @@ obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rs
 
     bool supervisoryFrameFlag = false;
     if(unstuffedPacket.length == AX25_SUPERVISORY_FRAME_LENGTH){
+        /* TODO: not the best way to determine S flag? */
         supervisoryFrameFlag = true;
     }
-    else if (unstuffedPacket.length != AX25_MINIMUM_PKT_LEN){
+    else if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN){
+        /* TODO: same as above */
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
@@ -225,15 +223,15 @@ static obc_error_code_t ax25Unstuff(const packed_ax25_packet_t* packet, unstuffe
             else {
                 bitCount = 0;
             }
-            if(unstuffedBitLength >= (AX25_MINIMUM_PKT_LEN-1)*8){
+            if(unstuffedBitLength >= (AX25_MINIMUM_I_FRAME_LEN-1)*8){
                 break;
             }
             unstuffedPacket->data[unstuffedBitLength / 8] |= bit << (7 - (unstuffedBitLength % 8));
             unstuffedBitLength++;
         }
     }
-    // Add last flag
-    unstuffedPacket->data[AX25_MINIMUM_PKT_LEN - 1] = AX25_FLAG;
+    // Add last flag to end of the packet, rounding up
+    unstuffedPacket->data[(unstuffedBitLength + 7)/8] = AX25_FLAG;
     unstuffedBitLength += 8;
 
     // convert bits to bytes, rounding up
@@ -323,7 +321,7 @@ static obc_error_code_t iFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, pac
 static obc_error_code_t fcsCalculate(const uint8_t* data, uint16_t *calculatedFcs){
    *calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
 
-    for (uint16_t i = 0; i < (AX25_MINIMUM_PKT_LEN - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
+    for (uint16_t i = 0; i < (AX25_MINIMUM_I_FRAME_LEN - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
         *calculatedFcs ^= (uint16_t)data[i] << 8;
 
         for (uint8_t j = 0; j < 8; ++j) {
@@ -364,7 +362,7 @@ static obc_error_code_t fcsCheck(const uint8_t* data, uint16_t fcs){
     fcs = reverse_num;
     uint16_t calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
 
-    for (uint16_t i = 0; i < (AX25_MINIMUM_PKT_LEN - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
+    for (uint16_t i = 0; i < (AX25_MINIMUM_I_FRAME_LEN - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
         calculatedFcs ^= (uint16_t)data[i] << 8;
 
         for (uint8_t j = 0; j < 8; ++j) {
@@ -392,28 +390,29 @@ static obc_error_code_t fcsCheck(const uint8_t* data, uint16_t fcs){
  * 
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
 */
-static obc_error_code_t bit_stuffing(uint8_t *RAW_DATA, packed_ax25_packet_t *STUFFED_DATA){
-    memset(STUFFED_DATA->data, 0, AX25_MAXIMUM_PKT_LEN);
-    size_t RAW_OFFSET = 0, STUFFED_OFFSET = 8, one_count = 0;
-    uint8_t current_bit;
+static obc_error_code_t bitStuffing(uint8_t *rawData, packed_ax25_packet_t *stuffedData){
+    /* TODO: implement variable length param */
+    memset(stuffedData->data, 0, AX25_MAXIMUM_PKT_LEN);
+    size_t rawOffset = 0, stuffedOffset = 8, oneCount = 0;
+    uint8_t currentBit;
 
 // Cycle through raw data to find 1s
-    for (RAW_OFFSET = 8; RAW_OFFSET < (275) * 8; ++RAW_OFFSET) {
-        current_bit = (RAW_DATA[RAW_OFFSET / 8] >> (7 - (RAW_OFFSET % 8))) & 1;
-        STUFFED_DATA->data[STUFFED_OFFSET / 8] |= (current_bit << (7 - (STUFFED_OFFSET % 8)));
-        STUFFED_OFFSET++;
+    for (rawOffset = 8; rawOffset < (AX25_MINIMUM_I_FRAME_LEN - 1) * 8; ++rawOffset) {
+        currentBit = (rawData[rawOffset / 8] >> (7 - (rawOffset % 8))) & 1;
+        stuffedData->data[stuffedOffset / 8] |= (currentBit << (7 - (stuffedOffset % 8)));
+        stuffedOffset++;
 
-        if (current_bit == 1) {
-            one_count++;
-            if (one_count == 5) {
-                one_count = 0;
-                STUFFED_DATA->data[STUFFED_OFFSET / 8] |= (0 << (7 - (STUFFED_OFFSET % 8)));
-                STUFFED_OFFSET++;
+        if (currentBit == 1) {
+            oneCount++;
+            if (oneCount == 5) {
+                oneCount = 0;
+                stuffedData->data[stuffedOffset / 8] |= 0;
+                stuffedOffset++;
             }
         } else {
-            one_count = 0;
+            oneCount = 0;
         }
     }
-    STUFFED_DATA->length = ((STUFFED_OFFSET+7)/8) + 1;
+    stuffedData->length = ((stuffedOffset+7)/8) + 1;
     return OBC_ERR_CODE_SUCCESS;
 }
