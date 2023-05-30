@@ -16,13 +16,13 @@ int main(int argc, char** argv) {
 
     // Grab com port from cmd line args
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <com port>\n", argv[0]);
+        printf("Usage: %s <com port>\n", argv[0]);
         return 1;
     }
     
     long int comPort = strtol(argv[1], NULL, 10);
     if (comPort < 0 || comPort > 255) {
-        fprintf(stderr, "Invalid com port: %ld\n", comPort);
+        printf("Invalid com port: %ld\n", comPort);
         return 1;
     }
 
@@ -61,22 +61,22 @@ int main(int argc, char** argv) {
     COMMTIMEOUTS timeouts = {0};
          
     // Open the serial port
-    fprintf(stderr, "Opening serial port...");
+    printf("Opening serial port...");
     hSerial = CreateFile(
                 comPortName, GENERIC_READ|GENERIC_WRITE, 0, NULL,
                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
     
     if (hSerial == INVALID_HANDLE_VALUE) {
-            fprintf(stderr, "Error\n");
+            printf("Error\n");
             return 1;
     } else {
-        fprintf(stderr, "OK\n");
+        printf("OK\n");
     }
 
     // Set device parameters
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
     if (GetCommState(hSerial, &dcbSerialParams) == 0) {
-        fprintf(stderr, "Error getting device state\n");
+        printf("Error getting device state\n");
         CloseHandle(hSerial);
         return 1;
     }
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     dcbSerialParams.StopBits = TWOSTOPBITS;
     dcbSerialParams.Parity = NOPARITY;
     if (SetCommState(hSerial, &dcbSerialParams) == 0) {
-        fprintf(stderr, "Error setting device parameters\n");
+        printf("Error setting device parameters\n");
         CloseHandle(hSerial);
         return 1;
     }
@@ -98,20 +98,20 @@ int main(int argc, char** argv) {
     timeouts.WriteTotalTimeoutConstant = 50;
     timeouts.WriteTotalTimeoutMultiplier = 10;
     if (SetCommTimeouts(hSerial, &timeouts) == 0) {
-        fprintf(stderr, "Error setting timeouts\n");
+        printf("Error setting timeouts\n");
         CloseHandle(hSerial);
         return 1;
     }
  
     // Send packet
     long unsigned int bytesWritten = 0;
-    fprintf(stderr, "Sending bytes...");
+    printf("Sending bytes...");
     if (!WriteFile(hSerial, buff, offset, &bytesWritten, NULL)) {
-        fprintf(stderr, "Error\n");
+        printf("Error\n");
         CloseHandle(hSerial);
         return 1;
     }   
-    fprintf(stderr, "%lu bytes written\n", bytesWritten);
+    printf("%lu bytes written\n", bytesWritten);
 
     unsigned char rxChar = '\0';
     while (1) {
@@ -124,12 +124,12 @@ int main(int argc, char** argv) {
 
      
     // Close serial port
-    fprintf(stderr, "Closing serial port...");
+    printf("Closing serial port...");
     if (CloseHandle(hSerial) == 0) {
-        fprintf(stderr, "Error\n");
+        printf("Error\n");
         return 1;
     }
-    fprintf(stderr, "OK\n");
+    printf("OK\n");
 
     return 0;
 }
