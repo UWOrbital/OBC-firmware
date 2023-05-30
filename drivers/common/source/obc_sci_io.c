@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 #define MAX_PRINTF_SIZE 128U
-#define UART_MUTEX_BLOCK_TIME pdMS_TO_TICKS(1000)
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static SemaphoreHandle_t sciMutex = NULL;
 static StaticSemaphore_t sciMutexBuffer;

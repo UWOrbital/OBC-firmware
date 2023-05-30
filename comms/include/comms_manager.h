@@ -2,9 +2,11 @@
 #define COMMS_INCLUDE_COMMS_MANAGER_H_
 
 #include "obc_errors.h"
+#include "telemetry_manager.h"
 
 #include <sys_common.h>
 
+#define MAX_DOWNLINK_TELEM_BUFFER_SIZE 1U
 
 /**
  * @enum	comms_event_id_t
@@ -14,7 +16,8 @@
 */
 typedef enum {
     BEGIN_UPLINK,
-    DOWNLINK_TELEMETRY
+    DOWNLINK_TELEMETRY_FILE,
+    DOWNLINK_DATA_BUFFER
 } comms_event_id_t;
 
 /**
@@ -27,6 +30,8 @@ typedef struct {
     comms_event_id_t eventID;
     union {
         uint32_t telemetryBatchId;
+        telemetry_data_t telemetryDataBuffer[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
+        uint8_t bufferSize;
     };
 } comms_event_t;
 

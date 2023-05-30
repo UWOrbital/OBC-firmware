@@ -94,7 +94,7 @@ static void telemetryManager(void * pvParameters) {
             // TODO: Handle this error
         }
 
-        comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY, .telemetryBatchId = telemetryBatchId};
+        comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
 
         LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
         if (errCode != OBC_ERR_CODE_SUCCESS) {

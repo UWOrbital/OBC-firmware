@@ -17,6 +17,7 @@
 #include "obc_fs_utils.h"
 #include "lm75bd.h"
 #include "obc_board_config.h"
+#include "cc1120_recv_task.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -77,7 +78,10 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 }
 
 static void sendStartupMessages(void) {
-    /* TODO: Add startup messages to other tasks */
+    #if CSDC_DEMO_ENABLED == 1
+    obc_error_code_t errCode;
+    LOG_IF_ERROR_CODE(startUplink());
+    #endif
 }
 
 static void vSupervisorTask(void * pvParameters) {
