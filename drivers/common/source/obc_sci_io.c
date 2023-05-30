@@ -138,6 +138,8 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 */
 
 obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks) {
+    obc_error_code_t errCode;
+
     SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
     configASSERT(mutex != NULL);
 
@@ -157,13 +159,16 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTic
 
     // Wait for transfer to complete
     if (xSemaphoreTake(sciTransferComplete, blockTimeTicks) != pdTRUE) {
-        sciRxBuff = NULL;
-        sciRxBuffLen = 0;
-        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+        errCode = OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+    } else {
+        errCode = OBC_ERR_CODE_SUCCESS;
     }
 
+    sciRxBuff = NULL;
+    sciRxBuffLen = 0;
+
     xSemaphoreGive(mutex);
-    return OBC_ERR_CODE_SUCCESS;
+    return errCode;
 }
 
 obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes) {

@@ -18,6 +18,7 @@ typedef enum {
     OBC_ERR_CODE_QUEUE_EMPTY = 12,
     OBC_ERR_CODE_NOT_MUTEX_OWNER = 13,
     OBC_ERR_CODE_PERSISTENT_CORRUPTED = 14,
+    
     /* Driver Errors 100 - 199*/
     OBC_ERR_CODE_SPI_FAILURE = 100,
     OBC_ERR_CODE_I2C_FAILURE = 101,
@@ -46,6 +47,7 @@ typedef enum {
     
 
     /* Payload errors 600 - 699 */
+    OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE = 600,
 
     /* File System errors 700 - 799 */
     OBC_ERR_CODE_INVALID_FILE_NAME = 700,
