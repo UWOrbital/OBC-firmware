@@ -87,6 +87,15 @@ typedef struct {
     
 } telemetry_data_t;
 
+typedef enum {
+    DATA_EVENT,
+    DOWNLINK_EVENT,
+} telemetry_event_id_t;
+
+typedef struct {
+    telemetry_data_t data;
+    telemetry_event_id_t id;
+} telemetry_event_t;
 #define MAX_TELEMETRY_DATA_SIZE sizeof(telemetry_data_t)
 
 #define BIT_0 (1 << 0)
