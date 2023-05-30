@@ -33,6 +33,7 @@ static const telemetry_pack_func_t telemPackFns[] = {
     [TELEM_OBC_STATE] = packObcState,
     [TELEM_EPS_STATE] = packEpsState,
     [TELEM_NUM_CSP_PACKETS_RCVD] = packNumCspPacketsRcvd,
+    [TELEM_PONG] = packPong,
 };
 
 static void packTelemetryId(telemetry_data_id_t id, uint8_t *buffer, size_t *offset);
@@ -173,4 +174,8 @@ void packEpsState(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
 
 void packNumCspPacketsRcvd(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
     packUint32(data->numCspPacketsRcvd, buffer, offset);
+}
+
+void packPong(telemetry_data_t *data, uint8_t *buffer, size_t *offset) {
+    // Nothing to pack
 }

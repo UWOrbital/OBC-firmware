@@ -3,6 +3,7 @@
 #include "obc_reset.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "comms_manager.h"
 
 #include <redposix.h>
 #include <stddef.h>
@@ -54,11 +55,17 @@ obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
 }
 
 obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
+    obc_error_code_t errCode;
+
     if (cmd == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
     
-    // TODO: Implement handling for this command
+    comms_event_t queueMsg;
+    queueMsg.eventID = DOWNLINK_DATA_BUFFER;
+    queueMsg.telemetryDataBuffer[0] = (telemetry_data_t) {.id = TELEM_PONG, /* .timestamp = */};
+
+    RETURN_IF_ERROR_CODE(sendToCommsQueue(&queueMsg));
     
     return OBC_ERR_CODE_SUCCESS;
 }
