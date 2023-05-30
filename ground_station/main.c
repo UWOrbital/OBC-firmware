@@ -126,6 +126,33 @@ int main(int argc, char *argv[]) {
         memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
         cmdPacketOffset += packedSingleCmdSize;
     }
+    
+    // if there are any bytes left, send them
+    if(cmdPacketOffset != 0){
+        // Apply Reed Solomon FEC
+        RETURN_IF_ERROR_CODE(rsEncode(&cmdPacket, &fecPkt));
+
+        // Perform AX.25 framing
+        RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
+
+        // transmit the ax25 packet
+        printf("Packet: ");
+        for (int i = 0; i < cmdPacketOffset; i++) {
+            printf("%02x ", cmdPacket.data[i]);
+        }
+        printf("\n");
+
+        // Send packet
+        long unsigned int bytesWritten = 0;
+
+        fprintf(stderr, "Sending bytes...");
+        if (!WriteFile(hSerial, cmdPacket.data, cmdPacketOffset, &bytesWritten, NULL)) {
+            fprintf(stderr, "Error\n");
+            CloseHandle(hSerial);
+            return 1;
+        }   
+        fprintf(stderr, "%lu bytes written\n", bytesWritten);
+    }
      
     // Close serial port
     fprintf(stderr, "Closing serial port...");
