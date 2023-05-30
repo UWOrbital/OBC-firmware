@@ -7,7 +7,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 
-#include <windows.h>
+#include "win_uart.h"
 
 #define COM_PORT_NAME_PREFIX "\\\\.\\COM"
 
@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
     }
  
     // Set COM port timeout settings
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
+    timeouts.ReadIntervalTimeout = 500;
+    timeouts.ReadTotalTimeoutConstant = 500;
     timeouts.ReadTotalTimeoutMultiplier = 10;
     timeouts.WriteTotalTimeoutConstant = 50;
     timeouts.WriteTotalTimeoutMultiplier = 10;
@@ -112,6 +112,16 @@ int main(int argc, char** argv) {
         return 1;
     }   
     fprintf(stderr, "%lu bytes written\n", bytesWritten);
+
+    unsigned char rxChar = '\0';
+    while (1) {
+        if (readSerialPort(hSerial, (uint8_t *)&rxChar, 1) == 0) {
+            break;
+        }
+        printf("%c", rxChar);
+    }
+    printf("\n");
+
      
     // Close serial port
     fprintf(stderr, "Closing serial port...");

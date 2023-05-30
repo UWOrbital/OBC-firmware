@@ -59,3 +59,13 @@ long unsigned int writeSerialPort(HANDLE hSerial, uint8_t *buff, size_t len) {
 
     return bytesWritten;
 }
+
+int readSerialPort(HANDLE hSerial, uint8_t *buff, size_t len) {
+    long unsigned int bytesRead = 0;
+    if (!ReadFile(hSerial, buff, len, &bytesRead, NULL)) {
+        CloseHandle(hSerial);
+        return -1;
+    }
+
+    return bytesRead;
+}
