@@ -1,6 +1,5 @@
 #include "ax25.h"
 #include "obc_logging.h"
-#include "comms_manager.h"
 
 #include <stdint.h>
 #include <string.h>

@@ -7,6 +7,8 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "ax25.h"
+#include "fec.h"
+#include "aes128.h"
 
 #include <windows.h>
 
@@ -76,7 +78,6 @@ int main(int argc, char *argv[]) {
     packed_telem_packet_t cmdPacket = {0}; // Holds 223B of "raw" command data.
                                              // Zero initialized because commands of 0 are ignored 
     size_t cmdPacketOffset = 0; // Number of bytes filled in cmdPacket
-    u8int8_t packedSingleCmdSize;
 
     packed_rs_packet_t fecPkt; // Holds a 255B RS packet
     packed_ax25_packet_t ax25Pkt; // Holds an AX.25 packet
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
         /* do stuff to get the cmdMsg */
         printf("Sending telemetry: %u", cmdMsg.id);
 
-        size_t packedSingleTelemSize = 0; // Size of the packed single telemetry
+        uint8_t packedSingleCmdSize = 0; // Size of the packed single telemetry
         // Pack the single telemetry into a uint8_t array
         RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd,
                              &cmdPacketOffset,
@@ -93,7 +94,8 @@ int main(int argc, char *argv[]) {
                              &packedSingleCmdSize));
         
         // If the single telemetry is too large to continue adding to the packet, send the packet
-        if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE) {
+        if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE-AES_IV_SIZE) {
+            /* TODO: implement AES128 encryption */
             // Apply Reed Solomon FEC
             RETURN_IF_ERROR_CODE(rsEncode(&cmdPacket, &fecPkt));
 
