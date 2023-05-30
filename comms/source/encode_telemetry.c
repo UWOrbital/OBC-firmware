@@ -34,6 +34,8 @@ static QueueHandle_t telemEncodeQueueHandle = NULL;
 static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH*COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
 
+ax25_addr_t groundStationAddr = {.data = {1}, .length = AX25_DEST_ADDR_BYTES}; // Mock Ground station address
+
 /**
  * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
  * 
@@ -176,7 +178,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
             RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
 
             // Perform AX.25 framing
-            RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
+            RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationAddr));
 
             // Send into CC1120 transmit queue
             RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
@@ -205,7 +207,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
     // If there is data left, send it
     // (any "unfilled" bytes in the telemPacket are ignored by the ground station as they have telem ID 0)
     RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
-    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
+    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationAddr));
     RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
 
     return OBC_ERR_CODE_SUCCESS;
