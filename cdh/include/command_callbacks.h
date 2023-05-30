@@ -20,4 +20,10 @@ obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd);
 // CMD_MICRO_SD_FORMAT
 obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd);
 
+// CMD_PING
+obc_error_code_t pingCmdCallback(cmd_msg_t *cmd);
+
+// CMD_PING_TIME_TAGGED
+obc_error_code_t pingTimeTaggedCmdCallback(cmd_msg_t *cmd);
+
 #endif // CDH_INCLUDE_COMMAND_CALLBACKS_H_

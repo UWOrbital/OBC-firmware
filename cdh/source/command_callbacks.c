@@ -52,3 +52,23 @@ obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
     }
     return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
+    if (cmd == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+    
+    // TODO: Implement handling for this command
+    
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t pingTimeTaggedCmdCallback(cmd_msg_t *cmd) {
+    if (cmd == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    // TODO: Implement handling for this command
+
+    return OBC_ERR_CODE_SUCCESS;
+}
