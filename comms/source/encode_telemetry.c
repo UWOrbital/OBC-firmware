@@ -176,7 +176,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
             RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
 
             // Perform AX.25 framing
-            RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
+            RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationCallsign, &cubesatCallsign));
 
             // Send into CC1120 transmit queue
             RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
@@ -205,7 +205,7 @@ static obc_error_code_t sendTelemetry(int32_t fd) {
     // If there is data left, send it
     // (any "unfilled" bytes in the telemPacket are ignored by the ground station as they have telem ID 0)
     RETURN_IF_ERROR_CODE(rsEncode(&telemPacket, &fecPkt));
-    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt));
+    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationCallsign, &cubesatCallsign));
     RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
 
     return OBC_ERR_CODE_SUCCESS;

@@ -6,6 +6,7 @@
 #include "command_id.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "ax25.h"
 
 #include <windows.h>
 
@@ -19,6 +20,7 @@ int main(void) {
     /* Construct packet */
 
     cmd_msg_t cmdMsg = {.id = CMD_EXEC_OBC_RESET, .isTimeTagged = true, .timestamp = 0x12345678UL};
+    /* do stuff to get the cmdMsgs */
     
     uint8_t buff[24] = {0};
     size_t offset = 0;

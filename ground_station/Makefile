@@ -14,6 +14,7 @@ INCS += -I"cdh/include"
 INCS += -I"common/include"
 INCS += -I"tiny_aes"
 INCS += -I"libcorrect/include"
+INCS += -I"comms/include"
 
 # Ground station specific source files
 SRCS := ground_station/main.c
