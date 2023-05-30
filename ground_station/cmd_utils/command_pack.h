@@ -22,4 +22,7 @@ void packDownlinkLogsNextPassCmdData(uint8_t* buffer, size_t* offset, const cmd_
 // CMD_MICRO_SD_FORMAT
 void packMicroSdFormat(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg);
 
+// CMD_PING
+void packPingCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* msg);
+
 #endif // CDH_INCLUDE_COMMAND_PACK_H_
