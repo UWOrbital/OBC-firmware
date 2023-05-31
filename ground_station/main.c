@@ -84,8 +84,8 @@ int main(int argc, char *argv[]) {
     }
  
     // Set COM port timeout settings
-    timeouts.ReadIntervalTimeout = 1000;
-    timeouts.ReadTotalTimeoutConstant = 5000;
+    timeouts.ReadIntervalTimeout = 10000;
+    timeouts.ReadTotalTimeoutConstant = 20000;
     timeouts.ReadTotalTimeoutMultiplier = 100;
     timeouts.WriteTotalTimeoutConstant = 50;
     timeouts.WriteTotalTimeoutMultiplier = 10;
@@ -220,6 +220,7 @@ int main(int argc, char *argv[]) {
         if (readSerialPort(hSerial, &byte, 1) == 0) {
             break;
         }
+        printf("%x ", byte);
         if (axDataIndex >= sizeof(axData.data)) {
             LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
 
