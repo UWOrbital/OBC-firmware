@@ -20,6 +20,11 @@ typedef enum {
     DOWNLINK_DATA_BUFFER
 } comms_event_id_t;
 
+typedef struct {
+    telemetry_data_t telemData[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
+    uint8_t bufferSize;
+} telemetry_data_buffer_t;
+
 /**
  * @struct	comms_event_t
  * @brief	comms event struct
@@ -30,8 +35,7 @@ typedef struct {
     comms_event_id_t eventID;
     union {
         uint32_t telemetryBatchId;
-        telemetry_data_t telemetryDataBuffer[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
-        uint8_t bufferSize;
+        telemetry_data_buffer_t telemetryDataBuffer;
     };
 } comms_event_t;
 

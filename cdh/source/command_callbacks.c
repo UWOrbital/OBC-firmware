@@ -64,7 +64,7 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
     
     comms_event_t queueMsg;
     queueMsg.eventID = DOWNLINK_DATA_BUFFER;
-    queueMsg.telemetryDataBuffer[0] = (telemetry_data_t) {.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
+    queueMsg.telemetryDataBuffer.telemData[0] = (telemetry_data_t) {.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
 
     RETURN_IF_ERROR_CODE(sendToCommsQueue(&queueMsg));
     

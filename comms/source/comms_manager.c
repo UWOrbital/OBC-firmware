@@ -96,7 +96,7 @@ static void vCommsManagerTask(void * pvParameters) {
                 // LOG_IF_ERROR_CODE(sendToDownlinkQueue(queueMsg));
                 break;
             case DOWNLINK_DATA_BUFFER:
-                LOG_IF_ERROR_CODE(sendToDownlinkQueue(queueMsg));
+                LOG_IF_ERROR_CODE(sendToDownlinkQueue(&queueMsg));
                 break;
             case BEGIN_UPLINK:
                 LOG_IF_ERROR_CODE(startUplink());
