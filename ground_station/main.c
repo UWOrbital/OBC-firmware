@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 
 // Example - todo: remove
 #include "command_pack.h"
@@ -20,6 +21,11 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03,
                                                       0x04, 0x05, 0x06, 0x07,
                                                       0x08, 0x09, 0x0A, 0x0B,
                                                       0x0C, 0x0D, 0x0E, 0x0F};
+
+static struct AES_ctx ctx;
+static correct_reed_solomon* rsGs = NULL;
+
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 int main(int argc, char *argv[]) {
     obc_error_code_t errCode;
@@ -102,19 +108,15 @@ int main(int argc, char *argv[]) {
     packed_rs_packet_t fecPkt; // Holds a 255B RS packet
     packed_ax25_packet_t ax25Pkt; // Holds an AX.25 packet
 
-    struct AES_ctx ctx;
-
     AES_init_ctx(&ctx, TEMP_STATIC_KEY);
 
     uint8_t iv[AES_IV_SIZE];
 
     memset(iv, 1, AES_IV_SIZE);
-    
+
     AES_ctx_set_iv(&ctx, iv);
 
-    correct_reed_solomon* rs;
-
-    rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
+    rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
 
     for(uint32_t i = 0; i < (argc - 2)/ARGUMENTS_PER_COMMAND; ++i){
         unsigned long int id = strtoul(argv[ARGUMENTS_PER_COMMAND*i + 2], NULL, 10);
@@ -146,7 +148,7 @@ int main(int argc, char *argv[]) {
             AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
 
             // Apply Reed Solomon FEC
-            if((uint8_t) correct_reed_solomon_encode(rs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
+            if((uint8_t) correct_reed_solomon_encode(rsGs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
                 return 1;
             }
 
@@ -183,7 +185,7 @@ int main(int argc, char *argv[]) {
     // if there are any bytes left, send them
     if(cmdPacketOffset != 0){
         // Apply Reed Solomon FEC
-        if((uint8_t) correct_reed_solomon_encode(rs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
+        if((uint8_t) correct_reed_solomon_encode(rsGs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
             return 1;
         };
         printf("we survived rs encryption!\n");
@@ -208,12 +210,53 @@ int main(int argc, char *argv[]) {
         }   
         printf("%lu bytes written\n", bytesWritten);
     }
-   unsigned char rxChar = '\0';
+    // switch to receive
+    uint8_t byte = '\0';
+    packed_ax25_packet_t axData = {0};
+    uint16_t axDataIndex = 0;
+
+    bool startFlagReceived = false;
     while (1) {
-        if (readSerialPort(hSerial, (uint8_t *)&rxChar, 1) == 0) {
+        if (readSerialPort(hSerial, &byte, 1) == 0) {
             break;
         }
-        printf("%c", rxChar);
+        if (axDataIndex >= sizeof(axData.data)) {
+            LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+
+            // Restart the decoding process
+            memset(&axData, 0, sizeof(axData));
+            axDataIndex = 0;
+            startFlagReceived = false;
+        }
+
+        if (byte == AX25_FLAG) {
+            axData.data[axDataIndex++] = byte;
+
+            // Decode packet if we have start flag, end flag, and at least 1 byte of data
+            // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+            // axData.data[1] must be something other than AX25_FLAG
+            if (axDataIndex > 2) {
+                axData.length = axDataIndex;
+                    
+                packed_rs_packet_t rsData = {0};
+                aes_data_t aesData = {0};
+                LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+                    
+                // Restart the decoding process
+                memset(&axData, 0, sizeof(axData));
+                axDataIndex = 0;
+                startFlagReceived = false;
+            } else {
+                startFlagReceived = true;
+                axDataIndex = 1;
+            }
+                
+            continue;
+        }
+            
+        if (startFlagReceived) {
+            axData.data[axDataIndex++] = byte;
+        }
     }
     printf("\n");
     // Close serial port
@@ -224,7 +267,26 @@ int main(int argc, char *argv[]) {
     }
     printf("OK\n");
 
-    // switch to receive 
-
     return 0;
+}
+
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+    obc_error_code_t errCode;
+    
+    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &groundStationCallsign));
+    uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, aesData->rawData);
+    
+    if(decodedLength == -1)
+        return OBC_ERR_CODE_CORRUPTED_MSG;
+
+    uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE] = {0};
+    memcpy(decryptedData, aesData->aesStruct.ciphertext, RS_DECODED_SIZE-AES_IV_SIZE);
+    AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
+    AES_CTR_xcrypt_buffer(&ctx, decryptedData, RS_DECODED_SIZE-AES_IV_SIZE);
+    
+    for(uint8_t i = 0; i < RS_DECODED_SIZE-AES_IV_SIZE; ++i){
+        printf("%x ", decryptedData[i]);
+    }
+    printf("\n");
+    return OBC_ERR_CODE_SUCCESS;
 }
