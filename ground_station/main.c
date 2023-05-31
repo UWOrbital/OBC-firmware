@@ -9,12 +9,17 @@
 #include "ax25.h"
 #include "fec.h"
 #include "aes128.h"
+#include "aes.h"
 
-#include <windows.h>
+#include "win_uart.h"
 
+#define COM_PORT_NAME_PREFIX "\\\\.\\COM"
 #define ARGUMENTS_PER_COMMAND 3
 
-#define COM_PORT_NAME "\\\\.\\COM5"
+static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03,
+                                                      0x04, 0x05, 0x06, 0x07,
+                                                      0x08, 0x09, 0x0A, 0x0B,
+                                                      0x0C, 0x0D, 0x0E, 0x0F};
 
 int main(int argc, char *argv[]) {
     obc_error_code_t errCode;
@@ -42,22 +47,22 @@ int main(int argc, char *argv[]) {
     COMMTIMEOUTS timeouts = {0};
          
     // Open the serial port
-    fprintf(stderr, "Opening serial port...");
+    printf("Opening serial port...");
     hSerial = CreateFile(
-                COM_PORT_NAME, GENERIC_READ|GENERIC_WRITE, 0, NULL,
+                comPortName, GENERIC_READ|GENERIC_WRITE, 0, NULL,
                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
     
     if (hSerial == INVALID_HANDLE_VALUE) {
-            fprintf(stderr, "Error\n");
+            printf("Error\n");
             return 1;
     } else {
-        fprintf(stderr, "OK\n");
+        printf("OK\n");
     }
 
     // Set device parameters
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
     if (GetCommState(hSerial, &dcbSerialParams) == 0) {
-        fprintf(stderr, "Error getting device state\n");
+        printf("Error getting device state\n");
         CloseHandle(hSerial);
         return 1;
     }
@@ -67,19 +72,19 @@ int main(int argc, char *argv[]) {
     dcbSerialParams.StopBits = TWOSTOPBITS;
     dcbSerialParams.Parity = NOPARITY;
     if (SetCommState(hSerial, &dcbSerialParams) == 0) {
-        fprintf(stderr, "Error setting device parameters\n");
+        printf("Error setting device parameters\n");
         CloseHandle(hSerial);
         return 1;
     }
  
     // Set COM port timeout settings
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
+    timeouts.ReadIntervalTimeout = 500;
+    timeouts.ReadTotalTimeoutConstant = 500;
     timeouts.ReadTotalTimeoutMultiplier = 10;
     timeouts.WriteTotalTimeoutConstant = 50;
     timeouts.WriteTotalTimeoutMultiplier = 10;
     if (SetCommTimeouts(hSerial, &timeouts) == 0) {
-        fprintf(stderr, "Error setting timeouts\n");
+        printf("Error setting timeouts\n");
         CloseHandle(hSerial);
         return 1;
     }
@@ -97,9 +102,36 @@ int main(int argc, char *argv[]) {
     packed_rs_packet_t fecPkt; // Holds a 255B RS packet
     packed_ax25_packet_t ax25Pkt; // Holds an AX.25 packet
 
-    for(uint32_t i = 0; i < (argc - 1)/ARGUMENTS_PER_COMMAND; ++i){
-        /* do stuff to get the cmdMsg */
-        printf("Sending telemetry: %u", cmdMsg.id);
+    struct AES_ctx ctx;
+
+    AES_init_ctx(&ctx, TEMP_STATIC_KEY);
+
+    uint8_t iv[AES_IV_SIZE];
+
+    memset(iv, 1, AES_IV_SIZE);
+    
+    AES_ctx_set_iv(&ctx, iv);
+
+    correct_reed_solomon* rs;
+
+    rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
+
+    for(uint32_t i = 0; i < (argc - 2)/ARGUMENTS_PER_COMMAND; ++i){
+        unsigned long int id = strtoul(argv[ARGUMENTS_PER_COMMAND*i + 2], NULL, 10);
+        if(id > 255){
+            printf("invalid ID: %lu\n", id);
+            return 1;
+        }
+        cmdMsg.id = (uint8_t) id;
+        printf("command id is %lu\n", id);
+        if (strcmp(argv[ARGUMENTS_PER_COMMAND*i + 3], "0") == 0) {
+            cmdMsg.isTimeTagged = false;
+        } else if (strcmp(argv[ARGUMENTS_PER_COMMAND*i + 3], "1") == 0) {
+            cmdMsg.isTimeTagged = true;
+        } else {
+            printf("invalid isTimeTagged value: %s\n", argv[ARGUMENTS_PER_COMMAND*i + 3]);
+        }
+        cmdMsg.timestamp = (uint32_t) strtoul(argv[ARGUMENTS_PER_COMMAND*i + 4], NULL, 10);
 
         uint8_t packedSingleCmdSize = 0; // Size of the packed single telemetry
         // Pack the single telemetry into a uint8_t array
@@ -110,30 +142,34 @@ int main(int argc, char *argv[]) {
         
         // If the single telemetry is too large to continue adding to the packet, send the packet
         if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE-AES_IV_SIZE) {
-            /* TODO: implement AES128 encryption */
+            // encrypt
+            AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
+
             // Apply Reed Solomon FEC
-            RETURN_IF_ERROR_CODE(rsEncode(&cmdPacket, &fecPkt));
+            if((uint8_t) correct_reed_solomon_encode(rs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
+                return 1;
+            }
 
             // Perform AX.25 framing
             RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
 
             // transmit the ax25 packet
             printf("Packet: ");
-            for (int i = 0; i < cmdPacketOffset; i++) {
-                printf("%02x ", cmdPacket.data[i]);
+            for (int i = 0; i < AX25_MAXIMUM_PKT_LEN; i++) {
+                printf("%x ", cmdPacket.data[i]);
             }
             printf("\n");
 
             // Send packet
             long unsigned int bytesWritten = 0;
 
-            fprintf(stderr, "Sending bytes...");
+            printf("Sending bytes...");
             if (!WriteFile(hSerial, cmdPacket.data, cmdPacketOffset, &bytesWritten, NULL)) {
-                fprintf(stderr, "Error\n");
+                printf("Error\n");
                 CloseHandle(hSerial);
                 return 1;
             }   
-            fprintf(stderr, "%lu bytes written\n", bytesWritten);
+            printf("%lu bytes written\n", bytesWritten);
             // Reset the packedTelem struct and offset
             cmdPacket = (packed_telem_packet_t){0};
             cmdPacketOffset = 0;
@@ -143,32 +179,34 @@ int main(int argc, char *argv[]) {
         memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
         cmdPacketOffset += packedSingleCmdSize;
     }
-    
+    printf("We made it\n");
     // if there are any bytes left, send them
     if(cmdPacketOffset != 0){
         // Apply Reed Solomon FEC
-        RETURN_IF_ERROR_CODE(rsEncode(&cmdPacket, &fecPkt));
-
+        if((uint8_t) correct_reed_solomon_encode(rs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
+            return 1;
+        };
+        printf("we survived rs encryption!\n");
         // Perform AX.25 framing
         RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
 
         // transmit the ax25 packet
         printf("Packet: ");
-        for (int i = 0; i < cmdPacketOffset; i++) {
-            printf("%02x ", cmdPacket.data[i]);
+        for (int i = 0; i < ax25Pkt.length; i++) {
+            printf("%x ", ax25Pkt.data[i]);
         }
         printf("\n");
 
         // Send packet
         long unsigned int bytesWritten = 0;
 
-        fprintf(stderr, "Sending bytes...");
-        if (!WriteFile(hSerial, cmdPacket.data, cmdPacketOffset, &bytesWritten, NULL)) {
-            fprintf(stderr, "Error\n");
+        printf("Sending bytes...");
+        if (!WriteFile(hSerial, cmdPacket.data, ax25Pkt.length, &bytesWritten, NULL)) {
+            printf("Error\n");
             CloseHandle(hSerial);
             return 1;
         }   
-        fprintf(stderr, "%lu bytes written\n", bytesWritten);
+        printf("%lu bytes written\n", bytesWritten);
     }
    unsigned char rxChar = '\0';
     while (1) {
@@ -179,12 +217,12 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
     // Close serial port
-    fprintf(stderr, "Closing serial port...");
+    printf("Closing serial port...");
     if (CloseHandle(hSerial) == 0) {
-        fprintf(stderr, "Error\n");
+        printf("Error\n");
         return 1;
     }
-    fprintf(stderr, "OK\n");
+    printf("OK\n");
 
     // switch to receive 
 

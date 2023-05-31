@@ -3,7 +3,7 @@
 
 #include "aes.h"
 #include <stdint.h>
-#include <sys_common.h>
+#include <string.h>
 
 // Store the AES context
 static struct AES_ctx ctx;

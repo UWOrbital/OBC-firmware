@@ -8,9 +8,10 @@
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
 
-ax25_addr_t cubesatCallsign = { .data = {0xFF}, .length = AX25_DEST_ADDR_BYTES}; // mock cubesat address
+ax25_addr_t cubesatCallsign = { .data = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}, \
+                                .length = AX25_DEST_ADDR_BYTES}; // mock cubesat address
 
-ax25_addr_t groundStationCallsign = {.data = {1}, .length = AX25_DEST_ADDR_BYTES}; // Mock Ground station address
+ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES}; // Mock Ground station address
 
 /**
  * @brief performs bit unstuffing on a receive ax.25 packet
