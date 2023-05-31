@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
     }
  
     // Set COM port timeout settings
-    timeouts.ReadIntervalTimeout = 500;
-    timeouts.ReadTotalTimeoutConstant = 500;
-    timeouts.ReadTotalTimeoutMultiplier = 10;
+    timeouts.ReadIntervalTimeout = 1000;
+    timeouts.ReadTotalTimeoutConstant = 5000;
+    timeouts.ReadTotalTimeoutMultiplier = 100;
     timeouts.WriteTotalTimeoutConstant = 50;
     timeouts.WriteTotalTimeoutMultiplier = 10;
     if (SetCommTimeouts(hSerial, &timeouts) == 0) {
