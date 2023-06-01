@@ -23,12 +23,19 @@ obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
 }
 
 obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd) {
+    obc_error_code_t errCode;
+
     if (cmd == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
-    
-    // TODO: Implement handling for this command
-    LOG_DEBUG("Executing RTC sync command - time %lu", cmd->rtcSync.unixTime);
+
+    rtc_date_time_t dt;
+    RETURN_IF_ERROR_CODE(unixToDatetime(cmd->rtcSync.unixTime, &dt));
+
+    RETURN_IF_ERROR_CODE(setCurrentDateTimeRTC(&dt));
+
+    RETURN_IF_ERROR_CODE(syncUnixTime());
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -52,6 +59,7 @@ obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
         LOG_DEBUG("Executing microSD format error code %u", OBC_ERR_CODE_FS_FORMAT_FAILED);
         return OBC_ERR_CODE_FS_FORMAT_FAILED;
     }
+    
     return OBC_ERR_CODE_SUCCESS;
 }
 
