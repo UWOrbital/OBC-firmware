@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
         long unsigned int bytesWritten = 0;
 
         printf("Sending bytes...");
-        if (!WriteFile(hSerial, cmdPacket.data, ax25Pkt.length, &bytesWritten, NULL)) {
+        if (!WriteFile(hSerial, ax25Pkt.data, ax25Pkt.length, &bytesWritten, NULL)) {
             printf("Error\n");
             CloseHandle(hSerial);
             return 1;
