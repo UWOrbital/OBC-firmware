@@ -9,8 +9,6 @@
 #define OBC_ACTIVE_POLICY CMD_POLICY_RND
 #endif
 
-#define MAX_CMD_SIZE 44U
-
 // Policy is defined by a mask of the following flags
 typedef enum {
     CMD_POLICY_RND      = 0x1, // R&D policy
