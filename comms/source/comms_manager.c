@@ -93,7 +93,7 @@ static void vCommsManagerTask(void * pvParameters) {
         
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY_FILE:
-                // LOG_IF_ERROR_CODE(sendToDownlinkQueue(queueMsg));
+                LOG_IF_ERROR_CODE(sendToDownlinkQueue(&queueMsg));
                 break;
             case DOWNLINK_DATA_BUFFER:
                 LOG_IF_ERROR_CODE(sendToDownlinkQueue(&queueMsg));

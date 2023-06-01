@@ -102,4 +102,6 @@ void initTelemetry(void);
  */
 obc_error_code_t addTelemetryData(telemetry_data_t *data);
 
+obc_error_code_t setTelemetryManagerDownlinkReady(void);
+
 #endif /* CDH_INCLUDE_TELEMETRY_H_ */

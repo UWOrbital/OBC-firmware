@@ -23,4 +23,7 @@ void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmd
 // CMD_PING
 void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
+// CMD_DOWNLINK_TELEM
+void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
 #endif // CDH_INCLUDE_COMMAND_UNPACK_H_
