@@ -31,7 +31,7 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t *offset, cmd_msg_t
     uint8_t id = unpackUint8(buffer, offset);
 
     // MSB is 0 if the command is time tagged    
-    bool isTimeTagged = (id & 0x80) ? false : true;
+    bool isTimeTagged = (id & 0x80);
 
     // Mask out the MSB
     id = id & 0x7F;

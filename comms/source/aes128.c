@@ -3,7 +3,7 @@
 
 #include "aes.h"
 #include <stdint.h>
-#include <sys_common.h>
+#include <string.h>
 
 // Store the AES context
 static struct AES_ctx ctx;
@@ -28,7 +28,7 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes){
     memcpy(cmdBytes, aesData->aesStruct.ciphertext, RS_DECODED_SIZE-AES_IV_SIZE);
     AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
     AES_CTR_xcrypt_buffer(&ctx, cmdBytes, RS_DECODED_SIZE-AES_IV_SIZE);
-
+    memcpy(cmdBytes, cmdBytes+5, RS_DECODED_SIZE-AES_IV_SIZE-5);
     return OBC_ERR_CODE_SUCCESS;
 }
 
