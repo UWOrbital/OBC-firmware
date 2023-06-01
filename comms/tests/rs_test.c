@@ -21,7 +21,7 @@ void testRs(void) {
     LOG_DEBUG("Corrupted data: %s\r\n", rsData.data);
 
     uint8_t decodedData[RS_DECODED_SIZE] = {0};
-    rsDecode(&rsData, decodedData, (uint8_t) RS_ENCODED_SIZE);
+    rsDecode(&rsData, decodedData);
     LOG_DEBUG("Decoded data: %s\r\n", decodedData);
 
     destroyRs();
