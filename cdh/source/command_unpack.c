@@ -16,6 +16,7 @@ static const unpack_func_t unpackFns[] = {
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = unpackDownlinkLogsNextPassCmdData,
     [CMD_MICRO_SD_FORMAT] = unpackMicroSdFormat,
     [CMD_PING] = unpackPingCmdData,
+    [CMD_DOWNLINK_TELEM] = unpackDownlinkTelemCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -74,5 +75,9 @@ void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmd
 }
 
 void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+    // No data to unpack
+}
+
+void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
     // No data to unpack
 }

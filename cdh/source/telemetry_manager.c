@@ -48,6 +48,9 @@ static QueueHandle_t telemetryDataQueueHandle = NULL;
 static StaticQueue_t telemetryDataQueue;
 static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH*TELEMETRY_DATA_QUEUE_ITEM_SIZE];
 
+static SemaphoreHandle_t downlinkReady = NULL;
+static StaticSemaphore_t downlinkReadyBuffer;
+
 void initTelemetry(void) {
     memset(&telemetryTaskBuffer, 0, sizeof(telemetryTaskBuffer));
     memset(&telemetryTaskStack, 0, sizeof(telemetryTaskStack));
@@ -60,6 +63,9 @@ void initTelemetry(void) {
 
     ASSERT( (telemetryDataQueueStack != NULL) && (&telemetryDataQueue != NULL) );
     telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE, telemetryDataQueueStack, &telemetryDataQueue);
+
+    ASSERT(&downlinkReadyBuffer != NULL);
+    downlinkReady = xSemaphoreCreateBinaryStatic(&downlinkReadyBuffer);
 }
 
 static void telemetryManager(void * pvParameters) {
@@ -83,7 +89,6 @@ static void telemetryManager(void * pvParameters) {
         }
 
         // Check if we need to downlink telemetry
-        // TODO: This is a mock implementation. We need to implement a proper alarm system
         if (!checkDownlinkAlarm()) {
             continue;
         }
@@ -132,13 +137,13 @@ obc_error_code_t addTelemetryData(telemetry_data_t *data) {
 }
 
 static bool checkDownlinkAlarm(void) {
-    // TODO: Check if it's time to downlink telemetry data. This is currently a mock implementation
-    static uint32_t downlinkCounter = 0;
-    downlinkCounter++;
+    return xSemaphoreTake(downlinkReady, 0) == pdPASS;
+}
 
-    if (downlinkCounter % 10 != 0) {
-        return false;
+obc_error_code_t setTelemetryManagerDownlinkReady(void) {
+    if (xSemaphoreGive(downlinkReady) != pdPASS) {
+        return OBC_ERR_CODE_SEMAPHORE_FULL;
     }
 
-    return true;
+    return OBC_ERR_CODE_SUCCESS;
 }

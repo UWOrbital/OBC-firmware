@@ -5,6 +5,7 @@
 #include "obc_logging.h"
 #include "obc_time.h"
 #include "comms_manager.h"
+#include "telemetry_manager.h"
 
 #include <redposix.h>
 #include <stddef.h>
@@ -59,7 +60,7 @@ obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
         LOG_DEBUG("Executing microSD format error code %u", OBC_ERR_CODE_FS_FORMAT_FAILED);
         return OBC_ERR_CODE_FS_FORMAT_FAILED;
     }
-    
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -76,5 +77,13 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
 
     RETURN_IF_ERROR_CODE(sendToCommsQueue(&queueMsg));
     
+    return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
+    obc_error_code_t errCode;
+
+    RETURN_IF_ERROR_CODE(setTelemetryManagerDownlinkReady());
+
     return OBC_ERR_CODE_SUCCESS;
 }

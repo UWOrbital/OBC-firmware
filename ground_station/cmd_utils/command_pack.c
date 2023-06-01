@@ -16,6 +16,7 @@ static const pack_func_t packFns[] = {
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = packDownlinkLogsNextPassCmdData,
     [CMD_MICRO_SD_FORMAT] = packMicroSdFormat,
     [CMD_PING] = packPingCmdData,
+    [CMD_DOWNLINK_TELEM] = packDownlinkTelemCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -67,5 +68,10 @@ void packMicroSdFormat(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg)
 
 // CMD_PING
 void packPingCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
+    // No data to pack
+}
+
+// CMD_DOWNLINK_TELEM
+void packDownlinkTelemCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* msg) {
     // No data to pack
 }
