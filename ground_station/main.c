@@ -141,6 +141,10 @@ int main(int argc, char *argv[]) {
                              &cmdPacketOffset,
                              &cmdMsg,
                              &packedSingleCmdSize));
+        for (int i = 0; i < packedSingleCmdSize; i++) {
+            printf("%02x ", packedSingleCmd[i]);
+        }
+        printf("\n");
         
         // If the single telemetry is too large to continue adding to the packet, send the packet
         if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE-AES_IV_SIZE) {
@@ -184,8 +188,13 @@ int main(int argc, char *argv[]) {
     printf("We made it\n");
     // if there are any bytes left, send them
     if(cmdPacketOffset != 0){
+        // encrypt
+        AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
+        uint8_t data[RS_DECODED_SIZE];
+        memcpy(data, iv, AES_IV_SIZE);
+        memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
         // Apply Reed Solomon FEC
-        if((uint8_t) correct_reed_solomon_encode(rsGs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
+        if((uint8_t) correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
             return 1;
         };
         printf("we survived rs encryption!\n");
