@@ -87,19 +87,3 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
 
     return OBC_ERR_CODE_SUCCESS;
 }
-
-obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
-    obc_error_code_t errCode;
-
-    if (cmd == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
-    
-    comms_event_t queueMsg;
-    queueMsg.eventID = DOWNLINK_DATA_BUFFER;
-    queueMsg.telemetryDataBuffer.telemData[0] = (telemetry_data_t) {.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
-
-    RETURN_IF_ERROR_CODE(sendToCommsQueue(&queueMsg));
-    
-    return OBC_ERR_CODE_SUCCESS;
-}
