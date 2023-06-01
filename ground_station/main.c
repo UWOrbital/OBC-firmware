@@ -25,7 +25,7 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03,
 static struct AES_ctx ctx;
 static correct_reed_solomon* rsGs = NULL;
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData);
 
 int main(int argc, char *argv[]) {
     obc_error_code_t errCode;
@@ -141,40 +141,19 @@ int main(int argc, char *argv[]) {
                              &cmdPacketOffset,
                              &cmdMsg,
                              &packedSingleCmdSize));
-        for (int i = 0; i < packedSingleCmdSize; i++) {
-            printf("%02x ", packedSingleCmd[i]);
-        }
-        printf("\n");
         
         // If the single telemetry is too large to continue adding to the packet, send the packet
         if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE-AES_IV_SIZE) {
             // encrypt
             AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
-            printf("Encrypted: ");
-            for (int i = 0; i < RS_DECODED_SIZE-AES_IV_SIZE; i++) {
-                printf("%02x ", cmdPacket.data[i]);
-            }
-            printf("\n");
 
             // Apply Reed Solomon FEC
             if((uint8_t) correct_reed_solomon_encode(rsGs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
                 return 1;
             }
-            printf("FEC: ");
-            for (int i = 0; i < RS_ENCODED_SIZE; i++) {
-                printf("%02x ", fecPkt.data[i]);
-            }
-            printf("\n");
 
             // Perform AX.25 framing
             RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
-
-            // transmit the ax25 packet
-            printf("Packet: ");
-            for (int i = 0; i < AX25_MAXIMUM_PKT_LEN; i++) {
-                printf("%x ", cmdPacket.data[i]);
-            }
-            printf("\n");
 
             // Send packet
             long unsigned int bytesWritten = 0;
@@ -195,7 +174,6 @@ int main(int argc, char *argv[]) {
         memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
         cmdPacketOffset += packedSingleCmdSize;
     }
-    printf("We made it\n");
     // if there are any bytes left, send them
     if(cmdPacketOffset != 0){
         // encrypt
@@ -203,29 +181,12 @@ int main(int argc, char *argv[]) {
         uint8_t data[RS_DECODED_SIZE];
         memcpy(data, iv, AES_IV_SIZE);
         memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
-        printf("Encrypted: ");
-        for (int i = 0; i < RS_DECODED_SIZE; i++) {
-            printf("%02x ", data[i]);
-        }
-        printf("\n");
         // Apply Reed Solomon FEC
         if((uint8_t) correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
             return 1;
         };
-        printf("FEC: ");
-        for (int i = 0; i < RS_ENCODED_SIZE; i++) {
-            printf("%02x ", fecPkt.data[i]);
-        }
-        printf("\n");
         // Perform AX.25 framing
         RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
-
-        // transmit the ax25 packet
-        printf("Packet: ");
-        for (int i = 0; i < ax25Pkt.length; i++) {
-            printf("%x ", ax25Pkt.data[i]);
-        }
-        printf("\n");
 
         // Send packet
         long unsigned int bytesWritten = 0;
@@ -248,7 +209,6 @@ int main(int argc, char *argv[]) {
         if (readSerialPort(hSerial, &byte, 1) == 0) {
             break;
         }
-        printf("%x ", byte);
         if (axDataIndex >= sizeof(axData.data)) {
             LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
 
@@ -268,8 +228,7 @@ int main(int argc, char *argv[]) {
                 axData.length = axDataIndex;
                     
                 packed_rs_packet_t rsData = {0};
-                aes_data_t aesData = {0};
-                LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+                LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData));
                     
                 // Restart the decoding process
                 memset(&axData, 0, sizeof(axData));
@@ -287,7 +246,6 @@ int main(int argc, char *argv[]) {
             axData.data[axDataIndex++] = byte;
         }
     }
-    printf("\n");
     // Close serial port
     printf("Closing serial port...");
     if (CloseHandle(hSerial) == 0) {
@@ -299,22 +257,19 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
     obc_error_code_t errCode;
     
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &groundStationCallsign));
-    uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, aesData->rawData);
+    uint8_t decodedData[RS_DECODED_SIZE];
+    uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
     
     if(decodedLength == -1)
         return OBC_ERR_CODE_CORRUPTED_MSG;
-
-    uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE] = {0};
-    memcpy(decryptedData, aesData->aesStruct.ciphertext, RS_DECODED_SIZE-AES_IV_SIZE);
-    AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
-    AES_CTR_xcrypt_buffer(&ctx, decryptedData, RS_DECODED_SIZE-AES_IV_SIZE);
     
-    for(uint8_t i = 0; i < RS_DECODED_SIZE-AES_IV_SIZE; ++i){
-        printf("%x ", decryptedData[i]);
+    printf("Decoded data: ");
+    for(uint8_t i = 0; i < decodedLength; ++i){
+        printf("%x ", decodedData[i]);
     }
     printf("\n");
     return OBC_ERR_CODE_SUCCESS;
