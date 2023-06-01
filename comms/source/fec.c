@@ -4,7 +4,6 @@
 #include "aes128.h"
 
 #include <stdint.h>
-#include <sys_common.h>
 
 correct_reed_solomon* rs = NULL;
 

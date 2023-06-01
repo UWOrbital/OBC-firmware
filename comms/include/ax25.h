@@ -52,25 +52,30 @@ typedef struct {
     uint8_t length;
 } ax25_addr_t;
 
+extern ax25_addr_t cubesatCallsign;
+extern ax25_addr_t groundStationCallsign;
+
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in ax25Data->length
  * 
  * @param rsData reed solomon data that needs ax.25 headers added onto it
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
+ * @param srcAddress address of the sender of the ax25 packet
  * 
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
 */
-obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t* destAddress);
+obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress, ax25_addr_t *srcAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
  * 
  * @param ax25Data the received ax.25 frame
  * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
- *
+ * @param recvAddress address of the receiver of the ax.25 packet
+ * 
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
 */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData);
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData, ax25_addr_t *recvAddress);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */

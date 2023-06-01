@@ -15,6 +15,7 @@ INCS += -I"cdh/include"
 INCS += -I"common/include"
 INCS += -I"tiny_aes"
 INCS += -I"libcorrect/include"
+INCS += -I"comms/include"
 
 # Ground station specific source files
 SRCS := ground_station/main.c
@@ -26,6 +27,9 @@ SRCS += ground_station/serial_utils/win_uart.c
 # Source files shared with OBC firmware
 SRCS += common/source/obc_pack_utils.c
 SRCS += common/source/obc_unpack_utils.c
+SRCS += comms/source/ax25.c
+SRCS += comms/source/fec.c
+SRCS += comms/source/aes128.c
 
 SRCS += tiny_aes/aes.c
 

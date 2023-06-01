@@ -344,7 +344,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
     RETURN_IF_ERROR_CODE(rsEncode(telemPacket, &fecPkt));
 
     // Perform AX.25 framing
-    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationAddr));
+    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationAddr, &cubesatCallsign));
 
     // Send into CC1120 transmit queue
     RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));

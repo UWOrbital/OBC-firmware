@@ -67,7 +67,7 @@ static void vRecvTask(void * pvParameters){
             continue;
         }
         switch (queueMsg.eventID) {
-            case BEGIN_UPLINK:
+            case BEGIN_UPLINK:          
                 #if COMMS_PHY == COMMS_PHY_UART
                 uint8_t rxByte;
 

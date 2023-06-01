@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cmdMsg);
+obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cmdMsg, uint8_t *numPacked);
 
 /* Pack functions for each command */
 
