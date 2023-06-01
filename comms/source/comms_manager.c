@@ -65,6 +65,9 @@ void initCommsManager(void) {
     
     initRecvTask();
     initDecodeTask();
+
+    initTelemEncodeTask();
+    initCC1120TransmitTask();
 }
 
 obc_error_code_t sendToCommsQueue(comms_event_t *event) {
