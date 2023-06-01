@@ -44,5 +44,6 @@ void packEpsObc3v3Voltage(telemetry_data_t *data, uint8_t *buffer, size_t *offse
 void packObcState(telemetry_data_t *data, uint8_t *buffer, size_t *offset);
 void packEpsState(telemetry_data_t *data, uint8_t *buffer, size_t *offset);
 void packNumCspPacketsRcvd(telemetry_data_t *data, uint8_t *buffer, size_t *offset);
+void packPong(telemetry_data_t *data, uint8_t *buffer, size_t *offset);
 
 #endif /* CDH_INCLUDE_TELEMETRY_PACK_H_ */
