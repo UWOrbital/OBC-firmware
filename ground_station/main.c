@@ -150,11 +150,21 @@ int main(int argc, char *argv[]) {
         if (cmdPacketOffset + packedSingleCmdSize > RS_DECODED_SIZE-AES_IV_SIZE) {
             // encrypt
             AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
+            printf("Encrypted: ");
+            for (int i = 0; i < RS_DECODED_SIZE-AES_IV_SIZE; i++) {
+                printf("%02x ", cmdPacket.data[i]);
+            }
+            printf("\n");
 
             // Apply Reed Solomon FEC
             if((uint8_t) correct_reed_solomon_encode(rsGs, cmdPacket.data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
                 return 1;
             }
+            printf("FEC: ");
+            for (int i = 0; i < RS_ENCODED_SIZE; i++) {
+                printf("%02x ", fecPkt.data[i]);
+            }
+            printf("\n");
 
             // Perform AX.25 framing
             RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
@@ -193,11 +203,20 @@ int main(int argc, char *argv[]) {
         uint8_t data[RS_DECODED_SIZE];
         memcpy(data, iv, AES_IV_SIZE);
         memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
+        printf("Encrypted: ");
+        for (int i = 0; i < RS_DECODED_SIZE; i++) {
+            printf("%02x ", data[i]);
+        }
+        printf("\n");
         // Apply Reed Solomon FEC
         if((uint8_t) correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
             return 1;
         };
-        printf("we survived rs encryption!\n");
+        printf("FEC: ");
+        for (int i = 0; i < RS_ENCODED_SIZE; i++) {
+            printf("%02x ", fecPkt.data[i]);
+        }
+        printf("\n");
         // Perform AX.25 framing
         RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
 
