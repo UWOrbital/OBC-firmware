@@ -323,7 +323,7 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
 
     // Copy the telemetry data into the packedTelem struct
     memcpy(telemPacket->data + (*telemPacketOffset), packedSingleTelem, packedSingleTelemSize);
-    telemPacketOffset += packedSingleTelemSize;
+    *telemPacketOffset += packedSingleTelemSize;
 
     return OBC_ERR_CODE_SUCCESS;
 }
