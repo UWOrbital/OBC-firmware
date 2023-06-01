@@ -96,10 +96,10 @@ int main(int argc, char *argv[]) {
     }
 
     /* Construct packet */
-    cmd_msg_t cmdMsg;
+    cmd_msg_t cmdMsg = {0};
 
     // Initialize important variables related to packing and queueing the telemetry to be sent
-    uint8_t packedSingleCmd[MAX_CMD_SIZE]; // Holds a serialized version of the current command
+    uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE]; // Holds a serialized version of the current command
 
     packed_telem_packet_t cmdPacket = {0}; // Holds 223B of "raw" command data.
                                              // Zero initialized because commands of 0 are ignored 
