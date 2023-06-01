@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
     obc_error_code_t errCode;
 
     // Grab com port from cmd line args
-    if (argc < 2) {
-        printf("Usage: %s <com port>\n", argv[0]);
+    if (argc < 5) {
+        printf("Usage: %s <com port> <CMD1 id> <CMD1 isTimeTagged> <CMD1 timetag> <CMD2 id> <CMD2 isTimeTagged> <CMD2 timetag> ...\n", argv[0]);
         return 1;
     }
     
@@ -96,10 +96,10 @@ int main(int argc, char *argv[]) {
     }
 
     /* Construct packet */
-    cmd_msg_t cmdMsg;
+    cmd_msg_t cmdMsg = {0};
 
     // Initialize important variables related to packing and queueing the telemetry to be sent
-    uint8_t packedSingleCmd[MAX_CMD_SIZE]; // Holds a serialized version of the current command
+    uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE]; // Holds a serialized version of the current command
 
     packed_telem_packet_t cmdPacket = {0}; // Holds 223B of "raw" command data.
                                              // Zero initialized because commands of 0 are ignored 

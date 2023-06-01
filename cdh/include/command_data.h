@@ -37,4 +37,6 @@ typedef struct {
     uint8_t id; // Command ID
 } cmd_msg_t;
 
+#define MAX_CMD_MSG_SIZE sizeof(cmd_msg_t)
+
 #endif // CDH_INCLUDE_COMMAND_DATA_H_
