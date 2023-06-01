@@ -4,11 +4,15 @@
 #include <stdint.h>
 
 int openSerialPort(HANDLE *hSerial, char *portName) {
-    hSerial = CreateFile(
+    if (hSerial == NULL || portName == NULL) {
+        return -1;
+    }
+
+    *hSerial = CreateFile(
                 portName, GENERIC_READ | GENERIC_WRITE, 0, NULL,
                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     
-    if (hSerial == INVALID_HANDLE_VALUE) {
+    if (*hSerial == INVALID_HANDLE_VALUE) {
         return -1;
     } 
 
