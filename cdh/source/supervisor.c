@@ -1,11 +1,23 @@
 #include "supervisor.h"
-#include "telemetry.h"
+#include "timekeeper.h"
+#include "telemetry_manager.h"
 #include "adcs_manager.h"
+#include "command_manager.h"
 #include "comms_manager.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
+#include "alarm_handler.h"
+#include "health_collector.h"
+#include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_states.h"
+#include "obc_task_config.h"
+#include "obc_reset.h"
+#include "obc_fs_utils.h"
+#include "lm75bd.h"
+#include "obc_board_config.h"
+#include "cc1120_recv_task.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -14,6 +26,13 @@
 
 #include <sys_common.h>
 #include <gio.h>
+#include <redposix.h>
+
+/* Supervisor queue config */
+#define SUPERVISOR_QUEUE_LENGTH 10U
+#define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_t)
+#define SUPERVISOR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define SUPERVISOR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
@@ -59,47 +78,75 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 }
 
 static void sendStartupMessages(void) {
-    /* Send startup message to telemetry task as example */
-    telemetry_event_t newMsg;
-    newMsg.eventID = TURN_ON_LED_EVENT_ID;
-    newMsg.data.i = TELEMETRY_DELAY_TICKS;
-    sendToTelemetryQueue(&newMsg);
-
-    /* TODO: Add startup messages to other tasks */
+    #if CSDC_DEMO_ENABLED == 1
+    obc_error_code_t errCode;
+    LOG_IF_ERROR_CODE(startUplink());
+    #endif
 }
 
 static void vSupervisorTask(void * pvParameters) {
+    obc_error_code_t errCode;
+
     ASSERT(supervisorQueueHandle != NULL);
 
+    /* Initialize critical peripherals */
+    LOG_IF_ERROR_CODE(setupFileSystem()); // microSD card
+    LOG_IF_ERROR_CODE(initTime()); // RTC
+
+    lm75bd_config_t config = {
+        .devAddr = LM75BD_OBC_I2C_ADDR,
+        .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
+        .osFaultQueueSize = 2,
+        .osPolarity = LM75BD_OS_POL_ACTIVE_LOW,
+        .osOperationMode = LM75BD_OS_OP_MODE_COMP,
+        .overTempThresholdCelsius = 125.0f,
+        .hysteresisThresholdCelsius = 75.0f,
+    };
+
+    LOG_IF_ERROR_CODE(lm75bdInit(&config)); // LM75BD temperature sensor (OBC)
+
     /* Initialize other tasks */
+    // Don't start running any tasks until all tasks are initialized
+    taskENTER_CRITICAL();
+    
+    initTimekeeper();
+    initAlarmHandler();
+
     initTelemetry();
+    initCommandManager();
     initADCSManager();
     initCommsManager();
     initEPSManager();
     initPayloadManager();
+    initHealthCollector();
+    
+    taskEXIT_CRITICAL();
+
+    initSwWatchdog();
+
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
 
     /* Send initial messages to system queues */
     sendStartupMessages();    
+
+    // TODO: Deal with errors
+    LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
     
     while(1) {
         supervisor_event_t inMsg;
-        telemetry_event_t outMsgTelemetry;
-
-        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS)
-            inMsg.eventID = SUPERVISOR_NULL_EVENT_ID;
+        
+        if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+            #if defined(DEBUG) && !defined(OBC_REVISION_2)
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            gioToggleBit(SUPERVISOR_DEBUG_LED_GIO_PORT, SUPERVISOR_DEBUG_LED_GIO_BIT);
+            #endif
+            continue;
+        }
 
         switch (inMsg.eventID) {
-            case TURN_OFF_LED_EVENT_ID:
-                gioSetBit(gioPORTB, 1, 0);
-                LOG_INFO("Turning off LED");
-                outMsgTelemetry.eventID = TURN_ON_LED_EVENT_ID;
-                outMsgTelemetry.data.i = TELEMETRY_DELAY_TICKS;
-                sendToTelemetryQueue(&outMsgTelemetry);
-                break;
-            case SUPERVISOR_NULL_EVENT_ID:
-                break;
             default:
-                ;
+                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         }
     }
 }
