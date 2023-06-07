@@ -5,8 +5,8 @@ target_include_directories(OBC-firmware.out PUBLIC
 )
 
 target_sources(OBC-firmware.out PUBLIC
-    source/arducam.c
-    source/camera_reg.c
-    source/ov5642_reg.c
-    source/payload_manager.c
+    source/reed-solomon/decode.c
+    source/reed-solomon/encode.c
+    source/reed-solomon/polynomial.c
+    source/reed-solomon/reed-solomon.c
 )

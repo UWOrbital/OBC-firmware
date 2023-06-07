@@ -5,6 +5,7 @@ target_include_directories(OBC-firmware.out PUBLIC
 )
 
 target_sources(OBC-firmware.out PUBLIC
+    source/can.c
     source/dabort.s
     source/errata_SSWF021_45.c
     source/esm.c
