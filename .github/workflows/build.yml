@@ -12,7 +12,12 @@ jobs:
     - name: Setup
       run: |
         sudo apt-get -y install build-essential cmake
-        
+    
+    - name: Create binary directory
+      run: |
+        mkdir build
+        cd build
+
     - name: Build (Release-Launchpad)
       run: |
         cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" BOARD_TYPE=RM46_LAUNCHPAD
