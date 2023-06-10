@@ -31,8 +31,15 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 #---------------------------------------------------------------------------------------
 # Set compiler/linker flags
 #---------------------------------------------------------------------------------------
-add_compile_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16 -Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa-cgraph -MMD -std=gnu99)
-add_link_options(-Wl,--gc-sections --specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T ${LINKER_SCRIPT})
+# ARM specific flags
+add_compile_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
+
+# Common flags
+add_compile_options(-Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa-cgraph -MMD -std=gnu99)
+
+# Linker flags
+add_link_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
+add_link_options(-specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT})
 
 #---------------------------------------------------------------------------------------
 # Set compilers
