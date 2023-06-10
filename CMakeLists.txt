@@ -44,10 +44,10 @@ if(NOT EXISTS ${TOOLCHAIN_DIR})
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Firmware)
-    project(OBC-firmware LANGUAGES C ASM)
-
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/source/sys_link.ld")
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
+
+    project(OBC-firmware LANGUAGES C ASM)
     
     set(PROJECT_EXTENSION out)
     set(EXECUTABLE_NAME ${PROJECT_NAME}.${PROJECT_EXTENSION})

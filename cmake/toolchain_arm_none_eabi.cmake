@@ -31,10 +31,18 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 #---------------------------------------------------------------------------------------
 # Set compiler/linker flags
 #---------------------------------------------------------------------------------------
-target_compile_options(OBC-firmware.out PRIVATE -mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
-target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf -Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa-cgraph -MMD -std=gnu99)
-target_compile_definitions(OBC-firmware.out PRIVATE DEBUG RM46_LAUNCHPAD LOG_DEFAULT_OUTPUT_LOCATION=LOG_TO_UART LOG_DEFAULT_LEVEL=LOG_TRACE)
-target_link_options(OBC-firmware.out PRIVATE -Wl,--gc-sections --specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T ${LINKER_SCRIPT})
+add_compile_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
+add_compile_options(-Og -g -gdwarf-3 -gstrict-dwarf -Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa-cgraph -MMD -std=gnu99)
+add_compile_definitions(DEBUG=1 RM46_LAUNCHPAD LOG_DEFAULT_OUTPUT_LOCATION=LOG_TO_UART LOG_DEFAULT_LEVEL=LOG_TRACE)
+add_link_options(-Wl,--gc-sections --specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T ${LINKER_SCRIPT})
+
+# set(OBJECT_GEN_FLAGS "-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16 -Og -g -gdwarf-3 -gstrict-dwarf -Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa-cgraph -MMD -DDEBUG=1 -DRM46_LAUNCHPAD -DLOG_DEFAULT_OUTPUT_LOCATION=LOG_TO_UART -DLOG_DEFAULT_LEVEL=LOG_TRACE")
+
+# set(CMAKE_C_FLAGS   "${OBJECT_GEN_FLAGS} -std=gnu99 " CACHE INTERNAL "C Compiler options")
+# set(CMAKE_CXX_FLAGS "${OBJECT_GEN_FLAGS} -std=c++11 " CACHE INTERNAL "C++ Compiler options")
+# set(CMAKE_ASM_FLAGS "${OBJECT_GEN_FLAGS} -x assembler-with-cpp " CACHE INTERNAL "ASM Compiler options")
+
+# set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections --specs=nano.specs --specs=nosys.specs -mthumb -mabi=aapcs -Wl,-Map=${CMAKE_PROJECT_NAME}.map" CACHE INTERNAL "Linker options")
 
 #---------------------------------------------------------------------------------------
 # Set compilers

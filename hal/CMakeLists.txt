@@ -10,6 +10,7 @@ target_sources(OBC-firmware.out PUBLIC
     source/errata_SSWF021_45.c
     source/esm.c
     source/gio.c
+    source/het.c
     source/i2c.c
     source/notification.c
     source/os_croutine.c
