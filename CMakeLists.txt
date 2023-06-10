@@ -43,6 +43,26 @@ if(NOT EXISTS ${TOOLCHAIN_DIR})
 
 endif()
 
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Firmware)
+endif()
+
+if (NOT DEFINED DEBUG)
+    set(DEBUG 1)
+endif()
+
+if (NOT DEFINED BOARD_TYPE)
+    set(BOARD_TYPE RM46_LAUNCHPAD)
+endif()
+
+if (NOT DEFINED LOG_DEFAULT_OUTPUT_LOCATION)
+    set(LOG_DEFAULT_OUTPUT_LOCATION LOG_TO_UART)
+endif()
+
+if (NOT DEFINED LOG_DEFAULT_LEVEL)
+    set(LOG_DEFAULT_LEVEL LOG_TRACE)
+endif()
+
 if(CMAKE_BUILD_TYPE MATCHES Firmware)
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/source/sys_link.ld")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
@@ -61,6 +81,29 @@ endif()
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
 if(CMAKE_BUILD_TYPE MATCHES Firmware)
+    if (DEBUG MATCHES 1)
+        message(STATUS "Debug build")
+        target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
+    else()
+        message(STATUS "Release build")
+        target_compile_options(OBC-firmware.out PRIVATE -O0)
+    endif()
+
+    if (BOARD_TYPE MATCHES RM46_LAUNCHPAD)
+        message(STATUS "Using RM46 Launchpad")
+        target_compile_definitions(OBC-firmware.out PRIVATE RM46_LAUNCHPAD)
+    elseif (BOARD_TYPE MATCHES OBC_REVISION_1)
+        message(STATUS "Using OBC Revision 1")
+        target_compile_definitions(OBC-firmware.out PRIVATE OBC_REVISION_1)
+    elseif (BOARD_TYPE MATCHES OBC_REVISION_2)
+        message(STATUS "Using OBC Revision 2")
+        target_compile_definitions(OBC-firmware.out PRIVATE OBC_REVISION_2)
+    else()
+        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
+    endif()
+
+    target_compile_definitions(OBC-firmware.out PRIVATE LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION} LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL} DEBUG=${DEBUG})
+
     include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
     add_subdirectory(adcs)
     add_subdirectory(cdh)
