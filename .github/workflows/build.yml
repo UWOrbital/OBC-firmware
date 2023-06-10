@@ -21,17 +21,20 @@ jobs:
     - name: Build (Release-Launchpad)
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" BOARD_TYPE=RM46_LAUNCHPAD
+        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD
+        make clean
         make
 
     - name: Build (Release-OBC Rev1)
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" BOARD_TYPE=OBC_REVISION_1
+        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1
+        make clean
         make
 
     - name: Build (Release-OBC Rev2)
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" BOARD_TYPE=OBC_REVISION_2
+        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2
+        make clean
         make
