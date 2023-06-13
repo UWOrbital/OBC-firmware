@@ -23,7 +23,7 @@ static void printPositionData(const position_data_t *data) {
 // For testing purposes only
 static void printPositionDataManager(const position_data_manager_t *manager){
     assert(manager);
-    for(int i=0; i<ADCS_POSITION_DATA_SIZE; i++) {
+    for(unsigned int i=0; i<ADCS_POSITION_DATA_SIZE; i++) {
         printPositionData(&(manager->data[i]));
     }
     printf("Read Index: %zu\n", manager->readIndex);
@@ -104,8 +104,8 @@ static int searchManagerLinear(const position_data_manager_t *manager, float jul
     assert(manager);
     assert(julianDate > ADCS_INVALID_JULIAN_DATE);
 
-    int writeIndex = manager->writeIndex;
-    int index = writeIndex;
+    size_t writeIndex = manager->writeIndex;
+    size_t index = writeIndex;
 
     while (1) {
         if (julianDate <= (manager->data[index]).julianDate) {
@@ -192,7 +192,7 @@ position_data_t getPositionData(const position_data_manager_t *manager, float ju
         return dataHigher;
     } else {
         position_data_t dataLower = getPositionDataByIndex(manager, index - 1 + ADCS_POSITION_DATA_SIZE);
-        position_data_t newData = {julianDate};
+        position_data_t newData = {julianDate, 0, 0, 0};
         newData.x = calculateValue(julianDate, dataLower.x, dataHigher.x, dataLower.julianDate, dataHigher.julianDate);
         newData.y = calculateValue(julianDate, dataLower.y, dataHigher.y, dataLower.julianDate, dataHigher.julianDate);
         newData.z = calculateValue(julianDate, dataLower.z, dataHigher.z, dataLower.julianDate, dataHigher.julianDate);
@@ -218,7 +218,7 @@ static position_data_t initPositionData(float julianDate, float x, float y, floa
 position_data_manager_t initPositionDataManager(void) {
     position_data_manager_t manager;
 
-    for(int i=0; i<ADCS_POSITION_DATA_SIZE; i++) {
+    for(unsigned int i=0; i<ADCS_POSITION_DATA_SIZE; i++) {
         manager.data[i] = initPositionData(ADCS_INVALID_JULIAN_DATE, 0, 0, 0);
     }
 
