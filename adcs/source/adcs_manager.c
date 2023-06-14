@@ -6,8 +6,8 @@
 #include <os_queue.h>
 #include <os_task.h>
 
-#include <sys_common.h>
-#include <gio.h>
+// #include <sys_common.h>
+// #include <gio.h>
 
 static TaskHandle_t adcsTaskHandle = NULL;
 static StaticTask_t adcsTaskBuffer;
@@ -18,16 +18,38 @@ static StaticQueue_t adcsQueue;
 static uint8_t adcsQueueStack[ADCS_MANAGER_QUEUE_LENGTH*ADCS_MANAGER_QUEUE_ITEM_SIZE];
 
 /*Boolean values related to the state of the program*/
-static uint16_t isDetumbling = 0;
-static uint16_t hasAttitudeError = 0;
+static int isDetumbling = 0;
+static int hasAttitudeError = 0;
 
-/*Task Handlers*/
+/*Detumbling */
 static TaskHandle_t detumblingHandle = NULL;
+static StaticTask_t detumblingTaskBuffer;
+static StackType_t detumblingTaskStack[DEFAULT_STACK_SIZE];
+
+/*Attitude Determination*/
 static TaskHandle_t reactionWheelHandle = NULL;
-static TaskHandle_t altitudeTrackingHandle = NULL;
+static StaticTask_t reactionWheelTaskBuffer;
+static StackType_t reactionWheelTaskStack[DEFAULT_STACK_SIZE];
+
+/*Atitude Tracking*/
+static TaskHandle_t attitudeTrackingHandle = NULL;
+static StaticTask_t attitudeTrackingTaskBuffer;
+static StackType_t attitudeTrackingTaskStack[DEFAULT_STACK_SIZE];
+
+/*Orbital Determination*/
 static TaskHandle_t orbitalDeterminationHandle = NULL;
+static StaticTask_t orbitalDeterminationTaskBuffer;
+static StackType_t orbitalDeterminationTaskStack[DEFAULT_STACK_SIZE];
+
+/*Momentum Dumping*/
 static TaskHandle_t momentumDumpingHandle = NULL;
+static StaticTask_t momentumDumpingTaskBuffer;
+static StackType_t momentumDumpingTaskStack[DEFAULT_STACK_SIZE];
+
+/*Low Power*/
 static TaskHandle_t lowPowerHandle = NULL;
+static StaticTask_t lowPowerTaskBuffer;
+static StackType_t lowPowerTaskStack[DEFAULT_STACK_SIZE];
 
 /**
  * @brief	ADCS Manager task.
@@ -41,12 +63,12 @@ static void vADCSManagerTask(void * pvParameters);
 static int initSupervisorTask(void);
 
 void initADCSManager(void) {
-    ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
+    // ASSERT( (adcsTaskStack != NULL) && (&adcsTaskBuffer != NULL) );
     if (adcsTaskHandle == NULL) {
         adcsTaskHandle = xTaskCreateStatic(vADCSManagerTask, ADCS_MANAGER_NAME, ADCS_MANAGER_STACK_SIZE, NULL, ADCS_MANAGER_PRIORITY, adcsTaskStack, &adcsTaskBuffer);
     }
 
-    ASSERT( (adcsQueueStack != NULL) && (&adcsQueue != NULL) );
+    // ASSERT( (adcsQueueStack != NULL) && (&adcsQueue != NULL) );
     if (adcsQueueHandle == NULL) {
         adcsQueueHandle = xQueueCreateStatic(ADCS_MANAGER_QUEUE_LENGTH, ADCS_MANAGER_QUEUE_ITEM_SIZE, adcsQueueStack, &adcsQueue);
     }
@@ -55,7 +77,7 @@ void initADCSManager(void) {
 }
 
 obc_error_code_t sendToADCSQueue(adcs_event_t *event) {
-    ASSERT(adcsQueueHandle != NULL);
+    // ASSERT(adcsQueueHandle != NULL);
 
     if (event == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
@@ -67,7 +89,7 @@ obc_error_code_t sendToADCSQueue(adcs_event_t *event) {
 }
 
 static void vADCSManagerTask(void * pvParameters) {
-    ASSERT(adcsQueueHandle != NULL);
+    // ASSERT(adcsQueueHandle != NULL);
 
     while(1) {
         adcs_event_t queueMsg;
@@ -94,7 +116,7 @@ static void vADCSManagerTask(void * pvParameters) {
  * @brief Runs low power mode Algorithrm
  * @param pvParameter Task parameters.
  */
-static void lowPower(void * pvParameters){
+static void lowPower(void * pvParameters) {
     while(1) {
         // Insert Code here
     }
@@ -104,10 +126,8 @@ static void lowPower(void * pvParameters){
  * @brief Changes the state of the appliation based on if the satellite is detumbling
  * @param pvParameter Task parameters.
  */
-static void detumblingMonitor(void * pvParameter)
-{
-    while (1)
-    {
+static void detumblingMonitor(void * pvParameter) {
+    while (1) {
         /*If the satellite is detumbling then set isDetumbling=1 (true)*/
         /*If the satellite is NOT detumbling then set isDetumbling=0 (false)*/
 
@@ -116,7 +136,7 @@ static void detumblingMonitor(void * pvParameter)
             vTaskResume(detumblingHandle);
         } else {
             vTaskResume(reactionWheelHandle);
-            vTaskResume(altitudeTrackingHandle);
+            vTaskResume(attitudeTrackingHandle);
             vTaskResume(orbitalDeterminationHandle);
             vTaskResume(momentumDumpingHandle);
         }
@@ -129,8 +149,7 @@ static void detumblingMonitor(void * pvParameter)
  * @brief Quest Algorithrm code
  * @param pvParameter Task parameters.
  */
-static void questAlgorithm(void * pvParameter)
-{
+static void kalmanFilter(void * pvParameter) {
     while (1) {
         /*Main code will go here*/
     }
@@ -140,8 +159,7 @@ static void questAlgorithm(void * pvParameter)
  * @brief Runs Detumbling Control Law Algorithrm
  * @param pvParameter Task parameters.
  */
-static void detumblingControl(void * pvParameter)
-{
+static void detumblingControl(void * pvParameter) {
     while (1) {
         /*Suspends itself when the satellite is not detumbling*/
         if (!isDetumbling) {
@@ -156,10 +174,8 @@ static void detumblingControl(void * pvParameter)
  * @brief Runs Reaction Wheel Control Law Algorithrm
  * @param pvParameter Task parameters.
  */
-static void reactionWheelControl(void * pvParameter)
-{
-    while (1)
-    {
+static void reactionWheelControl(void * pvParameter) {
+    while (1) {
         /*Suspends itself when the satellite is detumbling or doesn't have an altitude error*/
         if (isDetumbling || !hasAttitudeError) {
             vTaskSuspend(NULL);
@@ -173,8 +189,7 @@ static void reactionWheelControl(void * pvParameter)
  * @brief Runs Altitude Tracking Algorithrm (Might need to include the Solar Panel and/or Ground Target Tracking Code here or in seperate function(s))
  * @param pvParameter Task parameters.
  */
-static void attitudeTracking(void * pvParameter)
-{
+static void attitudeTracking(void * pvParameter) {
     while (1){
         /*If the satellite's error is LESS than the error bounds then set hasAltitudeError=0 (false)*/
         /*If the satellite's error is GREATER than or equal to the error bounds then set hasAltitudeError=1 (true)*/
@@ -196,8 +211,7 @@ static void attitudeTracking(void * pvParameter)
  * @brief Runs Orbital Determination Algorithrm 
  * @param pvParameter Task parameters.
  */
-static void orbitalDetermination(void * pvParameter)
-{
+static void orbitalDetermination(void * pvParameter) {
     while (1) {
         /*Suspends itself when the satellite is detumbling*/
         if (isDetumbling) {
@@ -225,15 +239,18 @@ static void momentumDumping(void * pvParameter) {
 
 static int initSupervisorTask(void) {
     /* Initialize the functions*/
-    /*xTaskCreate(func, name, size, parameters, priority, handle)*/
-    xTaskCreate(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
-    xTaskCreate(questAlgorithm, "Quest Algorithm", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL);
-    xTaskCreate(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &detumblingHandle);
-    xTaskCreate(reactionWheelControl, "Reaction Wheel Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &reactionWheelHandle);
-    xTaskCreate(attitudeTracking, "Attitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &altitudeTrackingHandle);
-    xTaskCreate(orbitalDetermination, "Orbital Determination", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &orbitalDeterminationHandle);
-    xTaskCreate(momentumDumping, "Momentum Dumping", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &momentumDumpingHandle);
-    xTaskCreate(lowPower, "Low Power", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, &lowPowerHandle);
+    /*xTaskCreateStatic(func, name, size, parameters, priority, handle, buffer)*/
+    // Always be running
+    (void) xTaskCreateStatic(detumblingMonitor, "Detumbling Monitor", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+    (void) xTaskCreateStatic(kalmanFilter, "Quest Algorithm", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+
+    // Can be suspended
+    detumblingHandle = xTaskCreateStatic(detumblingControl, "Detumbling Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+    reactionWheelHandle = xTaskCreateStatic(reactionWheelControl, "Reaction Wheel Control", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+    attitudeTrackingHandle = xTaskCreateStatic(attitudeTracking, "Attitude Tracking", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+    orbitalDeterminationHandle = xTaskCreateStatic(orbitalDetermination, "Orbital Determination", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+    momentumDumpingHandle = xTaskCreateStatic(momentumDumping, "Momentum Dumping", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
+    lowPowerHandle = xTaskCreateStatic(lowPower, "Low Power", DEFAULT_STACK_SIZE, NULL, DEFAULT_PRIORITY, NULL, NULL);
 
     /*Start scheduler*/
     vTaskStartScheduler();
@@ -241,3 +258,9 @@ static int initSupervisorTask(void) {
     while (1) {};
     return 0;
 }
+
+#ifdef ADCS_MANAGER_TESTING
+int main(void) {
+    initADCSManager();   
+}
+#endif

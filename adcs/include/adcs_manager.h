@@ -14,6 +14,9 @@
 #define DEFAULT_STACK_SIZE  256U
 #define DEFAULT_PRIORITY    1U 
 
+// For testing purposes
+#define ADCS_MANAGER_TESTING
+
 /**
  * @enum	adcs_event_id_t
  * @brief	adcs event ID enum.
