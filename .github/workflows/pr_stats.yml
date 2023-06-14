@@ -10,7 +10,7 @@ jobs:
         uses: flowwer-dev/pull-request-stats@master
         with:
           token: ${{ secrets.ADD_A_PERSONAL_ACCESS_TOKEN }}
-          period: 365
+          period: 120
           chats: true
           disable-links: true
           sort-by: 'REVIEWS'
