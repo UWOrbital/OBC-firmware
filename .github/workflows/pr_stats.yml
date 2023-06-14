@@ -12,5 +12,5 @@ jobs:
           token: ${{ secrets.ADD_A_PERSONAL_ACCESS_TOKEN }}
           period: 120
           chats: true
-          disable-links: true
+          disable-links: false
           sort-by: 'REVIEWS'
