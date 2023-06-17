@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
     obc_error_code_t errCode;
     
-    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &groundStationCallsign));
+    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, &groundStationCallsign, RS_ENCODED_SIZE));
     uint8_t decodedData[RS_DECODED_SIZE] = {0};
     uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
     
