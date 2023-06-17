@@ -132,14 +132,18 @@ obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax
  * @param ax25Data the received ax.25 frame
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
+ * @param uplinkDataLen length of the uplinkData array
  * 
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
 */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, ax25_addr_t *recvAddress){
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, ax25_addr_t *recvAddress, uint8_t uplinkDataLen){
     if(ax25Data == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
     if(uplinkData == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+    if(uplinkDataLen < AX25_INFO_BYTES){
         return OBC_ERR_CODE_INVALID_ARG;
     }
     if(ax25Data->length > AX25_MAXIMUM_PKT_LEN){

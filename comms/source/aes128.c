@@ -13,15 +13,20 @@ static struct AES_ctx ctx;
  * 
  * @param aesData Pointer to an aes_data_t union that includes a struct of the IV and data
  * @param cmdBytes 223B-AES_IV_SIZE array to store the decrypted data
+ * @param cmdBytesLen length of the cmdBytes array
  * 
  * @return obc_error_code_t - whether or not the data was successfully decrypted
 */
-obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes){
+obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes, uint8_t cmdBytesLen){
     if(aesData == NULL){
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
     if(cmdBytes == NULL){
+        return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    if(cmdBytesLen < AES_DECRYPTED_SIZE){
         return OBC_ERR_CODE_INVALID_ARG;
     }
 

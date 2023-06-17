@@ -59,7 +59,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes){
     uint32_t bytesUnpacked = 0;
     // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in cmdBytes
     // If the command id is the id for end of transmission, isStillUplinking should be set to false
-    while(bytesUnpacked < RS_DECODED_SIZE-AES_IV_SIZE){
+    while(bytesUnpacked < AES_DECRYPTED_SIZE){
         if(cmdBytes[bytesUnpacked] == CMD_END_OF_FRAME){
             // means we have reached the end of the packet and rest can be ignored
             return OBC_ERR_CODE_SUCCESS;
@@ -159,11 +159,11 @@ static void vDecodeTask(void * pvParameters){
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
     obc_error_code_t errCode;
     
-    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, &cubesatCallsign));
-    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData));
+    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, &cubesatCallsign, RS_ENCODED_SIZE));
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData, RS_DECODED_SIZE));
 
-    uint8_t decryptedData[RS_DECODED_SIZE-AES_IV_SIZE] = {0};
-    RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData));
+    uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
+    RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE));
     
     RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
     return OBC_ERR_CODE_SUCCESS;
