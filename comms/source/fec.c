@@ -15,14 +15,14 @@ correct_reed_solomon* rs = NULL;
  * 
  * @return obc_error_code_t - whether or not the data was successfully encoded
 */
-obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData) {
+obc_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData) {
     if (telemData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
     if (rsData == NULL)
         return OBC_ERR_CODE_INVALID_ARG;
 
-    if((uint8_t) correct_reed_solomon_encode(rs, telemData->data, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE){
+    if((uint8_t) correct_reed_solomon_encode(rs, telemData, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE){
         return OBC_ERR_CODE_CORRUPTED_MSG;
     }
 
