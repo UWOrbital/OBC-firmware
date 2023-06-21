@@ -81,11 +81,10 @@ static obc_error_code_t bitStuffing(uint8_t *rawData, packed_ax25_packet_t *stuf
  * @param telemData data to send that needs ax.25 headers added onto it
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
- * @param srcAddress address of the sender of the ax25 packet
  * 
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
 */
-obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress, ax25_addr_t *srcAddress) {
+obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress) {
     if (telemData == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -110,7 +109,11 @@ obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax
     ax25PacketUnstuffed[0] = AX25_FLAG;
     //ax25PacketUnstuffed[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
     memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES, destAddress->data, AX25_DEST_ADDR_BYTES);
-    memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, srcAddress->data, AX25_SRC_ADDR_BYTES);
+    #if defined(RM46_LAUNCHPAD) || defined(OBC_REVISION_1) || defined(OBC_REVISION_2)
+    memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, cubesatCallsign.data, AX25_SRC_ADDR_BYTES);
+    #else
+    memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, groundStationCallsign.data, AX25_SRC_ADDR_BYTES);
+    #endif
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] = (pktReceiveNum << 1);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + 1] = (pktSentNum << 1);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES] = AX25_PID;
