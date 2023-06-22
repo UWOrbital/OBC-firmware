@@ -26,14 +26,14 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t out
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    if(outputBufferLen + AES_IV_SIZE != aesData->rawDataLen){
+    if(outputBufferLen != aesData->ciphertextLen){
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
-    memcpy(output, aesData->rawData + AES_IV_SIZE, aesData->rawDataLen - AES_IV_SIZE);
-    AES_ctx_set_iv(&ctx, aesData->rawData);
-    AES_CTR_xcrypt_buffer(&ctx, output, aesData->rawDataLen - AES_IV_SIZE);
-    memcpy(output, output+5, aesData->rawDataLen - AES_IV_SIZE-5);
+    memcpy(output, aesData->ciphertext, aesData->ciphertextLen);
+    AES_ctx_set_iv(&ctx, aesData->iv);
+    AES_CTR_xcrypt_buffer(&ctx, output, aesData->ciphertextLen);
+    memcpy(output, output + 5, aesData->ciphertextLen - 5);
     return OBC_ERR_CODE_SUCCESS;
 }
 

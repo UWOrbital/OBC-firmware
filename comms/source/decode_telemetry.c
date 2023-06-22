@@ -161,11 +161,11 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
     
     RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, &cubesatCallsign, RS_ENCODED_SIZE));
     uint8_t decodedData[RS_DECODED_SIZE] = {0};
-    aesData->rawData = decodedData;
-    RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData, RS_DECODED_SIZE));
-
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, decodedData, RS_DECODED_SIZE));
+    memcpy(aesData->iv, decodedData, AES_IV_SIZE);
+    memcpy(aesData->ciphertext, decodedData + AES_IV_SIZE, RS_DECODED_SIZE - AES_IV_SIZE);
+    aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
     uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
-    aesData->rawDataLen = RS_DECODED_SIZE;
     RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE));
     
     RETURN_IF_ERROR_CODE(handleCommands(decryptedData));

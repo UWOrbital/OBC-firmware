@@ -14,8 +14,9 @@
 // TODO: Fix circular includes so that this can be removed
 
 typedef struct {
-    uint8_t *rawData;
-    uint8_t rawDataLen;
+  uint8_t iv[AES_IV_SIZE];
+  uint8_t *ciphertext;
+  size_t ciphertextLen;
 } aes_data_t;
 
 /**
