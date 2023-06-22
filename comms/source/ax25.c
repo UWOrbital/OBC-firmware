@@ -5,6 +5,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+#ifndef SRC_CALLSIGN
+#define SRC_CALLSIGN "ABCDEFG"
+#endif
+
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
 
@@ -109,11 +113,8 @@ obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax
     ax25PacketUnstuffed[0] = AX25_FLAG;
     //ax25PacketUnstuffed[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
     memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES, destAddress->data, AX25_DEST_ADDR_BYTES);
-    #if defined(RM46_LAUNCHPAD) || defined(OBC_REVISION_1) || defined(OBC_REVISION_2)
-    memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, cubesatCallsign.data, AX25_SRC_ADDR_BYTES);
-    #else
-    memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, groundStationCallsign.data, AX25_SRC_ADDR_BYTES);
-    #endif
+    uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
+    memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, srcAddress, AX25_SRC_ADDR_BYTES);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] = (pktReceiveNum << 1);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + 1] = (pktSentNum << 1);
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES] = AX25_PID;

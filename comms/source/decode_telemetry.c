@@ -165,7 +165,8 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
     RETURN_IF_ERROR_CODE(rsDecode(rsData, aesData->rawData, RS_DECODED_SIZE));
 
     uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
-    RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, RS_DECODED_SIZE, decryptedData));
+    aesData->rawDataLen = RS_DECODED_SIZE;
+    RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE));
     
     RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
     return OBC_ERR_CODE_SUCCESS;

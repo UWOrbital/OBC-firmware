@@ -15,18 +15,19 @@
 
 typedef struct {
     uint8_t *rawData;
+    uint8_t rawDataLen;
 } aes_data_t;
 
 /**
  * @brief Decrypts the AES blocks
  * 
  * @param aesData Pointer to an aes_data_t struct that includes a struct of the IV and data
- * @param aesDataLen length of the aesData array
  * @param output array to store the decrypted data
+ * @param outputBufferLen length of the buffer to store the decrypted data
  * 
  * @return obc_error_code_t - whether or not the data was successfully decrypted
 */
-obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t aesDataLen, uint8_t *output);
+obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen);
 
 /**
  * @brief Initializes the AES context
