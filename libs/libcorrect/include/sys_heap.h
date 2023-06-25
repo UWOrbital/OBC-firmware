@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// TODO: Remove this file once libcorrect is updated to not use malloc/free
+
 /**
  * @brief Allocates a block of size bytes of memory, returning a pointer to the beginning of the block.
  * 
