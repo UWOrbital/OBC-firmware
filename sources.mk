@@ -23,17 +23,17 @@ SRC_DIRS += eps/source
 SRC_DIRS += payload/source
 
 # Reliance Edge File System
-SRC_DIRS += reliance_edge/fatfs_port
-SRC_DIRS += reliance_edge/bdev
-SRC_DIRS += reliance_edge/core/driver
-SRC_DIRS += reliance_edge/fse
-SRC_DIRS += reliance_edge/os/freertos/services
-SRC_DIRS += reliance_edge/posix
-SRC_DIRS += reliance_edge/util
-SRC_DIRS += reliance_edge/projects/freertos_rm46/host
+SRC_DIRS += libs/reliance_edge/fatfs_port
+SRC_DIRS += libs/reliance_edge/bdev
+SRC_DIRS += libs/reliance_edge/core/driver
+SRC_DIRS += libs/reliance_edge/fse
+SRC_DIRS += libs/reliance_edge/os/freertos/services
+SRC_DIRS += libs/reliance_edge/posix
+SRC_DIRS += libs/reliance_edge/util
+SRC_DIRS += libs/reliance_edge/projects/freertos_rm46/host
 
 # Tiny AES
-SRC_DIRS += tiny_aes/source
+SRC_DIRS += libs/tiny_aes/source
 
 # libcorrect for reed solomon forward error correction
-SRC_DIRS += libcorrect/source/reed-solomon
+SRC_DIRS += libs/libcorrect/source/reed-solomon

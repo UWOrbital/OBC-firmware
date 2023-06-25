@@ -117,6 +117,7 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
     )
 
     include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
+
     add_subdirectory(adcs)
     add_subdirectory(cdh)
     add_subdirectory(common)
@@ -124,8 +125,12 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
     add_subdirectory(drivers)
     add_subdirectory(eps)
     add_subdirectory(hal)
-    add_subdirectory(libcorrect)
     add_subdirectory(payload)
-    add_subdirectory(reliance_edge)
-    add_subdirectory(tiny_aes)
+    add_subdirectory(libs)
+
+    target_link_libraries(OBC-firmware.out PRIVATE 
+        tiny-aes
+        lib-correct
+    )
+
 endif()

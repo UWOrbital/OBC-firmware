@@ -6,6 +6,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ds3232/include
     fram/include
     lm75bd/include
+    sdcard/include
 )
 
 target_sources(OBC-firmware.out PUBLIC
@@ -20,4 +21,5 @@ target_sources(OBC-firmware.out PUBLIC
     ds3232/source/ds3232_mz.c
     fram/source/fram.c
     lm75bd/source/lm75bd.c
+    sdcard/source/sdc_bdev.c
 )
