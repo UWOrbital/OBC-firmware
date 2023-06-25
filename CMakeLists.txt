@@ -43,27 +43,40 @@ if(NOT EXISTS ${TOOLCHAIN_DIR})
 
 endif()
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Firmware)
-endif()
-
-if (NOT DEFINED DEBUG)
-    set(DEBUG 1)
-endif()
-
-if (NOT DEFINED BOARD_TYPE)
-    set(BOARD_TYPE RM46_LAUNCHPAD)
-endif()
-
-if (NOT DEFINED LOG_DEFAULT_OUTPUT_LOCATION)
-    set(LOG_DEFAULT_OUTPUT_LOCATION LOG_TO_UART)
-endif()
-
-if (NOT DEFINED LOG_DEFAULT_LEVEL)
-    set(LOG_DEFAULT_LEVEL LOG_TRACE)
-endif()
-
 if(CMAKE_BUILD_TYPE MATCHES Firmware)
+    # Set default values for build options
+    if (NOT DEFINED DEBUG)
+        set(DEBUG 1)
+    endif()
+
+    if (NOT DEFINED BOARD_TYPE)
+        set(BOARD_TYPE RM46_LAUNCHPAD)
+    endif()
+
+    if (NOT DEFINED LOG_DEFAULT_OUTPUT_LOCATION)
+        set(LOG_DEFAULT_OUTPUT_LOCATION LOG_TO_UART)
+    endif()
+
+    if (NOT DEFINED LOG_DEFAULT_LEVEL)
+        set(LOG_DEFAULT_LEVEL LOG_TRACE)
+    endif()
+
+    if (NOT DEFINED CMD_POLICY)
+        set(CMD_POLICY CMD_POLICY_RND)
+    endif()
+
+    if (NOT DEFINED COMMS_PHY)
+        set(COMMS_PHY COMMS_PHY_NONE)
+    endif()
+
+    if (NOT DEFINED OBC_UART_BAUD_RATE)
+        set(OBC_UART_BAUD_RATE 115200)
+    endif()
+
+    if (NOT DEFINED CSDC_DEMO_ENABLED)
+        set(CSDC_DEMO_ENABLED 0)
+    endif()
+
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/source/sys_link.ld")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
 
@@ -90,20 +103,18 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
         target_compile_options(OBC-firmware.out PRIVATE -O0)
     endif()
 
-    if (BOARD_TYPE MATCHES RM46_LAUNCHPAD)
-        message(STATUS "Using RM46 Launchpad")
-        target_compile_definitions(OBC-firmware.out PRIVATE RM46_LAUNCHPAD)
-    elseif (BOARD_TYPE MATCHES OBC_REVISION_1)
-        message(STATUS "Using OBC Revision 1")
-        target_compile_definitions(OBC-firmware.out PRIVATE OBC_REVISION_1)
-    elseif (BOARD_TYPE MATCHES OBC_REVISION_2)
-        message(STATUS "Using OBC Revision 2")
-        target_compile_definitions(OBC-firmware.out PRIVATE OBC_REVISION_2)
-    else()
-        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
-    endif()
+    message(STATUS "Using ${BOARD_TYPE}")
+    target_compile_definitions(OBC-firmware.out PRIVATE ${BOARD_TYPE})
 
-    target_compile_definitions(OBC-firmware.out PRIVATE LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION} LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL} DEBUG=${DEBUG})
+    target_compile_definitions(OBC-firmware.out PRIVATE 
+        LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION} 
+        LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL} 
+        DEBUG=${DEBUG}
+        CMD_POLICY=${CMD_POLICY}
+        COMMS_PHY=${COMMS_PHY}
+        OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
+        CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
+    )
 
     include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
     add_subdirectory(adcs)

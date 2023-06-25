@@ -1,9 +1,0 @@
-- Copy path to arm-none-eabi into .env file
-
-- mkdir build
-- cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Test
-
-- mkdir build_arm
-- cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Firmware
-
-ruby cmock/lib/cmock.rb -ocmock/mock_config.yml examples/unit_test_demo/rectangle.h

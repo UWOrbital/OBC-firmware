@@ -1,7 +1,0 @@
-:cmock:
-  :plugins: []
-  :includes:
-  :mock_path: ./tests/mocks
-  :mock_prefix: mock_
-
-colour: true
