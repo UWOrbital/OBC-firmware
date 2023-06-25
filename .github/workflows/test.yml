@@ -1,0 +1,26 @@
+name: Test
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Test
+    - name: Build
+      run: |
+        cd build
+        cmake --build .
+    - name: Run Tests
+      run: |
+        cd build
+        ctest --verbose
