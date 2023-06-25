@@ -70,11 +70,10 @@ obc_error_code_t initCam(void) {
 obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
 {
   obc_error_code_t errCode;
-  switch (size)
-  {
+  switch (size) {
     // Todo: all other resolutions are unimplemented
     case OV5642_320x240:
-      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN);
+      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
       break;
     case OV5642_640x480:
       // camWriteSensorRegs16_8(ov5642_640x480);
@@ -95,10 +94,11 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
       // camWriteSensorRegs16_8(ov5642_2592x1944);
       break;
     default:
-      errCode = camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN);
+      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
       break;
   }
-  return errCode;
+  
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t flushFifo(camera_t cam) {

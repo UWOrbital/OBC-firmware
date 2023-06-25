@@ -82,7 +82,8 @@ obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t r
     for (int i = 0; i < reglistLen; i++) {
         RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(reglist[i].reg, reglist[i].val));
     }
-    return errCode;
+
+    return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t tcaSelect(camera_t cam) {
