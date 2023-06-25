@@ -74,6 +74,7 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/ds3232/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/fram/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/lm75bd/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/cc1120/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/sdcard/include"
 
 INCLUDE_DIRS += -I"$(ROOT_DIR)/common/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/adcs/include"
