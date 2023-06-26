@@ -74,6 +74,7 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/ds3232/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/fram/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/lm75bd/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/cc1120/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/drivers/sdcard/include"
 
 INCLUDE_DIRS += -I"$(ROOT_DIR)/common/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/adcs/include"
@@ -83,14 +84,14 @@ INCLUDE_DIRS += -I"$(ROOT_DIR)/eps/include"
 INCLUDE_DIRS += -I"$(ROOT_DIR)/payload/include"
 
 # Reliance Edge File System
-INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/fatfs_port"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/core/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/os/freertos/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/reliance_edge/projects/freertos_rm46/host"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/reliance_edge/fatfs_port"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/reliance_edge/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/reliance_edge/core/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/reliance_edge/os/freertos/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/reliance_edge/projects/freertos_rm46/host"
 
-INCLUDE_DIRS += -I"$(ROOT_DIR)/tiny_aes/include"
-INCLUDE_DIRS += -I"$(ROOT_DIR)/libcorrect/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/tiny_aes/include"
+INCLUDE_DIRS += -I"$(ROOT_DIR)/libs/libcorrect/include"
 LIBS := 
 
 $(BUILD_DIR)/%.o : $(ROOT_DIR)/%.c
