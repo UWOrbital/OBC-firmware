@@ -33,6 +33,12 @@ This section will explain how to set up the repo, and how to build, flash, and d
     sudo apt-get update
     sudo apt-get install build-essential
     ```
+6. Choose the environment where you'll be running `git commit` (either WSL2 or the host). In that environment, install Python 3.8+ and pip if they're not already installed. Then, run the following in the OBC-firmware directory:
+    ```sh
+    pip install pre-commit # You may want to create a Python virtual env before this
+    pre-commit install
+    ```
+    **Note:** pre-commit is used to format your code whenever you make a commit.
 
 You'll be using WSL2 primarily for building the firmware and running tests.
 
@@ -43,6 +49,13 @@ brew install cmake
 brew install make
 brew install gcc
 ```
+
+Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
+```sh
+pip install pre-commit # You may want to create a Python virtual env before this
+pre-commit install
+```
+
 Download UniFlash: https://www.ti.com/tool/UNIFLASH#downloads
 
 Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO
@@ -55,6 +68,12 @@ sudo apt-get install build-essential
 Download UniFlash: https://www.ti.com/tool/UNIFLASH#downloads
 
 Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO
+
+Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
+```sh
+pip install pre-commit # You may want to create a Python virtual env before this
+pre-commit install
+```
 
 ### Getting the Source
 
@@ -104,9 +123,9 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 2. Create a feature branch for whatever task you're working on.
     * Our branch naming scheme is `<developer_name>/<feature_description>`.
       * Example: `danielg/implement-random-device-driver`
-3. Make a PR. 
-    - For the PR description, make sure to fill in all the require details in the generated template. 
-    - Add at least 3 PR reviewers, including 1 firmware lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR. 
+3. Make a PR.
+    - For the PR description, make sure to fill in all the require details in the generated template.
+    - Add at least 3 PR reviewers, including 1 firmware lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR.
 4. Make any requested changes and merge your branch onto main once the PR is approved.
 
 **[Back to top](#table-of-contents)**
@@ -117,7 +136,7 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 
 #### Single Line Comments
 
-Variable and function names should be descriptive enough to understand even without comments. Comments are needed to describe any complicated logic. You may use `//` or `/* */` for single line comments. 
+Variable and function names should be descriptive enough to understand even without comments. Comments are needed to describe any complicated logic. You may use `//` or `/* */` for single line comments.
 
 #### Function Comments
 
@@ -125,7 +144,7 @@ Function comments should exist in the .h file. For static functions, they should
 ```c
 /**
  * @brief Adds two numbers together
- * 
+ *
  * @param num1 - The first number to add.
  * @param num2 - The second number to add.
  * @return uint8_t - Returns the sum of of the two numbers.
@@ -156,7 +175,7 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
 -   `#define MACRO_NAME` in CAPITAL_SNAKE_CASE
 -   `file_names` in snake_case
 -   `type_defs` in snake_case with _t suffix
-    -   Ex: 
+    -   Ex:
         ```c
         typedef struct {
             int a;
@@ -180,13 +199,13 @@ myFunction(hasToo,
 ### ****General Rules****
 Some of these rules don't apply in certain cases. Use your better judgement.
 
-1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)).
+1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)).
 2. All loops must have fixed bounds. This prevents runaway code.
-3. Avoid [heap memory allocation](https://en.wikipedia.org/wiki/Memory_management#DYNAMIC).
-4. Use an average of two [runtime assertions](https://en.wikipedia.org/wiki/Assertion_(software_development)#Assertions_for_run-time_checking) per function.
+3. Avoid [heap memory allocation](https://en.wikipedia.org/wiki/Memory_management#DYNAMIC).
+4. Use an average of two [runtime assertions](https://en.wikipedia.org/wiki/Assertion_(software_development)#Assertions_for_run-time_checking) per function.
 5. Restrict the scope of data to the smallest possible.
 6. Check the return value of all non-void functions, or cast to void to indicate the return value is useless.
-7. Limit pointer use to a single [dereference](https://en.wikipedia.org/wiki/Dereference_operator), and do not use [function pointers](https://en.wikipedia.org/wiki/Function_pointer).
+7. Limit pointer use to a single [dereference](https://en.wikipedia.org/wiki/Dereference_operator), and do not use [function pointers](https://en.wikipedia.org/wiki/Function_pointer).
 8. Compile with all possible warnings active; all warnings should then be addressed before release of the software.
 
 **[Back to top](#table-of-contents)**
