@@ -4,7 +4,7 @@ BIN = gs
 
 CFLAGS = -Wall -g
 
-INCS := 
+INCS :=
 
 # Ground station specific headers
 INCS += -I"ground_station/cmd_utils"
@@ -38,7 +38,7 @@ SRCS += libs/libcorrect/source/reed-solomon/encode.c
 SRCS += libs/libcorrect/source/reed-solomon/polynomial.c
 SRCS += libs/libcorrect/source/reed-solomon/reed-solomon.c
 
-# Define the object files 
+# Define the object files
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
 .PHONY: all clean

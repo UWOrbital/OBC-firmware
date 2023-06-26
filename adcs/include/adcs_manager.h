@@ -5,36 +5,33 @@
 
 #include <sys_common.h>
 
-
-
 /**
  * @enum	adcs_event_id_t
  * @brief	adcs event ID enum.
  *
  * Enum containing all possible event IDs passed to the adcs event queue.
-*/
-typedef enum {
-    ADCS_MANAGER_NULL_EVENT_ID
-} adcs_event_id_t;
+ */
+typedef enum { ADCS_MANAGER_NULL_EVENT_ID } adcs_event_id_t;
 
 /**
  * @union	adcs_event_data_t
  * @brief	adcs event data union
-*/
+ */
 typedef union {
-    int i;
-    float f;
+  int i;
+  float f;
 } adcs_event_data_t;
 
 /**
  * @struct	adcs_event_t
  * @brief	adcs event struct
  *
- * Holds the message data for each event sent/received by the adcs manager queue.
-*/
+ * Holds the message data for each event sent/received by the adcs manager
+ * queue.
+ */
 typedef struct {
-    adcs_event_id_t eventID;
-    adcs_event_data_t data;
+  adcs_event_id_t eventID;
+  adcs_event_data_t data;
 } adcs_event_t;
 
 /* adcs queue config */
@@ -43,9 +40,9 @@ typedef struct {
 #define ADCS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define ADCS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
-
 /**
- * @brief	Initialize the adcs task and associated FreeRTOS constructs (queues, timers, etc.)
+ * @brief	Initialize the adcs task and associated FreeRTOS constructs (queues,
+ * timers, etc.)
  */
 void initADCSManager(void);
 

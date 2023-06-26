@@ -7,10 +7,10 @@ jobs:
     defaults:
       run:
         shell: bash
-    
+
     steps:
     - uses: actions/checkout@v3
-        
+
     - name: Build
       run: |
         make -f ground_station/Makefile

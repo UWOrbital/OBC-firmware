@@ -7,13 +7,16 @@
 
 static obc_state_t currStateOBC;
 
-// This function is not thread safe. It should only be called from the supervisor task.
+// This function is not thread safe. It should only be called from the
+// supervisor task.
 obc_error_code_t changeStateOBC(obc_state_t newState) {
-    obc_error_code_t errCode;
-    
-    currStateOBC = newState;
-    telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
-    
-    RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
-    return OBC_ERR_CODE_SUCCESS;
+  obc_error_code_t errCode;
+
+  currStateOBC = newState;
+  telemetry_data_t telemData = {.id = TELEM_OBC_STATE,
+                                .timestamp = getCurrentUnixTime(),
+                                .obcState = currStateOBC};
+
+  RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
+  return OBC_ERR_CODE_SUCCESS;
 }

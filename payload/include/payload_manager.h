@@ -5,35 +5,33 @@
 
 #include <sys_common.h>
 
-
 /**
  * @enum	payload_event_id_t
  * @brief	payload event ID enum.
  *
  * Enum containing all possible event IDs passed to the payload event queue.
-*/
-typedef enum {
-    PAYLOAD_MANAGER_NULL_EVENT_ID
-} payload_event_id_t;
+ */
+typedef enum { PAYLOAD_MANAGER_NULL_EVENT_ID } payload_event_id_t;
 
 /**
  * @union	payload_event_data_t
  * @brief	payload event data union
-*/
+ */
 typedef union {
-    int i;
-    float f;
+  int i;
+  float f;
 } payload_event_data_t;
 
 /**
  * @struct	payload_event_t
  * @brief	payload event struct
  *
- * Holds the message data for each event sent/received by the payload manager queue.
-*/
+ * Holds the message data for each event sent/received by the payload manager
+ * queue.
+ */
 typedef struct {
-    payload_event_id_t eventID;
-    payload_event_data_t data;
+  payload_event_id_t eventID;
+  payload_event_data_t data;
 } payload_event_t;
 
 /* payload queue config */
@@ -43,7 +41,8 @@ typedef struct {
 #define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
- * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs (queues, timers, etc.)
+ * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs
+ * (queues, timers, etc.)
  */
 void initPayloadManager(void);
 

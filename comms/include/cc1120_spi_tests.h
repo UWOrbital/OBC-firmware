@@ -10,9 +10,11 @@
  * Reads through all registers up to the extended register space,
  * and compares values to default values.
  * Burst reads all the values and compares them to the default values.
- * Burst reads FREQ registers in extended address space and compares them to defaults.
- * 
- * @return OBC_ERROR_CODE_SUCCESS - If all registers are read correctly and have the right value.
+ * Burst reads FREQ registers in extended address space and compares them to
+ * defaults.
+ *
+ * @return OBC_ERROR_CODE_SUCCESS - If all registers are read correctly and have
+ * the right value.
  * @return An error code - If any register does not have the expected value,
  *                 or status byte is invalid.
  */

@@ -32,8 +32,8 @@ INCLUDE_DIRS += -I"hal/include"
 INCLUDE_DIRS += -I"drivers/include"
 INCLUDE_DIRS += -I"common/include"
 
-LIBS := 
-	
+LIBS :=
+
 SRC_DIRS :=
 SRC_DIRS += hal/source
 SRC_DIRS += drivers/source
@@ -55,7 +55,7 @@ $(BUILD_DIR)/$(BIN): $(OBJS)
 	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
 
 $(BUILD_DIR)/%.o : %.c
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $< 
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<
 
 $(BUILD_DIR)/%.o : %.s
 	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<

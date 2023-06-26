@@ -5,24 +5,21 @@
 
 #include <sys_common.h>
 
-
 /**
  * @enum	eps_event_id_t
  * @brief	eps event ID enum.
  *
  * Enum containing all possible event IDs passed to the eps event queue.
-*/
-typedef enum {
-    EPS_MANAGER_NULL_EVENT_ID
-} eps_event_id_t;
+ */
+typedef enum { EPS_MANAGER_NULL_EVENT_ID } eps_event_id_t;
 
 /**
  * @union	eps_event_data_t
  * @brief	eps event data union
-*/
+ */
 typedef union {
-    int i;
-    float f;
+  int i;
+  float f;
 } eps_event_data_t;
 
 /**
@@ -30,10 +27,10 @@ typedef union {
  * @brief	eps event struct
  *
  * Holds the message data for each event sent/received by the eps manager queue.
-*/
+ */
 typedef struct {
-    eps_event_id_t eventID;
-    eps_event_data_t data;
+  eps_event_id_t eventID;
+  eps_event_data_t data;
 } eps_event_t;
 
 /* EPS queue config */
@@ -43,7 +40,8 @@ typedef struct {
 #define EPS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
- * @brief	Initialize the EPS Manager task and associated FreeRTOS constructs (queues, timers, etc.)
+ * @brief	Initialize the EPS Manager task and associated FreeRTOS constructs
+ * (queues, timers, etc.)
  */
 void initEPSManager(void);
 
