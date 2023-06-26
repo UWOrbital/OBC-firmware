@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup
       run: |
         sudo apt-get -y install build-essential cmake
-    
+
     - name: Create binary directory
       run: |
         mkdir build

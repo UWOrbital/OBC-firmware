@@ -11,4 +11,3 @@ include $(P_BASEDIR)/os/win32/build/host.mk
 else
 include $(P_BASEDIR)/os/linux/build/host.mk
 endif
-

@@ -52,7 +52,7 @@
     licensing and training services. */
 /*-----------------------------------------------------------*/
 
-        .section .kernelTEXT 
+        .section .kernelTEXT
         .syntax unified
         .cpu cortex-r4
         .arm
@@ -63,10 +63,10 @@
         .extern   ulCriticalNesting
 
 /*-----------------------------------------------------------*/
-@ Save Task Context 
+@ Save Task Context
 
-        .macro portSAVE_CONTEXT 
-        
+        .macro portSAVE_CONTEXT
+
         DSB
 
         @ Push R0 as we are going to use it
@@ -123,7 +123,7 @@
 /*-----------------------------------------------------------*/
 @ Restore Task Context
 
-        .macro portRESTORE_CONTEXT 
+        .macro portRESTORE_CONTEXT
 
         LDR     R0, pxCurrentTCBConst
         LDR     R0, [R0]
@@ -193,17 +193,17 @@ portMax_MPU_Region:      .word   12 - 1
 
         .weak vPortStartFirstTask
         .type vPortStartFirstTask, %function
-        
+
 vPortStartFirstTask:
         cps #0x13
         portRESTORE_CONTEXT
-        
+
 /*-----------------------------------------------------------*/
 @ Yield to another task.
 
         .weak vPortYieldProcessor
         .type vPortYieldProcessor, %function
-        
+
 swiPortYield:
         @  Restore stack and LR before calling vPortYieldProcessor
         ldmfd   sp!, {r11,r12,lr}
@@ -222,14 +222,14 @@ vPortYieldProcessor:
 
         @ Restore the context of the task selected to execute.
         portRESTORE_CONTEXT
-        
-        
+
+
 /*-----------------------------------------------------------*/
 @ Yield to another task from within the FreeRTOS API
 
         .weak vPortYeildWithinAPI
-        .type vPortYeildWithinAPI, %function        
-        
+        .type vPortYeildWithinAPI, %function
+
 vPortYeildWithinAPI:
         @ Save the context of the current task.
 
@@ -243,14 +243,14 @@ vPortYeildWithinAPI:
 
         @ Restore the context of the task selected to execute.
         portRESTORE_CONTEXT
-        
-        
+
+
 /*-----------------------------------------------------------*/
 @ Preemptive Tick
 
         .weak vPortPreemptiveTick
         .type vPortPreemptiveTick, %function
-        
+
 vPortPreemptiveTick:
 
         @ Save the context of the current task.
@@ -273,13 +273,13 @@ vPortPreemptiveTick:
         @ Restore the context of the task selected to execute.
         portRESTORE_CONTEXT
         ##endasmfunc##
-        
+
 /*-------------------------------------------------------------------------------*/
 
 
         .weak vPortInitialiseFPSCR
         .type vPortInitialiseFPSCR, %function
-        
+
 vPortInitialiseFPSCR:
 
         MOV     R0, #0
@@ -291,18 +291,18 @@ vPortInitialiseFPSCR:
 
         .weak ulPortCountLeadingZeros
         .type ulPortCountLeadingZeros, %function
-        
+
 ulPortCountLeadingZeros:
 
         CLZ     R0, R0
         BX      LR
-        
+
 /*-------------------------------------------------------------------------------*/
 @ SWI Handler, interface to Protected Mode Functions
 
         .weak vPortSWI
         .type vPortSWI, %function
-        
+
 vPortSWI:
         stmfd   sp!, {r11,r12,lr}
         mrs     r12, spsr
@@ -325,28 +325,28 @@ jumpTable:
         .word   swiPortTaskUsesFPU           @ 4 - vPortTaskUsesFPU
         .word   swiPortDisableInterrupts     @ 5 - vPortDisableInterrupts
         .word   swiPortEnableInterrupts      @ 6 - vPortEnableInterrupts
-        
+
 /*-------------------------------------------------------------------------------*/
 @ swiPortDisableInterrupts
-        
+
 swiPortDisableInterrupts:
         mrs     r11, SPSR
         orr     r11, r11, #0x80
         msr     SPSR_c, r11
         bx      r14
-        
+
 /*-------------------------------------------------------------------------------*/
 @ swiPortEnableInterrupts
-        
+
 swiPortEnableInterrupts:
         mrs     r11, SPSR
         bic     r11, r11, #0x80
         msr     SPSR_c, r11
         bx      r14
-        
+
 /*-------------------------------------------------------------------------------*/
 @ swiPortTaskUsesFPU
-        
+
 swiPortTaskUsesFPU:
         ldr     r12, ulTaskHasFPUContextConst
         mov     r11, #1
@@ -354,23 +354,23 @@ swiPortTaskUsesFPU:
         mov     r11, #0
         fmxr    FPSCR, r11
         bx      r14
-    
-        
+
+
 /*-------------------------------------------------------------------------------*/
 @ swiRaisePrivilege
 
 @ Must return zero in R0 if caller was in user mode
-        
+
 swiRaisePrivilege:
         mrs     r12, spsr
         ands    r0, r12, #0x0F       @return value
         orreq   r12, r12, #0x1F
         msreq   spsr_c, r12
         bx      r14
-        
+
 /*-------------------------------------------------------------------------------*/
 @ swiPortEnterCritical
-        
+
 swiPortEnterCritical:
         mrs     r11, SPSR
         orr     r11, r11, #0x80
@@ -380,10 +380,10 @@ swiPortEnterCritical:
         add     r12, r12, #1
         str     r12, [r11]
         bx      r14
-        
+
 /*-------------------------------------------------------------------------------*/
 @ swiPortExitCritical
-        
+
 swiPortExitCritical:
         ldr     r11, ulCriticalNestingConst
         ldr     r12, [r11]
@@ -396,13 +396,13 @@ swiPortExitCritical:
         bic     r11, r11, #0x80
         msr     SPSR_c, r11
         bx      r14
-        
+
 /*-------------------------------------------------------------------------------*/
 @ SetRegion
 @void _mpuSetRegion(unsigned region, unsigned base, unsigned size, unsigned access)
 
         .weak  prvMpuSetRegion
-       
+
 prvMpuSetRegion:
         and   r0,  r0, #15                 @ select region
         mcr   p15, #0, r0, c6, c2, #0
@@ -410,12 +410,12 @@ prvMpuSetRegion:
         mcr   p15, #0, r3, c6, c1, #4      @ Access Attributes
         mcr   p15, #0, r2, c6, c1, #2      @ Size and Enable
         bx    lr
-        
+
 /*-------------------------------------------------------------------------------*/
 @ Enable Mpu
 
         .weak  prvMpuEnable
-        
+
 prvMpuEnable:
         mrc   p15, #0, r0, c1, c0, #0
         orr   r0,  r0, #1
@@ -423,12 +423,12 @@ prvMpuEnable:
         mcr   p15, #0, r0, c1, c0, #0
         isb
         bx    lr
-        
+
 /*-------------------------------------------------------------------------------*/
 @ Disable Mpu
 
         .weak  prvMpuDisable
-        
+
 prvMpuDisable:
         mrc   p15, #0, r0, c1, c0, #0
         bic   r0,  r0, #1
@@ -436,7 +436,7 @@ prvMpuDisable:
         mcr   p15, #0, r0, c1, c0, #0
         isb
         bx    lr
-        
+
 /*-------------------------------------------------------------------------------*/
 @ vPortYield
 
@@ -444,7 +444,7 @@ prvMpuDisable:
 
 vPortYield:
         swi 0
-        bx  lr          
+        bx  lr
 
 /*-------------------------------------------------------------------------------*/
 @ prvRaisePrivilege
@@ -453,7 +453,7 @@ vPortYield:
 
 prvRaisePrivilege:
         swi 1
-        bx  lr      
+        bx  lr
 
 /*-------------------------------------------------------------------------------*/
 @ vPortEnterCritical
@@ -462,7 +462,7 @@ prvRaisePrivilege:
 
 vPortEnterCritical:
         swi 2
-        bx  lr      
+        bx  lr
 
 /*-------------------------------------------------------------------------------*/
 @ vPortExitCritical
@@ -471,7 +471,7 @@ vPortEnterCritical:
 
 vPortExitCritical:
         swi 3
-        bx  lr  
+        bx  lr
 
 /*-------------------------------------------------------------------------------*/
 @ vPortTaskUsesFPU
@@ -490,7 +490,7 @@ vPortTaskUsesFPU:
 vPortDisableInterrupts:
         swi 5
         bx  lr
-        
+
 /*-------------------------------------------------------------------------------*/
 @ vPortEnableInterrupts
 
@@ -498,8 +498,8 @@ vPortDisableInterrupts:
 
 vPortEnableInterrupts:
         swi 6
-        bx  lr      
-                
+        bx  lr
+
 /*-------------------------------------------------------------------------------*/
 pxCurrentTCBConst:        .word   pxCurrentTCB
 ulFPUContextConst:        .word   ulTaskHasFPUContext

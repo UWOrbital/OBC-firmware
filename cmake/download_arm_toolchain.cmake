@@ -15,8 +15,8 @@ else()
 endif()
 
 # Download the toolchain
-file(DOWNLOAD 
-    ${TOOLCHAIN_URL} 
+file(DOWNLOAD
+    ${TOOLCHAIN_URL}
     ${TOOLCHAIN_ZIP_FILE}
     SHOW_PROGRESS)
 

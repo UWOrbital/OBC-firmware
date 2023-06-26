@@ -18,8 +18,9 @@ void initI2CMutex(void);
  * @param sAddr The slave address of the device to send to
  * @param size The number of bytes to send
  * @param buf The buffer to send
- * @return OBC_ERR_CODE_SUCCESS if the bytes were sent, OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out, 
- * OBC_ERR_CODE_INVALID_ARG if the buffer is NULL or the size is 0
+ * @return OBC_ERR_CODE_SUCCESS if the bytes were sent,
+ * OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out, OBC_ERR_CODE_INVALID_ARG
+ * if the buffer is NULL or the size is 0
  */
 obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf);
 
@@ -28,8 +29,9 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf);
  * @param sAddr The slave address of the device to receive from
  * @param size The number of bytes to receive
  * @param buf The buffer to receive into
- * @return OBC_ERR_CODE_SUCCESS if the bytes were sent, OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out, 
- * OBC_ERR_CODE_INVALID_ARG if the buffer is NULL or the size is 0
+ * @return OBC_ERR_CODE_SUCCESS if the bytes were sent,
+ * OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out, OBC_ERR_CODE_INVALID_ARG
+ * if the buffer is NULL or the size is 0
  */
 obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf);
 
@@ -42,7 +44,8 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf);
  * @note  You can read from consecutive registers by using numBytes > 1.
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes);
+obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data,
+                            uint16_t numBytes);
 
 /**
  * @brief Write byte(s) to a device's register(s).
@@ -53,6 +56,7 @@ obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t 
  * @note  You can write to consecutive registers by using numBytes > 1.
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes);
+obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data,
+                             uint8_t numBytes);
 
-#endif /* DRIVERS_INCLUDE_OBC_I2C_IO_H_ */ 
+#endif /* DRIVERS_INCLUDE_OBC_I2C_IO_H_ */

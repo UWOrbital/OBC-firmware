@@ -1,51 +1,51 @@
 /*--------------------------------------------------------------------------
  dabort.s
 
- Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
- 
- 
-  Redistribution and use in source and binary forms, with or without 
-  modification, are permitted provided that the following conditions 
+ Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com
+
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
   are met:
 
-    Redistributions of source code must retain the above copyright 
+    Redistributions of source code must retain the above copyright
     notice, this list of conditions and the following disclaimer.
 
     Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the 
-    documentation and/or other materials provided with the   
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the
     distribution.
 
     Neither the name of Texas Instruments Incorporated nor the names of
     its contributors may be used to endorse or promote products derived
     from this software without specific prior written permission.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------*/
 
 
-    .section .text 
+    .section .text
     .syntax unified
     .cpu cortex-r4
-    .arm 
+    .arm
 
 
 /*-------------------------------------------------------------------------------*/
 @ Run Memory Test
 
-    .extern custom_dabort   
-    .weak _dabort   
+    .extern custom_dabort
+    .weak _dabort
     .type _dabort, %function
 
 _dabort:
@@ -118,8 +118,8 @@ flashErrorFound:
         tst     r2, #5              @ check if bits 19:16 are 5, this indicates diagnostic mode is enabled
         beq     flashErrorReal
         mov     r2, #1
-        mov     r2, r2, lsl #8      
-        
+        mov     r2, r2, lsl #8
+
         str     r2, [r1, #0x1C]     @ clear FEDACSTATUS error flag
 
         mov     r2, #0x80
@@ -135,13 +135,10 @@ flashErrorFound:
 
 flashErrorReal:
         b       flashErrorReal      @ branch here forever as continuing operation is not recommended
-        
-esmsr3:      .word 0xFFFFF520    
-ramctrl:     .word 0xFFFFF800    
-ram2ctrl:    .word 0xFFFFF900    
-ram1errstat: .word 0xFFFFF810    
-ram2errstat: .word 0xFFFFF910    
-flashbase:   .word 0xFFF87000    
 
-
-
+esmsr3:      .word 0xFFFFF520
+ramctrl:     .word 0xFFFFF800
+ram2ctrl:    .word 0xFFFFF900
+ram1errstat: .word 0xFFFFF810
+ram2errstat: .word 0xFFFFF910
+flashbase:   .word 0xFFF87000

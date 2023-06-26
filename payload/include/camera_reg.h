@@ -11,18 +11,15 @@
  * @brief	Primary or secondary camera.
  *
  * Enum containing camera identifiers.
-*/
-typedef enum {
-  PRIMARY,
-  SECONDARY
-} camera_t;
+ */
+typedef enum { PRIMARY, SECONDARY } camera_t;
 
 /**
  * @struct	camera_settings_t
  * @brief	Camera settings struct
  *
  * Holds the settings for each camera.
-*/
+ */
 typedef struct {
   spiDAT1_t spi_config;
   uint8_t cs_num;
@@ -60,7 +57,7 @@ obc_error_code_t camWriteByte(uint8_t byte, camera_t cam);
  * @param cam  Camera identifier
  * @return Error code
  */
-obc_error_code_t camReadByte(uint8_t *byte, camera_t cam);
+obc_error_code_t camReadByte(uint8_t* byte, camera_t cam);
 
 /**
  * @brief Read 8 bits from a 16 bit register over I2C
@@ -83,7 +80,8 @@ obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat);
  * @param reglist List of registers and data to write
  * @return Error code indicating if the writes were successful
  */
-obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t reglistLen);
+obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[],
+                                        uint16_t reglistLen);
 
 /**
  * @brief Select an I2C port on the TCA9458a multiplexer

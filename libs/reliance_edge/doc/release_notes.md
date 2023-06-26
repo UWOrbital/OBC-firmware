@@ -537,4 +537,3 @@ SafeRTOS support.
 ### Reliance Edge v0.9 (Beta), April 2015
 
 First public release.
-
