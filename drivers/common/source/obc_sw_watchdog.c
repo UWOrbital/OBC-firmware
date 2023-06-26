@@ -31,8 +31,7 @@
 // This check does not explicitly check for 73.333 MHz, but it will fail if the
 // RTI frequency changed too much
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73, "RTI frequency is not 73.333 MHz");
-STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL,
-              "Preload value is out of range");
+STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
 
 static StackType_t watchdogStack[SW_WATCHDOG_STACK_SIZE];
 static StaticTask_t watchdogTaskBuffer;
@@ -50,9 +49,8 @@ static void feedSwWatchdog(void);
 
 void initSwWatchdog(void) {
   ASSERT((watchdogStack != NULL) && (&watchdogTaskBuffer != NULL));
-  watchdogTaskHandle = xTaskCreateStatic(
-      swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
-      SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
+  watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
+                                         SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
 }
 
 static void swWatcdogFeeder(void* pvParameters) {

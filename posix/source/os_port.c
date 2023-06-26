@@ -104,8 +104,7 @@ static portBASE_TYPE xSchedulerEnd = pdFALSE;
 static void prvSetupSignalsAndSchedulerPolicy(void);
 static void prvSetupTimerInterrupt(void);
 static void *prvWaitForStart(void *pvParams);
-static void prvSwitchThread(Thread_t *xThreadToResume,
-                            Thread_t *xThreadToSuspend);
+static void prvSwitchThread(Thread_t *xThreadToResume, Thread_t *xThreadToSuspend);
 static void prvSuspendSelf(Thread_t *thread);
 static void prvResumeThread(Thread_t *xThreadId);
 static void vPortSystemTickHandler(int sig);
@@ -120,9 +119,8 @@ static void prvFatalError(const char *pcCall, int iErrno) {
 /*
  * See header file for description.
  */
-portSTACK_TYPE *pxPortInitialiseStack(portSTACK_TYPE *pxTopOfStack,
-                                      portSTACK_TYPE *pxEndOfStack,
-                                      pdTASK_CODE pxCode, void *pvParameters) {
+portSTACK_TYPE *pxPortInitialiseStack(portSTACK_TYPE *pxTopOfStack, portSTACK_TYPE *pxEndOfStack, pdTASK_CODE pxCode,
+                                      void *pvParameters) {
   Thread_t *thread;
   pthread_attr_t xThreadAttributes;
   size_t ulStackSize;
@@ -148,8 +146,7 @@ portSTACK_TYPE *pxPortInitialiseStack(portSTACK_TYPE *pxTopOfStack,
 
   vPortEnterCritical();
 
-  iRet = pthread_create(&thread->pthread, &xThreadAttributes, prvWaitForStart,
-                        thread);
+  iRet = pthread_create(&thread->pthread, &xThreadAttributes, prvWaitForStart, thread);
   if (iRet) {
     prvFatalError("pthread_create", iRet);
   }
@@ -278,14 +275,10 @@ void vPortYield(void) {
 }
 /*-----------------------------------------------------------*/
 
-void vPortDisableInterrupts(void) {
-  pthread_sigmask(SIG_BLOCK, &xAllSignals, NULL);
-}
+void vPortDisableInterrupts(void) { pthread_sigmask(SIG_BLOCK, &xAllSignals, NULL); }
 /*-----------------------------------------------------------*/
 
-void vPortEnableInterrupts(void) {
-  pthread_sigmask(SIG_UNBLOCK, &xAllSignals, NULL);
-}
+void vPortEnableInterrupts(void) { pthread_sigmask(SIG_UNBLOCK, &xAllSignals, NULL); }
 /*-----------------------------------------------------------*/
 
 portBASE_TYPE xPortSetInterruptMask(void) {
@@ -420,8 +413,7 @@ static void *prvWaitForStart(void *pvParams) {
 }
 /*-----------------------------------------------------------*/
 
-static void prvSwitchThread(Thread_t *pxThreadToResume,
-                            Thread_t *pxThreadToSuspend) {
+static void prvSwitchThread(Thread_t *pxThreadToResume, Thread_t *pxThreadToSuspend) {
   BaseType_t uxSavedCriticalNesting;
 
   if (pxThreadToSuspend != pxThreadToResume) {
@@ -492,8 +484,7 @@ static void prvSetupSignalsAndSchedulerPolicy(void) {
    * When a thread is resumed for the first time, all signals
    * will be unblocked.
    */
-  (void)pthread_sigmask(SIG_SETMASK, &xAllSignals,
-                        &xSchedulerOriginalSignalMask);
+  (void)pthread_sigmask(SIG_SETMASK, &xAllSignals, &xSchedulerOriginalSignalMask);
 
   /* SIG_RESUME is only used with sigwait() so doesn't need a
      handler. */

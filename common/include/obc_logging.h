@@ -24,15 +24,7 @@ typedef enum { LOG_TO_SDCARD, LOG_TO_UART } log_output_location_t;
  *
  * Enum containing all log levels.
  */
-typedef enum {
-  LOG_TRACE,
-  LOG_DEBUG,
-  LOG_INFO,
-  LOG_WARN,
-  LOG_ERROR,
-  LOG_FATAL,
-  LOG_OFF
-} log_level_t;
+typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, LOG_OFF } log_level_t;
 
 #ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL LOG_TRACE
@@ -98,7 +90,6 @@ void logSetOutputLocation(log_output_location_t newOutputLocation);
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  *
  */
-obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line,
-                        const char *s, ...);
+obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, const char *s, ...);
 
 #endif

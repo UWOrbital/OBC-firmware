@@ -107,23 +107,18 @@ extern "C" {
  */
 #if (portUSING_MPU_WRAPPERS == 1)
 #if (portHAS_STACK_OVERFLOW_CHECKING == 1)
-StackType_t* pxPortInitialiseStack(
-    StackType_t* pxTopOfStack, StackType_t* pxEndOfStack, TaskFunction_t pxCode,
-    void* pvParameters, BaseType_t xRunPrivileged) PRIVILEGED_FUNCTION;
+StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack, StackType_t* pxEndOfStack, TaskFunction_t pxCode,
+                                   void* pvParameters, BaseType_t xRunPrivileged) PRIVILEGED_FUNCTION;
 #else
-StackType_t* pxPortInitialiseStack(
-    StackType_t* pxTopOfStack, TaskFunction_t pxCode, void* pvParameters,
-    BaseType_t xRunPrivileged) PRIVILEGED_FUNCTION;
+StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack, TaskFunction_t pxCode, void* pvParameters,
+                                   BaseType_t xRunPrivileged) PRIVILEGED_FUNCTION;
 #endif
 #else /* if ( portUSING_MPU_WRAPPERS == 1 ) */
 #if (portHAS_STACK_OVERFLOW_CHECKING == 1)
-StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack,
-                                   StackType_t* pxEndOfStack,
-                                   TaskFunction_t pxCode,
+StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack, StackType_t* pxEndOfStack, TaskFunction_t pxCode,
                                    void* pvParameters) PRIVILEGED_FUNCTION;
 #else
-StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack,
-                                   TaskFunction_t pxCode,
+StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack, TaskFunction_t pxCode,
                                    void* pvParameters) PRIVILEGED_FUNCTION;
 #endif
 #endif /* if ( portUSING_MPU_WRAPPERS == 1 ) */
@@ -137,31 +132,25 @@ typedef struct HeapRegion {
 
 /* Used to pass information about the heap out of vPortGetHeapStats(). */
 typedef struct xHeapStats {
-  size_t
-      xAvailableHeapSpaceInBytes; /* The total heap size currently available -
-                                     this is the sum of all the free blocks, not
-                                     the largest block that can be allocated. */
-  size_t
-      xSizeOfLargestFreeBlockInBytes; /* The maximum size, in bytes, of all the
-                                         free blocks within the heap at the time
-                                         vPortGetHeapStats() is called. */
-  size_t
-      xSizeOfSmallestFreeBlockInBytes; /* The minimum size, in bytes, of all the
-                                          free blocks within the heap at the
-                                          time vPortGetHeapStats() is called. */
-  size_t
-      xNumberOfFreeBlocks; /* The number of free memory blocks within the heap
-                              at the time vPortGetHeapStats() is called. */
-  size_t
-      xMinimumEverFreeBytesRemaining; /* The minimum amount of total free memory
-                                         (sum of all free blocks) there has been
-                                         in the heap since the system booted. */
-  size_t xNumberOfSuccessfulAllocations; /* The number of calls to
-                                            pvPortMalloc() that have returned a
-                                            valid memory block. */
-  size_t
-      xNumberOfSuccessfulFrees; /* The number of calls to vPortFree() that has
-                                   successfully freed a block of memory. */
+  size_t xAvailableHeapSpaceInBytes;      /* The total heap size currently available -
+                                             this is the sum of all the free blocks, not
+                                             the largest block that can be allocated. */
+  size_t xSizeOfLargestFreeBlockInBytes;  /* The maximum size, in bytes, of all the
+                                             free blocks within the heap at the time
+                                             vPortGetHeapStats() is called. */
+  size_t xSizeOfSmallestFreeBlockInBytes; /* The minimum size, in bytes, of all the
+                                             free blocks within the heap at the
+                                             time vPortGetHeapStats() is called. */
+  size_t xNumberOfFreeBlocks;             /* The number of free memory blocks within the heap
+                                             at the time vPortGetHeapStats() is called. */
+  size_t xMinimumEverFreeBytesRemaining;  /* The minimum amount of total free memory
+                                             (sum of all free blocks) there has been
+                                             in the heap since the system booted. */
+  size_t xNumberOfSuccessfulAllocations;  /* The number of calls to
+                                             pvPortMalloc() that have returned a
+                                             valid memory block. */
+  size_t xNumberOfSuccessfulFrees;        /* The number of calls to vPortFree() that has
+                                             successfully freed a block of memory. */
 } HeapStats_t;
 
 /*
@@ -175,8 +164,7 @@ typedef struct xHeapStats {
  * terminated by a HeapRegions_t structure that has a size of 0.  The region
  * with the lowest start address must appear first in the array.
  */
-void vPortDefineHeapRegions(const HeapRegion_t* const pxHeapRegions)
-    PRIVILEGED_FUNCTION;
+void vPortDefineHeapRegions(const HeapRegion_t* const pxHeapRegions) PRIVILEGED_FUNCTION;
 
 /*
  * Returns a HeapStats_t structure filled with information about the current
@@ -223,10 +211,8 @@ void vPortEndScheduler(void) PRIVILEGED_FUNCTION;
  */
 #if (portUSING_MPU_WRAPPERS == 1)
 struct xMEMORY_REGION;
-void vPortStoreTaskMPUSettings(xMPU_SETTINGS* xMPUSettings,
-                               const struct xMEMORY_REGION* const xRegions,
-                               StackType_t* pxBottomOfStack,
-                               uint32_t ulStackDepth) PRIVILEGED_FUNCTION;
+void vPortStoreTaskMPUSettings(xMPU_SETTINGS* xMPUSettings, const struct xMEMORY_REGION* const xRegions,
+                               StackType_t* pxBottomOfStack, uint32_t ulStackDepth) PRIVILEGED_FUNCTION;
 #endif
 
 /* *INDENT-OFF* */

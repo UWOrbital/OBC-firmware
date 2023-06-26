@@ -10,8 +10,7 @@
 // Extra 10 for the small extra pieces in "%s - %s\r\n"
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
-static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO",
-                                      "WARN",  "ERROR", "FATAL"};
+static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
 static log_level_t logLevel;
 
@@ -19,8 +18,7 @@ void initLogger(void) { logSetLevel(LOG_DEFAULT_LEVEL); }
 
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
-obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line,
-                        const char *s, ...) {
+obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, const char *s, ...) {
   if (msgLevel < logLevel) return OBC_ERR_CODE_LOG_MSG_SILENCED;
 
   if (file == NULL || s == NULL) return OBC_ERR_CODE_INVALID_ARG;
@@ -44,8 +42,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line,
 
   // File & line number
   char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
-  ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%u",
-                 LEVEL_STRINGS[msgLevel], file, line);
+  ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%u", LEVEL_STRINGS[msgLevel], file, line);
   if (ret < 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

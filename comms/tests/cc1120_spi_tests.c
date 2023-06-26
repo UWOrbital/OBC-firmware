@@ -92,8 +92,7 @@ obc_error_code_t cc1120TestSpiRead(void) {
     }
   }
 
-  if (errCode == OBC_ERR_CODE_SUCCESS)
-    LOG_INFO("CC1120 SPI read test passed.\n");
+  if (errCode == OBC_ERR_CODE_SUCCESS) LOG_INFO("CC1120 SPI read test passed.\n");
 
   return errCode;
 }

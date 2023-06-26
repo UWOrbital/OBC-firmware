@@ -21,8 +21,7 @@ static StackType_t cmdManagerTaskStack[CMD_MANAGER_STACK_SIZE];
 
 static QueueHandle_t commandQueueHandle;
 static StaticQueue_t commandQueue;
-static uint8_t
-    commandQueueStack[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
+static uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
 
 typedef struct {
   cmd_callback_t callback;
@@ -31,28 +30,18 @@ typedef struct {
 } cmd_info_t;
 
 static const cmd_info_t cmdsConfig[] = {
-    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD,
-                          CMD_TYPE_NORMAL},
-    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback,
-                            CMD_POLICY_RND | CMD_POLICY_PROD,
-                            CMD_TYPE_CRITICAL},
-    [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD,
-                      CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback,
-                                     CMD_POLICY_RND | CMD_POLICY_PROD,
+    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD,
                                      CMD_TYPE_CRITICAL},
-    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback,
-                             CMD_POLICY_RND | CMD_POLICY_PROD,
-                             CMD_TYPE_CRITICAL},
-    [CMD_PING] = {pingCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD,
-                  CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback,
-                            CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
+    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_PING] = {pingCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
 
 #define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))
 
-STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX,
-              "Max command ID must be less than 256");
+STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
 /**
  * @brief Task that manages the command queue and executes commands
@@ -62,16 +51,14 @@ static void commandManagerTask(void *pvParameters);
 void initCommandManager(void) {
   ASSERT((cmdManagerTaskStack != NULL) && (&cmdManagerTaskBuffer != NULL));
   if (cmdManagerTaskHandle == NULL) {
-    cmdManagerTaskHandle = xTaskCreateStatic(
-        commandManagerTask, CMD_MANAGER_NAME, CMD_MANAGER_STACK_SIZE, NULL,
-        CMD_MANAGER_PRIORITY, cmdManagerTaskStack, &cmdManagerTaskBuffer);
+    cmdManagerTaskHandle = xTaskCreateStatic(commandManagerTask, CMD_MANAGER_NAME, CMD_MANAGER_STACK_SIZE, NULL,
+                                             CMD_MANAGER_PRIORITY, cmdManagerTaskStack, &cmdManagerTaskBuffer);
   }
 
   ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
   if (commandQueueHandle == NULL) {
     commandQueueHandle =
-        xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE,
-                           commandQueueStack, &commandQueue);
+        xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, commandQueueStack, &commandQueue);
   }
 }
 
@@ -97,8 +84,7 @@ static void commandManagerTask(void *pvParameters) {
   // Used to track whether a safety-critical command is currently being executed
   // This is inefficient space-wise, but simplifies the code. We can optimize
   // later if needed.
-  static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {
-      false};
+  static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {false};
 
   while (1) {
     cmd_msg_t cmd;
@@ -130,8 +116,7 @@ static void commandManagerTask(void *pvParameters) {
         // TODO: Make this persistent across resets
         if (!cmdProgressTracker[cmd.id]) {
           // Begin the two-step process of executing a safety-critical command
-          LOG_DEBUG("Process started to execute safety-critical command %u",
-                    cmd.id);
+          LOG_DEBUG("Process started to execute safety-critical command %u", cmd.id);
           cmdProgressTracker[cmd.id] = true;
           continue;
         }
@@ -152,17 +137,16 @@ static void commandManagerTask(void *pvParameters) {
         continue;
       }
 
-      alarm_handler_event_t alarm = {
-          .id = ALARM_HANDLER_NEW_ALARM,
-          .alarmInfo = {
-              .unixTime = cmd.timestamp,
-              .callbackDef =
-                  {
-                      .cmdCallback = currCmdInfo.callback,
-                  },
-              .type = ALARM_TYPE_TIME_TAGGED_CMD,
-              .cmdMsg = cmd,
-          }};
+      alarm_handler_event_t alarm = {.id = ALARM_HANDLER_NEW_ALARM,
+                                     .alarmInfo = {
+                                         .unixTime = cmd.timestamp,
+                                         .callbackDef =
+                                             {
+                                                 .cmdCallback = currCmdInfo.callback,
+                                             },
+                                         .type = ALARM_TYPE_TIME_TAGGED_CMD,
+                                         .cmdMsg = cmd,
+                                     }};
 
       LOG_IF_ERROR_CODE(sendToAlarmHandlerQueue(&alarm));
     }

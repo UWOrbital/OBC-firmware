@@ -46,8 +46,7 @@ static StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
 // Telemetry Data Queue
 static QueueHandle_t telemetryDataQueueHandle = NULL;
 static StaticQueue_t telemetryDataQueue;
-static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH *
-                                       TELEMETRY_DATA_QUEUE_ITEM_SIZE];
+static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH * TELEMETRY_DATA_QUEUE_ITEM_SIZE];
 
 static SemaphoreHandle_t downlinkReady = NULL;
 static StaticSemaphore_t downlinkReadyBuffer;
@@ -60,14 +59,12 @@ void initTelemetry(void) {
   memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
 
   ASSERT((telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL));
-  telemetryTaskHandle = xTaskCreateStatic(
-      telemetryManager, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL,
-      TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
+  telemetryTaskHandle = xTaskCreateStatic(telemetryManager, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL,
+                                          TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
 
   ASSERT((telemetryDataQueueStack != NULL) && (&telemetryDataQueue != NULL));
-  telemetryDataQueueHandle = xQueueCreateStatic(
-      TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE,
-      telemetryDataQueueStack, &telemetryDataQueue);
+  telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE,
+                                                telemetryDataQueueStack, &telemetryDataQueue);
 
   ASSERT(&downlinkReadyBuffer != NULL);
   downlinkReady = xSemaphoreCreateBinaryStatic(&downlinkReadyBuffer);
@@ -84,13 +81,11 @@ static void telemetryManager(void *pvParameters) {
   LOG_IF_ERROR_CODE(mkTelemetryDir());
 
   // TODO: Deal with errors
-  LOG_IF_ERROR_CODE(
-      createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
+  LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
 
   while (1) {
     telemetry_data_t telemData;
-    if (xQueueReceive(telemetryDataQueueHandle, &telemData,
-                      TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
+    if (xQueueReceive(telemetryDataQueueHandle, &telemData, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
       // TODO: Deal with errors
       LOG_IF_ERROR_CODE(writeTelemetryToFile(telemetryFileId, telemData));
     }
@@ -106,8 +101,7 @@ static void telemetryManager(void *pvParameters) {
       // TODO: Handle this error
     }
 
-    comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY_FILE,
-                                   .telemetryBatchId = telemetryBatchId};
+    comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
 
     LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
@@ -122,8 +116,7 @@ static void telemetryManager(void *pvParameters) {
 
     // TODO: Save batch ID to FRAM
 
-    LOG_IF_ERROR_CODE(
-        createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
+    LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       // TODO: Deal with errors
     }
@@ -139,17 +132,14 @@ obc_error_code_t addTelemetryData(telemetry_data_t *data) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(telemetryDataQueueHandle, (void *)data,
-                 TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(telemetryDataQueueHandle, (void *)data, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static bool checkDownlinkAlarm(void) {
-  return xSemaphoreTake(downlinkReady, 0) == pdPASS;
-}
+static bool checkDownlinkAlarm(void) { return xSemaphoreTake(downlinkReady, 0) == pdPASS; }
 
 obc_error_code_t setTelemetryManagerDownlinkReady(void) {
   if (xSemaphoreGive(downlinkReady) != pdPASS) {

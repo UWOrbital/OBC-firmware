@@ -23,8 +23,7 @@ static const unpack_func_t unpackFns[] = {
 #define MAX_CMD_ID ((sizeof(unpackFns) / sizeof(unpack_func_t)) - 1)
 
 // Unpack the command message
-obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset,
-                              cmd_msg_t* cmdMsg) {
+obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -57,35 +56,28 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset,
 }
 
 // CMD_EXEC_OBC_RESET
-void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset,
-                               cmd_msg_t* cmdMsg) {
+void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
 // CMD_RTC_SYNC
-void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset,
-                          cmd_msg_t* cmdMsg) {
+void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   cmdMsg->rtcSync.unixTime = unpackUint32(buffer, offset);
 }
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
-void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset,
-                                       cmd_msg_t* cmdMsg) {
-  cmdMsg->downlinkLogsNextPass.logLevel =
-      (log_level_t)unpackUint8(buffer, offset);
+void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+  cmdMsg->downlinkLogsNextPass.logLevel = (log_level_t)unpackUint8(buffer, offset);
 }
 
-void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset,
-                         cmd_msg_t* cmdMsg) {
+void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
-void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset,
-                       cmd_msg_t* cmdMsg) {
+void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
-void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset,
-                                cmd_msg_t* msg) {
+void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
   // No data to unpack
 }

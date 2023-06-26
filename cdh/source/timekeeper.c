@@ -27,9 +27,8 @@ void initTimekeeper(void) {
   memset(&timekeeperTaskStack, 0, sizeof(timekeeperTaskStack));
 
   ASSERT(timekeeperTaskStack != NULL && &timekeeperTaskBuffer != NULL);
-  timekeeperTaskHandle = xTaskCreateStatic(
-      timekeeperTask, TIMEKEEPER_NAME, TIMEKEEPER_STACK_SIZE, NULL,
-      TIMEKEEPER_PRIORITY, timekeeperTaskStack, &timekeeperTaskBuffer);
+  timekeeperTaskHandle = xTaskCreateStatic(timekeeperTask, TIMEKEEPER_NAME, TIMEKEEPER_STACK_SIZE, NULL,
+                                           TIMEKEEPER_PRIORITY, timekeeperTaskStack, &timekeeperTaskBuffer);
 }
 
 static void timekeeperTask(void *pvParameters) {

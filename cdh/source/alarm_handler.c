@@ -21,8 +21,7 @@ static StackType_t alarmHandlerTaskStack[ALARM_HANDLER_STACK_SIZE];
 
 static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
-static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH *
-                                      ALARM_HANDLER_QUEUE_ITEM_SIZE];
+static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER_QUEUE_ITEM_SIZE];
 
 #define ALARM_QUEUE_SIZE 24U
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
@@ -30,26 +29,22 @@ static size_t numActiveAlarms = 0;
 
 static void alarmHandler(void *pvParameters);
 
-static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm,
-                                     size_t *insertedAlarmIndex);
+static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm, size_t *insertedAlarmIndex);
 
 static obc_error_code_t dequeueAlarm(alarm_handler_alarm_info_t *alarm);
 
 static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 
-static void datetimeToAlarmTime(rtc_date_time_t *datetime,
-                                rtc_alarm_time_t *alarmTime);
+static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
 
 void initAlarmHandler(void) {
   ASSERT((alarmHandlerTaskStack != NULL) && (&alarmHandlerTaskBuffer != NULL));
-  alarmHandlerTaskHandle = xTaskCreateStatic(
-      alarmHandler, ALARM_HANDLER_NAME, ALARM_HANDLER_STACK_SIZE, NULL,
-      ALARM_HANDLER_PRIORITY, alarmHandlerTaskStack, &alarmHandlerTaskBuffer);
+  alarmHandlerTaskHandle = xTaskCreateStatic(alarmHandler, ALARM_HANDLER_NAME, ALARM_HANDLER_STACK_SIZE, NULL,
+                                             ALARM_HANDLER_PRIORITY, alarmHandlerTaskStack, &alarmHandlerTaskBuffer);
 
   ASSERT((alarmHandlerQueueStack != NULL) && (&alarmHandlerQueue != NULL));
-  alarmHandlerQueueHandle = xQueueCreateStatic(
-      ALARM_HANDLER_QUEUE_LENGTH, ALARM_HANDLER_QUEUE_ITEM_SIZE,
-      alarmHandlerQueueStack, &alarmHandlerQueue);
+  alarmHandlerQueueHandle = xQueueCreateStatic(ALARM_HANDLER_QUEUE_LENGTH, ALARM_HANDLER_QUEUE_ITEM_SIZE,
+                                               alarmHandlerQueueStack, &alarmHandlerQueue);
 }
 
 static void alarmHandler(void *pvParameters) {
@@ -58,8 +53,7 @@ static void alarmHandler(void *pvParameters) {
   while (1) {
     alarm_handler_event_t event;
 
-    if (xQueueReceive(alarmHandlerQueueHandle, &event,
-                      ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(alarmHandlerQueueHandle, &event, ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
 
@@ -77,16 +71,14 @@ static void alarmHandler(void *pvParameters) {
 
         // If the new alarm is the earliest alarm, set the RTC alarm to it
         rtc_date_time_t alarmDateTime;
-        LOG_IF_ERROR_CODE(
-            unixToDatetime(event.alarmInfo.unixTime, &alarmDateTime));
+        LOG_IF_ERROR_CODE(unixToDatetime(event.alarmInfo.unixTime, &alarmDateTime));
         if (errCode != OBC_ERR_CODE_SUCCESS) {
           break;
         }
 
         rtc_alarm_time_t alarmTime;
         datetimeToAlarmTime(&alarmDateTime, &alarmTime);
-        LOG_IF_ERROR_CODE(setAlarm1RTC(
-            RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS, alarmTime));
+        LOG_IF_ERROR_CODE(setAlarm1RTC(RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS, alarmTime));
 
         break;
       }
@@ -165,16 +157,14 @@ obc_error_code_t sendToAlarmHandlerQueue(alarm_handler_event_t *event) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(alarmHandlerQueueHandle, (void *)event,
-                 ALARM_HANDLER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(alarmHandlerQueueHandle, (void *)event, ALARM_HANDLER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm,
-                                     size_t *insertedAlarmIndex) {
+static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm, size_t *insertedAlarmIndex) {
   if (numActiveAlarms >= ALARM_QUEUE_SIZE) {
     return OBC_ERR_CODE_QUEUE_FULL;
   }
@@ -237,16 +227,14 @@ void alarmInterruptCallback(void) {
   // after we send the alarm triggered event.
 
   alarm_handler_event_t event = {.id = ALARM_HANDLER_ALARM_TRIGGERED};
-  xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event,
-                           &xHigherPriorityTaskWoken);
+  xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event, &xHigherPriorityTaskWoken);
 
   if (xHigherPriorityTaskWoken) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   }
 }
 
-static void datetimeToAlarmTime(rtc_date_time_t *datetime,
-                                rtc_alarm_time_t *alarmTime) {
+static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime) {
   alarmTime->time.seconds = datetime->time.seconds;
   alarmTime->time.minutes = datetime->time.minutes;
   alarmTime->time.hours = datetime->time.hours;

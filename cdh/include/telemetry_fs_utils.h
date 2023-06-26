@@ -12,10 +12,9 @@
 #define TELEMETRY_FILE_PREFIX "t_"
 #define TELEMETRY_FILE_EXTENSION ".tlm"
 #define TELEMETRY_FILE_NAME_MAX_LENGTH 10  // uint32_t max length
-#define TELEMETRY_FILE_PATH_MAX_LENGTH                                        \
-  sizeof(TELEMETRY_FILE_DIRECTORY) + sizeof(TELEMETRY_FILE_PREFIX) +          \
-      sizeof(TELEMETRY_FILE_EXTENSION) + TELEMETRY_FILE_NAME_MAX_LENGTH - 3 + \
-      1  // -3 for the 3 %s in the format string, +1 for the null terminator
+#define TELEMETRY_FILE_PATH_MAX_LENGTH                                                                  \
+  sizeof(TELEMETRY_FILE_DIRECTORY) + sizeof(TELEMETRY_FILE_PREFIX) + sizeof(TELEMETRY_FILE_EXTENSION) + \
+      TELEMETRY_FILE_NAME_MAX_LENGTH - 3 + 1  // -3 for the 3 %s in the format string, +1 for the null terminator
 
 /**
  * @brief Create the telemetry directory.
@@ -33,8 +32,7 @@ obc_error_code_t mkTelemetryDir(void);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error
  * code
  */
-obc_error_code_t createTelemetryFile(uint32_t telemBatchId,
-                                     int32_t *telemFileId);
+obc_error_code_t createTelemetryFile(uint32_t telemBatchId, int32_t *telemFileId);
 
 /**
  * @brief Open a new telemetry file in read/write mode.
@@ -44,8 +42,7 @@ obc_error_code_t createTelemetryFile(uint32_t telemBatchId,
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error
  * code
  */
-obc_error_code_t openTelemetryFileRW(uint32_t telemBatchId,
-                                     int32_t *telemFileId);
+obc_error_code_t openTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId);
 
 /**
  * @brief Open a telemetry file in read-only mode.
@@ -55,8 +52,7 @@ obc_error_code_t openTelemetryFileRW(uint32_t telemBatchId,
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error
  * code
  */
-obc_error_code_t openTelemetryFileRO(uint32_t telemBatchId,
-                                     int32_t *telemFileId);
+obc_error_code_t openTelemetryFileRO(uint32_t telemBatchId, int32_t *telemFileId);
 
 /**
  * @brief Close a telemetry file.
@@ -77,8 +73,7 @@ obc_error_code_t closeTelemetryFile(int32_t telemFileId);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the file name was
  * successfully obtained, error code otherwise
  */
-obc_error_code_t constructTelemetryFilePath(uint32_t telemBatchId, char *buff,
-                                            size_t buffSize);
+obc_error_code_t constructTelemetryFilePath(uint32_t telemBatchId, char *buff, size_t buffSize);
 
 /**
  * @brief Write telemetry data to file.
@@ -89,8 +84,7 @@ obc_error_code_t constructTelemetryFilePath(uint32_t telemBatchId, char *buff,
  * code
  * @note File must already be opened for writing
  */
-obc_error_code_t writeTelemetryToFile(int32_t telFileId,
-                                      telemetry_data_t telemetryData);
+obc_error_code_t writeTelemetryToFile(int32_t telFileId, telemetry_data_t telemetryData);
 
 /**
  * @brief Get the next telemetry data point from the given telemetry file
@@ -101,8 +95,7 @@ obc_error_code_t writeTelemetryToFile(int32_t telFileId,
  * otherwise
  * @note File must already be opened for reading
  */
-obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId,
-                                           telemetry_data_t *telemData);
+obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t *telemData);
 
 /**
  * @brief Create and open a new telemetry file in read/write mode.
@@ -111,7 +104,6 @@ obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId,
  * @param telemFileId Buffer to store the telemetry file descriptor
  * @return obc_error_code_t
  */
-obc_error_code_t createAndOpenTelemetryFileRW(uint32_t telemBatchId,
-                                              int32_t *telemFileId);
+obc_error_code_t createAndOpenTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId);
 
 #endif /* CDH_INCLUDE_TELEMETRY_FS_UTILS_H_ */

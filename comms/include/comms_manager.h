@@ -14,11 +14,7 @@
  *
  * Enum containing all possible event IDs passed to the comms event queue.
  */
-typedef enum {
-  BEGIN_UPLINK,
-  DOWNLINK_TELEMETRY_FILE,
-  DOWNLINK_DATA_BUFFER
-} comms_event_id_t;
+typedef enum { BEGIN_UPLINK, DOWNLINK_TELEMETRY_FILE, DOWNLINK_DATA_BUFFER } comms_event_id_t;
 
 typedef struct {
   telemetry_data_t telemData[MAX_DOWNLINK_TELEM_BUFFER_SIZE];

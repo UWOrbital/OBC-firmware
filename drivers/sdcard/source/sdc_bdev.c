@@ -69,8 +69,7 @@
 #define SDC_CLOCK_TRANSITION_BYTES 10U
 
 #define SDC_ACTION_NUM_ATTEMPTS_DEFAULT 50U
-STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255,
-              "SDC_ACTION_NUM_ATTEMPTS_DEFAULT must be <= 255");
+STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255, "SDC_ACTION_NUM_ATTEMPTS_DEFAULT must be <= 255");
 
 #define SDC_DELAY_1MS pdMS_TO_TICKS(1)
 
@@ -90,9 +89,8 @@ static spiDAT1_t sdcSpiConfig = {
 };
 
 static volatile DSTATUS stat = STA_NOINIT; /* Disk status */
-static uint8_t
-    cardType; /* Card type flags: b0:MMC, b1:SDC, b2:Block addressing */
-static sdc_power_t powerFlag = POWER_OFF; /* indicates if "power" is on */
+static uint8_t cardType;                   /* Card type flags: b0:MMC, b1:SDC, b2:Block addressing */
+static sdc_power_t powerFlag = POWER_OFF;  /* indicates if "power" is on */
 
 /*---------------------------------------------*/
 /* SD Card Private Functions                   */
@@ -111,8 +109,7 @@ static bool isCardReady(void) {
   for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
     uint8_t res;
 
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, &res));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res));
 
     if (res == 0xFF) return true;
 
@@ -181,8 +178,7 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
   /* Wait for a data packet */
   for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, &token));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &token));
     if (token != 0xFF) break;
     vTaskDelay(SDC_DELAY_1MS);
   }
@@ -192,19 +188,15 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
 
   /* Receive the data block into buffer */
   while (btr) {
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, buff++));
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, buff++));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, buff++));
     btr -= 2;
   }
 
   /* Discard CRC */
   unsigned char crc;
-  LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                              SDC_MOSI_HIGH, &crc));
-  LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                              SDC_MOSI_HIGH, &crc));
+  LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc));
+  LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &crc));
 
   return true;
 }
@@ -224,8 +216,7 @@ static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
 
   if (!isCardReady()) return false;
 
-  LOG_IF_ERROR_CODE(
-      spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, token));  // Send token
+  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, token));  // Send token
 
   if (token != SD_STOP_TRANSMISSION) {
     for (unsigned int wc = 0; wc < SD_SECTOR_SIZE; wc++) {
@@ -239,10 +230,8 @@ static bool sendDataBlock(const uint8_t *buff, uint8_t token) {
 
     uint8_t resp;
     LOG_IF_ERROR_CODE(
-        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH,
-                                  &resp)); /* Receive data response */
-    if ((resp & SD_DATA_RESPONSE_MASK) != SD_DATA_RESPONSE_ACCEPTED)
-      return false;
+        spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &resp)); /* Receive data response */
+    if ((resp & SD_DATA_RESPONSE_MASK) != SD_DATA_RESPONSE_ACCEPTED) return false;
   }
 
   return true;
@@ -263,16 +252,11 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
   if (!isCardReady()) return 0xFFU;
 
   /* Send command packet */
-  LOG_IF_ERROR_CODE(
-      spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, cmd)); /* Command */
-  LOG_IF_ERROR_CODE(spiTransmitByte(
-      SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 24))); /* Argument[31..24] */
-  LOG_IF_ERROR_CODE(spiTransmitByte(
-      SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 16))); /* Argument[23..16] */
-  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig,
-                                    (uint8_t)(arg >> 8))); /* Argument[15..8] */
-  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig,
-                                    (uint8_t)arg)); /* Argument[7..0] */
+  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, cmd));                  /* Command */
+  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 24))); /* Argument[31..24] */
+  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 16))); /* Argument[23..16] */
+  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)(arg >> 8)));  /* Argument[15..8] */
+  LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, (uint8_t)arg));         /* Argument[7..0] */
 
   /* Some commands require a CRC to be sent */
   uint8_t crc = 0xFFU;
@@ -287,15 +271,13 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
   /* Skip a uint8_t after "stop reading" cmd is sent */
   unsigned char tmp;
   if (cmd == SDC_CMD12) {
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, &tmp));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &tmp));
   }
 
   /* Receive command response */
   uint8_t res;
   for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, &res));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res));
     if (!(res & SDC_CMD_RESP_MASK)) break;
     vTaskDelay(SDC_DELAY_1MS);
   }
@@ -324,8 +306,7 @@ static uint8_t stopTransmission(void) {
   /* Data transfer stops 2 bytes after 6-uint8_t SDC_CMD12 */
   uint8_t val;
   for (uint8_t i = 0; i < 2; i++) {
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, &val));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val));
   }
 
   /* SDC should now send 2-6 0xFF bytes, the response uint8_t, and then another
@@ -334,8 +315,7 @@ static uint8_t stopTransmission(void) {
   uint8_t res;
   const uint8_t numBytesRcv = 8U;
   for (unsigned int n = 0; n < numBytesRcv; n++) {
-    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                SDC_MOSI_HIGH, &val));
+    LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &val));
     if (val != 0xFF) res = val;
   }
 
@@ -393,8 +373,7 @@ DSTATUS disk_initialize(uint8_t drv) {
     uint8_t ocr[ocrSize];
 
     for (uint8_t i = 0; i < ocrSize; i++) {
-      LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig,
-                                                  SDC_MOSI_HIGH, &ocr[i]));
+      LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]));
     }
 
     // Check if the lower 12 bits in the response are 0x1AA
@@ -409,12 +388,10 @@ DSTATUS disk_initialize(uint8_t drv) {
             // Check bit 6 of response to determine if card is SDHC or standard
             // SD card
             for (unsigned int i = 0; i < ocrSize; i++) {
-              LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(
-                  SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]));
+              LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &ocr[i]));
             }
-            ty = (ocr[0] & CARD_CAPACITY_OCR_MASK)
-                     ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK)
-                     : (CARD_TYPE_SDC_MASK);
+            ty = (ocr[0] & CARD_CAPACITY_OCR_MASK) ? (CARD_TYPE_SDC_MASK | CARD_TYPE_BLOCK_ADDR_MASK)
+                                                   : (CARD_TYPE_SDC_MASK);
           }
         }
         vTaskDelay(SDC_DELAY_1MS);
@@ -424,17 +401,14 @@ DSTATUS disk_initialize(uint8_t drv) {
     }
   } else {
     // Card is SDC Ver1 or MMC
-    ty = (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) <= 1)
-             ? (CARD_TYPE_SDC_MASK)
-             : (CARD_TYPE_MMC_MASK);
+    ty = (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) <= 1) ? (CARD_TYPE_SDC_MASK) : (CARD_TYPE_MMC_MASK);
 
     bool initSuccess = false;
     for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
       // Begin the initialization process with ACMD41 for SDC or CMD1 for MMC
       // CMD55 must be sent before ACMD41
       if (ty & CARD_TYPE_SDC_MASK) {
-        if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) == 0)
-          initSuccess = true;
+        if (sendCMD(SDC_CMD55, 0) <= 1 && sendCMD(SDC_CMD41, 0) == 0) initSuccess = true;
       } else {
         if (sendCMD(SDC_CMD1, 0) == 0) initSuccess = true;
       }
@@ -488,15 +462,13 @@ DSTATUS disk_status(uint8_t pdrv) {
  * @param count Sector count (1..255).
  * @return DRESULT Result
  */
-DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector,
-                  uint32_t count) {
+DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) {
   obc_error_code_t errCode;
 
   if (pdrv || !count) return RES_PARERR;
   if (stat & STA_NOINIT) return RES_NOTRDY;
 
-  if (!(cardType & CARD_TYPE_BLOCK_ADDR_MASK))
-    sector *= SD_SECTOR_SIZE; /* Convert to uint8_t address if needed */
+  if (!(cardType & CARD_TYPE_BLOCK_ADDR_MASK)) sector *= SD_SECTOR_SIZE; /* Convert to uint8_t address if needed */
 
   // Recursive take done so we can send byte when CS is high at the end of
   // transaction
@@ -512,8 +484,7 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector,
 
   if (count == 1) {
     /* Single block read */
-    if ((sendCMD(SDC_CMD17, sector) == 0) && rcvDataBlock(buff, SD_SECTOR_SIZE))
-      count = 0;
+    if ((sendCMD(SDC_CMD17, sector) == 0) && rcvDataBlock(buff, SD_SECTOR_SIZE)) count = 0;
   } else {
     /* Multiple block read */
     if (sendCMD(SDC_CMD18, sector) == 0) {
@@ -544,16 +515,14 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector,
  * @param count Sector count (1..255).
  * @return DRESULT Result
  */
-DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector,
-                   uint32_t count) {
+DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector, uint32_t count) {
   obc_error_code_t errCode;
 
   if (pdrv || !count) return RES_PARERR;
   if (stat & STA_NOINIT) return RES_NOTRDY;
   if (stat & STA_PROTECT) return RES_WRPRT;
 
-  if (!(cardType & (CARD_TYPE_BLOCK_ADDR_MASK)))
-    sector *= SD_SECTOR_SIZE; /* Convert to uint8_t address if needed */
+  if (!(cardType & (CARD_TYPE_BLOCK_ADDR_MASK))) sector *= SD_SECTOR_SIZE; /* Convert to uint8_t address if needed */
 
   // Recursive take done so we can send byte when CS is high at the end of
   // transaction
@@ -569,9 +538,7 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t *buff, uint32_t sector,
 
   if (count == 1) {
     /* Single block write */
-    if ((sendCMD(SDC_CMD24, sector) == 0) &&
-        sendDataBlock(buff, SDC_CMD24_DATA_TOKEN))
-      count = 0;
+    if ((sendCMD(SDC_CMD24, sector) == 0) && sendDataBlock(buff, SDC_CMD24_DATA_TOKEN)) count = 0;
   } else {
     /* Multiple block write */
     if (cardType & CARD_TYPE_SDC_MASK) {
@@ -653,10 +620,9 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
     }
 
     const uint8_t csdSize = 16U;  // Size of buffer to hold CSD register data
-    uint8_t
-        csd[csdSize];  // Card-specific data (CSD); Note the index numbers are
-                       // opposite to the bit numbers in the CSD register
-    uint32_t csize;    // Device size
+    uint8_t csd[csdSize];         // Card-specific data (CSD); Note the index numbers are
+                                  // opposite to the bit numbers in the CSD register
+    uint32_t csize;               // Device size
     switch (ctrl) {
       case GET_SECTOR_COUNT:
         /* Get number of sectors on the disk (uint32_t) */
@@ -667,21 +633,16 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
           if (csdStructField == 1) {
             // CSIZE field spans bits [69:48] of the CSD register
             // Disk size (bytes) = (CSIZE+1) * 512KB * 1024B/KB
-            csize = ((uint32_t)(csd[7] & 0x3F) << 16) |
-                    ((uint16_t)csd[8] << 8) | csd[9];
+            csize = ((uint32_t)(csd[7] & 0x3F) << 16) | ((uint16_t)csd[8] << 8) | csd[9];
             *(uint32_t *)buff = (uint32_t)(csize + 1) << 10;
           } else {
             // CSIZE field spans bits [73:62] of the CSD register
             // Capacity = (CSIZE+1) * 2^(C_SIZE_MULT+READ_BL_LEN+2)
-            csize = ((uint32_t)(csd[6] & 0x03) << 10) |
-                    ((uint16_t)csd[7] << 2) | (csd[8] >> 6);
-            const uint8_t readBlLen =
-                csd[5] & 0xF;  // READ_BL_LEN field spans bits [83:80] of the
-                               // CSD register
-            const uint8_t cSizeMult =
-                ((csd[9] & 0x3) << 1) |
-                (csd[10] >> 7);  // C_SIZE_MULT field spans bits [49:47] of the
-                                 // CSD register
+            csize = ((uint32_t)(csd[6] & 0x03) << 10) | ((uint16_t)csd[7] << 2) | (csd[8] >> 6);
+            const uint8_t readBlLen = csd[5] & 0xF;  // READ_BL_LEN field spans bits [83:80] of the
+                                                     // CSD register
+            const uint8_t cSizeMult = ((csd[9] & 0x3) << 1) | (csd[10] >> 7);  // C_SIZE_MULT field spans bits [49:47]
+                                                                               // of the CSD register
             const uint8_t n = (cSizeMult + readBlLen + 2);
             *(uint32_t *)buff = (uint32_t)(csize + 1) << (n - 9);
           }

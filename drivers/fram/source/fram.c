@@ -10,8 +10,7 @@
 #include <sys_common.h>
 
 // SPI values
-static spiDAT1_t framSPIDataFmt = {
-    .CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = FRAM_spiFMT, .WDEL = 0};
+static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = FRAM_spiFMT, .WDEL = 0};
 
 // FRAM OPCODES
 #define OP_WRITE_ENABLE 0x06U
@@ -82,8 +81,7 @@ static obc_error_code_t framTransmitAddress(uint32_t addr) {
   // Send last 3 bytes MSB first
   for (int i = 2; i >= 0; i--) {
     uint8_t byte = (addr >> (i * 8)) & (0xFF);
-    obc_error_code_t ret =
-        spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, (unsigned char)byte);
+    obc_error_code_t ret = spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, (unsigned char)byte);
     if (ret != OBC_ERR_CODE_SUCCESS) {
       return ret;
     }
@@ -99,11 +97,8 @@ obc_error_code_t framReadStatusReg(uint8_t *status) {
 
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
 
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_READ_STATUS_REG));
-  DEASSERT_RETURN_IF_ERROR_CODE(
-      FRAM_spiPORT, FRAM_CS,
-      spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, status));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ_STATUS_REG));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, status));
 
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
 
@@ -114,16 +109,12 @@ obc_error_code_t framWriteStatusReg(uint8_t status) {
   obc_error_code_t errCode;
   // Send WREN
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_WRITE_EN));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE_EN));
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
 
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_WRITE_STATUS_REG));
-  DEASSERT_RETURN_IF_ERROR_CODE(
-      FRAM_spiPORT, FRAM_CS,
-      spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, status));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE_STATUS_REG));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, status));
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
 
   return OBC_ERR_CODE_SUCCESS;
@@ -137,21 +128,15 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
 
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
 
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_FAST_READ));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitAddress(addr));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_FAST_READ));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitAddress(addr));
 
   // Send dummy byte
-  DEASSERT_RETURN_IF_ERROR_CODE(
-      FRAM_spiPORT, FRAM_CS,
-      spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, 0xFF));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, 0xFF));
 
   for (uint32_t i = 0; i < nBytes; i++) {
     uint8_t receiveByte;
-    DEASSERT_RETURN_IF_ERROR_CODE(
-        FRAM_spiPORT, FRAM_CS,
-        spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
+    DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
     buffer[i] = receiveByte;
   }
 
@@ -167,16 +152,12 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
 
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
 
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_READ));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitAddress(addr));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitAddress(addr));
 
   for (uint32_t i = 0; i < nBytes; i++) {
     uint8_t receiveByte;
-    DEASSERT_RETURN_IF_ERROR_CODE(
-        FRAM_spiPORT, FRAM_CS,
-        spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
+    DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
     buffer[i] = receiveByte;
   }
 
@@ -192,21 +173,16 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
 
   // Send WREN
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_WRITE_EN));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE_EN));
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
 
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
 
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_WRITE));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitAddress(addr));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_WRITE));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitAddress(addr));
 
   for (uint32_t i = 0; i < nBytes; i++) {
-    DEASSERT_RETURN_IF_ERROR_CODE(
-        FRAM_spiPORT, FRAM_CS,
-        spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, data[i]));
+    DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, data[i]));
   }
 
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
@@ -217,8 +193,7 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
 obc_error_code_t framSleep(void) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_SLEEP));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_SLEEP));
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -239,14 +214,11 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS,
-                                framTransmitOpCode(FRAM_READ_ID));
+  DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ_ID));
 
   for (uint32_t i = 0; i < nBytes && i < FRAM_ID_LEN; i++) {
     uint8_t receiveByte;
-    DEASSERT_RETURN_IF_ERROR_CODE(
-        FRAM_spiPORT, FRAM_CS,
-        spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
+    DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
     id[i] = receiveByte;
   }
 

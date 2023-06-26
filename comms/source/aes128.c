@@ -26,8 +26,7 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  memcpy(cmdBytes, aesData->aesStruct.ciphertext,
-         RS_DECODED_SIZE - AES_IV_SIZE);
+  memcpy(cmdBytes, aesData->aesStruct.ciphertext, RS_DECODED_SIZE - AES_IV_SIZE);
   AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
   AES_CTR_xcrypt_buffer(&ctx, cmdBytes, RS_DECODED_SIZE - AES_IV_SIZE);
   memcpy(cmdBytes, cmdBytes + 5, RS_DECODED_SIZE - AES_IV_SIZE - 5);

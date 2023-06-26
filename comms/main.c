@@ -24,8 +24,7 @@ static void vTestTask(void* pvParameters);
 void initTestTask(void) {
   ASSERT((testTaskStack != NULL) && (&testTaskBuffer != NULL));
   if (testTaskHandle == NULL) {
-    testTaskHandle = xTaskCreateStatic(vTestTask, "test task", 1024U, NULL, 1U,
-                                       testTaskStack, &testTaskBuffer);
+    testTaskHandle = xTaskCreateStatic(vTestTask, "test task", 1024U, NULL, 1U, testTaskStack, &testTaskBuffer);
   }
 }
 

@@ -59,8 +59,7 @@ typedef struct {
   // fram_payload_data_t payload_data;
 } fram_persist_t;
 
-STATIC_ASSERT(sizeof(fram_persist_t) <= FRAM_MAX_ADDRESS,
-              "Data stored too large for FRAM");
+STATIC_ASSERT(sizeof(fram_persist_t) <= FRAM_MAX_ADDRESS, "Data stored too large for FRAM");
 
 #define FRAM_ADDRESS_OF(data) (0x0 + offsetof(fram_persist_t, data))
 
@@ -75,8 +74,7 @@ obc_error_code_t getPersistentTimeData(fram_time_data_t *buffer) {
 
   // Read FRAM
   uint8_t read_buffer[sizeof(fram_time_persist_t)] = {0};
-  RETURN_IF_ERROR_CODE(
-      framRead(fram_address, read_buffer, sizeof(fram_time_persist_t)));
+  RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_time_persist_t)));
 
   // Parse Stored data
   fram_time_persist_t read_data = {0};
@@ -111,8 +109,7 @@ obc_error_code_t setPersistentTimeData(fram_time_data_t data) {
   write_data.data = data;
   memcpy(write_buffer, &write_data, sizeof(fram_time_persist_t));
 
-  RETURN_IF_ERROR_CODE(
-      framWrite(fram_address, write_buffer, sizeof(fram_time_persist_t)));
+  RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_time_persist_t)));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -127,16 +124,14 @@ obc_error_code_t getPersistentStateData(fram_state_data_t *buffer) {
 
   // Read FRAM
   uint8_t read_buffer[sizeof(fram_state_persist_t)] = {0};
-  RETURN_IF_ERROR_CODE(
-      framRead(fram_address, read_buffer, sizeof(fram_state_persist_t)));
+  RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_state_persist_t)));
 
   // Parse Stored data
   fram_state_persist_t read_data = {0};
   memcpy(&read_data, read_buffer, sizeof(fram_state_persist_t));
 
   // Integrity Check
-  uint32_t crc32 =
-      RedCrc32Update(0, &read_data.data, sizeof(fram_state_data_t));
+  uint32_t crc32 = RedCrc32Update(0, &read_data.data, sizeof(fram_state_data_t));
   if (read_data.header.len != sizeof(fram_state_data_t)) {
     // Do something
     return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
@@ -164,8 +159,7 @@ obc_error_code_t setPersistentStateData(fram_state_data_t data) {
   write_data.data = data;
   memcpy(write_buffer, &write_data, sizeof(fram_state_persist_t));
 
-  RETURN_IF_ERROR_CODE(
-      framWrite(fram_address, write_buffer, sizeof(fram_state_persist_t)));
+  RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_state_persist_t)));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -282,8 +276,7 @@ obc_error_code_t getPersistentCDHData(fram_cdh_data_t *buffer) {
 
   // Read FRAM
   uint8_t read_buffer[sizeof(fram_cdh_persist_t)] = {0};
-  RETURN_IF_ERROR_CODE(
-      framRead(fram_address, read_buffer, sizeof(fram_cdh_persist_t)));
+  RETURN_IF_ERROR_CODE(framRead(fram_address, read_buffer, sizeof(fram_cdh_persist_t)));
 
   // Parse Stored data
   fram_cdh_persist_t read_data = {0};
@@ -317,8 +310,7 @@ obc_error_code_t setPersistentCDHData(fram_cdh_data_t data) {
   write_data.data = data;
   memcpy(write_buffer, &write_data, sizeof(fram_cdh_persist_t));
 
-  RETURN_IF_ERROR_CODE(
-      framWrite(fram_address, write_buffer, sizeof(fram_cdh_persist_t)));
+  RETURN_IF_ERROR_CODE(framWrite(fram_address, write_buffer, sizeof(fram_cdh_persist_t)));
   return OBC_ERR_CODE_SUCCESS;
 }
 

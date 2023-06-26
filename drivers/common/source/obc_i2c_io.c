@@ -40,8 +40,7 @@ void initI2CMutex(void) {
   ASSERT(i2cMutex != NULL);
 
   if (i2cTransferComplete == NULL) {
-    i2cTransferComplete =
-        xSemaphoreCreateBinaryStatic(&i2cTransferCompleteBuffer);
+    i2cTransferComplete = xSemaphoreCreateBinaryStatic(&i2cTransferCompleteBuffer);
   }
 
   ASSERT(i2cTransferComplete != NULL);
@@ -118,8 +117,7 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf) {
   return errCode;
 }
 
-obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data,
-                            uint16_t numBytes) {
+obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes) {
   obc_error_code_t errCode;
 
   ASSERT(i2cMutex != NULL);
@@ -133,14 +131,12 @@ obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data,
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data,
-                             uint8_t numBytes) {
+obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes) {
   obc_error_code_t errCode;
 
   ASSERT(i2cMutex != NULL);
 
-  if (data == NULL || numBytes < 1 || numBytes > I2C_WRITE_REG_MAX_BYTES)
-    return OBC_ERR_CODE_INVALID_ARG;
+  if (data == NULL || numBytes < 1 || numBytes > I2C_WRITE_REG_MAX_BYTES) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t dataBuf[I2C_WRITE_REG_MAX_BYTES + 1];
   dataBuf[0] = reg;

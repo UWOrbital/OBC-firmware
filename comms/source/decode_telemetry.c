@@ -39,13 +39,10 @@ static StackType_t decodeTaskStack[COMMS_DECODE_STACK_SIZE];
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
-static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH *
-                                    DECODE_DATA_QUEUE_ITEM_SIZE];
+static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void *pvParameters);
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data,
-                                     packed_rs_packet_t *rsData,
-                                     aes_data_t *aesData);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager
@@ -86,15 +83,13 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
 void initDecodeTask(void) {
   ASSERT((decodeTaskStack != NULL) && (&decodeTaskBuffer != NULL));
   if (decodeTaskHandle == NULL) {
-    decodeTaskHandle = xTaskCreateStatic(
-        vDecodeTask, COMMS_DECODE_TASK_NAME, COMMS_DECODE_STACK_SIZE, NULL,
-        COMMS_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
+    decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_DECODE_TASK_NAME, COMMS_DECODE_STACK_SIZE, NULL,
+                                         COMMS_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
   }
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
-    decodeDataQueueHandle = xQueueCreateStatic(
-        DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,
-        decodeDataQueueStack, &decodeDataQueue);
+    decodeDataQueueHandle = xQueueCreateStatic(DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,
+                                               decodeDataQueueStack, &decodeDataQueue);
   }
 }
 
@@ -116,8 +111,7 @@ static void vDecodeTask(void *pvParameters) {
   bool startFlagReceived = false;
 
   while (1) {
-    if (xQueueReceive(decodeDataQueueHandle, &byte,
-                      DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
+    if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
       if (axDataIndex >= sizeof(axData.data)) {
         LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
 
@@ -171,9 +165,7 @@ static void vDecodeTask(void *pvParameters) {
  * @return obc_error_code_t - whether or not the data was completely decoded
  * successfully
  */
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data,
-                                     packed_rs_packet_t *rsData,
-                                     aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &cubesatCallsign));
@@ -204,8 +196,7 @@ obc_error_code_t sendToDecodeDataQueue(uint8_t *data) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(decodeDataQueueHandle, (void *)data,
-                 DECODE_DATA_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(decodeDataQueueHandle, (void *)data, DECODE_DATA_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 

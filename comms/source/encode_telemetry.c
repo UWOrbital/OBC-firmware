@@ -27,15 +27,13 @@ static StaticTask_t telemEncodeTaskBuffer;
 static StackType_t telemEncodeTaskStack[COMMS_TELEM_ENCODE_STACK_SIZE];
 
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
-#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE \
-  sizeof(comms_event_t)  // Size of the telemetry batch ID
+#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(comms_event_t)  // Size of the telemetry batch ID
 #define COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
 static QueueHandle_t telemEncodeQueueHandle = NULL;
 static StaticQueue_t telemEncodeQueue;
-static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH *
-                                     COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
+static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH * COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
 
 /**
  * @brief Puts telemetry data through OSI model layers and queues into the
@@ -52,8 +50,7 @@ static void vTelemEncodeTask(void *pvParameters);
  * @param numTelemetryData - Number of telemetry data points in the buffer
  * @return obc_error_code_t
  */
-static obc_error_code_t sendTelemetryBuffer(
-    telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData);
+static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData);
 
 /**
  * @brief Reads chunks of telemetry out of a file and sends it into the CC1120
@@ -72,8 +69,7 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId);
  * @param fd - Pointer to the file descriptor to be set
  * @return obc_error_code_t
  */
-static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId,
-                                          int32_t *fd);
+static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd);
 
 /**
  * @brief Sends a telemetry packet, applying FEC and AX.25 framing
@@ -93,9 +89,8 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket);
  * telemPacket
  * @return obc_error_code_t
  */
-static obc_error_code_t sendOrPackNextTelemetry(
-    telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
-    size_t *telemPacketOffset);
+static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
+                                                size_t *telemPacketOffset);
 
 /**
  * @brief Initializes the telemetry encoding task and queue
@@ -105,16 +100,14 @@ void initTelemEncodeTask(void) {
   ASSERT((telemEncodeTaskStack != NULL) && (&telemEncodeTaskBuffer != NULL));
 
   if (telemEncodeTaskHandle == NULL) {
-    telemEncodeTaskHandle = xTaskCreateStatic(
-        vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME,
-        COMMS_TELEM_ENCODE_STACK_SIZE, NULL, COMMS_TELEM_ENCODE_TASK_PRIORITY,
-        telemEncodeTaskStack, &telemEncodeTaskBuffer);
+    telemEncodeTaskHandle =
+        xTaskCreateStatic(vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME, COMMS_TELEM_ENCODE_STACK_SIZE, NULL,
+                          COMMS_TELEM_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
   }
 
   if (telemEncodeQueueHandle == NULL) {
-    telemEncodeQueueHandle = xQueueCreateStatic(
-        COMMS_TELEM_ENCODE_QUEUE_LENGTH, COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE,
-        telemEncodeQueueStack, &telemEncodeQueue);
+    telemEncodeQueueHandle = xQueueCreateStatic(COMMS_TELEM_ENCODE_QUEUE_LENGTH, COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE,
+                                                telemEncodeQueueStack, &telemEncodeQueue);
   }
 }
 
@@ -129,8 +122,7 @@ void initTelemEncodeTask(void) {
 obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg) {
   ASSERT(telemEncodeQueueHandle != NULL);
 
-  if (xQueueSend(telemEncodeQueueHandle, (void *)queueMsg,
-                 COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(telemEncodeQueueHandle, (void *)queueMsg, COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
@@ -150,8 +142,7 @@ static void vTelemEncodeTask(void *pvParameters) {
     comms_event_t queueMsg;
 
     // Wait for a telemetry downlink event
-    if (xQueueReceive(telemEncodeQueueHandle, &queueMsg,
-                      COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(telemEncodeQueueHandle, &queueMsg, COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       // TODO: Handle this if necessary
       continue;
     }
@@ -162,8 +153,7 @@ static void vTelemEncodeTask(void *pvParameters) {
         break;
       case DOWNLINK_DATA_BUFFER:
         LOG_IF_ERROR_CODE(
-            sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData,
-                                queueMsg.telemetryDataBuffer.bufferSize));
+            sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -179,8 +169,7 @@ static void vTelemEncodeTask(void *pvParameters) {
  * @param numTelemetryData - Number of telemetry data points in the buffer
  * @return obc_error_code_t
  */
-static obc_error_code_t sendTelemetryBuffer(
-    telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData) {
+static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData) {
   obc_error_code_t errCode;
 
   if (telemetryDataBuffer == NULL) {
@@ -193,16 +182,14 @@ static obc_error_code_t sendTelemetryBuffer(
 
   // Initialize important variables related to packing and queueing the
   // telemetry to be sen
-  packed_telem_packet_t telemPacket = {
-      0};  // Holds 223B of "raw" telemetry data.
-           // Zero initialized because telem IDs of 0 are ignored at the ground
-           // station
-  size_t telemPacketOffset = 0;  // Number of bytes filled in telemPacket
+  packed_telem_packet_t telemPacket = {0};  // Holds 223B of "raw" telemetry data.
+                                            // Zero initialized because telem IDs of 0 are ignored at the ground
+                                            // station
+  size_t telemPacketOffset = 0;             // Number of bytes filled in telemPacket
 
   // Loop through all telemetry data in the buffer
   for (uint8_t i = 0; i < numTelemetryData; i++) {
-    RETURN_IF_ERROR_CODE(sendOrPackNextTelemetry(
-        telemetryDataBuffer + i, &telemPacket, &telemPacketOffset));
+    RETURN_IF_ERROR_CODE(sendOrPackNextTelemetry(telemetryDataBuffer + i, &telemPacket, &telemPacketOffset));
   }
 
   // Send the last packet if it is not empty
@@ -230,20 +217,16 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
 
   // Initialize important variables related to packing and queueing the
   // telemetry to be sent
-  telemetry_data_t
-      singleTelem;  // Holds a single piece of telemetry from getNextTelemetry()
+  telemetry_data_t singleTelem;  // Holds a single piece of telemetry from getNextTelemetry()
 
-  packed_telem_packet_t telemPacket = {
-      0};  // Holds 223B of "raw" telemetry data.
-           // Zero initialized because telem IDs of 0 are ignored at the ground
-           // station
-  size_t telemPacketOffset = 0;  // Number of bytes filled in telemPacket
+  packed_telem_packet_t telemPacket = {0};  // Holds 223B of "raw" telemetry data.
+                                            // Zero initialized because telem IDs of 0 are ignored at the ground
+                                            // station
+  size_t telemPacketOffset = 0;             // Number of bytes filled in telemPacket
 
   // Read a single piece of telemetry from the file
-  while ((errCode = readNextTelemetryFromFile(fd, &singleTelem)) ==
-         OBC_ERR_CODE_SUCCESS) {
-    errCode =
-        sendOrPackNextTelemetry(&singleTelem, &telemPacket, &telemPacketOffset);
+  while ((errCode = readNextTelemetryFromFile(fd, &singleTelem)) == OBC_ERR_CODE_SUCCESS) {
+    errCode = sendOrPackNextTelemetry(&singleTelem, &telemPacket, &telemPacketOffset);
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       LOG_ERROR_CODE(errCode);
       RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
@@ -283,8 +266,7 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
  * @param fd - Pointer to the file descriptor to be set
  * @return obc_error_code_t
  */
-static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId,
-                                          int32_t *fd) {
+static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd) {
   obc_error_code_t errCode;
 
   if (fd == NULL) {
@@ -306,8 +288,7 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId,
 
   // Print telemetry file name
   char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
-  errCode = constructTelemetryFilePath(telemetryBatchId, fileName,
-                                       TELEMETRY_FILE_PATH_MAX_LENGTH);
+  errCode = constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
     closeTelemetryFile(*fd);
@@ -329,9 +310,8 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId,
  * telemPacket
  * @return obc_error_code_t
  */
-static obc_error_code_t sendOrPackNextTelemetry(
-    telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
-    size_t *telemPacketOffset) {
+static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
+                                                size_t *telemPacketOffset) {
   obc_error_code_t errCode;
 
   LOG_DEBUG("Sending telemetry: %u", singleTelem->id);
@@ -339,12 +319,11 @@ static obc_error_code_t sendOrPackNextTelemetry(
   uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized
                                                        // version of the current
                                                        // piece of telemetry
-  size_t packedSingleTelemSize = 0;  // Size of the packed single telemetry
+  size_t packedSingleTelemSize = 0;                    // Size of the packed single telemetry
 
   // Pack the single telemetry into a uint8_t array
-  RETURN_IF_ERROR_CODE(packTelemetry(
-      singleTelem, packedSingleTelem,
-      sizeof(packedSingleTelem) / sizeof(uint8_t), &packedSingleTelemSize));
+  RETURN_IF_ERROR_CODE(packTelemetry(singleTelem, packedSingleTelem, sizeof(packedSingleTelem) / sizeof(uint8_t),
+                                     &packedSingleTelemSize));
 
   // If the single telemetry is too large to continue adding to the telemPacket,
   // send the telemPacket
@@ -356,8 +335,7 @@ static obc_error_code_t sendOrPackNextTelemetry(
   }
 
   // Copy the telemetry data into the packedTelem struct
-  memcpy(telemPacket->data + (*telemPacketOffset), packedSingleTelem,
-         packedSingleTelemSize);
+  memcpy(telemPacket->data + (*telemPacketOffset), packedSingleTelem, packedSingleTelemSize);
   *telemPacketOffset += packedSingleTelemSize;
 
   return OBC_ERR_CODE_SUCCESS;
@@ -369,8 +347,7 @@ static obc_error_code_t sendOrPackNextTelemetry(
  * @param telemPacket - A complete telemetry packet of size 223B
  * @return obc_error_code_t
  */
-static obc_error_code_t sendTelemetryPacket(
-    packed_telem_packet_t *telemPacket) {
+static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) {
   obc_error_code_t errCode;
 
   packed_rs_packet_t fecPkt;     // Holds a 255B RS packet
@@ -380,8 +357,7 @@ static obc_error_code_t sendTelemetryPacket(
   RETURN_IF_ERROR_CODE(rsEncode(telemPacket, &fecPkt));
 
   // Perform AX.25 framing
-  RETURN_IF_ERROR_CODE(
-      ax25Send(&fecPkt, &ax25Pkt, &groundStationCallsign, &cubesatCallsign));
+  RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationCallsign, &cubesatCallsign));
 
   // Send into CC1120 transmit queue
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));

@@ -63,8 +63,7 @@ obc_error_code_t writeFile(int32_t fileId, const void *data, size_t dataLen);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error
  * code
  */
-obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize,
-                          size_t *bytesRead);
+obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize, size_t *bytesRead);
 
 /**
  * @brief Get the size of a file.

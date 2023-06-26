@@ -35,9 +35,8 @@ void vTask1(void *pvParameters) {
   // Enable interrupt on alarm 1
   rtc_control_t control;
   LOG_IF_ERROR_CODE(getControlRTC(&control));
-  LOG_INFO("RTC Control: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u",
-           control.EOSC, control.BBSQW, control.CONV, control.A1IE,
-           control.A2IE, control.INTCN);
+  LOG_INFO("RTC Control: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u", control.EOSC, control.BBSQW, control.CONV,
+           control.A1IE, control.A2IE, control.INTCN);
 
   control.A1IE = 1;
   control.INTCN = 1;
@@ -60,10 +59,8 @@ void vTask1(void *pvParameters) {
   while (1) {
     rtc_date_time_t newDateTime;
     LOG_IF_ERROR_CODE(getCurrentDateTimeRTC(&newDateTime));
-    LOG_INFO("RTC Date: %u/%u/%u", newDateTime.date.month,
-             newDateTime.date.date, newDateTime.date.year);
-    LOG_INFO("RTC Time: %u:%u:%u", newDateTime.time.hours,
-             newDateTime.time.minutes, newDateTime.time.seconds);
+    LOG_INFO("RTC Date: %u/%u/%u", newDateTime.date.month, newDateTime.date.date, newDateTime.date.year);
+    LOG_INFO("RTC Time: %u:%u:%u", newDateTime.time.hours, newDateTime.time.minutes, newDateTime.time.seconds);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }

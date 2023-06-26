@@ -105,18 +105,14 @@ extern void vPortExitCritical(void);
 
 /*-----------------------------------------------------------*/
 
-extern void vPortThreadDying(void *pxTaskToDelete,
-                             volatile BaseType_t *pxPendYield);
+extern void vPortThreadDying(void *pxTaskToDelete, volatile BaseType_t *pxPendYield);
 extern void vPortCancelThread(void *pxTaskToDelete);
-#define portPRE_TASK_DELETE_HOOK(pvTaskToDelete, pxPendYield) \
-  vPortThreadDying((pvTaskToDelete), (pxPendYield))
+#define portPRE_TASK_DELETE_HOOK(pvTaskToDelete, pxPendYield) vPortThreadDying((pvTaskToDelete), (pxPendYield))
 #define portCLEAN_UP_TCB(pxTCB) vPortCancelThread(pxTCB)
 /*-----------------------------------------------------------*/
 
-#define portTASK_FUNCTION_PROTO(vFunction, pvParameters) \
-  void vFunction(void *pvParameters)
-#define portTASK_FUNCTION(vFunction, pvParameters) \
-  void vFunction(void *pvParameters)
+#define portTASK_FUNCTION_PROTO(vFunction, pvParameters) void vFunction(void *pvParameters)
+#define portTASK_FUNCTION(vFunction, pvParameters) void vFunction(void *pvParameters)
 /*-----------------------------------------------------------*/
 
 /*

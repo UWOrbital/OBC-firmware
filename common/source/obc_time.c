@@ -113,17 +113,15 @@ obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime) {
   uint32_t tmHour = datetime->time.hours;
 
   uint32_t tmYday =
-      (uint32_t)calcDayOfYear(datetime->date.month, datetime->date.date,
-                              RTC_YEAR_OFFSET + datetime->date.year);
+      (uint32_t)calcDayOfYear(datetime->date.month, datetime->date.date, RTC_YEAR_OFFSET + datetime->date.year);
 
   // Get year since 1900
   uint32_t tmYear = (RTC_YEAR_OFFSET + datetime->date.year) - 1900;
 
   // See
   // https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html
-  *unixTime = tmSec + tmMin * 60 + tmHour * 3600 + tmYday * 86400 +
-              (tmYear - 70) * 31536000 + ((tmYear - 69) / 4) * 86400 -
-              ((tmYear - 1) / 100) * 86400 + ((tmYear + 299) / 400) * 86400;
+  *unixTime = tmSec + tmMin * 60 + tmHour * 3600 + tmYday * 86400 + (tmYear - 70) * 31536000 +
+              ((tmYear - 69) / 4) * 86400 - ((tmYear - 1) / 100) * 86400 + ((tmYear + 299) / 400) * 86400;
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -157,8 +155,7 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
   }
 
   // Since LEAPOCH starts in March, the first month is March
-  static const uint8_t daysInMonth[] = {31, 30, 31, 30, 31, 31,
-                                        30, 31, 30, 31, 31, 29};
+  static const uint8_t daysInMonth[] = {31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29};
 
   // Track remainders
   uint32_t remDays, remSecs, remYears;
@@ -259,15 +256,12 @@ obc_error_code_t unixToDatetime(uint32_t ts, rtc_date_time_t *dt) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static bool isLeapYear(uint16_t year) {
-  return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
+static bool isLeapYear(uint16_t year) { return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0); }
 
 static uint16_t calcDayOfYear(uint8_t month, uint8_t day, uint16_t year) {
   // Cumulative days in a year up to the start of each month
-  static const uint16_t days[2][12] = {
-      {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
-      {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}};
+  static const uint16_t days[2][12] = {{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334},
+                                       {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335}};
 
   // Row 0 is for non-leap years, row 1 is for leap years
   uint8_t leap = (uint8_t)isLeapYear(year);

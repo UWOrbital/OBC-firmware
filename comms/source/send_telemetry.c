@@ -28,8 +28,7 @@ static StackType_t cc1120TransmitTaskStack[CC1120_TRANSMIT_STACK_SIZE];
 
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
-static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH *
-                                        CC1120_TRANSMIT_QUEUE_ITEM_SIZE];
+static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH * CC1120_TRANSMIT_QUEUE_ITEM_SIZE];
 
 /**
  * @brief Sends data from the CC1120 transmit queue into the CC1120 FIFO memory
@@ -43,20 +42,17 @@ static void vCC1120TransmitTask(void *pvParameters);
  *
  */
 void initCC1120TransmitTask(void) {
-  ASSERT((cc1120TransmitTaskStack != NULL) &&
-         (&cc1120TransmitTaskBuffer != NULL));
+  ASSERT((cc1120TransmitTaskStack != NULL) && (&cc1120TransmitTaskBuffer != NULL));
 
   if (cc1120TransmitTaskHandle == NULL) {
-    cc1120TransmitTaskHandle = xTaskCreateStatic(
-        vCC1120TransmitTask, CC1120_TRANSMIT_TASK_NAME,
-        CC1120_TRANSMIT_STACK_SIZE, NULL, CC1120_TRANSMIT_TASK_PRIORITY,
-        cc1120TransmitTaskStack, &cc1120TransmitTaskBuffer);
+    cc1120TransmitTaskHandle =
+        xTaskCreateStatic(vCC1120TransmitTask, CC1120_TRANSMIT_TASK_NAME, CC1120_TRANSMIT_STACK_SIZE, NULL,
+                          CC1120_TRANSMIT_TASK_PRIORITY, cc1120TransmitTaskStack, &cc1120TransmitTaskBuffer);
   }
 
   if (cc1120TransmitQueueHandle == NULL) {
-    cc1120TransmitQueueHandle = xQueueCreateStatic(
-        CC1120_TRANSMIT_QUEUE_LENGTH, CC1120_TRANSMIT_QUEUE_ITEM_SIZE,
-        cc1120TransmitQueueStack, &cc1120TransmitQueue);
+    cc1120TransmitQueueHandle = xQueueCreateStatic(CC1120_TRANSMIT_QUEUE_LENGTH, CC1120_TRANSMIT_QUEUE_ITEM_SIZE,
+                                                   cc1120TransmitQueueStack, &cc1120TransmitQueue);
   }
 }
 
@@ -74,8 +70,7 @@ obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_packet_t *ax25Pkt) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(cc1120TransmitQueueHandle, (void *)ax25Pkt,
-                 CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(cc1120TransmitQueueHandle, (void *)ax25Pkt, CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
@@ -94,8 +89,7 @@ static void vCC1120TransmitTask(void *pvParameters) {
   while (1) {
     // Wait for CC1120 transmit queue
     packed_ax25_packet_t ax25_pkt;
-    if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt,
-                      CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       // TODO: Handle this if necessary
       continue;
     }

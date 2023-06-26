@@ -43,8 +43,7 @@ void packInt32(int32_t value, uint8_t* buffer, size_t* offset) {
 }
 
 void packFloat(float value, uint8_t* buffer, size_t* offset) {
-  STATIC_ASSERT(sizeof(float) == sizeof(uint32_t),
-                "float and uint32_t must be the same size");
+  STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
 
   uint32_t tmp;
   memcpy(&tmp, &value, sizeof(tmp));

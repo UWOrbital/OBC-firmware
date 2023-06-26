@@ -43,8 +43,7 @@ void vTask1(void *pvParameters) {
 
   REDSTATFS statfs;
   red_statvfs("", &statfs);
-  sciPrintf("Disk Info - Total Blocks: %d, Free Blocks: %d\r\n",
-            statfs.f_blocks, statfs.f_bfree);
+  sciPrintf("Disk Info - Total Blocks: %d, Free Blocks: %d\r\n", statfs.f_blocks, statfs.f_bfree);
 
   int32_t file = red_open(fname, RED_O_WRONLY | RED_O_CREAT);
   if (file < 0) {
@@ -54,8 +53,7 @@ void vTask1(void *pvParameters) {
   }
   sciPrintf("Successfully opened %s\r\n", fname);
 
-  ret =
-      red_write(file, "TESTING 1...2...3\r\n", strlen("TESTING 1...2...3\r\n"));
+  ret = red_write(file, "TESTING 1...2...3\r\n", strlen("TESTING 1...2...3\r\n"));
   if (ret < 0) {
     sciPrintf("red_write() returned %d\r\n", ret);
     while (1)
@@ -81,8 +79,7 @@ void vTask1(void *pvParameters) {
   sciPrintf("Successfully opened %s\r\n", fname);
 
   // Append some text to the file
-  ret =
-      red_write(file, "TESTING 3...2...1\r\n", strlen("TESTING 3...2...1\r\n"));
+  ret = red_write(file, "TESTING 3...2...1\r\n", strlen("TESTING 3...2...1\r\n"));
   if (ret < 0) {
     sciPrintf("red_write() returned %d\r\n", ret);
     while (1)
@@ -140,8 +137,7 @@ int main(void) {
 
   sciPrintf("Starting Reliance Edge Demo\r\n");
 
-  xTaskCreateStatic(vTask1, "RelianceEdgeDemo", 1024, NULL, 1, taskStack,
-                    &taskBuffer);
+  xTaskCreateStatic(vTask1, "RelianceEdgeDemo", 1024, NULL, 1, taskStack, &taskBuffer);
 
   vTaskStartScheduler();
 

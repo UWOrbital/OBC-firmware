@@ -1,10 +1,7 @@
 #include "cc1120_mcu.h"
 #include "obc_spi_io.h"
 
-static const spiDAT1_t spiConfig = {.CS_HOLD = false,
-                                    .WDEL = false,
-                                    .DFSEL = CC1120_SPI_FMT,
-                                    .CSNR = CC1120_SPI_CS};
+static const spiDAT1_t spiConfig = {.CS_HOLD = false, .WDEL = false, .DFSEL = CC1120_SPI_FMT, .CSNR = CC1120_SPI_CS};
 
 /**
  * @brief Simultaneously sends and receives a byte over CC1120 SPI interface
@@ -15,8 +12,7 @@ static const spiDAT1_t spiConfig = {.CS_HOLD = false,
  */
 obc_error_code_t mcuCC1120SpiTransfer(uint8_t outb, uint8_t *inb) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(
-      CC1120_SPI_REG, (spiDAT1_t *)&spiConfig, outb, inb));
+  RETURN_IF_ERROR_CODE(spiTransmitAndReceiveByte(CC1120_SPI_REG, (spiDAT1_t *)&spiConfig, outb, inb));
   return OBC_ERR_CODE_SUCCESS;
 }
 

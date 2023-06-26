@@ -44,17 +44,14 @@ obc_error_code_t initCam(void) {
   // Reset camera
   RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
   // Setup at 320x420 resolution
-  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(
-      getCamConfig(OV5642_QVGA_Preview_Config), PREVIEW_CONFIG_LEN));
+  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_QVGA_Preview_Config), PREVIEW_CONFIG_LEN));
   vTaskDelay(pdMS_TO_TICKS(1));
   if (m_fmt == JPEG) {
     vTaskDelay(pdMS_TO_TICKS(1));
     // Switch to JPEG capture
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(
-        getCamConfig(OV5642_JPEG_Capture_QSXGA_Config), JPEG_CONFIG_LEN));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_JPEG_Capture_QSXGA_Config), JPEG_CONFIG_LEN));
     // Switch to lowest JPEG resolution
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(
-        getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
+    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
 
     vTaskDelay(pdMS_TO_TICKS(1));
     // Vertical flip
@@ -78,8 +75,7 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size) {
   switch (size) {
     // Todo: all other resolutions are unimplemented
     case OV5642_320x240:
-      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(
-          getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
+      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
       break;
     case OV5642_640x480:
       // camWriteSensorRegs16_8(ov5642_640x480);
@@ -100,29 +96,20 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size) {
       // camWriteSensorRegs16_8(ov5642_2592x1944);
       break;
     default:
-      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(
-          getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
+      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
       break;
   }
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t flushFifo(camera_t cam) {
-  return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
-}
+obc_error_code_t flushFifo(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam); }
 
-obc_error_code_t startCapture(camera_t cam) {
-  return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam);
-}
+obc_error_code_t startCapture(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam); }
 
-obc_error_code_t clearFifoFlag(camera_t cam) {
-  return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
-}
+obc_error_code_t clearFifoFlag(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam); }
 
-obc_error_code_t setFifoBurst(camera_t cam) {
-  return camWriteByte(BURST_FIFO_READ, cam);
-}
+obc_error_code_t setFifoBurst(camera_t cam) { return camWriteByte(BURST_FIFO_READ, cam); }
 
 obc_error_code_t captureImage(camera_t cam) {
   obc_error_code_t errCode;
@@ -136,9 +123,7 @@ obc_error_code_t captureImage(camera_t cam) {
   return errCode;
 }
 
-bool isCaptureDone(camera_t cam) {
-  return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam);
-}
+bool isCaptureDone(camera_t cam) { return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam); }
 
 obc_error_code_t readFifoLength(uint32_t *length, camera_t cam) {
   obc_error_code_t errCode;

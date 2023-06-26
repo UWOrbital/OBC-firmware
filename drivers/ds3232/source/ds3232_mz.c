@@ -148,8 +148,7 @@ obc_error_code_t getSecondsRTC(uint8_t *seconds) {
   if (seconds == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &data, 1));
 
   *seconds = twoDigitDecimalFromBCD(data);
 
@@ -161,8 +160,7 @@ obc_error_code_t getMinutesRTC(uint8_t *minutes) {
   if (minutes == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &data, 1));
 
   *minutes = twoDigitDecimalFromBCD(data);
 
@@ -175,8 +173,7 @@ obc_error_code_t getHourRTC(uint8_t *hours) {
   if (hours == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &data, 1));
 
   *hours = twoDigitDecimalFromBCD(data);
 
@@ -189,8 +186,7 @@ obc_error_code_t getDayRTC(uint8_t *days) {
   if (days == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &data, 1));
 
   *days = data;
 
@@ -203,8 +199,7 @@ obc_error_code_t getDateRTC(uint8_t *date) {
   if (date == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &data, 1));
 
   *date = twoDigitDecimalFromBCD(data);
 
@@ -217,8 +212,7 @@ obc_error_code_t getMonthRTC(uint8_t *month) {
   if (month == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &data, 1));
 
   *month = twoDigitDecimalFromBCD(data & 0x1F);
 
@@ -231,8 +225,7 @@ obc_error_code_t getYearRTC(uint8_t *year) {
   if (year == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &data, 1));
 
   *year = twoDigitDecimalFromBCD(data);
 
@@ -277,8 +270,7 @@ obc_error_code_t getControlRTC(rtc_control_t *control) {
   if (control == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &data, 1));
 
   control->EOSC = (data >> 7) & 1;
   control->BBSQW = (data >> 6) & 1;
@@ -296,8 +288,7 @@ obc_error_code_t getStatusRTC(rtc_status_t *status) {
   if (status == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &data, 1));
 
   status->OSF = (data >> 7) & 1;
   status->BB32KHZ = (data >> 6) & 1;
@@ -315,8 +306,7 @@ obc_error_code_t getAgingOffsetRTC(int8_t *agingOffset) {
   if (agingOffset == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &data, 1));
 
   *agingOffset = (int8_t)data;
 
@@ -329,8 +319,7 @@ obc_error_code_t getTemperatureRTC(float *temperature) {
   if (temperature == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t dataBuff[2];
-  RETURN_IF_ERROR_CODE(
-      i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_TEMP_MSB, dataBuff, 2));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_TEMP_MSB, dataBuff, 2));
 
   int16_t val = ((int8_t)dataBuff[0] << 2) | (dataBuff[1] >> 6);
 
@@ -348,8 +337,7 @@ obc_error_code_t setSecondsRTC(uint8_t writeSeconds) {
 
   uint8_t writeVal = twoDigitDecimalToBCD(writeSeconds);
 
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -361,8 +349,7 @@ obc_error_code_t setMinutesRTC(uint8_t writeMinutes) {
 
   uint8_t writeVal = twoDigitDecimalToBCD(writeMinutes);
 
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -373,8 +360,7 @@ obc_error_code_t setHourRTC(uint8_t writeHours) {
   if (writeHours > MAX_HOURS) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = twoDigitDecimalToBCD(writeHours);
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -382,11 +368,9 @@ obc_error_code_t setHourRTC(uint8_t writeHours) {
 obc_error_code_t setDayRTC(uint8_t writeDays) {
   obc_error_code_t errCode;
 
-  if (writeDays < MIN_DAY || writeDays > MAX_DAY)
-    return OBC_ERR_CODE_INVALID_ARG;
+  if (writeDays < MIN_DAY || writeDays > MAX_DAY) return OBC_ERR_CODE_INVALID_ARG;
 
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &writeDays, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &writeDays, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -394,12 +378,10 @@ obc_error_code_t setDayRTC(uint8_t writeDays) {
 obc_error_code_t setDateRTC(uint8_t writeDates) {
   obc_error_code_t errCode;
 
-  if (writeDates < MIN_DATE || writeDates > MAX_DATE)
-    return OBC_ERR_CODE_INVALID_ARG;
+  if (writeDates < MIN_DATE || writeDates > MAX_DATE) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = twoDigitDecimalToBCD(writeDates);
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -408,12 +390,10 @@ obc_error_code_t setMonthRTC(uint8_t writeMonths) {
   obc_error_code_t errCode;
 
   uint8_t monthNum = writeMonths & 0x1F;
-  if (monthNum > MAX_MONTH || monthNum < MIN_MONTH)
-    return OBC_ERR_CODE_INVALID_ARG;
+  if (monthNum > MAX_MONTH || monthNum < MIN_MONTH) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = twoDigitDecimalToBCD(writeMonths);
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -424,8 +404,7 @@ obc_error_code_t setYearRTC(uint8_t writeYears) {
   if (writeYears > MAX_YEAR) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = twoDigitDecimalToBCD(writeYears);
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -451,12 +430,10 @@ obc_error_code_t setControlRTC(rtc_control_t *writeControl) {
 
   if (writeControl == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t writeVal = (writeControl->EOSC << 7) | (writeControl->BBSQW << 6) |
-                     (writeControl->CONV << 5) | (writeControl->INTCN << 2) |
-                     (writeControl->A2IE << 1) | (writeControl->A1IE);
+  uint8_t writeVal = (writeControl->EOSC << 7) | (writeControl->BBSQW << 6) | (writeControl->CONV << 5) |
+                     (writeControl->INTCN << 2) | (writeControl->A2IE << 1) | (writeControl->A1IE);
 
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -466,12 +443,10 @@ obc_error_code_t setStatusRTC(rtc_status_t *writeStatus) {
 
   if (writeStatus == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t writeVal = (writeStatus->OSF << 7) | (writeStatus->BB32KHZ << 6) |
-                     (writeStatus->EN32KHZ << 3) | (writeStatus->BSY << 2) |
-                     (writeStatus->A2F << 1) | (writeStatus->A1F);
+  uint8_t writeVal = (writeStatus->OSF << 7) | (writeStatus->BB32KHZ << 6) | (writeStatus->EN32KHZ << 3) |
+                     (writeStatus->BSY << 2) | (writeStatus->A2F << 1) | (writeStatus->A1F);
 
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -482,8 +457,7 @@ obc_error_code_t setAgingOffsetRTC(int8_t writeAgingOffset) {
   uint8_t writeVal = (writeAgingOffset < 0) ? (1 << 7) : 0;
   writeVal |= (writeAgingOffset < 0) ? -writeAgingOffset : writeAgingOffset;
 
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -494,8 +468,7 @@ obc_error_code_t setAlarm1SecondsRTC(alarm_match_t en, uint8_t seconds) {
   if (seconds > MAX_SECONDS) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(seconds);
-  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS,
-                                   DS3232_REG_ALARM_1_SECONDS, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_1_SECONDS, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -506,8 +479,7 @@ obc_error_code_t setAlarm1MinutesRTC(alarm_match_t en, uint8_t minutes) {
   if (minutes > MAX_MINUTES) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(minutes);
-  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS,
-                                   DS3232_REG_ALARM_1_MINUTES, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_1_MINUTES, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -518,8 +490,7 @@ obc_error_code_t setAlarm1HoursRTC(alarm_match_t en, uint8_t hours) {
   if (hours > MAX_HOURS) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(hours);
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_1_HOURS, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_1_HOURS, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -530,8 +501,7 @@ obc_error_code_t setAlarm1DateRTC(alarm_match_t en, uint8_t date) {
   if (date < MIN_DATE || date > MAX_DATE) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(date);
-  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS,
-                                   DS3232_REG_ALARM_1_DAY_DATE, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_1_DAY_DATE, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -583,8 +553,7 @@ obc_error_code_t setAlarm2MinutesRTC(alarm_match_t en, uint8_t minutes) {
   if (minutes > MAX_MINUTES) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(minutes);
-  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS,
-                                   DS3232_REG_ALARM_2_MINUTES, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_2_MINUTES, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -595,8 +564,7 @@ obc_error_code_t setAlarm2HoursRTC(alarm_match_t en, uint8_t hours) {
   if (hours > MAX_HOURS) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(hours);
-  RETURN_IF_ERROR_CODE(
-      i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_2_HOURS, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_2_HOURS, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -607,8 +575,7 @@ obc_error_code_t setAlarm2DateRTC(alarm_match_t en, uint8_t date) {
   if (date < MIN_DATE || date > MAX_DATE) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t writeVal = (en << 7) | twoDigitDecimalToBCD(date);
-  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS,
-                                   DS3232_REG_ALARM_2_DAY_DATE, &writeVal, 1));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(DS3232_I2C_ADDRESS, DS3232_REG_ALARM_2_DAY_DATE, &writeVal, 1));
 
   return OBC_ERR_CODE_SUCCESS;
 }

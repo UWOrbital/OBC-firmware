@@ -13,6 +13,5 @@ void testI2C(void) {
         "device\r\n");
     return;
   }
-  sciPrintf(
-      "Successfully sending message (0xff, 0x00, 0xff) through I2C...\r\n");
+  sciPrintf("Successfully sending message (0xff, 0x00, 0xff) through I2C...\r\n");
 }

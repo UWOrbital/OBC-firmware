@@ -35,12 +35,10 @@ static StackType_t commsTaskStack[COMMS_MANAGER_STACK_SIZE];
 
 static QueueHandle_t commsQueueHandle = NULL;
 static StaticQueue_t commsQueue;
-static uint8_t
-    commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_ITEM_SIZE];
+static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_ITEM_SIZE];
 
-static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                                      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
 /**
  * @brief	Comms Manager task.
@@ -51,16 +49,14 @@ static void vCommsManagerTask(void *pvParameters);
 void initCommsManager(void) {
   ASSERT((commsTaskStack != NULL) && (&commsTaskBuffer != NULL));
   if (commsTaskHandle == NULL) {
-    commsTaskHandle = xTaskCreateStatic(
-        vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, NULL,
-        COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
+    commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, NULL,
+                                        COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
   }
 
   ASSERT((commsQueueStack != NULL) && (&commsQueue != NULL));
   if (commsQueueHandle == NULL) {
-    commsQueueHandle = xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH,
-                                          COMMS_MANAGER_QUEUE_ITEM_SIZE,
-                                          commsQueueStack, &commsQueue);
+    commsQueueHandle =
+        xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH, COMMS_MANAGER_QUEUE_ITEM_SIZE, commsQueueStack, &commsQueue);
   }
 
   // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static
@@ -82,8 +78,7 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(commsQueueHandle, (void *)event,
-                 COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(commsQueueHandle, (void *)event, COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
@@ -96,8 +91,7 @@ static void vCommsManagerTask(void *pvParameters) {
   while (1) {
     comms_event_t queueMsg;
 
-    if (xQueueReceive(commsQueueHandle, &queueMsg,
-                      COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
 

@@ -88,8 +88,7 @@ obc_error_code_t deleteFile(const char *filePath) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t writeFile(int32_t fileId, const void *data,
-                           size_t dataLength) {
+obc_error_code_t writeFile(int32_t fileId, const void *data, size_t dataLength) {
   if (fileId < 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -113,8 +112,7 @@ obc_error_code_t writeFile(int32_t fileId, const void *data,
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize,
-                          size_t *bytesRead) {
+obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize, size_t *bytesRead) {
   if (fileId < 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

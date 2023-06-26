@@ -78,9 +78,8 @@ obc_error_code_t readConfigLM75BD(lm75bd_config_t *config);
  * @param devOperationMode Device operation mode, 0 = normal, 1 = shutdown
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
-obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize,
-                                   uint8_t osPolarity, uint8_t osOperationMode,
-                                   uint8_t devOperationMode);
+obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osPolarity,
+                                   uint8_t osOperationMode, uint8_t devOperationMode);
 
 /**
  * @brief Get the hysteresis threshold from the LM75BD
@@ -89,8 +88,7 @@ obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize,
  * @param hysteresisThresholdCelsius Hysteresis threshold, in degrees Celsius
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
-obc_error_code_t readThystLM75BD(uint8_t devAddr,
-                                 float *hysteresisThresholdCelsius);
+obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius);
 
 /**
  * @brief Set the hysteresis threshold for the LM75BD
@@ -100,8 +98,7 @@ obc_error_code_t readThystLM75BD(uint8_t devAddr,
  * (<= 127.5)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
-obc_error_code_t writeThystLM75BD(uint8_t devAddr,
-                                  float hysteresisThresholdCelsius);
+obc_error_code_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCelsius);
 
 /**
  * @brief Get the overtemperature shutdown threshold from the LM75BD
@@ -111,8 +108,7 @@ obc_error_code_t writeThystLM75BD(uint8_t devAddr,
  * degrees Celsius
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
-obc_error_code_t readTosLM75BD(uint8_t devAddr,
-                               float *overTempThresholdCelsius);
+obc_error_code_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius);
 
 /**
  * @brief Set the overtemperature shutdown threshold for the LM75BD
@@ -122,8 +118,7 @@ obc_error_code_t readTosLM75BD(uint8_t devAddr,
  * degrees Celsius (<= 127.5)
  * @return OBC_ERR_CODE_SUCCESS if successful, error code otherwise
  */
-obc_error_code_t writeTosLM75BD(uint8_t devAddr,
-                                float overTempThresholdCelsius);
+obc_error_code_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius);
 
 /**
  * @brief Handle an OS interrupt from the LM75BD

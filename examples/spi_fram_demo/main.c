@@ -26,9 +26,8 @@ int main(void) {
 
   // Read Manufacture ID
   framReadID(chipID, FRAM_ID_LEN);
-  snprintf(msg, 50, "ID:%X %X %X %X %X %X %X %X %X\r\n", chipID[0], chipID[1],
-           chipID[2], chipID[3], chipID[4], chipID[5], chipID[6], chipID[7],
-           chipID[8]);
+  snprintf(msg, 50, "ID:%X %X %X %X %X %X %X %X %X\r\n", chipID[0], chipID[1], chipID[2], chipID[3], chipID[4],
+           chipID[5], chipID[6], chipID[7], chipID[8]);
   // Note: This will send through the USB port on the LaunchPad
   sciPrintText((unsigned char *)msg, strlen(msg));
 
@@ -51,8 +50,7 @@ int main(void) {
   sciPrintText((unsigned char *)msg, strlen(msg));
 
   // Multipe Bytes
-  unsigned char hello_world[12] = {'H', 'e', 'l', 'l', 'o', ' ',
-                                   'W', 'o', 'r', 'l', 'd'};
+  unsigned char hello_world[12] = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
   snprintf(msg, 50, "Writting %s to %lX\r\n", hello_world, addr);
   sciPrintText((unsigned char *)msg, strlen(msg));
   // Write Hello World to 0x12345
@@ -85,8 +83,7 @@ int main(void) {
   framWriteStatusReg(oldStatusReg);
 
   // Sleep
-  sciPrintText((unsigned char *)"Going to sleep\r\n",
-               strlen("Going to sleep\r\n"));
+  sciPrintText((unsigned char *)"Going to sleep\r\n", strlen("Going to sleep\r\n"));
   framSleep();
   framWakeUp();
   // Read Hello World from 0x1234

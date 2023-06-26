@@ -30,14 +30,12 @@ obc_error_code_t cc1120ReadSpi(uint8_t addr, uint8_t data[], uint8_t len) {
 
   if (len < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header =
-      (len > 1) ? (READ_BIT | BURST_BIT | addr) : (READ_BIT | addr);
+  uint8_t header = (len > 1) ? (READ_BIT | BURST_BIT | addr) : (READ_BIT | addr);
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -56,26 +54,22 @@ obc_error_code_t cc1120ReadSpi(uint8_t addr, uint8_t data[], uint8_t len) {
  * @return An error code - If the register is not valid, or the errCode byte is
  * invalid.
  */
-obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[],
-                                      uint8_t len) {
+obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len) {
   obc_error_code_t errCode;
 
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_1_START &&
-       addr <= CC1120_REGS_EXT_RESERVE_SPACE_1_END))
+  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_1_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_1_END))
     return OBC_ERR_CODE_INVALID_ARG;
 
-  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_2_START &&
-       addr <= CC1120_REGS_EXT_RESERVE_SPACE_2_END))
+  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_2_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_2_END))
     return OBC_ERR_CODE_INVALID_ARG;
 
   if (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES) return OBC_ERR_CODE_INVALID_ARG;
 
   if (len < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header = (len > 1) ? (READ_BIT | BURST_BIT | CC1120_REGS_EXT_ADDR)
-                             : (READ_BIT | CC1120_REGS_EXT_ADDR);
+  uint8_t header = (len > 1) ? (READ_BIT | BURST_BIT | CC1120_REGS_EXT_ADDR) : (READ_BIT | CC1120_REGS_EXT_ADDR);
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
@@ -89,8 +83,7 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[],
     return errCode;
   }
 
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -122,8 +115,7 @@ obc_error_code_t cc1120WriteSpi(uint8_t addr, uint8_t data[], uint8_t len) {
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -142,26 +134,22 @@ obc_error_code_t cc1120WriteSpi(uint8_t addr, uint8_t data[], uint8_t len) {
  * @return An error code - If the register is not valid, or the errCode byte is
  * invalid.
  */
-obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[],
-                                       uint8_t len) {
+obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len) {
   obc_error_code_t errCode;
 
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_1_START &&
-       addr <= CC1120_REGS_EXT_RESERVE_SPACE_1_END))
+  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_1_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_1_END))
     return OBC_ERR_CODE_INVALID_ARG;
 
-  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_2_START &&
-       addr <= CC1120_REGS_EXT_RESERVE_SPACE_2_END))
+  if ((addr >= CC1120_REGS_EXT_RESERVE_SPACE_2_START && addr <= CC1120_REGS_EXT_RESERVE_SPACE_2_END))
     return OBC_ERR_CODE_INVALID_ARG;
 
   if (addr > CC1120_REGS_EXT_FIFO_NUM_RXBYTES) return OBC_ERR_CODE_INVALID_ARG;
 
   if (len < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header =
-      (len > 1) ? (BURST_BIT | CC1120_REGS_EXT_ADDR) : CC1120_REGS_EXT_ADDR;
+  uint8_t header = (len > 1) ? (BURST_BIT | CC1120_REGS_EXT_ADDR) : CC1120_REGS_EXT_ADDR;
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
@@ -175,8 +163,7 @@ obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[],
     return errCode;
   }
 
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -194,8 +181,7 @@ obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[],
 obc_error_code_t cc1120StrobeSpi(uint8_t addr) {
   obc_error_code_t errCode;
 
-  if (addr < CC1120_STROBE_SRES || addr > CC1120_STROBE_SNOP)
-    return OBC_ERR_CODE_INVALID_ARG;
+  if (addr < CC1120_STROBE_SRES || addr > CC1120_STROBE_SNOP) return OBC_ERR_CODE_INVALID_ARG;
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(addr));
@@ -221,15 +207,13 @@ obc_error_code_t cc1120ReadFifo(uint8_t data[], uint8_t len) {
 
   if (len < 1 || len > CC1120_TX_FIFO_SIZE) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header = (len > 1)
-                       ? (READ_BIT | BURST_BIT | CC1120_REGS_FIFO_ACCESS_STD)
-                       : (READ_BIT | CC1120_REGS_FIFO_ACCESS_STD);
+  uint8_t header =
+      (len > 1) ? (READ_BIT | BURST_BIT | CC1120_REGS_FIFO_ACCESS_STD) : (READ_BIT | CC1120_REGS_FIFO_ACCESS_STD);
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -252,14 +236,12 @@ obc_error_code_t cc1120WriteFifo(uint8_t data[], uint8_t len) {
 
   if (len < 1 || len > CC1120_TX_FIFO_SIZE) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header = (len > 1) ? (BURST_BIT | CC1120_REGS_FIFO_ACCESS_STD)
-                             : CC1120_REGS_FIFO_ACCESS_STD;
+  uint8_t header = (len > 1) ? (BURST_BIT | CC1120_REGS_FIFO_ACCESS_STD) : CC1120_REGS_FIFO_ACCESS_STD;
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -277,25 +259,22 @@ obc_error_code_t cc1120WriteFifo(uint8_t data[], uint8_t len) {
  * @return An error code - If the register is not valid, or the errCode byte is
  * invalid.
  */
-obc_error_code_t cc1120ReadFifoDirect(uint8_t addr, uint8_t data[],
-                                      uint8_t len) {
+obc_error_code_t cc1120ReadFifoDirect(uint8_t addr, uint8_t data[], uint8_t len) {
   obc_error_code_t errCode;
 
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   if (len < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header = (len > 1)
-                       ? (READ_BIT | BURST_BIT | CC1120_REGS_FIFO_ACCESS_DIR)
-                       : (READ_BIT | CC1120_REGS_FIFO_ACCESS_DIR);
+  uint8_t header =
+      (len > 1) ? (READ_BIT | BURST_BIT | CC1120_REGS_FIFO_ACCESS_DIR) : (READ_BIT | CC1120_REGS_FIFO_ACCESS_DIR);
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
   uint8_t ignore;
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -314,24 +293,21 @@ obc_error_code_t cc1120ReadFifoDirect(uint8_t addr, uint8_t data[],
  * @return An error code - If the register is not valid, or the errCode byte is
  * invalid.
  */
-obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[],
-                                       uint8_t len) {
+obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len) {
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   if (len < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t header = (len > 1) ? (BURST_BIT | CC1120_REGS_FIFO_ACCESS_DIR)
-                             : CC1120_REGS_FIFO_ACCESS_DIR;
+  uint8_t header = (len > 1) ? (BURST_BIT | CC1120_REGS_FIFO_ACCESS_DIR) : CC1120_REGS_FIFO_ACCESS_DIR;
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
   uint8_t ignore;
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
-  for (uint8_t i = 0; i < len; i++)
-    CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
   return OBC_ERR_CODE_SUCCESS;

@@ -18,14 +18,12 @@
 /* THIS GROUND STATION IS FOR DEMO PURPOSES */
 /* AND ONLY SENDS A SINGLE COMMAND PER PACKET */
 
-static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                                      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
 static correct_reed_solomon *rsGs;
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data,
-                                     packed_rs_packet_t *rsData);
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData);
 static uint32_t getCurrentTime(void);
 
 int main(int argc, char *argv[]) {
@@ -55,8 +53,7 @@ int main(int argc, char *argv[]) {
   /* Setup the serial port */
 
   char comPortName[16] = {0};
-  snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX,
-           comPort);
+  snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX, comPort);
 
   // Declare variables and structures
   HANDLE hSerial;
@@ -142,19 +139,16 @@ int main(int argc, char *argv[]) {
   memset(iv, 1, AES_IV_SIZE);
   AES_ctx_set_iv(&ctx, iv);
 
-  rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1,
-                                     1, 32);
+  rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
 
   size_t cmdPacketOffset = 0;
 
   uint8_t packedSingleCmdSize = 0;
   uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE] = {0};
-  RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd, &cmdPacketOffset, &cmdMsg,
-                                  &packedSingleCmdSize));
+  RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd, &cmdPacketOffset, &cmdMsg, &packedSingleCmdSize));
 
   packed_telem_packet_t cmdPacket = {0};
-  memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd,
-         packedSingleCmdSize);
+  memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
   cmdPacketOffset += packedSingleCmdSize;
 
   if (cmdPacketOffset != 0) {
@@ -165,17 +159,14 @@ int main(int argc, char *argv[]) {
     memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE - AES_IV_SIZE);
 
     packed_rs_packet_t fecPkt = {0};
-    if ((uint8_t)correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE,
-                                             fecPkt.data) < RS_ENCODED_SIZE) {
+    if ((uint8_t)correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE) {
       exit(1);
     };
 
     packed_ax25_packet_t ax25Pkt = {0};
-    RETURN_IF_ERROR_CODE(
-        ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
+    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
 
-    long unsigned int bytesWritten =
-        writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
+    long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
       printf("Failed to write entire AX.25 packet!");
       exit(1);
@@ -241,14 +232,12 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data,
-                                     packed_rs_packet_t *rsData) {
+static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &groundStationCallsign));
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  uint8_t decodedLength = correct_reed_solomon_decode(
-      rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
+  uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
 
   if (decodedLength == -1) {
     return OBC_ERR_CODE_CORRUPTED_MSG;

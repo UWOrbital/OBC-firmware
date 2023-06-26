@@ -16,13 +16,11 @@
 #define AX25_PID_BYTES 1
 #define AX25_FCS_BYTES 2
 #define AX25_INFO_BYTES 255
-#define AX25_MINIMUM_I_FRAME_LEN                                     \
-  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + \
-   AX25_PID_BYTES + AX25_FCS_BYTES + AX25_INFO_BYTES)
+#define AX25_MINIMUM_I_FRAME_LEN \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + AX25_INFO_BYTES)
 #define AX25_MAXIMUM_PKT_LEN AX25_MINIMUM_I_FRAME_LEN * 6 / 5
-#define AX25_SUPERVISORY_FRAME_LENGTH                                \
-  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + \
-   AX25_PID_BYTES + AX25_FCS_BYTES)
+#define AX25_SUPERVISORY_FRAME_LENGTH \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
 
 #define AX25_FLAG 0x7E
 #define AX25_PID 0xF0U
@@ -62,9 +60,8 @@ extern ax25_addr_t groundStationCallsign;
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully
  * added
  */
-obc_error_code_t ax25Send(packed_rs_packet_t *rsData,
-                          packed_ax25_packet_t *ax25Data,
-                          ax25_addr_t *destAddress, ax25_addr_t *srcAddress);
+obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress,
+                          ax25_addr_t *srcAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
@@ -77,7 +74,6 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData,
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully
  * stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data,
-                          packed_rs_packet_t *rsData, ax25_addr_t *recvAddress);
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData, ax25_addr_t *recvAddress);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */

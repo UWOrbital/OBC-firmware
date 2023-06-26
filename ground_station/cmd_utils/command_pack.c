@@ -23,8 +23,7 @@ static const pack_func_t packFns[] = {
 #define MAX_CMD_ID ((sizeof(packFns) / sizeof(pack_func_t)) - 1)
 
 // Pack the command message
-obc_error_code_t packCmdMsg(uint8_t* buffer, size_t* offset,
-                            const cmd_msg_t* cmdMsg, uint8_t* numPacked) {
+obc_error_code_t packCmdMsg(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked) {
   if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -50,26 +49,22 @@ obc_error_code_t packCmdMsg(uint8_t* buffer, size_t* offset,
 }
 
 // CMD_EXEC_OBC_RESET
-void packExecObcResetCmdData(uint8_t* buffer, size_t* offset,
-                             const cmd_msg_t* cmdMsg) {
+void packExecObcResetCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
   // No data to pack
 }
 
 // CMD_RTC_SYNC
-void packRtcSyncCmdData(uint8_t* buffer, size_t* offset,
-                        const cmd_msg_t* cmdMsg) {
+void packRtcSyncCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
   packUint32(cmdMsg->rtcSync.unixTime, buffer, offset);
 }
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
-void packDownlinkLogsNextPassCmdData(uint8_t* buffer, size_t* offset,
-                                     const cmd_msg_t* cmdMsg) {
+void packDownlinkLogsNextPassCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
   packUint8((uint8_t)cmdMsg->downlinkLogsNextPass.logLevel, buffer, offset);
 }
 
 // CMD_MICRO_SD_FORMAT
-void packMicroSdFormat(uint8_t* buffer, size_t* offset,
-                       const cmd_msg_t* cmdMsg) {
+void packMicroSdFormat(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
   // No data to pack
 }
 
@@ -79,7 +74,6 @@ void packPingCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg) {
 }
 
 // CMD_DOWNLINK_TELEM
-void packDownlinkTelemCmdData(uint8_t* buffer, size_t* offset,
-                              const cmd_msg_t* msg) {
+void packDownlinkTelemCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* msg) {
   // No data to pack
 }

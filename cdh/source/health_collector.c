@@ -20,12 +20,10 @@ StaticTask_t healthCollectorTaskBuffer;
 StackType_t healthCollectorTaskStack[HEALTH_COLLECTOR_STACK_SIZE];
 
 void initHealthCollector(void) {
-  ASSERT(healthCollectorTaskStack != NULL &&
-         &healthCollectorTaskBuffer != NULL);
-  healthCollectorTaskHandle = xTaskCreateStatic(
-      healthCollectorTask, "health_collector", HEALTH_COLLECTOR_STACK_SIZE,
-      NULL, HEALTH_COLLECTOR_PRIORITY, healthCollectorTaskStack,
-      &healthCollectorTaskBuffer);
+  ASSERT(healthCollectorTaskStack != NULL && &healthCollectorTaskBuffer != NULL);
+  healthCollectorTaskHandle =
+      xTaskCreateStatic(healthCollectorTask, "health_collector", HEALTH_COLLECTOR_STACK_SIZE, NULL,
+                        HEALTH_COLLECTOR_PRIORITY, healthCollectorTaskStack, &healthCollectorTaskBuffer);
 }
 
 static void healthCollectorTask(void* pvParameters) {
@@ -43,8 +41,7 @@ static obc_error_code_t collectObcLm75bdTemp(void) {
   float temp = 0.0f;
   RETURN_IF_ERROR_CODE(readTempLM75BD(LM75BD_OBC_I2C_ADDR, &temp));
 
-  telemetry_data_t obcTempVal = {
-      .obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
 
   RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
 

@@ -37,23 +37,20 @@ static StackType_t recvTaskStack[COMMS_RECV_STACK_SIZE];
 // Recv Data Queue
 static QueueHandle_t recvDataQueueHandle = NULL;
 static StaticQueue_t recvDataQueue;
-static uint8_t
-    recvDataQueueStack[RECV_DATA_QUEUE_LENGTH * RECV_DATA_QUEUE_ITEM_SIZE];
+static uint8_t recvDataQueueStack[RECV_DATA_QUEUE_LENGTH * RECV_DATA_QUEUE_ITEM_SIZE];
 
 static void vRecvTask(void *pvParameters);
 
 void initRecvTask(void) {
   ASSERT((recvTaskStack != NULL) && (&recvTaskBuffer != NULL));
   if (recvTaskHandle == NULL) {
-    recvTaskHandle = xTaskCreateStatic(
-        vRecvTask, COMMS_RECV_TASK_NAME, COMMS_RECV_STACK_SIZE, NULL,
-        COMMS_RECV_PRIORITY, recvTaskStack, &recvTaskBuffer);
+    recvTaskHandle = xTaskCreateStatic(vRecvTask, COMMS_RECV_TASK_NAME, COMMS_RECV_STACK_SIZE, NULL,
+                                       COMMS_RECV_PRIORITY, recvTaskStack, &recvTaskBuffer);
   }
   ASSERT((recvDataQueueStack != NULL) && (&recvDataQueue != NULL));
   if (recvDataQueueHandle == NULL) {
     recvDataQueueHandle =
-        xQueueCreateStatic(RECV_DATA_QUEUE_LENGTH, RECV_DATA_QUEUE_ITEM_SIZE,
-                           recvDataQueueStack, &recvDataQueue);
+        xQueueCreateStatic(RECV_DATA_QUEUE_LENGTH, RECV_DATA_QUEUE_ITEM_SIZE, recvDataQueueStack, &recvDataQueue);
   }
 }
 
@@ -69,8 +66,7 @@ static void vRecvTask(void *pvParameters) {
   obc_error_code_t errCode;
   while (1) {
     comms_event_t queueMsg;
-    if (xQueueReceive(recvDataQueueHandle, &queueMsg,
-                      RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
     switch (queueMsg.eventID) {
@@ -117,8 +113,7 @@ obc_error_code_t startUplink(void) {
   }
   comms_event_t event;
   event.eventID = BEGIN_UPLINK;
-  if (xQueueSend(recvDataQueueHandle, (void *)&event,
-                 RECV_DATA_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(recvDataQueueHandle, (void *)&event, RECV_DATA_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 

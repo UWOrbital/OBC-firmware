@@ -40,8 +40,7 @@ static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
 
 static QueueHandle_t supervisorQueueHandle = NULL;
 static StaticQueue_t supervisorQueue;
-static uint8_t
-    supervisorQueueStack[SUPERVISOR_QUEUE_LENGTH * SUPERVISOR_QUEUE_ITEM_SIZE];
+static uint8_t supervisorQueueStack[SUPERVISOR_QUEUE_LENGTH * SUPERVISOR_QUEUE_ITEM_SIZE];
 
 /**
  * @brief	Supervisor task.
@@ -57,16 +56,14 @@ static void sendStartupMessages(void);
 void initSupervisor(void) {
   ASSERT((supervisorTaskStack != NULL) && (&supervisorTaskBuffer != NULL));
   if (supervisorTaskHandle == NULL) {
-    supervisorTaskHandle = xTaskCreateStatic(
-        vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL,
-        SUPERVISOR_PRIORITY, supervisorTaskStack, &supervisorTaskBuffer);
+    supervisorTaskHandle = xTaskCreateStatic(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL,
+                                             SUPERVISOR_PRIORITY, supervisorTaskStack, &supervisorTaskBuffer);
   }
 
   ASSERT((supervisorQueueStack != NULL) && (&supervisorQueue != NULL));
   if (supervisorQueueHandle == NULL) {
     supervisorQueueHandle =
-        xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE,
-                           supervisorQueueStack, &supervisorQueue);
+        xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE, supervisorQueueStack, &supervisorQueue);
   }
 }
 
@@ -75,8 +72,7 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 
   if (event == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if (xQueueSend(supervisorQueueHandle, (void *)event,
-                 SUPERVISOR_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+  if (xQueueSend(supervisorQueueHandle, (void *)event, SUPERVISOR_QUEUE_TX_WAIT_PERIOD) == pdPASS)
     return OBC_ERR_CODE_SUCCESS;
 
   return OBC_ERR_CODE_QUEUE_FULL;
@@ -141,8 +137,7 @@ static void vSupervisorTask(void *pvParameters) {
   while (1) {
     supervisor_event_t inMsg;
 
-    if (xQueueReceive(supervisorQueueHandle, &inMsg,
-                      SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
       vTaskDelay(pdMS_TO_TICKS(1000));
       gioToggleBit(SUPERVISOR_DEBUG_LED_GIO_PORT, SUPERVISOR_DEBUG_LED_GIO_BIT);

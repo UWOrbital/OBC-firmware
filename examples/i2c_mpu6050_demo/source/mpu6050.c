@@ -14,8 +14,7 @@ void wakeupMPU6050(void) {
 
 uint8_t readAccelDataMPU6050(double *accX, double *accY, double *accZ) {
   uint8_t data[6];
-  if (i2cReadReg(MPU6050_DEFAULT_ADDRESS, MPU6050_REG_ACCEL_XOUT_H, data, 6) ==
-      0) {
+  if (i2cReadReg(MPU6050_DEFAULT_ADDRESS, MPU6050_REG_ACCEL_XOUT_H, data, 6) == 0) {
     sciPrintText((unsigned char *)"Failed to read acceleration data\r\n", 35);
     return 0;
   }

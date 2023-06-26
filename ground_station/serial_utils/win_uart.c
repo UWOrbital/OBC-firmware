@@ -8,8 +8,7 @@ int openSerialPort(HANDLE *hSerial, char *portName) {
     return -1;
   }
 
-  *hSerial = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL,
-                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  *hSerial = CreateFile(portName, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
   if (*hSerial == INVALID_HANDLE_VALUE) {
     return -1;

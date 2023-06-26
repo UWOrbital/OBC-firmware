@@ -71,8 +71,7 @@
 #define vTaskSetApplicationTaskTag MPU_vTaskSetApplicationTaskTag
 #define xTaskGetApplicationTaskTag MPU_xTaskGetApplicationTaskTag
 #define vTaskSetThreadLocalStoragePointer MPU_vTaskSetThreadLocalStoragePointer
-#define pvTaskGetThreadLocalStoragePointer \
-  MPU_pvTaskGetThreadLocalStoragePointer
+#define pvTaskGetThreadLocalStoragePointer MPU_pvTaskGetThreadLocalStoragePointer
 #define xTaskCallApplicationTaskHook MPU_xTaskCallApplicationTaskHook
 #define xTaskGetIdleTaskHandle MPU_xTaskGetIdleTaskHandle
 #define uxTaskGetSystemState MPU_uxTaskGetSystemState
@@ -103,8 +102,7 @@
 #define xQueueCreateMutex MPU_xQueueCreateMutex
 #define xQueueCreateMutexStatic MPU_xQueueCreateMutexStatic
 #define xQueueCreateCountingSemaphore MPU_xQueueCreateCountingSemaphore
-#define xQueueCreateCountingSemaphoreStatic \
-  MPU_xQueueCreateCountingSemaphoreStatic
+#define xQueueCreateCountingSemaphoreStatic MPU_xQueueCreateCountingSemaphoreStatic
 #define xQueueGetMutexHolder MPU_xQueueGetMutexHolder
 #define xQueueTakeMutexRecursive MPU_xQueueTakeMutexRecursive
 #define xQueueGiveMutexRecursive MPU_xQueueGiveMutexRecursive
@@ -150,8 +148,7 @@
  * equivalents. */
 #define xStreamBufferSend MPU_xStreamBufferSend
 #define xStreamBufferReceive MPU_xStreamBufferReceive
-#define xStreamBufferNextMessageLengthBytes \
-  MPU_xStreamBufferNextMessageLengthBytes
+#define xStreamBufferNextMessageLengthBytes MPU_xStreamBufferNextMessageLengthBytes
 #define vStreamBufferDelete MPU_vStreamBufferDelete
 #define xStreamBufferIsFull MPU_xStreamBufferIsFull
 #define xStreamBufferIsEmpty MPU_xStreamBufferIsEmpty

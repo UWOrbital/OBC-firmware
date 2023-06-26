@@ -82,8 +82,7 @@ typedef struct A_BLOCK_LINK {
  * the block in front it and/or the block behind it if the memory blocks are
  * adjacent to each other.
  */
-static void prvInsertBlockIntoFreeList(BlockLink_t* pxBlockToInsert)
-    PRIVILEGED_FUNCTION;
+static void prvInsertBlockIntoFreeList(BlockLink_t* pxBlockToInsert) PRIVILEGED_FUNCTION;
 
 /*
  * Called automatically to setup the required heap structures the first time
@@ -96,8 +95,7 @@ static void prvHeapInit(void) PRIVILEGED_FUNCTION;
 /* The size of the structure placed at the beginning of each allocated memory
  * block must by correctly byte aligned. */
 static const size_t xHeapStructSize =
-    (sizeof(BlockLink_t) + ((size_t)(portBYTE_ALIGNMENT - 1))) &
-    ~((size_t)portBYTE_ALIGNMENT_MASK);
+    (sizeof(BlockLink_t) + ((size_t)(portBYTE_ALIGNMENT - 1))) & ~((size_t)portBYTE_ALIGNMENT_MASK);
 
 /* Create a couple of list links to mark the start and end of the list. */
 PRIVILEGED_DATA static BlockLink_t xStart, *pxEnd = NULL;
@@ -138,19 +136,15 @@ void* pvPortMalloc(size_t xWantedSize) {
     if ((xWantedSize & xBlockAllocatedBit) == 0) {
       /* The wanted size must be increased so it can contain a BlockLink_t
        * structure in addition to the requested amount of bytes. */
-      if ((xWantedSize > 0) &&
-          ((xWantedSize + xHeapStructSize) > xWantedSize)) /* Overflow check */
+      if ((xWantedSize > 0) && ((xWantedSize + xHeapStructSize) > xWantedSize)) /* Overflow check */
       {
         xWantedSize += xHeapStructSize;
 
         /* Ensure that blocks are always aligned. */
         if ((xWantedSize & portBYTE_ALIGNMENT_MASK) != 0x00) {
           /* Byte alignment required. Check for overflow. */
-          if ((xWantedSize +
-               (portBYTE_ALIGNMENT - (xWantedSize & portBYTE_ALIGNMENT_MASK))) >
-              xWantedSize) {
-            xWantedSize +=
-                (portBYTE_ALIGNMENT - (xWantedSize & portBYTE_ALIGNMENT_MASK));
+          if ((xWantedSize + (portBYTE_ALIGNMENT - (xWantedSize & portBYTE_ALIGNMENT_MASK))) > xWantedSize) {
+            xWantedSize += (portBYTE_ALIGNMENT - (xWantedSize & portBYTE_ALIGNMENT_MASK));
             configASSERT((xWantedSize & portBYTE_ALIGNMENT_MASK) == 0);
           } else {
             xWantedSize = 0;
@@ -168,8 +162,7 @@ void* pvPortMalloc(size_t xWantedSize) {
         pxPreviousBlock = &xStart;
         pxBlock = xStart.pxNextFreeBlock;
 
-        while ((pxBlock->xBlockSize < xWantedSize) &&
-               (pxBlock->pxNextFreeBlock != NULL)) {
+        while ((pxBlock->xBlockSize < xWantedSize) && (pxBlock->pxNextFreeBlock != NULL)) {
           pxPreviousBlock = pxBlock;
           pxBlock = pxBlock->pxNextFreeBlock;
         }
@@ -179,8 +172,7 @@ void* pvPortMalloc(size_t xWantedSize) {
         if (pxBlock != pxEnd) {
           /* Return the memory space pointed to - jumping over the
            * BlockLink_t structure at its start. */
-          pvReturn = (void*)(((uint8_t*)pxPreviousBlock->pxNextFreeBlock) +
-                             xHeapStructSize);
+          pvReturn = (void*)(((uint8_t*)pxPreviousBlock->pxNextFreeBlock) + xHeapStructSize);
 
           /* This block is being returned for use so must be taken out
            * of the list of free blocks. */
@@ -194,8 +186,7 @@ void* pvPortMalloc(size_t xWantedSize) {
              * cast is used to prevent byte alignment warnings from the
              * compiler. */
             pxNewBlockLink = (void*)(((uint8_t*)pxBlock) + xWantedSize);
-            configASSERT((((size_t)pxNewBlockLink) & portBYTE_ALIGNMENT_MASK) ==
-                         0);
+            configASSERT((((size_t)pxNewBlockLink) & portBYTE_ALIGNMENT_MASK) == 0);
 
             /* Calculate the sizes of two blocks split from the
              * single block. */
@@ -295,13 +286,10 @@ void vPortFree(void* pv) {
 size_t xPortGetFreeHeapSize(void) { return xFreeBytesRemaining; }
 /*-----------------------------------------------------------*/
 
-size_t xPortGetMinimumEverFreeHeapSize(void) {
-  return xMinimumEverFreeBytesRemaining;
-}
+size_t xPortGetMinimumEverFreeHeapSize(void) { return xMinimumEverFreeBytesRemaining; }
 /*-----------------------------------------------------------*/
 
-void vPortInitialiseBlocks(void) {
-  /* This just exists to keep the linker quiet. */
+void vPortInitialiseBlocks(void) { /* This just exists to keep the linker quiet. */
 }
 /*-----------------------------------------------------------*/
 
@@ -348,21 +336,18 @@ static void prvHeapInit(void) /* PRIVILEGED_FUNCTION */
   xFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;
 
   /* Work out the position of the top bit in a size_t variable. */
-  xBlockAllocatedBit = ((size_t)1)
-                       << ((sizeof(size_t) * heapBITS_PER_BYTE) - 1);
+  xBlockAllocatedBit = ((size_t)1) << ((sizeof(size_t) * heapBITS_PER_BYTE) - 1);
 }
 /*-----------------------------------------------------------*/
 
-static void prvInsertBlockIntoFreeList(
-    BlockLink_t* pxBlockToInsert) /* PRIVILEGED_FUNCTION */
+static void prvInsertBlockIntoFreeList(BlockLink_t* pxBlockToInsert) /* PRIVILEGED_FUNCTION */
 {
   BlockLink_t* pxIterator;
   uint8_t* puc;
 
   /* Iterate through the list until a block is found that has a higher address
    * than the block being inserted. */
-  for (pxIterator = &xStart; pxIterator->pxNextFreeBlock < pxBlockToInsert;
-       pxIterator = pxIterator->pxNextFreeBlock) {
+  for (pxIterator = &xStart; pxIterator->pxNextFreeBlock < pxBlockToInsert; pxIterator = pxIterator->pxNextFreeBlock) {
     /* Nothing to do here, just iterate to the right position. */
   }
 
@@ -381,13 +366,11 @@ static void prvInsertBlockIntoFreeList(
    * make a contiguous block of memory? */
   puc = (uint8_t*)pxBlockToInsert;
 
-  if ((puc + pxBlockToInsert->xBlockSize) ==
-      (uint8_t*)pxIterator->pxNextFreeBlock) {
+  if ((puc + pxBlockToInsert->xBlockSize) == (uint8_t*)pxIterator->pxNextFreeBlock) {
     if (pxIterator->pxNextFreeBlock != pxEnd) {
       /* Form one big block from the two blocks. */
       pxBlockToInsert->xBlockSize += pxIterator->pxNextFreeBlock->xBlockSize;
-      pxBlockToInsert->pxNextFreeBlock =
-          pxIterator->pxNextFreeBlock->pxNextFreeBlock;
+      pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock->pxNextFreeBlock;
     } else {
       pxBlockToInsert->pxNextFreeBlock = pxEnd;
     }
@@ -409,9 +392,8 @@ static void prvInsertBlockIntoFreeList(
 
 void vPortGetHeapStats(HeapStats_t* pxHeapStats) {
   BlockLink_t* pxBlock;
-  size_t xBlocks = 0, xMaxSize = 0,
-         xMinSize = portMAX_DELAY; /* portMAX_DELAY used as a portable way of
-                                      getting the maximum value. */
+  size_t xBlocks = 0, xMaxSize = 0, xMinSize = portMAX_DELAY; /* portMAX_DELAY used as a portable way of
+                                                                 getting the maximum value. */
 
   vTaskSuspendAll();
   {
@@ -448,11 +430,9 @@ void vPortGetHeapStats(HeapStats_t* pxHeapStats) {
   taskENTER_CRITICAL();
   {
     pxHeapStats->xAvailableHeapSpaceInBytes = xFreeBytesRemaining;
-    pxHeapStats->xNumberOfSuccessfulAllocations =
-        xNumberOfSuccessfulAllocations;
+    pxHeapStats->xNumberOfSuccessfulAllocations = xNumberOfSuccessfulAllocations;
     pxHeapStats->xNumberOfSuccessfulFrees = xNumberOfSuccessfulFrees;
-    pxHeapStats->xMinimumEverFreeBytesRemaining =
-        xMinimumEverFreeBytesRemaining;
+    pxHeapStats->xMinimumEverFreeBytesRemaining = xMinimumEverFreeBytesRemaining;
   }
   taskEXIT_CRITICAL();
 }

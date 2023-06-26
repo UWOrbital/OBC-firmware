@@ -50,8 +50,7 @@ obc_error_code_t sciReadByte(unsigned char *character);
  * @param blockTimeTicks Number of ticks to wait for async transfer to complete
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes,
-                              size_t blockTimeTicks);
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks);
 
 /**
  * @brief Send raw bytes to UART_PRINT_REG (blocking).

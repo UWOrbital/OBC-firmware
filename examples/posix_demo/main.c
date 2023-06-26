@@ -12,8 +12,7 @@ void main(void) {
 
   // Create a dummy task.
   BaseType_t xReturned;
-  xReturned =
-      xTaskCreate(vDummyTask, "dummyTaskA", 1024, NULL, 1, &dummyTaskHandle);
+  xReturned = xTaskCreate(vDummyTask, "dummyTaskA", 1024, NULL, 1, &dummyTaskHandle);
 
   if (xReturned == pdPASS) {
     // Start the scheduler if the task was created successfully.

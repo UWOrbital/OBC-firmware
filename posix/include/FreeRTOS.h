@@ -310,8 +310,7 @@ extern "C" {
 #endif
 
 #ifndef portCLEAR_INTERRUPT_MASK_FROM_ISR
-#define portCLEAR_INTERRUPT_MASK_FROM_ISR(uxSavedStatusValue) \
-  (void)uxSavedStatusValue
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(uxSavedStatusValue) (void)uxSavedStatusValue
 #endif
 
 #ifndef portCLEAN_UP_TCB
@@ -631,9 +630,7 @@ extern "C" {
 #endif
 
 #ifndef traceEVENT_GROUP_SYNC_END
-#define traceEVENT_GROUP_SYNC_END(xEventGroup, uxBitsToSet, uxBitsToWaitFor, \
-                                  xTimeoutOccurred)                          \
-  (void)xTimeoutOccurred
+#define traceEVENT_GROUP_SYNC_END(xEventGroup, uxBitsToSet, uxBitsToWaitFor, xTimeoutOccurred) (void)xTimeoutOccurred
 #endif
 
 #ifndef traceEVENT_GROUP_WAIT_BITS_BLOCK
@@ -641,9 +638,7 @@ extern "C" {
 #endif
 
 #ifndef traceEVENT_GROUP_WAIT_BITS_END
-#define traceEVENT_GROUP_WAIT_BITS_END(xEventGroup, uxBitsToWaitFor, \
-                                       xTimeoutOccurred)             \
-  (void)xTimeoutOccurred
+#define traceEVENT_GROUP_WAIT_BITS_END(xEventGroup, uxBitsToWaitFor, xTimeoutOccurred) (void)xTimeoutOccurred
 #endif
 
 #ifndef traceEVENT_GROUP_CLEAR_BITS
@@ -671,8 +666,7 @@ extern "C" {
 #endif
 
 #ifndef tracePEND_FUNC_CALL_FROM_ISR
-#define tracePEND_FUNC_CALL_FROM_ISR(xFunctionToPend, pvParameter1, \
-                                     ulParameter2, ret)
+#define tracePEND_FUNC_CALL_FROM_ISR(xFunctionToPend, pvParameter1, ulParameter2, ret)
 #endif
 
 #ifndef traceQUEUE_REGISTRY_ADD
@@ -937,8 +931,7 @@ extern "C" {
 #endif /* INCLUDE_vTaskSuspend */
 #endif /* configUSE_TICKLESS_IDLE */
 
-#if ((configSUPPORT_STATIC_ALLOCATION == 0) && \
-     (configSUPPORT_DYNAMIC_ALLOCATION == 0))
+#if ((configSUPPORT_STATIC_ALLOCATION == 0) && (configSUPPORT_DYNAMIC_ALLOCATION == 0))
 #error configSUPPORT_STATIC_ALLOCATION and configSUPPORT_DYNAMIC_ALLOCATION cannot both be 0, but can both be 1.
 #endif
 
@@ -957,10 +950,8 @@ extern "C" {
  * the tick count is returned to the standard critical section macros. */
 #define portTICK_TYPE_ENTER_CRITICAL() portENTER_CRITICAL()
 #define portTICK_TYPE_EXIT_CRITICAL() portEXIT_CRITICAL()
-#define portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR() \
-  portSET_INTERRUPT_MASK_FROM_ISR()
-#define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR(x) \
-  portCLEAR_INTERRUPT_MASK_FROM_ISR((x))
+#define portTICK_TYPE_SET_INTERRUPT_MASK_FROM_ISR() portSET_INTERRUPT_MASK_FROM_ISR()
+#define portTICK_TYPE_CLEAR_INTERRUPT_MASK_FROM_ISR(x) portCLEAR_INTERRUPT_MASK_FROM_ISR((x))
 #else
 
 /* The tick type can be read atomically, so critical sections used when the
@@ -1129,10 +1120,9 @@ extern "C" {
  * |           | |     |         |        | xTaskCreateRestrictedStatic | | | |
  * +-----+---------+--------+-----------------------------+-----------------------------------+------------------+-----------+
  */
-#define tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE \
-  (((portUSING_MPU_WRAPPERS == 0) &&              \
-    (configSUPPORT_DYNAMIC_ALLOCATION == 1) &&    \
-    (configSUPPORT_STATIC_ALLOCATION == 1)) ||    \
+#define tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE                               \
+  (((portUSING_MPU_WRAPPERS == 0) && (configSUPPORT_DYNAMIC_ALLOCATION == 1) && \
+    (configSUPPORT_STATIC_ALLOCATION == 1)) ||                                  \
    ((portUSING_MPU_WRAPPERS == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1)))
 
 /*
@@ -1270,8 +1260,7 @@ typedef struct xSTATIC_QUEUE {
   UBaseType_t uxDummy4[3];
   uint8_t ucDummy5[2];
 
-#if ((configSUPPORT_STATIC_ALLOCATION == 1) && \
-     (configSUPPORT_DYNAMIC_ALLOCATION == 1))
+#if ((configSUPPORT_STATIC_ALLOCATION == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1))
   uint8_t ucDummy6;
 #endif
 
@@ -1308,8 +1297,7 @@ typedef struct xSTATIC_EVENT_GROUP {
   UBaseType_t uxDummy3;
 #endif
 
-#if ((configSUPPORT_STATIC_ALLOCATION == 1) && \
-     (configSUPPORT_DYNAMIC_ALLOCATION == 1))
+#if ((configSUPPORT_STATIC_ALLOCATION == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1))
   uint8_t ucDummy4;
 #endif
 } StaticEventGroup_t;

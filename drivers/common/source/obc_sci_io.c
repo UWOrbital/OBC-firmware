@@ -31,8 +31,7 @@ static size_t sciRxBuffLen = 0;
 
 STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG),
               "UART_PRINT_REG must be sciREG or scilinREG");
-STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG),
-              "UART_READ_REG must be sciREG or scilinREG");
+STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG), "UART_READ_REG must be sciREG or scilinREG");
 
 /**
  * @brief Iterate through an array of bytes and transmit them via
@@ -56,8 +55,7 @@ void initSciMutex(void) {
   configASSERT(sciLinMutex);
 
   if (sciTransferComplete == NULL) {
-    sciTransferComplete =
-        xSemaphoreCreateBinaryStatic(&sciTransferCompleteBuffer);
+    sciTransferComplete = xSemaphoreCreateBinaryStatic(&sciTransferCompleteBuffer);
   }
   configASSERT(sciTransferComplete);
 
@@ -135,8 +133,7 @@ OBC_ERR_CODE_SUCCESS;
 }
 */
 
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes,
-                              size_t blockTimeTicks) {
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks) {
   obc_error_code_t errCode;
 
   SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;

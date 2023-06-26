@@ -15,14 +15,12 @@ correct_reed_solomon *rs = NULL;
  *
  * @return obc_error_code_t - whether or not the data was successfully encoded
  */
-obc_error_code_t rsEncode(packed_telem_packet_t *telemData,
-                          packed_rs_packet_t *rsData) {
+obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData) {
   if (telemData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   if (rsData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if ((uint8_t)correct_reed_solomon_encode(rs, telemData->data, RS_DECODED_SIZE,
-                                           rsData->data) < RS_ENCODED_SIZE) {
+  if ((uint8_t)correct_reed_solomon_encode(rs, telemData->data, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE) {
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
 
@@ -43,8 +41,7 @@ obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData) {
 
   if (decodedData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  int8_t decodedLength = correct_reed_solomon_decode(
-      rs, rsData->data, RS_ENCODED_SIZE, decodedData);
+  int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, RS_ENCODED_SIZE, decodedData);
 
   if (decodedLength == -1) return OBC_ERR_CODE_CORRUPTED_MSG;
 
@@ -54,8 +51,7 @@ obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData) {
 void initRs(void) {
   if (rs == NULL) {
     // Create reed solomon variable for encryption and decryption
-    rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1,
-                                     1, 32);
+    rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
   }
 }
 
