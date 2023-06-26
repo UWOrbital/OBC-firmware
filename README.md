@@ -35,7 +35,7 @@ This section will explain how to set up the repo, and how to build, flash, and d
     ```
 6. Choose the environment where you'll be running `git commit` (either WSL2 or the host). In that environment, install Python 3.8+ and pip if they're not already installed. Then, run the following in the OBC-firmware directory:
     ```sh
-    pip install pre-commit # You may want to create a Python virtual env before this
+    pip install -r requirements.txt # You may want to create a Python virtual env before this
     pre-commit install
     ```
     **Note:** pre-commit is used to format your code whenever you make a commit.
@@ -52,7 +52,7 @@ brew install gcc
 
 Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
 ```sh
-pip install pre-commit # You may want to create a Python virtual env before this
+pip install -r requirements.txt # You may want to create a Python virtual env before this
 pre-commit install
 ```
 
@@ -71,7 +71,7 @@ Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO
 
 Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
 ```sh
-pip install pre-commit # You may want to create a Python virtual env before this
+pip install -r requirements.txt # You may want to create a Python virtual env before this
 pre-commit install
 ```
 
