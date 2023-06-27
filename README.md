@@ -39,7 +39,7 @@ This section will explain how to set up the repo, and how to build, flash, and d
     pre-commit install
     ```
     - You may receive a message in yellow saying where pre-commit.exe was installed and that you need to add it to PATH
-        - To do this go to View advanced System settings -> Environment Variables -> Path -> Edit and copy and paste the path to where pre-commit.exe is                    installed. You may need to restart after doing this for the changes to take place.
+        - To do this go to View advanced System settings -> Environment Variables -> Path -> Edit and click new to paste the path to where pre-commit.exe is                    installed into here. You may need to restart after doing this for the changes to take place.
     - Once your PATH is set up and pre-commit is installed you can use `pre-commit run --all-files` to format all of your files before committing
     **Note:** pre-commit is used to format your code whenever you make a commit.
 
