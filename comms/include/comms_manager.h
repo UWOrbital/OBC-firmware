@@ -13,16 +13,12 @@
  * @brief	comms event ID enum.
  *
  * Enum containing all possible event IDs passed to the comms event queue.
-*/
-typedef enum {
-    BEGIN_UPLINK,
-    DOWNLINK_TELEMETRY_FILE,
-    DOWNLINK_DATA_BUFFER
-} comms_event_id_t;
+ */
+typedef enum { BEGIN_UPLINK, DOWNLINK_TELEMETRY_FILE, DOWNLINK_DATA_BUFFER } comms_event_id_t;
 
 typedef struct {
-    telemetry_data_t telemData[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
-    uint8_t bufferSize;
+  telemetry_data_t telemData[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
+  uint8_t bufferSize;
 } telemetry_data_buffer_t;
 
 /**
@@ -30,13 +26,13 @@ typedef struct {
  * @brief	comms event struct
  *
  * Holds the message data for each event sent/received by the comms manager queue.
-*/
+ */
 typedef struct {
-    comms_event_id_t eventID;
-    union {
-        uint32_t telemetryBatchId;
-        telemetry_data_buffer_t telemetryDataBuffer;
-    };
+  comms_event_id_t eventID;
+  union {
+    uint32_t telemetryBatchId;
+    telemetry_data_buffer_t telemetryDataBuffer;
+  };
 } comms_event_t;
 
 /**

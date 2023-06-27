@@ -17,27 +17,26 @@
 #include <het.h>
 
 int main(void) {
+  // Run hardware initialization code
+  gioInit();
+  sciInit();
+  i2cInit();
+  spiInit();
+  canInit();
+  hetInit();
 
-    // Run hardware initialization code
-    gioInit();
-    sciInit();
-    i2cInit();
-    spiInit();
-    canInit();
-    hetInit();
+  _enable_interrupt_();
 
-    _enable_interrupt_();
+  // Initialize logger
+  initLogger();
 
-    // Initialize logger
-    initLogger();
+  // Initialize bus mutexes
+  initSciMutex();
+  initI2CMutex();
+  initSpiMutex();
 
-    // Initialize bus mutexes
-    initSciMutex();
-    initI2CMutex();
-    initSpiMutex();
+  // The supervisor is the only task running initially.
+  initSupervisor();
 
-    // The supervisor is the only task running initially.
-    initSupervisor();
-
-    vTaskStartScheduler();
+  vTaskStartScheduler();
 }

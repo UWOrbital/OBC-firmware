@@ -27,7 +27,7 @@ static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
 
-static void alarmHandler(void * pvParameters);
+static void alarmHandler(void *pvParameters);
 
 static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm, size_t *insertedAlarmIndex);
 
@@ -38,215 +38,205 @@ static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
 
 void initAlarmHandler(void) {
-    ASSERT( (alarmHandlerTaskStack != NULL) && (&alarmHandlerTaskBuffer != NULL) );
-    alarmHandlerTaskHandle = xTaskCreateStatic(alarmHandler,
-        ALARM_HANDLER_NAME,
-        ALARM_HANDLER_STACK_SIZE,
-        NULL,
-        ALARM_HANDLER_PRIORITY,
-        alarmHandlerTaskStack,
-        &alarmHandlerTaskBuffer
-    );
+  ASSERT((alarmHandlerTaskStack != NULL) && (&alarmHandlerTaskBuffer != NULL));
+  alarmHandlerTaskHandle = xTaskCreateStatic(alarmHandler, ALARM_HANDLER_NAME, ALARM_HANDLER_STACK_SIZE, NULL,
+                                             ALARM_HANDLER_PRIORITY, alarmHandlerTaskStack, &alarmHandlerTaskBuffer);
 
-    ASSERT( (alarmHandlerQueueStack != NULL) && (&alarmHandlerQueue != NULL) );
-    alarmHandlerQueueHandle = xQueueCreateStatic(
-        ALARM_HANDLER_QUEUE_LENGTH,
-        ALARM_HANDLER_QUEUE_ITEM_SIZE,
-        alarmHandlerQueueStack,
-        &alarmHandlerQueue
-    );
+  ASSERT((alarmHandlerQueueStack != NULL) && (&alarmHandlerQueue != NULL));
+  alarmHandlerQueueHandle = xQueueCreateStatic(ALARM_HANDLER_QUEUE_LENGTH, ALARM_HANDLER_QUEUE_ITEM_SIZE,
+                                               alarmHandlerQueueStack, &alarmHandlerQueue);
 }
 
-static void alarmHandler(void * pvParameters) {
-    obc_error_code_t errCode;
+static void alarmHandler(void *pvParameters) {
+  obc_error_code_t errCode;
 
-    while(1) {
-        alarm_handler_event_t event;
+  while (1) {
+    alarm_handler_event_t event;
 
-        if (xQueueReceive(alarmHandlerQueueHandle, &event, ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-            continue;
-        }
-
-        switch (event.id) {
-            case ALARM_HANDLER_NEW_ALARM: {
-                size_t insertedAlarmIndex;
-                LOG_IF_ERROR_CODE(enqueueAlarm(event.alarmInfo, &insertedAlarmIndex));
-                if (errCode != OBC_ERR_CODE_SUCCESS) {
-                    break;
-                }
-
-                if (insertedAlarmIndex != 0) {
-                    break;
-                }
-
-                // If the new alarm is the earliest alarm, set the RTC alarm to it
-                rtc_date_time_t alarmDateTime;
-                LOG_IF_ERROR_CODE(unixToDatetime(event.alarmInfo.unixTime, &alarmDateTime));
-                if (errCode != OBC_ERR_CODE_SUCCESS) {
-                    break;
-                }
-
-                rtc_alarm_time_t alarmTime;
-                datetimeToAlarmTime(&alarmDateTime, &alarmTime);
-                LOG_IF_ERROR_CODE(setAlarm1RTC(RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS, alarmTime));
-
-                break;
-            }
-
-            case ALARM_HANDLER_ALARM_TRIGGERED: {
-                // Reset alarm flag
-                LOG_IF_ERROR_CODE(clearAlarm1RTC());
-                if (errCode != OBC_ERR_CODE_SUCCESS) {
-                    break;
-                }
-
-                alarm_handler_alarm_info_t alarm;
-                LOG_IF_ERROR_CODE(peekEarliestAlarm(&alarm));
-                if (errCode != OBC_ERR_CODE_SUCCESS) {
-                    break;
-                }
-
-                // Local time incremented since timekeeper might
-                // not have updated the local time yet
-                static const uint32_t tol = 2; // tolerance of 2 seconds
-                uint32_t currTime = getCurrentUnixTime();
-                if (currTime + tol < alarm.unixTime) {
-                    LOG_ERROR_CODE(OBC_ERR_CODE_RTC_ALARM_EARLY);
-                    break;
-                }
-
-                uint32_t timestampThresh = alarm.unixTime;
-
-                // Execute callbacks for all alarms that have triggered
-                // I.e. any alarm with a timestamp less than or equal to the first
-                // alarm in the queue
-                for (size_t i = 0; i < numActiveAlarms; i++) {
-                    LOG_IF_ERROR_CODE(peekEarliestAlarm(&alarm));
-                    if (errCode != OBC_ERR_CODE_SUCCESS) {
-                        break;
-                    }
-
-                    if (alarm.unixTime > timestampThresh) {
-                        break;
-                    }
-
-                    LOG_IF_ERROR_CODE(dequeueAlarm(&alarm));
-                    if (errCode != OBC_ERR_CODE_SUCCESS) {
-                        break;
-                    }
-
-                    switch (alarm.type) {
-                        case ALARM_TYPE_DEFAULT:
-                            LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
-                            break;
-                        case ALARM_TYPE_TIME_TAGGED_CMD:
-                            LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg));
-                            break;
-                        default:
-                            LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);
-                            break;
-                    }
-                }
-                break;
-            }
-
-            default: {
-                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
-                continue;
-            }
-        }
+    if (xQueueReceive(alarmHandlerQueueHandle, &event, ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+      continue;
     }
+
+    switch (event.id) {
+      case ALARM_HANDLER_NEW_ALARM: {
+        size_t insertedAlarmIndex;
+        LOG_IF_ERROR_CODE(enqueueAlarm(event.alarmInfo, &insertedAlarmIndex));
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+          break;
+        }
+
+        if (insertedAlarmIndex != 0) {
+          break;
+        }
+
+        // If the new alarm is the earliest alarm, set the RTC alarm to it
+        rtc_date_time_t alarmDateTime;
+        LOG_IF_ERROR_CODE(unixToDatetime(event.alarmInfo.unixTime, &alarmDateTime));
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+          break;
+        }
+
+        rtc_alarm_time_t alarmTime;
+        datetimeToAlarmTime(&alarmDateTime, &alarmTime);
+        LOG_IF_ERROR_CODE(setAlarm1RTC(RTC_ALARM1_MATCH_DATE_HOURS_MINUTES_SECONDS, alarmTime));
+
+        break;
+      }
+
+      case ALARM_HANDLER_ALARM_TRIGGERED: {
+        // Reset alarm flag
+        LOG_IF_ERROR_CODE(clearAlarm1RTC());
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+          break;
+        }
+
+        alarm_handler_alarm_info_t alarm;
+        LOG_IF_ERROR_CODE(peekEarliestAlarm(&alarm));
+        if (errCode != OBC_ERR_CODE_SUCCESS) {
+          break;
+        }
+
+        // Local time incremented since timekeeper might
+        // not have updated the local time yet
+        static const uint32_t tol = 2;  // tolerance of 2 seconds
+        uint32_t currTime = getCurrentUnixTime();
+        if (currTime + tol < alarm.unixTime) {
+          LOG_ERROR_CODE(OBC_ERR_CODE_RTC_ALARM_EARLY);
+          break;
+        }
+
+        uint32_t timestampThresh = alarm.unixTime;
+
+        // Execute callbacks for all alarms that have triggered
+        // I.e. any alarm with a timestamp less than or equal to the first
+        // alarm in the queue
+        for (size_t i = 0; i < numActiveAlarms; i++) {
+          LOG_IF_ERROR_CODE(peekEarliestAlarm(&alarm));
+          if (errCode != OBC_ERR_CODE_SUCCESS) {
+            break;
+          }
+
+          if (alarm.unixTime > timestampThresh) {
+            break;
+          }
+
+          LOG_IF_ERROR_CODE(dequeueAlarm(&alarm));
+          if (errCode != OBC_ERR_CODE_SUCCESS) {
+            break;
+          }
+
+          switch (alarm.type) {
+            case ALARM_TYPE_DEFAULT:
+              LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
+              break;
+            case ALARM_TYPE_TIME_TAGGED_CMD:
+              LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg));
+              break;
+            default:
+              LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);
+              break;
+          }
+        }
+        break;
+      }
+
+      default: {
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+        continue;
+      }
+    }
+  }
 }
 
 obc_error_code_t sendToAlarmHandlerQueue(alarm_handler_event_t *event) {
-    if (alarmHandlerQueueHandle == NULL) {
-        return OBC_ERR_CODE_INVALID_STATE;
-    }
+  if (alarmHandlerQueueHandle == NULL) {
+    return OBC_ERR_CODE_INVALID_STATE;
+  }
 
-    if (event == NULL) {
-        return OBC_ERR_CODE_INVALID_ARG;
-    }
+  if (event == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
 
-    if (xQueueSend(alarmHandlerQueueHandle, (void *)event, ALARM_HANDLER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
-        return OBC_ERR_CODE_SUCCESS;
-    }
-    
-    return OBC_ERR_CODE_QUEUE_FULL;
+  if (xQueueSend(alarmHandlerQueueHandle, (void *)event, ALARM_HANDLER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+    return OBC_ERR_CODE_SUCCESS;
+  }
+
+  return OBC_ERR_CODE_QUEUE_FULL;
 }
 
 static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm, size_t *insertedAlarmIndex) {
-    if (numActiveAlarms >= ALARM_QUEUE_SIZE) {
-        return OBC_ERR_CODE_QUEUE_FULL;
-    }
+  if (numActiveAlarms >= ALARM_QUEUE_SIZE) {
+    return OBC_ERR_CODE_QUEUE_FULL;
+  }
 
-    // Insert the alarm into the queue in order of increasing time
-    size_t i = 0;
-    while (i < numActiveAlarms && alarmQueue[i].unixTime < alarm.unixTime) {
-        i++;
-    }
+  // Insert the alarm into the queue in order of increasing time
+  size_t i = 0;
+  while (i < numActiveAlarms && alarmQueue[i].unixTime < alarm.unixTime) {
+    i++;
+  }
 
-    // Shift all alarms after the new alarm back by one
-    for (size_t j = numActiveAlarms; j > i; j--) {
-        alarmQueue[j] = alarmQueue[j - 1];
-    }
+  // Shift all alarms after the new alarm back by one
+  for (size_t j = numActiveAlarms; j > i; j--) {
+    alarmQueue[j] = alarmQueue[j - 1];
+  }
 
-    // Insert the new alarm
-    alarmQueue[i] = alarm;
-    numActiveAlarms++;
+  // Insert the new alarm
+  alarmQueue[i] = alarm;
+  numActiveAlarms++;
 
-    *insertedAlarmIndex = i;
+  *insertedAlarmIndex = i;
 
-    return OBC_ERR_CODE_SUCCESS;
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t dequeueAlarm(alarm_handler_alarm_info_t *alarm) {
-    if (numActiveAlarms == 0) {
-        return OBC_ERR_CODE_QUEUE_EMPTY;
+  if (numActiveAlarms == 0) {
+    return OBC_ERR_CODE_QUEUE_EMPTY;
+  }
+
+  *alarm = alarmQueue[0];
+
+  // Shift all alarms after the new alarm back by one
+  for (size_t j = 0; j < numActiveAlarms - 1; j++) {
+    if (j >= ALARM_QUEUE_SIZE - 1) {
+      break;
     }
 
-    *alarm = alarmQueue[0];
+    alarmQueue[j] = alarmQueue[j + 1];
+  }
 
-    // Shift all alarms after the new alarm back by one
-    for (size_t j = 0; j < numActiveAlarms - 1; j++) {
-        if (j >= ALARM_QUEUE_SIZE - 1) {
-            break;
-        }
+  numActiveAlarms--;
 
-        alarmQueue[j] = alarmQueue[j + 1];
-    }
-
-    numActiveAlarms--;
-
-    return OBC_ERR_CODE_SUCCESS;
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm) {
-    if (numActiveAlarms == 0) {
-        return OBC_ERR_CODE_QUEUE_EMPTY;
-    }
+  if (numActiveAlarms == 0) {
+    return OBC_ERR_CODE_QUEUE_EMPTY;
+  }
 
-    *alarm = alarmQueue[0];
+  *alarm = alarmQueue[0];
 
-    return OBC_ERR_CODE_SUCCESS;
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 void alarmInterruptCallback(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    // Currently, it's fine if the alarm handler task received other events 
-    // after we send the alarm triggered event.
+  // Currently, it's fine if the alarm handler task received other events
+  // after we send the alarm triggered event.
 
-    alarm_handler_event_t event = {.id = ALARM_HANDLER_ALARM_TRIGGERED};
-    xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event, &xHigherPriorityTaskWoken);
+  alarm_handler_event_t event = {.id = ALARM_HANDLER_ALARM_TRIGGERED};
+  xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event, &xHigherPriorityTaskWoken);
 
-    if (xHigherPriorityTaskWoken) {
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    }
+  if (xHigherPriorityTaskWoken) {
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  }
 }
 
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime) {
-    alarmTime->time.seconds = datetime->time.seconds;
-    alarmTime->time.minutes = datetime->time.minutes;
-    alarmTime->time.hours = datetime->time.hours;
-    alarmTime->date = datetime->date.date;
+  alarmTime->time.seconds = datetime->time.seconds;
+  alarmTime->time.minutes = datetime->time.minutes;
+  alarmTime->time.hours = datetime->time.hours;
+  alarmTime->date = datetime->date.date;
 }

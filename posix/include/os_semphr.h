@@ -30,17 +30,16 @@
 #define SEMAPHORE_H
 
 #ifndef INC_FREERTOS_H
-    #error "include FreeRTOS.h" must appear in source files before "include semphr.h"
+#error "include FreeRTOS.h" must appear in source files before "include semphr.h"
 #endif
 
 #include "os_queue.h"
 
 typedef QueueHandle_t SemaphoreHandle_t;
 
-#define semBINARY_SEMAPHORE_QUEUE_LENGTH    ( ( uint8_t ) 1U )
-#define semSEMAPHORE_QUEUE_ITEM_LENGTH      ( ( uint8_t ) 0U )
-#define semGIVE_BLOCK_TIME                  ( ( TickType_t ) 0U )
-
+#define semBINARY_SEMAPHORE_QUEUE_LENGTH ((uint8_t)1U)
+#define semSEMAPHORE_QUEUE_ITEM_LENGTH ((uint8_t)0U)
+#define semGIVE_BLOCK_TIME ((TickType_t)0U)
 
 /**
  * semphr. h
@@ -93,15 +92,15 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup vSemaphoreCreateBinary vSemaphoreCreateBinary
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    #define vSemaphoreCreateBinary( xSemaphore )                                                                                     \
-    {                                                                                                                                \
-        ( xSemaphore ) = xQueueGenericCreate( ( UBaseType_t ) 1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE ); \
-        if( ( xSemaphore ) != NULL )                                                                                                 \
-        {                                                                                                                            \
-            ( void ) xSemaphoreGive( ( xSemaphore ) );                                                                               \
-        }                                                                                                                            \
-    }
+#if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
+#define vSemaphoreCreateBinary(xSemaphore)                                                                     \
+  {                                                                                                            \
+    (xSemaphore) =                                                                                             \
+        xQueueGenericCreate((UBaseType_t)1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE); \
+    if ((xSemaphore) != NULL) {                                                                                \
+      (void)xSemaphoreGive((xSemaphore));                                                                      \
+    }                                                                                                          \
+  }
 #endif
 
 /**
@@ -163,8 +162,9 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateBinary xSemaphoreCreateBinary
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    #define xSemaphoreCreateBinary()    xQueueGenericCreate( ( UBaseType_t ) 1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE )
+#if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
+#define xSemaphoreCreateBinary() \
+  xQueueGenericCreate((UBaseType_t)1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE)
 #endif
 
 /**
@@ -224,8 +224,10 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateBinaryStatic xSemaphoreCreateBinaryStatic
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    #define xSemaphoreCreateBinaryStatic( pxStaticSemaphore )    xQueueGenericCreateStatic( ( UBaseType_t ) 1, semSEMAPHORE_QUEUE_ITEM_LENGTH, NULL, pxStaticSemaphore, queueQUEUE_TYPE_BINARY_SEMAPHORE )
+#if (configSUPPORT_STATIC_ALLOCATION == 1)
+#define xSemaphoreCreateBinaryStatic(pxStaticSemaphore)                                              \
+  xQueueGenericCreateStatic((UBaseType_t)1, semSEMAPHORE_QUEUE_ITEM_LENGTH, NULL, pxStaticSemaphore, \
+                            queueQUEUE_TYPE_BINARY_SEMAPHORE)
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
@@ -295,7 +297,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreTake xSemaphoreTake
  * \ingroup Semaphores
  */
-#define xSemaphoreTake( xSemaphore, xBlockTime )    xQueueSemaphoreTake( ( xSemaphore ), ( xBlockTime ) )
+#define xSemaphoreTake(xSemaphore, xBlockTime) xQueueSemaphoreTake((xSemaphore), (xBlockTime))
 
 /**
  * semphr. h
@@ -390,8 +392,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreTakeRecursive xSemaphoreTakeRecursive
  * \ingroup Semaphores
  */
-#if ( configUSE_RECURSIVE_MUTEXES == 1 )
-    #define xSemaphoreTakeRecursive( xMutex, xBlockTime )    xQueueTakeMutexRecursive( ( xMutex ), ( xBlockTime ) )
+#if (configUSE_RECURSIVE_MUTEXES == 1)
+#define xSemaphoreTakeRecursive(xMutex, xBlockTime) xQueueTakeMutexRecursive((xMutex), (xBlockTime))
 #endif
 
 /**
@@ -457,7 +459,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreGive xSemaphoreGive
  * \ingroup Semaphores
  */
-#define xSemaphoreGive( xSemaphore )    xQueueGenericSend( ( QueueHandle_t ) ( xSemaphore ), NULL, semGIVE_BLOCK_TIME, queueSEND_TO_BACK )
+#define xSemaphoreGive(xSemaphore) \
+  xQueueGenericSend((QueueHandle_t)(xSemaphore), NULL, semGIVE_BLOCK_TIME, queueSEND_TO_BACK)
 
 /**
  * semphr. h
@@ -543,8 +546,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreGiveRecursive xSemaphoreGiveRecursive
  * \ingroup Semaphores
  */
-#if ( configUSE_RECURSIVE_MUTEXES == 1 )
-    #define xSemaphoreGiveRecursive( xMutex )    xQueueGiveMutexRecursive( ( xMutex ) )
+#if (configUSE_RECURSIVE_MUTEXES == 1)
+#define xSemaphoreGiveRecursive(xMutex) xQueueGiveMutexRecursive((xMutex))
 #endif
 
 /**
@@ -637,7 +640,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreGiveFromISR xSemaphoreGiveFromISR
  * \ingroup Semaphores
  */
-#define xSemaphoreGiveFromISR( xSemaphore, pxHigherPriorityTaskWoken )    xQueueGiveFromISR( ( QueueHandle_t ) ( xSemaphore ), ( pxHigherPriorityTaskWoken ) )
+#define xSemaphoreGiveFromISR(xSemaphore, pxHigherPriorityTaskWoken) \
+  xQueueGiveFromISR((QueueHandle_t)(xSemaphore), (pxHigherPriorityTaskWoken))
 
 /**
  * semphr. h
@@ -672,7 +676,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * @return pdTRUE if the semaphore was successfully taken, otherwise
  * pdFALSE
  */
-#define xSemaphoreTakeFromISR( xSemaphore, pxHigherPriorityTaskWoken )    xQueueReceiveFromISR( ( QueueHandle_t ) ( xSemaphore ), NULL, ( pxHigherPriorityTaskWoken ) )
+#define xSemaphoreTakeFromISR(xSemaphore, pxHigherPriorityTaskWoken) \
+  xQueueReceiveFromISR((QueueHandle_t)(xSemaphore), NULL, (pxHigherPriorityTaskWoken))
 
 /**
  * semphr. h
@@ -731,8 +736,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateMutex xSemaphoreCreateMutex
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    #define xSemaphoreCreateMutex()    xQueueCreateMutex( queueQUEUE_TYPE_MUTEX )
+#if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
+#define xSemaphoreCreateMutex() xQueueCreateMutex(queueQUEUE_TYPE_MUTEX)
 #endif
 
 /**
@@ -794,10 +799,9 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateMutexStatic xSemaphoreCreateMutexStatic
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    #define xSemaphoreCreateMutexStatic( pxMutexBuffer )    xQueueCreateMutexStatic( queueQUEUE_TYPE_MUTEX, ( pxMutexBuffer ) )
+#if (configSUPPORT_STATIC_ALLOCATION == 1)
+#define xSemaphoreCreateMutexStatic(pxMutexBuffer) xQueueCreateMutexStatic(queueQUEUE_TYPE_MUTEX, (pxMutexBuffer))
 #endif /* configSUPPORT_STATIC_ALLOCATION */
-
 
 /**
  * semphr. h
@@ -864,8 +868,8 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateRecursiveMutex xSemaphoreCreateRecursiveMutex
  * \ingroup Semaphores
  */
-#if ( ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configUSE_RECURSIVE_MUTEXES == 1 ) )
-    #define xSemaphoreCreateRecursiveMutex()    xQueueCreateMutex( queueQUEUE_TYPE_RECURSIVE_MUTEX )
+#if ((configSUPPORT_DYNAMIC_ALLOCATION == 1) && (configUSE_RECURSIVE_MUTEXES == 1))
+#define xSemaphoreCreateRecursiveMutex() xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX)
 #endif
 
 /**
@@ -939,8 +943,9 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateRecursiveMutexStatic xSemaphoreCreateRecursiveMutexStatic
  * \ingroup Semaphores
  */
-#if ( ( configSUPPORT_STATIC_ALLOCATION == 1 ) && ( configUSE_RECURSIVE_MUTEXES == 1 ) )
-    #define xSemaphoreCreateRecursiveMutexStatic( pxStaticSemaphore )    xQueueCreateMutexStatic( queueQUEUE_TYPE_RECURSIVE_MUTEX, pxStaticSemaphore )
+#if ((configSUPPORT_STATIC_ALLOCATION == 1) && (configUSE_RECURSIVE_MUTEXES == 1))
+#define xSemaphoreCreateRecursiveMutexStatic(pxStaticSemaphore) \
+  xQueueCreateMutexStatic(queueQUEUE_TYPE_RECURSIVE_MUTEX, pxStaticSemaphore)
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
@@ -1021,14 +1026,16 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateCounting xSemaphoreCreateCounting
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-    #define xSemaphoreCreateCounting( uxMaxCount, uxInitialCount )    xQueueCreateCountingSemaphore( ( uxMaxCount ), ( uxInitialCount ) )
+#if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
+#define xSemaphoreCreateCounting(uxMaxCount, uxInitialCount) \
+  xQueueCreateCountingSemaphore((uxMaxCount), (uxInitialCount))
 #endif
 
 /**
  * semphr. h
  * @code{c}
- * SemaphoreHandle_t xSemaphoreCreateCountingStatic( UBaseType_t uxMaxCount, UBaseType_t uxInitialCount, StaticSemaphore_t *pxSemaphoreBuffer );
+ * SemaphoreHandle_t xSemaphoreCreateCountingStatic( UBaseType_t uxMaxCount, UBaseType_t uxInitialCount,
+ * StaticSemaphore_t *pxSemaphoreBuffer );
  * @endcode
  *
  * Creates a new counting semaphore instance, and returns a handle by which the
@@ -1108,8 +1115,9 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup xSemaphoreCreateCountingStatic xSemaphoreCreateCountingStatic
  * \ingroup Semaphores
  */
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    #define xSemaphoreCreateCountingStatic( uxMaxCount, uxInitialCount, pxSemaphoreBuffer )    xQueueCreateCountingSemaphoreStatic( ( uxMaxCount ), ( uxInitialCount ), ( pxSemaphoreBuffer ) )
+#if (configSUPPORT_STATIC_ALLOCATION == 1)
+#define xSemaphoreCreateCountingStatic(uxMaxCount, uxInitialCount, pxSemaphoreBuffer) \
+  xQueueCreateCountingSemaphoreStatic((uxMaxCount), (uxInitialCount), (pxSemaphoreBuffer))
 #endif /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
@@ -1126,7 +1134,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \defgroup vSemaphoreDelete vSemaphoreDelete
  * \ingroup Semaphores
  */
-#define vSemaphoreDelete( xSemaphore )                   vQueueDelete( ( QueueHandle_t ) ( xSemaphore ) )
+#define vSemaphoreDelete(xSemaphore) vQueueDelete((QueueHandle_t)(xSemaphore))
 
 /**
  * semphr.h
@@ -1143,7 +1151,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * the holder may change between the function exiting and the returned value
  * being tested.
  */
-#define xSemaphoreGetMutexHolder( xSemaphore )           xQueueGetMutexHolder( ( xSemaphore ) )
+#define xSemaphoreGetMutexHolder(xSemaphore) xQueueGetMutexHolder((xSemaphore))
 
 /**
  * semphr.h
@@ -1156,7 +1164,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * by a task), return NULL.
  *
  */
-#define xSemaphoreGetMutexHolderFromISR( xSemaphore )    xQueueGetMutexHolderFromISR( ( xSemaphore ) )
+#define xSemaphoreGetMutexHolderFromISR(xSemaphore) xQueueGetMutexHolderFromISR((xSemaphore))
 
 /**
  * semphr.h
@@ -1170,7 +1178,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * semaphore is not available.
  *
  */
-#define uxSemaphoreGetCount( xSemaphore )                uxQueueMessagesWaiting( ( QueueHandle_t ) ( xSemaphore ) )
+#define uxSemaphoreGetCount(xSemaphore) uxQueueMessagesWaiting((QueueHandle_t)(xSemaphore))
 
 /**
  * semphr.h
@@ -1184,6 +1192,6 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * semaphore is not available.
  *
  */
-#define uxSemaphoreGetCountFromISR( xSemaphore )         uxQueueMessagesWaitingFromISR( ( QueueHandle_t ) ( xSemaphore ) )
+#define uxSemaphoreGetCountFromISR(xSemaphore) uxQueueMessagesWaitingFromISR((QueueHandle_t)(xSemaphore))
 
 #endif /* SEMAPHORE_H */

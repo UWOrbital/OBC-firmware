@@ -5,24 +5,21 @@
 
 #include <sys_common.h>
 
-
 /**
  * @enum	payload_event_id_t
  * @brief	payload event ID enum.
  *
  * Enum containing all possible event IDs passed to the payload event queue.
-*/
-typedef enum {
-    PAYLOAD_MANAGER_NULL_EVENT_ID
-} payload_event_id_t;
+ */
+typedef enum { PAYLOAD_MANAGER_NULL_EVENT_ID } payload_event_id_t;
 
 /**
  * @union	payload_event_data_t
  * @brief	payload event data union
-*/
+ */
 typedef union {
-    int i;
-    float f;
+  int i;
+  float f;
 } payload_event_data_t;
 
 /**
@@ -30,10 +27,10 @@ typedef union {
  * @brief	payload event struct
  *
  * Holds the message data for each event sent/received by the payload manager queue.
-*/
+ */
 typedef struct {
-    payload_event_id_t eventID;
-    payload_event_data_t data;
+  payload_event_id_t eventID;
+  payload_event_data_t data;
 } payload_event_t;
 
 /* payload queue config */

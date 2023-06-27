@@ -7,14 +7,14 @@ endif()
 
 set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
 
-if(${CMAKE_BUILD_TYPE} MATCHES Firmware AND NOT EXISTS ${TOOLCHAIN_DIR})    
+if(${CMAKE_BUILD_TYPE} MATCHES Firmware AND NOT EXISTS ${TOOLCHAIN_DIR})
     include(cmake/download_arm_toolchain.cmake)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Firmware)
     # Set default values for firmware build options
     include(cmake/fw_build_options.cmake)
-    
+
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/source/sys_link.ld")
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
 
@@ -36,10 +36,10 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
         target_compile_options(OBC-firmware.out PRIVATE -O0)
     endif()
 
-    target_compile_definitions(OBC-firmware.out PRIVATE 
+    target_compile_definitions(OBC-firmware.out PRIVATE
         ${BOARD_TYPE}
-        LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION} 
-        LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL} 
+        LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
+        LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
         DEBUG=${DEBUG}
         CMD_POLICY=${CMD_POLICY}
         COMMS_PHY=${COMMS_PHY}
@@ -59,7 +59,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     add_subdirectory(payload)
     add_subdirectory(libs)
 
-    target_link_libraries(OBC-firmware.out PRIVATE 
+    target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
     )
