@@ -29,6 +29,9 @@
 #define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
+SemaphoreHandle_t cc1120Mutex = NULL;
+StaticSemaphore_t cc1120MutexBuffer;
+
 static TaskHandle_t commsTaskHandle = NULL;
 static StaticTask_t commsTaskBuffer;
 static StackType_t commsTaskStack[COMMS_MANAGER_STACK_SIZE];
@@ -59,6 +62,9 @@ void initCommsManager(void) {
         commsQueueHandle = xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH, COMMS_MANAGER_QUEUE_ITEM_SIZE, commsQueueStack, &commsQueue);
     }
     
+    if(cc1120Mutex == NULL){
+        cc1120Mutex = xSemaphoreCreateMutexStatic(&cc1120MutexBuffer);
+    }
     // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
     initializeAesCtx(TEMP_STATIC_KEY);
     initRs();

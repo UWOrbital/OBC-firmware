@@ -141,10 +141,22 @@ static void vTelemEncodeTask(void *pvParameters) {
 
         switch (queueMsg.eventID) {
             case DOWNLINK_TELEMETRY_FILE:
+                if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
+                    LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
+                    break;
+                } 
                 LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
+                txFifoEmptyCheckBlocking();
+                xSemaphoreGive(cc1120Mutex);
                 break;
             case DOWNLINK_DATA_BUFFER:
+                if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
+                    LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
+                    break;
+                } 
                 LOG_IF_ERROR_CODE(sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
+                txFifoEmptyCheckBlocking();
+                xSemaphoreGive(cc1120Mutex);
                 break;
             default:
                 LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);

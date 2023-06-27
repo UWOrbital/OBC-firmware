@@ -413,6 +413,19 @@ obc_error_code_t cc1120Receive(void)
     return OBC_ERR_CODE_SUCCESS;
 }
 
+/**
+ * @brief block until the tx fifo is empty without decrementing the semaphore
+ * 
+ * @return obc_error_code_t - whether the tx fifo empty semaphore became available without timing out or not
+*/
+obc_error_code_t txFifoEmptyCheckBlocking(void){
+    if(xSemaphoreTake(txFifoEmptySemaphore, TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT) != pdPASS){
+        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+    }
+    xSemaphoreGive(txFifoEmptySemaphore);
+    return OBC_ERR_CODE_SUCCESS;
+}
+
 void txFifoReadyCallback(void){
     BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
     // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current one

@@ -92,9 +92,14 @@ static void vRecvTask(void * pvParameters){
                 LOG_IF_ERROR_CODE(startUplink());
                 #endif
                 #else
+                if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
+                    LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
+                    break;
+                }
                 // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
                 LOG_IF_ERROR_CODE(cc1120Receive());
                 LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+                xSemaphoreGive(cc1120Mutex);
                 #endif
                 break;
             default:
