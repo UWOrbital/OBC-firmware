@@ -146,6 +146,7 @@ static void vTelemEncodeTask(void *pvParameters) {
                     break;
                 } 
                 LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
+                // wait for TX FIFO to be emptied before unlocking the mutex
                 txFifoEmptyCheckBlocking();
                 xSemaphoreGive(cc1120Mutex);
                 break;
@@ -155,6 +156,7 @@ static void vTelemEncodeTask(void *pvParameters) {
                     break;
                 } 
                 LOG_IF_ERROR_CODE(sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
+                // wait for TX FIFO to be emptied before unlocking the mutex
                 txFifoEmptyCheckBlocking();
                 xSemaphoreGive(cc1120Mutex);
                 break;
