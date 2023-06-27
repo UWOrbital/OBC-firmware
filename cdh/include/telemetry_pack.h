@@ -9,7 +9,7 @@
 
 /**
  * @brief Pack telemetry data into a buffer of bytes
- * 
+ *
  * @param data The telemetry data to pack
  * @param buffer The buffer to pack the data into
  * @param buffLen The length of the buffer

@@ -7,21 +7,23 @@
 #include <redposix.h>
 
 // Camera control
-#define ARDUCHIP_TRIG      		0x41  // Trigger source
-#define ARDUCHIP_TIM       		0x03  // Timing control
-#define VSYNC_LEVEL_MASK   		0x02  // 0 = High active , 		1 = Low active
-#define ARDUCHIP_FRAMES			  0x01  // FRAME control register, Bit[2:0] = Number of frames to be captured  //  On 5MP_Plus platforms bit[2:0] = 7 means continuous capture until frame buffer is full
-#define CAP_DONE_MASK      		0x04
-#define BURST_FIFO_READ			  0x3C  //Burst FIFO read operation
+#define ARDUCHIP_TRIG 0x41     // Trigger source
+#define ARDUCHIP_TIM 0x03      // Timing control
+#define VSYNC_LEVEL_MASK 0x02  // 0 = High active , 		1 = Low active
+#define ARDUCHIP_FRAMES \
+  0x01  // FRAME control register, Bit[2:0] = Number of frames to be captured  //  On 5MP_Plus platforms bit[2:0] = 7
+        // means continuous capture until frame buffer is full
+#define CAP_DONE_MASK 0x04
+#define BURST_FIFO_READ 0x3C  // Burst FIFO read operation
 
-#define ARDUCHIP_FIFO      		0x04  // FIFO and I2C control
-#define FIFO_CLEAR_MASK    		0x01
-#define FIFO_START_MASK    		0x02
-#define MAX_FIFO_SIZE		      0x7FFFFF  // 8MByte
+#define ARDUCHIP_FIFO 0x04  // FIFO and I2C control
+#define FIFO_CLEAR_MASK 0x01
+#define FIFO_START_MASK 0x02
+#define MAX_FIFO_SIZE 0x7FFFFF  // 8MByte
 
-#define FIFO_SIZE1				0x42  // Camera write FIFO size[7:0] for burst to read
-#define FIFO_SIZE2				0x43  // Camera write FIFO size[15:8]
-#define FIFO_SIZE3				0x44  // Camera write FIFO size[18:16]
+#define FIFO_SIZE1 0x42  // Camera write FIFO size[7:0] for burst to read
+#define FIFO_SIZE2 0x43  // Camera write FIFO size[15:8]
+#define FIFO_SIZE3 0x44  // Camera write FIFO size[18:16]
 
 static uint8_t m_fmt;
 // Todo: support multiple image captures in different files
@@ -30,7 +32,7 @@ static const char fname[] = "image.jpg";
 void setFormat(image_format_t fmt) {
   if (fmt == BMP)
     m_fmt = BMP;
-  else if(fmt == RAW)
+  else if (fmt == RAW)
     m_fmt = RAW;
   else
     m_fmt = JPEG;
@@ -62,13 +64,12 @@ obc_error_code_t initCam(void) {
     // Lens correction
     RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5888, 0x00));
     // Image processor setup
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5000, 0xFF)); 
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5000, 0xFF));
   }
   return errCode;
 }
 
-obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
-{
+obc_error_code_t ov5642SetJpegSize(image_resolution_t size) {
   obc_error_code_t errCode;
   switch (size) {
     // Todo: all other resolutions are unimplemented
@@ -97,48 +98,38 @@ obc_error_code_t ov5642SetJpegSize(image_resolution_t size)
       RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
       break;
   }
-  
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t flushFifo(camera_t cam) {
-  return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
-}
+obc_error_code_t flushFifo(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam); }
 
-obc_error_code_t startCapture(camera_t cam) {
-	return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam);
-}
+obc_error_code_t startCapture(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam); }
 
-obc_error_code_t clearFifoFlag(camera_t cam) {
-	return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam);
-}
+obc_error_code_t clearFifoFlag(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam); }
 
-obc_error_code_t setFifoBurst(camera_t cam){
-  return camWriteByte(BURST_FIFO_READ, cam);
-}
+obc_error_code_t setFifoBurst(camera_t cam) { return camWriteByte(BURST_FIFO_READ, cam); }
 
 obc_error_code_t captureImage(camera_t cam) {
   obc_error_code_t errCode;
   errCode = flushFifo(cam);
-  if(!errCode) {
-   errCode = startCapture(cam); 
+  if (!errCode) {
+    errCode = startCapture(cam);
   }
-  if(!errCode) {
+  if (!errCode) {
     errCode = clearFifoFlag(cam);
   }
   return errCode;
 }
 
-bool isCaptureDone(camera_t cam) {
-  return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam);
-}
+bool isCaptureDone(camera_t cam) { return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam); }
 
 obc_error_code_t readFifoLength(uint32_t *length, camera_t cam) {
   obc_error_code_t errCode;
-	uint32_t len1 = 0, len2 = 0, len3 = 0;
+  uint32_t len1 = 0, len2 = 0, len3 = 0;
   uint8_t rx_data = 0;
 
-	RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE1, &rx_data, cam));
+  RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE1, &rx_data, cam));
   len1 = rx_data;
   RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE2, &rx_data, cam));
   len1 = rx_data;
@@ -157,14 +148,14 @@ obc_error_code_t readFifoBurst(camera_t cam) {
   uint8_t temp = 0, temp_last = 0;
   bool is_header = false;
 
-  // Open a new image file  
+  // Open a new image file
   RETURN_IF_ERROR_CODE(createFile(fname, &file));
 
   readFifoLength(&length, cam);
   if (length >= MAX_FIFO_SIZE) {
     // 512 kb
     errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
-  } else if (length == 0 ) {
+  } else if (length == 0) {
     // 0 kb
     errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
   }
@@ -176,22 +167,20 @@ obc_error_code_t readFifoBurst(camera_t cam) {
   errCode = setFifoBurst(cam);
   camReadByte(&temp, cam);
   length--;
-  while(length-- && !errCode) {
+  while (length-- && !errCode) {
     temp_last = temp;
     errCode = camReadByte(&temp, cam);
-    if(!errCode) {
-
-      if(is_header == true) {
+    if (!errCode) {
+      if (is_header == true) {
         errCode = writeFile(file, &temp, 1);
-      }
-      else if((temp == 0xD8) & (temp_last == 0xFF)) {
+      } else if ((temp == 0xD8) & (temp_last == 0xFF)) {
         is_header = true;
         errCode = writeFile(file, &temp_last, 1);
         if (!errCode) {
           errCode = writeFile(file, &temp, 1);
         }
       }
-      if((temp == 0xD9) && (temp_last == 0xFF)) {
+      if ((temp == 0xD9) && (temp_last == 0xFF)) {
         break;
       }
     }
@@ -199,17 +188,17 @@ obc_error_code_t readFifoBurst(camera_t cam) {
     // Todo: Can this be changed to ~15us instead?
     vTaskDelay(pdMS_TO_TICKS(1));
   }
-  
-  if(!errCode) {
+
+  if (!errCode) {
     errCode = deassertChipSelect(CAM_SPI_PORT, 1);
   } else {
     // If there was an error during capture, deassert without an error check
     deassertChipSelect(CAM_SPI_PORT, 1);
   }
 
-  if(!errCode) {
+  if (!errCode) {
     errCode = closeFile(file);
   }
-  
+
   return errCode;
 }
