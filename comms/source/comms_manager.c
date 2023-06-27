@@ -56,20 +56,21 @@ void initCommsManager(void) {
                                         COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
   }
 
-    ASSERT( (commsQueueStack != NULL) && (&commsQueue != NULL) );
-    if (commsQueueHandle == NULL) {
-        commsQueueHandle = xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH, COMMS_MANAGER_QUEUE_ITEM_SIZE, commsQueueStack, &commsQueue);
-    }
-    
-    if(cc1120Mutex == NULL){
-        cc1120Mutex = xSemaphoreCreateMutexStatic(&cc1120MutexBuffer);
-    }
-    // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
-    initializeAesCtx(TEMP_STATIC_KEY);
-    initRs();
-    
-    initRecvTask();
-    initDecodeTask();
+  ASSERT((commsQueueStack != NULL) && (&commsQueue != NULL));
+  if (commsQueueHandle == NULL) {
+    commsQueueHandle =
+        xQueueCreateStatic(COMMS_MANAGER_QUEUE_LENGTH, COMMS_MANAGER_QUEUE_ITEM_SIZE, commsQueueStack, &commsQueue);
+  }
+
+  if (cc1120Mutex == NULL) {
+    cc1120Mutex = xSemaphoreCreateMutexStatic(&cc1120MutexBuffer);
+  }
+  // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
+  initializeAesCtx(TEMP_STATIC_KEY);
+  initRs();
+
+  initRecvTask();
+  initDecodeTask();
 
   initTelemEncodeTask();
   initCC1120TransmitTask();

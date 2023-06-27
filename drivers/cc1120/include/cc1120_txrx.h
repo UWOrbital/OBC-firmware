@@ -101,9 +101,9 @@ obc_error_code_t cc1120Receive(void);
 
 /**
  * @brief block until the tx fifo is empty without decrementing the semaphore
- * 
+ *
  * @return obc_error_code_t - whether the tx fifo empty semaphore became available without timing out or not
-*/
+ */
 obc_error_code_t txFifoEmptyCheckBlocking(void);
 
 /**

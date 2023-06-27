@@ -139,33 +139,33 @@ static void vTelemEncodeTask(void *pvParameters) {
       continue;
     }
 
-        switch (queueMsg.eventID) {
-            case DOWNLINK_TELEMETRY_FILE:
-                if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-                    LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-                    break;
-                } 
-                LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
-                // wait for TX FIFO to be emptied before unlocking the mutex
-                txFifoEmptyCheckBlocking();
-                xSemaphoreGive(cc1120Mutex);
-                break;
-            case DOWNLINK_DATA_BUFFER:
-                if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-                    LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-                    break;
-                } 
-                LOG_IF_ERROR_CODE(sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
-                // wait for TX FIFO to be emptied before unlocking the mutex
-                txFifoEmptyCheckBlocking();
-                xSemaphoreGive(cc1120Mutex);
-                break;
-            default:
-                LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
-                break;
+    switch (queueMsg.eventID) {
+      case DOWNLINK_TELEMETRY_FILE:
+        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
+          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
+          break;
         }
-
+        LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
+        // wait for TX FIFO to be emptied before unlocking the mutex
+        txFifoEmptyCheckBlocking();
+        xSemaphoreGive(cc1120Mutex);
+        break;
+      case DOWNLINK_DATA_BUFFER:
+        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
+          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
+          break;
+        }
+        LOG_IF_ERROR_CODE(
+            sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
+        // wait for TX FIFO to be emptied before unlocking the mutex
+        txFifoEmptyCheckBlocking();
+        xSemaphoreGive(cc1120Mutex);
+        break;
+      default:
+        LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+        break;
     }
+  }
 }
 
 /**
