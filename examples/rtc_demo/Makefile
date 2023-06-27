@@ -27,7 +27,7 @@ BOARD_TYPE ?= OBC_REVISION_1
 CPP_FLAGS += -D$(BOARD_TYPE)
 
 LOG_OUTPUT ?= LOG_TO_UART
-CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT) 
+CPP_FLAGS += -DLOG_DEFAULT_OUTPUT_LOCATION=$(LOG_OUTPUT)
 
 LOG_LEVEL ?= LOG_TRACE
 CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
@@ -41,8 +41,8 @@ INCLUDE_DIRS += -I"drivers/common/include"
 INCLUDE_DIRS += -I"drivers/ds3232/include"
 
 
-LIBS := 
-	
+LIBS :=
+
 SRC_DIRS :=
 SRC_DIRS += hal/source
 SRC_DIRS += drivers/source
@@ -67,7 +67,7 @@ $(BUILD_DIR)/$(BIN): $(OBJS)
 	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
 
 $(BUILD_DIR)/%.o : %.c
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $< 
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<
 
 $(BUILD_DIR)/%.o : %.s
 	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<

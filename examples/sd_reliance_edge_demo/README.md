@@ -1,4 +1,4 @@
-**To try this example, follow these steps:** 
+**To try this example, follow these steps:**
 
 1. Connect the LaunchPad to a microSD breakout board. Connect to the SPI3 pins (and use SPI3 CS1)
 2. Change to the top-level directory (i.e. `OBC-firmware/`)

@@ -3,7 +3,7 @@
 
 /**
  * @brief Initialize the timekeeper.
- * 
+ *
  */
 void initTimekeeper(void);
 

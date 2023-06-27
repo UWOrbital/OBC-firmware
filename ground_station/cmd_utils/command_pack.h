@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-obc_error_code_t packCmdMsg(uint8_t* buffer, size_t *offset, const cmd_msg_t* cmdMsg, uint8_t *numPacked);
+obc_error_code_t packCmdMsg(uint8_t* buffer, size_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked);
 
 /* Pack functions for each command */
 
@@ -28,4 +28,4 @@ void packPingCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* msg);
 // CMD_DOWNLINK_TELEM
 void packDownlinkTelemCmdData(uint8_t* buffer, size_t* offset, const cmd_msg_t* msg);
 
-#endif // CDH_INCLUDE_COMMAND_PACK_H_
+#endif  // CDH_INCLUDE_COMMAND_PACK_H_

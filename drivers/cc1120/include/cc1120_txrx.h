@@ -14,42 +14,41 @@
 // See chapter 8.5 in the datasheet
 #define TXRX_INTERRUPT_THRESHOLD 100U
 
-typedef struct
-{
-    uint8_t addr;
-    uint8_t val;
+typedef struct {
+  uint8_t addr;
+  uint8_t val;
 } register_setting_t;
 
 typedef enum {
-    CC1120_STATE_SLEEP = 0,
-    CC1120_STATE_IDLE,
-    CC1120_STATE_XOFF,
-    CC1120_STATE_BIAS_SETTLE_MC, 
-    CC1120_STATE_REG_SETTLE_MC, 
-    CC1120_STATE_MANCAL,
-    CC1120_STATE_BIAS_SETTLE,
-    CC1120_STATE_REG_SETTLE,
-    CC1120_STATE_STARTCAL,
-    CC1120_STATE_BWBOOST,
-    CC1120_STATE_FS_LOCK,
-    CC1120_STATE_IFADCON,
-    CC1120_STATE_RX,
-    CC1120_STATE_RX_END,
-    CC1120_STATE_RESERVED,
-    CC1120_STATE_TXRX_SWITCH,
-    CC1120_STATE_RX_FIFO_ERR,
-    CC1120_STATE_FSTXON,
-    CC1120_STATE_TX,
-    CC1120_STATE_TX_END,
-    CC1120_STATE_RXTX_SWITCH,
-    CC1120_STATE_TX_FIFO_ERR,
-    CC1120_STATE_IFADCON_TXRX
+  CC1120_STATE_SLEEP = 0,
+  CC1120_STATE_IDLE,
+  CC1120_STATE_XOFF,
+  CC1120_STATE_BIAS_SETTLE_MC,
+  CC1120_STATE_REG_SETTLE_MC,
+  CC1120_STATE_MANCAL,
+  CC1120_STATE_BIAS_SETTLE,
+  CC1120_STATE_REG_SETTLE,
+  CC1120_STATE_STARTCAL,
+  CC1120_STATE_BWBOOST,
+  CC1120_STATE_FS_LOCK,
+  CC1120_STATE_IFADCON,
+  CC1120_STATE_RX,
+  CC1120_STATE_RX_END,
+  CC1120_STATE_RESERVED,
+  CC1120_STATE_TXRX_SWITCH,
+  CC1120_STATE_RX_FIFO_ERR,
+  CC1120_STATE_FSTXON,
+  CC1120_STATE_TX,
+  CC1120_STATE_TX_END,
+  CC1120_STATE_RXTX_SWITCH,
+  CC1120_STATE_TX_FIFO_ERR,
+  CC1120_STATE_IFADCON_TXRX
 } cc1120_state_t;
 
 /**
  * @brief Initializes all of the semaphores that will be used by cc1120Send and cc1120Receive
- * 
-*/
+ *
+ */
 void initAllTxRxSemaphores(void);
 
 /**
@@ -108,7 +107,8 @@ obc_error_code_t cc1120Receive(void);
 obc_error_code_t txFifoEmptyCheckBlocking(void);
 
 /**
- * @brief callback function to be used in an ISR when the TX FIFO drops below (CC1120_TX_FIFO_SIZE - TXRX_INTERRUPT_THRESHOLD)
+ * @brief callback function to be used in an ISR when the TX FIFO drops below (CC1120_TX_FIFO_SIZE -
+ * TXRX_INTERRUPT_THRESHOLD)
  */
 void txFifoReadyCallback(void);
 
@@ -129,9 +129,9 @@ void syncEventCallback(void);
 
 /**
  * @brief allows other files to access the cc1120 RX semaphore handle
- * 
+ *
  * @return SemaphoreHandle_t - handle of the cc1120 RX semaphore
-*/
+ */
 SemaphoreHandle_t getCC1120RxSemaphoreHandle(void);
 
 #endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */

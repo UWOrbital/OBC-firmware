@@ -25,4 +25,4 @@ float unpackFloat(const uint8_t* buffer, uint32_t* offset);
 }
 #endif
 
-#endif // COMMON_INCLUDE_OBC_UNPACK_H_
+#endif  // COMMON_INCLUDE_OBC_UNPACK_H_
