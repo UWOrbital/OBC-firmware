@@ -86,30 +86,30 @@ static void vRecvTask(void *pvParameters) {
           while (1) {
             LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(500)));
 
-                        if (errCode == OBC_ERR_CODE_SUCCESS) {
-                            LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-                        }
-                    }
-                }
-                #if CSDC_DEMO_ENABLED == 1
-                LOG_IF_ERROR_CODE(startUplink());
-                #endif
-                #else
-                if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-                    LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-                    break;
-                }
-                // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
-                LOG_IF_ERROR_CODE(cc1120Receive());
-                LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
-                xSemaphoreGive(cc1120Mutex);
-                #endif
-                break;
-            default:
-                LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+            if (errCode == OBC_ERR_CODE_SUCCESS) {
+              LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+            }
+          }
         }
+#if CSDC_DEMO_ENABLED == 1
+        LOG_IF_ERROR_CODE(startUplink());
+#endif
+#else
+        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
+          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
+          break;
+        }
+        // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+        LOG_IF_ERROR_CODE(cc1120Receive());
+        LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+        xSemaphoreGive(cc1120Mutex);
+#endif
+        break;
+      default:
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
     }
-} 
+  }
+}
 
 obc_error_code_t startUplink(void) {
   if (recvDataQueueHandle == NULL) {
