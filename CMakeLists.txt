@@ -20,6 +20,11 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
 
     project(OBC-firmware LANGUAGES C ASM)
     add_executable(OBC-firmware.out main.c)
+
+    # Higher optimization levels on some hal files will break firmware for some reason
+    # Compile them with no optimizations amd link them back
+    add_library(NO_OPTIMIZE_FILES OBJECT)
+
 elseif(CMAKE_BUILD_TYPE MATCHES Test)
     project(OBC-firmware-tests LANGUAGES CXX C)
 else()
@@ -30,10 +35,15 @@ if (CMAKE_BUILD_TYPE MATCHES Test)
     add_subdirectory(test)
 elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     if (DEBUG MATCHES 1)
-        # Higher optimization levels break firmware for some reason
-        target_compile_options(OBC-firmware.out PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
+        target_compile_options(OBC-firmware.out PRIVATE -O3 -g -gdwarf-3 -gstrict-dwarf)
+        # Higher optimization levels on some hal files will break firmware for some reason
+        # Compile them with no optimizations
+        target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
     else()
-        target_compile_options(OBC-firmware.out PRIVATE -O0)
+        target_compile_options(OBC-firmware.out PRIVATE -O3)
+        # Higher optimization levels on some hal files will break firmware for some reason
+        # Compile them with no optimizations
+        target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0)
     endif()
 
     target_compile_definitions(OBC-firmware.out PRIVATE
@@ -62,5 +72,6 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
+        $<TARGET_OBJECTS:NO_OPTIMIZE_FILES>
     )
 endif()

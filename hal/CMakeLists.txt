@@ -17,7 +17,6 @@ target_sources(OBC-firmware.out PUBLIC
     source/os_event_groups.c
     source/os_heap.c
     source/os_list.c
-    source/os_mpu_wrappers.c
     source/os_port.c
     source/os_portasm.s
     source/os_queue.c
@@ -35,8 +34,17 @@ target_sources(OBC-firmware.out PUBLIC
     source/sys_phantom.c
     source/sys_pmm.c
     source/sys_pmu.s
-    source/sys_selftest.c
-    source/sys_startup.c
     source/sys_vim.c
     source/system.c
+)
+
+# Higher optimization levels on some hal files will break firmware for some reason
+# Compile them with no optimizations
+target_include_directories(NO_OPTIMIZE_FILES PUBLIC
+    include
+)
+target_sources(NO_OPTIMIZE_FILES PUBLIC
+    source/sys_selftest.c
+    source/sys_startup.c
+    source/os_mpu_wrappers.c
 )
