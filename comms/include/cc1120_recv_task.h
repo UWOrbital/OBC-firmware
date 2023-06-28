@@ -10,10 +10,11 @@
 
 /**
  * @brief initializes the receive task for uplink
+ * @param pvParameters parameters to be passed into the created task
  *
  * @return void
  */
-void initRecvTask(void);
+void initRecvTask(void *pvParameters);
 
 /**
  * @brief send an event to the Recv queue to start uplink

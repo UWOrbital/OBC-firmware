@@ -4,9 +4,13 @@
 #include "obc_errors.h"
 #include "telemetry_manager.h"
 
+#include <FreeRTOS.h>
+#include <os_semphr.h>
 #include <sys_common.h>
 
 #define MAX_DOWNLINK_TELEM_BUFFER_SIZE 1U
+
+#define CC1120_MUTEX_TIMEOUT pdMS_TO_TICKS(300000)
 
 /**
  * @enum	comms_event_id_t
