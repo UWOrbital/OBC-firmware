@@ -12,9 +12,6 @@
 
 #define CC1120_MUTEX_TIMEOUT pdMS_TO_TICKS(300000)
 
-extern SemaphoreHandle_t cc1120Mutex;
-extern StaticSemaphore_t cc1120MutexBuffer;
-
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.

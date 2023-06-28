@@ -29,8 +29,8 @@
 #define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
-SemaphoreHandle_t cc1120Mutex = NULL;
-StaticSemaphore_t cc1120MutexBuffer;
+static SemaphoreHandle_t cc1120Mutex = NULL;
+static StaticSemaphore_t cc1120MutexBuffer;
 
 static TaskHandle_t commsTaskHandle = NULL;
 static StaticTask_t commsTaskBuffer;
@@ -69,10 +69,10 @@ void initCommsManager(void) {
   initializeAesCtx(TEMP_STATIC_KEY);
   initRs();
 
-  initRecvTask();
+  initRecvTask(&cc1120Mutex);
   initDecodeTask();
 
-  initTelemEncodeTask();
+  initTelemEncodeTask(&cc1120Mutex);
   initCC1120TransmitTask();
 }
 

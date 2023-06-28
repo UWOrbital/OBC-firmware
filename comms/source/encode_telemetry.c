@@ -89,14 +89,15 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
 
 /**
  * @brief Initializes the telemetry encoding task and queue
+ * @param pvParameters parameters to be passed into the created task
  *
  */
-void initTelemEncodeTask(void) {
+void initTelemEncodeTask(void *pvParameters) {
   ASSERT((telemEncodeTaskStack != NULL) && (&telemEncodeTaskBuffer != NULL));
 
   if (telemEncodeTaskHandle == NULL) {
     telemEncodeTaskHandle =
-        xTaskCreateStatic(vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME, COMMS_TELEM_ENCODE_STACK_SIZE, NULL,
+        xTaskCreateStatic(vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME, COMMS_TELEM_ENCODE_STACK_SIZE, pvParameters,
                           COMMS_TELEM_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
   }
 
@@ -129,6 +130,7 @@ obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg) {
  */
 static void vTelemEncodeTask(void *pvParameters) {
   obc_error_code_t errCode;
+  SemaphoreHandle_t cc1120Mutex = *((SemaphoreHandle_t *)pvParameters);
 
   while (1) {
     comms_event_t queueMsg;

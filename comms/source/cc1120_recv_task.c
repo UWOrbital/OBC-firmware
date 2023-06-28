@@ -41,7 +41,7 @@ static uint8_t recvDataQueueStack[RECV_DATA_QUEUE_LENGTH * RECV_DATA_QUEUE_ITEM_
 
 static void vRecvTask(void *pvParameters);
 
-void initRecvTask(void) {
+void initRecvTask(void *pvParameters) {
   ASSERT((recvTaskStack != NULL) && (&recvTaskBuffer != NULL));
   if (recvTaskHandle == NULL) {
     recvTaskHandle = xTaskCreateStatic(vRecvTask, COMMS_RECV_TASK_NAME, COMMS_RECV_STACK_SIZE, NULL,
@@ -66,6 +66,7 @@ static void vRecvTask(void *pvParameters) {
   obc_error_code_t errCode;
   while (1) {
     comms_event_t queueMsg;
+    SemaphoreHandle_t cc1120Mutex = *((SemaphoreHandle_t *)pvParameters);
     if (xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
