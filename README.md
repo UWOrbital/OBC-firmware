@@ -107,7 +107,7 @@ ctest --verbose
 ```
 
 ### Flashing
-To flashing the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.
+To flash the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.
 #### **RM46 Launchpad:**
 - Device = LAUNCHXL2-RM46
 - Connection = Texas Instruments XDS110 USB Debug Probe
@@ -127,7 +127,7 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
     * Our branch naming scheme is `<developer_name>/<feature_description>`.
       * Example: `danielg/implement-random-device-driver`
 3. Make a PR.
-    - For the PR description, make sure to fill in all the require details in the generated template.
+    - For the PR description, make sure to fill in all the required details in the generated template.
     - Add at least 3 PR reviewers, including 1 firmware lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR.
 4. Make any requested changes and merge your branch onto main once the PR is approved.
 
@@ -150,7 +150,7 @@ Function comments should exist in the .h file. For static functions, they should
  *
  * @param num1 - The first number to add.
  * @param num2 - The second number to add.
- * @return uint8_t - Returns the sum of of the two numbers.
+ * @return uint8_t - Returns the sum of the two numbers.
  */
 uint8_t addNumbers(uint8_t num1, uint8_t num2);
 ```
@@ -185,14 +185,14 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
             int b;
         } struct_name_t
         ```
--   4 spaces per level of indentation (NOT TABS)
+-   2 spaces per level of indentation (NOT TABS)
 -   Use spaces after opening brackets for conditionals and loops (e.g. `if ()` and `while ()`), but not for function calls (i.e. `my_func()`).
--   Import statments should be grouped in the following order:
+-   Import statements should be grouped in the following order:
     1.  Local imports (e.g. `#include "cc1120_driver.h`)
     2.  External library imports (e.g. `#include <os_semphr.h>`)
     3.  Standard library imports (e.g. `#include <stdint.h>`)
 -   160 character limit per line (not a hard limit, use common sense)
--   Hanging indents should be aligned to delimeter:
+-   Hanging indents should be aligned to delimiter:
 
 ```c
 myFunction(hasToo,
