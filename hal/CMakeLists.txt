@@ -4,7 +4,7 @@ set(RM46_LAUNCHPAD_HAL_LIB rm46-launchpad-hal)
 set(OBC_REV1_HAL_LIB obc-rev1-hal)
 set(OBC_REV2_HAL_LIB obc-rev2-hal)
 
-add_library(${RM46_LAUNCHPAD_HAL_LIB} STATIC
+set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/dabort.s
@@ -41,12 +41,7 @@ add_library(${RM46_LAUNCHPAD_HAL_LIB} STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/system.c
 )
 
-target_include_directories(${RM46_LAUNCHPAD_HAL_LIB} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/common
-)
-
-add_library(${OBC_REV1_HAL_LIB} STATIC
+set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/dabort.s
@@ -83,12 +78,7 @@ add_library(${OBC_REV1_HAL_LIB} STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/system.c
 )
 
-target_include_directories(${OBC_REV1_HAL_LIB} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/common
-)
-
-add_library(${OBC_REV2_HAL_LIB} STATIC
+set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/dabort.s
@@ -125,18 +115,23 @@ add_library(${OBC_REV2_HAL_LIB} STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/system.c
 )
 
-target_include_directories(${OBC_REV2_HAL_LIB} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/common
-)
+if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
+    set(HAL_LIB rm46-launchpad-hal)
+    set(HAL_SOURCES ${RM46_LAUNCHPAD_HAL_SOURCES})
+    set(HAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/include)
+elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
+    set(HAL_LIB obc-rev1-hal)
+    set(HAL_SOURCES ${OBC_REV1_HAL_SOURCES})
+    set(HAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/include)
+elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    set(HAL_LIB obc-rev2-hal)
+    set(HAL_SOURCES ${OBC_REV2_HAL_SOURCES})
+    set(HAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/include)
+else()
+message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
+endif()
 
-# Higher optimization levels on some hal files will break firmware for some reason
-# Compile them with no optimizations
-target_include_directories(NO_OPTIMIZE_FILES PUBLIC
-    include
-)
-target_sources(NO_OPTIMIZE_FILES PUBLIC
-    source/sys_selftest.c
-    source/sys_startup.c
-    source/os_mpu_wrappers.c
-)
+target_sources(OBC-firmware.out PRIVATE ${HAL_SOURCES})
+target_include_directories(OBC-firmware.out PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+
+# TODO: Create a static library for the HAL and link it to the main firmware

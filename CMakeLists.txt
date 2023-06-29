@@ -79,21 +79,9 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
 
     add_subdirectory(hal)
 
-    if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
-        set(HAL_LIB rm46-launchpad-hal)
-    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
-        set(HAL_LIB obc-rev1-hal)
-    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
-        set(HAL_LIB obc-rev2-hal)
-    else()
-        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
-    endif()
-
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
-        $<TARGET_OBJECTS:NO_OPTIMIZE_FILES>
-        ${HAL_LIB}
     )
 
 endif()
