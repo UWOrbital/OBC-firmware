@@ -11,7 +11,7 @@ set(TEST_MOCKS
 
 set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/main.cpp
-    ${CMAKE_SOURCE_DIR}/test/test_pack_unpack.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_pack_unpack_utils.cpp
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
