@@ -11,24 +11,29 @@ static struct AES_ctx ctx;
 /**
  * @brief Decrypts the AES blocks
  *
- * @param aesData Pointer to an aes_data_t union that includes a struct of the IV and data
- * @param cmdBytes 223B-AES_IV_SIZE array to store the decrypted data
+ * @param aesData Pointer to an aes_data_t struct that includes a struct of the IV and data
+ * @param output array to store the decrypted data
+ * @param outputBufferLen length of the buffer to store the decrypted data
  *
  * @return obc_error_code_t - whether or not the data was successfully decrypted
  */
-obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes) {
+obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen) {
   if (aesData == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (cmdBytes == NULL) {
+  if (output == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  memcpy(cmdBytes, aesData->aesStruct.ciphertext, RS_DECODED_SIZE - AES_IV_SIZE);
-  AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
-  AES_CTR_xcrypt_buffer(&ctx, cmdBytes, RS_DECODED_SIZE - AES_IV_SIZE);
-  memcpy(cmdBytes, cmdBytes + 5, RS_DECODED_SIZE - AES_IV_SIZE - 5);
+  if (outputBufferLen != aesData->ciphertextLen) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  memcpy(output, aesData->ciphertext, aesData->ciphertextLen);
+  AES_ctx_set_iv(&ctx, aesData->iv);
+  AES_CTR_xcrypt_buffer(&ctx, output, aesData->ciphertextLen);
+  memcpy(output, output + 5, aesData->ciphertextLen - 5);
   return OBC_ERR_CODE_SUCCESS;
 }
 

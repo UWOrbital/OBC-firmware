@@ -15,12 +15,12 @@ correct_reed_solomon *rs = NULL;
  *
  * @return obc_error_code_t - whether or not the data was successfully encoded
  */
-obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData) {
+obc_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData) {
   if (telemData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   if (rsData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if ((uint8_t)correct_reed_solomon_encode(rs, telemData->data, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE) {
+  if ((uint8_t)correct_reed_solomon_encode(rs, telemData, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE) {
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
 
@@ -31,15 +31,17 @@ obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *
  * @brief Decodes the reed solomon data
  *
  * @param rsData 255 byte array that has encoded reed solomon data
- * @param decodedData pointer to a union that includes a uint8_t array of size 223B
+ * @param decodedData pointer to a uint8_t array of size 223B
+ * @param decodedDataLen length of the decodedData array
  *
  * @return obc_error_code_t - whether or not the data was successfully decoded
  */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData) {
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData, uint8_t decodedDataLen) {
   if (rsData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   if (decodedData == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
+  if (decodedDataLen < RS_DECODED_SIZE) return OBC_ERR_CODE_INVALID_ARG;
   int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, RS_ENCODED_SIZE, decodedData);
 
   if (decodedLength == -1) return OBC_ERR_CODE_CORRUPTED_MSG;

@@ -49,27 +49,29 @@ extern ax25_addr_t cubesatCallsign;
 extern ax25_addr_t groundStationCallsign;
 
 /**
- * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in ax25Data->length
+ * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  *
- * @param rsData reed solomon data that needs ax.25 headers added onto it
+ * @param telemData data to send that needs ax.25 headers added onto it
+ * @param telemDataLen length of the telemData array
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
- * @param srcAddress address of the sender of the ax25 packet
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
-obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress,
-                          ax25_addr_t *srcAddress);
+obc_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_packet_t *ax25Data,
+                          ax25_addr_t *destAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
  *
  * @param ax25Data the received ax.25 frame
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
+ * @param uplinkDataLen length of the uplinkData array
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData, ax25_addr_t *recvAddress);
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
+                          ax25_addr_t *recvAddress);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */
