@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
     };
 
     packed_ax25_packet_t ax25Pkt = {0};
-    RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, , &cubesatCallsign));
+    RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign));
 
     long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
