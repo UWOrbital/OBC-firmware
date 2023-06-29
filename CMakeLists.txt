@@ -31,7 +31,7 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
     add_executable(OBC-firmware.out main.c)
 
     # Higher optimization levels on some hal files will break firmware for some reason
-    # Compile them with no optimizations amd link them back
+    # Compile them with no optimizations
     add_library(NO_OPTIMIZE_FILES OBJECT)
 
 elseif(CMAKE_BUILD_TYPE MATCHES Test)
@@ -82,6 +82,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
+        $<TARGET_OBJECTS:NO_OPTIMIZE_FILES>
     )
 
 endif()
