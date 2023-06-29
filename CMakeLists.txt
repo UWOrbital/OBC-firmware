@@ -15,7 +15,16 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
     # Set default values for firmware build options
     include(cmake/fw_build_options.cmake)
 
-    set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/source/sys_link.ld")
+    if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
+        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/launchpad/source/sys_link.ld")
+    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
+        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev1/source/sys_link.ld")
+    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
+        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev2/source/sys_link.ld")
+    else()
+        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
+    endif()
+
     set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
 
     project(OBC-firmware LANGUAGES C ASM)
@@ -55,12 +64,25 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     add_subdirectory(comms)
     add_subdirectory(drivers)
     add_subdirectory(eps)
-    add_subdirectory(hal)
     add_subdirectory(payload)
     add_subdirectory(libs)
+
+    add_subdirectory(hal)
+
+    if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
+        set(HAL_LIB rm46-launchpad-hal)
+    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
+        set(HAL_LIB obc-rev1-hal)
+    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
+        set(HAL_LIB obc-rev2-hal)
+    else()
+        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
+    endif()
 
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
+        ${HAL_LIB}
     )
+
 endif()
