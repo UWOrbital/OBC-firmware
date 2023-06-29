@@ -25,12 +25,15 @@ ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES
 /**
  * @brief performs bit unstuffing on a receive ax.25 packet
  *
- * @param packet - pointer to a received stuffed ax.25 packet
- * @param unstuffedPacket - pointer to a unstuffed_ax25_i_frame_t struct to hold the unstuffed ax.25 packet
+ * @param packet pointer to a buffer with the received stuffed ax.25 data
+ * @param packetLen length of the packetLen buffer
+ * @param unstuffedPacket pointer to a buffer to hold the unstuffed ax.25 packet
+ * @param unstuffedPacketLen expected length of the unstuffed packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t ax25Unstuff(const packed_ax25_i_frame_t *packet, unstuffed_ax25_i_frame_t *unstuffedPacket);
+static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
+                                    uint16_t unstuffedPacketLen);
 
 /**
  * @brief strips away the ax.25 headers for an s Frame
@@ -281,7 +284,7 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
   uint16_t unstuffedBitLength = 0;  // count as bits
 
   // Clear the unstuffed data
-  memset(unstuffedPacket->data, 0, sizeof(unstuffedPacket->data));
+  memset(unstuffedPacket, 0, sizeof(unstuffedPacket->data));
 
   // Set the first flag
   unstuffedPacket[0] = AX25_FLAG;
