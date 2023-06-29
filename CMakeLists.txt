@@ -44,12 +44,12 @@ if (CMAKE_BUILD_TYPE MATCHES Test)
     add_subdirectory(test)
 elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     if (DEBUG MATCHES 1)
-        target_compile_options(OBC-firmware.out PRIVATE -O3 -g -gdwarf-3 -gstrict-dwarf)
+        target_compile_options(OBC-firmware.out PRIVATE -O2 -g -gdwarf-3 -gstrict-dwarf)
         # Higher optimization levels on some hal files will break firmware for some reason
         # Compile them with no optimizations
         target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
     else()
-        target_compile_options(OBC-firmware.out PRIVATE -O3)
+        target_compile_options(OBC-firmware.out PRIVATE -O2)
         # Higher optimization levels on some hal files will break firmware for some reason
         # Compile them with no optimizations
         target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0)
