@@ -17,6 +17,8 @@ target_sources(OBC-firmware.out PUBLIC
     common/source/obc_reset.c
     common/source/obc_spi_io.c
     common/source/obc_sci_io.c
+    common/source/obc_gio_ctrl.c
+    common/source/obc_het_ctrl.c
     common/source/obc_sw_watchdog.c
     ds3232/source/ds3232_mz.c
     fram/source/fram.c
