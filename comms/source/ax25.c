@@ -85,12 +85,14 @@ static obc_error_code_t bitStuffing(uint8_t *rawData, packed_ax25_packet_t *stuf
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  *
  * @param telemData data to send that needs ax.25 headers added onto it
+ * @param telemDataLen length of the telemData array
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
-obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress) {
+obc_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_packet_t *ax25Data,
+                          ax25_addr_t *destAddress) {
   if (telemData == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -121,7 +123,7 @@ obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + 1] = (pktSentNum << 1);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES] = AX25_PID;
   memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES,
-         telemData, RS_ENCODED_SIZE);
+         telemData, telemDataLen);
   uint16_t fcs;
   RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, &fcs));
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES +
@@ -145,8 +147,8 @@ obc_error_code_t ax25Send(uint8_t *telemData, packed_ax25_packet_t *ax25Data, ax
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, ax25_addr_t *recvAddress,
-                          uint8_t uplinkDataLen) {
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
+                          ax25_addr_t *recvAddress) {
   if (ax25Data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
