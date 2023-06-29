@@ -7,7 +7,7 @@ TEST(TestPackAndUnpack, ValidUint8PackUnpack) {
   uint8_t val = 0x12;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packUint8(val, buf, &len);
   EXPECT_EQ(len, sizeof(uint8_t));
 
@@ -22,7 +22,7 @@ TEST(TestPackAndUnpack, ValidUint16PackUnpack) {
   uint16_t val = 0x1234;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packUint16(val, buf, &len);
   EXPECT_EQ(len, sizeof(uint16_t));
 
@@ -37,7 +37,7 @@ TEST(TestPackAndUnpack, ValidUint32PackUnpack) {
   uint32_t val = 0x12345678;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packUint32(val, buf, &len);
   EXPECT_EQ(len, sizeof(uint32_t));
 
@@ -52,7 +52,7 @@ TEST(TestPackAndUnpack, ValidInt8PackUnpack) {
   int8_t val = 0x12;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packInt8(val, buf, &len);
   EXPECT_EQ(len, sizeof(int8_t));
 
@@ -67,7 +67,7 @@ TEST(TestPackAndUnpack, ValidInt16PackUnpack) {
   int16_t val = 0x1234;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packInt16(val, buf, &len);
   EXPECT_EQ(len, sizeof(int16_t));
 
@@ -82,7 +82,7 @@ TEST(TestPackAndUnpack, ValidInt32PackUnpack) {
   int32_t val = 0x12345678;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packInt32(val, buf, &len);
   EXPECT_EQ(len, sizeof(int32_t));
 
@@ -97,7 +97,7 @@ TEST(TestPackAndUnpack, ValidFloatPackUnpack) {
   float val = 12.3456789;
   uint8_t buf[sizeof(val)];
 
-  size_t len = 0;
+  uint32_t len = 0;
   packFloat(val, buf, &len);
   EXPECT_EQ(len, sizeof(float));
 

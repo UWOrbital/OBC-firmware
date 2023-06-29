@@ -45,7 +45,7 @@ int main(void) {
   cmdMsg.timestamp = 95;
   cmdMsg.isTimeTagged = true;
 
-  size_t offset = 0;
+  uint32_t offset = 0;
   uint8_t packedCmd[MAX_CMD_SIZE] = {0};
   uint8_t numPacked = 0;
   packCmdMsg(packedCmd, &offset, &cmdMsg, &numPacked);

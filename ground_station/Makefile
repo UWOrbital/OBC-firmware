@@ -27,6 +27,7 @@ SRCS += ground_station/serial_utils/win_uart.c
 # Source files shared with OBC firmware
 SRCS += common/source/obc_pack_utils.c
 SRCS += common/source/obc_unpack_utils.c
+SRCS += cdh/source/command_pack.c
 SRCS += comms/source/ax25.c
 SRCS += comms/source/fec.c
 SRCS += comms/source/aes128.c
