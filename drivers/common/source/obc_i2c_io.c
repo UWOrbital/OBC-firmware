@@ -33,152 +33,148 @@ static SemaphoreHandle_t i2cTransferComplete = NULL;
 static StaticSemaphore_t i2cTransferCompleteBuffer;
 
 void initI2CMutex(void) {
-    if (i2cMutex == NULL) {
-        i2cMutex = xSemaphoreCreateMutexStatic(&i2cMutexBuffer);
-    }
+  if (i2cMutex == NULL) {
+    i2cMutex = xSemaphoreCreateMutexStatic(&i2cMutexBuffer);
+  }
 
-    ASSERT(i2cMutex != NULL);
+  ASSERT(i2cMutex != NULL);
 
-    if (i2cTransferComplete == NULL) {
-        i2cTransferComplete = xSemaphoreCreateBinaryStatic(&i2cTransferCompleteBuffer);
-    }
+  if (i2cTransferComplete == NULL) {
+    i2cTransferComplete = xSemaphoreCreateBinaryStatic(&i2cTransferCompleteBuffer);
+  }
 
-    ASSERT(i2cTransferComplete != NULL);
+  ASSERT(i2cTransferComplete != NULL);
 }
 
 obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf) {
-    obc_error_code_t errCode;
+  obc_error_code_t errCode;
 
-    ASSERT(i2cMutex != NULL);
+  ASSERT(i2cMutex != NULL);
 
-    if (buf == NULL || size < 1)
-        return OBC_ERR_CODE_INVALID_ARG;
+  if (buf == NULL || size < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(i2cMutex, I2C_MUTEX_TIMEOUT) != pdTRUE) {
-        return OBC_ERR_CODE_MUTEX_TIMEOUT;
-    }
-    
-    taskENTER_CRITICAL();
-    i2cSetSlaveAdd(I2C_REG, sAddr);
-    i2cSetDirection(I2C_REG, I2C_TRANSMITTER);
-    i2cSetCount(I2C_REG, size);
-    i2cSetMode(I2C_REG, I2C_MASTER);
+  if (xSemaphoreTake(i2cMutex, I2C_MUTEX_TIMEOUT) != pdTRUE) {
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+  }
+
+  taskENTER_CRITICAL();
+  i2cSetSlaveAdd(I2C_REG, sAddr);
+  i2cSetDirection(I2C_REG, I2C_TRANSMITTER);
+  i2cSetCount(I2C_REG, size);
+  i2cSetMode(I2C_REG, I2C_MASTER);
+  i2cSetStop(I2C_REG);
+  i2cSetStart(I2C_REG);
+  taskEXIT_CRITICAL();
+
+  i2cSend(I2C_REG, size, buf);
+
+  if (xSemaphoreTake(i2cTransferComplete, I2C_TRANSFER_TIMEOUT) != pdTRUE) {
+    errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
     i2cSetStop(I2C_REG);
-    i2cSetStart(I2C_REG);
-    taskEXIT_CRITICAL();
-    
-    i2cSend(I2C_REG, size, buf);
+  } else {
+    errCode = OBC_ERR_CODE_SUCCESS;
+  }
 
-    if (xSemaphoreTake(i2cTransferComplete, I2C_TRANSFER_TIMEOUT) != pdTRUE) {
-        errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
-        i2cSetStop(I2C_REG);
-    } else {
-        errCode = OBC_ERR_CODE_SUCCESS;
-    }
+  i2cClearSCD(I2C_REG);
 
-    i2cClearSCD(I2C_REG);
-
-    xSemaphoreGive(i2cMutex); // Won't fail because the mutex is taken correctly
-    return errCode;
+  xSemaphoreGive(i2cMutex);  // Won't fail because the mutex is taken correctly
+  return errCode;
 }
 
 obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf) {
-    obc_error_code_t errCode;
+  obc_error_code_t errCode;
 
-    ASSERT(i2cMutex != NULL);
+  ASSERT(i2cMutex != NULL);
 
-    if (buf == NULL || size < 1)
-        return OBC_ERR_CODE_INVALID_ARG;
+  if (buf == NULL || size < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-    if (xSemaphoreTake(i2cMutex, I2C_MUTEX_TIMEOUT) != pdTRUE) {
-        return OBC_ERR_CODE_MUTEX_TIMEOUT;
-    }
+  if (xSemaphoreTake(i2cMutex, I2C_MUTEX_TIMEOUT) != pdTRUE) {
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+  }
 
-    taskENTER_CRITICAL();
-    i2cSetSlaveAdd(I2C_REG, sAddr);
-    i2cSetDirection(I2C_REG, I2C_RECEIVER);
-    i2cSetCount(I2C_REG, size);
-    i2cSetMode(I2C_REG, I2C_MASTER);
+  taskENTER_CRITICAL();
+  i2cSetSlaveAdd(I2C_REG, sAddr);
+  i2cSetDirection(I2C_REG, I2C_RECEIVER);
+  i2cSetCount(I2C_REG, size);
+  i2cSetMode(I2C_REG, I2C_MASTER);
+  i2cSetStop(I2C_REG);
+  i2cSetStart(I2C_REG);
+  taskEXIT_CRITICAL();
+
+  i2cReceive(I2C_REG, size, buf);
+
+  if (xSemaphoreTake(i2cTransferComplete, I2C_TRANSFER_TIMEOUT) != pdTRUE) {
+    errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
     i2cSetStop(I2C_REG);
-    i2cSetStart(I2C_REG);
-    taskEXIT_CRITICAL();
+  } else {
+    errCode = OBC_ERR_CODE_SUCCESS;
+  }
 
-    i2cReceive(I2C_REG, size, buf);
+  /* Clear the Stop condition */
+  i2cClearSCD(I2C_REG);
+  xSemaphoreGive(i2cMutex);
 
-    if (xSemaphoreTake(i2cTransferComplete, I2C_TRANSFER_TIMEOUT) != pdTRUE) {
-        errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
-        i2cSetStop(I2C_REG);
-    } else {
-        errCode = OBC_ERR_CODE_SUCCESS;
-    }
-
-    /* Clear the Stop condition */
-    i2cClearSCD(I2C_REG);
-    xSemaphoreGive(i2cMutex);
-    
-    return errCode;
+  return errCode;
 }
 
 obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes) {
-    obc_error_code_t errCode;
-    
-    ASSERT(i2cMutex != NULL);
+  obc_error_code_t errCode;
 
-    if (data == NULL || numBytes < 1)
-        return OBC_ERR_CODE_INVALID_ARG;
+  ASSERT(i2cMutex != NULL);
 
-    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, 1, &reg));
+  if (data == NULL || numBytes < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-    RETURN_IF_ERROR_CODE(i2cReceiveFrom(sAddr, numBytes, data));
+  RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, 1, &reg));
 
-    return OBC_ERR_CODE_SUCCESS;
+  RETURN_IF_ERROR_CODE(i2cReceiveFrom(sAddr, numBytes, data));
+
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes) {
-    obc_error_code_t errCode;
+  obc_error_code_t errCode;
 
-    ASSERT(i2cMutex != NULL);
+  ASSERT(i2cMutex != NULL);
 
-    if (data == NULL || numBytes < 1 || numBytes > I2C_WRITE_REG_MAX_BYTES)
-        return OBC_ERR_CODE_INVALID_ARG;
-    
-    uint8_t dataBuf[I2C_WRITE_REG_MAX_BYTES + 1];
-    dataBuf[0] = reg;
+  if (data == NULL || numBytes < 1 || numBytes > I2C_WRITE_REG_MAX_BYTES) return OBC_ERR_CODE_INVALID_ARG;
 
-    for (int i = 0; i < numBytes; i++) {
-        dataBuf[i + 1] = data[i];
-    }
+  uint8_t dataBuf[I2C_WRITE_REG_MAX_BYTES + 1];
+  dataBuf[0] = reg;
 
-    RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, numBytes + 1, dataBuf));
-    return OBC_ERR_CODE_SUCCESS;
+  for (int i = 0; i < numBytes; i++) {
+    dataBuf[i + 1] = data[i];
+  }
+
+  RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, numBytes + 1, dataBuf));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 void i2cNotification(i2cBASE_t *i2c, uint32 flags) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    if (flags & I2C_SCD_INT) {
-        xSemaphoreGiveFromISR(i2cTransferComplete, &xHigherPriorityTaskWoken);
-    } 
-    
-    if (flags & I2C_NACK_INT) {
-        i2c->STR = (uint32)I2C_NACK_INT;
-        i2cSetStop(i2c);
-    } 
-    
-    if (flags & I2C_AL_INT) {
-        i2c->STR = (uint32)I2C_AL_INT;
-        i2cSetStop(i2c);
-    } 
-    
-    if (flags & I2C_ARDY_INT) {
-        i2cSetStop(i2c);
-    } 
-    
-    if (flags & I2C_AAS_INT) {
-        i2cSetStop(i2c);
-    }
+  if (flags & I2C_SCD_INT) {
+    xSemaphoreGiveFromISR(i2cTransferComplete, &xHigherPriorityTaskWoken);
+  }
 
-    i2cClearSCD(i2c);    
+  if (flags & I2C_NACK_INT) {
+    i2c->STR = (uint32)I2C_NACK_INT;
+    i2cSetStop(i2c);
+  }
 
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+  if (flags & I2C_AL_INT) {
+    i2c->STR = (uint32)I2C_AL_INT;
+    i2cSetStop(i2c);
+  }
+
+  if (flags & I2C_ARDY_INT) {
+    i2cSetStop(i2c);
+  }
+
+  if (flags & I2C_AAS_INT) {
+    i2cSetStop(i2c);
+  }
+
+  i2cClearSCD(i2c);
+
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }

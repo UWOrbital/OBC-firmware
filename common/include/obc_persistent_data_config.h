@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-//System data
+// System data
 typedef struct {
-    uint32_t unix_time;
+  uint32_t unix_time;
 } fram_time_data_t;
 
 typedef struct {
-    uint32_t obc_state;
+  uint32_t obc_state;
 } fram_state_data_t;
 
 // //ADCS data
@@ -27,19 +27,19 @@ typedef struct {
 //     uint32_t data3;
 // } fram_comms_data_t;
 
-//CDH data
+// CDH data
 typedef struct {
-    uint32_t data1;
-    uint32_t data2;
-    uint32_t data3;
+  uint32_t data1;
+  uint32_t data2;
+  uint32_t data3;
 } fram_cdh_data_t;
 
-//EPS data
-// typedef struct {
-//     uint32_t data1;
-//     uint32_t data2;
-//     uint32_t data3;
-// } fram_eps_data_t;
+// EPS data
+//  typedef struct {
+//      uint32_t data1;
+//      uint32_t data2;
+//      uint32_t data3;
+//  } fram_eps_data_t;
 
 // typedef struct {
 //     uint32_t data1;
@@ -47,4 +47,4 @@ typedef struct {
 //     uint32_t data3;
 // } fram_payload_data_t;
 
-#endif  //COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_
+#endif  // COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_

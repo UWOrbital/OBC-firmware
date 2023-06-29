@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Packs an unsigned 8-bit integer into a buffer at the given offset.
  *
@@ -66,5 +70,9 @@ void packInt32(int32_t value, uint8_t* buffer, size_t* offset);
  * @param offset  A pointer to the offset within the buffer to pack the value at.
  */
 void packFloat(float value, uint8_t* buffer, size_t* offset);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // COMMON_INCLUDE_OBC_PACK_UTILS_H_

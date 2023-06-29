@@ -1,4 +1,4 @@
-**To try this example, follow these steps:** 
+**To try this example, follow these steps:**
 
 1. Change to the top-level directory (i.e. `OBC-firmware/`)
 2. Run `make -f examples/sci_read_demo/Makefile` to build

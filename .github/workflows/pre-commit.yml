@@ -1,0 +1,24 @@
+name: pre-commit
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+    - id: file_changes
+      uses: trilom/file-changes-action@v1.2.4
+      with:
+        prNumber: ${{ github.event.number }}
+        output: ' '
+    - uses: pre-commit/action@v3.0.0
+      name: pre-commit
+      with:
+        extra_args: --files ${{ steps.file_changes.outputs.files}}

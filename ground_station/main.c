@@ -18,10 +18,8 @@
 /* THIS GROUND STATION IS FOR DEMO PURPOSES */
 /* AND ONLY SENDS A SINGLE COMMAND PER PACKET */
 
-static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03,
-                                                      0x04, 0x05, 0x06, 0x07,
-                                                      0x08, 0x09, 0x0A, 0x0B,
-                                                      0x0C, 0x0D, 0x0E, 0x0F};
+static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                                      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
 static correct_reed_solomon *rsGs;
 
@@ -29,236 +27,235 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
 static uint32_t getCurrentTime(void);
 
 int main(int argc, char *argv[]) {
-    obc_error_code_t errCode;
+  obc_error_code_t errCode;
 
-    initLogger();
+  initLogger();
 
-    if (argc < 3) {
-        printf("Usage: %s <COM port> <Demo Number>"
-            "\n0: Immediate RTC Sync"
-            "\n1: Immediate Ping"
-            "\n2: Time-tagged Ping (15 sec in future)"
-            "\n", argv[0]);
-        return 1;
-    }
-    
-    long int comPort = strtol(argv[1], NULL, 10);
-    if (comPort < 0 || comPort > 255) {
-        printf("Invalid com port: %ld\n", comPort);
-        return 1;
-    }
+  if (argc < 3) {
+    printf(
+        "Usage: %s <COM port> <Demo Number>"
+        "\n0: Immediate RTC Sync"
+        "\n1: Immediate Ping"
+        "\n2: Time-tagged Ping (15 sec in future)"
+        "\n",
+        argv[0]);
+    return 1;
+  }
 
-    int demoNum = strtol(argv[2], NULL, 10);
+  long int comPort = strtol(argv[1], NULL, 10);
+  if (comPort < 0 || comPort > 255) {
+    printf("Invalid com port: %ld\n", comPort);
+    return 1;
+  }
 
-    /* Setup the serial port */
+  int demoNum = strtol(argv[2], NULL, 10);
 
-    char comPortName[16] = {0};
-    snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX, comPort);
+  /* Setup the serial port */
 
-    // Declare variables and structures
-    HANDLE hSerial;
-    if (openSerialPort(&hSerial, comPortName) != 0) {
-        printf("Failed to open serial port!");
-        exit(1);
-    }
+  char comPortName[16] = {0};
+  snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX, comPort);
 
-    DCB dcbSerialParams = {0};
-    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-    if (getDeviceState(hSerial, &dcbSerialParams) != 0) {
-        printf("Failed to get device state!");
-        return 1;
-    }
+  // Declare variables and structures
+  HANDLE hSerial;
+  if (openSerialPort(&hSerial, comPortName) != 0) {
+    printf("Failed to open serial port!");
+    exit(1);
+  }
 
-    dcbSerialParams.BaudRate = CBR_9600;
-    dcbSerialParams.ByteSize = 8;
-    dcbSerialParams.StopBits = TWOSTOPBITS;
-    dcbSerialParams.Parity = NOPARITY;
+  DCB dcbSerialParams = {0};
+  dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+  if (getDeviceState(hSerial, &dcbSerialParams) != 0) {
+    printf("Failed to get device state!");
+    return 1;
+  }
 
-    if (setDeviceParameters(hSerial, &dcbSerialParams) != 0) {
-        printf("Failed to set serial parameters!");
-        exit(1);
-    }
+  dcbSerialParams.BaudRate = CBR_9600;
+  dcbSerialParams.ByteSize = 8;
+  dcbSerialParams.StopBits = TWOSTOPBITS;
+  dcbSerialParams.Parity = NOPARITY;
 
-    COMMTIMEOUTS timeouts = {0};
+  if (setDeviceParameters(hSerial, &dcbSerialParams) != 0) {
+    printf("Failed to set serial parameters!");
+    exit(1);
+  }
 
-    if (demoNum == 2) {
-        timeouts.ReadIntervalTimeout = 30000; // ms
-    } else {
-        timeouts.ReadIntervalTimeout = 2500; // ms
-    }
-    
-    timeouts.ReadTotalTimeoutConstant = 0;
-    timeouts.ReadTotalTimeoutMultiplier = 0;
-    timeouts.WriteTotalTimeoutConstant = 0;
-    timeouts.WriteTotalTimeoutMultiplier = 0;
-    if (SetCommTimeouts(hSerial, &timeouts) == 0) {
-        printf("Error setting timeouts!");
-        CloseHandle(hSerial);
-        return 1;
-    }
+  COMMTIMEOUTS timeouts = {0};
 
-    printf("Serial port configured!\n");
+  if (demoNum == 2) {
+    timeouts.ReadIntervalTimeout = 30000;  // ms
+  } else {
+    timeouts.ReadIntervalTimeout = 2500;  // ms
+  }
 
-    /* Construct packet */
+  timeouts.ReadTotalTimeoutConstant = 0;
+  timeouts.ReadTotalTimeoutMultiplier = 0;
+  timeouts.WriteTotalTimeoutConstant = 0;
+  timeouts.WriteTotalTimeoutMultiplier = 0;
+  if (SetCommTimeouts(hSerial, &timeouts) == 0) {
+    printf("Error setting timeouts!");
+    CloseHandle(hSerial);
+    return 1;
+  }
 
-    cmd_msg_t cmdMsg = {0};
+  printf("Serial port configured!\n");
 
-    switch (demoNum) {
-        case 0: {
-            printf("Sending RTC Sync Command\n");
-            cmdMsg.id = CMD_RTC_SYNC;
-            cmdMsg.isTimeTagged = false;
-            cmdMsg.rtcSync.unixTime = getCurrentTime();
-            break;
-        }
+  /* Construct packet */
 
-        case 1: {
-            printf("Sending immediate ping command\n");
-            cmdMsg.id = CMD_PING;
-            cmdMsg.isTimeTagged = false;
-            break;
-        }
+  cmd_msg_t cmdMsg = {0};
 
-        case 2: {
-            printf("Sending time-tagged ping command (15 sec in the future)\n");
-            cmdMsg.id = CMD_PING;
-            cmdMsg.isTimeTagged = true;
-            cmdMsg.rtcSync.unixTime = getCurrentTime() + 15;
-            break;
-        }
-
-        default:
-            printf("Invalid demo number!");
-            exit(1);
+  switch (demoNum) {
+    case 0: {
+      printf("Sending RTC Sync Command\n");
+      cmdMsg.id = CMD_RTC_SYNC;
+      cmdMsg.isTimeTagged = false;
+      cmdMsg.rtcSync.unixTime = getCurrentTime();
+      break;
     }
 
-    struct AES_ctx ctx = {0};
-    AES_init_ctx(&ctx, TEMP_STATIC_KEY);
-
-    uint8_t iv[AES_IV_SIZE] = {0};
-    memset(iv, 1, AES_IV_SIZE);
-    AES_ctx_set_iv(&ctx, iv);
-
-    rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
-
-    size_t cmdPacketOffset = 0;
-
-    uint8_t packedSingleCmdSize = 0;
-    uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE] = {0};
-    RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd,
-                            &cmdPacketOffset,
-                            &cmdMsg,
-                            &packedSingleCmdSize));
-
-    packed_telem_packet_t cmdPacket = {0};
-    memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
-    cmdPacketOffset += packedSingleCmdSize;
-
-    if(cmdPacketOffset != 0){
-        AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
-
-        uint8_t data[RS_DECODED_SIZE] = {0};
-        memcpy(data, iv, AES_IV_SIZE);
-        memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE-AES_IV_SIZE);
-        
-        packed_rs_packet_t fecPkt = {0};
-        if((uint8_t) correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE){
-            exit(1);
-        };
-
-        packed_ax25_packet_t ax25Pkt = {0};
-        RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, &ax25Pkt, &cubesatCallsign));
-
-        long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
-        if (bytesWritten < ax25Pkt.length) {
-            printf("Failed to write entire AX.25 packet!");
-            exit(1);
-        }
-
-        printf("Bytes Written: %lu\n", bytesWritten);
+    case 1: {
+      printf("Sending immediate ping command\n");
+      cmdMsg.id = CMD_PING;
+      cmdMsg.isTimeTagged = false;
+      break;
     }
 
-    /* Receive Data */
-
-    uint16_t axDataIndex = 0;
-    packed_ax25_packet_t axData = {0};
-    bool startFlagReceived = false;
-    while (1) {
-        uint8_t byte = '\0';
-        if (readSerialPort(hSerial, &byte, 1) == 0) {
-            break;
-        }
-
-        if (axDataIndex >= sizeof(axData.data)) {
-            LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
-
-            // Restart the decoding process
-            memset(&axData, 0, sizeof(axData));
-            axDataIndex = 0;
-            startFlagReceived = false;
-        }
-
-        if (byte == AX25_FLAG) {
-            axData.data[axDataIndex++] = byte;
-
-            // Decode packet if we have start flag, end flag, and at least 1 byte of data
-            // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
-            // axData.data[1] must be something other than AX25_FLAG
-            if (axDataIndex > 2) {
-                axData.length = axDataIndex;
-                    
-                packed_rs_packet_t rsData = {0};
-                LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData));
-                    
-                // Restart the decoding process
-                memset(&axData, 0, sizeof(axData));
-                axDataIndex = 0;
-                startFlagReceived = false;
-            } else {
-                startFlagReceived = true;
-                axDataIndex = 1;
-            }
-                
-            continue;
-        }
-            
-        if (startFlagReceived) {
-            axData.data[axDataIndex++] = byte;
-        }
+    case 2: {
+      printf("Sending time-tagged ping command (15 sec in the future)\n");
+      cmdMsg.id = CMD_PING;
+      cmdMsg.isTimeTagged = true;
+      cmdMsg.rtcSync.unixTime = getCurrentTime() + 15;
+      break;
     }
 
-    if (closeSerialPort(hSerial) != 0) {
-        printf("Failed to close serial port!");
-        exit(1);
+    default:
+      printf("Invalid demo number!");
+      exit(1);
+  }
+
+  struct AES_ctx ctx = {0};
+  AES_init_ctx(&ctx, TEMP_STATIC_KEY);
+
+  uint8_t iv[AES_IV_SIZE] = {0};
+  memset(iv, 1, AES_IV_SIZE);
+  AES_ctx_set_iv(&ctx, iv);
+
+  rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
+
+  size_t cmdPacketOffset = 0;
+
+  uint8_t packedSingleCmdSize = 0;
+  uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE] = {0};
+  RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd, &cmdPacketOffset, &cmdMsg, &packedSingleCmdSize));
+
+  packed_telem_packet_t cmdPacket = {0};
+  memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
+  cmdPacketOffset += packedSingleCmdSize;
+
+  if (cmdPacketOffset != 0) {
+    AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE - AES_IV_SIZE);
+
+    uint8_t data[RS_DECODED_SIZE] = {0};
+    memcpy(data, iv, AES_IV_SIZE);
+    memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE - AES_IV_SIZE);
+
+    packed_rs_packet_t fecPkt = {0};
+    if ((uint8_t)correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE) {
+      exit(1);
+    };
+
+    packed_ax25_packet_t ax25Pkt = {0};
+    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
+
+    long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
+    if (bytesWritten < ax25Pkt.length) {
+      printf("Failed to write entire AX.25 packet!");
+      exit(1);
     }
 
-    return 0;
+    printf("Bytes Written: %lu\n", bytesWritten);
+  }
+
+  /* Receive Data */
+
+  uint16_t axDataIndex = 0;
+  packed_ax25_packet_t axData = {0};
+  bool startFlagReceived = false;
+  while (1) {
+    uint8_t byte = '\0';
+    if (readSerialPort(hSerial, &byte, 1) == 0) {
+      break;
+    }
+
+    if (axDataIndex >= sizeof(axData.data)) {
+      LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+
+      // Restart the decoding process
+      memset(&axData, 0, sizeof(axData));
+      axDataIndex = 0;
+      startFlagReceived = false;
+    }
+
+    if (byte == AX25_FLAG) {
+      axData.data[axDataIndex++] = byte;
+
+      // Decode packet if we have start flag, end flag, and at least 1 byte of data
+      // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+      // axData.data[1] must be something other than AX25_FLAG
+      if (axDataIndex > 2) {
+        axData.length = axDataIndex;
+
+        packed_rs_packet_t rsData = {0};
+        LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData));
+
+        // Restart the decoding process
+        memset(&axData, 0, sizeof(axData));
+        axDataIndex = 0;
+        startFlagReceived = false;
+      } else {
+        startFlagReceived = true;
+        axDataIndex = 1;
+      }
+
+      continue;
+    }
+
+    if (startFlagReceived) {
+      axData.data[axDataIndex++] = byte;
+    }
+  }
+
+  if (closeSerialPort(hSerial) != 0) {
+    printf("Failed to close serial port!");
+    exit(1);
+  }
+
+  return 0;
 }
 
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
-    obc_error_code_t errCode;
-    
-    RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, &groundStationCallsign, RS_ENCODED_SIZE));
-    uint8_t decodedData[RS_DECODED_SIZE] = {0};
-    uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
-    
-    if (decodedLength == -1) {
-        return OBC_ERR_CODE_CORRUPTED_MSG;
-    }
-    
-    printf("Received (and decoded) data: ");
-    for(uint8_t i = 0; i < decodedLength; ++i){
-        printf("%x ", decodedData[i]);
-    }
-    printf("\n");
-    return OBC_ERR_CODE_SUCCESS;
+  obc_error_code_t errCode;
+
+  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &groundStationCallsign));
+  uint8_t decodedData[RS_DECODED_SIZE] = {0};
+  uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
+
+  if (decodedLength == -1) {
+    return OBC_ERR_CODE_CORRUPTED_MSG;
+  }
+
+  printf("Received (and decoded) data: ");
+  for (uint8_t i = 0; i < decodedLength; ++i) {
+    printf("%x ", decodedData[i]);
+  }
+  printf("\n");
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static uint32_t getCurrentTime(void) {
-    time_t ts = time(NULL);
-    if (ts < 0 || ts > UINT32_MAX) {
-        printf("Current time not a uint32_t!");
-        exit(1);
-    }
-    return (uint32_t)ts;
+  time_t ts = time(NULL);
+  if (ts < 0 || ts > UINT32_MAX) {
+    printf("Current time not a uint32_t!");
+    exit(1);
+  }
+  return (uint32_t)ts;
 }

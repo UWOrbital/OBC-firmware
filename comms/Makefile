@@ -56,7 +56,7 @@ $(foreach dir,$(OBJ_DIRS), $(shell mkdir -p $(dir)))
 all: $(BUILD_DIR)/comms.out
 
 $(BUILD_DIR)/main.o: main.c
-	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $< 
+	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<
 
 $(BUILD_DIR)/comms.out: $(OBJS)
 	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"$(ROOT_DIR)/hal/source/sys_link.ld"
