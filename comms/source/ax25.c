@@ -129,8 +129,8 @@ obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed
   memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, srcAddress, AX25_SRC_ADDR_BYTES);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] = (pktReceiveNum << 1);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + 1] = (pktSentNum << 1);
-  ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES] = AX25_PID;
-  memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES,
+  ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES] = AX25_PID;
+  memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES,
          telemData, telemDataLen);
   uint16_t fcs;
   RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, &fcs));
@@ -216,7 +216,7 @@ obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, ui
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
+obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
                           ax25_addr_t *recvAddress) {
   if (ax25Data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -270,10 +270,12 @@ obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, u
  * @param packet pointer to a buffer with the received stuffed ax.25 data
  * @param packetLen length of the packetLen buffer
  * @param unstuffedPacket pointer to a buffer to hold the unstuffed ax.25 packet
+ * @param unstuffedPacketLen expected length of the unstuffed packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket) {
+static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
+                                    uint16_t unstuffedPacketLen) {
   uint8_t bitCount = 0;
   uint8_t stuffingFlag = 0;
   uint16_t unstuffedBitLength = 0;  // count as bits
@@ -282,11 +284,11 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
   memset(unstuffedPacket->data, 0, sizeof(unstuffedPacket->data));
 
   // Set the first flag
-  unstuffedPacket->data[0] = AX25_FLAG;
+  unstuffedPacket[0] = AX25_FLAG;
   unstuffedBitLength += 8;
 
   // loop from second byte to second last byte since first and last are the flags
-  for (uint16_t stuffedPacketIndex = 1; stuffedPacketIndex < packet->length - 1; ++stuffedPacketIndex) {
+  for (uint16_t stuffedPacketIndex = 1; stuffedPacketIndex < packetLen - 1; ++stuffedPacketIndex) {
     uint8_t current_byte = packet->data[stuffedPacketIndex];
 
     for (uint8_t offset = 0; offset < 8; ++offset) {
@@ -307,19 +309,15 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
       } else {
         bitCount = 0;
       }
-      if (unstuffedBitLength >= (AX25_MINIMUM_I_FRAME_LEN - 1) * 8) {
+      if (unstuffedBitLength >= (unstuffedPacketLen - 1) * 8) {
         break;
       }
-      unstuffedPacket->data[unstuffedBitLength / 8] |= bit << (7 - (unstuffedBitLength % 8));
+      unstuffedPacket[unstuffedBitLength / 8] |= bit << (7 - (unstuffedBitLength % 8));
       unstuffedBitLength++;
     }
   }
   // Add last flag to end of the packet, rounding up
-  unstuffedPacket->data[(unstuffedBitLength + 7) / 8] = AX25_FLAG;
-  unstuffedBitLength += 8;
-
-  // convert bits to bytes, rounding up
-  unstuffedPacket->length = (unstuffedBitLength + 7) / 8;
+  unstuffedPacket[(unstuffedBitLength + 7) / 8] = AX25_FLAG;
 
   return OBC_ERR_CODE_SUCCESS;
 }
