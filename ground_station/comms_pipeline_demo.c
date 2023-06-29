@@ -19,7 +19,7 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x
 static struct AES_ctx ctx;
 static correct_reed_solomon *rsGs = NULL;
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &cubesatCallsign));
@@ -80,8 +80,8 @@ int main(void) {
   }
   printf("\n");
 
-  packed_ax25_packet_t ax25Pkt;  // Holds an AX.25 packet
-  ax25Send(&rsPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign);
+  packed_ax25_i_frame_t ax25Pkt;  // Holds an AX.25 packet
+  ax25SendIFrame(&rsPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign);
 
   packed_rs_packet_t rsData;
   aes_data_t aesData;

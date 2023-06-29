@@ -12,15 +12,23 @@
 #define AX25_SRC_ADDR_BYTES 7
 #define AX25_DEST_ADDR_BYTES 7
 #define AX25_ADDRESS_BYTES (AX25_SRC_ADDR_BYTES + AX25_DEST_ADDR_BYTES)
-#define AX25_CONTROL_BYTES 2
+/* Number of control bytes currently used for our I and S Frames */
+#define AX25_MOD128_CONTROL_BYTES 2
+/* Number of control bytes currently used for our U Frames */
+#define AX25_MOD8_CONTROL_BYTES 1
 #define AX25_PID_BYTES 1
 #define AX25_FCS_BYTES 2
 #define AX25_INFO_BYTES 255
-#define AX25_MINIMUM_I_FRAME_LEN \
-  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + AX25_INFO_BYTES)
+#define AX25_MINIMUM_I_FRAME_LEN                                                                              \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
+   AX25_INFO_BYTES)
 #define AX25_MAXIMUM_PKT_LEN AX25_MINIMUM_I_FRAME_LEN * 6 / 5
 #define AX25_SUPERVISORY_FRAME_LENGTH \
-  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
+#define AX25_MINIMUM_U_FRAME_CMD_LENGTH \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
+#define AX25_MAXIMUM_U_FRAME_CMD_LENGTH \
+  AX25_MINIMUM_U_FRAME_CMD_LENGTH + 2  // Only place where a bit may get stuffed is in the control byte
 
 #define AX25_FLAG 0x7E
 #define AX25_PID 0xF0U
@@ -30,20 +38,33 @@
 #define AX25_S_FRAME_REJ_CONTROL 0x09U
 #define AX25_S_FRAME_SREJ_CONTROL 0x0DU
 
+#define MAX_U_FRAME_CMD_VALUE 2
+
 typedef struct {
   uint8_t data[AX25_MINIMUM_I_FRAME_LEN];
   uint16_t length;
-} unstuffed_ax25_packet_t;
+} unstuffed_ax25_i_frame_t;
 
 typedef struct {
   uint8_t data[AX25_MAXIMUM_PKT_LEN];
   uint16_t length;
-} packed_ax25_packet_t;
+} packed_ax25_i_frame_t;
+
+typedef struct {
+  uint8_t data[AX25_MINIMUM_U_FRAME_CMD_LENGTH];
+} unstuffed_ax25_u_frame_t;
+
+typedef struct {
+  uint8_t data[AX25_MAXIMUM_U_FRAME_CMD_LENGTH];
+  uint8_t length;
+} packed_ax25_u_frame_t;
 
 typedef struct {
   uint8_t data[AX25_DEST_ADDR_BYTES];
   uint8_t length;
 } ax25_addr_t;
+
+typedef enum { U_FRAME_CMD_CONNECT, U_FRAME_CMD_DISC, U_FRAME_CMD_ACK } u_frame_cmd_t;
 
 extern ax25_addr_t cubesatCallsign;
 extern ax25_addr_t groundStationCallsign;
@@ -58,8 +79,21 @@ extern ax25_addr_t groundStationCallsign;
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
-obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress,
-                          ax25_addr_t *srcAddress);
+obc_error_code_t ax25SendIFrame(packed_rs_packet_t *rsData, packed_ax25_i_frame_t *ax25Data, ax25_addr_t *destAddress,
+                                ax25_addr_t *srcAddress);
+
+/**
+ * @brief format a buffer into a U frame command such as connect, disconnect, or acknowledge
+ *
+ * @param ax25Data buffer to store the U frame to be sent
+ * @param cmd the U frame command you want to send
+ * @param pollFinalBit what to set the poll/final bit to in the U frame (either 1 or 0)
+ * @param destAddress address of the destination for the ax25 packet
+ *
+ * @return obc_error_code_t - whether or not the buffer was correctly formatted
+ */
+obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit,
+                                ax25_addr_t *destAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
@@ -70,6 +104,6 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData, ax25_addr_t *recvAddress);
+obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, ax25_addr_t *recvAddress);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */
