@@ -55,9 +55,6 @@ dkms.conf
 .vscode/
 .idea/
 
-# HALCoGen-generated main file
-**/sys_main.c
-
 .env
 
 build/
