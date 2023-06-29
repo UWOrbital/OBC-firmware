@@ -241,16 +241,16 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
 
   // perform bit unstuffing
   unstuffed_ax25_i_frame_t unstuffedPacket;
-  RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data, &unstuffedPacket));
+  RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, AX25_MINIMUM_I_FRAME_LEN));
 
-  bool supervisoryFrameFlag = false;
-  if (unstuffedPacket.length == AX25_SUPERVISORY_FRAME_LENGTH) {
-    /* TODO: not the best way to determine S flag? */
-    supervisoryFrameFlag = true;
-  } else if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
-    /* TODO: same as above */
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
+  // bool supervisoryFrameFlag = false;
+  // if (unstuffedPacket.length == AX25_SUPERVISORY_FRAME_LENGTH) {
+  //   /* TODO: not the best way to determine S flag? */
+  //   supervisoryFrameFlag = true;
+  // } else if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
+  //   /* TODO: same as above */
+  //   return OBC_ERR_CODE_INVALID_ARG;
+  // }
 
   // Check FCS
   uint16_t fcs = unstuffedPacket.data[AX25_INFO_BYTES + AX25_PID_BYTES + AX25_MOD128_CONTROL_BYTES +
@@ -292,7 +292,7 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
 
   // loop from second byte to second last byte since first and last are the flags
   for (uint16_t stuffedPacketIndex = 1; stuffedPacketIndex < packetLen - 1; ++stuffedPacketIndex) {
-    uint8_t current_byte = packet->data[stuffedPacketIndex];
+    uint8_t current_byte = packet[stuffedPacketIndex];
 
     for (uint8_t offset = 0; offset < 8; ++offset) {
       uint8_t bit = (current_byte >> (7 - offset)) & 0x01;
