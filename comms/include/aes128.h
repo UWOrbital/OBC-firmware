@@ -9,28 +9,26 @@
 #define AES_BLOCK_SIZE 16U
 #define AES_KEY_SIZE 16U
 #define AES_IV_SIZE 16U
+#define AES_DECRYPTED_SIZE RS_DECODED_SIZE - AES_IV_SIZE
 #define RS_DECODED_SIZE 223U  // Currently included in both AES and FEC
 // TODO: Fix circular includes so that this can be removed
 
 typedef struct {
   uint8_t iv[AES_IV_SIZE];
-  uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE];
-} aes_struct_t;
-
-typedef union {
-  aes_struct_t aesStruct;
-  uint8_t rawData[RS_DECODED_SIZE];
+  uint8_t *ciphertext;
+  size_t ciphertextLen;
 } aes_data_t;
 
 /**
  * @brief Decrypts the AES blocks
  *
- * @param aesData Pointer to an aes_data_t union that includes a struct of the IV and data
- * @param cmdBytes 128 byte array to store the decrypted data
+ * @param aesData Pointer to an aes_data_t struct that includes a struct of the IV and data
+ * @param output array to store the decrypted data
+ * @param outputBufferLen length of the buffer to store the decrypted data
  *
  * @return obc_error_code_t - whether or not the data was successfully decrypted
  */
-obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *cmdBytes);
+obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen);
 
 /**
  * @brief Initializes the AES context

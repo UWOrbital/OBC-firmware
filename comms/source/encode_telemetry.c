@@ -351,10 +351,10 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   packed_ax25_i_frame_t ax25Pkt;  // Holds an AX.25 packet
 
   // Apply Reed Solomon FEC
-  RETURN_IF_ERROR_CODE(rsEncode(telemPacket, &fecPkt));
+  RETURN_IF_ERROR_CODE(rsEncode(telemPacket->data, &fecPkt));
 
   // Perform AX.25 framing
-  RETURN_IF_ERROR_CODE(ax25SendIFrame(&fecPkt, &ax25Pkt, &groundStationCallsign, &cubesatCallsign));
+  RETURN_IF_ERROR_CODE(ax25SendIFrame(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign));
 
   // Send into CC1120 transmit queue
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));

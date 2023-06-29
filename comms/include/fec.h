@@ -29,17 +29,18 @@ typedef struct {
  *
  * @return obc_error_code_t - whether or not the data was successfully encoded
  */
-obc_error_code_t rsEncode(packed_telem_packet_t *telemData, packed_rs_packet_t *rsData);
+obc_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData);
 
 /**
  * @brief Decodes the reed solomon data
  *
  * @param rsData 255 byte array that has encoded reed solomon data
  * @param decodedData pointer to a uint8_t array of size 223B
+ * @param decodedDataLen length of the decodedData array
  *
  * @return obc_error_code_t - whether or not the data was successfully decoded
  */
-obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData);
+obc_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData, uint8_t decodedDataLen);
 
 /**
  * @brief initializes the rs variable to be used for rs encryption and decryption

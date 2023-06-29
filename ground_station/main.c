@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
     };
 
     packed_ax25_packet_t ax25Pkt = {0};
-    RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign));
+    RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign));
 
     long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
   obc_error_code_t errCode;
 
-  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &groundStationCallsign));
+  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &groundStationCallsign));
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
   uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
 
