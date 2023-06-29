@@ -9,9 +9,10 @@
 
 /**
  * @brief Initializes the telemetry encoding task and queue
+ * @param pvParameters parameters to be passed into the created task
  *
  */
-void initTelemEncodeTask(void);
+void initTelemEncodeTask(void *pvParameters);
 
 /**
  * @brief Sends downlink data to encoding task queue
