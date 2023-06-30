@@ -1,14 +1,17 @@
 #include "command_pack.h"
 #include "command_data.h"
 #include "command_id.h"
+
 #include "obc_gs_errors.h"
-#include "obc_errors.h"
-#include "obc_logging.h"
-#include "ax25.h"
-#include "fec.h"
-#include "aes128.h"
-#include "aes.h"
+#include "gs_errors.h"
+
+#include "obc_gs_ax25.h"
+#include "obc_gs_fec.h"
+#include "obc_gs_aes128.h"
+
 #include "win_uart.h"
+
+#include <aes.h>
 
 #include <stdio.h>
 #include <stdint.h>
@@ -24,13 +27,12 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x
 
 static correct_reed_solomon *rsGs;
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData);
+static gs_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData);
 static uint32_t getCurrentTime(void);
 
 int main(int argc, char *argv[]) {
-  obc_error_code_t errCode;
-
-  initLogger();
+  gs_error_code_t gsErrCode;
+  obc_gs_error_code_t obcGsErrCode;
 
   if (argc < 3) {
     printf(
@@ -168,7 +170,11 @@ int main(int argc, char *argv[]) {
     };
 
     packed_ax25_packet_t ax25Pkt = {0};
-    RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign));
+    obcGsErrCode = ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign);
+    if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+      printf("Failed to send AX.25 packet!");
+      exit(1);
+    }
 
     long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
@@ -191,8 +197,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (axDataIndex >= sizeof(axData.data)) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
-
       // Restart the decoding process
       memset(&axData, 0, sizeof(axData));
       axDataIndex = 0;
@@ -209,7 +213,11 @@ int main(int argc, char *argv[]) {
         axData.length = axDataIndex;
 
         packed_rs_packet_t rsData = {0};
-        LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData));
+        gsErrCode = decodePacket(&axData, &rsData);
+        if (gsErrCode != GS_ERR_CODE_SUCCESS) {
+          printf("Failed to decode packet!");
+          exit(1);
+        }
 
         // Restart the decoding process
         memset(&axData, 0, sizeof(axData));
@@ -236,15 +244,18 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
-  obc_error_code_t errCode;
+static gs_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
+  obc_gs_error_code_t obcGsErrCode;
+  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &groundStationCallsign);
+  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    return GS_ERR_CODE_AX25_DECODE_FAILURE;
+  }
 
-  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &groundStationCallsign));
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
   uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
 
   if (decodedLength == -1) {
-    return OBC_ERR_CODE_CORRUPTED_MSG;
+    return GS_ERR_CODE_CORRUPTED_MSG;
   }
 
   printf("Received (and decoded) data: ");
@@ -252,7 +263,7 @@ static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packe
     printf("%x ", decodedData[i]);
   }
   printf("\n");
-  return OBC_ERR_CODE_SUCCESS;
+  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 static uint32_t getCurrentTime(void) {

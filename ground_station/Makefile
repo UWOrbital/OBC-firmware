@@ -7,31 +7,35 @@ CFLAGS = -Wall -g
 INCS :=
 
 # Ground station specific headers
+INCS += -I"ground_station/common"
 INCS += -I"ground_station/serial_utils"
 
 # Headers shared with OBC firmware
 INCS += -I"fw/interfaces/common"
 INCS += -I"fw/interfaces/obc_gs_interface/commands"
 INCS += -I"fw/interfaces/obc_gs_interface/telemetry"
-INCS += -I"fw/interfaces/obc_gs_interface/common
-INCS += -I"common/include"
+INCS += -I"fw/interfaces/obc_gs_interface/common"
+INCS += -I"fw/interfaces/obc_gs_interface/aes128"
+INCS += -I"fw/interfaces/obc_gs_interface/fec"
+INCS += -I"fw/interfaces/obc_gs_interface/ax25"
+
 INCS += -I"libs/tiny_aes/include"
 INCS += -I"libs/libcorrect/include"
-INCS += -I"comms/include"
 
 # Ground station specific source files
 SRCS := ground_station/main.c
 SRCS += ground_station/common/gs_heap.c
-SRCS += ground_station/common/gs_logging.c
 SRCS += ground_station/serial_utils/win_uart.c
 
 # Source files shared with OBC firmware
-SRCS += common/source/obc_pack_utils.c
-SRCS += common/source/obc_unpack_utils.c
-SRCS += cdh/source/command_pack.c
-SRCS += comms/source/ax25.c
-SRCS += comms/source/fec.c
-SRCS += comms/source/aes128.c
+SRCS += fw/interfaces/common/obc_pack_utils.c
+SRCS += fw/interfaces/common/obc_unpack_utils.c
+SRCS += fw/interfaces/obc_gs_interface/commands/command_pack.c
+SRCS += fw/interfaces/obc_gs_interface/commands/command_unpack.c
+SRCS += fw/interfaces/obc_gs_interface/telemetry/telemetry_pack.c
+SRCS += fw/interfaces/obc_gs_interface/aes128/obc_gs_aes128.c
+SRCS += fw/interfaces/obc_gs_interface/ax25/obc_gs_ax25.c
+SRCS += fw/interfaces/obc_gs_interface/fec/obc_gs_fec.c
 
 SRCS += libs/tiny_aes/source/aes.c
 
