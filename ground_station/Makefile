@@ -7,11 +7,13 @@ CFLAGS = -Wall -g
 INCS :=
 
 # Ground station specific headers
-INCS += -I"ground_station/cmd_utils"
 INCS += -I"ground_station/serial_utils"
 
 # Headers shared with OBC firmware
-INCS += -I"cdh/include"
+INCS += -I"fw/interfaces/common"
+INCS += -I"fw/interfaces/obc_gs_interface/commands"
+INCS += -I"fw/interfaces/obc_gs_interface/telemetry"
+INCS += -I"fw/interfaces/obc_gs_interface/common
 INCS += -I"common/include"
 INCS += -I"libs/tiny_aes/include"
 INCS += -I"libs/libcorrect/include"
