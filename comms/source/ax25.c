@@ -60,6 +60,16 @@ static obc_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, ui
                                    ax25_addr_t *recvAddress);
 
 /**
+ * @brief recieves a U frame and performs the necessary next action
+ *
+ * @param unstuffedPacket unstuffed ax.25 packet
+ * @param recvAddress address of the receiver of the ax.25 packet
+ *
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
+ */
+static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, ax25_addr_t *recvAddress);
+
+/**
  * @brief calculates the FCS for an ax.25 packet
  *
  * @param data uint8_t array that holds the ax25 packet data
@@ -180,11 +190,14 @@ obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, ui
   uint8_t ax25PacketUnstuffed[AX25_MINIMUM_U_FRAME_CMD_LENGTH] = {0};
 
   ax25PacketUnstuffed[0] = AX25_FLAG;
-  // ax25PacketUnstuffed[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
+
   memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES, destAddress->data, AX25_DEST_ADDR_BYTES);
+
   uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, srcAddress, AX25_SRC_ADDR_BYTES);
+
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] = pollFinalBit << POLL_FINAL_BIT_OFFSET;
+
   if (cmd == U_FRAME_CMD_ACK) {
     ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] |= AX25_U_FRAME_ACK_CMD_CONTROL;
   } else if (cmd == U_FRAME_CMD_DISC) {
@@ -201,11 +214,13 @@ obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, ui
       (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_PID_BYTES + +1] =
       (uint8_t)(fcs & 0xFF);
+
   RETURN_IF_ERROR_CODE(
       bitStuffing(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, ax25Data->data, (uint16_t *)&ax25Data->length));
 
   ax25Data->data[ax25Data->length - 1] = AX25_FLAG;
   ax25Data->data[0] = AX25_FLAG;
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -240,10 +255,10 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
   obc_error_code_t errCode;
 
   // perform bit unstuffing
-  unstuffed_ax25_i_frame_t unstuffedPacket;
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, AX25_MINIMUM_I_FRAME_LEN));
 
-  // bool supervisoryFrameFlag = false;
+  bool supervisoryFrameFlag = false;
   // if (unstuffedPacket.length == AX25_SUPERVISORY_FRAME_LENGTH) {
   //   /* TODO: not the best way to determine S flag? */
   //   supervisoryFrameFlag = true;
@@ -259,7 +274,7 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
   fcs |= unstuffedPacket.data[AX25_INFO_BYTES + AX25_PID_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_ADDRESS_BYTES +
                               AX25_START_FLAG_BYTES + 1];
   RETURN_IF_ERROR_CODE(fcsCheck(unstuffedPacket.data, fcs));
-  if (supervisoryFrameFlag) {
+  if (unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAGS]) {
     RETURN_IF_ERROR_CODE(sFrameRecv(&unstuffedPacket, uplinkData, recvAddress));
   } else {
     RETURN_IF_ERROR_CODE(iFrameRecv(&unstuffedPacket, uplinkData, recvAddress));
@@ -282,9 +297,6 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
   uint8_t bitCount = 0;
   uint8_t stuffingFlag = 0;
   uint16_t unstuffedBitLength = 0;  // count as bits
-
-  // Clear the unstuffed data
-  memset(unstuffedPacket, 0, sizeof(unstuffedPacket->data));
 
   // Set the first flag
   unstuffedPacket[0] = AX25_FLAG;
@@ -482,7 +494,7 @@ static obc_error_code_t fcsCheck(const uint8_t *data, uint16_t fcs) {
  */
 static obc_error_code_t bitStuffing(uint8_t *rawData, uint16_t rawDataLen, uint8_t *stuffedData,
                                     uint16_t *stuffedDataLen) {
-  size_t rawOffset = 0, stuffedOffset = 8, oneCount = 0;
+  uint16_t rawOffset = 0, stuffedOffset = 8, oneCount = 0;
   uint8_t currentBit;
 
   // Cycle through raw data to find 1s
@@ -502,6 +514,6 @@ static obc_error_code_t bitStuffing(uint8_t *rawData, uint16_t rawDataLen, uint8
       oneCount = 0;
     }
   }
-  stuffedDataLen = ((stuffedOffset + 7) / 8) + 1;
+  *stuffedDataLen = ((stuffedOffset + 7) / 8) + 1;
   return OBC_ERR_CODE_SUCCESS;
 }
