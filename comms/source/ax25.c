@@ -5,6 +5,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+#ifndef SRC_CALLSIGN
+#define SRC_CALLSIGN "ABCDEFG"
+#endif
+
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
 
@@ -27,24 +31,24 @@ static obc_error_code_t ax25Unstuff(const packed_ax25_packet_t *packet, unstuffe
  * @brief strips away the ax.25 headers for an s Frame
  *
  * @param unstuffedPacket unstuffed ax.25 packet
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t sFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, packed_rs_packet_t *rsData,
+static obc_error_code_t sFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, uint8_t *uplinkData,
                                    ax25_addr_t *recvAddress);
 
 /**
  * @brief strips away the ax.25 headers for an i Frame
  *
  * @param unstuffedPacket unstuffed ax.25 packet
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t iFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, packed_rs_packet_t *rsData,
+static obc_error_code_t iFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, uint8_t *uplinkData,
                                    ax25_addr_t *recvAddress);
 
 /**
@@ -80,16 +84,16 @@ static obc_error_code_t bitStuffing(uint8_t *rawData, packed_ax25_packet_t *stuf
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  *
- * @param rsData reed solomon data that needs ax.25 headers added onto it
+ * @param telemData data to send that needs ax.25 headers added onto it
+ * @param telemDataLen length of the telemData array
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
- * @param srcAddress address of the sender of the ax25 packet
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
-obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25Data, ax25_addr_t *destAddress,
-                          ax25_addr_t *srcAddress) {
-  if (rsData == NULL) {
+obc_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_packet_t *ax25Data,
+                          ax25_addr_t *destAddress) {
+  if (telemData == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -113,12 +117,13 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
   ax25PacketUnstuffed[0] = AX25_FLAG;
   // ax25PacketUnstuffed[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
   memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES, destAddress->data, AX25_DEST_ADDR_BYTES);
-  memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, srcAddress->data, AX25_SRC_ADDR_BYTES);
+  uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
+  memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, srcAddress, AX25_SRC_ADDR_BYTES);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES] = (pktReceiveNum << 1);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + 1] = (pktSentNum << 1);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES] = AX25_PID;
   memcpy(ax25PacketUnstuffed + AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES,
-         rsData->data, RS_ENCODED_SIZE);
+         telemData, telemDataLen);
   uint16_t fcs;
   RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, &fcs));
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_CONTROL_BYTES + AX25_PID_BYTES +
@@ -136,16 +141,21 @@ obc_error_code_t ax25Send(packed_rs_packet_t *rsData, packed_ax25_packet_t *ax25
  * @brief strips away the ax.25 headers from a received packet
  *
  * @param ax25Data the received ax.25 frame
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
+ * @param uplinkDataLen length of the uplinkData array
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rsData, ax25_addr_t *recvAddress) {
+obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
+                          ax25_addr_t *recvAddress) {
   if (ax25Data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  if (rsData == NULL) {
+  if (uplinkData == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  if (uplinkDataLen < AX25_INFO_BYTES) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   if (ax25Data->length > AX25_MAXIMUM_PKT_LEN) {
@@ -180,9 +190,9 @@ obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, packed_rs_packet_t *rs
           .data[AX25_INFO_BYTES + AX25_PID_BYTES + AX25_CONTROL_BYTES + AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES + 1];
   RETURN_IF_ERROR_CODE(fcsCheck(unstuffedPacket.data, fcs));
   if (supervisoryFrameFlag) {
-    RETURN_IF_ERROR_CODE(sFrameRecv(&unstuffedPacket, rsData, recvAddress));
+    RETURN_IF_ERROR_CODE(sFrameRecv(&unstuffedPacket, uplinkData, recvAddress));
   } else {
-    RETURN_IF_ERROR_CODE(iFrameRecv(&unstuffedPacket, rsData, recvAddress));
+    RETURN_IF_ERROR_CODE(iFrameRecv(&unstuffedPacket, uplinkData, recvAddress));
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -250,12 +260,12 @@ static obc_error_code_t ax25Unstuff(const packed_ax25_packet_t *packet, unstuffe
  * @brief strips away the ax.25 headers for an s Frame
  *
  * @param unstuffedPacket unstuffed ax.25 packet
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t sFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, packed_rs_packet_t *rsData,
+static obc_error_code_t sFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, uint8_t *uplinkData,
                                    ax25_addr_t *recvAddress) {
   if (memcmp(unstuffedPacket->data + AX25_START_FLAG_BYTES, recvAddress->data, AX25_DEST_ADDR_BYTES) != 0) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
@@ -280,12 +290,12 @@ static obc_error_code_t sFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, pac
  * @brief strips away the ax.25 headers for an i Frame
  *
  * @param unstuffedPacket unstuffed ax.25 packet
- * @param rsData 255 byte array to store the reed solomon encoded data without ax.25 headers
+ * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t iFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, packed_rs_packet_t *rsData,
+static obc_error_code_t iFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, uint8_t *uplinkData,
                                    ax25_addr_t *recvAddress) {
   if (memcmp(unstuffedPacket->data + AX25_START_FLAG_BYTES, recvAddress->data, AX25_DEST_ADDR_BYTES) != 0) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
@@ -311,7 +321,7 @@ static obc_error_code_t iFrameRecv(unstuffed_ax25_packet_t *unstuffedPacket, pac
   if (unstuffedPacket->data[AX25_CONTROL_BYTES + AX25_ADDRESS_BYTES + 1] != AX25_PID) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
   }
-  memcpy(rsData->data,
+  memcpy(uplinkData,
          unstuffedPacket->data + AX25_PID_BYTES + AX25_CONTROL_BYTES + AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES,
          AX25_INFO_BYTES);
   pktReceiveNum++;

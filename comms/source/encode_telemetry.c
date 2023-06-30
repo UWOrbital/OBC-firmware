@@ -317,7 +317,7 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
   LOG_DEBUG("Sending telemetry: %u", singleTelem->id);
 
   uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized version of the current piece of telemetry
-  size_t packedSingleTelemSize = 0;                    // Size of the packed single telemetry
+  uint32_t packedSingleTelemSize = 0;                  // Size of the packed single telemetry
 
   // Pack the single telemetry into a uint8_t array
   RETURN_IF_ERROR_CODE(packTelemetry(singleTelem, packedSingleTelem, sizeof(packedSingleTelem) / sizeof(uint8_t),
@@ -351,10 +351,10 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   packed_ax25_packet_t ax25Pkt;  // Holds an AX.25 packet
 
   // Apply Reed Solomon FEC
-  RETURN_IF_ERROR_CODE(rsEncode(telemPacket, &fecPkt));
+  RETURN_IF_ERROR_CODE(rsEncode(telemPacket->data, &fecPkt));
 
   // Perform AX.25 framing
-  RETURN_IF_ERROR_CODE(ax25Send(&fecPkt, &ax25Pkt, &groundStationCallsign, &cubesatCallsign));
+  RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign));
 
   // Send into CC1120 transmit queue
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
