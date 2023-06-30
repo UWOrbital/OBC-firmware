@@ -8,7 +8,7 @@
 
 // CMD_EXEC_OBC_RESET
 TEST(TestCommandPackUnpack, ValidCmdExecObcResetPackUnpack) {
-  obc_gs_err_code_t errCode;
+  obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
   cmdMsg.id = CMD_EXEC_OBC_RESET;
 
@@ -29,7 +29,7 @@ TEST(TestCommandPackUnpack, ValidCmdExecObcResetPackUnpack) {
 
 // CMD_RTC_SYNC
 TEST(TestCommandPackUnpack, ValidCmdRtcSyncPackUnpack) {
-  obc_gs_err_code_t errCode;
+  obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
   cmdMsg.id = CMD_RTC_SYNC;
   cmdMsg.rtcSync.unixTime = 0x12345678;
@@ -52,7 +52,7 @@ TEST(TestCommandPackUnpack, ValidCmdRtcSyncPackUnpack) {
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
 TEST(TestCommandPackUnpack, ValidCmdDownlinkLogsNextPassPackUnpack) {
-  obc_gs_err_code_t errCode;
+  obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
   cmdMsg.id = CMD_DOWNLINK_LOGS_NEXT_PASS;
   cmdMsg.downlinkLogsNextPass.logLevel = 0;
@@ -75,7 +75,7 @@ TEST(TestCommandPackUnpack, ValidCmdDownlinkLogsNextPassPackUnpack) {
 
 // CMD_MICRO_SD_FORMAT
 TEST(TestCommandPackUnpack, ValidCmdMicroSdFormatPackUnpack) {
-  obc_gs_err_code_t errCode;
+  obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
   cmdMsg.id = CMD_MICRO_SD_FORMAT;
 
@@ -96,7 +96,7 @@ TEST(TestCommandPackUnpack, ValidCmdMicroSdFormatPackUnpack) {
 
 // CMD_PING
 TEST(TestCommandPackUnpack, ValidCmdPingPackUnpack) {
-  obc_gs_err_code_t errCode;
+  obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
   cmdMsg.id = CMD_PING;
 
@@ -117,7 +117,7 @@ TEST(TestCommandPackUnpack, ValidCmdPingPackUnpack) {
 
 // CMD_DOWNLINK_TELEM
 TEST(TestCommandPackUnpack, ValidCmdDownlinkTelemPackUnpack) {
-  obc_gs_err_code_t errCode;
+  obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
   cmdMsg.id = CMD_DOWNLINK_TELEM;
 
