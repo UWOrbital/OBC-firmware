@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_CC1120_RECV_TASK_H
-#define COMMS_INCLUDE_CC1120_RECV_TASK_H
+#pragma once
 
 #include "obc_logging.h"
 #include "comms_manager.h"
@@ -24,5 +23,3 @@ void initRecvTask(void *pvParameters);
  * @return obc_error_code_t - whether or not the packet was successfully sent to the queue
  */
 obc_error_code_t startUplink(void);
-
-#endif /* COMMS_INCLUDE_CC1120_RECV_TASK_H */

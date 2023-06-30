@@ -1,5 +1,4 @@
-#ifndef DRIVERS_CC1120_INCLUDE_CC1120_SPI_H_
-#define DRIVERS_CC1120_INCLUDE_CC1120_SPI_H_
+#pragma once
 
 #include <stdint.h>
 #include "obc_errors.h"
@@ -107,5 +106,3 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
  * @return OBC_ERR_CODE_CC1120_INVALID_STATUS_BYTE - If the status byte is invalid.
  */
 obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data);
-
-#endif /* DRIVERS_CC1120_INCLUDE_CC1120_SPI_H_ */

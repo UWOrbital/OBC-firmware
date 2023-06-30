@@ -1,5 +1,4 @@
-#ifndef DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H
-#define DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H
+#pragma once
 
 #include "obc_errors.h"
 
@@ -130,5 +129,3 @@ void syncEventCallback(void);
  * @return SemaphoreHandle_t - handle of the cc1120 RX semaphore
  */
 SemaphoreHandle_t getCC1120RxSemaphoreHandle(void);
-
-#endif /* DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H */

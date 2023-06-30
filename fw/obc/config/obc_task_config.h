@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_TASK_CONFIG_H_
-#define COMMON_INCLUDE_OBC_TASK_CONFIG_H_
+#pragma once
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -78,5 +77,3 @@
 #define HEALTH_COLLECTOR_STACK_SIZE 256U
 #define HEALTH_COLLECTOR_NAME "health_collector"
 #define HEALTH_COLLECTOR_PRIORITY tskIDLE_PRIORITY + 1U
-
-#endif /* COMMON_INCLUDE_OBC_TASK_CONFIG_H_ */

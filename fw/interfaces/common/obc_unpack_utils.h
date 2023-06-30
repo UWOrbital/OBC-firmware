@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_UNPACK_UTILS_H_
-#define COMMON_INCLUDE_OBC_UNPACK_UTILS_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -24,5 +23,3 @@ float unpackFloat(const uint8_t* buffer, uint32_t* offset);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // COMMON_INCLUDE_OBC_UNPACK_H_

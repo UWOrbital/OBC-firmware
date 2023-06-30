@@ -1,5 +1,4 @@
-#ifndef PAYLOAD_INCLUDE_OV5642_REGS_H_
-#define PAYLOAD_INCLUDE_OV5642_REGS_H_
+#pragma once
 
 #include "stdint.h"
 
@@ -30,5 +29,3 @@ typedef enum { OV5642_QVGA_Preview_Config, OV5642_JPEG_Capture_QSXGA_Config, OV5
  * @return Pointer to config array
  */
 sensor_reg_t* getCamConfig(cam_config_t config);
-
-#endif /* PAYLOAD_INCLUDE_OV5642_REGS_H_ */

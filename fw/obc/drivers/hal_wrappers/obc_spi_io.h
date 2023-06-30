@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_OBC_SPI_IO_H_
-#define DRIVERS_INCLUDE_OBC_SPI_IO_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -122,5 +121,3 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiData
  */
 obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes,
                                             uint8_t *inBytes, size_t numBytes);
-
-#endif  // DRIVERS_INCLUDE_OBC_SPI_IO_H_

@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_DECODE_TELEMETRY_H
-#define COMMS_INCLUDE_DECODE_TELEMETRY_H
+#pragma once
 
 #include "obc_errors.h"
 #include "ax25.h"
@@ -30,5 +29,3 @@ void initDecodeTask(void);
  * @return obc_error_code_t - whether or not the packet was successfully sent to the queue
  */
 obc_error_code_t sendToDecodeDataQueue(uint8_t *data);
-
-#endif /* COMMS_INCLUDE_DECODE_TELEMETRY_H */

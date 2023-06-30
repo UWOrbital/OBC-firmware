@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_TELEMETRY_PACK_H_
-#define CDH_INCLUDE_TELEMETRY_PACK_H_
+#pragma once
 
 #include "obc_gs_errors.h"
 #include "telemetry_data.h"
@@ -44,5 +43,3 @@ void packObcState(telemetry_data_t *data, uint8_t *buffer, uint32_t *offset);
 void packEpsState(telemetry_data_t *data, uint8_t *buffer, uint32_t *offset);
 void packNumCspPacketsRcvd(telemetry_data_t *data, uint8_t *buffer, uint32_t *offset);
 void packPong(telemetry_data_t *data, uint8_t *buffer, uint32_t *offset);
-
-#endif /* CDH_INCLUDE_TELEMETRY_PACK_H_ */

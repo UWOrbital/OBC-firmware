@@ -2,8 +2,7 @@
 /  Low level disk interface module include file   (C)ChaN, 2014          /
 /-----------------------------------------------------------------------*/
 
-#ifndef _DISKIO_DEFINED
-#define _DISKIO_DEFINED
+#pragma once
 
 #define _USE_WRITE 1 /* 1: Enable disk_write function */
 #define _USE_IOCTL 1 /* 1: Enable disk_ioctl fucntion */
@@ -64,5 +63,3 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t cmd, void* buff);
 #define ATA_GET_REV 20   /* Get F/W revision */
 #define ATA_GET_MODEL 21 /* Get model name */
 #define ATA_GET_SN 22    /* Get serial number */
-
-#endif

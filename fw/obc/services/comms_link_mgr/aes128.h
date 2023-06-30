@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_AES128_H_
-#define COMMS_INCLUDE_AES128_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -37,5 +36,3 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t out
  * @return obc_error_code_t - whether or not the context was successfully initialized
  */
 obc_error_code_t initializeAesCtx(const uint8_t *key);
-
-#endif /* COMMS_INCLUDE_ AES128_H_ */

@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_FEC_H_
-#define COMMS_INCLUDE_FEC_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "aes128.h"
@@ -51,4 +50,3 @@ void initRs(void);
  * @brief cleans up the memory allocated for the rs variable
  */
 void destroyRs(void);
-#endif /* COMMS_INCLUDE_FEC_H_ */

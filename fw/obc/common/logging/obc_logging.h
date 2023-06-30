@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_LOGGING_H_
-#define COMMON_INCLUDE_LOGGING_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -91,5 +90,3 @@ void logSetOutputLocation(log_output_location_t newOutputLocation);
  *
  */
 obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, const char *s, ...);
-
-#endif

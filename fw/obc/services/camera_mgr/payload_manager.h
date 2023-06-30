@@ -1,5 +1,4 @@
-#ifndef PAYLOAD_INCLUDE_PAYLOAD_MANAGER_H_
-#define PAYLOAD_INCLUDE_PAYLOAD_MANAGER_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -50,5 +49,3 @@ void initPayloadManager(void);
  * @return The error code
  */
 obc_error_code_t sendToPayloadQueue(payload_event_t *event);
-
-#endif /* PAYLOAD_INCLUDE_PAYLOAD_MANAGER_H_ */

@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_OBC_SCI_IO_H_
-#define DRIVERS_INCLUDE_OBC_SCI_IO_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -71,5 +70,3 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes);
  * A null terminator will be added to the end of the string.
  */
 obc_error_code_t sciRead(unsigned char *text, uint32_t length);
-
-#endif /* DRIVERS_INCLUDE_OBC_SCI_IO_H_ */

@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_COMMS_MANAGER_H_
-#define COMMS_INCLUDE_COMMS_MANAGER_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "telemetry_manager.h"
@@ -50,5 +49,3 @@ void initCommsManager(void);
  * @return The error code
  */
 obc_error_code_t sendToCommsQueue(comms_event_t *event);
-
-#endif /* COMMS_INCLUDE_COMMS_MANAGER_H_ */

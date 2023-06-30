@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_AX25_H_
-#define COMMS_INCLUDE_AX25_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "fec.h"
@@ -73,5 +72,3 @@ obc_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_
  */
 obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
                           ax25_addr_t *recvAddress);
-
-#endif /* COMMS_INCLUDE_AX25_H_ */

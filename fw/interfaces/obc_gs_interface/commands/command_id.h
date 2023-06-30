@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_COMMAND_ID_H_
-#define CDH_INCLUDE_COMMAND_ID_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -38,5 +37,3 @@ typedef enum {
 #define CMD_MICRO_SD_FORMAT (uint8_t)4
 #define CMD_PING (uint8_t)5
 #define CMD_DOWNLINK_TELEM (uint8_t)6
-
-#endif  // CDH_INCLUDE_COMMAND_ID_H_

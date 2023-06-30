@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_SUPERVISOR_H_
-#define CDH_INCLUDE_SUPERVISOR_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -46,5 +45,3 @@ void initSupervisor(void);
  * @return The error code
  */
 obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event);
-
-#endif /* CDH_INCLUDE_SUPERVISOR_H_ */

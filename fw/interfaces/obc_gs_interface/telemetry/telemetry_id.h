@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_TELEMETRY_ID_H_
-#define CDH_INCLUDE_TELEMETRY_ID_H_
+#pragma once
 
 typedef enum {
   /* Used to indicate that the telemetry data is invalid.
@@ -40,5 +39,3 @@ typedef enum {
   TELEM_NUM_CSP_PACKETS_RCVD,
   TELEM_PONG,
 } telemetry_data_id_t;
-
-#endif /* CDH_INCLUDE_TELEMETRY_H_ */

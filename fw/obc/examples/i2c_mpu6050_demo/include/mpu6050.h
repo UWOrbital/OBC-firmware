@@ -1,5 +1,4 @@
-#ifndef EXAMPLES_I2C_MPU6050_DEMO_INCLUDE_MPU6050_H_
-#define EXAMPLES_I2C_MPU6050_DEMO_INCLUDE_MPU6050_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -138,5 +137,3 @@ void wakeupMPU6050(void);
  * @return 1 if successful, 0 otherwise
  */
 uint8_t readAccelDataMPU6050(double *accX, double *accY, double *accZ);
-
-#endif /* EXAMPLES_I2C_MPU6050_DEMO_INCLUDE_MPU6050_H_ */

@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_HEALTH_COLLECTOR_H_
-#define CDH_INCLUDE_HEALTH_COLLECTOR_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -8,5 +7,3 @@
  * periodically and sends it to the telemetry manager.
  */
 void initHealthCollector(void);
-
-#endif /* CDH_INCLUDE_HEALTH_COLLECTOR_H_ */

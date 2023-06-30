@@ -1,5 +1,4 @@
-#ifndef CC1120_SPI_TESTS_H
-#define CC1120_SPI_TESTS_H
+#pragma once
 
 #include <stdbool.h>
 #include "cc1120_spi.h"
@@ -17,5 +16,3 @@
  *                 or status byte is invalid.
  */
 obc_error_code_t cc1120_test_spi_read(void);
-
-#endif /* CC1120_SPI_TESTS_H */

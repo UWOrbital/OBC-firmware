@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_COMMAND_UNPACK_H_
-#define CDH_INCLUDE_COMMAND_UNPACK_H_
+#pragma once
 
 #include "command_data.h"
 #include "obc_gs_errors.h"
@@ -34,5 +33,3 @@ void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // CDH_INCLUDE_COMMAND_UNPACK_H_

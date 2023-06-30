@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_BIT_OPS_H_
-#define COMMON_INCLUDE_OBC_BIT_OPS_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -18,5 +17,3 @@ static inline uint8_t twoDigitDecimalToBCD(uint8_t inputVal) { return ((inputVal
  * @return the decimal value.
  */
 static inline uint8_t twoDigitDecimalFromBCD(uint8_t data) { return ((data >> 4) * 10) + (data & 0xF); }
-
-#endif  // COMMON_INCLUDE_OBC_BIT_OPS_H_

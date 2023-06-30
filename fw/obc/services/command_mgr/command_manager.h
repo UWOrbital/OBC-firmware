@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_COMMAND_MANAGER_H_
-#define CDH_INCLUDE_COMMAND_MANAGER_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "command_data.h"
@@ -17,5 +16,3 @@ void initCommandManager(void);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
 obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd);
-
-#endif /* CDH_INCLUDE_COMMAND_MANAGER_H_ */

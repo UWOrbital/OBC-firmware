@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_FRAM_H_
-#define DRIVERS_INCLUDE_FRAM_H_
+#pragma once
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -70,4 +69,3 @@ obc_error_code_t framWakeUp(void);
  * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
  */
 obc_error_code_t framReadID(uint8_t *id, size_t nBytes);
-#endif

@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_TELEMETRY_H_
-#define CDH_INCLUDE_TELEMETRY_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "telemetry_data.h"
@@ -20,5 +19,3 @@ void initTelemetry(void);
 obc_error_code_t addTelemetryData(telemetry_data_t *data);
 
 obc_error_code_t setTelemetryManagerDownlinkReady(void);
-
-#endif /* CDH_INCLUDE_TELEMETRY_H_ */

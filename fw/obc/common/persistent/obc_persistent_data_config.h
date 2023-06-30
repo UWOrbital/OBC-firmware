@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_
-#define COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_
+#pragma once
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -46,5 +45,3 @@ typedef struct {
 //     uint32_t data2;
 //     uint32_t data3;
 // } fram_payload_data_t;
-
-#endif  // COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_

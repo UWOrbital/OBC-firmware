@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_OBC_I2C_IO_H_
-#define DRIVERS_INCLUDE_OBC_I2C_IO_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -54,5 +53,3 @@ obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t 
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint8_t numBytes);
-
-#endif /* DRIVERS_INCLUDE_OBC_I2C_IO_H_ */

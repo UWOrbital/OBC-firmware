@@ -1,5 +1,4 @@
-#ifndef PAYLOAD_INCLUDE_CAMERA_REG_H_
-#define PAYLOAD_INCLUDE_CAMERA_REG_H_
+#pragma once
 
 #include "stdint.h"
 #include "obc_spi_io.h"
@@ -95,5 +94,3 @@ obc_error_code_t tcaSelect(camera_t cam);
  * @param bit Bit to read
  */
 uint8_t getBit(uint8_t addr, uint8_t bit, camera_t cam);
-
-#endif /* PAYLOAD_INCLUDE_CAMERA_REG_H_ */

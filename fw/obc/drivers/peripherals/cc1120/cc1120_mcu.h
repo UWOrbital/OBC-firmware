@@ -1,5 +1,4 @@
-#ifndef DRIVERS_CC1120_INCLUDE_CC1120_MCU_H_
-#define DRIVERS_CC1120_INCLUDE_CC1120_MCU_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -35,5 +34,3 @@ obc_error_code_t mcuCC1120CSAssert(void);
  * @return error code - An error code from obc_errors.h
  */
 obc_error_code_t mcuCC1120CSDeassert(void);
-
-#endif /* DRIVERS_CC1120_INCLUDE_CC1120_MCU_H_ */

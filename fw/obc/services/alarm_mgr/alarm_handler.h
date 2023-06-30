@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_RTC_ALARM_HANDLER_H_
-#define CDH_INCLUDE_RTC_ALARM_HANDLER_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -63,5 +62,3 @@ obc_error_code_t sendToAlarmHandlerQueue(alarm_handler_event_t *event);
  *
  */
 void alarmInterruptCallback(void);
-
-#endif /* CDH_INCLUDE_RTC_ALARM_HANDLER_H_ */

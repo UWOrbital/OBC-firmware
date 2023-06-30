@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_ENCODE_TELEMETRY_H_
-#define COMMS_INCLUDE_ENCODE_TELEMETRY_H_
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -21,5 +20,3 @@ void initTelemEncodeTask(void *pvParameters);
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
 obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg);
-
-#endif /* COMMS_INCLUDE_ENCODE_TELEMETRY_H_ */

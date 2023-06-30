@@ -1,5 +1,4 @@
-#ifndef GROUND_STATION_SERIAL_UTILS_WIN_UART_H_
-#define GROUND_STATION_SERIAL_UTILS_WIN_UART_H_
+#pragma once
 
 #include <Windows.h>
 
@@ -18,5 +17,3 @@ int setCommTimeouts(HANDLE hSerial, COMMTIMEOUTS *timeouts);
 long unsigned int writeSerialPort(HANDLE hSerial, uint8_t *buff, size_t len);
 
 int readSerialPort(HANDLE hSerial, uint8_t *buff, size_t len);
-
-#endif /* GROUND_STATION_SERIAL_UTILS_WIN_UART_H_ */

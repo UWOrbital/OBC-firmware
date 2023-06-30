@@ -1,5 +1,4 @@
-#ifndef PAYLOAD_INCLUDE_ARDUCAM_H_
-#define PAYLOAD_INCLUDE_ARDUCAM_H_
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -69,5 +68,3 @@ obc_error_code_t readFifoBurst(camera_t cam);
  * @return Returns true if capture is complete
  */
 bool isCaptureDone(camera_t cam);
-
-#endif /* PAYLOAD_INCLUDE_ARDUCAM_H_ */

@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_LM75BD_H_
-#define DRIVERS_INCLUDE_LM75BD_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -118,5 +117,3 @@ obc_error_code_t writeTosLM75BD(uint8_t devAddr, float overTempThresholdCelsius)
  * @param devAddr I2C address of the LM75BD
  */
 void osHandlerLM75BD(uint8_t devAddr);
-
-#endif /* DRIVERS_INCLUDE_LM75BD_H_ */

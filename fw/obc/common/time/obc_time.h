@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_TIME_H_
-#define COMMON_INCLUDE_OBC_TIME_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "ds3232_mz.h"
@@ -56,5 +55,3 @@ obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
  */
 obc_error_code_t unixToDatetime(uint32_t unixTime, rtc_date_time_t *datetime);
-
-#endif /* COMMON_INCLUDE_OBC_TIME_H_ */

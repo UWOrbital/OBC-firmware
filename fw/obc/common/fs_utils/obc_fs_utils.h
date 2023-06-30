@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_FS_UTILS_H_
-#define COMMON_INCLUDE_OBC_FS_UTILS_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -67,5 +66,3 @@ obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize, size_
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
  */
 obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize);
-
-#endif /* COMMON_INCLUDE_OBC_FS_UTILS_H_ */

@@ -1,5 +1,4 @@
-#ifndef EPS_INCLUDE_EPS_MANAGER_H_
-#define EPS_INCLUDE_EPS_MANAGER_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -50,5 +49,3 @@ void initEPSManager(void);
  * @return The error code
  */
 obc_error_code_t sendToEPSQueue(eps_event_t *event);
-
-#endif /* EPS_INCLUDE_EPS_MANAGER_H_ */

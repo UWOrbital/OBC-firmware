@@ -1,5 +1,4 @@
-#ifndef COMMON_INCLUDE_OBC_ERRORS_H_
-#define COMMON_INCLUDE_OBC_ERRORS_H_
+#pragma once
 
 typedef enum {
   /* Common Errors 0 - 99 */
@@ -68,5 +67,3 @@ typedef enum {
   OBC_ERR_CODE_RTC_ALARM_EARLY = 801,
 
 } obc_error_code_t;
-
-#endif  // COMMON_INCLUDE_OBC_ERRORS_H_

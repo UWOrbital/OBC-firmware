@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_TELEMETRY_FS_UTILS_H_
-#define CDH_INCLUDE_TELEMETRY_FS_UTILS_H_
+#pragma once
 
 #include "obc_errors.h"
 #include "telemetry_manager.h"
@@ -96,5 +95,3 @@ obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t
  * @return obc_error_code_t
  */
 obc_error_code_t createAndOpenTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId);
-
-#endif /* CDH_INCLUDE_TELEMETRY_FS_UTILS_H_ */

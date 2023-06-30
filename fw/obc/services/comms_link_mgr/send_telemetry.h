@@ -1,5 +1,4 @@
-#ifndef COMMS_INCLUDE_SEND_TELEMETRY_H_
-#define COMMS_INCLUDE_SEND_TELEMETRY_H_
+#pragma once
 
 #include "ax25.h"
 
@@ -16,5 +15,3 @@ void initCC1120TransmitTask(void);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
 obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_packet_t *ax25Pkt);
-
-#endif /* COMMS_INCLUDE_COMMS_TX_H_ */

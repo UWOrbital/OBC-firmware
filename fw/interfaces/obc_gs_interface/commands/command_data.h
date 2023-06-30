@@ -1,5 +1,4 @@
-#ifndef CDH_INCLUDE_COMMAND_DATA_H_
-#define CDH_INCLUDE_COMMAND_DATA_H_
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -35,5 +34,3 @@ typedef struct {
 } cmd_msg_t;
 
 #define MAX_CMD_MSG_SIZE sizeof(cmd_msg_t)
-
-#endif  // CDH_INCLUDE_COMMAND_DATA_H_

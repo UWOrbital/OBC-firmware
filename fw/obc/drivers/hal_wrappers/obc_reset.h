@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_OBC_RESET_H_
-#define DRIVERS_INCLUDE_OBC_RESET_H_
+#pragma once
 
 /**
  * @brief Reasons for resetting the system
@@ -16,5 +15,3 @@ typedef enum {
  * @param obc_reset_reason_t - the reason to reset system
  */
 void resetSystem(obc_reset_reason_t reason);
-
-#endif  // DRIVERS_INCLUDE_OBC_RESET_H_

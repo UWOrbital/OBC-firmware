@@ -1,5 +1,4 @@
-#ifndef DRIVERS_INCLUDE_DS3232_MZ_H_
-#define DRIVERS_INCLUDE_DS3232_MZ_H_
+#pragma once
 
 #include "obc_errors.h"
 
@@ -365,5 +364,3 @@ obc_error_code_t setAlarm2RTC(rtc_alarm2_mode_t mode, rtc_alarm_time_t dt);
  * @warning This should only be called from the alarm handler.
  */
 obc_error_code_t clearAlarm1RTC(void);
-
-#endif /* DRIVERS_INCLUDE_DS3232_MZ_H_ */
