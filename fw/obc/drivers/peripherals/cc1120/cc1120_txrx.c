@@ -4,8 +4,10 @@
 #include "cc1120_spi.h"
 #include "cc1120_defs.h"
 #include "obc_math.h"
-#include "decode_telemetry.h"
 #include "obc_board_config.h"
+
+// TODO: Ideally, we shouldn't need to include this in the driver
+#include "uplink_decoder.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>

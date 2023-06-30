@@ -1,12 +1,12 @@
-#include "decode_telemetry.h"
-#include "obc_logging.h"
-#include "cc1120_recv_task.h"
+#include "comms_uplink_receiver.h"
+#include "uplink_decoder.h"
 #include "comms_manager.h"
+#include "obc_gs_ax25.h"
 #include "cc1120_txrx.h"
-#include "ax25.h"
-#include "obc_task_config.h"
 #include "cc1120_spi.h"
 #include "cc1120_defs.h"
+#include "obc_logging.h"
+#include "obc_task_config.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"

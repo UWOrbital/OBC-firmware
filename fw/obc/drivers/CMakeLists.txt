@@ -9,6 +9,9 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/lm75bd
     ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/sdcard
     ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/sw_wdt
+
+    # TODO: Update cc1120 driver so that it doesn't need to include this
+    ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
 
 target_sources(OBC-firmware.out PUBLIC

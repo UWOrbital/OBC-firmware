@@ -1,8 +1,8 @@
-#include "fec.h"
-#include "ax25.h"
-#include "encode_telemetry.h"
-#include "send_telemetry.h"
+#include "downlink_encoder.h"
+#include "comms_downlink_transmitter.h"
 #include "cc1120_txrx.h"
+#include "obc_gs_fec.h"
+#include "obc_gs_ax25.h"
 
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
@@ -347,18 +347,24 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
  * @return obc_error_code_t
  */
 static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) {
-  obc_error_code_t errCode;
-
-  packed_rs_packet_t fecPkt;     // Holds a 255B RS packet
-  packed_ax25_packet_t ax25Pkt;  // Holds an AX.25 packet
+  packed_rs_packet_t fecPkt = {0};     // Holds a 255B RS packet
+  packed_ax25_packet_t ax25Pkt = {0};  // Holds an AX.25 packet
 
   // Apply Reed Solomon FEC
-  RETURN_IF_ERROR_CODE(rsEncode(telemPacket->data, &fecPkt));
+  obc_gs_error_code_t obcGsErrCode;
+  obcGsErrCode = rsEncode(telemPacket->data, &fecPkt);
+  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_FEC_ENCODE_FAILURE;
+  }
 
   // Perform AX.25 framing
-  RETURN_IF_ERROR_CODE(ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign));
+  obcGsErrCode = ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign);
+  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
+  }
 
   // Send into CC1120 transmit queue
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
 
   return OBC_ERR_CODE_SUCCESS;

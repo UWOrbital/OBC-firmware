@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ax25.h"
+#include "obc_errors.h"
+#include "obc_gs_ax25.h"
 
 /**
  * @brief Initialize the CC1120 transmit task and queue

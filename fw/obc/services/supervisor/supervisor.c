@@ -17,7 +17,7 @@
 #include "obc_fs_utils.h"
 #include "lm75bd.h"
 #include "obc_board_config.h"
-#include "cc1120_recv_task.h"
+#include "comms_uplink_receiver.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

@@ -41,7 +41,7 @@ static const telemetry_pack_func_t telemPackFns[] = {
 static void packTelemetryId(telemetry_data_id_t id, uint8_t *buffer, uint32_t *offset);
 static void packTelemetryTimestamp(uint32_t timestamp, uint8_t *buffer, uint32_t *offset);
 
-obc_gs_err_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t len, uint32_t *numPacked) {
+obc_gs_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t len, uint32_t *numPacked) {
   if (data == NULL || buffer == NULL || numPacked == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }

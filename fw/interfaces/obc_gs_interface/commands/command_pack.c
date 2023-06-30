@@ -23,7 +23,7 @@ static const pack_func_t packFns[] = {
 #define MAX_CMD_ID ((sizeof(packFns) / sizeof(pack_func_t)) - 1)
 
 // Pack the command message
-obc_gs_err_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked) {
+obc_gs_error_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked) {
   if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }

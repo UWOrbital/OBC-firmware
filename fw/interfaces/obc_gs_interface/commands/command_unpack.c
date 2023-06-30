@@ -23,7 +23,7 @@ static const unpack_func_t unpackFns[] = {
 #define MAX_CMD_ID ((sizeof(unpackFns) / sizeof(unpack_func_t)) - 1)
 
 // Unpack the command message
-obc_gs_err_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+obc_gs_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }

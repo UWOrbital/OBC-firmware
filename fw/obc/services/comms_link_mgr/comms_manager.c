@@ -1,17 +1,18 @@
 #include "comms_manager.h"
+#include "uplink_decoder.h"
+#include "downlink_encoder.h"
+#include "comms_uplink_receiver.h"
+#include "comms_downlink_transmitter.h"
+#include "obc_gs_aes128.h"
+#include "obc_gs_fec.h"
+
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_task_config.h"
 #include "telemetry_manager.h"
-#include "obc_fs_utils.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_pack.h"
-#include "obc_task_config.h"
-#include "send_telemetry.h"
-#include "encode_telemetry.h"
-#include "cc1120_recv_task.h"
-#include "decode_telemetry.h"
-#include "aes128.h"
-#include "fec.h"
+#include "obc_fs_utils.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

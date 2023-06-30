@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-obc_gs_err_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked);
+obc_gs_error_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked);
 
 /* Pack functions for each command */
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "ax25.h"
 
+#include <stdint.h>
 #include <stdbool.h>
 
 /**

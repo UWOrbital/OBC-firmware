@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-obc_gs_err_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg);
+obc_gs_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg);
 
 /* Unpack functions for each command */
 

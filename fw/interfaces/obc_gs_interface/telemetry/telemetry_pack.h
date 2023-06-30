@@ -14,7 +14,7 @@
  * @param buffLen The length of the buffer
  * @param numPacked The number of bytes packed into the buffer
  */
-obc_gs_err_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, uint32_t *numPacked);
+obc_gs_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, uint32_t *numPacked);
 
 /* Declare all pack functions for telemetry data */
 void packCC1120Temp(telemetry_data_t *data, uint8_t *buffer, uint32_t *offset);

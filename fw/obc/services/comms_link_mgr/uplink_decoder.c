@@ -1,26 +1,27 @@
-#include "decode_telemetry.h"
-#include "obc_logging.h"
-#include "aes128.h"
-#include "ax25.h"
-#include "fec.h"
+#include "uplink_decoder.h"
+#include "obc_gs_aes128.h"
+#include "obc_gs_ax25.h"
+#include "obc_gs_fec.h"
+#include "cc1120_txrx.h"
 #include "cc1120_defs.h"
 #include "command_unpack.h"
+#include "command_id.h"
 #include "command_data.h"
 #include "command_manager.h"
 #include "obc_task_config.h"
-#include "cc1120_txrx.h"
-#include "command_id.h"
+#include "obc_logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
 #include <os_semphr.h>
-
 #include <sys_common.h>
 #include <gio.h>
+
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 // decode data queue length should be double TXRX_INTERRUPT_THRESHOLD for safety to avoid cc1120 getting blocked
@@ -162,18 +163,33 @@ static void vDecodeTask(void *pvParameters) {
  * @return obc_error_code_t - whether or not the data was completely decoded successfully
  */
 static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
-  obc_error_code_t errCode;
+  obc_gs_error_code_t obcGsErrCode;
 
-  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &cubesatCallsign));
+  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &cubesatCallsign);
+  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_DECODE_FAILURE;
+  }
+
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  RETURN_IF_ERROR_CODE(rsDecode(rsData, decodedData, RS_DECODED_SIZE));
+  obcGsErrCode = rsDecode(rsData, decodedData, RS_DECODED_SIZE);
+  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_FEC_DECODE_FAILURE;
+  }
+
   memcpy(aesData->iv, decodedData, AES_IV_SIZE);
   memcpy(aesData->ciphertext, decodedData + AES_IV_SIZE, RS_DECODED_SIZE - AES_IV_SIZE);
-  aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
-  uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
-  RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE));
 
+  aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
+
+  uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
+  obcGsErrCode = aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE);
+  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
+  }
+
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
+
   return OBC_ERR_CODE_SUCCESS;
 }
 

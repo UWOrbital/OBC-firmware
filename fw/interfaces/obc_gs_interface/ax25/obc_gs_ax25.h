@@ -1,7 +1,6 @@
 #pragma once
 
-#include "obc_errors.h"
-#include "fec.h"
+#include "obc_gs_errors.h"
 
 #include <stdint.h>
 
@@ -54,11 +53,9 @@ extern ax25_addr_t groundStationCallsign;
  * @param telemDataLen length of the telemData array
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
- *
- * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
-obc_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_packet_t *ax25Data,
-                          ax25_addr_t *destAddress);
+obc_gs_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_packet_t *ax25Data,
+                             ax25_addr_t *destAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
@@ -67,8 +64,6 @@ obc_error_code_t ax25Send(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
  * @param recvAddress address of the receiver of the ax.25 packet
  * @param uplinkDataLen length of the uplinkData array
- *
- * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
-                          ax25_addr_t *recvAddress);
+obc_gs_error_code_t ax25Recv(packed_ax25_packet_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
+                             ax25_addr_t *recvAddress);
