@@ -2,7 +2,7 @@
 #include "command_data.h"
 #include "command_id.h"
 #include "obc_pack_utils.h"
-#include "obc_errors.h"
+#include "obc_gs_errors.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,17 +23,17 @@ static const pack_func_t packFns[] = {
 #define MAX_CMD_ID ((sizeof(packFns) / sizeof(pack_func_t)) - 1)
 
 // Pack the command message
-obc_error_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked) {
+obc_gs_err_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked) {
   if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
+    return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
   if (cmdMsg->id > MAX_CMD_ID) {
-    return OBC_ERR_CODE_UNSUPPORTED_CMD;
+    return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
   }
 
   if (packFns[cmdMsg->id] == NULL) {
-    return OBC_ERR_CODE_UNSUPPORTED_CMD;
+    return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
   }
 
   uint8_t oldOffset = *offset;
@@ -45,7 +45,7 @@ obc_error_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* 
   packFns[cmdMsg->id](buffer, offset, cmdMsg);
 
   *numPacked = *offset - oldOffset;
-  return OBC_ERR_CODE_SUCCESS;
+  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 // CMD_EXEC_OBC_RESET

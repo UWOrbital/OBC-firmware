@@ -65,7 +65,10 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
       return OBC_ERR_CODE_SUCCESS;
     }
     cmd_msg_t command;
-    RETURN_IF_ERROR_CODE(unpackCmdMsg(cmdBytes, &bytesUnpacked, &command));
+    if (unpackCmdMsg(cmdBytes, &bytesUnpacked, &command) != OBC_GS_ERR_CODE_SUCCESS) {
+      return OBC_ERR_CODE_FAILED_UNPACK;
+    }
+
     RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
   }
   return OBC_ERR_CODE_SUCCESS;

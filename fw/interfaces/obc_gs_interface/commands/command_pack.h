@@ -2,6 +2,7 @@
 #define CDH_INCLUDE_COMMAND_PACK_H_
 
 #include "command_data.h"
+#include "obc_gs_errors.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -10,7 +11,7 @@
 extern "C" {
 #endif
 
-obc_error_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked);
+obc_gs_err_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg, uint8_t* numPacked);
 
 /* Pack functions for each command */
 

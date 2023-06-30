@@ -5,6 +5,7 @@
 #include "obc_errors.h"
 #include "obc_time.h"
 #include "obc_logging.h"
+#include "obc_assert.h"
 #include "alarm_handler.h"
 
 #include <FreeRTOS.h>

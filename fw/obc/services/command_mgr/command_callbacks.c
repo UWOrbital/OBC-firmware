@@ -45,7 +45,7 @@ obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  // TODO: Implement handling for this command
+  // TODO: Implement handling for this command. Check if the log level is valid
   LOG_DEBUG("Executing log downlink command - log level %u", cmd->downlinkLogsNextPass.logLevel);
   return OBC_ERR_CODE_SUCCESS;
 }

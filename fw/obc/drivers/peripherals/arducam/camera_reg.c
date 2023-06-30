@@ -6,7 +6,7 @@
 #include "obc_logging.h"
 #include "obc_board_config.h"
 
-#include "ov5642_regs.h"
+#include "ov5642_reg.h"
 #include "camera_reg.h"
 
 #define CAM_I2C_WR_ADDR 0x3C

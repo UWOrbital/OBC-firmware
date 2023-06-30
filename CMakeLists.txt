@@ -64,6 +64,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
+        obc-gs-interface
     )
 
 endif()

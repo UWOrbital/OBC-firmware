@@ -2,7 +2,7 @@
 #include "command_data.h"
 #include "command_id.h"
 #include "obc_unpack_utils.h"
-#include "obc_errors.h"
+#include "obc_gs_errors.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,9 +23,9 @@ static const unpack_func_t unpackFns[] = {
 #define MAX_CMD_ID ((sizeof(unpackFns) / sizeof(unpack_func_t)) - 1)
 
 // Unpack the command message
-obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+obc_gs_err_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   if (buffer == NULL || offset == NULL || cmdMsg == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
+    return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
   uint8_t id = unpackUint8(buffer, offset);
@@ -37,11 +37,11 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t
   id = id & 0x7F;
 
   if (id > MAX_CMD_ID) {
-    return OBC_ERR_CODE_UNSUPPORTED_CMD;
+    return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
   }
 
   if (unpackFns[id] == NULL) {
-    return OBC_ERR_CODE_UNSUPPORTED_CMD;
+    return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
   }
 
   uint32_t timestamp = unpackUint32(buffer, offset);
@@ -52,7 +52,7 @@ obc_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_msg_t
 
   unpackFns[id](buffer, offset, cmdMsg);
 
-  return OBC_ERR_CODE_SUCCESS;
+  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 // CMD_EXEC_OBC_RESET
@@ -67,7 +67,7 @@ void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cm
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
 void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
-  cmdMsg->downlinkLogsNextPass.logLevel = (log_level_t)unpackUint8(buffer, offset);
+  cmdMsg->downlinkLogsNextPass.logLevel = unpackUint8(buffer, offset);
 }
 
 void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {

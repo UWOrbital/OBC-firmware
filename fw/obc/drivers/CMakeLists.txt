@@ -1,27 +1,39 @@
 cmake_minimum_required(VERSION 3.15)
 
 target_include_directories(OBC-firmware.out PUBLIC
-    cc1120/include
-    common/include
-    ds3232/include
-    fram/include
-    lm75bd/include
-    sdcard/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/arducam
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/cc1120
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/ds3232
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/fram
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/lm75bd
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/sdcard
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/sw_wdt
 )
 
 target_sources(OBC-firmware.out PUBLIC
-    cc1120/source/cc1120_mcu.c
-    cc1120/source/cc1120_spi.c
-    cc1120/source/cc1120_txrx.c
-    common/source/obc_i2c_io.c
-    common/source/obc_reset.c
-    common/source/obc_spi_io.c
-    common/source/obc_sci_io.c
-    common/source/obc_gio_ctrl.c
-    common/source/obc_het_ctrl.c
-    common/source/obc_sw_watchdog.c
-    ds3232/source/ds3232_mz.c
-    fram/source/fram.c
-    lm75bd/source/lm75bd.c
-    sdcard/source/sdc_bdev.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers/obc_gio_ctrl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers/obc_het_ctrl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers/obc_i2c_io.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers/obc_reset.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers/obc_sci_io.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal_wrappers/obc_spi_io.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/arducam/arducam.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/arducam/camera_reg.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/arducam/ov5642_reg.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/cc1120/cc1120_mcu.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/cc1120/cc1120_spi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/cc1120/cc1120_txrx.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/ds3232/ds3232_mz.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/fram/fram.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/lm75bd/lm75bd.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/sdcard/sdc_bdev.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/peripherals/sw_wdt/obc_sw_watchdog.c
 )

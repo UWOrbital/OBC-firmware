@@ -1,7 +1,6 @@
 #include "supervisor.h"
 #include "timekeeper.h"
 #include "telemetry_manager.h"
-#include "adcs_manager.h"
 #include "command_manager.h"
 #include "comms_manager.h"
 #include "eps_manager.h"
@@ -11,7 +10,8 @@
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
-#include "obc_states.h"
+#include "obc_state_handle.h"
+#include "obc_state_defs.h"
 #include "obc_task_config.h"
 #include "obc_reset.h"
 #include "obc_fs_utils.h"
@@ -115,7 +115,6 @@ static void vSupervisorTask(void *pvParameters) {
 
   initTelemetry();
   initCommandManager();
-  initADCSManager();
   initCommsManager();
   initEPSManager();
   initPayloadManager();

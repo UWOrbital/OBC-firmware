@@ -320,8 +320,10 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
   uint32_t packedSingleTelemSize = 0;                  // Size of the packed single telemetry
 
   // Pack the single telemetry into a uint8_t array
-  RETURN_IF_ERROR_CODE(packTelemetry(singleTelem, packedSingleTelem, sizeof(packedSingleTelem) / sizeof(uint8_t),
-                                     &packedSingleTelemSize));
+  if (packTelemetry(singleTelem, packedSingleTelem, sizeof(packedSingleTelem) / sizeof(uint8_t),
+                    &packedSingleTelemSize) != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_FAILED_PACK;
+  }
 
   // If the single telemetry is too large to continue adding to the telemPacket, send the telemPacket
   if ((*telemPacketOffset) + packedSingleTelemSize > PACKED_TELEM_PACKET_SIZE) {

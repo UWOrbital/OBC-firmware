@@ -1,5 +1,4 @@
 #include "obc_pack_utils.h"
-#include "obc_assert.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -43,7 +42,7 @@ void packInt32(int32_t value, uint8_t* buffer, uint32_t* offset) {
 }
 
 void packFloat(float value, uint8_t* buffer, uint32_t* offset) {
-  STATIC_ASSERT(sizeof(float) == sizeof(uint32_t), "float and uint32_t must be the same size");
+  _Static_assert(sizeof(float) == sizeof(uint32_t), "float is not 32 bits");
 
   uint32_t tmp;
   memcpy(&tmp, &value, sizeof(tmp));

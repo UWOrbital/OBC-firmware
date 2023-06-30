@@ -1,7 +1,6 @@
 #ifndef CDH_INCLUDE_COMMAND_ID_H_
 #define CDH_INCLUDE_COMMAND_ID_H_
 
-#include "obc_assert.h"
 #include <stdint.h>
 
 // Specify whether we're using R&D or production commands

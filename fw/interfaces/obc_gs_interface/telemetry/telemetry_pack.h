@@ -1,8 +1,8 @@
 #ifndef CDH_INCLUDE_TELEMETRY_PACK_H_
 #define CDH_INCLUDE_TELEMETRY_PACK_H_
 
-#include "obc_errors.h"
-#include "telemetry_manager.h"
+#include "obc_gs_errors.h"
+#include "telemetry_data.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -14,9 +14,8 @@
  * @param buffer The buffer to pack the data into
  * @param buffLen The length of the buffer
  * @param numPacked The number of bytes packed into the buffer
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the data was packed successfully, otherwise an error code
  */
-obc_error_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, uint32_t *numPacked);
+obc_gs_err_code_t packTelemetry(telemetry_data_t *data, uint8_t *buffer, size_t buffLen, uint32_t *numPacked);
 
 /* Declare all pack functions for telemetry data */
 void packCC1120Temp(telemetry_data_t *data, uint8_t *buffer, uint32_t *offset);

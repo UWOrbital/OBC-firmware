@@ -1,6 +1,7 @@
 #include "command_pack.h"
 #include "command_data.h"
 #include "command_id.h"
+#include "obc_gs_errors.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "ax25.h"
@@ -145,7 +146,10 @@ int main(int argc, char *argv[]) {
 
   uint8_t packedSingleCmdSize = 0;
   uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE] = {0};
-  RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd, &cmdPacketOffset, &cmdMsg, &packedSingleCmdSize));
+  if (packCmdMsg(packedSingleCmd, &cmdPacketOffset, &cmdMsg, &packedSingleCmdSize) != OBC_GS_ERR_CODE_SUCCESS) {
+    printf("Failed to pack command message!");
+    exit(1);
+  }
 
   packed_telem_packet_t cmdPacket = {0};
   memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);

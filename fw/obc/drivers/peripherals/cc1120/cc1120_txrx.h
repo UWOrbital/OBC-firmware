@@ -1,15 +1,12 @@
 #ifndef DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H
 #define DRIVERS_CC1120_INCLUDE_CC1120_TXRX_H
 
+#include "obc_errors.h"
+
 #include <stdint.h>
-#include "obc_logging.h"
-#include "obc_math.h"
-#include "ax25.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
-#include <sys_common.h>
-#include <FreeRTOSConfig.h>
 
 // See chapter 8.5 in the datasheet
 #define TXRX_INTERRUPT_THRESHOLD 100U

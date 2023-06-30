@@ -6,10 +6,10 @@
 #include "obc_time.h"
 #include "telemetry_manager.h"
 
-static obc_state_t currStateOBC;
+static uint8_t currStateOBC;
 
 // This function is not thread safe. It should only be called from the supervisor task.
-obc_error_code_t changeStateOBC(obc_state_t newState) {
+obc_error_code_t changeStateOBC(uint8_t newState) {
   obc_error_code_t errCode;
 
   currStateOBC = newState;
