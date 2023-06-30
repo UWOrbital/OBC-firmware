@@ -16,11 +16,11 @@ if(CMAKE_BUILD_TYPE MATCHES Firmware)
     include(cmake/fw_build_options.cmake)
 
     if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/launchpad/source/sys_link.ld")
+        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/fw/obc/hal/launchpad/source/sys_link.ld")
     elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev1/source/sys_link.ld")
+        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/fw/obc/hal/obc_rev1/source/sys_link.ld")
     elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev2/source/sys_link.ld")
+        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/fw/obc/hal/obc_rev2/source/sys_link.ld")
     else()
         message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
     endif()
@@ -36,7 +36,7 @@ else()
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Test)
-    add_subdirectory(test)
+    add_subdirectory(fw/test)
 elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     if (DEBUG MATCHES 1)
         # Higher optimization levels break firmware for some reason
@@ -58,17 +58,9 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
 
     include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
 
-    add_subdirectory(adcs)
-    add_subdirectory(cdh)
-    add_subdirectory(common)
-    add_subdirectory(comms)
-    add_subdirectory(drivers)
-    add_subdirectory(eps)
-    add_subdirectory(payload)
+    add_subdirectory(fw)
+
     add_subdirectory(libs)
-
-    add_subdirectory(hal)
-
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct
