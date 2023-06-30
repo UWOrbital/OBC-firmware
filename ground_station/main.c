@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 
   rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
 
-  size_t cmdPacketOffset = 0;
+  uint32_t cmdPacketOffset = 0;
 
   uint8_t packedSingleCmdSize = 0;
   uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE] = {0};
