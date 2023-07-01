@@ -1,6 +1,6 @@
-#include "command_pack.h"
-#include "command_data.h"
-#include "command_id.h"
+#include "obc_gs_command_pack.h"
+#include "obc_gs_command_data.h"
+#include "obc_gs_command_id.h"
 #include "data_pack_utils.h"
 #include "obc_gs_errors.h"
 

@@ -30,9 +30,9 @@ SRCS += ground_station/serial_utils/win_uart.c
 # Source files shared with OBC firmware
 SRCS += fw/interfaces/data_pack_unpack/data_pack_utils.c
 SRCS += fw/interfaces/data_pack_unpack/data_unpack_utils.c
-SRCS += fw/interfaces/obc_gs_interface/commands/command_pack.c
-SRCS += fw/interfaces/obc_gs_interface/commands/command_unpack.c
-SRCS += fw/interfaces/obc_gs_interface/telemetry/telemetry_pack.c
+SRCS += fw/interfaces/obc_gs_interface/commands/obc_gs_command_pack.c
+SRCS += fw/interfaces/obc_gs_interface/commands/obc_gs_command_unpack.c
+SRCS += fw/interfaces/obc_gs_interface/telemetry/obc_gs_telemetry_pack.c
 SRCS += fw/interfaces/obc_gs_interface/aes128/obc_gs_aes128.c
 SRCS += fw/interfaces/obc_gs_interface/ax25/obc_gs_ax25.c
 SRCS += fw/interfaces/obc_gs_interface/fec/obc_gs_fec.c

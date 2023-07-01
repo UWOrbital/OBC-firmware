@@ -6,7 +6,7 @@
 
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
-#include "telemetry_pack.h"
+#include "obc_gs_telemetry_pack.h"
 
 #include "obc_task_config.h"
 #include "obc_logging.h"

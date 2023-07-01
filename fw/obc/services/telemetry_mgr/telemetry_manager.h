@@ -1,7 +1,7 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "telemetry_data.h"
+#include "obc_gs_telemetry_data.h"
 
 #include <stdint.h>
 #include <stddef.h>

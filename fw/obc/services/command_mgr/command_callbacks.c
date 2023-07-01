@@ -1,5 +1,5 @@
 #include "command_callbacks.h"
-#include "command_data.h"
+#include "obc_gs_command_data.h"
 #include "obc_reset.h"
 #include "obc_errors.h"
 #include "obc_logging.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "command_data.h"
+#include "obc_gs_command_data.h"
 #include "obc_gs_errors.h"
 #include <stdint.h>
 

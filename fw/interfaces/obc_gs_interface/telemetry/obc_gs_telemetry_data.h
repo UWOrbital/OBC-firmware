@@ -1,6 +1,6 @@
 #pragma once
 
-#include "telemetry_id.h"
+#include "obc_gs_telemetry_id.h"
 
 #include <stdint.h>
 #include <stddef.h>

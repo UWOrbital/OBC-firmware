@@ -1,5 +1,5 @@
-#include "command_data.h"
-#include "command_id.h"
+#include "obc_gs_command_data.h"
+#include "obc_gs_command_id.h"
 #include "command_callbacks.h"
 #include "obc_task_config.h"
 #include "obc_errors.h"

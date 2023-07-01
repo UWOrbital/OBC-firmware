@@ -1,7 +1,7 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "command_data.h"
+#include "obc_gs_command_data.h"
 
 /**
  * @brief Initializes the command manager task

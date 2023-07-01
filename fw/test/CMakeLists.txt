@@ -3,8 +3,8 @@ set(TEST_BINARY OBC-firmware-tests)
 set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/fw/interfaces/data_pack_unpack/data_pack_utils.c
     ${CMAKE_SOURCE_DIR}/fw/interfaces/data_pack_unpack/data_unpack_utils.c
-    ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands/command_pack.c
-    ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands/command_unpack.c
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands/obc_gs_command_pack.c
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands/obc_gs_command_unpack.c
 )
 
 set(TEST_MOCKS
