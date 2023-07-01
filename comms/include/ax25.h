@@ -98,12 +98,10 @@ obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, ui
  *
  * @param ax25Data the received ax.25 frame
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param recvAddress address of the receiver of the ax.25 packet
  * @param uplinkDataLen length of the uplinkData array
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
-                          ax25_addr_t *recvAddress);
+obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen);
 
 #endif /* COMMS_INCLUDE_AX25_H_ */

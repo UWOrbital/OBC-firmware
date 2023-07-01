@@ -22,7 +22,7 @@ static correct_reed_solomon *rsGs = NULL;
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_error_code_t errCode;
 
-  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData, &cubesatCallsign));
+  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
   uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, aesData->rawData);
 
   if (decodedLength == -1) return OBC_ERR_CODE_CORRUPTED_MSG;

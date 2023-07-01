@@ -251,10 +251,10 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
   RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data));
 
   uint8_t recvAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
-  if (memcmp(unstuffedPacket->data + AX25_START_FLAG_BYTES, recvAddress, AX25_DEST_ADDR_BYTES) != 0) {
+  if (memcmp(unstuffedPacket.data + AX25_START_FLAG_BYTES, recvAddress, AX25_DEST_ADDR_BYTES) != 0) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
   }
-  if (unstuffedPacket->data[AX25_MOD128_CONTROL_BYTES + AX25_ADDRESS_BYTES + 1] != AX25_PID) {
+  if (unstuffedPacket.data[AX25_MOD128_CONTROL_BYTES + AX25_ADDRESS_BYTES + 1] != AX25_PID) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
   }
   // Check FCS (not used in our case so it is commented out)
@@ -266,11 +266,11 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
   */
 
   // check if the LSB of the control field is 0, which means it is a I frame
-  if (!(unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAGS] & 0x01)) {
+  if (!(unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES] & 0x01)) {
     RETURN_IF_ERROR_CODE(iFrameRecv(&unstuffedPacket, uplinkData));
   }
   // If the LSB was 1, check if the next bit is a 1 to see if it is a U Frame
-  else if (unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAGS] & (0x01 << 1)) {
+  else if (unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES] & (0x01 << 1)) {
     RETURN_IF_ERROR_CODE(uFrameRecv(&unstuffedPacket));
   } else {
     // Must be an S Frame if we reach this point
