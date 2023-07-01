@@ -1,7 +1,7 @@
 #include "arducam.h"
 #include "ov5642_reg.h"
 #include "obc_spi_io.h"
-#include "obc_fs_utils.h"
+#include "obc_reliance_fs.h"
 #include "obc_board_config.h"
 
 #include <redposix.h>

@@ -3,7 +3,7 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
-#include "obc_fs_utils.h"
+#include "obc_reliance_fs.h"
 
 #include <redposix.h>
 

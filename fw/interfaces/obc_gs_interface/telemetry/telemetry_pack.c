@@ -1,7 +1,7 @@
 #include "telemetry_pack.h"
 #include "telemetry_data.h"
 #include "telemetry_id.h"
-#include "obc_pack_utils.h"
+#include "data_pack_utils.h"
 #include "obc_gs_errors.h"
 
 #include <stddef.h>

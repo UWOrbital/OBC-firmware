@@ -1,8 +1,8 @@
 set(TEST_BINARY OBC-firmware-tests)
 
 set(TEST_DEPENDENCIES
-    ${CMAKE_SOURCE_DIR}/fw/interfaces/common/obc_pack_utils.c
-    ${CMAKE_SOURCE_DIR}/fw/interfaces/common/obc_unpack_utils.c
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/data_pack_unpack/data_pack_utils.c
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/data_pack_unpack/data_unpack_utils.c
     ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands/command_pack.c
     ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands/command_unpack.c
 )
@@ -23,7 +23,7 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
-    ${CMAKE_SOURCE_DIR}/fw/interfaces/common/
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/data_pack_unpack/
     ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/common
     ${CMAKE_SOURCE_DIR}/fw/interfaces/obc_gs_interface/commands
 )

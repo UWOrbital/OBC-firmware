@@ -14,7 +14,7 @@
 #include "obc_state_defs.h"
 #include "obc_task_config.h"
 #include "obc_reset.h"
-#include "obc_fs_utils.h"
+#include "obc_reliance_fs.h"
 #include "lm75bd.h"
 #include "obc_board_config.h"
 #include "comms_uplink_receiver.h"

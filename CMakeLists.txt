@@ -35,6 +35,9 @@ else()
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
+add_subdirectory(fw/interfaces)
+add_subdirectory(libs)
+
 if (CMAKE_BUILD_TYPE MATCHES Test)
     add_subdirectory(fw/test)
 elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
@@ -58,9 +61,8 @@ elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
 
     include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
 
-    add_subdirectory(fw)
+    add_subdirectory(fw/obc)
 
-    add_subdirectory(libs)
     target_link_libraries(OBC-firmware.out PRIVATE
         tiny-aes
         lib-correct

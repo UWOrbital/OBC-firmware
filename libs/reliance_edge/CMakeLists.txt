@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 
-target_include_directories(OBC-firmware.out PUBLIC
+set(INCLUDE_DIRS
     include
     core/include
     os/freertos/include
     projects/freertos_rm46/host
 )
 
-target_sources(OBC-firmware.out PUBLIC
+set(SOURCES 
     bdev/bdev.c
     core/driver/blockio.c
     core/driver/buffer.c
@@ -46,3 +46,6 @@ target_sources(OBC-firmware.out PUBLIC
     util/string.c
     projects/freertos_rm46/host/redconf.c
 )
+
+target_include_directories(OBC-firmware.out PUBLIC ${INCLUDE_DIRS})
+target_sources(OBC-firmware.out PUBLIC ${SOURCES})

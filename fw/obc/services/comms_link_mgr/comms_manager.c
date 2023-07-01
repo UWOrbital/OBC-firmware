@@ -12,7 +12,7 @@
 #include "telemetry_manager.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_pack.h"
-#include "obc_fs_utils.h"
+#include "obc_reliance_fs.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

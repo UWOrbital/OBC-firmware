@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/fs_utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/fs_wrapper
     ${CMAKE_CURRENT_SOURCE_DIR}/logging
     ${CMAKE_CURRENT_SOURCE_DIR}/persistent
     ${CMAKE_CURRENT_SOURCE_DIR}/state
@@ -11,7 +11,7 @@ target_include_directories(OBC-firmware.out PUBLIC
 )
 
 target_sources(OBC-firmware.out PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/fs_utils/obc_fs_utils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/fs_wrapper/obc_reliance_fs.c
     ${CMAKE_CURRENT_SOURCE_DIR}/logging/obc_logging.c
     ${CMAKE_CURRENT_SOURCE_DIR}/persistent/obc_persistent_store.c
     ${CMAKE_CURRENT_SOURCE_DIR}/state/obc_state.c
