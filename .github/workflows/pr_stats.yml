@@ -14,4 +14,4 @@ jobs:
           chats: true
           disable-links: false
           sort-by: 'REVIEWS'
-          organization: 'UW Orbital'
+          organization: 'UWOrbital'
