@@ -11,7 +11,7 @@ INCS += -I"ground_station/common"
 INCS += -I"ground_station/serial_utils"
 
 # Headers shared with OBC firmware
-INCS += -I"fw/interfaces/common"
+INCS += -I"fw/interfaces/data_pack_unpack"
 INCS += -I"fw/interfaces/obc_gs_interface/commands"
 INCS += -I"fw/interfaces/obc_gs_interface/telemetry"
 INCS += -I"fw/interfaces/obc_gs_interface/common"
@@ -28,8 +28,8 @@ SRCS += ground_station/common/gs_heap.c
 SRCS += ground_station/serial_utils/win_uart.c
 
 # Source files shared with OBC firmware
-SRCS += fw/interfaces/common/data_pack_utils.c
-SRCS += fw/interfaces/common/data_unpack_utils.c
+SRCS += fw/interfaces/data_pack_unpack/data_pack_utils.c
+SRCS += fw/interfaces/data_pack_unpack/data_unpack_utils.c
 SRCS += fw/interfaces/obc_gs_interface/commands/command_pack.c
 SRCS += fw/interfaces/obc_gs_interface/commands/command_unpack.c
 SRCS += fw/interfaces/obc_gs_interface/telemetry/telemetry_pack.c
