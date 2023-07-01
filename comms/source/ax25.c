@@ -410,12 +410,15 @@ static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
     // Send an unnumbered acknowledgement
     packed_ax25_u_frame_t ax25Data = {0};
     ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
+    // Future PR will handle sending this to the proper queue
   } else if (controlByte == U_FRAME_CMD_DISC) {
     // Send an unnumbered acknowledgement
     packed_ax25_u_frame_t ax25Data = {0};
     ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
+    // Future PR will handle sending this to the proper queue
   } else if (controlByte == U_FRAME_CMD_ACK) {
     // acknowledgeFlag == true
+    // Future PR will handle what to do here most likely some kind of state variable change
   }
   // Add more command actions as our architecture changes to need different commands
   return OBC_ERR_CODE_SUCCESS;
