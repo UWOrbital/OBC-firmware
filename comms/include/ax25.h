@@ -27,8 +27,10 @@
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
 #define AX25_MINIMUM_U_FRAME_CMD_LENGTH \
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
-#define AX25_MAXIMUM_U_FRAME_CMD_LENGTH \
-  AX25_MINIMUM_U_FRAME_CMD_LENGTH + 2  // Only place where a bit may get stuffed is in the control byte
+#define AX25_MAXIMUM_U_FRAME_CMD_LENGTH                 \
+  (AX25_MINIMUM_U_FRAME_CMD_LENGTH +                    \
+   (AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES) * 6 / \
+       5)  // Only place where a bit may get stuffed is in the control byte or address bytes
 
 #define AX25_FLAG 0x7E
 #define AX25_PID 0xF0U
@@ -49,10 +51,6 @@ typedef struct {
   uint8_t data[AX25_MAXIMUM_PKT_LEN];
   uint16_t length;
 } packed_ax25_i_frame_t;
-
-typedef struct {
-  uint8_t data[AX25_MINIMUM_U_FRAME_CMD_LENGTH];
-} unstuffed_ax25_u_frame_t;
 
 typedef struct {
   uint8_t data[AX25_MAXIMUM_U_FRAME_CMD_LENGTH];

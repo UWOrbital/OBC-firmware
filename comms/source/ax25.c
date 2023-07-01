@@ -9,6 +9,7 @@
 #define AX25_U_FRAME_DISC_CMD_CONTROL 0b01000011
 #define AX25_U_FRAME_ACK_CMD_CONTROL 0b01100011
 #define POLL_FINAL_BIT_OFFSET 4
+#define POLL_FINAL_BIT_MASK (0x01 << POLL_FINAL_BIT_OFFSET)
 
 #ifndef SRC_CALLSIGN
 #define SRC_CALLSIGN "ABCDEFG"
@@ -28,46 +29,39 @@ ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES
  * @param packet pointer to a buffer with the received stuffed ax.25 data
  * @param packetLen length of the packetLen buffer
  * @param unstuffedPacket pointer to a buffer to hold the unstuffed ax.25 packet
- * @param unstuffedPacketLen expected length of the unstuffed packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
-                                    uint16_t unstuffedPacketLen);
+static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket);
 
 /**
  * @brief strips away the ax.25 headers for an s Frame
  *
  * @param unstuffedPacket unstuffed ax.25 packet
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData,
-                                   ax25_addr_t *recvAddress);
+static obc_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData);
 
 /**
  * @brief strips away the ax.25 headers for an i Frame
  *
  * @param unstuffedPacket unstuffed ax.25 packet
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData,
-                                   ax25_addr_t *recvAddress);
+static obc_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData);
 
 /**
  * @brief recieves a U frame and performs the necessary next action
  *
  * @param unstuffedPacket unstuffed ax.25 packet
- * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, ax25_addr_t *recvAddress);
+static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket);
 
 /**
  * @brief calculates the FCS for an ax.25 packet
@@ -229,13 +223,11 @@ obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, ui
  *
  * @param ax25Data the received ax.25 frame
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param recvAddress address of the receiver of the ax.25 packet
  * @param uplinkDataLen length of the uplinkData array
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen,
-                          ax25_addr_t *recvAddress) {
+obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, uint8_t uplinkDataLen) {
   if (ax25Data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -256,28 +248,33 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
 
   // perform bit unstuffing
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
-  RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, AX25_MINIMUM_I_FRAME_LEN));
+  RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data));
 
-  bool supervisoryFrameFlag = false;
-  // if (unstuffedPacket.length == AX25_SUPERVISORY_FRAME_LENGTH) {
-  //   /* TODO: not the best way to determine S flag? */
-  //   supervisoryFrameFlag = true;
-  // } else if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
-  //   /* TODO: same as above */
-  //   return OBC_ERR_CODE_INVALID_ARG;
-  // }
-
-  // Check FCS
-  uint16_t fcs = unstuffedPacket.data[AX25_INFO_BYTES + AX25_PID_BYTES + AX25_MOD128_CONTROL_BYTES +
-                                      AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES]
+  uint8_t recvAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
+  if (memcmp(unstuffedPacket->data + AX25_START_FLAG_BYTES, recvAddress, AX25_DEST_ADDR_BYTES) != 0) {
+    return OBC_ERR_CODE_INVALID_AX25_PACKET;
+  }
+  if (unstuffedPacket->data[AX25_MOD128_CONTROL_BYTES + AX25_ADDRESS_BYTES + 1] != AX25_PID) {
+    return OBC_ERR_CODE_INVALID_AX25_PACKET;
+  }
+  // Check FCS (not used in our case so it is commented out)
+  /*
+  uint16_t fcs = unstuffedPacket.data[ax25Data.length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES]
                  << 8;
-  fcs |= unstuffedPacket.data[AX25_INFO_BYTES + AX25_PID_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_ADDRESS_BYTES +
-                              AX25_START_FLAG_BYTES + 1];
+  fcs |= unstuffedPacket.data[ax25Data->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES + 1];
   RETURN_IF_ERROR_CODE(fcsCheck(unstuffedPacket.data, fcs));
-  if (unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAGS]) {
-    RETURN_IF_ERROR_CODE(sFrameRecv(&unstuffedPacket, uplinkData, recvAddress));
+  */
+
+  // check if the LSB of the control field is 0, which means it is a I frame
+  if (!(unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAGS] & 0x01)) {
+    RETURN_IF_ERROR_CODE(iFrameRecv(&unstuffedPacket, uplinkData));
+  }
+  // If the LSB was 1, check if the next bit is a 1 to see if it is a U Frame
+  else if (unstuffedPacket.data[AX25_ADDRESS_BYTES + AX25_START_FLAGS] & (0x01 << 1)) {
+    RETURN_IF_ERROR_CODE(uFrameRecv(&unstuffedPacket));
   } else {
-    RETURN_IF_ERROR_CODE(iFrameRecv(&unstuffedPacket, uplinkData, recvAddress));
+    // Must be an S Frame if we reach this point
+    RETURN_IF_ERROR_CODE(sFrameRecv(&unstuffedPacket, uplinkData));
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -288,12 +285,10 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
  * @param packet pointer to a buffer with the received stuffed ax.25 data
  * @param packetLen length of the packetLen buffer
  * @param unstuffedPacket pointer to a buffer to hold the unstuffed ax.25 packet
- * @param unstuffedPacketLen expected length of the unstuffed packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
-                                    uint16_t unstuffedPacketLen) {
+static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket) {
   uint8_t bitCount = 0;
   uint8_t stuffingFlag = 0;
   uint16_t unstuffedBitLength = 0;  // count as bits
@@ -324,9 +319,6 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
       } else {
         bitCount = 0;
       }
-      if (unstuffedBitLength >= (unstuffedPacketLen - 1) * 8) {
-        break;
-      }
       unstuffedPacket[unstuffedBitLength / 8] |= bit << (7 - (unstuffedBitLength % 8));
       unstuffedBitLength++;
     }
@@ -342,15 +334,10 @@ static obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t
  *
  * @param unstuffedPacket unstuffed ax.25 packet
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData,
-                                   ax25_addr_t *recvAddress) {
-  if (memcmp(unstuffedPacket->data + AX25_START_FLAG_BYTES, recvAddress->data, AX25_DEST_ADDR_BYTES) != 0) {
-    return OBC_ERR_CODE_INVALID_AX25_PACKET;
-  }
+static obc_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData) {
   uint8_t controlBytes[AX25_MOD128_CONTROL_BYTES] = {unstuffedPacket->data[AX25_ADDRESS_BYTES + 1],
                                                      unstuffedPacket->data[AX25_ADDRESS_BYTES + 2]};
   if (controlBytes[0] == AX25_S_FRAME_RR_CONTROL) {
@@ -372,25 +359,17 @@ static obc_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, ui
  *
  * @param unstuffedPacket unstuffed ax.25 packet
  * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param recvAddress address of the receiver of the ax.25 packet
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData,
-                                   ax25_addr_t *recvAddress) {
-  if (memcmp(unstuffedPacket->data + AX25_START_FLAG_BYTES, recvAddress->data, AX25_DEST_ADDR_BYTES) != 0) {
-    return OBC_ERR_CODE_INVALID_AX25_PACKET;
-  }
+static obc_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, uint8_t *uplinkData) {
   // first control byte will be the the after the flag and the address bytes
   // next control byte will be immediately after the previous one
   // See AX.25 standard
   uint8_t controlBytes[AX25_MOD128_CONTROL_BYTES] = {
       unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES],
       unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES + 1]};
-  // LSB should be 0 for a valid I frame
-  if (controlBytes[0] & 0x01) {
-    return OBC_ERR_CODE_INVALID_AX25_PACKET;
-  }
+
   if ((controlBytes[0] >> 1) != pktReceiveNum) {
     // TODO: implement retransmission requests
   }
@@ -408,6 +387,37 @@ static obc_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, ui
       unstuffedPacket->data + AX25_PID_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES,
       AX25_INFO_BYTES);
   pktReceiveNum++;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief recieves a U frame and performs the necessary next action
+ *
+ * @param unstuffedPacket unstuffed ax.25 packet
+ *
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
+ */
+static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+  uint8_t controlByte = unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES];
+  uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK;
+  // clear the poll/final bit from controlByte
+  controlByte &= ~POLL_FINAL_BIT_MASK;
+
+  ax25_addr_t destAddress = {0};
+  // the destination address for the packet we send will be the src address of the packet we just received
+  memcpy(destAddress.data, unstuffedPacket->data + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, AX25_DEST_ADDR_BYTES);
+  if (controlByte == U_FRAME_CMD_CONNECT) {
+    // Send an unnumbered acknowledgement
+    packed_ax25_u_frame_t ax25Data = {0};
+    ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
+  } else if (controlByte == U_FRAME_CMD_DISC) {
+    // Send an unnumbered acknowledgement
+    packed_ax25_u_frame_t ax25Data = {0};
+    ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
+  } else if (controlByte == U_FRAME_CMD_ACK) {
+    // acknowledgeFlag == true
+  }
+  // Add more command actions as our architecture changes to need different commands
   return OBC_ERR_CODE_SUCCESS;
 }
 
