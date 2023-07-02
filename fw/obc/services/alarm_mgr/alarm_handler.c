@@ -4,6 +4,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_time.h"
+#include "obc_time_utils.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>

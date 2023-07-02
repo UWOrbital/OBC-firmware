@@ -39,7 +39,8 @@ add_subdirectory(fw/interfaces)
 add_subdirectory(libs)
 
 if (CMAKE_BUILD_TYPE MATCHES Test)
-    add_subdirectory(fw/test)
+    add_subdirectory(fw/obc/test)
+    add_subdirectory(fw/interfaces/test)
 elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
     if (DEBUG MATCHES 1)
         # Higher optimization levels break firmware for some reason

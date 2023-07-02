@@ -16,5 +16,6 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/persistent/obc_persistent_store.c
     ${CMAKE_CURRENT_SOURCE_DIR}/state/obc_state.c
     ${CMAKE_CURRENT_SOURCE_DIR}/time/obc_time.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/time/obc_time_utils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_heap.c
 )

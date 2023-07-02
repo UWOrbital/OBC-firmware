@@ -4,6 +4,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_time.h"
+#include "obc_time_utils.h"
 #include "comms_manager.h"
 #include "telemetry_manager.h"
 

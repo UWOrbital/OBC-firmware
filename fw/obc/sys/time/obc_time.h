@@ -37,21 +37,3 @@ void incrementCurrentUnixTime(void);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
  */
 obc_error_code_t syncUnixTime(void);
-
-/**
- * @brief Convert a datetime to unix time.
- *
- * @param datetime The datetime to convert.
- * @param unixTime Buffer to store the unix time.
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
- */
-obc_error_code_t datetimeToUnix(rtc_date_time_t *datetime, uint32_t *unixTime);
-
-/**
- * @brief Convert unix time to a datetime.
- *
- * @param unixTime The unix time to convert.
- * @param datetime Buffer to store the datetime.
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
- */
-obc_error_code_t unixToDatetime(uint32_t unixTime, rtc_date_time_t *datetime);

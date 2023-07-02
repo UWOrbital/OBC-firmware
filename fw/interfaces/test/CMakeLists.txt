@@ -1,4 +1,4 @@
-set(TEST_BINARY OBC-firmware-tests)
+set(TEST_BINARY obc-interface-tests)
 
 set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/fw/interfaces/data_pack_unpack/data_pack_utils.c
@@ -12,9 +12,9 @@ set(TEST_MOCKS
 )
 
 set(TEST_SOURCES
-    ${CMAKE_SOURCE_DIR}/fw/test/unit/main.cpp
-    ${CMAKE_SOURCE_DIR}/fw/test/unit/test_pack_unpack_utils.cpp
-    ${CMAKE_SOURCE_DIR}/fw/test/unit/test_command_pack_unpack.cpp
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/test/unit/main.cpp
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/test/unit/test_pack_unpack_utils.cpp
+    ${CMAKE_SOURCE_DIR}/fw/interfaces/test/unit/test_command_pack_unpack.cpp
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
