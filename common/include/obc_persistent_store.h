@@ -13,4 +13,4 @@ obc_error_code_t setPersistentObcState(obc_state_persist_data_t *data);
 obc_error_code_t getPersistentObcConfig(obc_config_persist_data_t *buffer);
 obc_error_code_t setPersistentObcConfig(obc_config_persist_data_t *data);
 
-#endif //COMMON_INCLUDE_OBC_PERSISTENT_STORE_H_
+#endif  // COMMON_INCLUDE_OBC_PERSISTENT_STORE_H_

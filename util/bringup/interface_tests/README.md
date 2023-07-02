@@ -1,4 +1,4 @@
-**To run this utility, follow these steps:** 
+**To run this utility, follow these steps:**
 
 1. Change to the top-level directory (i.e. `OBC-firmware/`)
 2. Run `make -f util/bringup/interface_tests/Makefile` to build

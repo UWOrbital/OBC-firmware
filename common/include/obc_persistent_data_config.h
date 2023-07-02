@@ -9,17 +9,17 @@
 
 // obc_time module
 typedef struct {
-    uint32_t unixTime;
+  uint32_t unixTime;
 } obc_time_persist_data_t;
 
 // obc_state module
 typedef struct {
-    obc_state_t obcState;
+  obc_state_t obcState;
 } obc_state_persist_data_t;
 
 // obc config
 typedef struct {
-    bool isInitialized; // OBC is initialized
+  bool isInitialized;  // OBC is initialized
 } obc_config_persist_data_t;
 
 #endif  // COMMON_INCLUDE_OBC_PERSISTENT_DATA_CONFIG_H_

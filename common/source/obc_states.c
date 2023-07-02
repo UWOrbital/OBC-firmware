@@ -10,14 +10,14 @@ static obc_state_t currStateOBC;
 
 // This function is not thread safe. It should only be called from the supervisor task.
 obc_error_code_t changeStateOBC(obc_state_t newState) {
-    obc_error_code_t errCode;
-    
-    currStateOBC = newState;
-    telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
-    RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
+  obc_error_code_t errCode;
 
-    obc_state_persist_data_t persist = {.obcState = newState};
-    RETURN_IF_ERROR_CODE(setPersistentObcState(&persist));
+  currStateOBC = newState;
+  telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
+  RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
 
-    return OBC_ERR_CODE_SUCCESS;
+  obc_state_persist_data_t persist = {.obcState = newState};
+  RETURN_IF_ERROR_CODE(setPersistentObcState(&persist));
+
+  return OBC_ERR_CODE_SUCCESS;
 }
