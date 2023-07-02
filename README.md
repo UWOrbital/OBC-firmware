@@ -150,7 +150,7 @@ Function comments should exist in the .h file. For static functions, they should
  *
  * @param num1 - The first number to add.
  * @param num2 - The second number to add.
- * @return uint8_t - Returns the sum of the two numbers.
+ * @return Returns the sum of the two numbers.
  */
 uint8_t addNumbers(uint8_t num1, uint8_t num2);
 ```
@@ -161,15 +161,7 @@ uint8_t addNumbers(uint8_t num1, uint8_t num2);
 
 #### Header Guard
 
-- The symbol name should have the form `<PATH>_<FILE>_H_`
-
-For example, if the file is `abc/xyz/foo.h`, then the header guard should be
-```c
-#ifndef ABC_XYZ_FOO_H_
-#define ABC_XYZ_FOO_H_
-...
-#endif
-```
+We use `#pragma once` instead of include guards.
 
 ### ****Naming and typing conventions****
 
@@ -181,26 +173,17 @@ For example, if the file is `abc/xyz/foo.h`, then the header guard should be
     -   Ex:
         ```c
         typedef struct {
-            int a;
-            int b;
+          int a;
+          int b;
         } struct_name_t
         ```
--   2 spaces per level of indentation (NOT TABS)
--   Use spaces after opening brackets for conditionals and loops (e.g. `if ()` and `while ()`), but not for function calls (i.e. `my_func()`).
 -   Import statements should be grouped in the following order:
     1.  Local imports (e.g. `#include "cc1120_driver.h`)
     2.  External library imports (e.g. `#include <os_semphr.h>`)
     3.  Standard library imports (e.g. `#include <stdint.h>`)
--   160 character limit per line (not a hard limit, use common sense)
--   Hanging indents should be aligned to delimiter:
-
-```c
-myFunction(hasToo,
-            many, variables)
-```
 
 ### ****General Rules****
-Some of these rules don't apply in certain cases. Use your better judgement.
+Some of these rules don't apply in certain cases. Use your better judgement. To learn more about these rules, research NASA's Power of 10.
 
 1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)).
 2. All loops must have fixed bounds. This prevents runaway code.
@@ -210,6 +193,8 @@ Some of these rules don't apply in certain cases. Use your better judgement.
 6. Check the return value of all non-void functions, or cast to void to indicate the return value is useless.
 7. Limit pointer use to a single [dereference](https://en.wikipedia.org/wiki/Dereference_operator), and do not use [function pointers](https://en.wikipedia.org/wiki/Function_pointer).
 8. Compile with all possible warnings active; all warnings should then be addressed before release of the software.
+9. Use the preprocessor sparingly
+10. Restrict functions to a single printed page
 
 **[Back to top](#table-of-contents)**
 
