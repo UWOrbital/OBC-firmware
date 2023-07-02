@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "fram.h"
 #include <FreeRTOS.h>
-#include <os_semphr.h>
 
 #include "spi.h"
 #include "obc_spi_io.h"
@@ -12,12 +11,6 @@
 
 // SPI values
 static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = FRAM_spiFMT, .WDEL = 0};
-
-// Sleep Status
-static volatile bool isAsleep = false;
-
-static SemaphoreHandle_t sleepMutex;
-static StaticSemaphore_t sleepMutexBuffer;
 
 // FRAM OPCODES
 #define OP_WRITE_ENABLE 0x06U
@@ -33,6 +26,18 @@ static StaticSemaphore_t sleepMutexBuffer;
 #define OP_GET_ID 0x9FU
 
 #define FRAM_WAKE_BUSY_WAIT 99000U  // Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay
+
+typedef enum cmd {
+  FRAM_READ_STATUS_REG,   // Read Status Register
+  FRAM_READ,              // Normal read
+  FRAM_FAST_READ,         // Fast read, Note this is used for serial flash compatibility not to read data fast!
+  FRAM_READ_ID,           // Get Device ID
+  FRAM_WRITE_EN,          // Set Write EN
+  FRAM_WRITE_EN_RESET,    // Reset Write EN
+  FRAM_WRITE_STATUS_REG,  // Write to Status Register
+  FRAM_WRITE,             // Write memory data
+  FRAM_SLEEP              // Put FRAM to sleep
+} cmd_t;
 
 // Function Declarations
 static obc_error_code_t framTransmitOpCode(cmd_t cmd);
@@ -193,11 +198,10 @@ obc_error_code_t framSleep(void) {
 obc_error_code_t framWakeUp(void) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  for (volatile uint32_t i = 0; i < FRAM_WAKE_BUSY_WAIT; i++) {  // volatile to prevent from being optimized away
+  for (uint32_t i = 0; i < FRAM_WAKE_BUSY_WAIT; i++) {
     // Do Nothing
   }
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-  isAsleep = true;
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -215,20 +219,6 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
     id[i] = receiveByte;
   }
 
-  obc_error_code_t framReadID(uint8_t * id, size_t nBytes) {
-    obc_error_code_t errCode;
-    if (id == NULL) {
-      return OBC_ERR_CODE_INVALID_ARG;
-    }
-    RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-    DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, framTransmitOpCode(FRAM_READ_ID));
-
-    for (uint32_t i = 0; i < nBytes && i < FRAM_ID_LEN; i++) {
-      uint8_t receiveByte;
-      DEASSERT_RETURN_IF_ERROR_CODE(FRAM_spiPORT, FRAM_CS, spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
-      id[i] = receiveByte;
-    }
-
-    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    return OBC_ERR_CODE_SUCCESS;
-  }
+  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  return OBC_ERR_CODE_SUCCESS;
+}
