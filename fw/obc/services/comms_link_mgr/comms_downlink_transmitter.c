@@ -22,7 +22,7 @@ static StaticTask_t cc1120TransmitTaskBuffer;
 static StackType_t cc1120TransmitTaskStack[CC1120_TRANSMIT_STACK_SIZE];
 
 #define CC1120_TRANSMIT_QUEUE_LENGTH 3U
-#define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(packed_ax25_packet_t)
+#define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(packed_ax25_i_frame_t)
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
@@ -62,7 +62,7 @@ void initCC1120TransmitTask(void) {
  * @param ax25Pkt - Pointer to the AX.25 packet to send
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
-obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_packet_t *ax25Pkt) {
+obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_i_frame_t *ax25Pkt) {
   ASSERT(cc1120TransmitQueueHandle != NULL);
 
   if (ax25Pkt == NULL) {
@@ -87,7 +87,7 @@ static void vCC1120TransmitTask(void *pvParameters) {
 
   while (1) {
     // Wait for CC1120 transmit queue
-    packed_ax25_packet_t ax25_pkt;
+    packed_ax25_i_frame_t ax25_pkt;
     if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       // TODO: Handle this if necessary
       continue;

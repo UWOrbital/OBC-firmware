@@ -347,8 +347,8 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
  * @return obc_error_code_t
  */
 static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) {
-  packed_rs_packet_t fecPkt = {0};     // Holds a 255B RS packet
-  packed_ax25_packet_t ax25Pkt = {0};  // Holds an AX.25 packet
+  packed_rs_packet_t fecPkt = {0};      // Holds a 255B RS packet
+  packed_ax25_i_frame_t ax25Pkt = {0};  // Holds an AX.25 packet
 
   // Apply Reed Solomon FEC
   obc_gs_error_code_t obcGsErrCode;
@@ -358,7 +358,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   }
 
   // Perform AX.25 framing
-  obcGsErrCode = ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign);
+  obcGsErrCode = ax25SendIFrame(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign);
   if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }

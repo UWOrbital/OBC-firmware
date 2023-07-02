@@ -42,7 +42,7 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void *pvParameters);
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -104,7 +104,7 @@ static void vDecodeTask(void *pvParameters) {
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
-  packed_ax25_packet_t axData = {0};
+  packed_ax25_i_frame_t axData = {0};
   uint16_t axDataIndex = 0;
 
   bool startFlagReceived = false;
@@ -162,10 +162,10 @@ static void vDecodeTask(void *pvParameters) {
  *
  * @return obc_error_code_t - whether or not the data was completely decoded successfully
  */
-static obc_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_gs_error_code_t obcGsErrCode;
 
-  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &cubesatCallsign);
+  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE);
   if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_DECODE_FAILURE;
   }

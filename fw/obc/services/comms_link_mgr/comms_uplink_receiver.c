@@ -66,7 +66,6 @@ static void vRecvTask(void *pvParameters) {
   obc_error_code_t errCode;
   while (1) {
     comms_event_t queueMsg;
-    SemaphoreHandle_t cc1120Mutex = *((SemaphoreHandle_t *)pvParameters);
     if (xQueueReceive(recvDataQueueHandle, &queueMsg, RECV_DATA_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
@@ -96,6 +95,8 @@ static void vRecvTask(void *pvParameters) {
         LOG_IF_ERROR_CODE(startUplink());
 #endif
 #else
+        SemaphoreHandle_t cc1120Mutex = *((SemaphoreHandle_t *)pvParameters);
+
         if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
           LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
           break;

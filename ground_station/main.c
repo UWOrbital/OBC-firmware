@@ -27,7 +27,7 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x
 
 static correct_reed_solomon *rsGs;
 
-static gs_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData);
+static gs_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData);
 static uint32_t getCurrentTime(void);
 
 int main(int argc, char *argv[]) {
@@ -169,8 +169,8 @@ int main(int argc, char *argv[]) {
       exit(1);
     };
 
-    packed_ax25_packet_t ax25Pkt = {0};
-    obcGsErrCode = ax25Send(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign);
+    packed_ax25_i_frame_t ax25Pkt = {0};
+    obcGsErrCode = ax25SendIFrame(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign);
     if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
       printf("Failed to send AX.25 packet!");
       exit(1);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
   /* Receive Data */
 
   uint16_t axDataIndex = 0;
-  packed_ax25_packet_t axData = {0};
+  packed_ax25_i_frame_t axData = {0};
   bool startFlagReceived = false;
   while (1) {
     uint8_t byte = '\0';
@@ -244,9 +244,9 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static gs_error_code_t decodePacket(packed_ax25_packet_t *data, packed_rs_packet_t *rsData) {
+static gs_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData) {
   obc_gs_error_code_t obcGsErrCode;
-  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE, &groundStationCallsign);
+  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE);
   if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
     return GS_ERR_CODE_AX25_DECODE_FAILURE;
   }
