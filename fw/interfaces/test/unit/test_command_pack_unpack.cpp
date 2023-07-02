@@ -23,8 +23,8 @@ TEST(TestCommandPackUnpack, ValidCmdExecObcResetPackUnpack) {
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  ASSERT_EQ(packOffset, unpackOffset);
-  ASSERT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
 }
 
 // CMD_RTC_SYNC
@@ -45,9 +45,9 @@ TEST(TestCommandPackUnpack, ValidCmdRtcSyncPackUnpack) {
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  ASSERT_EQ(packOffset, unpackOffset);
-  ASSERT_EQ(cmdMsg.id, unpackedCmdMsg.id);
-  ASSERT_EQ(cmdMsg.rtcSync.unixTime, unpackedCmdMsg.rtcSync.unixTime);
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(cmdMsg.rtcSync.unixTime, unpackedCmdMsg.rtcSync.unixTime);
 }
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
@@ -68,9 +68,9 @@ TEST(TestCommandPackUnpack, ValidCmdDownlinkLogsNextPassPackUnpack) {
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  ASSERT_EQ(packOffset, unpackOffset);
-  ASSERT_EQ(cmdMsg.id, unpackedCmdMsg.id);
-  ASSERT_EQ(cmdMsg.downlinkLogsNextPass.logLevel, unpackedCmdMsg.downlinkLogsNextPass.logLevel);
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(cmdMsg.downlinkLogsNextPass.logLevel, unpackedCmdMsg.downlinkLogsNextPass.logLevel);
 }
 
 // CMD_MICRO_SD_FORMAT
@@ -90,8 +90,8 @@ TEST(TestCommandPackUnpack, ValidCmdMicroSdFormatPackUnpack) {
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  ASSERT_EQ(packOffset, unpackOffset);
-  ASSERT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
 }
 
 // CMD_PING
@@ -111,8 +111,8 @@ TEST(TestCommandPackUnpack, ValidCmdPingPackUnpack) {
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  ASSERT_EQ(packOffset, unpackOffset);
-  ASSERT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
 }
 
 // CMD_DOWNLINK_TELEM
@@ -132,6 +132,6 @@ TEST(TestCommandPackUnpack, ValidCmdDownlinkTelemPackUnpack) {
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  ASSERT_EQ(packOffset, unpackOffset);
-  ASSERT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
 }
