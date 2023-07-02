@@ -18,6 +18,7 @@
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
 
+/* Note these will need to be adjusted according to chapter 3.12 of the AX.25 Standard */
 ax25_addr_t cubesatCallsign = {.data = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
                                .length = AX25_DEST_ADDR_BYTES};  // mock cubesat address
 
@@ -107,7 +108,7 @@ static obc_error_code_t bitStuffing(uint8_t *rawData, uint16_t rawDataLen, uint8
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
 obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_i_frame_t *ax25Data,
-                                ax25_addr_t *destAddress) {
+                                const ax25_addr_t *destAddress) {
   if (telemData == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -145,7 +146,7 @@ obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed
                       AX25_INFO_BYTES] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_START_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES +
                       AX25_INFO_BYTES + 1] = (uint8_t)(fcs & 0xFF);
-  memset(ax25Data->data, 0, AX25_MAXIMUM_PKT_LEN);
+  memset(ax25Data->data, 0, sizeof(ax25Data->data));
   RETURN_IF_ERROR_CODE(bitStuffing(ax25PacketUnstuffed, AX25_MINIMUM_I_FRAME_LEN, ax25Data->data, &ax25Data->length));
   ax25Data->data[ax25Data->length - 1] = AX25_FLAG;
   ax25Data->data[0] = AX25_FLAG;
@@ -164,12 +165,16 @@ obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed
  * @return obc_error_code_t - whether or not the buffer was correctly formatted
  */
 obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit,
-                                ax25_addr_t *destAddress) {
+                                const ax25_addr_t *destAddress) {
   if (cmd > MAX_U_FRAME_CMD_VALUE) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   if (ax25Data == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  if (destAddress == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -406,7 +411,7 @@ static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   ax25_addr_t destAddress = {0};
   // the destination address for the packet we send will be the src address of the packet we just received
   memcpy(destAddress.data, unstuffedPacket->data + AX25_START_FLAG_BYTES + AX25_DEST_ADDR_BYTES, AX25_DEST_ADDR_BYTES);
-  if (controlByte == U_FRAME_CMD_CONNECT) {
+  if (controlByte == U_FRAME_CMD_CONN) {
     // Send an unnumbered acknowledgement
     packed_ax25_u_frame_t ax25Data = {0};
     ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);

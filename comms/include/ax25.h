@@ -22,11 +22,17 @@
 #define AX25_MINIMUM_I_FRAME_LEN                                                                              \
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
    AX25_INFO_BYTES)
+/*
+AX.25 bit stuffing will add a bit after every 5 consecutive 1s. The maximum number of added bits for a buffer of x bytes
+is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x)/5] / 8 = x * 6/5
+*/
+/* The maximum AX25 Frame length is also the maximum I Frame length since I frames are the largest type of frames */
 #define AX25_MAXIMUM_PKT_LEN AX25_MINIMUM_I_FRAME_LEN * 6 / 5
 #define AX25_SUPERVISORY_FRAME_LENGTH \
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
 #define AX25_MINIMUM_U_FRAME_CMD_LENGTH \
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
+/* same calculation as explained above for maximum bytes after bit stuffing */
 #define AX25_MAXIMUM_U_FRAME_CMD_LENGTH                 \
   (AX25_MINIMUM_U_FRAME_CMD_LENGTH +                    \
    (AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES) * 6 / \
@@ -62,13 +68,13 @@ typedef struct {
   uint8_t length;
 } ax25_addr_t;
 
-typedef enum { U_FRAME_CMD_CONNECT, U_FRAME_CMD_DISC, U_FRAME_CMD_ACK } u_frame_cmd_t;
+typedef enum { U_FRAME_CMD_CONN, U_FRAME_CMD_DISC, U_FRAME_CMD_ACK } u_frame_cmd_t;
 
 extern ax25_addr_t cubesatCallsign;
 extern ax25_addr_t groundStationCallsign;
 
 /**
- * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
+ * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in ax25Data->length
  *
  * @param telemData data to send that needs ax.25 headers added onto it
  * @param telemDataLen length of the telemData array

@@ -80,7 +80,7 @@ int main(void) {
   }
   printf("\n");
 
-  packed_ax25_i_frame_t ax25Pkt;  // Holds an AX.25 packet
+  packed_ax25_i_frame_t ax25Pkt = {0};  // Holds an AX.25 packet
   ax25SendIFrame(&rsPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign);
 
   packed_rs_packet_t rsData;
