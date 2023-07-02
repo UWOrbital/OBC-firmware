@@ -46,7 +46,7 @@ void taskA(void* pvParameters) {
 
 void taskB(void* pvParameters) {
   while (1) {
-    for (int i = 0; i < 100000; i++)
+    for (volatile int i = 0; i < 100000; i++)
       ;
     vTaskDelay(1000);
   }
@@ -54,7 +54,7 @@ void taskB(void* pvParameters) {
 
 void taskC(void* pvParameters) {
   while (1) {
-    for (int i = 0; i < 100000; i++)
+    for (volatile int i = 0; i < 100000; i++)
       ;
     vTaskDelay(2000);
   }
@@ -62,7 +62,7 @@ void taskC(void* pvParameters) {
 
 void taskD(void* pvParameters) {
   while (1) {
-    for (int i = 0; i < 100000; i++)
+    for (volatile int i = 0; i < 100000; i++)
       ;
     vTaskDelay(500);
   }
