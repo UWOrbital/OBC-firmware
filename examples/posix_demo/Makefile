@@ -27,7 +27,7 @@ SRC_DIRS += examples/posix_demo/source
 SRC_DIRS += examples/posix_demo
 
 # Preprocessor flags
-CPPFLAGS := $(INCLUDE_DIRS) 
+CPPFLAGS := $(INCLUDE_DIRS)
 CPPFLAGS += -DBUILD_DIR=\"$(BUILD_DIR)\"
 CPPFLAGS += -D_WINDOWS_
 CPPFLAGS += -DTRACE_ON_ENTER=0

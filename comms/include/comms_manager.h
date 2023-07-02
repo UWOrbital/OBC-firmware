@@ -2,45 +2,42 @@
 #define COMMS_INCLUDE_COMMS_MANAGER_H_
 
 #include "obc_errors.h"
+#include "telemetry_manager.h"
 
+#include <FreeRTOS.h>
+#include <os_semphr.h>
 #include <sys_common.h>
 
+#define MAX_DOWNLINK_TELEM_BUFFER_SIZE 1U
+
+#define CC1120_MUTEX_TIMEOUT pdMS_TO_TICKS(300000)
 
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.
  *
  * Enum containing all possible event IDs passed to the comms event queue.
-*/
-typedef enum {
-    COMMS_MANAGER_NULL_EVENT_ID
-} comms_event_id_t;
+ */
+typedef enum { BEGIN_UPLINK, DOWNLINK_TELEMETRY_FILE, DOWNLINK_DATA_BUFFER } comms_event_id_t;
 
-/**
- * @union	comms_event_data_t
- * @brief	comms event data union
-*/
-typedef union {
-    int i;
-    float f;
-} comms_event_data_t;
+typedef struct {
+  telemetry_data_t telemData[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
+  uint8_t bufferSize;
+} telemetry_data_buffer_t;
 
 /**
  * @struct	comms_event_t
  * @brief	comms event struct
  *
  * Holds the message data for each event sent/received by the comms manager queue.
-*/
+ */
 typedef struct {
-    comms_event_id_t eventID;
-    comms_event_data_t data;
+  comms_event_id_t eventID;
+  union {
+    uint32_t telemetryBatchId;
+    telemetry_data_buffer_t telemetryDataBuffer;
+  };
 } comms_event_t;
-
-/* Comms Manager event queue config */
-#define COMMS_MANAGER_QUEUE_LENGTH 10U
-#define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
-#define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-#define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
  * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)

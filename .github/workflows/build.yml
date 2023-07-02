@@ -8,18 +8,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Install arm-none-eabi-gcc
-      uses: carlosperate/arm-none-eabi-gcc-action@v1
-      with:
-        release: '11.2-2022.02'
-        path-env-var: ARM_NONE_EABI_GCC_PATH
-      
-    - name: Make envfile
+
+    - name: Setup
       run: |
-        touch .env
-        echo CC_FOLDER_ROOT="${ARM_NONE_EABI_GCC_PATH::-4}" >> .env
-        cat .env
-        
-    - name: Build (Release)
-      run: make DEBUG=0
+        sudo apt-get -y install build-essential cmake
+
+    - name: Create binary directory
+      run: |
+        mkdir build
+        cd build
+
+    - name: Build (Release-Launchpad)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD
+        make clean
+        make
+
+    - name: Build (Release-OBC Rev1)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1
+        make clean
+        make
+
+    - name: Build (Release-OBC Rev2)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2
+        make clean
+        make

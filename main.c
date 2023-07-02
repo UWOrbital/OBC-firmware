@@ -8,31 +8,35 @@
 #include <os_task.h>
 
 #include <sys_common.h>
+#include <sys_core.h>
 #include <gio.h>
 #include <sci.h>
 #include <i2c.h>
 #include <spi.h>
 #include <can.h>
+#include <het.h>
 
 int main(void) {
+  // Run hardware initialization code
+  gioInit();
+  sciInit();
+  i2cInit();
+  spiInit();
+  canInit();
+  hetInit();
 
-    // Run hardware initialization code (TODO: refactor all this into one function call)
-    gioInit();
-    sciInit();
-    i2cInit();
-    spiInit();
-    canInit();
+  _enable_interrupt_();
 
-    // Initialize logger
-    initLogger();
+  // Initialize logger
+  initLogger();
 
-    // Initialize bus mutexes
-    initSciMutex();
-    initI2CMutex();
-    initSpiMutex();
+  // Initialize bus mutexes
+  initSciMutex();
+  initI2CMutex();
+  initSpiMutex();
 
-    // The supervisor is the only task running initially.
-    initSupervisor();
+  // The supervisor is the only task running initially.
+  initSupervisor();
 
-    vTaskStartScheduler();
+  vTaskStartScheduler();
 }
