@@ -22,7 +22,7 @@ int main(void) {
     gioToggleBit(gioPORTB, 1);
 
     // Simple delay.
-    for (int i = 0; i < 1000000; i++) {
+    for (volatile int i = 0; i < 1000000; i++) {
       // Do nothing.
     }
   }
