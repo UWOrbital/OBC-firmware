@@ -74,7 +74,7 @@ extern ax25_addr_t cubesatCallsign;
 extern ax25_addr_t groundStationCallsign;
 
 /**
- * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in ax25Data->length
+ * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  *
  * @param telemData data to send that needs ax.25 headers added onto it
  * @param telemDataLen length of the telemData array
@@ -84,7 +84,7 @@ extern ax25_addr_t groundStationCallsign;
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
 obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_i_frame_t *ax25Data,
-                                ax25_addr_t *destAddress);
+                                const ax25_addr_t *destAddress);
 
 /**
  * @brief format a buffer into a U frame command such as connect, disconnect, or acknowledge
@@ -97,7 +97,7 @@ obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed
  * @return obc_error_code_t - whether or not the buffer was correctly formatted
  */
 obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit,
-                                ax25_addr_t *destAddress);
+                                const ax25_addr_t *destAddress);
 
 /**
  * @brief strips away the ax.25 headers from a received packet
