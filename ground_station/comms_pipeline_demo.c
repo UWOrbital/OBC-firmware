@@ -65,13 +65,16 @@ int main(void) {
   uint8_t iv[AES_IV_SIZE];
   memset(iv, 1, AES_IV_SIZE);
 
+  uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
+
+  memcpy(encryptedCmd + AES_IV_SIZE, packedCmd, numPacked);
+
   AES_init_ctx(&ctx, TEMP_STATIC_KEY);
   AES_ctx_set_iv(&ctx, iv);
-  AES_CTR_xcrypt_buffer(&ctx, packedCmd, RS_DECODED_SIZE);
+  AES_CTR_xcrypt_buffer(&ctx, encryptedCmd + AES_IV_SIZE, AES_DECRYPTED_SIZE);
 
-  uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
   memcpy(encryptedCmd, iv, AES_IV_SIZE);
-  memcpy(encryptedCmd + AES_IV_SIZE, packedCmd, numPacked);
+  // memcpy(encryptedCmd + AES_IV_SIZE, packedCmd, numPacked);
   printf("Encrypted command: ");
   for (uint8_t i = 0; i < RS_DECODED_SIZE; ++i) {
     printf("%x ", encryptedCmd[i]);

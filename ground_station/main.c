@@ -147,19 +147,17 @@ int main(int argc, char *argv[]) {
   uint8_t packedSingleCmd[MAX_CMD_MSG_SIZE] = {0};
   RETURN_IF_ERROR_CODE(packCmdMsg(packedSingleCmd, &cmdPacketOffset, &cmdMsg, &packedSingleCmdSize));
 
-  packed_telem_packet_t cmdPacket = {0};
-  memcpy(&cmdPacket.data[cmdPacketOffset], packedSingleCmd, packedSingleCmdSize);
-  cmdPacketOffset += packedSingleCmdSize;
+  uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
+
+  memcpy(encryptedCmd + AES_IV_SIZE, packedSingleCmd, packedSingleCmdSize);
+
+  AES_CTR_xcrypt_buffer(&ctx, encryptedCmd + AES_IV_SIZE, AES_DECRYPTED_SIZE);
+
+  memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
   if (cmdPacketOffset != 0) {
-    AES_CTR_xcrypt_buffer(&ctx, cmdPacket.data, RS_DECODED_SIZE - AES_IV_SIZE);
-
-    uint8_t data[RS_DECODED_SIZE] = {0};
-    memcpy(data, iv, AES_IV_SIZE);
-    memcpy(&data[AES_IV_SIZE], cmdPacket.data, RS_DECODED_SIZE - AES_IV_SIZE);
-
     packed_rs_packet_t fecPkt = {0};
-    if ((uint8_t)correct_reed_solomon_encode(rsGs, data, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE) {
+    if ((uint8_t)correct_reed_solomon_encode(rsGs, encryptedCmd, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE) {
       exit(1);
     };
 
