@@ -1,7 +1,6 @@
 #include "ax25.h"
 #include "obc_logging.h"
 
-#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
@@ -254,12 +253,6 @@ obc_error_code_t ax25Recv(packed_ax25_i_frame_t *ax25Data, uint8_t *uplinkData, 
   // perform bit unstuffing
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data));
-
-  printf("Unstuffed data: ");
-  for (uint16_t i = 0; i < AX25_MINIMUM_I_FRAME_LEN; ++i) {
-    printf("%x ", unstuffedPacket.data[i]);
-  }
-  printf("\n");
 
   uint8_t recvAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   if (memcmp(unstuffedPacket.data + AX25_START_FLAG_BYTES, recvAddress, AX25_DEST_ADDR_BYTES) != 0) {

@@ -23,11 +23,10 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_pack
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE));
-  printf("Here?\n");
+
   uint8_t rawAesData[RS_DECODED_SIZE] = {0};
   uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, rawAesData);
 
-  printf("hi\n");
   if (decodedLength == -1) return OBC_ERR_CODE_CORRUPTED_MSG;
 
   uint8_t decryptedData[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
@@ -38,11 +37,10 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_pack
   memcpy(decryptedData, aesData->ciphertext, RS_DECODED_SIZE - AES_IV_SIZE);
   AES_ctx_set_iv(&ctx, aesData->iv);
   AES_CTR_xcrypt_buffer(&ctx, decryptedData, RS_DECODED_SIZE - AES_IV_SIZE);
-  printf("hello there\n");
+
   for (uint8_t i = 0; i < RS_DECODED_SIZE - AES_IV_SIZE; ++i) {
     printf("%x ", decryptedData[i]);
   }
-  printf("yo\n");
   return OBC_ERR_CODE_SUCCESS;
 }
 
