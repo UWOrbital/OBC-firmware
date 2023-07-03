@@ -18,7 +18,7 @@ INCS += -I"libs/libcorrect/include"
 INCS += -I"comms/include"
 
 # Ground station specific source files
-SRCS := ground_station/main.c
+SRCS := ground_station/comms_pipeline_demo.c
 SRCS += ground_station/common/gs_heap.c
 SRCS += ground_station/common/gs_logging.c
 SRCS += ground_station/serial_utils/win_uart.c
