@@ -371,7 +371,10 @@ obc_error_code_t cc1120Receive(void) {
   // See chapters 8.1, 8.4, 8.5
   // If we do not stop receiving data, continue looping until COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple
   // of TXRX_INTERRUPT_THRESHOLD bytes are received
-  for (uint8_t i = 0; i < (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD; ++i) {
+  uint8_t rxFifoReadCycles;  // number of times we receive TXRX_INTERRUPT_THRESHOLD bytes and read them out
+  for (rxFifoReadCycles = 0;
+       rxFifoReadCycles < (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD;
+       ++rxFifoReadCycles) {
     // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than RX_SEMAPHORE_TIMEOUT
     // before exiting this loop since that means we are no longer transmitting
     if (xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS) {
@@ -396,6 +399,11 @@ obc_error_code_t cc1120Receive(void) {
   // send the bytes read (if any) to decode data queue
   for (uint8_t i = 0; i < numBytesInRxFifo; ++i) {
     sendToDecodeDataQueue(&dataBuffer[i]);
+  }
+
+  if (rxFifoReadCycles = (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD) {
+    // if recv was terminated by the cubesat due to us receiving the max number of bytes return an error
+    return OBC_ERR_CODE_CC1120_RECEIVE_TERMINATED;
   }
 
   return OBC_ERR_CODE_SUCCESS;
