@@ -14,6 +14,9 @@
 
 #include <stdbool.h>
 
+#define COMMS_MAX_UPLINK_BYTES \
+  1000U  // Maximum amount of bytes we will currently be uplinking at a time (should be updated in the future)
+
 #define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(100)
 #define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
@@ -366,7 +369,9 @@ obc_error_code_t cc1120Receive(void) {
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
   // See chapters 8.1, 8.4, 8.5
-  while (true) {
+  // If we do not stop receiving data, continue looping until COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple
+  // of TXRX_INTERRUPT_THRESHOLD bytes are received
+  for (uint8_t i = 0; i < (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD; ++i) {
     // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than RX_SEMAPHORE_TIMEOUT
     // before exiting this loop since that means we are no longer transmitting
     if (xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS) {
