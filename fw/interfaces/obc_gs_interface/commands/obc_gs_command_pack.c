@@ -8,6 +8,26 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/* Pack functions for each command */
+
+// CMD_EXEC_OBC_RESET
+static void packExecObcResetCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_RTC_SYNC
+static void packRtcSyncCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_DOWNLINK_LOGS_NEXT_PASS
+static void packDownlinkLogsNextPassCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_MICRO_SD_FORMAT
+static void packMicroSdFormat(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg);
+
+// CMD_PING
+static void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_DOWNLINK_TELEM
+static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
 typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);
 
 static const pack_func_t packFns[] = {
@@ -49,31 +69,31 @@ obc_gs_error_code_t packCmdMsg(uint8_t* buffer, uint32_t* offset, const cmd_msg_
 }
 
 // CMD_EXEC_OBC_RESET
-void packExecObcResetCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+static void packExecObcResetCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   // No data to pack
 }
 
 // CMD_RTC_SYNC
-void packRtcSyncCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+static void packRtcSyncCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   packUint32(cmdMsg->rtcSync.unixTime, buffer, offset);
 }
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
-void packDownlinkLogsNextPassCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+static void packDownlinkLogsNextPassCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   packUint8((uint8_t)cmdMsg->downlinkLogsNextPass.logLevel, buffer, offset);
 }
 
 // CMD_MICRO_SD_FORMAT
-void packMicroSdFormat(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+static void packMicroSdFormat(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   // No data to pack
 }
 
 // CMD_PING
-void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+static void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   // No data to pack
 }
 
 // CMD_DOWNLINK_TELEM
-void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
   // No data to pack
 }

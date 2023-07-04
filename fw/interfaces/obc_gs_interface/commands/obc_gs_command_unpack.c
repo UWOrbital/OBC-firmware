@@ -8,6 +8,26 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/* Unpack functions for each command */
+
+// CMD_EXEC_OBC_RESET
+static void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_RTC_SYNC
+static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_DOWNLINK_LOGS_NEXT_PASS
+static void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_MICRO_SD_FORMAT
+static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg);
+
+// CMD_PING
+static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_DOWNLINK_TELEM
+static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
 typedef void (*unpack_func_t)(const uint8_t*, uint32_t*, cmd_msg_t*);
 
 static const unpack_func_t unpackFns[] = {
@@ -56,28 +76,28 @@ obc_gs_error_code_t unpackCmdMsg(const uint8_t* buffer, uint32_t* offset, cmd_ms
 }
 
 // CMD_EXEC_OBC_RESET
-void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+static void unpackExecObcResetCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
 // CMD_RTC_SYNC
-void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   cmdMsg->rtcSync.unixTime = unpackUint32(buffer, offset);
 }
 
 // CMD_DOWNLINK_LOGS_NEXT_PASS
-void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+static void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   cmdMsg->downlinkLogsNextPass.logLevel = unpackUint8(buffer, offset);
 }
 
-void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
-void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
-void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
+static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
   // No data to unpack
 }
