@@ -401,7 +401,7 @@ obc_error_code_t cc1120Receive(void) {
     sendToDecodeDataQueue(&dataBuffer[i]);
   }
 
-  if (rxFifoReadCycles = (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD) {
+  if (rxFifoReadCycles == (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD) {
     // if recv was terminated by the cubesat due to us receiving the max number of bytes return an error
     return OBC_ERR_CODE_CC1120_RECEIVE_TERMINATED;
   }
