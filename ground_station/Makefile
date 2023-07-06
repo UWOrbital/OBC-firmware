@@ -21,7 +21,7 @@ INCS += -I"comms/include"
 SRCS := ground_station/main.c
 SRCS += ground_station/common/gs_heap.c
 SRCS += ground_station/common/gs_logging.c
-# SRCS += ground_station/serial_utils/win_uart.c
+SRCS += ground_station/serial_utils/win_uart.c
 
 # Source files shared with OBC firmware
 SRCS += common/source/obc_pack_utils.c

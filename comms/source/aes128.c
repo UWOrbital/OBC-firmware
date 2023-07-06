@@ -33,7 +33,7 @@ obc_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t out
   memcpy(output, aesData->ciphertext, aesData->ciphertextLen);
   AES_ctx_set_iv(&ctx, aesData->iv);
   AES_CTR_xcrypt_buffer(&ctx, output, aesData->ciphertextLen);
-  // memcpy(output, output + 5, aesData->ciphertextLen - 5);
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
