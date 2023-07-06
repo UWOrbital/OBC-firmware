@@ -22,20 +22,25 @@ static correct_reed_solomon *rsGs = NULL;
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_error_code_t errCode;
 
-  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData));
-  uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, aesData->rawData);
+  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE));
+
+  uint8_t rawAesData[RS_DECODED_SIZE] = {0};
+  uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, rawAesData);
 
   if (decodedLength == -1) return OBC_ERR_CODE_CORRUPTED_MSG;
 
   uint8_t decryptedData[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
-  memcpy(decryptedData, aesData->aesStruct.ciphertext, RS_DECODED_SIZE - AES_IV_SIZE);
-  AES_ctx_set_iv(&ctx, aesData->aesStruct.iv);
+  memcpy(aesData->iv, rawAesData, AES_IV_SIZE);
+  uint8_t cipherData[AES_DECRYPTED_SIZE] = {0};
+  aesData->ciphertext = cipherData;
+  memcpy(aesData->ciphertext, rawAesData + AES_IV_SIZE, AES_DECRYPTED_SIZE);
+  memcpy(decryptedData, aesData->ciphertext, RS_DECODED_SIZE - AES_IV_SIZE);
+  AES_ctx_set_iv(&ctx, aesData->iv);
   AES_CTR_xcrypt_buffer(&ctx, decryptedData, RS_DECODED_SIZE - AES_IV_SIZE);
 
   for (uint8_t i = 0; i < RS_DECODED_SIZE - AES_IV_SIZE; ++i) {
     printf("%x ", decryptedData[i]);
   }
-  printf("\n");
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -46,7 +51,7 @@ int main(void) {
   cmdMsg.isTimeTagged = true;
 
   uint32_t offset = 0;
-  uint8_t packedCmd[MAX_CMD_SIZE] = {0};
+  uint8_t packedCmd[MAX_CMD_MSG_SIZE] = {0};
   uint8_t numPacked = 0;
   packCmdMsg(packedCmd, &offset, &cmdMsg, &numPacked);
   printf("Packed command: ");
@@ -58,20 +63,23 @@ int main(void) {
   uint8_t iv[AES_IV_SIZE];
   memset(iv, 1, AES_IV_SIZE);
 
+  uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
+
+  memcpy(encryptedCmd + AES_IV_SIZE, packedCmd, numPacked);
+
   AES_init_ctx(&ctx, TEMP_STATIC_KEY);
   AES_ctx_set_iv(&ctx, iv);
-  AES_CTR_xcrypt_buffer(&ctx, packedCmd, RS_DECODED_SIZE);
+  AES_CTR_xcrypt_buffer(&ctx, encryptedCmd + AES_IV_SIZE, AES_DECRYPTED_SIZE);
 
-  uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
   memcpy(encryptedCmd, iv, AES_IV_SIZE);
-  memcpy(encryptedCmd + AES_IV_SIZE, packedCmd, numPacked);
+  // memcpy(encryptedCmd + AES_IV_SIZE, packedCmd, numPacked);
   printf("Encrypted command: ");
   for (uint8_t i = 0; i < RS_DECODED_SIZE; ++i) {
     printf("%x ", encryptedCmd[i]);
   }
   printf("\n");
 
-  packed_rs_packet_t rsPkt;
+  packed_rs_packet_t rsPkt = {0};
   rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
   correct_reed_solomon_encode(rsGs, encryptedCmd, RS_DECODED_SIZE, rsPkt.data);
   printf("RS encoded command: ");
@@ -81,10 +89,15 @@ int main(void) {
   printf("\n");
 
   packed_ax25_i_frame_t ax25Pkt = {0};  // Holds an AX.25 packet
-  ax25SendIFrame(&rsPkt, &ax25Pkt, &cubesatCallsign, &groundStationCallsign);
+  ax25SendIFrame(rsPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign);
 
-  packed_rs_packet_t rsData;
-  aes_data_t aesData;
+  printf("AX25 Sent Packet: ");
+  for (uint16_t i = 0; i < ax25Pkt.length; ++i) {
+    printf("%x ", ax25Pkt.data[i]);
+  }
+  printf("\n");
+  packed_rs_packet_t rsData = {0};
+  aes_data_t aesData = {0};
   decodePacket(&ax25Pkt, &rsData, &aesData);
 
   return 0;

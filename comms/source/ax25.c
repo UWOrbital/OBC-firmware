@@ -17,8 +17,7 @@ static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
 
 /* Note these will need to be adjusted according to chapter 3.12 of the AX.25 Standard */
-ax25_addr_t cubesatCallsign = {.data = {0, 0, 0, 0, 0, 0, 0}, .length = AX25_DEST_ADDR_BYTES};  // mock cubesat address
-
+ax25_addr_t cubesatCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};        // mock cubesat address
 ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};  // Mock Ground station address
 
 /**
