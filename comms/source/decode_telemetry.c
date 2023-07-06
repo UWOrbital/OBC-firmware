@@ -164,6 +164,10 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_pack
   RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE));
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
   RETURN_IF_ERROR_CODE(rsDecode(rsData, decodedData, RS_DECODED_SIZE));
+
+  uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
+  aesData->ciphertext = ciphertext;
+
   memcpy(aesData->iv, decodedData, AES_IV_SIZE);
   memcpy(aesData->ciphertext, decodedData + AES_IV_SIZE, RS_DECODED_SIZE - AES_IV_SIZE);
   aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
