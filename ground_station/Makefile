@@ -8,7 +8,7 @@ INCS :=
 
 # Ground station specific headers
 INCS += -I"ground_station/cmd_utils"
-# INCS += -I"ground_station/serial_utils"
+INCS += -I"ground_station/serial_utils"
 
 # Headers shared with OBC firmware
 INCS += -I"cdh/include"
