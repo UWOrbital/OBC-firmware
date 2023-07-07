@@ -59,6 +59,9 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 
 #define MAX_U_FRAME_CMD_VALUE 2
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct {
   uint8_t data[AX25_MINIMUM_I_FRAME_LEN];
   uint16_t length;
@@ -131,5 +134,9 @@ obc_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket);
  */
 obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
                              uint16_t *unstuffedPacketLen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* COMMS_INCLUDE_AX25_H_ */

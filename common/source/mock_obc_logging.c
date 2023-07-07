@@ -1,6 +1,5 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
-#include "obc_sci_io.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -54,7 +53,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
   if ((uint32_t)ret >= MAX_LOG_SIZE) return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
   if (outputLocation == LOG_TO_UART) {
-    obc_error_code_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf));
+    obc_error_code_t retSci = printf("%s", (unsigned char *)buf);
     return retSci;
   } else if (outputLocation == LOG_TO_SDCARD) {
     // implement when SD card driver is written

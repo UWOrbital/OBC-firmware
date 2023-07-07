@@ -37,7 +37,11 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
 #define LOG_ERROR(...) logLog(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 #define LOG_FATAL(...) logLog(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
 
+#ifdef __cplusplus
+#define LOG_ERROR_CODE(errCode) printf("Error code: %lu", (uint32_t)errCode);
+#else
 #define LOG_ERROR_CODE(errCode) LOG_ERROR("Error code: %lu", (uint32_t)errCode)
+#endif
 
 #define RETURN_IF_ERROR_CODE(_ret)         \
   do {                                     \
