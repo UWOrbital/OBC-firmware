@@ -160,16 +160,25 @@ static void vDecodeTask(void *pvParameters) {
  */
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_error_code_t errCode;
-
-  RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE));
-  uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  RETURN_IF_ERROR_CODE(rsDecode(rsData, decodedData, RS_DECODED_SIZE));
+  // perform bit unstuffing
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  RETURN_IF_ERROR_CODE(ax25Unstuff(data->data, data->length, unstuffedPacket.data, &unstuffedPacket.length));
+  if (unstuffedPacket.length == AX25_MINIMUM_I_FRAME_LEN) {
+    // copy the unstuffed data into rsData
+    memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
+    // clear the info field of the unstuffed packet
+    memset(unstuffedPacket.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
+    // decode the info field and store it in the unstuffed packet
+    RETURN_IF_ERROR_CODE(rsDecode(rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE));
+  }
+  // check for a valid ax25 frame and perform the command response if necessary
+  RETURN_IF_ERROR_CODE(ax25Recv(&unstuffedPacket));
 
   uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
   aesData->ciphertext = ciphertext;
 
-  memcpy(aesData->iv, decodedData, AES_IV_SIZE);
-  memcpy(aesData->ciphertext, decodedData + AES_IV_SIZE, RS_DECODED_SIZE - AES_IV_SIZE);
+  memcpy(aesData->iv, rsData->data, AES_IV_SIZE);
+  memcpy(aesData->ciphertext, rsData->data + AES_IV_SIZE, RS_DECODED_SIZE - AES_IV_SIZE);
   aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
   uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
   RETURN_IF_ERROR_CODE(aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE));
