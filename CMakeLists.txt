@@ -1,84 +1,25 @@
 cmake_minimum_required(VERSION 3.15)
 
-if (CMAKE_BUILD_TYPE MATCHES Test)
-    include(cmake/fetch_googletest.cmake)
-    enable_testing()
+if(${CMAKE_BUILD_TYPE} MATCHES GS)
+    project(Orbital-gs LANGUAGES C CXX)
+    add_subdirectory(gs)
 endif()
 
-set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
+if(${CMAKE_BUILD_TYPE} MATCHES OBC)
+    set(CMAKE_TOOLCHAIN_FILE "obc/cmake/toolchain_arm_none_eabi.cmake")
 
-if(${CMAKE_BUILD_TYPE} MATCHES Firmware AND NOT EXISTS ${TOOLCHAIN_DIR})
-    include(cmake/download_arm_toolchain.cmake)
+    project(Orbital-fw LANGUAGES C ASM)
+
+    add_subdirectory(obc)
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Firmware)
-    # Set default values for firmware build options
-    include(cmake/fw_build_options.cmake)
-
-    if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/fw/obc/hal/launchpad/source/sys_link.ld")
-    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/fw/obc/hal/obc_rev1/source/sys_link.ld")
-    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/fw/obc/hal/obc_rev2/source/sys_link.ld")
-    else()
-        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
-    endif()
-
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
-
-    project(OBC-firmware LANGUAGES C ASM)
-    add_executable(OBC-firmware.out main.c)
-
-    # Higher optimization levels on some hal files will break firmware for some reason
-    # Compile them with no optimizations
-    add_library(NO_OPTIMIZE_FILES OBJECT)
-
-elseif(CMAKE_BUILD_TYPE MATCHES Test)
-    project(OBC-firmware-tests LANGUAGES CXX C)
-else()
-    message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
+if(${CMAKE_BUILD_TYPE} MATCHES Test)
+    project(Orbital-test LANGUAGES C CXX)
+    add_subdirectory(test)
 endif()
 
-add_subdirectory(fw/interfaces)
+# Build tiny-aes and lib-correct libs
 add_subdirectory(libs)
 
-if (CMAKE_BUILD_TYPE MATCHES Test)
-    add_subdirectory(fw/obc/test)
-    add_subdirectory(fw/interfaces/test)
-elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
-    if (DEBUG MATCHES 1)
-        target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
-        # Higher optimization levels on some hal files will break firmware for some reason
-        # Compile them with no optimizations
-        target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
-    else()
-        target_compile_options(OBC-firmware.out PRIVATE -O2)
-        # Higher optimization levels on some hal files will break firmware for some reason
-        # Compile them with no optimizations
-        target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0)
-    endif()
-
-    target_compile_definitions(OBC-firmware.out PRIVATE
-        ${BOARD_TYPE}
-        LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
-        LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
-        DEBUG=${DEBUG}
-        CMD_POLICY=${CMD_POLICY}
-        COMMS_PHY=${COMMS_PHY}
-        OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
-        CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
-    )
-
-    include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
-
-    add_subdirectory(fw/obc)
-
-    target_link_libraries(OBC-firmware.out PRIVATE
-        tiny-aes
-        lib-correct
-        obc-gs-interface
-        $<TARGET_OBJECTS:NO_OPTIMIZE_FILES>
-    )
-
-endif()
+# Build interface libs
+add_subdirectory(interfaces)
