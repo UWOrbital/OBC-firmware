@@ -10,17 +10,13 @@
 #define POLL_FINAL_BIT_OFFSET 4
 #define POLL_FINAL_BIT_MASK (0x01 << POLL_FINAL_BIT_OFFSET)
 
-#ifndef SRC_CALLSIGN
-#define SRC_CALLSIGN "ABCDEFG"
-#endif
+#define SRC_CALLSIGN "\0\0\0\0\0\0\0"
 
 static uint8_t pktSentNum = 1;
 static uint8_t pktReceiveNum = 1;
 
 /* Note these will need to be adjusted according to chapter 3.12 of the AX.25 Standard */
-ax25_addr_t cubesatCallsign = {.data = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
-                               .length = AX25_DEST_ADDR_BYTES};  // mock cubesat address
-
+ax25_addr_t cubesatCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};        // mock cubesat address
 ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};  // Mock Ground station address
 
 /**

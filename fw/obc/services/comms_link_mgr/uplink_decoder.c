@@ -176,6 +176,9 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_pack
     return OBC_ERR_CODE_FEC_DECODE_FAILURE;
   }
 
+  uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
+  aesData->ciphertext = ciphertext;
+
   memcpy(aesData->iv, decodedData, AES_IV_SIZE);
   memcpy(aesData->ciphertext, decodedData + AES_IV_SIZE, RS_DECODED_SIZE - AES_IV_SIZE);
 
