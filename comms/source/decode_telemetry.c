@@ -41,7 +41,7 @@ static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
 static void vDecodeTask(void *pvParameters);
-static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData);
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -158,11 +158,11 @@ static void vDecodeTask(void *pvParameters) {
  *
  * @return obc_error_code_t - whether or not the data was completely decoded successfully
  */
-static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
   obc_error_code_t errCode;
   // perform bit unstuffing
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
-  RETURN_IF_ERROR_CODE(ax25Unstuff(data->data, data->length, unstuffedPacket.data, &unstuffedPacket.length));
+  RETURN_IF_ERROR_CODE(ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, &unstuffedPacket.length));
   if (unstuffedPacket.length == AX25_MINIMUM_I_FRAME_LEN) {
     // copy the unstuffed data into rsData
     memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
