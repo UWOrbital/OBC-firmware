@@ -3,6 +3,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
 
+if(NOT EXISTS ${TOOLCHAIN_DIR})
+    include(obc/cmake/download_arm_toolchain.cmake)
+endif()
+
 # Target definition
 set(CMAKE_SYSTEM_NAME  Generic)
 set(CMAKE_SYSTEM_PROCESSOR ARM)
