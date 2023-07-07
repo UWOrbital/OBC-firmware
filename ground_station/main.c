@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData) {
   obc_error_code_t errCode;
   // perform bit unstuffing
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
