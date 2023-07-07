@@ -255,7 +255,7 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   memcpy(decodedData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
 
   printf("Received (and decoded) data: ");
-  for (uint8_t i = 0; i < decodedLength; ++i) {
+  for (uint8_t i = 0; i < unstuffedPacket.length; ++i) {
     printf("%x ", decodedData[i]);
   }
   printf("\n");
