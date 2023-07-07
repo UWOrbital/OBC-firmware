@@ -19,7 +19,7 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x
 static struct AES_ctx ctx;
 static correct_reed_solomon *rsGs = NULL;
 
-static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
+static obc_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(ax25Recv(data, rsData->data, RS_ENCODED_SIZE));
