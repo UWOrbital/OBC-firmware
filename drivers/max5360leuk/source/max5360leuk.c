@@ -31,6 +31,7 @@ obc_error_code_t max5460WriteVoltage(float analogVoltsOutput) {
   uint8_t dacCode = ((uint8_t)round(analogVoltsOutput * DAC_STEP_VALUE / DAC_VREF_VALUE)) << 2;
 
   RETURN_IF_ERROR_CODE(i2cSendTo(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacCode));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -42,4 +43,5 @@ obc_error_code_t max5460PowerOff(void) {
   uint8_t dacAddress = DAC_ADDRESS | DAC_SHUT_DOWN_BIT;
   uint8_t dacCode = 0;  // output 0 volts
   RETURN_IF_ERROR_CODE(i2cSendTo(dacAddress, DAC_CODE_TRANSFER_BYTES, &dacCode));
+  return OBC_ERR_CODE_SUCCESS;
 }
