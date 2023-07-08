@@ -45,7 +45,7 @@ obc_error_code_t max5360PowerOff(void) {
   uint8_t dacRecvBuf;
   // Reading from the DAC will turn it off
   // See datasheet page 10
-  RETURN_IF_ERROR_CODE(i2cReceiveFrom(dacAddress, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf));
+  RETURN_IF_ERROR_CODE(i2cReceiveFrom(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf));
   // DAC should output all ones
   if (dacRecvBuf != UINT8_MAX) {
     return OBC_ERR_CODE_MAX5360_SHUTDOWN_FAILURE;
