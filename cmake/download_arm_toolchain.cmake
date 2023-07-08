@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
+set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
 set(TOOLCHAIN_TMP_DIR ${CMAKE_BINARY_DIR}/toolchain_tmp)
 set(TOOLCHAIN_ZIP_FILE ${CMAKE_BINARY_DIR}/toolchain.tar.gz)
 
@@ -33,7 +34,6 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${TOOLCHAIN_ZIP_FILE}"
 
 file(GLOB TOOLCHAIN_TMP_DIR_CONTENTS "${TOOLCHAIN_TMP_DIR}/*")
 list(GET TOOLCHAIN_TMP_DIR_CONTENTS 0 INNER_DIR_PATH)
-
 file(RENAME ${INNER_DIR_PATH} ${TOOLCHAIN_DIR})
 
 # Remove the temporary directory

@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
-
-if(NOT EXISTS ${TOOLCHAIN_DIR})
-    include(cmake/download_arm_toolchain.cmake)
-endif()
-
 # Set default values for firmware build options
-include(cmake/obc_build_options.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/launchpad/source/sys_link.ld")
@@ -55,7 +49,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
 )
 
 target_include_directories(OBC-firmware.out PUBLIC
-    ${TOOLCHAIN_DIR}/arm-none-eabi/include
+    ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
     config
 )
 
