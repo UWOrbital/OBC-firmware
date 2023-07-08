@@ -4,7 +4,6 @@
 #include "obc_i2c_io.h"
 
 #include <stdint.h>
-#include <math.h>
 
 #define DAC_ADDRESS 0x60U
 #define DAC_VREF_VALUE 2U
@@ -29,7 +28,8 @@ obc_error_code_t max5460WriteVoltage(float analogVoltsOutput) {
   obc_error_code_t errCode;
   // the dac will calculate the output voltage by doing dacCode * DAC_VREF_VALUE / DAC_STEP_VALUE so we need to account
   // for this the 2 LSB should be 0 according to datasheet
-  uint8_t dacCode = ((uint8_t)round(analogVoltsOutput * DAC_STEP_VALUE / DAC_VREF_VALUE)) << 2;
+  // round the value to the nearest integer before casting
+  uint8_t dacCode = ((uint8_t)(analogVoltsOutput * DAC_STEP_VALUE / DAC_VREF_VALUE + 0.5)) << 2;
 
   RETURN_IF_ERROR_CODE(i2cSendTo(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacCode));
   return OBC_ERR_CODE_SUCCESS;
