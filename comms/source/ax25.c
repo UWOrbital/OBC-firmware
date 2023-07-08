@@ -51,21 +51,23 @@ static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket);
  * @brief calculates the FCS for an ax.25 packet
  *
  * @param data uint8_t array that holds the ax25 packet data
+ * @param dataLen total length of the data array
  * @param calculatedFcs pointer to a un16_t to hold the calculated FCS
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t fcsCalculate(const uint8_t *data, uint16_t *calculatedFcs);
+static obc_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs);
 
 /**
  * @brief checks if a received fcs is correct
  *
  * @param data the received ax.25 packet data
+ * @param dataLen total length of the data array
  * @param fcs the FCS of the received packet to be checked if it is valid or not
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was a valid fcs and error code if not
  */
-static obc_error_code_t fcsCheck(const uint8_t *data, uint16_t fcs);
+static obc_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
 
 /**
  * @brief performs bit unstuffing on a receive ax.25 packet
@@ -123,7 +125,7 @@ obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed
   ax25PacketUnstuffed[AX25_MOD128_PID_POSITION] = AX25_PID;
   memcpy(ax25PacketUnstuffed + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
   uint16_t fcs;
-  RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, &fcs));
+  RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_I_FRAME_LEN, &fcs));
   ax25PacketUnstuffed[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
   memset(ax25Data->data, 0, sizeof(ax25Data->data));
@@ -188,7 +190,7 @@ obc_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, ui
   ax25PacketUnstuffed[AX25_MOD8_PID_POSITION] = AX25_PID;
 
   uint16_t fcs;
-  RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, &fcs));
+  RETURN_IF_ERROR_CODE(fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs));
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
 
@@ -215,10 +217,6 @@ obc_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   if (unstuffedPacket->length > AX25_MINIMUM_I_FRAME_LEN || unstuffedPacket->length < AX25_MINIMUM_U_FRAME_CMD_LENGTH) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  // check to make sure that the data starts and ends with a valid flag
-  if ((unstuffedPacket->data[0] != AX25_FLAG) || (unstuffedPacket->data[unstuffedPacket->length - 1] != AX25_FLAG)) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
 
   uint8_t recvAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   if (memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, recvAddress, AX25_DEST_ADDR_BYTES) != 0) {
@@ -230,7 +228,7 @@ obc_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   // Check FCS
   uint16_t fcs = unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES] << 8;
   fcs |= unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES + 1];
-  RETURN_IF_ERROR_CODE(fcsCheck(unstuffedPacket->data, fcs));
+  RETURN_IF_ERROR_CODE(fcsCheck(unstuffedPacket->data, unstuffedPacket->length, fcs));
 
   // check if the LSB of the control field is 0, which means it is a I frame
   if (!(unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION] & 0x01)) {
@@ -296,8 +294,8 @@ obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstu
   unstuffedPacket[(unstuffedBitLength + 7) / 8] = AX25_FLAG;
   unstuffedBitLength += 8;
 
-  // convert bits to bytes, rounding up
-  *unstuffedPacketLen = (unstuffedBitLength + 7) / 8;
+  // convert bits to bytes
+  *unstuffedPacketLen = unstuffedBitLength / 8;
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -403,15 +401,16 @@ static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
  * @brief calculates the FCS for an ax.25 packet
  *
  * @param data uint8_t array that holds the ax25 packet data
+ * @param dataLen total length of the data array
  * @param calculatedFcs pointer to a un16_t to hold the calculated FCS
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_error_code_t fcsCalculate(const uint8_t *data, uint16_t *calculatedFcs) {
+static obc_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
   /* TODO: look into this more and make sure this is the right implementation */
   *calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
 
-  for (uint16_t i = 0; i < (AX25_MINIMUM_I_FRAME_LEN - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
+  for (uint16_t i = 0; i < (dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
     *calculatedFcs ^= (uint16_t)data[i] << 8;
 
     for (uint8_t j = 0; j < 8; ++j) {
@@ -437,11 +436,12 @@ static obc_error_code_t fcsCalculate(const uint8_t *data, uint16_t *calculatedFc
  * @brief checks if a received fcs is correct
  *
  * @param data the received ax.25 packet data
+ * @param dataLen total length of the data array
  * @param fcs the FCS of the received packet to be checked if it is valid or not
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was a valid fcs and error code if not
  */
-static obc_error_code_t fcsCheck(const uint8_t *data, uint16_t fcs) {
+static obc_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs) {
   // reverse bit order of fcs to account for the fact that it was transmitted in the reverse order as the other bytes
   uint16_t reverse_num = 0;
   for (uint8_t i = 0; i < sizeof(fcs) * 8; i++) {
@@ -450,7 +450,7 @@ static obc_error_code_t fcsCheck(const uint8_t *data, uint16_t fcs) {
   fcs = reverse_num;
   uint16_t calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
 
-  for (uint16_t i = 0; i < (AX25_MINIMUM_I_FRAME_LEN - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
+  for (uint16_t i = 0; i < (dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
     calculatedFcs ^= (uint16_t)data[i] << 8;
 
     for (uint8_t j = 0; j < 8; ++j) {
