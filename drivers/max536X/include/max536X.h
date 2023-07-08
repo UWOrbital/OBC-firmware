@@ -1,5 +1,5 @@
-#ifndef DRIVERS_MAX5460LEUK_INCLUDE_MAX5460LEUK_H_
-#define DRIVERS_MAX5460LEUK_INCLUDE_MAX5460LEUK_H_
+#ifndef DRIVERS_MAX536X_INCLUDE_MAX536X_H_
+#define DRIVERS_MAX536X_INCLUDE_MAX536X_H_
 
 #include "obc_errors.h"
 
@@ -10,13 +10,13 @@
  *
  * @return obc_error_code_t - whether it was successful or not
  */
-obc_error_code_t max5460WriteVoltage(float analogVoltsOutput);
+obc_error_code_t max5360WriteVoltage(float analogVoltsOutput);
 
 /**
  * @brief powers off the max5360 and stops it from outputting anything
  *
  * @return obc_error_code_t whether the power off was successful or not
  */
-obc_error_code_t max5460PowerOff(void);
+obc_error_code_t max5360PowerOff(void);
 
-#endif /* DRIVERS_MAX5460LEUK_INCLUDE_MAX5460LEUK_H_ */
+#endif /* DRIVERS_MAX536X_INCLUDE_MAX536X_H_ */

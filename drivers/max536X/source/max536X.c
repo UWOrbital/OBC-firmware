@@ -1,4 +1,4 @@
-#include "max5360leuk.h"
+#include "max536X.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_i2c_io.h"
@@ -10,18 +10,18 @@
 #define DAC_STEP_VALUE 64U
 #define DAC_SHUT_DOWN_BIT 0x01U
 #define DAC_CODE_TRANSFER_BYTES 1U
-#define DAC_MAX_VOLTAGE_OUTPUT   \
-  (DAC_VREF_VALUE * 0b00111111 / \
+#define DAC_MAX_VOLTAGE_OUTPUT          \
+  ((float)DAC_VREF_VALUE * 0b00111111 / \
    DAC_STEP_VALUE)  // the dac takes a 6 bit number for what to output so the max for that number is 0b00111111
 
 /**
- * @brief powers on the max5460leuk DAC and sets it to output a certain voltage
+ * @brief powers on the max5460 DAC and sets it to output a certain voltage
  *
  * @param analogVoltsOutput the value in volts that will be outputted by the DAC
  *
  * @return obc_error_code_t - whether it was successful or not
  */
-obc_error_code_t max5460WriteVoltage(float analogVoltsOutput) {
+obc_error_code_t max5360WriteVoltage(float analogVoltsOutput) {
   if (analogVoltsOutput < 0 || analogVoltsOutput > DAC_MAX_VOLTAGE_OUTPUT) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -40,10 +40,15 @@ obc_error_code_t max5460WriteVoltage(float analogVoltsOutput) {
  *
  * @return obc_error_code_t whether the power off was successful or not
  */
-obc_error_code_t max5460PowerOff(void) {
+obc_error_code_t max5360PowerOff(void) {
   obc_error_code_t errCode;
-  uint8_t dacAddress = DAC_ADDRESS | DAC_SHUT_DOWN_BIT;
-  uint8_t dacCode = 0;  // output 0 volts
-  RETURN_IF_ERROR_CODE(i2cSendTo(dacAddress, DAC_CODE_TRANSFER_BYTES, &dacCode));
+  uint8_t dacRecvBuf;
+  // Reading from the DAC will turn it off
+  // See datasheet page 10
+  RETURN_IF_ERROR_CODE(i2cReceiveFrom(dacAddress, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf));
+  // DAC should output all ones
+  if (dacRecvBuf != UINT8_MAX) {
+    return OBC_ERR_CODE_MAX5360_SHUTDOWN_FAILURE;
+  }
   return OBC_ERR_CODE_SUCCESS;
 }
