@@ -43,7 +43,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
 
   // File & line number
   char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
-  ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%u", LEVEL_STRINGS[msgLevel], file, line);
+  ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[msgLevel], file, line);
   if (ret < 0) return OBC_ERR_CODE_INVALID_ARG;
   if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE) return OBC_ERR_CODE_BUFF_TOO_SMALL;
 

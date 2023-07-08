@@ -1,7 +1,6 @@
 set(TEST_BINARY OBC-firmware-tests)
 
 set(TEST_DEPENDENCIES
-    ${CMAKE_SOURCE_DIR}/common/source/mock_obc_logging.c
     ${CMAKE_SOURCE_DIR}/common/source/obc_pack_utils.c
     ${CMAKE_SOURCE_DIR}/common/source/obc_unpack_utils.c
     ${CMAKE_SOURCE_DIR}/cdh/source/command_pack.c
@@ -10,7 +9,7 @@ set(TEST_DEPENDENCIES
 )
 
 set(TEST_MOCKS
-
+    ${CMAKE_SOURCE_DIR}/test/mock/mock_obc_logging.c
 )
 
 set(TEST_SOURCES
