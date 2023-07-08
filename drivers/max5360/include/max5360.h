@@ -1,5 +1,5 @@
-#ifndef DRIVERS_MAX536X_INCLUDE_MAX536X_H_
-#define DRIVERS_MAX536X_INCLUDE_MAX536X_H_
+#ifndef DRIVERS_MAX5360_INCLUDE_MAX5360_H_
+#define DRIVERS_MAX5360_INCLUDE_MAX5360_H_
 
 #include "obc_errors.h"
 
@@ -19,4 +19,4 @@ obc_error_code_t max5360WriteVoltage(float analogVoltsOutput);
  */
 obc_error_code_t max5360PowerOff(void);
 
-#endif /* DRIVERS_MAX536X_INCLUDE_MAX536X_H_ */
+#endif /* DRIVERS_MAX5360_INCLUDE_MAX5360_H_ */
