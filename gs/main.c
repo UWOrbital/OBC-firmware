@@ -242,26 +242,43 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static gs_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData) {
-  obc_gs_error_code_t obcGsErrCode;
-  obcGsErrCode = ax25Recv(data, rsData->data, RS_ENCODED_SIZE);
-  if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData) {
+  obc_gs_error_code_t interfaceErr;
+
+  // perform bit unstuffing
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  interfaceErr = ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, &unstuffedPacket.length);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return GS_ERR_CODE_AX25_DECODE_FAILURE;
   }
 
-  uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE, decodedData);
+  if (unstuffedPacket.length == AX25_MINIMUM_I_FRAME_LEN) {
+    // copy the unstuffed data into rsData
+    memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
+    // clear the info field of the unstuffed packet
+    memset(unstuffedPacket.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
+    // decode the info field and store it in the unstuffed packet
+    uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE,
+                                                        unstuffedPacket.data + AX25_INFO_FIELD_POSITION);
 
-  if (decodedLength == -1) {
-    return GS_ERR_CODE_CORRUPTED_MSG;
+    if (decodedLength == -1) {
+      return GS_ERR_CODE_CORRUPTED_MSG;
+    }
   }
 
+  // check for a valid ax25 frame and perform the command response if necessary
+  interfaceErr = ax25Recv(&unstuffedPacket);
+
+  uint8_t decodedData[RS_DECODED_SIZE] = {0};
+  memcpy(decodedData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
+
   printf("Received (and decoded) data: ");
-  for (uint8_t i = 0; i < decodedLength; ++i) {
+  for (uint8_t i = 0; i < unstuffedPacket.length; ++i) {
     printf("%x ", decodedData[i]);
   }
   printf("\n");
-  return OBC_GS_ERR_CODE_SUCCESS;
+
+  return GS_ERR_CODE_SUCCESS;
 }
 
 static uint32_t getCurrentTime(void) {
