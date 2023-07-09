@@ -21,7 +21,7 @@ target_include_directories(${TEST_BINARY}
     PRIVATE
     ${CMAKE_SOURCE_DIR}/obc/sys
     ${CMAKE_SOURCE_DIR}/obc/sys/time
-    ${CMAKE_SOURCE_DIR}/obc/drivers/peripherals/ds3232
+    ${CMAKE_SOURCE_DIR}/obc/drivers/ds3232
 )
 
 target_link_libraries(${TEST_BINARY}
