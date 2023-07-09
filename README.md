@@ -1,6 +1,6 @@
 # OBC-firmware
 
-This repository holds all the code that runs on our CubeSat's onboard computer (OBC).
+This repository holds all the code written by UW Orbital's firmware team.
 
 ## Table of Contents
 
@@ -83,19 +83,26 @@ pre-commit install
 To clone this project and pull all required submodules, run the following:
 ```
 git clone git@github.com:UWOrbital/OBC-firmware.git
-git submodule update --init --recursive
 ```
 
 ### Building
 
-#### **Firmware**
-From the top-level directory, run the following to build the firmware.
+#### **OBC Firmware**
+From the top-level directory, run the following to build the OBC firmware.
 ```
 mkdir build_arm && cd build_arm
-cmake .. -DCMAKE_BUILD_TYPE=Firmware
+cmake .. -DCMAKE_BUILD_TYPE=OBC
 cmake --build .
 ```
 Take a look at `cmake/fw_build_options.cmake` to see the available build options.
+
+#### **Ground Station**
+From the top-level directory, run the following to build the ground station. Currently, the ground station must be built on Windows.
+```
+mkdir build_gs && cd build_gs
+cmake .. -DCMAKE_BUILD_TYPE=GS
+cmake --build .
+```
 
 #### **Tests**
 From the top-level directory, run the following to build and run the tests.
