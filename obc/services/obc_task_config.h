@@ -31,7 +31,7 @@
 /* Comms transceiver transmit task config */
 #define CC1120_TRANSMIT_STACK_SIZE 512U
 #define CC1120_TRANSMIT_TASK_NAME "comms_transmit"
-#define CC1120_TRANSMIT_TASK_PRIORITY tskIDLE_PRIORITY + 3U
+#define CC1120_TRANSMIT_TASK_PRIORITY tskIDLE_PRIORITY + 4U
 
 /* Comms telemetry encode task config */
 #define COMMS_TELEM_ENCODE_STACK_SIZE 512U
