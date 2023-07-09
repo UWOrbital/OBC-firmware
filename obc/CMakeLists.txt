@@ -21,8 +21,6 @@ add_executable(OBC-firmware.out main.c)
 # Compile them with no optimizations
 add_library(NO_OPTIMIZE_FILES OBJECT)
 
-add_subdirectory(ext/reliance_edge)
-
 if (DEBUG MATCHES 1)
     target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
 
@@ -50,13 +48,13 @@ target_compile_definitions(OBC-firmware.out PRIVATE
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
-    config
 )
 
 add_subdirectory(hal)
 add_subdirectory(drivers)
 add_subdirectory(sys)
 add_subdirectory(services)
+add_subdirectory(reliance_edge)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes

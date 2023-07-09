@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 target_include_directories(OBC-firmware.out PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/alarm_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/altitude_ctrl_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/camera_mgr
