@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 # Set the toolchain file before the project is declared
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     # Download the toolchain if it doesn't exist
@@ -21,15 +19,16 @@ endif()
 project(OrbitalSw)
 
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     enable_language(C ASM)
     add_subdirectory(obc)
 endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES GS)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     enable_language(C CXX)
     add_subdirectory(gs)
 endif()
-
 
 if(${CMAKE_BUILD_TYPE} MATCHES Test)
     enable_language(C CXX)
