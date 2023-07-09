@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 # Set the toolchain file before the project is declared
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     # Download the toolchain if it doesn't exist
@@ -8,8 +10,9 @@ if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     endif()
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake)
 elseif(${CMAKE_BUILD_TYPE} MATCHES GS)
-
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_ground_station_gcc.cmake)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Test)
+    include(${CMAKE_SOURCE_DIR}/cmake/fetch_googletest.cmake)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_linux_gcc.cmake)
 else()
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
@@ -17,18 +20,20 @@ endif()
 
 project(OrbitalSw)
 
-if(${CMAKE_BUILD_TYPE} MATCHES GS)
-    enable_language(C CXX)
-    add_subdirectory(gs)
-endif()
-
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     enable_language(C ASM)
     add_subdirectory(obc)
 endif()
 
+if(${CMAKE_BUILD_TYPE} MATCHES GS)
+    enable_language(C CXX)
+    add_subdirectory(gs)
+endif()
+
+
 if(${CMAKE_BUILD_TYPE} MATCHES Test)
     enable_language(C CXX)
+    enable_testing()
     add_subdirectory(test)
 endif()
 
