@@ -159,11 +159,6 @@ int main(int argc, char *argv[]) {
     packed_ax25_i_frame_t ax25Pkt = {0};
     unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
 
-    for (uint16_t i = 0; i < RS_DECODED_SIZE; ++i) {
-      printf("%x ", encryptedCmd[i]);
-    }
-    printf("\n");
-
     // Perform AX.25 framing
     RETURN_IF_ERROR_CODE(ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt, &groundStationCallsign));
 
