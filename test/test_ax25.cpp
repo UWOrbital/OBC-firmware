@@ -10,8 +10,8 @@ TEST(TestAx25SendRecv, iFrameNoStuff) {
   packed_ax25_i_frame_t ax25Data = {0};
   unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
   ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign);
-  EXPECT_EQ(ax25Data.length, AX25_MINIMUM_I_FRAME_LEN);
   ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length);
+  EXPECT_EQ(ax25Data.length, AX25_MINIMUM_I_FRAME_LEN);
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   EXPECT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length), 0);
