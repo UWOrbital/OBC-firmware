@@ -17,6 +17,7 @@
  * @return obc_err_code_t - whether or not the chip was successfully turned on
  */
 obc_error_code_t rffm6404ActivateRx(void) {
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(max5360PowerOff());
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 0);
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 1);
@@ -32,6 +33,7 @@ obc_error_code_t rffm6404ActivateRx(void) {
  * @return obc_err_code_t - whether or not the chip was successfully turned on
  */
 obc_error_code_t rff6404ActivateTx(float voltagePowerControl) {
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(max5360WriteVoltage(voltagePowerControl));
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 1);
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 1);
@@ -45,6 +47,7 @@ obc_error_code_t rff6404ActivateTx(float voltagePowerControl) {
  * @return obc_err_code_t - whether or not the operation was successful
  */
 obc_error_code_t rffm6404ActivateRecvByp(void) {
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(max5360PowerOff());
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 0);
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 1);
@@ -58,7 +61,8 @@ obc_error_code_t rffm6404ActivateRecvByp(void) {
  * @return obc_err_code_t - whether or not the power off was successful
  */
 obc_error_code_t rffm6404PowerOff(void) {
-  RETURN_IF_ERROR_CODE(max5360PowerOff())
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(max5360PowerOff());
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 0);
   return OBC_ERR_CODE_SUCCESS;
 }
