@@ -1,14 +1,13 @@
-pragma #once
+#pragma once
 
 #include "obc_errors.h"
 
-    /**
-     * @brief powers on the RFFE chip in receive mode
-     *
-     * @return obc_err_code_t - whether or not the chip was successfully turned on
-     */
-    obc_error_code_t
-    rffm6404ActivateRx(void);
+/**
+ * @brief powers on the RFFE chip in receive mode
+ *
+ * @return obc_err_code_t - whether or not the chip was successfully turned on
+ */
+obc_error_code_t rffm6404ActivateRx(void);
 
 /**
  * @brief powers on the RFFE chip in transmit mode
