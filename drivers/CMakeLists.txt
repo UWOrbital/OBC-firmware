@@ -8,6 +8,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     lm75bd/include
     sdcard/include
     max5360/include
+    rffm6404/include
 )
 
 target_sources(OBC-firmware.out PUBLIC
@@ -26,4 +27,5 @@ target_sources(OBC-firmware.out PUBLIC
     lm75bd/source/lm75bd.c
     sdcard/source/sdc_bdev.c
     max5360/source/max5360.c
+    rffm6404/source/rffm6404.c
 )
