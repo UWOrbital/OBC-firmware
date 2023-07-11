@@ -21,6 +21,7 @@ obc_error_code_t rffm6404ActivateRx(void) {
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 0);
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 1);
   gioSetBit(RFFM6404_BYP_PIN_PORT, RFFM6404_BYP_PIN_NUM, 0);
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -35,6 +36,7 @@ obc_error_code_t rff6404ActivateTx(float voltagePowerControl) {
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 1);
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 1);
   gioSetBit(RFFM6404_BYP_PIN_PORT, RFFM6404_BYP_PIN_NUM, 0);
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -47,6 +49,7 @@ obc_error_code_t rffm6404ActivateRecvByp(void) {
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 0);
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 1);
   gioSetBit(RFFM6404_BYP_PIN_PORT, RFFM6404_BYP_PIN_NUM, 1);
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -57,4 +60,5 @@ obc_error_code_t rffm6404ActivateRecvByp(void) {
 obc_error_code_t rffm6404PowerOff(void) {
   RETURN_IF_ERROR_CODE(max5360PowerOff())
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 0);
+  return OBC_ERR_CODE_SUCCESS;
 }
