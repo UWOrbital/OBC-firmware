@@ -4,6 +4,8 @@
 #include "max5360.h"
 #include "obc_board_config.h"
 
+/* See Page 4 of the RFFM6404 datasheet for truth table explaining necessary pin values for each mode */
+
 /**
  * @brief powers on the RFFE chip in receive mode
  *
