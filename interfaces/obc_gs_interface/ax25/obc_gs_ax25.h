@@ -96,7 +96,7 @@ extern "C" {
  * @param ax25Data array to store the ax.25 frame
  * @param destAddress address of the destination for the ax25 packet
  */
-obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_i_frame_t *ax25Data,
+obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
                                    const ax25_addr_t *destAddress);
 
 /**
@@ -132,6 +132,16 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket);
  */
 obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
                                 uint16_t *unstuffedPacketLen);
+
+/**
+ * @brief performs bit unstuffing on a receive ax.25 packet
+ *
+ * @param rawData unstuffed data buffer
+ * @param rawDataLen length of the rawData buffer
+ * @param stuffedData buffer to store the stuffed data
+ * @param stuffedDataLen number of bytes filled into the stuffedData buffer
+ */
+obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *stuffedData, uint16_t *stuffedDataLen);
 
 #ifdef __cplusplus
 }
