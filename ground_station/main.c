@@ -156,13 +156,26 @@ int main(int argc, char *argv[]) {
   memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
   if (cmdPacketOffset != 0) {
+    packed_ax25_i_frame_t ax25Pkt = {0};
+    unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
+
+    // Perform AX.25 framing
+    RETURN_IF_ERROR_CODE(ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt, &groundStationCallsign));
+
     packed_rs_packet_t fecPkt = {0};
-    if ((uint8_t)correct_reed_solomon_encode(rsGs, encryptedCmd, RS_DECODED_SIZE, fecPkt.data) < RS_ENCODED_SIZE) {
+
+    // Apply Reed Solomon FEC
+    if ((uint8_t)correct_reed_solomon_encode(rsGs, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE,
+                                             fecPkt.data) < RS_ENCODED_SIZE) {
       exit(1);
     };
 
-    packed_ax25_i_frame_t ax25Pkt = {0};
-    RETURN_IF_ERROR_CODE(ax25SendIFrame(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &cubesatCallsign));
+    memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
+
+    RETURN_IF_ERROR_CODE(ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, ax25Pkt.data, &ax25Pkt.length));
+
+    ax25Pkt.data[0] = AX25_FLAG;
+    ax25Pkt.data[ax25Pkt.length - 1] = AX25_FLAG;
 
     long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
@@ -248,6 +261,7 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
       return OBC_ERR_CODE_CORRUPTED_MSG;
     }
   }
+
   // check for a valid ax25 frame and perform the command response if necessary
   RETURN_IF_ERROR_CODE(ax25Recv(&unstuffedPacket));
 
@@ -255,7 +269,7 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   memcpy(decodedData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
 
   printf("Received (and decoded) data: ");
-  for (uint8_t i = 0; i < unstuffedPacket.length; ++i) {
+  for (uint8_t i = 0; i < RS_DECODED_SIZE; ++i) {
     printf("%x ", decodedData[i]);
   }
   printf("\n");

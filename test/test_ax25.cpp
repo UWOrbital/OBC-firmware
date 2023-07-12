@@ -8,7 +8,9 @@
 TEST(TestAx25SendRecv, iFrameNoStuff) {
   uint8_t telemData[RS_ENCODED_SIZE] = {0};
   packed_ax25_i_frame_t ax25Data = {0};
-  ax25SendIFrame(telemData, RS_ENCODED_SIZE, &ax25Data, &groundStationCallsign);
+  unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
+  ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign);
+  ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length);
   EXPECT_EQ(ax25Data.length, AX25_MINIMUM_I_FRAME_LEN);
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
@@ -24,8 +26,9 @@ TEST(TestAx25SendRecv, iFrameMaxStuff) {
   uint8_t telemData[RS_ENCODED_SIZE] = {0};
   memset(telemData, 0xFF, RS_ENCODED_SIZE);
   packed_ax25_i_frame_t ax25Data = {0};
-  ax25SendIFrame(telemData, RS_ENCODED_SIZE, &ax25Data, &groundStationCallsign);
-
+  unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
+  ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign);
+  ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length);
   EXPECT_TRUE(ax25Data.length > AX25_MINIMUM_I_FRAME_LEN && ax25Data.length < AX25_MAXIMUM_PKT_LEN);
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
@@ -46,7 +49,9 @@ TEST(TestAx25SendRecv, iFrameSomeStuff) {
     telemData[i] = (uint8_t)(seed & 0xFF);
   }
   packed_ax25_i_frame_t ax25Data = {0};
-  ax25SendIFrame(telemData, RS_ENCODED_SIZE, &ax25Data, &groundStationCallsign);
+  unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
+  ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign);
+  ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length);
 
   EXPECT_TRUE(ax25Data.length > AX25_MINIMUM_I_FRAME_LEN && ax25Data.length < AX25_MAXIMUM_PKT_LEN);
 

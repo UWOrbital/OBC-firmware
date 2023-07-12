@@ -100,7 +100,7 @@ extern "C" {
  *
  * @return obc_error_code_t - whether or not the ax.25 headers were successfully added
  */
-obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, packed_ax25_i_frame_t *ax25Data,
+obc_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
                                 const ax25_addr_t *destAddress);
 
 /**
@@ -137,6 +137,18 @@ obc_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket);
  */
 obc_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *unstuffedPacket,
                              uint16_t *unstuffedPacketLen);
+
+/**
+ * @brief performs bit unstuffing on a receive ax.25 packet
+ *
+ * @param rawData unstuffed data buffer
+ * @param rawDataLen length of the rawData buffer
+ * @param stuffedData buffer to store the stuffed data
+ * @param stuffedDataLen number of bytes filled into the stuffedData buffer
+ *
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if it was successful and error code if not
+ */
+obc_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *stuffedData, uint16_t *stuffedDataLen);
 
 #ifdef __cplusplus
 }
