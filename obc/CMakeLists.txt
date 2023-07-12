@@ -53,7 +53,7 @@ target_include_directories(OBC-firmware.out PUBLIC
 add_subdirectory(hal)
 add_subdirectory(drivers)
 add_subdirectory(sys)
-add_subdirectory(services)
+add_subdirectory(modules)
 add_subdirectory(reliance_edge)
 
 target_link_libraries(OBC-firmware.out PRIVATE

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120
     ${CMAKE_CURRENT_SOURCE_DIR}/ds3232
@@ -18,12 +18,12 @@ target_include_directories(OBC-firmware.out PUBLIC
 )
 
 target_sources(OBC-firmware.out PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/obc_gio_ctrl.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/obc_het_ctrl.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/obc_i2c_io.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/obc_reset.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/obc_sci_io.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/obc_spi_io.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_het_ctrl.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_reset.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_sci_io.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_io.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam.c
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/camera_reg.c
