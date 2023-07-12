@@ -3,7 +3,6 @@
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
-#include "sys_dma.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -27,7 +26,6 @@ int main(void) {
   hetInit();
 
   _enable_interrupt_();
-  dmaEnable();
 
   // Initialize logger
   initLogger();

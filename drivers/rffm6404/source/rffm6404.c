@@ -2,14 +2,7 @@
 #include "obc_logging.h"
 #include "gio.h"
 #include "max5360.h"
-
-#define RFFM6404_TR_PIN_NUM 6U
-#define RFFM6404_EN_PIN_NUM 7U
-#define RFFM6404_BYP_PIN_NUM 2U
-
-#define RFFM6404_TR_PIN_PORT gioPORTA
-#define RFFM6404_EN_PIN_PORT gioPORTA
-#define RFFM6404_BYP_PIN_PORT gioPORTB
+#include "obc_board_config.h"
 
 /**
  * @brief powers on the RFFE chip in receive mode
