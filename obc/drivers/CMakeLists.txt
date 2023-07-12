@@ -9,6 +9,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/fram
     ${CMAKE_CURRENT_SOURCE_DIR}/lm75bd
     ${CMAKE_CURRENT_SOURCE_DIR}/max5360
+    ${CMAKE_CURRENT_SOURCE_DIR}/rffm6404
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog
 
@@ -39,6 +40,8 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/lm75bd/lm75bd.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/max5360/max5360.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/rffm6404/rffm6404.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdc_bdev.c
 
