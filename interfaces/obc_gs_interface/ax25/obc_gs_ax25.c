@@ -328,12 +328,8 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
     // TODO: implement retransmissions
   }
 
-  if (pktReceiveNum < UINT8_MAX) {
-    pktReceiveNum++;
-    return OBC_GS_ERR_CODE_SUCCESS;
-  }
-
-  return OBC_GS_ERR_CODE_BUFF_TOO_SMALL;
+  pktReceiveNum++;
+  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
