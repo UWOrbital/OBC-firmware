@@ -13,8 +13,8 @@
 
 #define SRC_CALLSIGN "\0\0\0\0\0\0\0"
 
-static uint8_t pktSentNum = 1;
-static uint8_t pktReceiveNum = 1;
+static uint8_t pktSentNum = 0;
+static uint8_t pktReceiveNum = 0;
 
 /* Note these will need to be adjusted according to chapter 3.12 of the AX.25 Standard */
 ax25_addr_t cubesatCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};        // mock cubesat address
@@ -366,6 +366,9 @@ static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   if (controlByte == U_FRAME_CMD_CONN) {
     // Send an unnumbered acknowledgement
     packed_ax25_u_frame_t ax25Data = {0};
+    // Reset the various numbering variables for the new link
+    pktSentNum = 0;
+    pktReceiveNum = 0;
     ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
     // Future PR will handle sending this to the proper queue
   } else if (controlByte == U_FRAME_CMD_DISC) {
@@ -374,6 +377,9 @@ static obc_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
     ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
     // Future PR will handle sending this to the proper queue
   } else if (controlByte == U_FRAME_CMD_ACK) {
+    // Reset the various numbering variables for the new link
+    pktSentNum = 0;
+    pktReceiveNum = 0;
     // acknowledgeFlag == true
     // Future PR will handle what to do here most likely some kind of state variable change
   }
