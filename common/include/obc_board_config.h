@@ -41,6 +41,16 @@
 #define DS3232_INT_PORT gioPORTA
 #define DS3232_INT_PIN 0U
 
+// RFFM6404 pin numbers
+#define RFFM6404_TR_PIN_NUM 6U
+#define RFFM6404_EN_PIN_NUM 7U
+#define RFFM6404_BYP_PIN_NUM 2U
+
+// RFFM6404 pin ports
+#define RFFM6404_TR_PIN_PORT gioPORTA
+#define RFFM6404_EN_PIN_PORT gioPORTA
+#define RFFM6404_BYP_PIN_PORT gioPORTB
+
 #elif defined(OBC_REVISION_1)
 // Serial config
 #define UART_PRINT_REG sciREG
@@ -78,6 +88,16 @@
 #define CC1120_TX_THR_PKT_hetPORT1_PIN 30U     // cc1120 GIO3
 #define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
 
+// RFFM6404 pin numbers
+#define RFFM6404_TR_PIN_NUM 6U
+#define RFFM6404_EN_PIN_NUM 7U
+#define RFFM6404_BYP_PIN_NUM 2U
+
+// RFFM6404 pin ports
+#define RFFM6404_TR_PIN_PORT gioPORTA
+#define RFFM6404_EN_PIN_PORT gioPORTA
+#define RFFM6404_BYP_PIN_PORT gioPORTB
+
 #elif defined(OBC_REVISION_2)
 // Serial config
 #define UART_PRINT_REG sciREG
@@ -111,6 +131,16 @@
 #define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U  // cc1120 GIO2
 #define CC1120_TX_THR_PKT_hetPORT1_PIN 30U     // cc1120 GIO3
 #define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
+
+// RFFM6404 pin numbers
+#define RFFM6404_TR_PIN_NUM 6U
+#define RFFM6404_EN_PIN_NUM 7U
+#define RFFM6404_BYP_PIN_NUM 2U
+
+// RFFM6404 pin ports
+#define RFFM6404_TR_PIN_PORT gioPORTA
+#define RFFM6404_EN_PIN_PORT gioPORTA
+#define RFFM6404_BYP_PIN_PORT gioPORTB
 
 #else
 #error Board configuration not defined

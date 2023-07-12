@@ -347,14 +347,22 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
 static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) {
   obc_error_code_t errCode;
 
-  packed_rs_packet_t fecPkt = {0};      // Holds a 255B RS packet
+  packed_rs_packet_t fecPkt = {0};  // Holds a 255B RS packet
+  unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
   packed_ax25_i_frame_t ax25Pkt = {0};  // Holds an AX.25 packet
 
-  // Apply Reed Solomon FEC
-  RETURN_IF_ERROR_CODE(rsEncode(telemPacket->data, &fecPkt));
-
   // Perform AX.25 framing
-  RETURN_IF_ERROR_CODE(ax25SendIFrame(fecPkt.data, RS_ENCODED_SIZE, &ax25Pkt, &groundStationCallsign));
+  RETURN_IF_ERROR_CODE(ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt, &groundStationCallsign));
+
+  // Apply Reed Solomon FEC
+  RETURN_IF_ERROR_CODE(rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &fecPkt));
+
+  memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
+
+  RETURN_IF_ERROR_CODE(ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, ax25Pkt.data, &ax25Pkt.length));
+
+  ax25Pkt.data[0] = AX25_FLAG;
+  ax25Pkt.data[ax25Pkt.length - 1] = AX25_FLAG;
 
   // Send into CC1120 transmit queue
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
