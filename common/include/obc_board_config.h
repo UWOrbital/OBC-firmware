@@ -49,6 +49,7 @@
 // RFFM6404 pin ports
 #define RFFM6404_TR_PIN_PORT gioPORTA
 #define RFFM6404_EN_PIN_PORT gioPORTA
+#define RFFM6404_BYP_PIN_PORT gioPORTB
 
 #elif defined(OBC_REVISION_1)
 // Serial config
@@ -139,6 +140,7 @@
 // RFFM6404 pin ports
 #define RFFM6404_TR_PIN_PORT gioPORTA
 #define RFFM6404_EN_PIN_PORT gioPORTA
+#define RFFM6404_BYP_PIN_PORT gioPORTB
 
 #else
 #error Board configuration not defined
