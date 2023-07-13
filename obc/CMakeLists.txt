@@ -48,6 +48,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/config
 )
 
 add_subdirectory(hal)
