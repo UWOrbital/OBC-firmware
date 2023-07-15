@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-correct_reed_solomon *rs = NULL;
+static correct_reed_solomon *rs = NULL;
 
 /**
  * @brief takes in a packed telemtry array and encodes it using reed solomon

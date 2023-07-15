@@ -9,8 +9,6 @@
 #define RS_ENCODED_SIZE 255U
 #define PACKED_TELEM_PACKET_SIZE RS_DECODED_SIZE
 
-extern correct_reed_solomon *rs;
-
 typedef struct {
   uint8_t data[RS_ENCODED_SIZE];
 } packed_rs_packet_t;
