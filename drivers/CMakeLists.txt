@@ -22,6 +22,7 @@ target_sources(OBC-firmware.out PUBLIC
     common/source/obc_gio_ctrl.c
     common/source/obc_het_ctrl.c
     common/source/obc_sw_watchdog.c
+    common/source/obc_mibspi_dma.c
     ds3232/source/ds3232_mz.c
     fram/source/fram.c
     lm75bd/source/lm75bd.c
