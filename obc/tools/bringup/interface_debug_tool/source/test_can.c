@@ -13,7 +13,7 @@ void testCAN(void) {
   const uint8 txData = 0xFFU;
   if (canTransmit(canREG1, TXBox, &txData) == 0U) {
     sciPrintf("Tramsmission Failed.\r\n");
-    return;
+    return ;
   }
 
   sciPrintf("Transmission Succeeded.\r\n");
