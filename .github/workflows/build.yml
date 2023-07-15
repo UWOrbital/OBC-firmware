@@ -1,7 +1,5 @@
-name: build
+name: OBC Build
 on: [push, pull_request]
-env:
-  ARM_NONE_EABI_GCC_PATH: none
 
 jobs:
   build:
@@ -21,20 +19,17 @@ jobs:
     - name: Build (Release-Launchpad)
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD
-        make clean
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD
         make
 
     - name: Build (Release-OBC Rev1)
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1
-        make clean
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1
         make
 
     - name: Build (Release-OBC Rev2)
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Firmware -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2
-        make clean
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2
         make

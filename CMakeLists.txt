@@ -1,88 +1,43 @@
 cmake_minimum_required(VERSION 3.15)
 
-if (CMAKE_BUILD_TYPE MATCHES Test)
-    include(cmake/fetch_googletest.cmake)
-    enable_testing()
-endif()
-
-set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
-
-if(${CMAKE_BUILD_TYPE} MATCHES Firmware AND NOT EXISTS ${TOOLCHAIN_DIR})
-    include(cmake/download_arm_toolchain.cmake)
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES Firmware)
-    # Set default values for firmware build options
-    include(cmake/fw_build_options.cmake)
-
-    if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/launchpad/source/sys_link.ld")
-    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev1/source/sys_link.ld")
-    elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
-        set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev2/source/sys_link.ld")
-    else()
-        message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
+# Set the toolchain file before the project is declared
+if(${CMAKE_BUILD_TYPE} MATCHES OBC)
+    # Download the toolchain if it doesn't exist
+    if(NOT EXISTS ${CMAKE_BINARY_DIR}/toolchain)
+        include(${CMAKE_SOURCE_DIR}/cmake/download_arm_toolchain.cmake)
     endif()
-
-    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake")
-
-    project(OBC-firmware LANGUAGES C ASM)
-    add_executable(OBC-firmware.out main.c)
-
-    # Higher optimization levels on some hal files will break firmware for some reason
-    # Compile them with no optimizations
-    add_library(NO_OPTIMIZE_FILES OBJECT)
-
-elseif(CMAKE_BUILD_TYPE MATCHES Test)
-    project(OBC-firmware-tests LANGUAGES CXX C)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake)
+elseif(${CMAKE_BUILD_TYPE} MATCHES GS)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_ground_station_gcc.cmake)
+elseif(${CMAKE_BUILD_TYPE} MATCHES Test)
+    include(${CMAKE_SOURCE_DIR}/cmake/fetch_googletest.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_linux_gcc.cmake)
 else()
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
-if (CMAKE_BUILD_TYPE MATCHES Test)
-    add_subdirectory(test)
-elseif(CMAKE_BUILD_TYPE MATCHES Firmware)
-    if (DEBUG MATCHES 1)
-        target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
-        # Higher optimization levels on some hal files will break firmware for some reason
-        # Compile them with no optimizations
-        target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
-    else()
-        target_compile_options(OBC-firmware.out PRIVATE -O2)
-        # Higher optimization levels on some hal files will break firmware for some reason
-        # Compile them with no optimizations
-        target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0)
-    endif()
+project(OrbitalSw)
 
-    target_compile_definitions(OBC-firmware.out PRIVATE
-        ${BOARD_TYPE}
-        LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
-        LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
-        DEBUG=${DEBUG}
-        CMD_POLICY=${CMD_POLICY}
-        COMMS_PHY=${COMMS_PHY}
-        OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
-        CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
-    )
-
-    include_directories(${TOOLCHAIN_DIR}/arm-none-eabi/include)
-
-    add_subdirectory(adcs)
-    add_subdirectory(cdh)
-    add_subdirectory(common)
-    add_subdirectory(comms)
-    add_subdirectory(drivers)
-    add_subdirectory(eps)
-    add_subdirectory(payload)
-    add_subdirectory(libs)
-
-    add_subdirectory(hal)
-
-    target_link_libraries(OBC-firmware.out PRIVATE
-        tiny-aes
-        lib-correct
-        $<TARGET_OBJECTS:NO_OPTIMIZE_FILES>
-    )
-
+if(${CMAKE_BUILD_TYPE} MATCHES OBC)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    enable_language(C ASM)
+    add_subdirectory(obc)
 endif()
+
+if(${CMAKE_BUILD_TYPE} MATCHES GS)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    enable_language(C CXX)
+    add_subdirectory(gs)
+endif()
+
+if(${CMAKE_BUILD_TYPE} MATCHES Test)
+    enable_language(C CXX)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
+# Build tiny-aes and lib-correct libs
+add_subdirectory(libs)
+
+# Build interface libs
+add_subdirectory(interfaces)
