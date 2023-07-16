@@ -57,14 +57,12 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
-  taskENTER_CRITICAL();
   i2cSetSlaveAdd(I2C_REG, sAddr);
   i2cSetDirection(I2C_REG, I2C_TRANSMITTER);
   i2cSetCount(I2C_REG, size);
   i2cSetMode(I2C_REG, I2C_MASTER);
   i2cSetStop(I2C_REG);
   i2cSetStart(I2C_REG);
-  taskEXIT_CRITICAL();
 
   i2cSend(I2C_REG, size, buf);
 
@@ -92,14 +90,12 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
-  taskENTER_CRITICAL();
   i2cSetSlaveAdd(I2C_REG, sAddr);
   i2cSetDirection(I2C_REG, I2C_RECEIVER);
   i2cSetCount(I2C_REG, size);
   i2cSetMode(I2C_REG, I2C_MASTER);
   i2cSetStop(I2C_REG);
   i2cSetStart(I2C_REG);
-  taskEXIT_CRITICAL();
 
   i2cReceive(I2C_REG, size, buf);
 
