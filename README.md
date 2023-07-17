@@ -94,6 +94,14 @@ pre-commit install
 
 #### Installing Dependcies & ToolChains
 Once you open the docker instance, open a terminal in VSCODE and run the following commands ```Ctrl + '```
+
+```
+sudo apt-get install python3-pip
+pip3 install -r requirements.txt
+pre-commit install
+```
+
+
 ```
 sudo apt-get update
 sudo apt-get install build-essential
@@ -101,7 +109,7 @@ sudo apt-get install cmake
 ```
 #### Testing The Container Build
 
-To test whether your Dev environment has been set up correctly run the following commands from your top level directory. 
+To test whether your Dev environment has been set up correctly run the following commands from your top level directory.
 
 The dollar-sign in your terminal should be prefaced by something like this : ```root ➜ /com.docker.devenvironments.code (main ✗)```
 
@@ -122,7 +130,7 @@ ctest --verbose
 
 If the development environment is setup correctly, ```2 of 2 (100%)``` tests should pass.
 
-**Note**: The docker container used pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary. 
+**Note**: The docker container used pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary.
 
 **Tip**: Use the ```git config --list``` command on the VsCode terminal to confirm your git info.
 
