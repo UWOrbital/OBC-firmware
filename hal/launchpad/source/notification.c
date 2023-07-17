@@ -52,7 +52,6 @@
 #include "sys_selftest.h"
 #include "can.h"
 #include "gio.h"
-#include "mibspi.h"
 #include "sci.h"
 #include "spi.h"
 #include "het.h"
@@ -141,23 +140,6 @@ void i2cNotification(i2cBASE_t *i2c, uint32 flags)
 /* USER CODE BEGIN (22) */
 __attribute__((weak))
 /* USER CODE END */
-void mibspiNotification(mibspiBASE_t *mibspi, uint32 flags)
-{
-/*  enter user code between the USER CODE BEGIN and USER CODE END. */
-/* USER CODE BEGIN (25) */
-/* USER CODE END */
-}
-
-/* USER CODE BEGIN (26) */
-/* USER CODE END */
-void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
-{
-/*  enter user code between the USER CODE BEGIN and USER CODE END. */
-/* USER CODE BEGIN (27) */
-/* USER CODE END */
-}
-/* USER CODE BEGIN (28) */
-/* USER CODE END */
 
 void sciNotification(sciBASE_t *sci, uint32 flags)     
 {
@@ -236,6 +218,16 @@ void dmaGroupANotification(dmaInterrupt_t inttype, uint32 channel)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (54) */
+switch (inttype){
+  case FTC:
+    switch(channel){
+      case DMA_CH0:
+        dmaSpi1FinishedCallback();
+        break;
+    }
+  case LFS:
+  case BTC:
+  case HBC:
 /* USER CODE END */
 }
 /* USER CODE BEGIN (55) */
