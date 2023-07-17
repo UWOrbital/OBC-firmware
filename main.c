@@ -81,7 +81,9 @@ void main(void) {
 
   _enable_interrupt_();
 
-  TX_DATA[20] = 0x00FF;
+  for (uint8_t i = 0; i < D_SIZE; ++i) {
+    TX_DATA[i] = i;
+  }
 
   spiEnableLoopback(spiREG1, 0);
 

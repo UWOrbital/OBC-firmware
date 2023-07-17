@@ -40,10 +40,20 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
 
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
+      spiREG1->PC0 = 0 | (1 << 11)  // SOMI[0] as functional pin
+                     | (1 << 10)    // SIMO[0] as functional pin
+                     | (1 << 9)     // CLK as functional pin
+                     | (0);         // CS as GIO pin
+      spiREG4->PC1 = 0x01;          // CS[0] as output
+      spiREG4->PC3 = 0x00;          // CS[0]=0
       dmaReqAssign(DMA_CH0, 0);
       dmaReqAssign(DMA_CH1, 1);
       dmaEnableInterrupt(DMA_CH0, FTC);
       initDmaSpi1FinishedSemaphore();
+      spiREG1->GCR1 = (spiREG1->GCR1 & 0xFFFFFFFFU) | (0x1 << 24);  // Enable SPI
+      spiEnableNotification(spiREG1, 0x10000);
+      dmaSetChEnable(DMA_CH0, DMA_HW);  // SPI1 RX, hardware triggering
+      dmaSetChEnable(DMA_CH1, DMA_HW);  // SPI1 TX, hardware triggering
       break;
     // Add more cases as start to implement different spi buses with
     default:
@@ -70,7 +80,7 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint16_t *txData, uint16
 
   dmaCtrlPktRx.PORTASGN = DMA_PORT_B;
   dmaCtrlPktRx.SADD = (uint32)(&spiReg->BUF);
-  dmaCtrlPktRx.DADD = (uint32)(rxData);
+  dmaCtrlPktRx.DADD = (uint32)(&rxData);
   dmaCtrlPktRx.FRCNT = 1;
   dmaCtrlPktRx.ELCNT = dataLen;
   dmaCtrlPktRx.CHCTRL = 0;
@@ -87,8 +97,8 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint16_t *txData, uint16
   dmaCtrlPktRx.AUTOINIT = AUTOINIT_ON;
 
   dmaCtrlPktTx.PORTASGN = DMA_PORT_B;
-  dmaCtrlPktTx.SADD = (uint32)(txData);
-  dmaCtrlPktTx.DADD = (uint32)(&spiReg->DAT0);
+  dmaCtrlPktTx.SADD = (uint32)(&txData);
+  dmaCtrlPktTx.DADD = (uint32)(&spiReg->DAT1);
   dmaCtrlPktTx.FRCNT = 1;
   dmaCtrlPktTx.ELCNT = dataLen;
   dmaCtrlPktTx.CHCTRL = 0;
@@ -131,7 +141,7 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spi
 
   RETURN_IF_ERROR_CODE(spiDmaConfig(spiReg, txData, rxData, dataLen));
 
-  spiSendAndGetData(spiReg, spiDataFormat, dataLen, txData, rxData);
+  spiTransmitAndReceiveData(spiReg, spiDataFormat, dataLen, txData, rxData);
 
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
