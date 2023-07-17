@@ -82,5 +82,5 @@
 // obc_error_code_t dmaSpiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes,
 //                                                uint8_t *inBytes, size_t numBytes);
 
-void mibspiDmaConfig(mibspiBASE_t *mibspi, uint32 channel, uint32 txchannel, uint32 rxchannel, uint32_t dataLen,
-                     uint16_t *txData);
+// void mibspiDmaConfig(mibspiBASE_t *mibspi, uint32 channel, uint32 txchannel, uint32 rxchannel, uint32_t dataLen,
+//                      uint16_t *txData);

@@ -6,6 +6,7 @@
 #include "sys_dma.h"
 #include "obc_mibspi_dma.h"
 #include "mibspi.h"
+#include "obc_spi_dma.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -27,10 +28,12 @@
 void loadDataPattern(uint32 psize, uint16* pptr);
 void mibspiEnableInternalLoopback(mibspiBASE_t* mibspi);
 
-uint16 TX_DATA[D_SIZE];       /* transmit buffer in sys ram */
-uint16 RX_DATA[D_SIZE] = {0}; /* receive  buffer in sys ram */
+uint16_t TX_DATA[D_SIZE];       /* transmit buffer in sys ram */
+uint16_t RX_DATA[D_SIZE] = {0}; /* receive  buffer in sys ram */
 
-g_dmaCTRL g_dmaCTRLPKT; /* dma control packet configuration stack */
+static const spiDAT1_t spiConfig = {.CS_HOLD = false, .WDEL = false};
+
+// g_dmaCTRL g_dmaCTRLPKT; /* dma control packet configuration stack */
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -44,31 +47,45 @@ g_dmaCTRL g_dmaCTRLPKT; /* dma control packet configuration stack */
 void main(void) {
   /* USER CODE BEGIN (3) */
 
-  /* - creating a data chunk in system ram to start with ... */
-  loadDataPattern(D_SIZE, &TX_DATA[0]);
+  // /* - creating a data chunk in system ram to start with ... */
+  // loadDataPattern(D_SIZE, &TX_DATA[0]);
 
-  /* - initializing mibspi - enabling tg 0 , length 127 (halcogen file)*/
-  mibspiInit();
+  // /* - initializing mibspi - enabling tg 0 , length 127 (halcogen file)*/
+  // mibspiInit();
 
-  /* - enabling loopback ( this is to emulate data transfer without external wires */
-  mibspiEnableInternalLoopback(mibspiREG1);
+  // /* - enabling loopback ( this is to emulate data transfer without external wires */
+  // mibspiEnableInternalLoopback(mibspiREG1);
 
-  /* - configuring the mibspi dma , channel 0 , tx line -0 , rxline -1     */
-  /* - refer to the device data sheet dma request source for mibspi tx/rx  */
-  mibspiDmaConfig(mibspiREG1, 0, 0, 1, D_SIZE, TX_DATA);
+  // /* - configuring the mibspi dma , channel 0 , tx line -0 , rxline -1     */
+  // /* - refer to the device data sheet dma request source for mibspi tx/rx  */
+  // mibspiDmaConfig(mibspiREG1, 0, 0, 1, D_SIZE, TX_DATA);
 
-  /* - enabling dma module */
+  // /* - enabling dma module */
+  // dmaEnable();
+
+  // /* - start the mibspi transfer tg 0 */
+  // mibspiTransfer(mibspiREG1, 0);
+
+  // /* ... wait until transfer complete  */
+  // while (!(mibspiIsTransferComplete(mibspiREG1, 0))) {
+  // };
+
+  // /* copy from mibspi ram to sys ram */
+  // mibspiGetData(mibspiREG1, 0, RX_DATA);
+
+  spiInit();
+
   dmaEnable();
 
-  /* - start the mibspi transfer tg 0 */
-  mibspiTransfer(mibspiREG1, 0);
+  spiDmaInit(spiREG1);
 
-  /* ... wait until transfer complete  */
-  while (!(mibspiIsTransferComplete(mibspiREG1, 0))) {
-  };
+  _enable_interrupt_();
 
-  /* copy from mibspi ram to sys ram */
-  mibspiGetData(mibspiREG1, 0, RX_DATA);
+  TX_DATA[20] = 0x00FF;
+
+  spiEnableLoopback(spiREG1, 0);
+
+  dmaSpiTransmitandReceiveBytes(spiREG1, &spiConfig, TX_DATA, RX_DATA, D_SIZE);
 
   while (1)
     ; /* loop forever */

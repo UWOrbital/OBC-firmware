@@ -59,6 +59,7 @@
 #include "sys_dma.h"
 
 /* USER CODE BEGIN (0) */
+#include "obc_spi_dma.h"
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
 {
@@ -228,6 +229,7 @@ switch (inttype){
   case LFS:
   case BTC:
   case HBC:
+}
 /* USER CODE END */
 }
 /* USER CODE BEGIN (55) */
