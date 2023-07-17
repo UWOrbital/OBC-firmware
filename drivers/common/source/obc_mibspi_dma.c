@@ -89,48 +89,48 @@
 // obc_error_code_t dmaSpiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes,
 //                                                uint8_t *inBytes, size_t numBytes);
 
-void mibspiDmaConfig(mibspiBASE_t *mibspi, uint32 channel, uint32 txchannel, uint32 rxchannel, uint32_t dataLen,
-                     uint16_t *txData) {
-  /* - assigning dma request: channel-0 with request line - 1 */
-  dmaReqAssign(0, 1);
+// void mibspiDmaConfig(mibspiBASE_t *mibspi, uint32 channel, uint32 txchannel, uint32 rxchannel, uint32_t dataLen,
+//                      uint16_t *txData) {
+//   /* - assigning dma request: channel-0 with request line - 1 */
+//   dmaReqAssign(0, 1);
 
-  g_dmaCTRL dmaCtrl;
-  /* - configuring dma control packets   */
-  /* upto 32 control packets are supported. */
-  dmaCtrl.SADD = (uint32)(&txData);                   /* source address             */
-  dmaCtrl.DADD = (uint32)(&(mibspiRAM1->tx[0].data)); /* destination  address       */
-  dmaCtrl.CHCTRL = 0;                                 /* channel control            */
-  dmaCtrl.FRCNT = 1;                                  /* frame count                */
-  dmaCtrl.ELCNT = dataLen;                            /* element count              */
-  dmaCtrl.ELDOFFSET = 4;                              /* element destination offset */
-  dmaCtrl.ELSOFFSET = 0;                              /* element destination offset */
-  dmaCtrl.FRDOFFSET = 0;                              /* frame destination offset   */
-  dmaCtrl.FRSOFFSET = 0;                              /* frame destination offset   */
-  dmaCtrl.PORTASGN = 4;                               /* port b                     */
-  dmaCtrl.RDSIZE = ACCESS_16_BIT;                     /* read size                  */
-  dmaCtrl.WRSIZE = ACCESS_16_BIT;                     /* write size                 */
-  dmaCtrl.TTYPE = FRAME_TRANSFER;                     /* transfer type              */
-  dmaCtrl.ADDMODERD = ADDR_INC1;                      /* address mode read          */
-  dmaCtrl.ADDMODEWR = ADDR_OFFSET;                    /* address mode write         */
-  dmaCtrl.AUTOINIT = AUTOINIT_ON;                     /* autoinit                   */
+//   g_dmaCTRL dmaCtrl;
+//   /* - configuring dma control packets   */
+//   /* upto 32 control packets are supported. */
+//   dmaCtrl.SADD = (uint32)(txData);                    /* source address             */
+//   dmaCtrl.DADD = (uint32)(&(mibspiRAM1->tx[0].data)); /* destination  address       */
+//   dmaCtrl.CHCTRL = 0;                                 /* channel control            */
+//   dmaCtrl.FRCNT = 1;                                  /* frame count                */
+//   dmaCtrl.ELCNT = dataLen;                            /* element count              */
+//   dmaCtrl.ELDOFFSET = 4;                              /* element destination offset */
+//   dmaCtrl.ELSOFFSET = 0;                              /* element destination offset */
+//   dmaCtrl.FRDOFFSET = 0;                              /* frame destination offset   */
+//   dmaCtrl.FRSOFFSET = 0;                              /* frame destination offset   */
+//   dmaCtrl.PORTASGN = 4;                               /* port b                     */
+//   dmaCtrl.RDSIZE = ACCESS_16_BIT;                     /* read size                  */
+//   dmaCtrl.WRSIZE = ACCESS_16_BIT;                     /* write size                 */
+//   dmaCtrl.TTYPE = FRAME_TRANSFER;                     /* transfer type              */
+//   dmaCtrl.ADDMODERD = ADDR_INC1;                      /* address mode read          */
+//   dmaCtrl.ADDMODEWR = ADDR_OFFSET;                    /* address mode write         */
+//   dmaCtrl.AUTOINIT = AUTOINIT_ON;                     /* autoinit                   */
 
-  /* - setting dma control packets */
-  dmaSetCtrlPacket(DMA_CH0, dmaCtrl);
+//   /* - setting dma control packets */
+//   dmaSetCtrlPacket(DMA_CH0, dmaCtrl);
 
-  /* - setting the dma channel to trigger on h/w request */
-  dmaSetChEnable(DMA_CH0, DMA_HW);
+//   /* - setting the dma channel to trigger on h/w request */
+//   dmaSetChEnable(DMA_CH0, DMA_HW);
 
-  uint32 buf = 0;
-  uint32 initialCount = 0;
+//   uint32 buf = 0;
+//   uint32 initialCount = 0;
 
-  /* setting transmit and receive channels */
-  mibspi->DMACTRL[channel] |= (((rxchannel << 4) | txchannel) << 16);
+//   /* setting transmit and receive channels */
+//   mibspi->DMACTRL[channel] |= (((rxchannel << 4) | txchannel) << 16);
 
-  /* enabling transmit and receive dma */
-  mibspi->DMACTRL[channel] |= 0x8000C000;
+//   /* enabling transmit and receive dma */
+//   mibspi->DMACTRL[channel] |= 0x8000C000;
 
-  /* setting Initial Count of DMA transfers and the buffer utilized for DMA transfer */
-  mibspi->DMACTRL[channel] |= (initialCount << 8) | (buf << 24);
-}
+//   /* setting Initial Count of DMA transfers and the buffer utilized for DMA transfer */
+//   mibspi->DMACTRL[channel] |= (initialCount << 8) | (buf << 24);
+// }
 
-void mibspiDmaInit(void) {}
+// void mibspiDmaInit(void) {}
