@@ -51,9 +51,6 @@
 #define RFFM6404_EN_PIN_PORT gioPORTA
 #define RFFM6404_BYP_PIN_PORT gioPORTB
 
-// DMA Channel config
-#define DMA_CHANNEL_SD_CARD 2U
-
 #elif defined(OBC_REVISION_1)
 // Serial config
 #define UART_PRINT_REG sciREG
@@ -101,9 +98,6 @@
 #define RFFM6404_EN_PIN_PORT gioPORTA
 #define RFFM6404_BYP_PIN_PORT gioPORTB
 
-// DMA Channel config
-#define DMA_CHANNEL_SD_CARD 2U
-
 #elif defined(OBC_REVISION_2)
 // Serial config
 #define UART_PRINT_REG sciREG
@@ -147,9 +141,6 @@
 #define RFFM6404_TR_PIN_PORT gioPORTA
 #define RFFM6404_EN_PIN_PORT gioPORTA
 #define RFFM6404_BYP_PIN_PORT gioPORTB
-
-// DMA Channel config
-#define DMA_CHANNEL_SD_CARD 2U
 
 #else
 #error Board configuration not defined

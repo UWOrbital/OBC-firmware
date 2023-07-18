@@ -51,7 +51,7 @@ extern "C" {
 #endif
 
 /* USER CODE BEGIN (0) */
-// /* USER CODE END */
+/* USER CODE END */
 
 /** @enum triggerEvent
 *   @brief Transfer Group Trigger Event
@@ -246,7 +246,7 @@ void mibspiNotification(mibspiBASE_t *mibspi, uint32 flags);
 void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group);
 
 /* USER CODE BEGIN (1) */
-// /* USER CODE END */
+/* USER CODE END */
 
 /**@}*/
 #ifdef __cplusplus
