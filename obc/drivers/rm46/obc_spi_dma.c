@@ -16,7 +16,7 @@
 static SemaphoreHandle_t dmaSpi1FinishedSemaphore = NULL;
 static StaticSemaphore_t dmaSpi1FinishedSemaphoreBuffer;
 static SemaphoreHandle_t dmaSpi1Mutex = NULL;
-static StaticSemaphore_t dmaSPi1MutexBuffer;
+static StaticSemaphore_t dmaSpi1MutexBuffer;
 
 /**
  * @brief configures DMA for a single spi transmission
@@ -43,7 +43,7 @@ static void initDmaSpi1Semaphores(void) {
     dmaSpi1FinishedSemaphore = xSemaphoreCreateBinaryStatic(&dmaSpi1FinishedSemaphoreBuffer);
   }
   if (dmaSpi1Mutex == NULL) {
-    dmaSpi1Mutex = xSemaphoreCreateMutex(&dmaSpi1Mutex);
+    dmaSpi1Mutex = xSemaphoreCreateMutexStatic(&dmaSpi1Mutex);
   }
 }
 
