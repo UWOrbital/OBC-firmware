@@ -9,7 +9,7 @@
 #include <sys_common.h>
 #include <FreeRTOSConfig.h>
 
-#define DMA_SPI_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(10000)
+#define DMA_SPI_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(100000)
 #define DMA_PORT_B 0x04
 #if ((__little_endian__ == 1) || (__LITTLE_ENDIAN__ == 1))
 #define SPI1_TX_ADDR ((uint32_t)(&(spiREG1->DAT1)) + 0)
@@ -22,7 +22,7 @@
 static SemaphoreHandle_t dmaSpi1FinishedSemaphore = NULL;
 static StaticSemaphore_t dmaSpi1FinishedSemaphoreBuffer;
 
-static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint16_t *txData, uint16_t *rxData, size_t dataLen);
+static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uint32_t rxDataAddr, size_t dataLen);
 static void initDmaSpi1FinishedSemaphore(void);
 
 static void initDmaSpi1FinishedSemaphore(void) {
@@ -48,8 +48,9 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
       spiREG4->PC3 = 0x00;          // CS[0]=0
       dmaReqAssign(DMA_CH0, 0);
       dmaReqAssign(DMA_CH1, 1);
-      dmaEnableInterrupt(DMA_CH0, FTC);
+      dmaEnableInterrupt(DMA_CH0, BTC);
       initDmaSpi1FinishedSemaphore();
+      xSemaphoreTake(dmaSpi1FinishedSemaphore, (TickType_t)0);
       spiREG1->GCR1 = (spiREG1->GCR1 & 0xFFFFFFFFU) | (0x1 << 24);  // Enable SPI
       spiEnableNotification(spiREG1, 0x10000);
       dmaSetChEnable(DMA_CH0, DMA_HW);  // SPI1 RX, hardware triggering
@@ -62,14 +63,14 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint16_t *txData, uint16_t *rxData, size_t dataLen) {
+static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uint32_t rxDataAddr, size_t dataLen) {
   if (spiReg == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  if (txData == NULL) {
+  if (txDataAddr == 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  if (rxData == NULL) {
+  if (rxDataAddr == 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   if (dataLen == 0) {
@@ -80,9 +81,9 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint16_t *txData, uint16
 
   dmaCtrlPktRx.PORTASGN = DMA_PORT_B;
   dmaCtrlPktRx.SADD = (uint32)(&spiReg->BUF);
-  dmaCtrlPktRx.DADD = (uint32)(&rxData);
-  dmaCtrlPktRx.FRCNT = 1;
-  dmaCtrlPktRx.ELCNT = dataLen;
+  dmaCtrlPktRx.DADD = (uint32)(rxDataAddr)-2;
+  dmaCtrlPktRx.FRCNT = dataLen;
+  dmaCtrlPktRx.ELCNT = 1;
   dmaCtrlPktRx.CHCTRL = 0;
   dmaCtrlPktRx.ELDOFFSET = 0;
   dmaCtrlPktRx.ELSOFFSET = 0;
@@ -97,10 +98,10 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint16_t *txData, uint16
   dmaCtrlPktRx.AUTOINIT = AUTOINIT_ON;
 
   dmaCtrlPktTx.PORTASGN = DMA_PORT_B;
-  dmaCtrlPktTx.SADD = (uint32)(&txData);
+  dmaCtrlPktTx.SADD = (uint32)(txDataAddr);
   dmaCtrlPktTx.DADD = (uint32)(&spiReg->DAT1);
-  dmaCtrlPktTx.FRCNT = 1;
-  dmaCtrlPktTx.ELCNT = dataLen;
+  dmaCtrlPktTx.FRCNT = dataLen;
+  dmaCtrlPktTx.ELCNT = 1;
   dmaCtrlPktTx.CHCTRL = 0;
   dmaCtrlPktTx.ELDOFFSET = 0;
   dmaCtrlPktTx.ELSOFFSET = 0;
@@ -139,7 +140,7 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spi
   }
   obc_error_code_t errCode;
 
-  RETURN_IF_ERROR_CODE(spiDmaConfig(spiReg, txData, rxData, dataLen));
+  RETURN_IF_ERROR_CODE(spiDmaConfig(spiReg, (uint32_t)txData, (uint32_t)rxData, dataLen));
 
   spiTransmitAndReceiveData(spiReg, spiDataFormat, dataLen, txData, rxData);
 

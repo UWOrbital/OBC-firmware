@@ -221,13 +221,13 @@ void dmaGroupANotification(dmaInterrupt_t inttype, uint32 channel)
 /* USER CODE BEGIN (54) */
 switch (inttype){
   case FTC:
+  case LFS:
+  case BTC:
     switch(channel){
       case DMA_CH0:
         dmaSpi1FinishedCallback();
         break;
     }
-  case LFS:
-  case BTC:
   case HBC:
 }
 /* USER CODE END */

@@ -31,7 +31,7 @@ void mibspiEnableInternalLoopback(mibspiBASE_t* mibspi);
 uint16_t TX_DATA[D_SIZE];       /* transmit buffer in sys ram */
 uint16_t RX_DATA[D_SIZE] = {0}; /* receive  buffer in sys ram */
 
-static const spiDAT1_t spiConfig = {.CS_HOLD = false, .WDEL = false};
+static const spiDAT1_t spiConfig = {.CS_HOLD = false, .WDEL = false, .DFSEL = 1};
 
 // g_dmaCTRL g_dmaCTRLPKT; /* dma control packet configuration stack */
 /* USER CODE END */
