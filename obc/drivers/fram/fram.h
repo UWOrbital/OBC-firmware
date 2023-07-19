@@ -9,7 +9,7 @@
 #define FRAM_ID_LEN 9
 
 /**
- * @brief Initializes FRAM sleep status mutex
+ * @brief Initializes FRAM sleep status
  */
 void initFRAMMutex(void);
 
