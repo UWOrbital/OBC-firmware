@@ -92,12 +92,16 @@ static register_setting_t cc1120SettingsExt[] = {
 void initAllTxRxSemaphores(void) {
   if (txSemaphore == NULL) {
     txSemaphore = xSemaphoreCreateBinaryStatic(&txSemaphoreBuffer);
+    // Initialize semaphore with count of 1
+    xSemaphoreGive(txSemaphore);
   }
   if (rxSemaphore == NULL) {
     rxSemaphore = xSemaphoreCreateBinaryStatic(&rxSemaphoreBuffer);
   }
   if (txFifoEmptySemaphore == NULL) {
     txFifoEmptySemaphore = xSemaphoreCreateBinaryStatic(&txFifoEmptySemaphoreBuffer);
+    // Initialize semaphore with count of 1
+    xSemaphoreGive(txFifoEmptySemaphore);
   }
   if (syncReceivedSemaphore == NULL) {
     syncReceivedSemaphore = xSemaphoreCreateBinaryStatic(&syncReceivedSemaphoreBuffer);
