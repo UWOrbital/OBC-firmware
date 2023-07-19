@@ -26,7 +26,7 @@ static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = F
 #define OP_GET_ID 0x9FU
 
 #define FRAM_WAKE_BUSY_WAIT 99000U  // Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay
-
+#define FRAM_WAKE_TIME_MS 0.45f     // equivalent to 450 us
 static bool isAsleep = false;
 
 typedef enum cmd {
@@ -351,8 +351,13 @@ obc_error_code_t framSleep(void) {
 obc_error_code_t framWakeUp(void) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  for (volatile uint32_t i = 0; i < FRAM_WAKE_BUSY_WAIT; i++) {
-    // Do Nothing
+  BaseType_t schedulerState = xTaskGetSchedulerState();
+  if (schedulerState == taskSCHEDULER_NOT_STARTED) {
+    for (volatile uint32_t i = 0; i < FRAM_WAKE_BUSY_WAIT; i++) {
+      // Do Nothing
+    }
+  } else {
+    vTaskDelay(pdMS_TO_TICKS(FRAM_WAKE_TIME_MS));
   }
   isAsleep = false;
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
