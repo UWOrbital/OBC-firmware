@@ -26,7 +26,7 @@ static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = F
 #define OP_GET_ID 0x9FU
 
 #define FRAM_WAKE_BUSY_WAIT 99000U  // Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay
-#define FRAM_WAKE_TIME_MS 0.45f     // equivalent to 450 us
+#define FRAM_WAKE_TIME_MS 1U        // Not woken up often, so ok to use minimum task delay of 1 ms
 static bool isAsleep = false;
 
 typedef enum cmd {
