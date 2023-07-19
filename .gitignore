@@ -60,8 +60,7 @@ dkms.conf
 
 .env
 
-build/
-build_arm/
+/build*
 
 .venv/
 venv/
