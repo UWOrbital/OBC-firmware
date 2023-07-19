@@ -143,7 +143,6 @@ target_include_directories(${HAL_LIB} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT
 target_sources(${HAL_LIB} PRIVATE ${HAL_SOURCES})
 
 add_library(${HAL_LIB_ARCHIVE} INTERFACE)
-add_library(${HAL_LIB} ALIAS ${HAL_LIB_ARCHIVE})
 target_link_libraries(${HAL_LIB_ARCHIVE} INTERFACE "-Wl,--whole-archive" ${HAL_LIB} "-Wl,--no-whole-archive")
 
 # Higher optimization levels on some hal files will break firmware for some reason
