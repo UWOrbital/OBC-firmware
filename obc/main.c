@@ -6,6 +6,7 @@
 #include "sys_dma.h"
 #include "mibspi.h"
 #include "obc_spi_dma.h"
+#include "obc_privilege.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -60,6 +61,7 @@ void main(void) {
   }
 
   spiEnableLoopback(spiREG1, 0);
+  spiDmaInit(spiREG1);
 
   TaskHandle_t t = xTaskCreateStatic(task, "name", 1024U, NULL, 500, stack, &taskBuf);
 
@@ -70,9 +72,9 @@ void main(void) {
 }
 
 void task(void *pvParameters) {
-  spiDmaInit(spiREG1);
-
+  BaseType_t ret = prvRaisePrivilege();
   dmaSpiTransmitandReceiveBytes(spiREG1, &spiConfig, TX_DATA, RX_DATA, D_SIZE);
+  portRESET_PRIVILEGE(ret);
 
   for (volatile uint32_t i = 0; i < 100000; ++i)
     ;
@@ -84,6 +86,8 @@ void task(void *pvParameters) {
     sciPrintText((unsigned char *)str, 5);
   }
 
-  while (1)
-    ;
+  for (uint8_t i = 0; i < 50; ++i) {
+    sprintf(str, "%u ", RX_DATA[0]);
+    sciPrintText((unsigned char *)str, 2);
+  }
 }

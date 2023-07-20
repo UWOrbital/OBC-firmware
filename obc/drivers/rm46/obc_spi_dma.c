@@ -3,6 +3,7 @@
 #include "sys_dma.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_privilege.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
@@ -71,9 +72,8 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
       dmaReqAssign(DMA_CH1, 1);          // Assign SPI1 TX to DMA channel 1
       dmaEnableInterrupt(DMA_CH0, BTC);  // Set DMA to trigger interrupt after a block transfer is complete
       initDmaSpi1Semaphores();           // Initialize dma spi1 semaphores
-      xSemaphoreTake(dmaSpi1FinishedSemaphore, (TickType_t)0);  // initialize semaphore with value of 0
-      dmaSetChEnable(DMA_CH0, DMA_HW);                          // SPI1 RX, hardware triggering
-      dmaSetChEnable(DMA_CH1, DMA_HW);                          // SPI1 TX, hardware triggering
+      dmaSetChEnable(DMA_CH0, DMA_HW);   // SPI1 RX, hardware triggering
+      dmaSetChEnable(DMA_CH1, DMA_HW);   // SPI1 TX, hardware triggering
       break;
     // Add more cases as we start to implement different spi buses with DMA
     default:
