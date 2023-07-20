@@ -10,13 +10,13 @@
 #include <FreeRTOSConfig.h>
 
 #define DMA_SPI_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(100000)
-#define DMA_SPI_MUTEX_TIMEOUT pdMS_TO_TICKS(10000)
+#define DMA_SPI_MUTEX_TIMEOUT portMAX_DELAY
 #define DMA_PORT_B 0x04
 
 static SemaphoreHandle_t dmaSpi1FinishedSemaphore = NULL;
 static StaticSemaphore_t dmaSpi1FinishedSemaphoreBuffer;
 static SemaphoreHandle_t dmaSpi1Mutex = NULL;
-static StaticSemaphore_t dmaSpi1MutexBuffer;
+static StaticSemaphore_t dmaSPi1MutexBuffer;
 
 /**
  * @brief configures DMA for a single spi transmission
@@ -43,7 +43,7 @@ static void initDmaSpi1Semaphores(void) {
     dmaSpi1FinishedSemaphore = xSemaphoreCreateBinaryStatic(&dmaSpi1FinishedSemaphoreBuffer);
   }
   if (dmaSpi1Mutex == NULL) {
-    dmaSpi1Mutex = xSemaphoreCreateMutexStatic(&dmaSpi1Mutex);
+    dmaSpi1Mutex = xSemaphoreCreateMutexStatic(&dmaSPi1MutexBuffer);
   }
 }
 
@@ -59,8 +59,6 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   spiReg->GCR1 |= (0x1 << 24);
-  spiReg->INT0 |= (0x1 << 16);
-  spiEnableNotification(spiReg, 0x10000);
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
       spiREG1->PC0 = 0 | (1 << 11)       // SOMI[0] as functional pin
@@ -113,7 +111,7 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
 
   dmaCtrlPktRx.PORTASGN = DMA_PORT_B;
   dmaCtrlPktRx.SADD = (uint32)(&spiReg->BUF);
-  dmaCtrlPktRx.DADD = (uint32)(rxDataAddr)-2;
+  dmaCtrlPktRx.DADD = (uint32)(rxDataAddr);
   dmaCtrlPktRx.FRCNT = dataLen;
   dmaCtrlPktRx.ELCNT = 1;
   dmaCtrlPktRx.CHCTRL = 0;
@@ -193,7 +191,7 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spi
 
   RETURN_IF_ERROR_CODE(spiDmaConfig(spiReg, (uint32_t)txData, (uint32_t)rxData, dataLen));
 
-  spiTransmitAndReceiveData(spiReg, spiDataFormat, dataLen, txData, rxData);
+  spiEnableNotification(spiReg, 0x10000);
 
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
