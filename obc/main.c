@@ -46,13 +46,12 @@ static const spiDAT1_t spiConfig = {.CS_HOLD = false, .WDEL = false, .DFSEL = 1}
 
 void main(void) {
   /* USER CODE BEGIN (3) */
-  initSciMutex();
   spiInit();
   sciInit();
 
   dmaEnable();
 
-  spiDmaInit(spiREG1);
+  initSciMutex();
 
   _enable_interrupt_();
 
@@ -61,25 +60,30 @@ void main(void) {
   }
 
   spiEnableLoopback(spiREG1, 0);
-  xTaskCreateStatic(task, "name", 1024U, NULL, 500, stack, &taskBuf);
+
+  TaskHandle_t t = xTaskCreateStatic(task, "name", 1024U, NULL, 500, stack, &taskBuf);
+
   vTaskStartScheduler();
 
   while (1)
-    ; /* loop forever */
-
-  /* USER CODE END */
+    ;
 }
 
 void task(void *pvParameters) {
+  spiDmaInit(spiREG1);
+
   dmaSpiTransmitandReceiveBytes(spiREG1, &spiConfig, TX_DATA, RX_DATA, D_SIZE);
-  for (volatile uint32_t i = 0; i < 100000; ++i) {
-    i += i;
-  }
-  char str[10] = "";
+
+  for (volatile uint32_t i = 0; i < 100000; ++i)
+    ;
+
+  char str[10] = {'\0'};
+
   for (uint8_t i = 0; i < D_SIZE; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
+
   while (1)
     ;
 }
