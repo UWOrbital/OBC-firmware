@@ -507,7 +507,5 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
         msg[i] = rs->received_polynomial.coeff[encoded_length - (i + 1)];
     }
 
-    polynomial_destroy(temp_poly);
-
     return msg_length;
 }
