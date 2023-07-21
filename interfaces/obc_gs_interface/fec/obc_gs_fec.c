@@ -3,10 +3,11 @@
 #include "obc_gs_errors.h"
 
 #include <correct.h>
+#include <correct/reed-solomon.h>
 
 #include <stdint.h>
 
-static correct_reed_solomon *rs = NULL;
+static correct_reed_solomon rs = {0};
 
 /**
  * @brief takes in a packed telemtry array and encodes it using reed solomon
@@ -21,7 +22,7 @@ obc_gs_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData) {
 
   if (rsData == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
 
-  if ((uint8_t)correct_reed_solomon_encode(rs, telemData, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE) {
+  if ((uint8_t)correct_reed_solomon_encode(&rs, telemData, RS_DECODED_SIZE, rsData->data) < RS_ENCODED_SIZE) {
     return OBC_GS_ERR_CODE_REED_SOL_ENC_ERR;
   }
 
@@ -44,21 +45,13 @@ obc_gs_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData, u
 
   if (decodedDataLen < RS_DECODED_SIZE) return OBC_GS_ERR_CODE_INVALID_ARG;
 
-  int8_t decodedLength = correct_reed_solomon_decode(rs, rsData->data, RS_ENCODED_SIZE, decodedData);
+  int8_t decodedLength = correct_reed_solomon_decode(&rs, rsData->data, RS_ENCODED_SIZE, decodedData);
   if (decodedLength == -1) return OBC_GS_ERR_CODE_REED_SOL_DEC_ERR;
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 void initRs(void) {
-  if (rs == NULL) {
-    // Create reed solomon variable for encryption and decryption
-    rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
-  }
-}
-
-void destroyRs(void) {
-  if (rs != NULL) {
-    correct_reed_solomon_destroy(rs);
-  }
+  // Create reed solomon variable for encryption and decryption
+  correct_reed_solomon_create(&rs, correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
 }

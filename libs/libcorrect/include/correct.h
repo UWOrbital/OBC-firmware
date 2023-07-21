@@ -80,7 +80,8 @@ static const uint16_t correct_rs_primitive_polynomial_ccsds =
  * generator_root_gap are 1 and 1. Not all combinations of
  * values produce valid codes.
  */
-correct_reed_solomon *correct_reed_solomon_create(uint16_t primitive_polynomial,
+correct_reed_solomon *correct_reed_solomon_create(correct_reed_solomon *rs,
+                                                  uint16_t primitive_polynomial,
                                                   uint8_t first_consecutive_root,
                                                   uint8_t generator_root_gap,
                                                   size_t num_roots);
