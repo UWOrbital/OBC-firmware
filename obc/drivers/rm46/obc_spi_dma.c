@@ -110,7 +110,7 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
 
   dmaCtrlPktTx.PORTASGN = DMA_PORT_B;
   dmaCtrlPktTx.SADD = (uint32)(txDataAddr);
-  dmaCtrlPktTx.DADD = (uint32)(&spiReg->DAT1);
+  dmaCtrlPktTx.DADD = (uint32)(&spiReg->DAT0);
   dmaCtrlPktTx.FRCNT = dataLen;
   dmaCtrlPktTx.ELCNT = 1;
   dmaCtrlPktTx.CHCTRL = 0;
