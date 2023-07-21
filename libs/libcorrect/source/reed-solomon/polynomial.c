@@ -13,10 +13,6 @@ polynomial_t polynomial_create(unsigned int order) {
     return polynomial;
 }
 
-void polynomial_destroy(polynomial_t polynomial) {
-    sysFreeMem(polynomial.coeff);
-}
-
 // if you want a full multiplication, then make res.order = l.order + r.order
 // but if you just care about a lower order, e.g. mul mod x^i, then you can select
 //    fewer coefficients
@@ -252,10 +248,6 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
 
     memcpy(poly.coeff, r[rcoeffres].coeff, (order + 1) * sizeof(field_element_t));
     poly.order = order;
-
-    sysFreeMem(l.coeff);
-    sysFreeMem(r[0].coeff);
-    sysFreeMem(r[1].coeff);
 
     return poly;
 }

@@ -481,7 +481,6 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
     if (!reed_solomon_factorize_error_locator(rs->field, erasure_length, rs->error_locator_log, rs->error_roots, rs->element_exp)) {
         // roots couldn't be found, so there were too many errors to deal with
         // RS has failed for this message
-        sysFreeMem(syndrome_copy);
         return -1;
     }
 
@@ -509,7 +508,6 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
     }
 
     polynomial_destroy(temp_poly);
-    sysFreeMem(syndrome_copy);
 
     return msg_length;
 }
