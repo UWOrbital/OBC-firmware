@@ -13,8 +13,8 @@ TEST(TestAx25SendRecv, iFrameNoStuff) {
   ASSERT_EQ(rsEncode(data, &encodedData), 0);
   // flip some bits
   encodedData.data[0] ^= 0b10000001;
-  encodeData.data[222] ^= 0b10100011;
+  encodedData.data[222] ^= 0b10100011;
   uint8_t decodedData[RS_DECODED_SIZE];
-  ASSERT_EQ(rsDecode(encodedData, decodedData, RS_DECODED_SIZE), 0);
+  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), 0);
   ASSERT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
 }
