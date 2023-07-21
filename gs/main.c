@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include <correct/reed-solomon.h>
 
 #define COM_PORT_NAME_PREFIX "\\\\.\\COM"
 

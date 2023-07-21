@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(TestAx25SendRecv, iFrameNoStuff) {
+TEST(TestFecEncodeDecode, EncodeDecode) {
   packed_rs_packet_t encodedData = {0};
   uint8_t data[RS_DECODED_SIZE];
   memset(data, 0xFF, RS_DECODED_SIZE);
