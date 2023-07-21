@@ -96,7 +96,6 @@ int main() {
     free_rs_char(fec_rs);
 
     rs_testbench_destroy(testbench);
-    correct_reed_solomon_destroy(rs);
 
     min_distance = 16;
     message_length = block_length - min_distance;
@@ -131,7 +130,6 @@ int main() {
     free_rs_char(fec_rs);
 
     rs_testbench_destroy(testbench);
-    correct_reed_solomon_destroy(rs);
 
     printf("test passed\n");
     return 0;

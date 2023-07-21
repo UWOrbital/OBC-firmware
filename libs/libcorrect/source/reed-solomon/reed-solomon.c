@@ -37,10 +37,6 @@ correct_reed_solomon *correct_reed_solomon_create(correct_reed_solomon *rs, fiel
     return rs;
 }
 
-void correct_reed_solomon_destroy(correct_reed_solomon *rs) {
-    field_destroy(rs->field);
-}
-
 void correct_reed_solomon_debug_print(correct_reed_solomon *rs) {
     for (unsigned int i = 0; i < 256; i++) {
         printf("%3d  %3d    %3d  %3d\n", i, rs->field.exp[i], i, rs->field.log[i]);

@@ -38,7 +38,6 @@
 
 // void free_rs_char(void *rs) {
 //     reed_solomon_shim *shim = (reed_solomon_shim *)rs;
-//     correct_reed_solomon_destroy(shim->rs);
 //     sysFreeMem(shim->msg_out);
 //     sysFreeMem(shim->erasures);
 //     sysFreeMem(shim);

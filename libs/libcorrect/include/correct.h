@@ -153,11 +153,6 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
                                                   const uint8_t *erasure_locations,
                                                   size_t erasure_length, uint8_t *msg);
 
-/* correct_reed_solomon_destroy releases the resources
- * associated with rs. This pointer should not be
- * used for any functions after this call.
- */
-void correct_reed_solomon_destroy(correct_reed_solomon *rs);
 
 #endif
 
