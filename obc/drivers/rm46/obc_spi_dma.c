@@ -4,6 +4,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_privilege.h"
+#include "obc_spi_io.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
@@ -13,6 +14,7 @@
 #define DMA_SPI_FINISHED_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(100000)
 #define DMA_SPI_MUTEX_TIMEOUT portMAX_DELAY
 #define DMA_PORT_B 0x04
+#define SPI_NOTIFICATION_DMA_REQ 0x10000
 
 static SemaphoreHandle_t dmaSpi1FinishedSemaphore = NULL;
 static StaticSemaphore_t dmaSpi1FinishedSemaphoreBuffer;
@@ -34,18 +36,16 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
 /**
  * @brief initializes the semaphores for using the DMA for SPI1
  */
-static void initDmaSpi1Semaphores(void);
+static void initDmaSpiSemaphores(void);
 
 /**
  * @brief initializes the semaphores for using the DMA for SPI1
  */
-static void initDmaSpi1Semaphores(void) {
+static void initDmaSpiSemaphores(void) {
   if (dmaSpi1FinishedSemaphore == NULL) {
     dmaSpi1FinishedSemaphore = xSemaphoreCreateBinaryStatic(&dmaSpi1FinishedSemaphoreBuffer);
   }
-  if (dmaSpi1Mutex == NULL) {
-    dmaSpi1Mutex = xSemaphoreCreateMutexStatic(&dmaSPi1MutexBuffer);
-  }
+  // Add more semaphores in the future as needed
 }
 
 /**
@@ -59,19 +59,12 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
   if (spiReg == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  spiReg->GCR1 |= (0x1 << 24);
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
-      spiREG1->PC0 = 0 | (1 << 11)       // SOMI[0] as functional pin
-                     | (1 << 10)         // SIMO[0] as functional pin
-                     | (1 << 9)          // CLK as functional pin
-                     | (0);              // CS as GIO pin
-      spiREG1->PC1 = 0x01;               // CS[0] as output
-      spiREG1->PC3 = 0x00;               // CS[0]=0
-      dmaReqAssign(DMA_CH0, 0);          // Assign SPI1 RX to DMA channel 0
-      dmaReqAssign(DMA_CH1, 1);          // Assign SPI1 TX to DMA channel 1
+      dmaReqAssign(DMA_CH0, 0);          // Assign SPI1 RX to DMA channel 0 (See Table 6-33 in datasheet)
+      dmaReqAssign(DMA_CH1, 1);          // Assign SPI1 TX to DMA channel 1 (See Table 6-33 in datasheet)
       dmaEnableInterrupt(DMA_CH0, BTC);  // Set DMA to trigger interrupt after a block transfer is complete
-      initDmaSpi1Semaphores();           // Initialize dma spi1 semaphores
+      initDmaSpiSemaphores();            // Initialize dma spi1 semaphores
       dmaSetChEnable(DMA_CH0, DMA_HW);   // SPI1 RX, hardware triggering
       dmaSetChEnable(DMA_CH1, DMA_HW);   // SPI1 TX, hardware triggering
       break;
@@ -79,20 +72,9 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
-  spiReg->GCR1 = (spiREG1->GCR1 & 0xFFFFFFFFU) | (0x1 << 24);  // Enable SPI
   return OBC_ERR_CODE_SUCCESS;
 }
 
-/**
- * @brief configures DMA for a single spi transmission
- *
- * @param spiReg SPI bus to use for the transfer
- * @param txDataAddr starting address of the data that needs to be sent
- * @param rxDataAddr starting address of the buffer for received data
- * @param dataLen number of uint16_t to send
- *
- * @return obc_error_code_t - whether or not the configuration was successful
- */
 static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uint32_t rxDataAddr, size_t dataLen) {
   if (spiReg == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -149,23 +131,9 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
   return OBC_ERR_CODE_SUCCESS;
 }
 
-/**
- * @brief Uses the DMA to transmit and receive bytes over SPI
- *
- * @param spiReg the SPI bus to use for the transfer
- * @param spiDataFormat the spi data format to use for the transfer
- * @param txData array of uint16_t to be sent over the SPI bus
- * @param rxData buffer of atleast dataLen size to hold the received bytes
- * @param dataLen number of uint16_t to send
- *
- * @return obc_error_code_t - whether or not the transfer was successful
- */
-obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint16_t *txData,
-                                               uint16_t *rxData, size_t dataLen) {
-  if (spiReg == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-  if (spiDataFormat == NULL) {
+obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txData, uint16_t *rxData, size_t dataLen,
+                                               uint32_t spiMutexTimeoutMs, uint32_t transferCompleteTimeoutMs) {
+  if (spiReg != spiREG1 /* add more checks with `&&` as we start to support more spi buses with DMA */) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   if (txData == NULL) {
@@ -179,30 +147,33 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spi
   }
   obc_error_code_t errCode;
 
-  switch ((uint32_t)spiReg) {
-    case (uint32_t)spiREG1:
-      if (xSemaphoreTake(dmaSpi1Mutex, DMA_SPI_MUTEX_TIMEOUT) != pdPASS) {
-        return OBC_ERR_CODE_MUTEX_TIMEOUT;
-      }
-      break;
-    default:
-      return OBC_ERR_CODE_INVALID_ARG;
+  SemaphoreHandle_t spiMutex;
+  RETURN_IF_ERROR_CODE(getSpiMutex(spiReg, &spiMutex));
+
+  if (!isSpiBusOwner(spiMutex)) {
+    return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
+  BaseType_t xRunningPriveleged = prvRaisePrivilege();
+  dmaEnable();
 
   RETURN_IF_ERROR_CODE(spiDmaConfig(spiReg, (uint32_t)txData, (uint32_t)rxData, dataLen));
 
-  spiEnableNotification(spiReg, 0x10000);
+  spiEnableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);
 
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
-      if (xSemaphoreTake(dmaSpi1FinishedSemaphore, DMA_SPI_FINISHED_SEMAPHORE_TIMEOUT) != pdPASS) {
+      if (xSemaphoreTake(dmaSpi1FinishedSemaphore, pdMS_TO_TICKS(transferCompleteTimeoutMs)) != pdPASS) {
+        spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
       }
-      xSemaphoreGive(dmaSpi1Mutex);
       break;
     default:
+      spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
       return OBC_ERR_CODE_INVALID_ARG;
   }
+  dmaDisable();
+  spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
+  portRESET_PRIVILEGE(xRunningPriveleged);
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -220,4 +191,21 @@ void dmaSpi1FinishedCallback(void) {
   // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
   // been unblocked
   portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
+}
+
+void dmaGroupANotification(dmaInterrupt_t inttype, uint32 channel) {
+  /*  enter user code between the USER CODE BEGIN and USER CODE END. */
+  /* USER CODE BEGIN (54) */
+  switch (inttype) {
+    case FTC:
+    case LFS:
+    case BTC:
+      switch (channel) {
+        case DMA_CH0:
+          dmaSpi1FinishedCallback();
+          break;
+      }
+    case HBC:
+  }
+  /* USER CODE END */
 }

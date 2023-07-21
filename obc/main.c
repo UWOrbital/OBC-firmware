@@ -53,6 +53,7 @@ void main(void) {
   dmaEnable();
 
   initSciMutex();
+  initSpiMutex();
 
   _enable_interrupt_();
 
@@ -72,12 +73,9 @@ void main(void) {
 }
 
 void task(void *pvParameters) {
-  BaseType_t ret = prvRaisePrivilege();
-  dmaSpiTransmitandReceiveBytes(spiREG1, &spiConfig, TX_DATA, RX_DATA, D_SIZE);
-  portRESET_PRIVILEGE(ret);
-
-  for (volatile uint32_t i = 0; i < 100000; ++i)
-    ;
+  assertChipSelect(spiPORT1, 0);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  deassertChipSelect(spiPORT1, 0);
 
   char str[10] = {'\0'};
 
@@ -87,7 +85,18 @@ void task(void *pvParameters) {
   }
 
   for (uint8_t i = 0; i < 50; ++i) {
-    sprintf(str, "%u ", RX_DATA[0]);
-    sciPrintText((unsigned char *)str, 2);
+    TX_DATA[i] = 0xff;
   }
+
+  assertChipSelect(spiPORT1, 0);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  deassertChipSelect(spiPORT1, 0);
+
+  for (uint8_t i = 0; i < 50; ++i) {
+    sprintf(str, "%u ", RX_DATA[i]);
+    sciPrintText((unsigned char *)str, 5);
+  }
+
+  while (1)
+    ;
 }

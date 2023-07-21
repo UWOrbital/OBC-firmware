@@ -59,7 +59,6 @@
 #include "sys_dma.h"
 
 /* USER CODE BEGIN (0) */
-#include "obc_spi_dma.h"
 /* USER CODE END */
 void esmGroup1Notification(uint32 channel)
 {
@@ -213,23 +212,13 @@ void hetNotification(hetBASE_t *het, uint32 offset)
 
 
 /* USER CODE BEGIN (53) */
+__attribute__((weak))
 /* USER CODE END */
 
 void dmaGroupANotification(dmaInterrupt_t inttype, uint32 channel)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (54) */
-switch (inttype){
-  case FTC:
-  case LFS:
-  case BTC:
-    switch(channel){
-      case DMA_CH0:
-        dmaSpi1FinishedCallback();
-        break;
-    }
-  case HBC:
-}
 /* USER CODE END */
 }
 /* USER CODE BEGIN (55) */
