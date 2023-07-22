@@ -11,7 +11,7 @@
 /**
  * @brief Initializes FRAM sleep status
  */
-void initFRAMMutex(void);
+void initFRAM(void);
 
 /**
  * @brief Read FRAM status register.

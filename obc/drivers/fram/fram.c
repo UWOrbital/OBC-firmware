@@ -88,7 +88,7 @@ static obc_error_code_t framTransmitAddress(uint32_t addr) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-void initFRAMMutex(void) { isAsleep = false; }
+void initFRAM(void) { isAsleep = false; }
 
 obc_error_code_t framReadStatusReg(uint8_t *status) {
   obc_error_code_t errCode;

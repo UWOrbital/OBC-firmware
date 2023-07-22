@@ -24,7 +24,7 @@ int main(void) {
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};
 
-  initFRAMMutex();
+  initFRAM();
 
   // Read Manufacture ID
   framReadID(chipID, FRAM_ID_LEN);
