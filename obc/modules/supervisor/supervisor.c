@@ -18,6 +18,7 @@
 #include "lm75bd.h"
 #include "obc_board_config.h"
 #include "comms_uplink_receiver.h"
+#include "fram.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -105,6 +106,8 @@ static void vSupervisorTask(void *pvParameters) {
   };
 
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
+
+  initFRAM();  // FRAM storage (OBC)
 
   /* Initialize other tasks */
   // Don't start running any tasks until all tasks are initialized
