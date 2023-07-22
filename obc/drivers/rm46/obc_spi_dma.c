@@ -18,8 +18,6 @@
 
 static SemaphoreHandle_t dmaSpi1FinishedSemaphore = NULL;
 static StaticSemaphore_t dmaSpi1FinishedSemaphoreBuffer;
-static SemaphoreHandle_t dmaSpi1Mutex = NULL;
-static StaticSemaphore_t dmaSPi1MutexBuffer;
 
 /**
  * @brief configures DMA for a single spi transmission
@@ -157,12 +155,10 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
       if (xSemaphoreTake(dmaSpi1FinishedSemaphore, pdMS_TO_TICKS(transferCompleteTimeoutMs)) != pdPASS) {
-        spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
       }
       break;
     default:
-      spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
       return OBC_ERR_CODE_INVALID_ARG;
   }
   portRESET_PRIVILEGE(xRunningPriveleged);

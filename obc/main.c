@@ -97,7 +97,7 @@ void task(void *pvParameters) {
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 50; ++i) {
-    sprintf(str, "%u ", RX_DATA[i]);
+    sprintf(str, "%u ", RX_DATA_SECOND[i + 1]);
     sciPrintText((unsigned char *)str, 5);
   }
   sciPrintText("           ", 20);
