@@ -51,6 +51,7 @@ void main(void) {
   sciInit();
 
   dmaEnable();
+  initDmaSpiSemaphores();
 
   initSciMutex();
   initSpiMutex();
@@ -83,111 +84,115 @@ void task(void *pvParameters) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
+  sciPrintText("           ", 20);
 
   for (uint8_t i = 0; i < 50; ++i) {
     TX_DATA[i] = 0xff;
   }
 
+  uint16_t RX_DATA_SECOND[51] = {0};
+
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA_SECOND + 1, 50, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 50; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
+  sciPrintText("           ", 20);
 
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x55;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 10, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x33;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 10, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x22;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 10, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x11;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 10, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x09;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 10, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   for (uint8_t i = 0; i < 5; ++i) {
     TX_DATA[i] = 0x08;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 5, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 5; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   for (uint8_t i = 0; i < 3; ++i) {
     TX_DATA[i] = 0x07;
   }
 
   assertChipSelect(spiPORT1, 0);
-  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, D_SIZE, 1000, 10000);
+  dmaSpiTransmitandReceiveBytes(spiREG1, TX_DATA, RX_DATA, 3, 1000, 10000);
   deassertChipSelect(spiPORT1, 0);
 
   for (uint8_t i = 0; i < 3; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5);
   }
-
+  sciPrintText("           ", 20);
   while (1)
     ;
 }

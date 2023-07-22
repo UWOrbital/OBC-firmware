@@ -36,12 +36,7 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
 /**
  * @brief initializes the semaphores for using the DMA for SPI1
  */
-static void initDmaSpiSemaphores(void);
-
-/**
- * @brief initializes the semaphores for using the DMA for SPI1
- */
-static void initDmaSpiSemaphores(void) {
+void initDmaSpiSemaphores(void) {
   if (dmaSpi1FinishedSemaphore == NULL) {
     dmaSpi1FinishedSemaphore = xSemaphoreCreateBinaryStatic(&dmaSpi1FinishedSemaphoreBuffer);
   }
@@ -154,7 +149,6 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
   BaseType_t xRunningPriveleged = prvRaisePrivilege();
-  dmaEnable();
 
   RETURN_IF_ERROR_CODE(spiDmaConfig(spiReg, (uint32_t)txData, (uint32_t)rxData, dataLen));
 
@@ -171,8 +165,6 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
       spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
       return OBC_ERR_CODE_INVALID_ARG;
   }
-  dmaDisable();
-  spiDisableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);  // End the spi transfer by stopping the DMAREQ line
   portRESET_PRIVILEGE(xRunningPriveleged);
 
   return OBC_ERR_CODE_SUCCESS;

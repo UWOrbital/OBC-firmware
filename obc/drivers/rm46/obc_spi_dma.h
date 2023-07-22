@@ -13,6 +13,11 @@
 obc_error_code_t spiDmaInit(spiBASE_t *spiReg);
 
 /**
+ * @brief initializes the semaphores for using the DMA for SPI1
+ */
+void initDmaSpiSemaphores(void);
+
+/**
  * @brief Uses the DMA to transmit and receive bytes over SPI
  *
  * @param spiReg the SPI bus to use for the transfer
