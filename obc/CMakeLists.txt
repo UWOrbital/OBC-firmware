@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.15)
 # Set default values for firmware build options
 include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
+include(hal/cmake/board_lib_defs.cmake)
+
 if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
     set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/launchpad/source/sys_link.ld")
 elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
@@ -17,22 +19,10 @@ add_link_options(-specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKE
 
 add_executable(OBC-firmware.out main.c)
 
-# Higher optimization levels on some hal files will break firmware for some reason
-# Compile them with no optimizations
-add_library(NO_OPTIMIZE_FILES OBJECT)
-
 if (DEBUG MATCHES 1)
     target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
-
-    # Higher optimization levels on some hal files will break firmware for some reason
-    # Compile them with no optimizations
-    target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
 else()
     target_compile_options(OBC-firmware.out PRIVATE -O2)
-
-    # Higher optimization levels on some hal files will break firmware for some reason
-    # Compile them with no optimizations
-    target_compile_options(NO_OPTIMIZE_FILES PRIVATE -O0)
 endif()
 
 target_compile_definitions(OBC-firmware.out PRIVATE
@@ -61,5 +51,6 @@ target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
-    $<TARGET_OBJECTS:NO_OPTIMIZE_FILES>
+    ${HAL_LIB_ARCHIVE}
+    $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
