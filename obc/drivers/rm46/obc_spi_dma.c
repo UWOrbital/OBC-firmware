@@ -72,12 +72,6 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
   if (spiReg == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  if (txDataAddr == 0) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-  if (rxDataAddr == 0) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
   if (dataLen == 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
