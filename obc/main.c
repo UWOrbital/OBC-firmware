@@ -20,23 +20,35 @@ int main(void) {
   // Run hardware initialization code
   gioInit();
   sciInit();
-  i2cInit();
-  spiInit();
-  canInit();
-  hetInit();
 
-  _enable_interrupt_();
+  char str[] = "Hello, OBC\r\n";
+  sciSend(scilinREG, sizeof(str), (uint8 *)str);
 
-  // Initialize logger
-  initLogger();
+  while (1) {
+    gioToggleBit(gioPORTB, 1);
+    for (volatile int i = 0; i < 10000000; i++) {
+      asm(" NOP");
+    }
+  }
 
-  // Initialize bus mutexes
-  initSciMutex();
-  initI2CMutex();
-  initSpiMutex();
+  // sciInit();
+  // i2cInit();
+  // spiInit();
+  // canInit();
+  // hetInit();
 
-  // The supervisor is the only task running initially.
-  initSupervisor();
+  // _enable_interrupt_();
 
-  vTaskStartScheduler();
+  // // Initialize logger
+  // initLogger();
+
+  // // Initialize bus mutexes
+  // initSciMutex();
+  // initI2CMutex();
+  // initSpiMutex();
+
+  // // The supervisor is the only task running initially.
+  // initSupervisor();
+
+  // vTaskStartScheduler();
 }

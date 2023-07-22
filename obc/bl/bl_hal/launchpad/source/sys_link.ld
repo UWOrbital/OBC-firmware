@@ -16,9 +16,9 @@ _Min_Heap_Size = 0x400;      /* required amount of heap  */
 /* Specify the memory areas */
 MEMORY
 {
-  VECTORS(rx)     : ORIGIN = 0x00028000, LENGTH = 0x00000020
-  KERNEL (rx)     : ORIGIN = 0x00028020, LENGTH = 0x00008000
-  FLASH  (rx)     : ORIGIN = 0x00030020, LENGTH = (0x0013ffff - 0x00030020)
+  VECTORS(rx)     : ORIGIN = 0x00000000, LENGTH = 0x00000020
+  KERNEL (rx)     : ORIGIN = 0x00000020, LENGTH = 0x00008000
+  FLASH  (rx)     : ORIGIN = 0x00008020, LENGTH = (0x00028000 - 0x00008020)
   CPU_STACK (rw)  : ORIGIN = 0x08000000, LENGTH = 0x00000800 /* Stack is configured in sys_core.asm */
   KRAM (xrw)      : ORIGIN = 0x08000800, LENGTH = 0x00000800
   RAM (xrw)       : ORIGIN = (0x08000800 + 0x00000800), LENGTH = (0x0002f800 - 0x00000800)
