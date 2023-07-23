@@ -192,12 +192,15 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
   BaseType_t xRunningPrivileged = prvRaisePrivilege();
+  /* START PRIVILEGED SECTION */
+  /* The following code causes hard fault if not done in priveleged mode */
 
   RETURN_IF_ERROR_CODE(spiDmaRxConfig(spiReg, (uint32_t)rxData, dataLen));
   RETURN_IF_ERROR_CODE(spiDmaTxConfig(spiReg, (uint32_t)txData, dataLen));
 
   spiEnableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);
 
+  /* END PRIVILEGED SECTION */
   portRESET_PRIVILEGE(xRunningPrivileged);
 
   switch ((uint32_t)spiReg) {
