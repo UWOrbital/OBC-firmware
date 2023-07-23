@@ -30,10 +30,27 @@
 #define CS_DEASSERTED 1
 
 /**
+ * @brief Get the Mutex for the specified SPI port and chip select pin.
+ *
+ * @param spi The SPI reg to use.
+ * @param mutex The mutex for the specified SPI port and chip select pin.
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+static obc_error_code_t getMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex);
+
+/**
  * @brief Log Spi Tx/Rx Errors.
  * @param spiErr Spi error flag.
  */
 static void spiLogErrors(uint32_t spiErr);
+
+/**
+ * @brief Check if the current task owns the SPI bus mutex.
+ *
+ * @param spiMutex The SPI bus mutex to check.
+ * @return true if the current task owns the SPI bus mutex; false otherwise.
+ */
+static bool isBusOwner(SemaphoreHandle_t spiMutex);
 
 // TODO: Deprecate this once codebase is refactored to allow non-SPI pins to be used as chip selects
 static spiBASE_t *portToReg(gioPORT_t *port);
@@ -54,7 +71,7 @@ obc_error_code_t spiTakeBusMutex(spiBASE_t *spi) {
   obc_error_code_t errCode;
 
   SemaphoreHandle_t spiMutex;
-  RETURN_IF_ERROR_CODE(getSpiMutex(spi, &spiMutex));
+  RETURN_IF_ERROR_CODE(getMutex(spi, &spiMutex));
 
   if (xSemaphoreTakeRecursive(spiMutex, SPI_BLOCKING_TIMEOUT) == pdTRUE) {
     return OBC_ERR_CODE_SUCCESS;
@@ -67,9 +84,9 @@ obc_error_code_t spiReleaseBusMutex(spiBASE_t *spi) {
   obc_error_code_t errCode;
 
   SemaphoreHandle_t spiMutex;
-  RETURN_IF_ERROR_CODE(getSpiMutex(spi, &spiMutex));
+  RETURN_IF_ERROR_CODE(getMutex(spi, &spiMutex));
 
-  if (!isSpiBusOwner(spiMutex)) {
+  if (!isBusOwner(spiMutex)) {
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
 
@@ -107,11 +124,11 @@ obc_error_code_t deassertChipSelect(gioPORT_t *spiPort, uint8_t csNum) {
   }
 
   SemaphoreHandle_t spiMutex;
-  RETURN_IF_ERROR_CODE(getSpiMutex(spiReg, &spiMutex));
+  RETURN_IF_ERROR_CODE(getMutex(spiReg, &spiMutex));
 
   // Since the CS pin must be deasserted before releasing the mutex, we need to do this check
   // before spiReleaseBusMutex
-  if (!isSpiBusOwner(spiMutex)) {
+  if (!isBusOwner(spiMutex)) {
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
 
@@ -150,9 +167,9 @@ obc_error_code_t spiTransmitBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, u
   }
 
   SemaphoreHandle_t spiMutex;
-  RETURN_IF_ERROR_CODE(getSpiMutex(spiReg, &spiMutex));
+  RETURN_IF_ERROR_CODE(getMutex(spiReg, &spiMutex));
 
-  if (!isSpiBusOwner(spiMutex)) {
+  if (!isBusOwner(spiMutex)) {
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
 
@@ -180,9 +197,9 @@ obc_error_code_t spiReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, ui
   }
 
   SemaphoreHandle_t spiMutex;
-  RETURN_IF_ERROR_CODE(getSpiMutex(spiReg, &spiMutex));
+  RETURN_IF_ERROR_CODE(getMutex(spiReg, &spiMutex));
 
-  if (!isSpiBusOwner(spiMutex)) {
+  if (!isBusOwner(spiMutex)) {
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
 
@@ -213,9 +230,9 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDat
   }
 
   SemaphoreHandle_t spiMutex;
-  RETURN_IF_ERROR_CODE(getSpiMutex(spiReg, &spiMutex));
+  RETURN_IF_ERROR_CODE(getMutex(spiReg, &spiMutex));
 
-  if (!isSpiBusOwner(spiMutex)) {
+  if (!isBusOwner(spiMutex)) {
     return OBC_ERR_CODE_NOT_MUTEX_OWNER;
   }
 
@@ -247,7 +264,7 @@ static void spiLogErrors(uint32_t spiErr) {
   if (spiErr & SPI_FLAG_RXOVRNINT) LOG_ERROR("SPI Error Flag: %u", SPI_FLAG_RXOVRNINT);
 }
 
-bool isSpiBusOwner(SemaphoreHandle_t spiMutex) {
+static bool isBusOwner(SemaphoreHandle_t spiMutex) {
   portENTER_CRITICAL();
   TaskHandle_t owner = xSemaphoreGetMutexHolder(spiMutex);
   portEXIT_CRITICAL();
@@ -255,7 +272,7 @@ bool isSpiBusOwner(SemaphoreHandle_t spiMutex) {
   return xSemaphoreGetMutexHolder(spiMutex) == owner;
 }
 
-obc_error_code_t getSpiMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex) {
+static obc_error_code_t getMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex) {
   if (spi == NULL || mutex == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
