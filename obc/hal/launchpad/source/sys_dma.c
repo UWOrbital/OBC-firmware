@@ -445,59 +445,5 @@ void dmaGetConfigValue(dma_config_reg_t *config_reg, config_value_type_t type)
 
 
 
-/** @fn void dmaFTCAInterrupt(void)
-*   @brief DMA Interrupt Handler
-*
-*   Frame transfer complete Interrupt handler for DMA channel routed to Group A
-*
-*/
-
-/* SourceId : DMA_SourceId_016 */
-/* DesignId : DMA_DesignId_016 */
-/* Requirements: HL_SR181, HL_SR182 */
-void dmaFTCAInterrupt(void)
-{
-    uint32 offset = dmaREG->FTCAOFFSET;
-
-/* USER CODE BEGIN (0) */
-/* USER CODE END */
-
-    if (offset != 0U)
-    {
-        dmaGroupANotification(FTC, offset - 1U);
-    }
-
-/* USER CODE BEGIN (1) */
-/* USER CODE END */
-
-}
 
 
-
-
-/** @fn void dmaBTCAInterrupt(void)
-*   @brief DMA Interrupt Handler
-*
-*   Frame transfer complete Interrupt handler for DMA channel routed to Group A
-*
-*/
-
-/* SourceId : DMA_SourceId_019 */
-/* DesignId : DMA_DesignId_016 */
-/* Requirements: HL_SR181, HL_SR182 */
-void dmaBTCAInterrupt(void)
-{
-    uint32 offset = dmaREG->BTCAOFFSET;
-
-/* USER CODE BEGIN (6) */
-/* USER CODE END */
-
-    if (offset != 0U)
-    {
-        dmaGroupANotification(BTC, offset - 1U);
-    }
-
-/* USER CODE BEGIN (7) */
-/* USER CODE END */
-
-}
