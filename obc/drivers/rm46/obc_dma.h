@@ -1,3 +1,5 @@
+#pragma once
+
 #define DMA_PORT_B 0x04
 
 // DMA SPI channels

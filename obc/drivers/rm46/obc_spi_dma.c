@@ -9,8 +9,6 @@
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
-#include <sys_common.h>
-#include <FreeRTOSConfig.h>
 
 #define SPI_NOTIFICATION_DMA_REQ 0x10000
 
@@ -200,6 +198,8 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
 
   spiEnableNotification(spiReg, SPI_NOTIFICATION_DMA_REQ);
 
+  portRESET_PRIVILEGE(xRunningPrivileged);
+
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
       if (xSemaphoreTake(dmaSpi1FinishedSemaphore, pdMS_TO_TICKS(transferCompleteTimeoutMs)) != pdPASS) {
@@ -214,7 +214,6 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
-  portRESET_PRIVILEGE(xRunningPrivileged);
 
   return OBC_ERR_CODE_SUCCESS;
 }
