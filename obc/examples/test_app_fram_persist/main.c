@@ -1,7 +1,7 @@
 #include "obc_sci_io.h"
 #include "obc_spi_io.h"
 #include "obc_errors.h"
-#include "obc_persistent_data_config.h"
+#include "obc_persistent_sections.h"
 #include "obc_persistent_store.h"
 #include "fram.h"
 

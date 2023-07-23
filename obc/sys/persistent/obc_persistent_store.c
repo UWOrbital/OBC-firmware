@@ -4,6 +4,7 @@
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_crc.h"
+#include "obc_assert.h"
 
 #include <string.h>
 
