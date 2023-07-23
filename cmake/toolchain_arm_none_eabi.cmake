@@ -1,6 +1,8 @@
 # Append current directory to CMAKE_MODULE_PATH for making device specific cmake modules visible
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+set(TOOLCHAIN_DIR ${CMAKE_BINARY_DIR}/toolchain)
+
 # Target definition
 set(CMAKE_SYSTEM_NAME  Generic)
 set(CMAKE_SYSTEM_PROCESSOR ARM)
@@ -39,7 +41,6 @@ add_compile_options(-Wall -Wextra -Wno-unused-parameter -fstack-usage -fdump-ipa
 
 # Linker flags
 add_link_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
-add_link_options(-specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT})
 
 #---------------------------------------------------------------------------------------
 # Set compilers
