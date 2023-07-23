@@ -8,8 +8,6 @@
 #include <gio.h>
 #include <FreeRTOS.h>
 #include <os_semphr.h>
-#include <sys_common.h>
-#include <FreeRTOSConfig.h>
 
 #define DEASSERT_RETURN_IF_ERROR_CODE(_spiPort, _csNum, _ret)     \
   do {                                                            \

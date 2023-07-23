@@ -3,6 +3,8 @@
 #include "obc_errors.h"
 #include "spi.h"
 
+#include <stdint.h>
+
 /**
  * @brief initalizes DMA for facilitating spi transfers for spiReg
  *
@@ -31,3 +33,13 @@ void initDmaSpiSemaphores(void);
  */
 obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txData, uint16_t *rxData, size_t dataLen,
                                                uint32_t spiMutexTimeoutMs, uint32_t transferCompleteTimeoutMs);
+
+/**
+ * @brief callback function to be called from ISR when DMA Block transfer is complete for SPI1
+ */
+void dmaSpi1FinishedCallback(void);
+
+/**
+ * @brief callback function to be called from ISR when DMA Block transfer is complete for SPI3
+ */
+void dmaSpi3FinishedCallback(void);
