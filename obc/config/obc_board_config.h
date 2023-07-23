@@ -1,7 +1,6 @@
 #include <spi.h>
 #include <sci.h>
 #include <gio.h>
-#include <sys_dma.h>
 
 /* Board macros for registers, ports, CS pins, data formats, etc. */
 
