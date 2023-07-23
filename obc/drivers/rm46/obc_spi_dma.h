@@ -31,8 +31,3 @@ void initDmaSpiSemaphores(void);
  */
 obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txData, uint16_t *rxData, size_t dataLen,
                                                uint32_t spiMutexTimeoutMs, uint32_t transferCompleteTimeoutMs);
-
-/**
- * @brief callback function to be called from ISR when DMA Block transfer is complete
- */
-void dmaSpi1FinishedCallback(void);

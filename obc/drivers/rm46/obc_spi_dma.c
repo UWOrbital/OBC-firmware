@@ -5,6 +5,7 @@
 #include "obc_logging.h"
 #include "obc_privilege.h"
 #include "obc_spi_io.h"
+#include "obc_board_config.h"
 
 #include <FreeRTOS.h>
 #include <os_semphr.h>
@@ -16,8 +17,13 @@
 #define DMA_PORT_B 0x04
 #define SPI_NOTIFICATION_DMA_REQ 0x10000
 
+static void dmaSpi1FinishedCallback(void);
+static void dmaSpi3FinishedCallback(void);
+
 static SemaphoreHandle_t dmaSpi1FinishedSemaphore = NULL;
 static StaticSemaphore_t dmaSpi1FinishedSemaphoreBuffer;
+static SemaphoreHandle_t dmaSpi3FinishedSemaphore = NULL;
+static StaticSemaphore_t dmaSpi3FinishedSemaphoreBuffer;
 
 /**
  * @brief configures DMA for a single spi transmission
@@ -38,6 +44,9 @@ void initDmaSpiSemaphores(void) {
   if (dmaSpi1FinishedSemaphore == NULL) {
     dmaSpi1FinishedSemaphore = xSemaphoreCreateBinaryStatic(&dmaSpi1FinishedSemaphoreBuffer);
   }
+  if (dmaSpi3FinishedSemaphore == NULL) {
+    dmaSpi3FinishedSemaphore = xSemaphoreCreateBinaryStatic(&dmaSpi3FinishedSemaphoreBuffer);
+  }
   // Add more semaphores in the future as needed
 }
 
@@ -54,12 +63,22 @@ obc_error_code_t spiDmaInit(spiBASE_t *spiReg) {
   }
   switch ((uint32_t)spiReg) {
     case (uint32_t)spiREG1:
-      dmaReqAssign(DMA_CH0, 0);          // Assign SPI1 RX to DMA channel 0 (See Table 6-33 in datasheet)
-      dmaReqAssign(DMA_CH1, 1);          // Assign SPI1 TX to DMA channel 1 (See Table 6-33 in datasheet)
-      dmaEnableInterrupt(DMA_CH0, BTC);  // Set DMA to trigger interrupt after a block transfer is complete
-      initDmaSpiSemaphores();            // Initialize dma spi1 semaphores
-      dmaSetChEnable(DMA_CH0, DMA_HW);   // SPI1 RX, hardware triggering
-      dmaSetChEnable(DMA_CH1, DMA_HW);   // SPI1 TX, hardware triggering
+      dmaReqAssign(DMA_SPI_1_RX_CHANNEL,
+                   DMA_SPI1_RX_REQ_LINE);  // Assign SPI1 RX to DMA channel 0 (See Table 6-33 in datasheet)
+      dmaReqAssign(DMA_SPI_1_TX_CHANNEL,
+                   DMA_SPI1_TX_REQ_LINE);             // Assign SPI1 TX to DMA channel 1 (See Table 6-33 in datasheet)
+      dmaEnableInterrupt(DMA_SPI_1_RX_CHANNEL, BTC);  // Set DMA to trigger interrupt after a block transfer is complete
+      dmaSetChEnable(DMA_SPI_1_RX_CHANNEL, DMA_HW);   // SPI1 RX, hardware triggering
+      dmaSetChEnable(DMA_SPI_1_TX_CHANNEL, DMA_HW);   // SPI1 TX, hardware triggering
+      break;
+    case (uint32_t)spiREG3:
+      dmaReqAssign(DMA_SPI_3_RX_CHANNEL,
+                   DMA_SPI3_RX_REQ_LINE);  // Assign SPI3 RX to DMA channel 2 (See Table 6-33 in datasheet)
+      dmaReqAssign(DMA_SPI_3_TX_CHANNEL,
+                   DMA_SPI3_TX_REQ_LINE);             // Assign SPI3 TX to DMA channel 3 (See Table 6-33 in datasheet)
+      dmaEnableInterrupt(DMA_SPI_3_RX_CHANNEL, BTC);  // Set DMA to trigger interrupt after a block transfer is complete
+      dmaSetChEnable(DMA_SPI_3_RX_CHANNEL, DMA_HW);   // SPI3 RX, hardware triggering
+      dmaSetChEnable(DMA_SPI_3_TX_CHANNEL, DMA_HW);   // SPI3 TX, hardware triggering
       break;
     // Add more cases as we start to implement different spi buses with DMA
     default:
@@ -112,8 +131,18 @@ static obc_error_code_t spiDmaConfig(spiBASE_t *spiReg, uint32_t txDataAddr, uin
   dmaCtrlPktTx.ADDMODEWR = ADDR_FIXED;
   dmaCtrlPktTx.AUTOINIT = AUTOINIT_ON;
 
-  dmaSetCtrlPacket(DMA_CH0, dmaCtrlPktRx);
-  dmaSetCtrlPacket(DMA_CH1, dmaCtrlPktTx);
+  switch ((uint32_t)spiReg) {
+    case (uint32_t)spiREG1:
+      dmaSetCtrlPacket(DMA_SPI_1_RX_CHANNEL, dmaCtrlPktRx);
+      dmaSetCtrlPacket(DMA_SPI_1_TX_CHANNEL, dmaCtrlPktTx);
+      break;
+    case (uint32_t)spiREG3:
+      dmaSetCtrlPacket(DMA_SPI_3_RX_CHANNEL, dmaCtrlPktRx);
+      dmaSetCtrlPacket(DMA_SPI_3_TX_CHANNEL, dmaCtrlPktTx);
+      break;
+    default:
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -152,6 +181,10 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
         return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
       }
       break;
+    case (uint32_t)spiREG3:
+      if (xSemaphoreTake(dmaSpi3FinishedSemaphore, pdMS_TO_TICKS(transferCompleteTimeoutMs)) != pdPASS) {
+        return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+      }
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -163,11 +196,26 @@ obc_error_code_t dmaSpiTransmitandReceiveBytes(spiBASE_t *spiReg, uint16_t *txDa
 /**
  * @brief callback function to be called from ISR when DMA Block transfer is complete
  */
-void dmaSpi1FinishedCallback(void) {
+static void dmaSpi1FinishedCallback(void) {
   BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
   // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
   // one
   if (xSemaphoreGiveFromISR(dmaSpi1FinishedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
+    /* TODO: figure out how to log from ISR */
+  }
+  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
+  // been unblocked
+  portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
+}
+
+/**
+ * @brief callback function to be called from ISR when DMA Block transfer is complete
+ */
+static void dmaSpi3FinishedCallback(void) {
+  BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
+  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
+  // one
+  if (xSemaphoreGiveFromISR(dmaSpi3FinishedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
     /* TODO: figure out how to log from ISR */
   }
   // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
@@ -183,8 +231,11 @@ void dmaGroupANotification(dmaInterrupt_t inttype, uint32 channel) {
     case LFS:
     case BTC:
       switch (channel) {
-        case DMA_CH0:
+        case DMA_SPI_1_RX_CHANNEL:
           dmaSpi1FinishedCallback();
+          break;
+        case DMA_SPI_3_RX_CHANNEL:
+          dmaSpi3FinishedCallback();
           break;
       }
     case HBC:
