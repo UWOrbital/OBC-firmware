@@ -7,7 +7,6 @@ void testGIO(void) {
   /* GIOA has 8 pins */
   for (int i = 0; i < 8; i++) {
     gioSetBit(gioPORTA, i, 1);
-    gioSetBit(gioPORTB, i, 1);
   }
 
   /* GIOB has 4 pins */
