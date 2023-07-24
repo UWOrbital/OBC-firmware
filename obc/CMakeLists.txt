@@ -13,9 +13,13 @@ else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
-add_link_options(-specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT})
-
 add_executable(OBC-firmware.out main.c)
+
+target_link_options(OBC-firmware.out PRIVATE
+    -specs=nosys.specs
+    -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT}
+    -Wl,--print-memory-usage
+)
 
 # Higher optimization levels on some hal files will break firmware for some reason
 # Compile them with no optimizations
