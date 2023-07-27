@@ -36,6 +36,20 @@ SECTIONS
     . = ALIGN(4);
   } >VECTORS
 
+  /* Flash API */
+  .flashApi : ALIGN(8)
+  {
+    __flashApiRunStart__ = .;
+    *(.flashApi)
+    *(.flashApi*)
+    *F021_API_CortexR4_LE.lib:*(.text .text*)
+    __flashApiRunEnd__ = .;
+  } >RAM AT> FLASH
+
+    /* used by bootloader to copy F021 API to RAM */
+  __flashApiLoadStart__ = LOADADDR(.flashApi);
+  __flashApiSize__ = SIZEOF(.flashApi);
+
  /* FreeRTOS Kernel in protected region of Flash */
   .kernelTEXT :
   {

@@ -8,9 +8,13 @@ include(${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/cmake/board_lib_defs.cmake)
 
 set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/launchpad/source/sys_link.ld")
 
-add_link_options(-specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT} -Wl,--print-memory-usage)
-
 add_executable(${BL_BIN} ${CMAKE_SOURCE_DIR}/obc/bl/bl_main.c)
+
+target_link_options(${BL_BIN} PRIVATE -specs=nosys.specs -T${LINKER_SCRIPT} -Wl,--print-memory-usage)
+target_link_options(${BL_BIN}
+    PUBLIC
+    LINKER:-Map=${CMAKE_BINARY_DIR}/${BL_BIN}.map
+)
 
 if (DEBUG MATCHES 1)
     target_compile_options(${BL_BIN} PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
@@ -20,12 +24,23 @@ endif()
 
 target_include_directories(${BL_BIN} PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
-    ${CMAKE_SOURCE_DIR}/obc/config
 )
+
+target_sources(${BL_BIN} PUBLIC
+    ${CMAKE_SOURCE_DIR}/obc/bl/F021_Flash_API/source/Fapi_UserDefinedFunctions.c
+)
+
+add_library(f021_api STATIC IMPORTED)
+set_property(TARGET f021_api PROPERTY IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/obc/bl/F021_Flash_API/F021_API_CortexR4_LE.lib)
+target_include_directories(f021_api INTERFACE ${CMAKE_SOURCE_DIR}/obc/bl/F021_Flash_API/include)
+
+add_library(f021_api_archive INTERFACE)
+target_link_libraries(f021_api_archive INTERFACE "-Wl,--whole-archive" f021_api "-Wl,--no-whole-archive")
 
 add_subdirectory(bl_hal)
 
 target_link_libraries(${BL_BIN} PRIVATE
     ${BL_HAL_LIB_ARCHIVE}
     $<TARGET_OBJECTS:${BL_HAL_LIB_NO_OPTIMIZE}>
+    f021_api_archive
 )
