@@ -12,6 +12,8 @@
 
 #define SRC_CALLSIGN "\0\0\0\0\0\0\0"
 
+#define CALL_SIGN_BYTES 6
+
 static uint8_t pktSentNum = 0;
 static uint8_t pktReceiveNum = 0;
 
@@ -67,6 +69,21 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if it was a valid fcs and error code if not
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
+
+/**
+ * @brief generates an address for the ax25 protocol
+ *
+ * @param sourceAddress the address of the source
+ * @param destAddress the address of the destination
+ * @param sourceCallSign the callsign of the source, if callsign is less than 6 bytes, fill in empty bytes as 0x40
+ * @param sourceSSID the SSID of the source
+ * @param destCallSign the callsign of the destination, if callsign is less than 6 bytes, fill in empty bytes as 0x40
+ * @param destSSID the SSID of the destination
+ *
+ * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if an address was generated and error code if not
+ */
+obc_gs_error_code_t ax25GetAddress(ax25_addr_t *sourceAddress, ax25_addr_t *destAddress, uint8_t sourceCallSign[],
+                                   uint8_t *sourceSSID, uint8_t destCallSign[], uint8_t *destSSID);
 
 obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
                                    const ax25_addr_t *destAddress) {
@@ -437,5 +454,28 @@ obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *st
   }
 
   *stuffedDataLen = ((stuffedOffset + 7) / 8) + 1;
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
+
+obc_gs_error_code_t ax25GetAddress(ax25_addr_t *sourceAddress, ax25_addr_t *destAddress, uint8_t sourceCallSign[],
+                                   uint8_t *sourceSSID, uint8_t destCallSign[], uint8_t *destSSID) {
+  if (sourceAddress == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (destAddress == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (sourceSSID == NULL || destSSID == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  memcpy(sourceAddress->data, sourceCallSign, CALL_SIGN_BYTES);
+  memcpy(sourceAddress->data + CALL_SIGN_BYTES, sourceSSID, 1);
+
+  memcpy(destAddress->data, destCallSign, CALL_SIGN_BYTES);
+  memcpy(destAddress->data + CALL_SIGN_BYTES, destSSID, 1);
+
   return OBC_GS_ERR_CODE_SUCCESS;
 }

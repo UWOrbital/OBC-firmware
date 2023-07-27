@@ -143,6 +143,20 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
  */
 obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *stuffedData, uint16_t *stuffedDataLen);
 
+/**
+ * @brief generates an address for the ax25 protocol
+ *
+ * @param sourceAddress the address of the source
+ * @param destAddress the address of the destination
+ * @param sourceCallSign the callsign of the source, if callsign is less than 6 bytes, fill in empty bytes as 0x40
+ * @param sourceSSID the SSID of the source
+ * @param destCallSign the callsign of the destination, if callsign is less than 6 bytes, fill in empty bytes as 0x40
+ * @param destSSID the SSID of the destination
+ *
+ * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if an address was generated and error code if not
+ */
+obc_gs_error_code_t ax25GetAddress(ax25_addr_t *sourceAddress, ax25_addr_t *destAddress, uint8_t sourceCallSign[],
+                                   uint8_t *sourceSSID, uint8_t destCallSign[], uint8_t *destSSID);
 #ifdef __cplusplus
 }
 #endif
