@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define AX25_TIMEOUT_SECONDS 300
+
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  *

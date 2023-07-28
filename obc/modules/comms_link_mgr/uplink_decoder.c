@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 // decode data queue length should be double TXRX_INTERRUPT_THRESHOLD for safety to avoid cc1120 getting blocked
 // can be reduced later depending on memory limitations
@@ -103,6 +104,8 @@ void initDecodeTask(void) {
 static void vDecodeTask(void *pvParameters) {
   obc_error_code_t errCode;
   uint8_t byte = 0;
+  time_t timeLastByteWasReceived, currentTime;
+  time(&timeLastByteWasReceived);
 
   packed_ax25_i_frame_t axData = {0};
   uint16_t axDataIndex = 0;
@@ -120,28 +123,34 @@ static void vDecodeTask(void *pvParameters) {
         startFlagReceived = false;
       }
 
+      time(&currentTime);
       if (byte == AX25_FLAG) {
-        axData.data[axDataIndex++] = byte;
+        if ((currentTime - timeLastByteWasReceived) <= AX25_TIMEOUT_SECONDS) {
+          timeLastByteWasReceived = currentTime;
+          axData.data[axDataIndex++] = byte;
 
-        // Decode packet if we have start flag, end flag, and at least 1 byte of data
-        // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
-        // axData.data[1] must be something other than AX25_FLAG
-        if (axDataIndex > 2) {
-          axData.length = axDataIndex;
+          // Decode packet if we have start flag, end flag, and at least 1 byte of data
+          // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+          // axData.data[1] must be something other than AX25_FLAG
+          if (axDataIndex > 2) {
+            axData.length = axDataIndex;
 
-          packed_rs_packet_t rsData = {0};
-          aes_data_t aesData = {0};
-          LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+            packed_rs_packet_t rsData = {0};
+            aes_data_t aesData = {0};
+            LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
 
-          // Restart the decoding process
-          memset(&axData, 0, sizeof(axData));
-          axDataIndex = 0;
-          startFlagReceived = false;
-        } else {
-          startFlagReceived = true;
-          axDataIndex = 1;
+            // Restart the decoding process
+            memset(&axData, 0, sizeof(axData));
+            axDataIndex = 0;
+            axData.data[axDataIndex++] = AX25_FLAG;
+          } else {
+            startFlagReceived = true;
+            axDataIndex = 1;
+          }
         }
-
+        else {
+          startFlagReceived = false;
+        }
         continue;
       }
 
