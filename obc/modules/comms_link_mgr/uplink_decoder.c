@@ -104,8 +104,8 @@ void initDecodeTask(void) {
 static void vDecodeTask(void *pvParameters) {
   obc_error_code_t errCode;
   uint8_t byte = 0;
-  time_t timeLastByteWasReceived, currentTime;
-  time(&timeLastByteWasReceived);
+  time_t timeLastFlagWasReceived, currentTime;
+  time(&timeLastFlagWasReceived);
 
   packed_ax25_i_frame_t axData = {0};
   uint16_t axDataIndex = 0;
@@ -125,8 +125,7 @@ static void vDecodeTask(void *pvParameters) {
 
       time(&currentTime);
       if (byte == AX25_FLAG) {
-        if ((currentTime - timeLastByteWasReceived) <= AX25_TIMEOUT_SECONDS) {
-          timeLastByteWasReceived = currentTime;
+          timeLastFlagWasReceived = currentTime;
           axData.data[axDataIndex++] = byte;
 
           // Decode packet if we have start flag, end flag, and at least 1 byte of data
@@ -147,13 +146,12 @@ static void vDecodeTask(void *pvParameters) {
             startFlagReceived = true;
             axDataIndex = 1;
           }
-        }
-        else {
-          startFlagReceived = false;
-        }
         continue;
       }
-
+      if ((currentTime - timeLastByteWasReceived) > AX25_TIMEOUT_SECONDS) {
+            startFlagReceived = false;
+            continue;
+      }
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
       }
