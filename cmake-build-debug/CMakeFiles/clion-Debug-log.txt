@@ -1,6 +1,0 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/ninja -G Ninja -S /Users/gagan/Desktop/OBC-firmware -B /Users/gagan/Desktop/OBC-firmware/cmake-build-debug
-CMake Error at CMakeLists.txt:16 (message):
-  Invalid build type: Debug
-
-
--- Configuring incomplete, errors occurred!

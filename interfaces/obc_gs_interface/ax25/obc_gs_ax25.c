@@ -86,7 +86,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (telemDataLen >= ax25DataLen){
+  if (telemDataLen >= ax25DataLen) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
@@ -134,7 +134,6 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
   // Send the last frame using ax25SendIFrame with both flags
   ax25SendIFrame(telemData + (pktSentNum * AX25_INFO_BYTES), remainingDataBytes, ax25Data[frameStart], destAddress);
   return OBC_GS_ERR_CODE_SUCCESS;
-
 }
 
 obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
