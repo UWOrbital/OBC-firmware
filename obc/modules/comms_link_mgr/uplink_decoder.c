@@ -125,32 +125,32 @@ static void vDecodeTask(void *pvParameters) {
 
       time(&currentTime);
       if (byte == AX25_FLAG) {
-          timeLastFlagWasReceived = currentTime;
-          axData.data[axDataIndex++] = byte;
+        timeLastFlagWasReceived = currentTime;
+        axData.data[axDataIndex++] = byte;
 
-          // Decode packet if we have start flag, end flag, and at least 1 byte of data
-          // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
-          // axData.data[1] must be something other than AX25_FLAG
-          if (axDataIndex > 2) {
-            axData.length = axDataIndex;
+        // Decode packet if we have start flag, end flag, and at least 1 byte of data
+        // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+        // axData.data[1] must be something other than AX25_FLAG
+        if (axDataIndex > 2) {
+          axData.length = axDataIndex;
 
-            packed_rs_packet_t rsData = {0};
-            aes_data_t aesData = {0};
-            LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+          packed_rs_packet_t rsData = {0};
+          aes_data_t aesData = {0};
+          LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
 
-            // Restart the decoding process
-            memset(&axData, 0, sizeof(axData));
-            axDataIndex = 0;
-            axData.data[axDataIndex++] = AX25_FLAG;
-          } else {
-            startFlagReceived = true;
-            axDataIndex = 1;
-          }
+          // Restart the decoding process
+          memset(&axData, 0, sizeof(axData));
+          axDataIndex = 0;
+          axData.data[axDataIndex++] = AX25_FLAG;
+        } else {
+          startFlagReceived = true;
+          axDataIndex = 1;
+        }
         continue;
       }
-      if ((currentTime - timeLastByteWasReceived) > AX25_TIMEOUT_SECONDS) {
-            startFlagReceived = false;
-            continue;
+      if ((currentTime - timeLastFlagWasReceived) > AX25_TIMEOUT_SECONDS) {
+        startFlagReceived = false;
+        continue;
       }
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
