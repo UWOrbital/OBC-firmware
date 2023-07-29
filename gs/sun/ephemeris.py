@@ -49,6 +49,9 @@ class ErrorCode(Enum):
     INVALID_STOP_TIME = 2
     INVALID_STEP_SIZE = 3
     INVALID_OUTPUT_FILE = 4
+    NO_SIGNATURE_FOUND = 5
+    INVALID_REQUEST400 = 6
+    INVALID_REQUEST = 7
 
 
 @dataclass
@@ -161,7 +164,7 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# Not testable as it is a print statement
+# Not testable as it is a print statement used for debugging
 def print_output_if_required(*values, output_type=ALWAYS_PRINT, sep: str | None = None, end: str | None = None,
                              file=sys.stdout, flush=False):
     """
@@ -178,20 +181,26 @@ def print_output_if_required(*values, output_type=ALWAYS_PRINT, sep: str | None 
         print(*values, sep=sep, end=end, file=file, flush=flush)
 
 
-def check_version(data: dict):
+def check_version(data: dict) -> ErrorCode:
     """
     Prints out a warning if the version is difference from the supported one
     :param data: response.txt
     """
-    if data.get('signature') is None:
-        logging.critical('ERROR: NO SIGNATURE FOUND')
-        sys.exit(1)
+    signature = data.get('signature')
 
-    if (data.get('signature')).get('version') != SUPPORTED_VERSION:
+    if signature is None or not isinstance(signature, dict):
+        logging.critical('ERROR: INVALID SIGNATURE')
+        return ErrorCode.NO_SIGNATURE_FOUND
+
+    if signature.get('version') != SUPPORTED_VERSION:
         logging.warning('WARNING: UNSUPPORTED HORIZON API VERSION USED')
 
+    return ErrorCode.SUCCESS
 
-def validate_response(response: Response):
+
+# Not testable as we can't simulate a Response object
+# Code taken from horizon API with slight modifications
+def validate_response(response: Response) -> ErrorCode:
     """
     Validates the responses. It handles the 400 status error code specifically. It also makes sure that the status code
     is always 200 for the rest of the script
@@ -204,14 +213,16 @@ def validate_response(response: Response):
             logging.critical(f"Message: {data['message']}")
         else:
             logging.critical(json.dumps(data, indent=2))
-        sys.exit(1)
+        return ErrorCode.INVALID_REQUEST400
 
     if response.status_code != 200:
         logging.critical(f'{response.status_code = }')
-        sys.exit(2)
+        return ErrorCode.INVALID_REQUEST
+
+    return ErrorCode.SUCCESS
 
 
-# Not testable as it is a print statement
+# Not testable as it is a print statement used for debugging
 def print_header(reverse=False):
     """
     Prints the header of the data printed
@@ -230,6 +241,7 @@ def print_header(reverse=False):
         print_output_if_required('-' * 130, output_type=ON_WRITE_PRINT)
 
 
+# Not tested yet
 def write_data(data: DataPoint, file_output: str):
     """
     Write the parameter data to the output.bin file and check if the written data is within the error bounds
@@ -265,7 +277,7 @@ def write_header(file_output: str, min_jd: float, max_jd: float, count: int, *, 
     :param write_to_file: If True then the header is written to the file
     """
     if not write_to_file:
-        return
+        return None
 
     data = [min_jd, calculate_step_size(min_jd, max_jd, count)]
 
@@ -311,7 +323,7 @@ def allocate_header(write_to_file: bool, file_output: str):
     :param file_output: The output file
     """
     if not write_to_file:
-        return
+        return None
 
     with open(file_output, 'wb') as file:
         b = bytes(SIZE_OF_HEADER)
@@ -342,6 +354,17 @@ def calculate_step_size(min_jd: float, max_jd: float, number_of_data_points: int
     return (max_jd - min_jd) / (number_of_data_points - 1)
 
 
+def exit_program_on_error(error_code: ErrorCode):
+    """
+    Exits the program with the given error code if it is not a success
+
+    :param error_code: The error code
+    """
+    if error_code != ErrorCode.SUCCESS:
+        sys.exit(error_code.value)
+
+
+# Not tested yet
 def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
     # Parse the arguments and set logging
     if isinstance(argsv, str):
@@ -349,9 +372,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
     else:
         args = define_parser().parse_args()
 
-    error_code = validate_input(args.start_time, args.stop_time, args.step_size, args.output)
-    if error_code != ErrorCode.SUCCESS:
-        raise ValueError(f'Invalid input: {error_code}')
+    exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
 
     global type_print  # This is not good practice, but it is the easiest way to do it
     type_print = args.print
@@ -362,7 +383,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
           f'{args.target}&OBJ_DATA=NO&STEP_SIZE={args.step_size}&START_TIME={args.start_time}&STOP_TIME=' \
           f'{args.stop_time}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1'
     response = requests.get(url)
-    validate_response(response)
+    exit_program_on_error(validate_response(response))
 
     try:
         data = json.loads(response.text)
@@ -370,7 +391,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
         logging.critical('Invalid JSON response')
         raise ValueError
 
-    check_version(data)
+    exit_program_on_error(check_version(data))
     lines = data.get('result').split('\n')
 
     # Find total number of lines to be written
@@ -415,7 +436,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
 
     write_header(args.output, min_jd, max_jd, lines_written)
     print_header(True)
-    print_output_if_required(f'Lines written: {lines_written}')
+    print(f'Lines written: {lines_written}')
 
     return data_points
 
