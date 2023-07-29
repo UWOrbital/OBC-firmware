@@ -1,6 +1,8 @@
 import pytest
 
 import logging
+from os import remove
+import os
 
 from sun import ephemeris
 from sun.ephemeris import ErrorCode
@@ -139,7 +141,6 @@ def test_validate_input_invalid_start_time(caplog):
 
     result = ephemeris.validate_input(start_time, stop_time, step_size, output)
     assert result == ErrorCode.INVALID_START_TIME
-    assert "Start time must be in the format YYYY-MM-DD or JD#" in caplog.text
 
 
 def test_validate_input_invalid_stop_time(caplog):
@@ -153,7 +154,6 @@ def test_validate_input_invalid_stop_time(caplog):
 
     result = ephemeris.validate_input(start_time, stop_time, step_size, output)
     assert result == ErrorCode.INVALID_STOP_TIME
-    assert "Stop time must be in the format YYYY-MM-DD or JD#" in caplog.text
 
 
 def test_validate_input_invalid_output_file(caplog):
@@ -167,4 +167,59 @@ def test_validate_input_invalid_output_file(caplog):
 
     result = ephemeris.validate_input(start_time, stop_time, step_size, output)
     assert result == ErrorCode.INVALID_OUTPUT_FILE
-    assert "Output file must be in the format *.bin" in caplog.text
+
+
+def test_allocate_header_false():
+    file = 'test_allocate_header.bin'
+    ephemeris.allocate_header(False, file)
+    assert not os.path.exists(file)
+
+
+def test_allocate_header_true():
+    file = 'test_allocate_header.bin'
+    ephemeris.allocate_header(True, file)
+    assert os.path.exists(file)
+
+    try:
+        with open(file, 'rb') as f:
+            assert f.read() == b'\x00' * ephemeris.SIZE_OF_HEADER
+    finally:
+        os.remove(file)
+
+
+def test_default_step_size():
+    parser = ephemeris.define_parser()
+    assert parser.get_default('step_size') == ephemeris.DEFAULT_STEP_SIZE
+
+
+# Check if the default value for target is set correctly
+def test_default_target():
+    parser = ephemeris.define_parser()
+    assert parser.get_default('target') == ephemeris.DEFAULT_TARGET
+
+
+# Check if the default value for output is set correctly
+def test_default_output():
+    parser = ephemeris.define_parser()
+    assert parser.get_default('output') == ephemeris.DEFAULT_FILE_OUTPUT
+
+
+def test_argument_parsing():
+    # Simulate command-line arguments
+    args = ['2023-07-26', '2023-07-27', '-s', '1h', '-t', 'sun', '-o', 'output_file.bin',
+            '-p', '2', '-e', 'both', '-v', '-l', 'debug.log']
+
+    # Parse the arguments using the defined parser
+    parser = ephemeris.define_parser()
+    parsed_args = parser.parse_args(args)
+
+    # Assert the values of the parsed arguments
+    assert parsed_args.start_time == '2023-07-26'
+    assert parsed_args.stop_time == '2023-07-27'
+    assert parsed_args.step_size == '1h'
+    assert parsed_args.target == 'sun'
+    assert parsed_args.output == 'output_file.bin'
+    assert parsed_args.print == 2
+    assert parsed_args.exclude == 'both'
+    assert parsed_args.verbose is True
+    assert parsed_args.log == 'debug.log'

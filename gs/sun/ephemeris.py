@@ -161,6 +161,7 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# Not testable as it is a print statement
 def print_output_if_required(*values, output_type=ALWAYS_PRINT, sep: str | None = None, end: str | None = None,
                              file=sys.stdout, flush=False):
     """
@@ -182,6 +183,10 @@ def check_version(data: dict):
     Prints out a warning if the version is difference from the supported one
     :param data: response.txt
     """
+    if data.get('signature') is None:
+        logging.critical('ERROR: NO SIGNATURE FOUND')
+        sys.exit(1)
+
     if (data.get('signature')).get('version') != SUPPORTED_VERSION:
         logging.warning('WARNING: UNSUPPORTED HORIZON API VERSION USED')
 
@@ -206,6 +211,7 @@ def validate_response(response: Response):
         sys.exit(2)
 
 
+# Not testable as it is a print statement
 def print_header(reverse=False):
     """
     Prints the header of the data printed

@@ -3,7 +3,6 @@ import os.path
 from typing import List, BinaryIO
 import struct
 from dataclasses import dataclass
-import sys
 
 import ephemeris
 from ephemeris import DataPoint
@@ -87,16 +86,5 @@ def main():
     assert expected == actual
 
 
-def _command_line():
-    """
-    Parses the command line arguments and runs the program
-    """
-    if len(sys.argv) != 2:
-        print("Usage: python parser.py <file>")
-        exit(1)
-    print(parse_file(sys.argv[1]))
-
-
 if __name__ == '__main__':
-    # _command_line()
     main()
