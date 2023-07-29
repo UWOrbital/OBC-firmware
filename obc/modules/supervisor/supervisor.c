@@ -91,8 +91,8 @@ static void vSupervisorTask(void *pvParameters) {
   ASSERT(supervisorQueueHandle != NULL);
 
   /* Initialize critical peripherals */
-  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
-  LOG_IF_ERROR_CODE(initTime());         // RTC
+  // LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
+  LOG_IF_ERROR_CODE(initTime());  // RTC
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
@@ -134,19 +134,6 @@ static void vSupervisorTask(void *pvParameters) {
   LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
 
   while (1) {
-    supervisor_event_t inMsg;
-
-    if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-#if defined(DEBUG) && !defined(OBC_REVISION_2)
-      vTaskDelay(pdMS_TO_TICKS(1000));
-      gioToggleBit(SUPERVISOR_DEBUG_LED_GIO_PORT, SUPERVISOR_DEBUG_LED_GIO_BIT);
-#endif
-      continue;
-    }
-
-    switch (inMsg.eventID) {
-      default:
-        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
-    }
+    portGET_RUN_TIME_COUNTER_VALUE();
   }
 }
