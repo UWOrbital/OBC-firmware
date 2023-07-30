@@ -97,11 +97,23 @@ TEST(TestAx25SendRecv, uFrameSendRecv) {
 
 TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
 
-  uint8_t telemDataFS[255] = {0};
-  uint8_t unstuffedAx25DataFS[276] = {0};
+  uint8_t telemDataFS[AX25_INFO_BYTES] = {0};
+  uint8_t unstuffedAx25DataFS[AX25_MINIMUM_I_FRAME_LEN] = {0};
   uint16_t axDataLen = {0};
 
-  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemDataFS, RS_ENCODED_SIZE, unstuffedAx25DataFS, &axDataLen, &groundStationCallsign),
+  uint32_t seed = 0xF72FA1;  // random number
+  for (uint16_t i = 0; i < AX25_INFO_BYTES; ++i) {
+    // Pseudorandom generation using a simple algorithm
+    seed = (seed * 1103515245 + 12345) % (1 << 31);
+    telemDataFS[i] = (uint8_t)(seed & 0xFF);
+  }
+
+  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemDataFS, AX25_INFO_BYTES, unstuffedAx25DataFS, &axDataLen, &groundStationCallsign),
             OBC_GS_ERR_CODE_SUCCESS);
-  ASSERT_EQ(axDataLen, 275);
+  ASSERT_EQ(axDataLen, AX25_MINIMUM_I_FRAME_LEN);
+  ASSERT_EQ(unstuffedAx25DataFS[0], AX25_FLAG);
+  ASSERT_EQ(unstuffedAx25DataFS[AX25_MINIMUM_I_FRAME_LEN - 1], AX25_FLAG);
+  for (int i = 0; i < AX25_INFO_BYTES; ++i){
+    ASSERT_EQ(unstuffedAx25DataFS[AX25_INFO_FIELD_POSITION + i], telemDataFS[i])
+  }
 }
