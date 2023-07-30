@@ -96,5 +96,13 @@ TEST(TestAx25SendRecv, uFrameSendRecv) {
 }
 
 TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
-  EXPECT_EQ(0, 0);
+  uint8_t telemData[RS_ENCODED_SIZE] = {0};
+
+  uint8_t telemDataFS[RS_ENCODED_SIZE] = {0};
+  uint8_t unstuffedAx25DataFS[276] = {0};
+  uint16_t axDataLen = {0};
+
+  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemDataFS, RS_ENCODED_SIZE, unstuffedAx25DataFS, &axDataLen, &groundStationCallsign),
+            OBC_GS_ERR_CODE_SUCCESS);
+  ASSERT_EQ(axDataLen, 1);
 }
