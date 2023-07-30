@@ -83,7 +83,7 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
 
   setEncodeFlag(true);
   RETURN_IF_ERROR_CODE(sendToDownlinkQueue(&encodeQueueMsg));
-  RETURN_IF_ERROR_CODE(sendToCommsQueue(&commsQueueMsg));
+  RETURN_IF_ERROR_CODE(sendToFrontOfCommsQueue(&commsQueueMsg));
 
   return OBC_ERR_CODE_SUCCESS;
 }

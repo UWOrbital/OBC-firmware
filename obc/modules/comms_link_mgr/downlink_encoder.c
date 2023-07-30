@@ -26,7 +26,7 @@ static StaticTask_t telemEncodeTaskBuffer;
 static StackType_t telemEncodeTaskStack[COMMS_TELEM_ENCODE_STACK_SIZE];
 
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
-#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(comms_event_t)  // Size of the telemetry batch ID
+#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(encode_event_t)  // Size of the telemetry batch ID
 #define COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 

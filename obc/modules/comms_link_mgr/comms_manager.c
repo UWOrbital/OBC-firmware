@@ -12,6 +12,7 @@
 #include "obc_reliance_fs.h"
 #include "telemetry_manager.h"
 #include "cc1120_txrx.h"
+#include "obc_privilege.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
@@ -64,10 +65,6 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x
  */
 static void vCommsManagerTask(void *pvParameters);
 
-static obc_error_code_t startUplink(void);
-
-static obc_error_code_t startTransmit(void);
-
 void initCommsManager(void) {
   ASSERT((commsTaskStack != NULL) && (&commsTaskBuffer != NULL));
   if (commsTaskHandle == NULL) {
@@ -110,6 +107,19 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
+obc_error_code_t sendToFrontOfCommsQueue(comms_event_t *event) {
+  ASSERT(commsQueueHandle != NULL);
+
+  if (event == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  if (xQueueSendToFront(commsQueueHandle, (void *)event, COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+    return OBC_ERR_CODE_SUCCESS;
+  }
+  return OBC_ERR_CODE_QUEUE_FULL;
+}
+
 static void vCommsManagerTask(void *pvParameters) {
   obc_error_code_t errCode;
 
@@ -122,10 +132,56 @@ static void vCommsManagerTask(void *pvParameters) {
 
     switch (queueMsg.eventID) {
       case BEGIN_DOWNLINK:
-        LOG_IF_ERROR_CODE(startTransmit());
+        for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
+          packed_ax25_i_frame_t ax25_pkt;
+          // poll the transmit queue
+          if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt, (TickType_t)0) != pdPASS) {
+            // if the queue was empty, break if we are done encoding so the transmission is over
+            // otherwise continue and poll again
+            if (encodingFlag) {
+              continue;
+            }
+            break;
+          }
+
+#if COMMS_PHY == COMMS_PHY_UART
+          LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25_pkt.data, ax25_pkt.length));
+#else
+          LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, ax25_pkt.length));
+#endif
+        }
         break;
       case BEGIN_UPLINK:
-        LOG_IF_ERROR_CODE(startUplink());
+#if COMMS_PHY == COMMS_PHY_UART
+        uint8_t rxByte;
+
+        // Read first byte
+        LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+
+        if (errCode == OBC_ERR_CODE_SUCCESS) {
+          LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+        }
+
+        if (errCode == OBC_ERR_CODE_SUCCESS) {
+          // Read the rest of the bytes until we stop uplinking
+          for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
+            LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+
+            if (errCode == OBC_ERR_CODE_SUCCESS) {
+              LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+            }
+          }
+        }
+#if CSDC_DEMO_ENABLED == 1
+        comms_event_t event = {0};
+        event.eventID = BEGIN_UPLINK;
+        LOG_IF_ERROR_CODE(sendToCommsQueue(&event));
+#endif
+#else
+        // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+        LOG_IF_ERROR_CODE(cc1120Receive());
+        LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+#endif
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -133,63 +189,6 @@ static void vCommsManagerTask(void *pvParameters) {
   }
 }
 
-static obc_error_code_t startUplink(void) {
-  obc_error_code_t errCode;
-#if COMMS_PHY == COMMS_PHY_UART
-  uint8_t rxByte;
-
-  // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
-
-  if (errCode == OBC_ERR_CODE_SUCCESS) {
-    RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  }
-
-  if (errCode == OBC_ERR_CODE_SUCCESS) {
-    // Read the rest of the bytes until we stop uplinking
-    while (1) {
-      RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(500)));
-
-      if (errCode == OBC_ERR_CODE_SUCCESS) {
-        RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-      }
-    }
-  }
-#if CSDC_DEMO_ENABLED == 1
-  comms_event_t event = {0};
-  event.eventID = BEGIN_UPLINK;
-  RETURN_IF_ERROR_CODE(sendToCommsQueue(&event));
-#endif
-#else
-  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
-  RETURN_IF_ERROR_CODE(cc1120Receive());
-  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
-#endif
-  return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t startTransmit(void) {
-  obc_error_code_t errCode;
-  for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
-    packed_ax25_i_frame_t ax25_pkt;
-    // poll the transmit queue
-    if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt, (TickType_t)0) != pdPASS) {
-      // if the queue was empty, break if we are done encoding so the transmission is over
-      // otherwise continue and poll again
-      if (encodingFlag) {
-        continue;
-      }
-      break;
-    }
-
-#if COMMS_PHY == COMMS_PHY_UART
-    LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25_pkt.data, ax25_pkt.length));
-#else
-    LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, ax25_pkt.length));
-#endif
-  }
-  return OBC_ERR_CODE_SUCCESS;
-}
 /**
  * @brief Sends an AX.25 packet to the CC1120 transmit queue
  *

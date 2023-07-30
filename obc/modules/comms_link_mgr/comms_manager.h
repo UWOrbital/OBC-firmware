@@ -50,6 +50,15 @@ void setEncodeFlag(bool val);
 obc_error_code_t sendToCommsQueue(comms_event_t *event);
 
 /**
+ * @brief Send an event to the front of the Comms Manager queue
+ *
+ * @param event Event to send
+ *
+ * @return obc_error_code_t whether or not the event was successfully sent to queue
+ */
+obc_error_code_t sendToFrontOfCommsQueue(comms_event_t *event);
+
+/**
  * @brief Sends an AX.25 packet to the CC1120 transmit queue
  *
  * @param ax25Pkt - Pointer to the AX.25 packet to send
