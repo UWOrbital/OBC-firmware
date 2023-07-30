@@ -47,7 +47,7 @@ obc_error_code_t driveMotorTorque(const DC_motor_t* motor, float speed, float64 
   if (duty > 100) duty = 100;
   if (speed <= 0) duty = -duty;
 
-  return DriveMotorPWM(motor, duty, period);
+  return driveMotorPWM(motor, duty, period);
 }
 
 obc_error_code_t forwardMotor(const DC_motor_t* motor) {
