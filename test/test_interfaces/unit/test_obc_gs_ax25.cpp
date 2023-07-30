@@ -114,6 +114,6 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
   ASSERT_EQ(unstuffedAx25DataFS[0], AX25_FLAG);
   ASSERT_EQ(unstuffedAx25DataFS[AX25_MINIMUM_I_FRAME_LEN - 1], AX25_FLAG);
   for (int i = 0; i < AX25_INFO_BYTES; ++i){
-    ASSERT_EQ(unstuffedAx25DataFS[AX25_INFO_FIELD_POSITION + i], telemDataFS[i])
+    ASSERT_EQ(unstuffedAx25DataFS[AX25_INFO_FIELD_POSITION + i], telemDataFS[i]);
   }
 }
