@@ -94,3 +94,7 @@ TEST(TestAx25SendRecv, uFrameSendRecv) {
             OBC_GS_ERR_CODE_SUCCESS);
   ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
 }
+
+TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
+  EXPECT_EQ(0, 0);
+}
