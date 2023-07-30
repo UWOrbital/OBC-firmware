@@ -18,6 +18,7 @@
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
+#include <ostimer.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -83,9 +84,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
  *
  * @return void
  */
-void flagTimeoutCallback(){
-  isFlagReceived = false;
-}
+void flagTimeoutCallback(){ isStartFlagReceived = false; }
 
 /**
  * @brief initializes the decode data pipeline task
@@ -113,13 +112,8 @@ void initDecodeTask(void) {
  * @return void
  */
 static void vDecodeTask(void *pvParameters) {
-  TimerHandle_t flagTimeoutTimer = xTimerCreate(
-      "FlagTimeout",
-      pdMS_TO_TICKS( AX25_TIMEOUT_MILLISECONDS ),
-      pdTrue,
-      (void *) 0,
-      (TimerCallbackFunction_t) flagTimeoutCallback
-  );
+  TimerHandle_t flagTimeoutTimer = xTimerCreate("FlagTimeout", pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdTRUE,
+                                               (void *) 0, flagTimeoutCallback);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
@@ -129,8 +123,8 @@ static void vDecodeTask(void *pvParameters) {
   bool startFlagReceived = false;
 
   while (1) {
-    if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS (100)) == pdPASS){
-      if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS ) {
+    if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS (100)) == pdPASS) {
+      if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
         if (axDataIndex >= sizeof(axData.data)) {
           LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
 
@@ -165,11 +159,11 @@ static void vDecodeTask(void *pvParameters) {
             continue;
           }
         }
-          if (startFlagReceived) {
+        if (startFlagReceived) {
             axData.data[axDataIndex++] = byte;
-          }
         }
       }
+    }
   }
 }
 
