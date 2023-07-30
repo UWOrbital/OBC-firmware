@@ -1,6 +1,6 @@
 # Sun Position
 
-Script for parsing data from the NASA Horizon API used by ADCS for onboard algorithms
+Script for parsing data from the NASA Horizon API used by GNC for onboard algorithms
 
 ## Requirements:
 Check the requirements.txt file for the latest version of the requirements (pip install -r requirements.txt)
@@ -9,7 +9,7 @@ Check the requirements.txt file for the latest version of the requirements (pip 
 - PyTest (pip install pytest)
 
 ## Usage:
-usage: sun.py [-h] [-s STEP_SIZE] [-t TARGET] [-o OUTPUT] [-d] [-p {0,1,2}] [-e {first,last,both,none}] [-l LOG] start_time stop_time
+usage: ephemeris.py [-h] [-s STEP_SIZE] [-t TARGET] [-o OUTPUT] [-d] [-p {0,1,2}] [-e {first,last,both,none}] [-l LOG] start_time stop_time
 
 Position Ephemeris Retriever
 
@@ -50,4 +50,4 @@ Where i = 0, 1, 2, ..., n-1
 
 ## Testing
 Make sure you have `pytest` installed before this.
-Navigate to the `sun` or `sun\test` directory and run `pytest` in the command line
+Navigate to the `gs\sun` or `gs\sun\test` directory and run `pytest` in the command line
