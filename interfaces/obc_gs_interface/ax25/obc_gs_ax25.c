@@ -91,9 +91,9 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
   }
 
   uint8_t numOfFrames = (telemDataLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES;  // Number of frames and rounding up
-  *ax25DataLen = numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG;
+  uint16_t writeableBytes = numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG;
 
-  memset(ax25Data, 0, ax25DataLen);
+  memset(ax25Data, 0, writeableBytes);
 
   uint8_t remainingDataBytes = telemDataLen;
   uint16_t frameStart;

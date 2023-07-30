@@ -96,7 +96,6 @@ TEST(TestAx25SendRecv, uFrameSendRecv) {
 }
 
 TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
-  uint8_t telemData[RS_ENCODED_SIZE] = {0};
 
   uint8_t telemDataFS[RS_ENCODED_SIZE] = {0};
   uint8_t unstuffedAx25DataFS[276] = {0};
