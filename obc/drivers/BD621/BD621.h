@@ -16,8 +16,8 @@
 * @param hetBase: pointer to HET RAM
     hetRAM1: HET1 RAM pointer
     hetRAM2: HET2 RAM pointer
-* @param finPwm: pointer to pwm driver that controls FIN (Forward pin of motor driver)
-* @param rinPwm: pointer to pwm driver that controls RIN (Reverse pin of motor driver)
+* @param finPwm: pwm driver that controls FIN (Forward pin of motor driver)
+* @param rinPwm: pwm driver that controls RIN (Reverse pin of motor driver)
     pwm0: Pwm 0
     pwm1: Pwm 1
     pwm2: Pwm 2
