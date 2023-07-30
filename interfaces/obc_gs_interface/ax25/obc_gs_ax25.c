@@ -104,9 +104,9 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
     ax25Data[frameStart] = AX25_FLAG;
 
     // Address Section
-    memcpy(ax25Data[frameStart] + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
+    memcpy(ax25Data + frameStart + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
     uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
-    memcpy(ax25Data[frameStart] + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
+    memcpy(ax25Data + frameStart + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
 
     // Control Section
     ax25Data[frameStart + AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
@@ -116,7 +116,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
     ax25Data[frameStart + AX25_MOD128_PID_POSITION] = AX25_PID;
 
     // Info Section
-    memcpy(ax25Data[frameStart] + AX25_INFO_FIELD_POSITION, telemData + (pktSentNum * AX25_INFO_BYTES), AX25_INFO_BYTES);
+    memcpy(ax25Data + frameStart + AX25_INFO_FIELD_POSITION, telemData + (pktSentNum * AX25_INFO_BYTES), AX25_INFO_BYTES);
 
     // FCS Section
     obc_gs_error_code_t errCode;
