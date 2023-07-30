@@ -93,19 +93,19 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
   uint8_t numOfFrames = (telemDataLen / AX25_INFO_BYTES) + ((telemData % AX25_INFO_BYTES != 0));  // Number of frames and rounding up
   *ax25DataLen = numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG;
 
-  memset(ax25Data, 0, ax25DataLen);
+  memset(ax25Data, 0, (size_t) *ax25DataLen);
 
   uint8_t remainingDataBytes = telemDataLen;
   uint16_t frameStart;
 
-  for (frameStart = 0; frameStart < ax25DataLen - 1; frameStart += AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) {
+  for (frameStart = 0; frameStart < *ax25DataLen - 1; frameStart += AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) {
     // Start or Share Flag
     ax25Data[frameStart] = AX25_FLAG;
 
     // Address Section
-    memcpy(frameStart + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
+    memcpy(ax25Data[frameStart] + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
     uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
-    memcpy(frameStart + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
+    memcpy(ax25Data[frameStart] + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
 
     // Control Section
     ax25Data[frameStart + AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
@@ -115,7 +115,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
     ax25Data[frameStart + AX25_MOD128_PID_POSITION] = AX25_PID;
 
     // Info Section
-    memcpy(frameStart + AX25_INFO_FIELD_POSITION, telemData + (pktSentNum * AX25_INFO_BYTES), AX25_INFO_BYTES);
+    memcpy(ax25Data[frameStart] + AX25_INFO_FIELD_POSITION, telemData + (pktSentNum * AX25_INFO_BYTES), AX25_INFO_BYTES);
 
     // FCS Section
     obc_gs_error_code_t errCode;
