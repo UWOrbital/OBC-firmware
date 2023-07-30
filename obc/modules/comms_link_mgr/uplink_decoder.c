@@ -84,7 +84,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
  *
  * @return void
  */
-void flagTimeoutCallback(){ isStartFlagReceived = false; }
+void flagTimeoutCallback() { isStartFlagReceived = false; }
 
 /**
  * @brief initializes the decode data pipeline task
@@ -112,8 +112,8 @@ void initDecodeTask(void) {
  * @return void
  */
 static void vDecodeTask(void *pvParameters) {
-  TimerHandle_t flagTimeoutTimer = xTimerCreate("FlagTimeout", pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdTRUE,
-                                               (void *) 0, flagTimeoutCallback);
+  TimerHandle_t flagTimeoutTimer =
+      xTimerCreate("FlagTimeout", pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdTRUE, (void *) 0, flagTimeoutCallback);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
