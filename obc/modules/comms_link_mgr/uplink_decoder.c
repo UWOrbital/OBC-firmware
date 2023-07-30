@@ -23,7 +23,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 
 // decode data queue length should be double TXRX_INTERRUPT_THRESHOLD for safety to avoid cc1120 getting blocked
 // can be reduced later depending on memory limitations
@@ -36,6 +35,7 @@
 static TaskHandle_t decodeTaskHandle = NULL;
 static StaticTask_t decodeTaskBuffer;
 static StackType_t decodeTaskStack[COMMS_DECODE_STACK_SIZE];
+static bool isStartFlagReceived;
 
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
@@ -77,6 +77,17 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
 }
 
 /**
+ * @brief flag timeout callback that sets isFlagReceived to false due to a timeout
+ *
+ * @param none
+ *
+ * @return void
+ */
+void flagTimeoutCallback(){
+  isFlagReceived = false;
+}
+
+/**
  * @brief initializes the decode data pipeline task
  *
  * @return void
@@ -102,10 +113,15 @@ void initDecodeTask(void) {
  * @return void
  */
 static void vDecodeTask(void *pvParameters) {
+  TimerHandle_t flagTimeoutTimer = xTimerCreate(
+      "FlagTimeout",
+      pdMS_TO_TICKS( AX25_TIMEOUT_MILLISECONDS ),
+      pdTrue,
+      (void *) 0,
+      (TimerCallbackFunction_t) flagTimeoutCallback
+  );
   obc_error_code_t errCode;
   uint8_t byte = 0;
-  time_t timeLastFlagWasReceived, currentTime;
-  time(&timeLastFlagWasReceived);
 
   packed_ax25_i_frame_t axData = {0};
   uint16_t axDataIndex = 0;
@@ -113,49 +129,47 @@ static void vDecodeTask(void *pvParameters) {
   bool startFlagReceived = false;
 
   while (1) {
-    if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
-      if (axDataIndex >= sizeof(axData.data)) {
-        LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
-
-        // Restart the decoding process
-        memset(&axData, 0, sizeof(axData));
-        axDataIndex = 0;
-        startFlagReceived = false;
-      }
-
-      time(&currentTime);
-      if (byte == AX25_FLAG) {
-        timeLastFlagWasReceived = currentTime;
-        axData.data[axDataIndex++] = byte;
-
-        // Decode packet if we have start flag, end flag, and at least 1 byte of data
-        // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
-        // axData.data[1] must be something other than AX25_FLAG
-        if (axDataIndex > 2) {
-          axData.length = axDataIndex;
-
-          packed_rs_packet_t rsData = {0};
-          aes_data_t aesData = {0};
-          LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+    if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS (100)) == pdPASS){
+      if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS ) {
+        if (axDataIndex >= sizeof(axData.data)) {
+          LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
 
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
           axDataIndex = 0;
-          axData.data[axDataIndex++] = AX25_FLAG;
-        } else {
-          startFlagReceived = true;
-          axDataIndex = 1;
+          startFlagReceived = false;
         }
-        continue;
+
+        if (byte == AX25_FLAG) {
+          if (xTimerReset(flagTimeoutTimer, pdMS_TO_TICKS(100)) == pdPASS) {
+            axData.data[axDataIndex++] = byte;
+
+            // Decode packet if we have start flag, end flag, and at least 1 byte of data
+            // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+            // axData.data[1] must be something other than AX25_FLAG
+            if (axDataIndex > 2) {
+              axData.length = axDataIndex;
+
+              packed_rs_packet_t rsData = {0};
+              aes_data_t aesData = {0};
+              LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+
+              // Restart the decoding process
+              memset(&axData, 0, sizeof(axData));
+              axDataIndex = 0;
+              axData.data[axDataIndex++] = AX25_FLAG;
+            } else {
+              startFlagReceived = true;
+              axDataIndex = 1;
+            }
+            continue;
+          }
+        }
+          if (startFlagReceived) {
+            axData.data[axDataIndex++] = byte;
+          }
+        }
       }
-      if ((currentTime - timeLastFlagWasReceived) > AX25_TIMEOUT_SECONDS) {
-        startFlagReceived = false;
-        continue;
-      }
-      if (startFlagReceived) {
-        axData.data[axDataIndex++] = byte;
-      }
-    }
   }
 }
 

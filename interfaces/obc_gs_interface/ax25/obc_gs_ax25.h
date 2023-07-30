@@ -93,6 +93,18 @@ extern "C" {
 #endif
 
 /**
+ * @brief prepares ax25data with appropriate I frames when utilizing flag-sharing
+ *
+ * @param telemData data to send that needs ax.25 headers added onto it
+ * @param telemDataLen length of the telemData array
+ * @param ax25Data array to store the ax.25 frame
+ * @param ax25DataLen ax.25 array length
+ * @param destAddress address of the destination for the ax25 packet
+ */
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t telemDataLen, uint8_t *ax25Data,
+                                                  uint16_t ax25DataLen, const ax25_addr_t *destAddress);
+
+/**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
  *
  * @param telemData data to send that needs ax.25 headers added onto it
