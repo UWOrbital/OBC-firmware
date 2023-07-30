@@ -6,6 +6,7 @@ import os
 
 from sun import ephemeris
 from sun.ephemeris import ErrorCode
+from sun.ephemeris import DataPoint
 from sun import ephemerisparser as ep
 
 
@@ -176,7 +177,7 @@ def test_define_parser_default_output():
 def test_define_parser_argument_parsing():
     # Simulate command-line arguments
     args = ['2023-07-26', '2023-07-27', '-s', '1h', '-t', 'sun', '-o', 'output_file.bin',
-            '-p', '2', '-e', 'both', '-v', '-l', 'debug.log']
+            '-p', '2', '-e', 'both', '-l', 'debug.log']
 
     # Parse the arguments using the defined parser
     parser = ephemeris.define_parser()
@@ -190,7 +191,6 @@ def test_define_parser_argument_parsing():
     assert parsed_args.output == 'output_file.bin'
     assert parsed_args.print == 2
     assert parsed_args.exclude == 'both'
-    assert parsed_args.verbose is True
     assert parsed_args.log == 'debug.log'
 
 
@@ -355,12 +355,12 @@ def test_exit_program_on_error_success():
 
 # JD is not written to the file so set it to 0
 @pytest.mark.parametrize("data_point", [
-    (ephemeris.DataPoint(0, 10, 15, -1)),
-    (ephemeris.DataPoint(0, 10, 15, 0)),
-    (ephemeris.DataPoint(0, -5, 65.5, 1)),
-    (ephemeris.DataPoint(0, 0, 0, 1)),
-    (ephemeris.DataPoint(0, 0, 0, 0)),
-    (ephemeris.DataPoint(0, 7, 7, 7))
+    (DataPoint(0, 10, 15, -1)),
+    (DataPoint(0, 10, 15, 0)),
+    (DataPoint(0, -5, 65.5, 1)),
+    (DataPoint(0, 0, 0, 1)),
+    (DataPoint(0, 0, 0, 0)),
+    (DataPoint(0, 7, 7, 7))
 ])
 def test_write_data(data_point):
     file = "test_write_data.bin"
@@ -376,3 +376,27 @@ def test_write_data(data_point):
 
     # JD is not written to file, so set it to 0
     assert ephemeris.DataPoint(0, x, y, z) == data_point
+
+
+@pytest.mark.parametrize("argsv, data_points_expected", [
+    ("JD1 JD2 -s 3h -o test_main.bin", [
+        DataPoint(1, x = 1.384519786747137E+08, y =-5.472710939424842E+07, z =-1.276932755237378E+06),
+        DataPoint(1.125000000, x = 1.385760653373899E+08, y =-5.442875513032935E+07, z =-1.272689795682322E+06),
+        DataPoint(1.250000000, x = 1.386995049407168E+08, y =-5.413014269361465E+07, z =-1.268441062983371E+06),
+        DataPoint(1.375000000, x = 1.388222969000409E+08, y =-5.383127342494688E+07, z =-1.264186567945778E+06),
+        DataPoint(1.500000000, x = 1.389444406309174E+08, y =-5.353214866855511E+07, z =-1.259926321179278E+06),
+        DataPoint(1.625000000, x = 1.390659355491845E+08, y =-5.323276977215502E+07, z =-1.255660333107308E+06),
+        DataPoint(1.750000000, x = 1.391867810710398E+08, y =-5.293313808704702E+07, z =-1.251388613976542E+06),
+        DataPoint(1.875000000, x = 1.393069766131224E+08, y =-5.263325496821213E+07, z =-1.247111173866812E+06)
+    ]),
+])
+def test_main(argsv, data_points_expected):
+    filename = "test_main.bin"
+    data_points_returned = ephemeris.main(argsv)
+
+    data_points_actual = ep.parse_file(filename)
+    os.remove(filename)
+
+    assert data_points_expected == data_points_returned
+    assert data_points_actual == data_points_returned
+    assert data_points_actual == data_points_expected

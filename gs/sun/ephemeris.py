@@ -19,13 +19,16 @@ import os
 # Script constants
 SUPPORTED_VERSION: Final[str] = '1.2'
 NUMBER_OF_HEADER_DOUBLES: Final[int] = 2
-ALWAYS_PRINT: Final[int] = 0  # Prints the required output
-ON_WRITE_PRINT: Final[int] = 1  # Prints helpful output
-VERBOSE_PRINT: Final[int] = 2  # Prints everything
+RELATIVE_TOLERANCE: Final[float] = 1e-7
+
+# Print values
+_LOGGING_LEVELS = [logging.WARNING, logging.INFO, logging.DEBUG]
+DEFAULT_PRINT_WARNING: Final[int] = 0  # Prints the required output
+
+# Data types
 DATA_FLOAT: Final[str] = 'f'
 DATA_DOUBLE: Final[str] = 'd'
 DATA_UINT: Final[str] = 'I'
-RELATIVE_TOLERANCE: Final[float] = 1e-7
 
 # Default values
 DEFAULT_STEP_SIZE: Final[str] = '5m'
@@ -38,10 +41,6 @@ SIZE_OF_DOUBLE: Final[int] = 8
 SIZE_OF_FLOAT: Final[int] = 4
 SIZE_OF_INT: Final[int] = 4
 SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF_INT
-
-# Global variable for the type of print (ALWAYS_PRINT, ON_WRITE_PRINT, VERBOSE_PRINT) set by the -p argument similar
-# debug levels
-type_print = ON_WRITE_PRINT
 
 
 class ErrorCode(Enum):
@@ -151,36 +150,16 @@ def define_parser() -> argparse.ArgumentParser:
                         help=f'Target object (e.g. sun, moon, mars). Default: {DEFAULT_TARGET}')
     parser.add_argument('-o', '--output', type=str, default=DEFAULT_FILE_OUTPUT,
                         help=f'Output file name. Default: {DEFAULT_FILE_OUTPUT}')
-    parser.add_argument('-p', '--print', type=int, choices=range(3), default=ALWAYS_PRINT,
+    parser.add_argument('-p', '--print', type=int, choices=range(3), default=DEFAULT_PRINT_WARNING,
                         help=f'Prints the output to the console. 0 = Always, 1 = On write, 2 = Verbose. '
-                             f'Default: {ALWAYS_PRINT}')
+                             f'Default: {DEFAULT_PRINT_WARNING}')
     parser.add_argument('-e', '--exclude', choices=['first', 'last', 'both', 'none'], default=DEFAULT_EXCLUDE,
                         help=f'Exclude the first, last, both or none of the values from the output file. '
                              f'Default: {DEFAULT_EXCLUDE}')
-    parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                        help='Verbose output used for debugging purposes. Default: False')
     parser.add_argument('-l', '--log', type=str, default=None,
                         help='Log file for debugging purposes. Default: None')
 
     return parser
-
-
-# Not testable as it is a print statement used for debugging
-# TODO: Remove this function
-def print_output_if_required(*values, output_type=ALWAYS_PRINT, sep: str | None = None, end: str | None = None,
-                             file=sys.stdout, flush=False):
-    """
-    Function to determine whether to print to the values based on the output_type and prints them if required
-
-    :param values: The values to be printed
-    :param output_type: The type of output used to determine when to print it
-    :param sep: Seperator
-    :param end: The end of a line
-    :param file: File SupportsWrite[str] | None
-    :param flush: Passed to print
-    """
-    if output_type == ALWAYS_PRINT or output_type <= type_print:
-        print(*values, sep=sep, end=end, file=file, flush=flush)
 
 
 def check_version(data: dict) -> ErrorCode:
@@ -227,20 +206,15 @@ def validate_response(response: Response) -> ErrorCode:
 # Not testable as it is a print statement used for debugging
 def print_header(reverse=False):
     """
-    Prints the header of the data printed
+    Prints the header of the data printed, used for debugging purposes
 
     :param reverse: If True then reverses the order of the header and prints and extra seperator line
-    :return:
     """
     if reverse:
-        print_output_if_required('-' * 130, output_type=ON_WRITE_PRINT)
-        print_output_if_required('\t' * 3, 'JD:', '\t' * 4, 'X:', '\t' * 5, 'Y:', '\t' * 4, 'Z:',
-                                 output_type=ON_WRITE_PRINT)
-        print_output_if_required('-' * 130, output_type=ON_WRITE_PRINT)
-    else:
-        print_output_if_required('\t' * 3, 'JD:', '\t' * 4, 'X:', '\t' * 5, 'Y:', '\t' * 4, 'Z:',
-                                 output_type=ON_WRITE_PRINT)
-        print_output_if_required('-' * 130, output_type=ON_WRITE_PRINT)
+        logging.info('-' * 130)
+
+    logging.info(('\t'*3) + 'JD:' + ('\t'*4) + 'X:' + ('\t'*5) + 'Y:' + ('\t'*4) + 'Z:')
+    logging.info('-' * 130)
 
 
 def write_data(data: DataPoint, file_output: str):
@@ -252,7 +226,7 @@ def write_data(data: DataPoint, file_output: str):
     """
     # Appends the data to the file and prints the expected data written if applicable
     with open(file_output, 'ab') as file:
-        print_output_if_required(f'\tData written: {data}', output_type=VERBOSE_PRINT)
+        logging.debug(f'\tData written: {data}')
 
         # Write the x value
         bx = struct.pack(DATA_FLOAT, data.x)
@@ -287,11 +261,11 @@ def write_header(file_output: str, min_jd: float, max_jd: float, count: int, *, 
     data = [min_jd, calculate_step_size(min_jd, max_jd, count)]
 
     with open(file_output, 'rb+') as file:
-        print_output_if_required(f'Writing header to {file_output}', output_type=VERBOSE_PRINT)
+        logging.debug(f'Writing header to {file_output}')
         file.seek(0)
 
         for i in data:
-            print_output_if_required(f'\tData written: {i}', output_type=VERBOSE_PRINT)
+            logging.debug(f'\tData written: {i}')
             b = struct.pack(DATA_DOUBLE, i)
             byte: bytearray = bytearray(b)
             file.write(byte)
@@ -379,14 +353,15 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
 
     exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
 
-    global type_print  # This is not good practice, but it is the easiest way to do it
-    type_print = args.print
-    logging.basicConfig(filename=args.log, level=logging.DEBUG if args.verbose else logging.INFO, encoding='utf-8')
+    logging.basicConfig(filename=args.log, level=_LOGGING_LEVELS[args.print], encoding='utf-8',
+                        format='%(asctime)s %(levelname)s (Line: %(lineno)d):  %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # Get the data from the API
     url = f'https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM=YES&EPHEM_TYPE=VECTORS&COMMAND=' \
           f'{args.target}&OBJ_DATA=NO&STEP_SIZE={args.step_size}&START_TIME={args.start_time}&STOP_TIME=' \
           f'{args.stop_time}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1'
+
     response = requests.get(url)
     exit_program_on_error(validate_response(response))
 
@@ -394,7 +369,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
         data = json.loads(response.text)
     except ValueError:
         logging.critical('Invalid JSON response')
-        raise ValueError
+        sys.exit(-1)
 
     exit_program_on_error(check_version(data))
     lines = data.get('result').split('\n')
@@ -423,7 +398,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
         if start and not i.startswith('$$SOE'):
             if not ((count == 0 and (args.exclude == 'both' or args.exclude == 'first'))
                     or (count == total_count - 1) and (args.exclude == 'both' or args.exclude == 'last')):
-                print_output_if_required(f'Line being parsed: {i}', output_type=VERBOSE_PRINT)
+                logging.debug(f'Line being parsed: {i}')
                 output = (i[:-1].split(', '))
                 output.pop(1)
 
@@ -432,7 +407,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
                     min_jd = jd
                 max_jd = jd
 
-                print_output_if_required(f'Output written: ', *output, output_type=ON_WRITE_PRINT)
+                logging.info(f'Output written: %s', output)
                 data_point = DataPoint(float(output[0]), float(output[1]), float(output[2]), float(output[3]))
                 data_points.append(data_point)
                 write_data(data_point, args.output)
