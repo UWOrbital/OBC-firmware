@@ -18,7 +18,7 @@
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
-#include <ostimer.h>
+#include <os_timer.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -123,7 +123,7 @@ static void vDecodeTask(void *pvParameters) {
   bool startFlagReceived = false;
 
   while (1) {
-    if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS (100)) == pdPASS) {
+    if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(100)) == pdPASS) {
       if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
         if (axDataIndex >= sizeof(axData.data)) {
           LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
@@ -160,7 +160,7 @@ static void vDecodeTask(void *pvParameters) {
           }
         }
         if (startFlagReceived) {
-            axData.data[axDataIndex++] = byte;
+          axData.data[axDataIndex++] = byte;
         }
       }
     }
