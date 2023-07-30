@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
 #define AX25_U_FRAME_DISC_CMD_CONTROL 0b01000011
@@ -90,7 +91,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  uint8_t numOfFrames = (telemDataLen / AX25_INFO_BYTES) + ((telemData % AX25_INFO_BYTES != 0));  // Number of frames and rounding up
+  uint8_t numOfFrames = ceil(telemDataLen / AX25_INFO_BYTES);  // Number of frames and rounding up
   *ax25DataLen = numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG;
 
   memset(ax25Data, 0, (size_t) *ax25DataLen);
