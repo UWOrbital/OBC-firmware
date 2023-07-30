@@ -6,6 +6,7 @@ import os
 
 from sun import ephemeris
 from sun.ephemeris import ErrorCode
+from sun import ephemerisparser as ep
 
 
 def test_is_float0():
@@ -155,24 +156,24 @@ def test_allocate_header_true():
     assert len(value) == ephemeris.SIZE_OF_HEADER  # Check if the file size is correct
 
 
-def test_default_step_size():
+def test_define_parser_default_step_size():
     parser = ephemeris.define_parser()
     assert parser.get_default('step_size') == ephemeris.DEFAULT_STEP_SIZE
 
 
 # Check if the default value for target is set correctly
-def test_default_target():
+def test_define_parser_default_target():
     parser = ephemeris.define_parser()
     assert parser.get_default('target') == ephemeris.DEFAULT_TARGET
 
 
 # Check if the default value for output is set correctly
-def test_default_output():
+def test_define_parser_default_output():
     parser = ephemeris.define_parser()
     assert parser.get_default('output') == ephemeris.DEFAULT_FILE_OUTPUT
 
 
-def test_argument_parsing():
+def test_define_parser_argument_parsing():
     # Simulate command-line arguments
     args = ['2023-07-26', '2023-07-27', '-s', '1h', '-t', 'sun', '-o', 'output_file.bin',
             '-p', '2', '-e', 'both', '-v', '-l', 'debug.log']
@@ -255,10 +256,6 @@ def test_check_version_signature_not_dict(caplog):
 
 def test_write_header():
     file = 'test_write_header.bin'
-    # Create an empty file as it is not created by default
-    if not os.path.exists(file):
-        open(file, "wb").close()
-
     ephemeris.write_header(file, 10, 15, 5)
     assert os.path.exists(file)
 
@@ -354,3 +351,28 @@ def test_exit_program_on_error(error_code_object, error_code):
 def test_exit_program_on_error_success():
     ephemeris.exit_program_on_error(ErrorCode.SUCCESS)
     assert True  # If we get here, we're good as the program didn't exit
+
+
+# JD is not written to the file so set it to 0
+@pytest.mark.parametrize("data_point", [
+    (ephemeris.DataPoint(0, 10, 15, -1)),
+    (ephemeris.DataPoint(0, 10, 15, 0)),
+    (ephemeris.DataPoint(0, -5, 65.5, 1)),
+    (ephemeris.DataPoint(0, 0, 0, 1)),
+    (ephemeris.DataPoint(0, 0, 0, 0)),
+    (ephemeris.DataPoint(0, 7, 7, 7))
+])
+def test_write_data(data_point):
+    file = "test_write_data.bin"
+    ephemeris.write_data(data_point, file)
+
+    with open(file, "rb") as f:
+        # get_single_data_point() is tested in test_ephermerisparser.py
+        x = ep.get_single_data_point(f)
+        y = ep.get_single_data_point(f)
+        z = ep.get_single_data_point(f)
+
+    os.remove(file)
+
+    # JD is not written to file, so set it to 0
+    assert ephemeris.DataPoint(0, x, y, z) == data_point

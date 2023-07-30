@@ -14,6 +14,7 @@ from typing import List
 from dataclasses import dataclass
 from math import isclose
 from enum import Enum
+import os
 
 # Script constants
 SUPPORTED_VERSION: Final[str] = '1.2'
@@ -165,6 +166,7 @@ def define_parser() -> argparse.ArgumentParser:
 
 
 # Not testable as it is a print statement used for debugging
+# TODO: Remove this function
 def print_output_if_required(*values, output_type=ALWAYS_PRINT, sep: str | None = None, end: str | None = None,
                              file=sys.stdout, flush=False):
     """
@@ -241,7 +243,6 @@ def print_header(reverse=False):
         print_output_if_required('-' * 130, output_type=ON_WRITE_PRINT)
 
 
-# Not tested yet
 def write_data(data: DataPoint, file_output: str):
     """
     Write the parameter data to the output.bin file and check if the written data is within the error bounds
@@ -278,6 +279,10 @@ def write_header(file_output: str, min_jd: float, max_jd: float, count: int, *, 
     """
     if not write_to_file:
         return None
+
+    # Create the file if it doesn't exist as it doesn't create one by default
+    if not os.path.exists(file_output):
+        open(file_output, "wb").close()
 
     data = [min_jd, calculate_step_size(min_jd, max_jd, count)]
 

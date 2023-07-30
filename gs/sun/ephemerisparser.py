@@ -1,11 +1,13 @@
 # Parser for tests and will be used as the basis for the parser on the OBC
-import os.path
+# Test harness for test_ephemeris.py
+from __future__ import annotations
+
 from typing import List, BinaryIO
 import struct
 from dataclasses import dataclass
 
-import ephemeris
-from ephemeris import DataPoint
+from . import ephemeris
+from .ephemeris import DataPoint
 
 
 @dataclass
@@ -70,21 +72,3 @@ def parse_file(file: str) -> List[DataPoint]:
             output.append(data_point)
 
     return output
-
-
-def main():
-    file_path = os.path.join('..', 'test_sun', 'test1.bin')
-    expected = ephemeris.main(f'2020-01-01 2020-01-02 -s 5m -o {file_path}')
-    actual = parse_file('test1.bin')
-    print(f'{len(expected) = }')
-    print(f'{len(actual) = }')
-    assert len(expected) == len(actual)
-    for i in range(len(expected)):
-        print(f'{expected[i] = }')
-        print(f'{actual[i] = }')
-        print()
-    assert expected == actual
-
-
-if __name__ == '__main__':
-    main()
