@@ -102,7 +102,7 @@ extern "C" {
  * @param destAddress address of the destination for the ax25 packet
  */
 obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t telemDataLen, uint8_t *ax25Data,
-                                                  uint16_t ax25DataLen, const ax25_addr_t *destAddress);
+                                                  uint16_t *ax25DataLen, const ax25_addr_t *destAddress);
 
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
