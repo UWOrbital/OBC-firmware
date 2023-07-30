@@ -10,99 +10,66 @@ from sun.ephemeris import DataPoint
 from sun import ephemerisparser as ep
 
 
-def test_is_float0():
-    assert ephemeris.is_float('-1.0')
+@pytest.mark.parametrize("arg", [
+    ("-1.0"),
+    ("1"),
+    ("1.0"),
+    ("0"),
+])
+def test_is_float_true(arg):
+    assert ephemeris.is_float(arg)
 
 
-def test_is_float1():
-    assert ephemeris.is_float('1')
+@pytest.mark.parametrize("arg", [
+    ("a"),
+    ("1a"),
+    ("a1"),
+    ("1.0a"),
+    ("a1.0"),
+    ("1.a0"),
+])
+def test_is_float_false(arg):
+    assert not ephemeris.is_float(arg)
+
+@pytest.mark.parametrize("arg", [
+    ("JD2451545.0"),
+    ("JD2451545"),
+    ("2020-01-02"),
+])
+def test_is_valid_true(arg):
+    assert ephemeris.is_valid_time(arg)
+
+@pytest.mark.parametrize("arg", [
+    ("2020-01-02 12:00:00"),
+    ("24")
+])
+def test_is_valid_false(arg):
+    assert not ephemeris.is_valid_time(arg)
 
 
-def test_is_float2():
-    assert ephemeris.is_float("1.0")
+@pytest.mark.parametrize("min_jd, max_jd, count, expected", [
+    (1, 1, 1, 0),
+    (1, 3, 2, 2),
+    (1, 7, 4, 2),
+    (10, 110, 11, 10),
+])
+def test_calculate_step_size_true(min_jd, max_jd, count, expected):
+    assert ephemeris.calculate_step_size(min_jd, max_jd, count) == expected
 
 
-def test_is_float3():
-    assert ephemeris.is_float("1")
-
-
-def test_is_float4():
-    assert not ephemeris.is_float("a")
-
-
-def test_is_float5():
-    assert not ephemeris.is_float("1a")
-
-
-def test_is_float6():
-    assert not ephemeris.is_float("a1")
-
-
-def test_is_float7():
-    assert not ephemeris.is_float("1.0a")
-
-
-def test_is_float8():
-    assert not ephemeris.is_float("a1.0")
-
-
-def test_is_float9():
-    assert not ephemeris.is_float("1.a0")
-
-
-def test_is_valid_time0():
-    assert ephemeris.is_valid_time("JD2451545.0")
-
-
-def test_is_valid_time1():
-    assert ephemeris.is_valid_time("JD2451545")
-
-
-def test_is_valid_time2():
-    assert ephemeris.is_valid_time("2020-01-02")
-
-
-def test_is_valid_time3():
-    assert not ephemeris.is_valid_time("2020-01-02 12:00:00")
-
-
-def test_calculate_step_size0():
-    assert ephemeris.calculate_step_size(1, 1, 1) == 0
-
-
-def test_calculate_step_size1():
-    assert ephemeris.calculate_step_size(1, 3, 2) == 2
-
-
-def test_calculate_step_size2():
-    assert ephemeris.calculate_step_size(1, 7, 4) == 2
-
-
-def test_calculate_step_size3():
-    assert ephemeris.calculate_step_size(10, 110, 11) == 10
-
-
-def test_calculate_step_size4():
+@pytest.mark.parametrize("min_jd, max_jd, count", [
+    (1, 1, 0),
+    (1, 1, -1),
+    (1, 1, 2),
+    (3, 1, 3),
+])
+def test_calculate_step_size_error(min_jd, max_jd, count):
     with pytest.raises(ValueError) as _:
-        ephemeris.calculate_step_size(1, 1, 0)
-
-
-def test_calculate_step_size5():
-    with pytest.raises(ValueError) as _:
-        ephemeris.calculate_step_size(1, 1, -1)
-
-
-def test_calculate_step_size6():
-    with pytest.raises(ValueError) as _:
-        ephemeris.calculate_step_size(1, 1, 2)
-
-
-def test_calculate_step_size7():
-    with pytest.raises(ValueError) as _:
-        ephemeris.calculate_step_size(3, 1, 3)
+        ephemeris.calculate_step_size(min_jd, max_jd, count)
 
 
 # Helper function to suppress logging during tests
+# Not tested as it is used in the tests itself
 def suppress_logging(caplog, *, level=logging.ERROR):
     for handler in logging.getLogger().handlers:
         caplog.set_level(level, logger=handler.name)
@@ -147,14 +114,17 @@ def test_allocate_header_false():
 def test_allocate_header_true():
     file = 'test_allocate_header.bin'
 
+    # Check if the file is created
     ephemeris.allocate_header(True, file)
     assert os.path.exists(file)
 
+    # Read and delete the file
     with open(file, 'rb') as f:
         value = f.read()
     os.remove(file)
 
-    assert len(value) == ephemeris.SIZE_OF_HEADER  # Check if the file size is correct
+    # Check if the file size is correct
+    assert len(value) == ephemeris.SIZE_OF_HEADER
 
 
 def test_define_parser_default_step_size():
@@ -219,7 +189,7 @@ def test_check_version_no_version(caplog):
     suppress_logging(caplog, level=logging.WARNING)
     d = {'signature': 'invalid'}
 
-    # Check if the version is incorrect
+    # Check if the signature is incorrect
     assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
     assert 'ERROR: INVALID SIGNATURE' in caplog.text
 
@@ -229,7 +199,7 @@ def test_check_version_no_signature(caplog):
     suppress_logging(caplog, level=logging.WARNING)
     d = {}
 
-    # Check if the version is incorrect
+    # Check if the signature doesn't exist
     assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
     assert 'ERROR: INVALID SIGNATURE' in caplog.text
 
@@ -239,7 +209,7 @@ def test_check_version_signature_none(caplog):
     suppress_logging(caplog, level=logging.WARNING)
     d = {'signature': None}
 
-    # Check if the version is incorrect
+    # Check if the signature is incorrect
     assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
     assert 'ERROR: INVALID SIGNATURE' in caplog.text
 
@@ -249,16 +219,19 @@ def test_check_version_signature_not_dict(caplog):
     suppress_logging(caplog, level=logging.WARNING)
     d = {'signature': 'invalid'}
 
-    # Check if the version is incorrect
+    # Check if the signature is incorrect
     assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
     assert 'ERROR: INVALID SIGNATURE' in caplog.text
 
 
 def test_write_header():
     file = 'test_write_header.bin'
+
+    # Write the header to the file and check that it exists
     ephemeris.write_header(file, 10, 15, 5)
     assert os.path.exists(file)
 
+    # Read and delete the file
     with open(file, 'rb') as f:
         value = f.read()
     os.remove(file)
@@ -331,21 +304,21 @@ $$EOE
     """.split('\n')
     assert ephemeris.find_number_of_data_points(lines) == 12
 
-@pytest.mark.parametrize("error_code_object, error_code", [
-    (ErrorCode.INVALID_START_TIME, 1),
-    (ErrorCode.INVALID_STOP_TIME, 2),
-    (ErrorCode.INVALID_STEP_SIZE, 3),
-    (ErrorCode.INVALID_OUTPUT_FILE, 4),
-    (ErrorCode.NO_SIGNATURE_FOUND, 5),
-    (ErrorCode.INVALID_REQUEST400, 6),
-    (ErrorCode.INVALID_REQUEST, 7),
+@pytest.mark.parametrize("error_code_object", [
+    (ErrorCode.INVALID_START_TIME),
+    (ErrorCode.INVALID_STOP_TIME),
+    (ErrorCode.INVALID_STEP_SIZE),
+    (ErrorCode.INVALID_OUTPUT_FILE),
+    (ErrorCode.NO_SIGNATURE_FOUND),
+    (ErrorCode.INVALID_REQUEST400),
+    (ErrorCode.INVALID_REQUEST),
 ])
-def test_exit_program_on_error(error_code_object, error_code):
+def test_exit_program_on_error(error_code_object):
     with pytest.raises(SystemExit) as e:
         ephemeris.exit_program_on_error(error_code_object)
 
     assert e.type == SystemExit
-    assert e.value.code == error_code
+    assert e.value.code == error_code_object.value
 
 
 def test_exit_program_on_error_success():
@@ -366,6 +339,7 @@ def test_write_data(data_point):
     file = "test_write_data.bin"
     ephemeris.write_data(data_point, file)
 
+    # Read the data points from the file
     with open(file, "rb") as f:
         # get_single_data_point() is tested in test_ephermerisparser.py
         x = ep.get_single_data_point(f)
@@ -379,6 +353,7 @@ def test_write_data(data_point):
 
 
 @pytest.mark.parametrize("argsv, data_points_expected", [
+    # Test 1: Default exclude (last)
     ("JD1 JD2 -s 3h -o test_main.bin", [
         DataPoint(1, x = 1.384519786747137E+08, y =-5.472710939424842E+07, z =-1.276932755237378E+06),
         DataPoint(1.125000000, x = 1.385760653373899E+08, y =-5.442875513032935E+07, z =-1.272689795682322E+06),
@@ -400,3 +375,48 @@ def test_main(argsv, data_points_expected):
     assert data_points_expected == data_points_returned
     assert data_points_actual == data_points_returned
     assert data_points_actual == data_points_expected
+
+# Main thing is to test the logic behind the function, assume math.isclose works
+@pytest.mark.parametrize("data_point, tolerance", [
+    (DataPoint(0, 0, 0, 0), 0),
+    (DataPoint(1, 1, 1, 1), 1e-7),
+    (DataPoint(1, 1, 1, 1), 1e-8),
+    (DataPoint(1, 1, 1, 1), -1e-8),
+    (DataPoint(1, 1, 1, 1), -1e-7),
+])
+def test_datapoint_equals(data_point, tolerance):
+    new_data_point = DataPoint(
+        data_point.jd * (1 + tolerance),
+        data_point.x * (1 + tolerance),
+        data_point.y * (1 + tolerance),
+        data_point.z * (1 + tolerance)
+    )
+
+    assert data_point == new_data_point
+
+# Main thing is to test the logic behind the function, assume math.isclose works
+@pytest.mark.parametrize("data_point, tolerance", [
+    (DataPoint(1, 1, 1, 1), 1e-6),
+    (DataPoint(1, 1, 1, 1), 1e-5),
+    (DataPoint(1, 1, 1, 1), -1e-6),
+    (DataPoint(1, 1, 1, 1), -1e-5),
+])
+def test_datapoint_not_equal_all(data_point, tolerance):
+    new_data_point = DataPoint(
+        data_point.jd * (1 + tolerance),
+        data_point.x * (1 + tolerance),
+        data_point.y * (1 + tolerance),
+        data_point.z * (1 + tolerance)
+    )
+
+    assert data_point != new_data_point
+
+# Main thing is to test the logic behind the function, assume math.isclose works
+@pytest.mark.parametrize("data_point1, data_point2", [
+    (DataPoint(1, 1, 1, 1), DataPoint((1 + 1e-6), 1, 1, 1)),
+    (DataPoint(1, 1, 1, 1), DataPoint(1, (1 + 1e-6), 1, 1)),
+    (DataPoint(1, 1, 1, 1), DataPoint(1, 1, (1 + 1e-6), 1)),
+    (DataPoint(1, 1, 1, 1), DataPoint(1, 1, 1, (1 + 1e-6))),
+])
+def test_datapoint_not_equal(data_point1, data_point2):
+    assert data_point1 != data_point2

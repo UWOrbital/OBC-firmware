@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+# 3rd party imports
 from requests import Response
 import requests
 
+# Standard library imports
 import argparse
 import json
 import struct
@@ -43,6 +45,7 @@ SIZE_OF_INT: Final[int] = 4
 SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF_INT
 
 
+# Error codes enumerator
 class ErrorCode(Enum):
     SUCCESS = 0
     INVALID_START_TIME = 1
@@ -57,7 +60,7 @@ class ErrorCode(Enum):
 @dataclass
 class DataPoint:
     """
-    Data class to store the data points
+    Data class to store a position data point
     """
     jd: float
     x: float
@@ -76,10 +79,38 @@ class DataPoint:
                isclose(self.z, other.z, rel_tol=RELATIVE_TOLERANCE)
 
 
+def define_parser() -> argparse.ArgumentParser:
+    """
+    Defines the parser for the script
+    :return: The parser
+    """
+    parser = argparse.ArgumentParser(description='Position Ephemeris Retriever')
+    parser.add_argument('start_time', type=str, help='Start time in the format YYYY-MM-DD or JD#')
+    parser.add_argument('stop_time', type=str, help='Stop time in the format YYYY-MM-DD or JD#')
+    parser.add_argument('-s', '--step-size', type=str, default=DEFAULT_STEP_SIZE,
+                        help=f'Step size in the same format as the horizontal API (e.g. 1m, 1h, 1d, 1y, 100). '
+                             f'Default: {DEFAULT_STEP_SIZE}')
+    parser.add_argument('-t', '--target', type=str, default=DEFAULT_TARGET,
+                        help=f'Target object (e.g. sun, moon, mars). Default: {DEFAULT_TARGET}')
+    parser.add_argument('-o', '--output', type=str, default=DEFAULT_FILE_OUTPUT,
+                        help=f'Output file name. Default: {DEFAULT_FILE_OUTPUT}')
+    parser.add_argument('-p', '--print', type=int, choices=range(3), default=DEFAULT_PRINT_WARNING,
+                        help=f'Prints the output to the console used for debugging purposes. \
+                        0 = Always, 1 = Basic debugging, 2 = All output. '
+                             f'Default: {DEFAULT_PRINT_WARNING}')
+    parser.add_argument('-e', '--exclude', choices=['first', 'last', 'both', 'none'], default=DEFAULT_EXCLUDE,
+                        help=f'Exclude the first, last, both or none of the values from the output file. '
+                             f'Default: {DEFAULT_EXCLUDE}')
+    parser.add_argument('-l', '--log', type=str, default=None,
+                        help='Log file for debugging purposes. Default: None (standard output)')
+
+    return parser
+
+
 def is_float(num: str):
     """
     Checks if the parameter is a float
-    :param num:
+    :param num: The parameter to check
     :return: True if the parameter is a float otherwise False
     """
     try:
@@ -92,7 +123,7 @@ def is_float(num: str):
 def is_valid_time(time: str):
     """
     Checks if the parameter is a valid time
-    :param time:
+    :param time: The parameter to check
     :return: True if the parameter is a valid time otherwise False
     """
     # Regex for time format
@@ -112,7 +143,7 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
     :param output: Output file name in the format *.bin
     """
 
-    # use the regex to check if the start time is in the correct format
+    # Check if the start time is in the correct format
     if not is_valid_time(start_time):
         logging.critical('Start time must be in the format YYYY-MM-DD or JD#')
         return ErrorCode.INVALID_START_TIME
@@ -135,33 +166,6 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
     return ErrorCode.SUCCESS
 
 
-def define_parser() -> argparse.ArgumentParser:
-    """
-    Defines the parser for the script
-    :return: The parser
-    """
-    parser = argparse.ArgumentParser(description='Position Ephemeris Retriever')
-    parser.add_argument('start_time', type=str, help='Start time in the format YYYY-MM-DD or JD#')
-    parser.add_argument('stop_time', type=str, help='Stop time in the format YYYY-MM-DD or JD#')
-    parser.add_argument('-s', '--step-size', type=str, default=DEFAULT_STEP_SIZE,
-                        help=f'Step size in the same format as the horizontal API (e.g. 1m, 1h, 1d, 1y, 100). '
-                             f'Default: {DEFAULT_STEP_SIZE}')
-    parser.add_argument('-t', '--target', type=str, default=DEFAULT_TARGET,
-                        help=f'Target object (e.g. sun, moon, mars). Default: {DEFAULT_TARGET}')
-    parser.add_argument('-o', '--output', type=str, default=DEFAULT_FILE_OUTPUT,
-                        help=f'Output file name. Default: {DEFAULT_FILE_OUTPUT}')
-    parser.add_argument('-p', '--print', type=int, choices=range(3), default=DEFAULT_PRINT_WARNING,
-                        help=f'Prints the output to the console. 0 = Always, 1 = On write, 2 = Verbose. '
-                             f'Default: {DEFAULT_PRINT_WARNING}')
-    parser.add_argument('-e', '--exclude', choices=['first', 'last', 'both', 'none'], default=DEFAULT_EXCLUDE,
-                        help=f'Exclude the first, last, both or none of the values from the output file. '
-                             f'Default: {DEFAULT_EXCLUDE}')
-    parser.add_argument('-l', '--log', type=str, default=None,
-                        help='Log file for debugging purposes. Default: None')
-
-    return parser
-
-
 def check_version(data: dict) -> ErrorCode:
     """
     Prints out a warning if the version is difference from the supported one
@@ -169,10 +173,12 @@ def check_version(data: dict) -> ErrorCode:
     """
     signature = data.get('signature')
 
+    # Checks if the signature is valid
     if signature is None or not isinstance(signature, dict):
         logging.critical('ERROR: INVALID SIGNATURE')
         return ErrorCode.NO_SIGNATURE_FOUND
 
+    # Checks if the version is supported
     if signature.get('version') != SUPPORTED_VERSION:
         logging.warning('WARNING: UNSUPPORTED HORIZON API VERSION USED')
 
@@ -184,9 +190,10 @@ def check_version(data: dict) -> ErrorCode:
 def validate_response(response: Response) -> ErrorCode:
     """
     Validates the responses. It handles the 400 status error code specifically. It also makes sure that the status code
-    is always 200 for the rest of the script
+    is always 200 (success) for the rest of the script
 
     :param response: The response object
+    :return: ErrorCode.SUCCESS if the response is valid otherwise ErrorCode.INVALID_REQUEST400 or ErrorCode.INVALID_REQUEST
     """
     if response.status_code == 400:
         data = json.loads(response.text)
@@ -204,7 +211,7 @@ def validate_response(response: Response) -> ErrorCode:
 
 
 # Not testable as it is a print statement used for debugging
-def print_header(reverse=False):
+def print_debug_header(reverse=False):
     """
     Prints the header of the data printed, used for debugging purposes
 
@@ -217,15 +224,15 @@ def print_header(reverse=False):
     logging.info('-' * 130)
 
 
-def write_data(data: DataPoint, file_output: str):
+def write_data(data: DataPoint, file_name: str):
     """
-    Write the parameter data to the output.bin file and check if the written data is within the error bounds
+    Write the parameter data to the given file
 
-    :param file_output: The output file
-    :param data: Data to be read and written check
+    :param file_name: The output file name
+    :param data: Data to be written
     """
     # Appends the data to the file and prints the expected data written if applicable
-    with open(file_output, 'ab') as file:
+    with open(file_name, 'ab') as file:
         logging.debug(f'\tData written: {data}')
 
         # Write the x value
@@ -243,11 +250,11 @@ def write_data(data: DataPoint, file_output: str):
 
 def write_header(file_output: str, min_jd: float, max_jd: float, count: int, *, write_to_file=True):
     """
-    Writes the header of the data to the output file
+    Writes the data header (min_jd, step_size, count) the output file
 
     :param count: The number of the data points
-    :param max_jd: The maximum JD
-    :param min_jd: The minimum JD
+    :param max_jd: The maximum JD value used to calculate the step size
+    :param min_jd: The minimum JD value
     :param file_output: The output file
     :param write_to_file: If True then the header is written to the file
     """
@@ -260,16 +267,19 @@ def write_header(file_output: str, min_jd: float, max_jd: float, count: int, *, 
 
     data = [min_jd, calculate_step_size(min_jd, max_jd, count)]
 
+    # Write the data to the file
     with open(file_output, 'rb+') as file:
         logging.debug(f'Writing header to {file_output}')
         file.seek(0)
 
+        # Write the data to the file that is of type double
         for i in data:
             logging.debug(f'\tData written: {i}')
             b = struct.pack(DATA_DOUBLE, i)
             byte: bytearray = bytearray(b)
             file.write(byte)
 
+        # Write the count to the file
         byte_count = struct.pack(DATA_UINT, int(count))
         file.write(bytearray(byte_count))
 
@@ -284,10 +294,13 @@ def find_number_of_data_points(lines: List[str]) -> int:
     total_count = 0
     start = False
     for i in lines:
+        # Start of data
         if i.startswith('$$SOE'):
             start = True
+        # End of data
         if i.startswith('$$EOE'):
             start = False
+        # Data point
         if start and not i.startswith('$$SOE'):
             total_count += 1
 
@@ -304,6 +317,7 @@ def allocate_header(write_to_file: bool, file_output: str):
     if not write_to_file:
         return None
 
+    # Writes SIZE_OF_HEADER bytes to the file
     with open(file_output, 'wb') as file:
         b = bytes(SIZE_OF_HEADER)
         file.write(b)
@@ -311,7 +325,7 @@ def allocate_header(write_to_file: bool, file_output: str):
 
 def calculate_step_size(min_jd: float, max_jd: float, number_of_data_points: int) -> float:
     """
-    Calculates the step size of the data
+    Calculates the step size of the data or raises an error if the parameters are invalid
 
     :param min_jd: The minimum JD
     :param max_jd: The maximum JD
@@ -343,21 +357,26 @@ def exit_program_on_error(error_code: ErrorCode):
         sys.exit(error_code.value)
 
 
-# Not tested yet
 def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
-    # Parse the arguments and set logging
+    """
+    Main function of the program
+    :param argsv: The arguments to be parsed, similar to sys.argv
+    :param write_to_file: NOT USED
+    """
+
+    # Parse the arguments and validate them
     if isinstance(argsv, str):
         args = define_parser().parse_args(argsv.split())
     else:
         args = define_parser().parse_args()
-
     exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
 
+    # Set up logging
     logging.basicConfig(filename=args.log, level=_LOGGING_LEVELS[args.print], encoding='utf-8',
                         format='%(asctime)s %(levelname)s (Line: %(lineno)d):  %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p')
 
-    # Get the data from the API
+    # Get the data from the API and validate it
     url = f'https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM=YES&EPHEM_TYPE=VECTORS&COMMAND=' \
           f'{args.target}&OBJ_DATA=NO&STEP_SIZE={args.step_size}&START_TIME={args.start_time}&STOP_TIME=' \
           f'{args.stop_time}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1'
@@ -372,6 +391,8 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
         sys.exit(-1)
 
     exit_program_on_error(check_version(data))
+
+    # Start processing the data taken from API
     lines = data.get('result').split('\n')
 
     # Find total number of lines to be written
@@ -386,7 +407,7 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
     min_jd = 0
     max_jd = 0
     data_points = []
-    print_header()
+    print_debug_header()
 
     # Loop over response
     for i in lines:
@@ -396,28 +417,34 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
             start = False
         # If the line is not the start or end of the data then it is a line of data
         if start and not i.startswith('$$SOE'):
+            # Depends on the exclude flag
             if not ((count == 0 and (args.exclude == 'both' or args.exclude == 'first'))
                     or (count == total_count - 1) and (args.exclude == 'both' or args.exclude == 'last')):
+                # Parse the line of data
                 logging.debug(f'Line being parsed: {i}')
                 output = (i[:-1].split(', '))
                 output.pop(1)
 
+                # Store the maximum JD
                 jd = float(output[0])
                 if min_jd == 0:
                     min_jd = jd
                 max_jd = jd
 
+                # Parse, store and write the data point
                 logging.info(f'Output written: %s', output)
                 data_point = DataPoint(float(output[0]), float(output[1]), float(output[2]), float(output[3]))
                 data_points.append(data_point)
                 write_data(data_point, args.output)
+
                 lines_written += 1
             count += 1
 
+    # Write the header, print debug header
     write_header(args.output, min_jd, max_jd, lines_written)
-    print_header(True)
-    print(f'Lines written: {lines_written}')
+    print_debug_header(True)
 
+    print(f'Lines written: {lines_written}')
     return data_points
 
 

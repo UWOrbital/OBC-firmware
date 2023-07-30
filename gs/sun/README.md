@@ -9,7 +9,7 @@ Check the requirements.txt file for the latest version of the requirements (pip 
 - PyTest (pip install pytest)
 
 ## Usage:
-usage: sun.py [-h] [-s STEP_SIZE] [-t TARGET] [-o OUTPUT] [-d] [-p {0,1,2}] [-e {first,last,both,none}] [-v] [-l LOG] start_time stop_time
+usage: sun.py [-h] [-s STEP_SIZE] [-t TARGET] [-o OUTPUT] [-d] [-p {0,1,2}] [-e {first,last,both,none}] [-l LOG] start_time stop_time
 
 Position Ephemeris Retriever
 
@@ -27,11 +27,11 @@ show this help message and exit
 -  -o OUTPUT, --output OUTPUT <br>
                         Output file name. Default: output.bin
 -  -p {0,1,2}, --print {0,1,2} <br>
-                        Prints the output to the console. 0 = Always, 1 = On write, 2 = Verbose. Default: 0
+                        Prints the output to the console used for debugging purposes.
+                        0 = Always, 1 = Basic debugging, 2 = All output.  Default: 0
 -  -e {first,last,both,none}, --exclude {first,last,both,none} <br>
                         Exclude the first, last, both or none of the values from the output file. Default: last
--  -v, --verbose        <br> Verbose output used for debugging purposes. Default: False (UNUSED)
--  -l LOG, --log LOG      <br>Log file for debugging purposes. Default: None (UNUSED)
+-  -l LOG, --log LOG      <br>Log file for debugging purposes. Default: None (Standard output)
 
 ## Contents of the output file:
 ### Header:
@@ -43,6 +43,10 @@ show this help message and exit
 - 4 bytes: x
 - 4 bytes: y
 - 4 bytes: z
+
+### JD calculation:
+JD = min_jd + i * step_size <br>
+Where i = 0, 1, 2, ..., n-1
 
 ## Testing
 Make sure you have `pytest` installed before this.
