@@ -134,7 +134,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t te
     remainingDataBytes -= AX25_INFO_BYTES;
   }
   // Send the last frame using ax25SendIFrame with both flags
-  ax25SendIFrame(telemData + (pktSentNum * AX25_INFO_BYTES), remainingDataBytes, ax25Data[frameStart], destAddress);
+  ax25SendIFrame(telemData + (pktSentNum * AX25_INFO_BYTES), remainingDataBytes, ax25Data + frameStart, destAddress);
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
