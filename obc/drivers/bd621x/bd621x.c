@@ -1,6 +1,6 @@
 #include "het.h"
 
-#include "BD621.h"
+#include "bd621x.h"
 #include "obc_errors.h"
 
 #include <stdlib.h>
