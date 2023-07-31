@@ -47,7 +47,7 @@ target_sources(OBC-firmware.out PUBLIC
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdc_bdev.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/bd621/bd621.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bd621/BD621.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
 )
