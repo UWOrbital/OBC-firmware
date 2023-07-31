@@ -7,6 +7,7 @@
 #define AX25_START_FLAG_BYTES 1
 #define AX25_END_FLAG_BYTES 1
 #define AX25_TOTAL_FLAG_BYTES 2
+#define AX25_SHARE_FLAG_BYTES 1
 #define AX25_SRC_ADDR_BYTES 7
 #define AX25_DEST_ADDR_BYTES 7
 #define AX25_ADDRESS_BYTES (AX25_SRC_ADDR_BYTES + AX25_DEST_ADDR_BYTES)
@@ -17,6 +18,9 @@
 #define AX25_PID_BYTES 1
 #define AX25_FCS_BYTES 2
 #define AX25_INFO_BYTES 255
+#define AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG                                                                   \
+  (AX25_SHARE_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
+   AX25_INFO_BYTES)
 #define AX25_MINIMUM_I_FRAME_LEN                                                                              \
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
    AX25_INFO_BYTES)
@@ -87,6 +91,18 @@ extern ax25_addr_t groundStationCallsign;
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief prepares ax25data with appropriate I frames when utilizing flag-sharing
+ *
+ * @param telemData data to send that needs ax.25 headers added onto it
+ * @param telemDataLen length of the telemData array
+ * @param ax25Data array to store the ax.25 frame
+ * @param ax25DataLen ax.25 array length
+ * @param destAddress address of the destination for the ax25 packet
+ */
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t telemDataLen, uint8_t *ax25Data,
+                                                  uint16_t *ax25DataLen, const ax25_addr_t *destAddress);
 
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length
