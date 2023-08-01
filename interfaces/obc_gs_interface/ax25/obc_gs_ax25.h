@@ -59,6 +59,8 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 
 #define MAX_U_FRAME_CMD_VALUE 2
 
+#define CALL_SIGN_BYTES 6
+
 typedef struct {
   uint8_t data[AX25_MINIMUM_I_FRAME_LEN];
   uint16_t length;
@@ -144,19 +146,30 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
 obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *stuffedData, uint16_t *stuffedDataLen);
 
 /**
- * @brief generates an address for the ax25 protocol
+ * @brief generates the destination address for the ax25 protocol
  *
- * @param sourceAddress the address of the source
- * @param destAddress the address of the destination
- * @param sourceCallSign the callsign of the source, if callsign is less than 6 bytes, fill in empty bytes as 0x40
- * @param sourceSSID the SSID of the source
- * @param destCallSign the callsign of the destination, if callsign is less than 6 bytes, fill in empty bytes as 0x40
- * @param destSSID the SSID of the destination
+ * @param address the address of the source
+ * @param callSign the callsign for the address
+ * @param ssid the ssid of the address
+ * @param controlBit the command/response bit in the ax25 protocol
  *
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if an address was generated and error code if not
  */
-obc_gs_error_code_t ax25GetAddress(ax25_addr_t *sourceAddress, ax25_addr_t *destAddress, uint8_t sourceCallSign[],
-                                   uint8_t *sourceSSID, uint8_t destCallSign[], uint8_t *destSSID);
+obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t ssid, uint8_t controlBit);
+
+/**
+ * @brief generates the source address for the ax25 protocol
+ *
+ * @param address the address of the source
+ * @param callSign the callsign for the address
+ * @param ssid the ssid of the address
+ * @param controlBit the command/response bit in the ax25 protocol
+ *
+ * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if an address was generated and error code if not
+ */
+obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignBytes, uint8_t ssid,
+                                         uint8_t controlBit);
+
 #ifdef __cplusplus
 }
 #endif
