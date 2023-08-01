@@ -75,4 +75,7 @@ typedef enum {
   OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE = 800,
   OBC_ERR_CODE_RTC_ALARM_EARLY = 801,
 
+  /* Error codes associataed with BMS max17320*/
+  OBC_ERR_CODE_BMS_NEW_TRANSACTION = 901,
+  OBC_ERR_CODE_BMS_MEM_SLAVE_ADDR_MISMATCH = 902
 } obc_error_code_t;
