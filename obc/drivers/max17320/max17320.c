@@ -47,6 +47,7 @@ static inline obc_error_code_t memoryAddressMatchesSlaveAddr(uint16_t addr, uint
 static obc_error_code_t isValidTransaction(uint16_t* startAddr, uint16_t* slaveAddr, uint16_t size) {
   bool isValid = 0;
 
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidMemoryAddress(startAddr, slaveAddr));
 
   for (uint16_t off = 0; off < size; off++) {
@@ -62,6 +63,7 @@ static obc_error_code_t writeToBmsBlockRegister(uint16_t startAddr, uint8_t* dat
   uint16_t slaveAddr = 0;
   uint16_t startCommAddr = startAddr;
 
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidTransaction(&startCommAddr, &slaveAddr, size));
   return (i2cWriteReg(slaveAddr, startCommAddr, data, size));
 }
@@ -70,6 +72,7 @@ static obc_error_code_t readFromBmsBlockRegister(uint32_t startAddr, uint16_t si
   uint16_t slaveAddr = 0;
   uint16_t startCommAddr = startAddr;
 
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidTransaction(&startCommAddr, &slaveAddr, size));
   return (i2cReadReg(slaveAddr, startCommAddr, buf, size));
 }
