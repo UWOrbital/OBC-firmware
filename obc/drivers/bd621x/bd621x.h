@@ -52,6 +52,7 @@ if it greater than that in magnitude. Same units as maxSpeed.
 * @param period: The PWM period in us.
 * @return Returns OBC_ERR_CODE_SUCCESS if successful, OBC_ERR_CODE_INVALID_ARG if motor is a pointer to NULL
  * or DC_motor_t struct parameters are invalid.
+*/
 obc_error_code_t driveMotorTorque(const DC_motor_t* motor, float speed, float64 period);
 
 /**
