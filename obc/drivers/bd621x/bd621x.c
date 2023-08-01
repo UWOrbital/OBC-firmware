@@ -2,6 +2,7 @@
 
 #include "bd621x.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
 
 #include <stdlib.h>
 
@@ -50,7 +51,7 @@ obc_error_code_t startMotor(const DC_motor_t* motor) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t driveMotorTorque(const DC_motor_t* motor, float speed, float64 period) {
+obc_error_code_t driveMotorSpeed(const DC_motor_t* motor, float speed, float64 period) {
   if (motor == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -68,13 +69,13 @@ obc_error_code_t driveMotorTorque(const DC_motor_t* motor, float speed, float64 
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  int32_t duty = (int32_t)(abs(speed / motor->maxSpeed) * 100);
+  int32_t duty = (int32_t)((speed / motor->maxSpeed) * 100);
 
-  if (abs(duty) > MOTOR_MAX_DUTY) {
-    duty = MOTOR_MAX_DUTY;
+  if (fabs(duty) > MOTOR_MAX_DUTY) {
+    return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  return driveMotorPwm(motor, duty, period);
+  return RETURN_IF_ERROR_CODE(driveMotorPwm(motor, duty, period));
 }
 
 obc_error_code_t brakeMotor(const DC_motor_t* motor) {
@@ -118,10 +119,7 @@ static obc_error_code_t driveMotorPwm(const DC_motor_t* motor, int32_t duty, flo
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static bool isValidPwm(uint32_t pwm) {
-  return ((pwm == pwm0) || (pwm == pwm1) || (pwm == pwm2) || (pwm == pwm3) || (pwm == pwm4) || (pwm == pwm5) ||
-          (pwm == pwm6) || (pwm == pwm7));
-}
+static bool isValidPwm(uint32_t pwm) { return ((pwm >= pwm0) && (pwm <= pwm7)); }
 static bool isValidHetBase(hetRAMBASE_t* hetRam) { return (hetRam == hetRAM1 || hetRam == hetRAM2); }
 
 static bool isValidMotorParameters(const DC_motor_t* motor) {
