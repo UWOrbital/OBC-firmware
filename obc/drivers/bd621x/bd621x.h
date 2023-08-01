@@ -3,15 +3,6 @@
 #include "obc_errors.h"
 #include "het.h"
 
-// Datasheet reference: https://fscdn.rohm.com/en/products/databook/datasheet/ic/motor/dc/bd621x-e.pdf
-
-#define MOTOR_DRIVE_HIGH 100          // 100% duty cycle, indiicating high signal.
-#define MOTOR_DRIVE_LOW 0             // 0% duty cycle, indiicating low signal.
-#define MOTOR_SPEED_LOWER_BOUND 0.01  // (m/s) Arbitrarily chosen lower bound for motor speed.
-#define MOTOR_MAX_FREQUENCY 100000    // (Hz) Max frequency allowed for the brushless motor,  Pg. 11 in the datasheet.
-#define MOTOR_MIN_FREQUENCY 20000     // (Hz) Min frequency allowed for the brushless motor, Pg. 11 in the datasheet.
-
-#define MOTOR_MAX_DUTY 100  // The maximum duty cycle allowed in percent.
 /**
 * @struct DC_motor_t
 * @brief Struct used to hold the motor's pwm modules and which HET driver its running on
