@@ -84,7 +84,7 @@ obc_error_code_t driveMotorSpeed(const DC_motor_t* motor, float speed, float64 p
   if (fabs(duty) > MOTOR_MAX_DUTY) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(driveMotorPwm(motor, duty, period));
   return OBC_ERR_CODE_SUCCESS;
 }
