@@ -101,7 +101,7 @@ extern "C" {
  * @param ax25DataLen ax.25 array length
  * @param destAddress address of the destination for the ax25 packet
  */
-obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint8_t telemDataLen, uint8_t *ax25Data,
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t telemDataLen, uint8_t *ax25Data,
                                                   uint16_t *ax25DataLen, const ax25_addr_t *destAddress);
 
 /**
