@@ -440,7 +440,8 @@ obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *st
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t ssid, uint8_t controlBit) {
+obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignLength, uint8_t ssid,
+                                       uint8_t controlBit) {
   if (address == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -454,6 +455,10 @@ obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[],
   }
 
   if (controlBit > 2) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (callSignLength > CALL_SIGN_BYTES) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 

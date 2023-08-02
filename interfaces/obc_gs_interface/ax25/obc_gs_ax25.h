@@ -150,24 +150,27 @@ obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *st
  *
  * @param address the address of the source
  * @param callSign the callsign for the address
+ * @param callSignLength the length/number of bytes of the callSign
  * @param ssid the ssid of the address
  * @param controlBit the command/response bit in the ax25 protocol
  *
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if an address was generated and error code if not
  */
-obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t ssid, uint8_t controlBit);
+obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignLength, uint8_t ssid,
+                                       uint8_t controlBit);
 
 /**
  * @brief generates the source address for the ax25 protocol
  *
  * @param address the address of the source
  * @param callSign the callsign for the address
+ * @param callSignLength the length/number of bytes of the callSign
  * @param ssid the ssid of the address
  * @param controlBit the command/response bit in the ax25 protocol
  *
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if an address was generated and error code if not
  */
-obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignBytes, uint8_t ssid,
+obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignLength, uint8_t ssid,
                                          uint8_t controlBit);
 
 #ifdef __cplusplus
