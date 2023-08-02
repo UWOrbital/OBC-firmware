@@ -12,6 +12,10 @@
 
 #define SRC_CALLSIGN "\0\0\0\0\0\0\0"
 
+#define AX25_ADDRESS_SPACE_BYTE 0x40
+#define AX25_ADDRESS_RESERVE_BIT_MASK 0b01100000
+#define AX25_ADDRESS_END_FLAG 0x01
+
 static uint8_t pktSentNum = 0;
 static uint8_t pktReceiveNum = 0;
 
@@ -462,17 +466,19 @@ obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[],
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  for (int i = 0; i < CALL_SIGN_BYTES; ++i) {
-    if ((callSign[i] >= 'A' && callSign[i] <= 'Z') || (callSign[i] >= '0' && callSign[i] <= '9')) {
-      address->data[i] = (callSign[i]) << 1;
-    } else {
-      address->data[i] = 0x40;
-    }
+  for (int i = 0; i < callSignLength; ++i) {
+    address->data[i] = callSign[i] << 1;
   }
+
+  for (int i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
+    address->data[i] = AX25_ADDRESS_SPACE_BYTE;
+  }
+
+  address->length = AX25_DEST_ADDR_BYTES;
 
   controlBit = controlBit << 7;
   ssid = ssid << 1;
-  ssid |= 0b01100000;
+  ssid |= AX25_ADDRESS_RESERVE_BIT_MASK;
   address->data[address->length - 1] = ssid | controlBit;
 
   return OBC_GS_ERR_CODE_SUCCESS;
@@ -500,18 +506,20 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  for (int i = 0; i < CALL_SIGN_BYTES; ++i) {
-    if ((callSign[i] >= 'A' && callSign[i] <= 'Z') || (callSign[i] >= '0' && callSign[i] <= '9')) {
-      address->data[i] = callSign[i] << 1;
-    } else {
-      address->data[i] = 0x40;
-    }
+  for (int i = 0; i < callSignLength; ++i) {
+    address->data[i] = callSign[i] << 1;
   }
+
+  for (int i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
+    address->data[i] = AX25_ADDRESS_SPACE_BYTE;
+  }
+
+  address->length = AX25_SRC_ADDR_BYTES;
 
   controlBit = controlBit << 7;
   ssid = ssid << 1;
-  ssid |= 0b01100000;                                             // set R bits to 1 unless specified
-  address->data[address->length - 1] = ssid | controlBit | 0x01;  // Indicating the end of the address field
+  ssid |= AX25_ADDRESS_RESERVE_BIT_MASK;  // set R bits to 1 unless specified
+  address->data[address->length - 1] = ssid | controlBit | AX25_ADDRESS_END_FLAG;
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }

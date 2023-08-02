@@ -104,9 +104,9 @@ TEST(TestAx25SendRecV, Ax25SourceAddressGenerator) {
   uint8_t callSign[] = {'N', '7', 'L', 'E', 'M'};
   uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
 
-  ASSERT_EQ(ax25GetSourceAddress(&sourceAddress, callSign2, 7, 0000, 0), 1);
+  ASSERT_EQ(ax25GetSourceAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
 
-  ax25GetSourceAddress(&sourceAddress, callSign, 5, 0000, 0);
+  ax25GetSourceAddress(&sourceAddress, callSign, 5, 0, 0);
   ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
 }
 
@@ -119,8 +119,8 @@ TEST(TestAx25SendRecV, Ax25DestAddressGenerator) {
   uint8_t callSign[] = {'N', 'J', '7', 'P'};
   uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
 
-  ASSERT_EQ(ax25GetDestAddress(&sourceAddress, callSign2, 7, 0000, 0), 1);
+  ASSERT_EQ(ax25GetDestAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
 
-  ax25GetDestAddress(&sourceAddress, callSign, 4, 0000, 1);
+  ax25GetDestAddress(&sourceAddress, callSign, 4, 0, 1);
   ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
 }
