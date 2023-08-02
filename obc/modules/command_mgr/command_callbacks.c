@@ -78,12 +78,8 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   encodeQueueMsg.telemetryDataBuffer.bufferSize = 1;
   encodeQueueMsg.telemetryDataBuffer.telemData[0] =
       (telemetry_data_t){.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
-  comms_event_t commsQueueMsg = {0};
-  commsQueueMsg.eventID = BEGIN_DOWNLINK;
 
-  setEncodeFlag(true);
-  RETURN_IF_ERROR_CODE(sendToDownlinkQueue(&encodeQueueMsg));
-  RETURN_IF_ERROR_CODE(sendToCommsQueue(&commsQueueMsg));
+  RETURN_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeQueueMsg));
 
   return OBC_ERR_CODE_SUCCESS;
 }

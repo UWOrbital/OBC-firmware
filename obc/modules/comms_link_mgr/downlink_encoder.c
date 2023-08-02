@@ -111,7 +111,7 @@ void initTelemEncodeTask(void) {
  * @param queueMsg - Includes command ID, and either a telemetry batch ID or a telemetry_data_t array
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
-obc_error_code_t sendToDownlinkQueue(encode_event_t *queueMsg) {
+obc_error_code_t sendToDownlinkEncodeQueue(encode_event_t *queueMsg) {
   ASSERT(telemEncodeQueueHandle != NULL);
 
   if (xQueueSend(telemEncodeQueueHandle, (void *)queueMsg, COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
@@ -140,10 +140,16 @@ static void vTelemEncodeTask(void *pvParameters) {
 
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
+        setEncodeFlag(true);
+        comms_event_t downlinkEvent = {.eventID = BEGIN_DOWNLINK};
+        sendToCommsQueue(&downlinkEvent);
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
         setEncodeFlag(false);
         break;
       case DOWNLINK_DATA_BUFFER:
+        setEncodeFlag(true);
+        comms_event_t downlinkEvent = {.eventID = BEGIN_DOWNLINK};
+        sendToCommsQueue(&downlinkEvent);
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         setEncodeFlag(false);

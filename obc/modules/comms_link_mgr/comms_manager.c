@@ -27,8 +27,9 @@
 
 #include <sys_common.h>
 #include <gio.h>
+#include <stdatomic.h>
 
-#define COMMS_MAX_DOWNLINK_FRAMES 1100U
+#define COMMS_DOWNLINK_LOOP_UPPER_BOUND 2000U
 
 /* Comms Manager event queue config */
 #define COMMS_MANAGER_QUEUE_LENGTH 10U
@@ -54,7 +55,7 @@ static StaticQueue_t cc1120TransmitQueue;
 static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH * CC1120_TRANSMIT_QUEUE_ITEM_SIZE];
 
 // flag used to determine whether the encode task is currently encoding more data
-static bool encodingFlag = false;
+static volatile bool encodingFlag = false;
 
 static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                                       0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -139,6 +140,7 @@ static void vCommsManagerTask(void *pvParameters) {
             // if the queue was empty, break if we are done encoding so the transmission is over
             // otherwise continue and poll again
             if (encodingFlag) {
+              portYIELD();
               continue;
             }
             break;
@@ -209,4 +211,4 @@ obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_i_frame_t *ax25Pkt) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-void setEncodeFlag(bool val) { encodingFlag = val; }
+void setEncodeFlag(bool val) { _Atomic_store8((volatile char *)encodingFlag, (char)val); }

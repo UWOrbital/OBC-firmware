@@ -103,11 +103,8 @@ static void telemetryManager(void *pvParameters) {
     }
 
     encode_event_t encodeEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
-    comms_event_t downlinkEvent = {.eventID = BEGIN_DOWNLINK};
 
-    setEncodeFlag(true);
-    LOG_IF_ERROR_CODE(sendToDownlinkQueue(&encodeEvent));
-    LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+    LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeEvent));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       // TODO: Handle this error, specifically if the queue is full. Other
       // errors should be caught during testing.

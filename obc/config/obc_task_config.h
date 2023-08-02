@@ -26,17 +26,18 @@
 /* Comms Manager task config */
 #define COMMS_MANAGER_STACK_SIZE 1024U
 #define COMMS_MANAGER_NAME "comms_manager"
-#define COMMS_MANAGER_PRIORITY tskIDLE_PRIORITY + 5U
+#define COMMS_MANAGER_PRIORITY tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* Comms telemetry encode task config */
 #define COMMS_TELEM_ENCODE_STACK_SIZE 512U
 #define COMMS_TELEM_ENCODE_TASK_NAME "comms_telemetry_encode"
-#define COMMS_TELEM_ENCODE_TASK_PRIORITY tskIDLE_PRIORITY + 3U
+#define COMMS_TELEM_ENCODE_TASK_PRIORITY \
+  tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* Comms Decode task config */
 #define COMMS_DECODE_TASK_NAME "decode_task"
 #define COMMS_DECODE_STACK_SIZE 1024U
-#define COMMS_DECODE_PRIORITY tskIDLE_PRIORITY + 1U
+#define COMMS_DECODE_PRIORITY tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* EPS Manager task config */
 #define EPS_MANAGER_STACK_SIZE 1024U

@@ -80,8 +80,7 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 static void sendStartupMessages(void) {
 #if CSDC_DEMO_ENABLED == 1
   obc_error_code_t errCode;
-  comms_event_t event = {0};
-  event.eventID = BEGIN_UPLINK;
+  comms_event_t event = {.eventID = BEGIN_UPLINK};
   LOG_IF_ERROR_CODE(sendToCommsQueue(&event));
 #endif
 }
