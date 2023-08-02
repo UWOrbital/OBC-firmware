@@ -133,9 +133,9 @@ static void vCommsManagerTask(void *pvParameters) {
     switch (queueMsg.eventID) {
       case BEGIN_DOWNLINK:
         for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
-          packed_ax25_i_frame_t ax25_pkt;
+          packed_ax25_i_frame_t ax25Pkt;
           // poll the transmit queue
-          if (xQueueReceive(cc1120TransmitQueueHandle, &ax25_pkt, (TickType_t)0) != pdPASS) {
+          if (xQueueReceive(cc1120TransmitQueueHandle, &ax25Pkt, (TickType_t)0) != pdPASS) {
             // if the queue was empty, break if we are done encoding so the transmission is over
             // otherwise continue and poll again
             if (encodingFlag) {
@@ -145,9 +145,9 @@ static void vCommsManagerTask(void *pvParameters) {
           }
 
 #if COMMS_PHY == COMMS_PHY_UART
-          LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25_pkt.data, ax25_pkt.length));
+          LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25Pkt.data, ax25Pkt.length));
 #else
-          LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25_pkt.data, ax25_pkt.length));
+          LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25Pkt.data, ax25Pkt.length));
 #endif
         }
         break;
