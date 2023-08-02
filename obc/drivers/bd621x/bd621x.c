@@ -40,7 +40,7 @@ static bool isValidMotorParameters(const DC_motor_t* motor);
 /**
  * @brief Drives the motor at the specified duty cycle and period.
  * @param motor: pointer to motor struct.
- * @param speed: The duty cycle give as a int32_t casted downt to uint32 with considerations for sign.
+ * @param speed: (m/s) The duty cycle give as a int32_t casted downt to uint32 with considerations for sign.
  * @param period: The PWM period in us.
  * @return Returns OBC_ERR_CODE_SUCCESS if successful, OBC_ERR_CODE_INVALID_ARG if motor is a pointer to NULL
  * or DC_motor_t struct parameters are invalid.

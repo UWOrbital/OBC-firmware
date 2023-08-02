@@ -38,7 +38,7 @@ obc_error_code_t startMotor(const DC_motor_t* motor);
 /**
 * @brief Drives the motor at the specified speed and period.
 * @param motor: pointer to motor struct.
-* @param speed: The signed speed value at which the motor should be run. Set to maxiumum speed for the motor
+* @param speed: (m/s) The signed speed value at which the motor should be run. Set to maxiumum speed for the motor
 if it greater than that in magnitude. Same units as maxSpeed.
 * @param period: The PWM period in us.
 * @return Returns OBC_ERR_CODE_SUCCESS if successful, OBC_ERR_CODE_INVALID_ARG if motor is a pointer to NULL
