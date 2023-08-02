@@ -463,7 +463,7 @@ obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[],
   }
 
   for (int i = 0; i < CALL_SIGN_BYTES; ++i) {
-    if ((callSign[i] >= 'A' && callSign[i] <= 'Z') || callSign[i] >= '0' && callSign[i] <= '9') {
+    if ((callSign[i] >= 'A' && callSign[i] <= 'Z') || (callSign[i] >= '0' && callSign[i] <= '9')) {
       address->data[i] = (callSign[i]) << 1;
     } else {
       address->data[i] = 0x40;
