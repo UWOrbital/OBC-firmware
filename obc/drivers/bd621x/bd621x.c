@@ -38,14 +38,14 @@ static bool isValidHetBase(hetRAMBASE_t* hetRam);
 static bool isValidMotorParameters(const DC_motor_t* motor);
 
 /**
- * @brief Drives the motor at the specified duty cycle and period.
+ * @brief Sets the motor at the specified duty cycle and period.
  * @param motor: pointer to motor struct.
  * @param speed: (m/s) The duty cycle give as a int32_t casted downt to uint32 with considerations for sign.
  * @param period: The PWM period in us.
  * @return Returns OBC_ERR_CODE_SUCCESS if successful, OBC_ERR_CODE_INVALID_ARG if motor is a pointer to NULL
  * or DC_motor_t struct parameters are invalid.
  **/
-static obc_error_code_t driveMotorPwm(const DC_motor_t* motor, int32_t duty, float64 period);
+static obc_error_code_t setMotorPwm(const DC_motor_t* motor, int32_t duty, float64 period);
 
 obc_error_code_t startMotor(const DC_motor_t* motor) {
   if (motor == NULL) {
@@ -61,7 +61,7 @@ obc_error_code_t startMotor(const DC_motor_t* motor) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t driveMotorSpeed(const DC_motor_t* motor, float speed, float64 period) {
+obc_error_code_t setMotorSpeed(const DC_motor_t* motor, float speed, float64 period) {
   if (motor == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -85,7 +85,7 @@ obc_error_code_t driveMotorSpeed(const DC_motor_t* motor, float speed, float64 p
     return OBC_ERR_CODE_INVALID_ARG;
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(driveMotorPwm(motor, duty, period));
+  RETURN_IF_ERROR_CODE(setMotorPwm(motor, duty, period));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -117,7 +117,7 @@ obc_error_code_t idleMotor(const DC_motor_t* motor) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t driveMotorPwm(const DC_motor_t* motor, int32_t duty, float64 period) {
+static obc_error_code_t setMotorPwm(const DC_motor_t* motor, int32_t duty, float64 period) {
   hetSIGNAL_t signal = {.duty = abs(duty), .period = period};
 
   if (duty >= 0) {
