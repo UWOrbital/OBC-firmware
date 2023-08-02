@@ -81,7 +81,7 @@ obc_error_code_t driveMotorSpeed(const DC_motor_t* motor, float speed, float64 p
 
   int32_t duty = (int32_t)((speed / motor->maxSpeed) * 100);
 
-  if (fabs(duty) > MOTOR_MAX_DUTY) {
+  if (abs(duty) > MOTOR_MAX_DUTY) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   obc_error_code_t errCode;
