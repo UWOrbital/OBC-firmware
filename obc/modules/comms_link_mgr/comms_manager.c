@@ -133,7 +133,7 @@ static void vCommsManagerTask(void *pvParameters) {
 
     switch (queueMsg.eventID) {
       case BEGIN_DOWNLINK:
-        for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
+        for (uint16_t i = 0; i < COMMS_DOWNLINK_LOOP_UPPER_BOUND; ++i) {
           packed_ax25_i_frame_t ax25Pkt;
           // poll the transmit queue
           if (xQueueReceive(cc1120TransmitQueueHandle, &ax25Pkt, (TickType_t)0) != pdPASS) {
