@@ -1,9 +1,5 @@
 #pragma once
 
-typedef enum {
+typedef enum { REGISTER = 500 } bms_analog_register_t;
 
-} bms_analog_register_t;
-
-typedef enum {
-
-} bms_config_register_t;
+typedef enum { REGISTER_CONFIG = 500 } bms_config_register_t;
