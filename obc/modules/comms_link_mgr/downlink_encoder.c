@@ -141,26 +141,24 @@ static void vTelemEncodeTask(void *pvParameters) {
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
         setEncodeFlag(true);
-        downlinkEvent.eventID = BEGIN_DOWNLINK
-    };
-    LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
-    LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
-    setEncodeFlag(false);
-    break;
-    case DOWNLINK_DATA_BUFFER:
-      setEncodeFlag(true);
-      downlinkEvent.eventID = BEGIN_DOWNLINK
-  };
-  LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
-  LOG_IF_ERROR_CODE(
-      sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
-  setEncodeFlag(false);
-  break;
-  default:
-    LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
-    break;
-}
-}
+        downlinkEvent.eventID = BEGIN_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
+        setEncodeFlag(false);
+        break;
+      case DOWNLINK_DATA_BUFFER:
+        setEncodeFlag(true);
+        downlinkEvent.eventID = BEGIN_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        LOG_IF_ERROR_CODE(
+            sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
+        setEncodeFlag(false);
+        break;
+      default:
+        LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+        break;
+    }
+  }
 }
 
 /**
