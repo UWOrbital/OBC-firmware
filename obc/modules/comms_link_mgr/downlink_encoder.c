@@ -137,22 +137,23 @@ static void vTelemEncodeTask(void *pvParameters) {
       // TODO: Handle this if necessary
       continue;
     }
-    comms_event_t downlinkEvent;
+    comms_event_t downlinkEvent = {0};
+    transmit_event_t transmitEvent = {0};
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
-        setEncodeFlag(true);
         downlinkEvent.eventID = BEGIN_DOWNLINK;
         LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
-        setEncodeFlag(false);
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
-        setEncodeFlag(true);
         downlinkEvent.eventID = BEGIN_DOWNLINK;
         LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
-        setEncodeFlag(false);
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&transmitEvent));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -368,7 +369,8 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
+  transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET, .ax25Pkt = &ax25Pkt};
+  RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
 
   return OBC_ERR_CODE_SUCCESS;
 }

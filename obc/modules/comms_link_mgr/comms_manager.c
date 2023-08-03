@@ -46,16 +46,13 @@ static StaticQueue_t commsQueue;
 static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_ITEM_SIZE];
 
 #define CC1120_TRANSMIT_QUEUE_LENGTH 3U
-#define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(packed_ax25_i_frame_t)
+#define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(transmit_event_t)
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
 static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH * CC1120_TRANSMIT_QUEUE_ITEM_SIZE];
-
-// flag used to determine whether the encode task is currently encoding more data
-static volatile bool encodingFlag = false;
 
 static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                                       0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -133,24 +130,24 @@ static void vCommsManagerTask(void *pvParameters) {
 
     switch (queueMsg.eventID) {
       case BEGIN_DOWNLINK:
-        for (uint16_t i = 0; i < COMMS_DOWNLINK_LOOP_UPPER_BOUND; ++i) {
-          packed_ax25_i_frame_t ax25Pkt;
+        for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
+          packed_ax25_i_frame_t transmitEvent;
           // poll the transmit queue
-          if (xQueueReceive(cc1120TransmitQueueHandle, &ax25Pkt, (TickType_t)0) != pdPASS) {
-            // if the queue was empty, break if we are done encoding so the transmission is over
-            // otherwise continue and poll again
-            if (encodingFlag) {
-              portYIELD();
-              continue;
-            }
-            break;
+          if (xQueueReceive(cc1120TransmitQueueHandle, &transmitEvent, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) !=
+              pdPASS) {
+            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_EMPTY);
           }
-
+          if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-          LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25Pkt.data, ax25Pkt.length));
+            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25Pkt.data, ax25Pkt.length));
 #else
-          LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25Pkt.data, ax25Pkt.length));
+            LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25Pkt.data, ax25Pkt.length));
 #endif
+          } else if (transmitEvent.eventID == END_DOWNLINK) {
+            break;
+          } else {
+            LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+          }
         }
         break;
       case BEGIN_UPLINK:
@@ -197,18 +194,16 @@ static void vCommsManagerTask(void *pvParameters) {
  * @param ax25Pkt - Pointer to the AX.25 packet to send
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
-obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_i_frame_t *ax25Pkt) {
+obc_error_code_t sendToCC1120TransmitQueue(transmit_event_t *event) {
   ASSERT(cc1120TransmitQueueHandle != NULL);
 
-  if (ax25Pkt == NULL) {
+  if (event == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(cc1120TransmitQueueHandle, (void *)ax25Pkt, CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(cc1120TransmitQueueHandle, (void *)event, CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
   return OBC_ERR_CODE_QUEUE_FULL;
 }
-
-void setEncodeFlag(bool val) { encodingFlag = val; }

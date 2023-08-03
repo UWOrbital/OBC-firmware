@@ -30,17 +30,17 @@ typedef struct {
   comms_event_id_t eventID;
 } comms_event_t;
 
+typedef enum { DOWNLINK_PACKET, END_DOWNLINK } transmit_event_id_t;
+
+typedef struct {
+  transmit_event_id_t eventID;
+  packed_ax25_i_frame_t *ax25Pkt;
+} transmit_event_t;
+
 /**
  * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)
  */
 void initCommsManager(void);
-
-/**
- * @brief sets the encodeFlag to the specified value
- *
- * @param val whether to set the flag to true or false
- */
-void setEncodeFlag(bool val);
 
 /**
  * @brief	Send an event to the Comms Manager queue.
@@ -64,4 +64,4 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event);
  * @param ax25Pkt - Pointer to the AX.25 packet to send
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
-obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_i_frame_t *ax25Pkt);
+obc_error_code_t sendToCC1120TransmitQueue(transmit_event_t *event);
