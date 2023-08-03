@@ -81,7 +81,7 @@ static void sendStartupMessages(void) {
 #if CSDC_DEMO_ENABLED == 1
   obc_error_code_t errCode;
   comms_event_t event = {.eventID = BEGIN_UPLINK};
-  LOG_IF_ERROR_CODE(sendToCommsQueue(&event));
+  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
 #endif
 }
 

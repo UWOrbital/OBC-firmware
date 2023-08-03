@@ -94,7 +94,7 @@ void initCommsManager(void) {
   initTelemEncodeTask();
 }
 
-obc_error_code_t sendToCommsQueue(comms_event_t *event) {
+obc_error_code_t sendToCommsManagerQueue(comms_event_t *event) {
   ASSERT(commsQueueHandle != NULL);
 
   if (event == NULL) {
@@ -108,7 +108,7 @@ obc_error_code_t sendToCommsQueue(comms_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-obc_error_code_t sendToFrontOfCommsQueue(comms_event_t *event) {
+obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
   ASSERT(commsQueueHandle != NULL);
 
   if (event == NULL) {
@@ -177,7 +177,7 @@ static void vCommsManagerTask(void *pvParameters) {
 #if CSDC_DEMO_ENABLED == 1
         comms_event_t event = {0};
         event.eventID = BEGIN_UPLINK;
-        LOG_IF_ERROR_CODE(sendToCommsQueue(&event));
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
 #endif
 #else
         // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission

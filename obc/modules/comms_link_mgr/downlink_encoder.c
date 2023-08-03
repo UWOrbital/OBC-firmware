@@ -142,14 +142,14 @@ static void vTelemEncodeTask(void *pvParameters) {
       case DOWNLINK_TELEMETRY_FILE:
         setEncodeFlag(true);
         downlinkEvent.eventID = BEGIN_DOWNLINK;
-        LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
         setEncodeFlag(false);
         break;
       case DOWNLINK_DATA_BUFFER:
         setEncodeFlag(true);
         downlinkEvent.eventID = BEGIN_DOWNLINK;
-        LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         setEncodeFlag(false);
