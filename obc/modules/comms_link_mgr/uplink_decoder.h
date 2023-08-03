@@ -5,16 +5,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define AX25_TIMEOUT_MILLISECONDS 300000
-
 /**
  * @brief flag timeout callback that sets isFlagReceived to false due to a timeout
- *
- * @param none
- *
- * @return void
  */
-void flagTimeoutCallback();
+static void flagTimeoutCallback();
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission

@@ -64,3 +64,4 @@ dkms.conf
 
 .venv/
 venv/
+/cmake-build-debug/

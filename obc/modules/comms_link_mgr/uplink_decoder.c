@@ -31,6 +31,9 @@
 #define DECODE_DATA_QUEUE_ITEM_SIZE sizeof(uint8_t)
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#define AX25_TIMEOUT_MILLISECONDS 300000
+#define TIMER_TIMEOUT_MILLISECONDS 100
+#define TIMER_NAME "flag_timeout"
 
 // Decode Data task
 static TaskHandle_t decodeTaskHandle = NULL;
@@ -79,12 +82,8 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
 
 /**
  * @brief flag timeout callback that sets isFlagReceived to false due to a timeout
- *
- * @param none
- *
- * @return void
  */
-void flagTimeoutCallback() { isStartFlagReceived = false; }
+static void flagTimeoutCallback() { isStartFlagReceived = false; }
 
 /**
  * @brief initializes the decode data pipeline task
@@ -113,7 +112,7 @@ void initDecodeTask(void) {
  */
 static void vDecodeTask(void *pvParameters) {
   TimerHandle_t flagTimeoutTimer =
-      xTimerCreate("FlagTimeout", pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdTRUE, (void *)0, flagTimeoutCallback);
+      xTimerCreate(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdTRUE, (void *)0, flagTimeoutCallback);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
@@ -123,7 +122,6 @@ static void vDecodeTask(void *pvParameters) {
   bool startFlagReceived = false;
 
   while (1) {
-    if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(100)) == pdPASS) {
       if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
         if (axDataIndex >= sizeof(axData.data)) {
           LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
@@ -135,7 +133,7 @@ static void vDecodeTask(void *pvParameters) {
         }
 
         if (byte == AX25_FLAG) {
-          if (xTimerReset(flagTimeoutTimer, pdMS_TO_TICKS(100)) == pdPASS) {
+          if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_TIMEOUT_MILLISECONDS)) == pdPASS) {
             axData.data[axDataIndex++] = byte;
 
             // Decode packet if we have start flag, end flag, and at least 1 byte of data
@@ -163,7 +161,6 @@ static void vDecodeTask(void *pvParameters) {
           axData.data[axDataIndex++] = byte;
         }
       }
-    }
   }
 }
 
