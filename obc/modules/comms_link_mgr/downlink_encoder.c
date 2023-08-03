@@ -1,5 +1,4 @@
 #include "downlink_encoder.h"
-#include "comms_downlink_transmitter.h"
 #include "cc1120_txrx.h"
 #include "obc_gs_fec.h"
 #include "obc_gs_ax25.h"
@@ -24,10 +23,10 @@
 
 static TaskHandle_t telemEncodeTaskHandle = NULL;
 static StaticTask_t telemEncodeTaskBuffer;
-static StackType_t telemEncodeTaskStack[COMMS_TELEM_ENCODE_STACK_SIZE];
+static StackType_t telemEncodeTaskStack[COMMS_DOWNLINK_ENCODE_STACK_SIZE];
 
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
-#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(comms_event_t)  // Size of the telemetry batch ID
+#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(encode_event_t)  // Size of the telemetry batch ID
 #define COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
@@ -89,16 +88,15 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
 
 /**
  * @brief Initializes the telemetry encoding task and queue
- * @param pvParameters parameters to be passed into the created task
  *
  */
-void initTelemEncodeTask(void *pvParameters) {
+void initTelemEncodeTask(void) {
   ASSERT((telemEncodeTaskStack != NULL) && (&telemEncodeTaskBuffer != NULL));
 
   if (telemEncodeTaskHandle == NULL) {
     telemEncodeTaskHandle =
-        xTaskCreateStatic(vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME, COMMS_TELEM_ENCODE_STACK_SIZE, pvParameters,
-                          COMMS_TELEM_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
+        xTaskCreateStatic(vTelemEncodeTask, COMMS_DOWNLINK_ENCODE_NAME, COMMS_DOWNLINK_ENCODE_STACK_SIZE, NULL,
+                          COMMS_DOWNLINK_ENCODE_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
   }
 
   if (telemEncodeQueueHandle == NULL) {
@@ -113,7 +111,7 @@ void initTelemEncodeTask(void *pvParameters) {
  * @param queueMsg - Includes command ID, and either a telemetry batch ID or a telemetry_data_t array
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
-obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg) {
+obc_error_code_t sendToDownlinkEncodeQueue(encode_event_t *queueMsg) {
   ASSERT(telemEncodeQueueHandle != NULL);
 
   if (xQueueSend(telemEncodeQueueHandle, (void *)queueMsg, COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
@@ -130,38 +128,32 @@ obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg) {
  */
 static void vTelemEncodeTask(void *pvParameters) {
   obc_error_code_t errCode;
-  SemaphoreHandle_t cc1120Mutex = *((SemaphoreHandle_t *)pvParameters);
 
   while (1) {
-    comms_event_t queueMsg;
+    encode_event_t queueMsg;
 
     // Wait for a telemetry downlink event
     if (xQueueReceive(telemEncodeQueueHandle, &queueMsg, COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       // TODO: Handle this if necessary
       continue;
     }
-
+    comms_event_t downlinkEvent = {0};
+    transmit_event_t transmitEvent = {0};
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
-        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-          break;
-        }
+        downlinkEvent.eventID = BEGIN_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
-        // wait for TX FIFO to be emptied before unlocking the mutex
-        txFifoEmptyCheckBlocking();
-        xSemaphoreGive(cc1120Mutex);
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
-        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-          break;
-        }
+        downlinkEvent.eventID = BEGIN_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
-        // wait for TX FIFO to be emptied before unlocking the mutex
-        txFifoEmptyCheckBlocking();
-        xSemaphoreGive(cc1120Mutex);
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -377,7 +369,8 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
+  transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET, .ax25Pkt = &ax25Pkt};
+  RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
 
   return OBC_ERR_CODE_SUCCESS;
 }
