@@ -466,11 +466,11 @@ obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[],
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  for (int i = 0; i < callSignLength; ++i) {
+  for (uint8_t i = 0; i < callSignLength; ++i) {
     address->data[i] = callSign[i] << 1;
   }
 
-  for (int i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
+  for (uint8_t i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
     address->data[i] = AX25_ADDRESS_SPACE_BYTE;
   }
 
@@ -506,11 +506,11 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  for (int i = 0; i < callSignLength; ++i) {
+  for (uint8_t i = 0; i < callSignLength; ++i) {
     address->data[i] = callSign[i] << 1;
   }
 
-  for (int i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
+  for (uint8_t i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
     address->data[i] = AX25_ADDRESS_SPACE_BYTE;
   }
 
