@@ -145,7 +145,7 @@ static void vTelemEncodeTask(void *pvParameters) {
         LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
         transmitEvent.eventID = END_DOWNLINK;
-        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&transmitEvent));
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
         downlinkEvent.eventID = BEGIN_DOWNLINK;
@@ -153,7 +153,7 @@ static void vTelemEncodeTask(void *pvParameters) {
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         transmitEvent.eventID = END_DOWNLINK;
-        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&transmitEvent));
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);

@@ -29,7 +29,7 @@
 #include <gio.h>
 #include <stdatomic.h>
 
-#define COMMS_DOWNLINK_LOOP_UPPER_BOUND 2000U
+#define COMMS_MAX_DOWNLINK_FRAMES 1000U
 
 /* Comms Manager event queue config */
 #define COMMS_MANAGER_QUEUE_LENGTH 10U
@@ -131,7 +131,7 @@ static void vCommsManagerTask(void *pvParameters) {
     switch (queueMsg.eventID) {
       case BEGIN_DOWNLINK:
         for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
-          packed_ax25_i_frame_t transmitEvent;
+          transmit_event_t transmitEvent;
           // poll the transmit queue
           if (xQueueReceive(cc1120TransmitQueueHandle, &transmitEvent, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) !=
               pdPASS) {
@@ -139,9 +139,9 @@ static void vCommsManagerTask(void *pvParameters) {
           }
           if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)ax25Pkt.data, ax25Pkt.length));
+            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, ax25Pkt.length));
 #else
-            LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)ax25Pkt.data, ax25Pkt.length));
+            LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, ax25Pkt.length));
 #endif
           } else if (transmitEvent.eventID == END_DOWNLINK) {
             break;
