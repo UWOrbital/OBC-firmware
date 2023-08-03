@@ -95,8 +95,8 @@ void initTelemEncodeTask(void) {
 
   if (telemEncodeTaskHandle == NULL) {
     telemEncodeTaskHandle =
-        xTaskCreateStatic(vTelemEncodeTask, COMMS_DOWNLINK_ENCODE_TASK_NAME, COMMS_DOWNLINK_ENCODE_STACK_SIZE, NULL,
-                          COMMS_DOWNLINK_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
+        xTaskCreateStatic(vTelemEncodeTask, COMMS_DOWNLINK_ENCODE_NAME, COMMS_DOWNLINK_ENCODE_STACK_SIZE, NULL,
+                          COMMS_DOWNLINK_ENCODE_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
   }
 
   if (telemEncodeQueueHandle == NULL) {
