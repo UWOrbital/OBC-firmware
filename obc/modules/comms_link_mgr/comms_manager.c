@@ -27,7 +27,6 @@
 
 #include <sys_common.h>
 #include <gio.h>
-#include <stdatomic.h>
 
 #define COMMS_MAX_DOWNLINK_FRAMES 1000U
 

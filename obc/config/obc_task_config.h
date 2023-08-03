@@ -30,12 +30,12 @@
 
 /* Comms telemetry encode task config */
 #define COMMS_DOWNLINK_ENCODE_STACK_SIZE 512U
-#define COMMS_DOWNLINK_ENCODE_TASK_NAME "comms_telemetry_encode"
-#define COMMS_DOWNLINK_ENCODE_TASK_PRIORITY \
+#define COMMS_DOWNLINK_ENCODE_NAME "comms_telemetry_encode"
+#define COMMS_DOWNLINK_ENCODE_PRIORITY \
   tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* Comms Decode task config */
-#define COMMS_UPLINK_DECODE_TASK_NAME "decode_task"
+#define COMMS_UPLINK_DECODE_NAME "decode_task"
 #define COMMS_UPLINK_DECODE_STACK_SIZE 1024U
 #define COMMS_UPLINK_DECODE_PRIORITY tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
