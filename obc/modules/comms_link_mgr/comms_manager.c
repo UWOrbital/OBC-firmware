@@ -211,4 +211,4 @@ obc_error_code_t sendToCC1120TransmitQueue(packed_ax25_i_frame_t *ax25Pkt) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-void setEncodeFlag(bool val) { _Atomic_store8((volatile char *)encodingFlag, (char)val); }
+void setEncodeFlag(bool val) { encodingFlag = val; }
