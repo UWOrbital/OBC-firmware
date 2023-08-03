@@ -3,6 +3,7 @@
 #include "obc_privilege.h"
 #include "obc_task_config.h"
 
+#include <os_event_groups.h>
 #include <system.h>
 #include <reg_rti.h>
 #include <rti.h>
@@ -14,6 +15,9 @@
 #define RESET_DWD_CMD2 0xA35CUL
 
 #define DWD_CTRL_ENABLE 0xA98559DAUL
+
+// When all task checked in
+#define taskCheckinTrue (TASK1 | TASK2 | TASK3 | TASK4)
 
 // Preload value is used to set the timeout period
 #define MIN_PRELOAD_VAL 0
@@ -32,9 +36,9 @@
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73, "RTI frequency is not 73.333 MHz");
 STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
 
-static StackType_t watchdogStack[SW_WATCHDOG_STACK_SIZE];
-static StaticTask_t watchdogTaskBuffer;
-static TaskHandle_t watchdogTaskHandle;
+// Enable event flag and checks each crital task's status
+EventGroupHandle_t watchdogTaskHandle;
+StaticEventGroup_t watchdogEventGroup;
 
 /**
  * @brief Software watchdog task
@@ -47,9 +51,8 @@ static void swWatcdogFeeder(void* pvParameters);
 static void feedSwWatchdog(void);
 
 void initSwWatchdog(void) {
-  ASSERT((watchdogStack != NULL) && (&watchdogTaskBuffer != NULL));
-  watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
-                                         SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
+  ASSERT(&watchdogEventGroup);
+  watchdogTaskHandle = xEventGroupCreateStatic(&watchdogEventGroup);
 }
 
 static void swWatcdogFeeder(void* pvParameters) {
@@ -64,8 +67,11 @@ static void swWatcdogFeeder(void* pvParameters) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 
   while (1) {
-    feedSwWatchdog();
-    vTaskDelay(FEEDING_PERIOD);
+    // Check if all tasks has checked in
+    uint32_t result = xEventGroupWaitBits(watchdogTaskHandle, taskCheckinTrue, pdTRUE, pdTRUE, FEEDING_PERIOD);
+    if ((result & taskCheckinTrue) == taskCheckinTrue) {
+      feedSwWatchdog();
+    }
   }
 }
 
