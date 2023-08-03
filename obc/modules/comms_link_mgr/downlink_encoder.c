@@ -23,7 +23,7 @@
 
 static TaskHandle_t telemEncodeTaskHandle = NULL;
 static StaticTask_t telemEncodeTaskBuffer;
-static StackType_t telemEncodeTaskStack[COMMS_TELEM_ENCODE_STACK_SIZE];
+static StackType_t telemEncodeTaskStack[COMMS_DOWNLINK_ENCODE_STACK_SIZE];
 
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
 #define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(encode_event_t)  // Size of the telemetry batch ID
@@ -95,8 +95,8 @@ void initTelemEncodeTask(void) {
 
   if (telemEncodeTaskHandle == NULL) {
     telemEncodeTaskHandle =
-        xTaskCreateStatic(vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME, COMMS_TELEM_ENCODE_STACK_SIZE, NULL,
-                          COMMS_TELEM_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
+        xTaskCreateStatic(vTelemEncodeTask, COMMS_DOWNLINK_ENCODE_TASK_NAME, COMMS_DOWNLINK_ENCODE_STACK_SIZE, NULL,
+                          COMMS_DOWNLINK_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
   }
 
   if (telemEncodeQueueHandle == NULL) {

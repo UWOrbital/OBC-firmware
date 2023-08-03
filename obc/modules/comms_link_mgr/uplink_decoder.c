@@ -34,7 +34,7 @@
 // Decode Data task
 static TaskHandle_t decodeTaskHandle = NULL;
 static StaticTask_t decodeTaskBuffer;
-static StackType_t decodeTaskStack[COMMS_DECODE_STACK_SIZE];
+static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
 
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
@@ -83,8 +83,8 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
 void initDecodeTask(void) {
   ASSERT((decodeTaskStack != NULL) && (&decodeTaskBuffer != NULL));
   if (decodeTaskHandle == NULL) {
-    decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_DECODE_TASK_NAME, COMMS_DECODE_STACK_SIZE, NULL,
-                                         COMMS_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
+    decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_UPLINK_DECODE_TASK_NAME, COMMS_UPLINK_DECODE_STACK_SIZE,
+                                         NULL, COMMS_UPLINK_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
   }
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
