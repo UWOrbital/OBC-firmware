@@ -11,6 +11,7 @@
 #define TASK3 0x04
 #define TASK4 0x08
 
+#define EvenGroupHandle_t watchdogTaskHandle
 /**
  * @brief Initialize Digital Windowed Watchdog
  */
