@@ -67,6 +67,7 @@ int main() {
               min_distance / 2, 20000);
 
     rs_testbench_destroy(testbench);
+    correct_reed_solomon_destroy(rs);
 
     min_distance = 16;
     message_length = block_length - min_distance;
@@ -90,6 +91,7 @@ int main() {
               min_distance / 2, 20000);
 
     rs_testbench_destroy(testbench);
+    correct_reed_solomon_destroy(rs);
 
     min_distance = 8;
     message_length = block_length - min_distance;
@@ -113,6 +115,7 @@ int main() {
               min_distance / 2, 20000);
 
     rs_testbench_destroy(testbench);
+    correct_reed_solomon_destroy(rs);
 
     min_distance = 4;
     message_length = block_length - min_distance;
@@ -136,6 +139,7 @@ int main() {
               min_distance / 2, 20000);
 
     rs_testbench_destroy(testbench);
+    correct_reed_solomon_destroy(rs);
 
     printf("test passed\n");
     return 0;

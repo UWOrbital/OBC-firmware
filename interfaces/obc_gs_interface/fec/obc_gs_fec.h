@@ -17,10 +17,6 @@ typedef struct {
   uint8_t data[PACKED_TELEM_PACKET_SIZE];
 } packed_telem_packet_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief takes in a packed telemtry array and encodes it using reed solomon
  *
@@ -47,7 +43,3 @@ void initRs(void);
  * @brief cleans up the memory allocated for the rs variable
  */
 void destroyRs(void);
-
-#ifdef __cplusplus
-}
-#endif

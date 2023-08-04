@@ -1,7 +1,6 @@
 #include "correct/reed-solomon/reed-solomon.h"
 #include "sys_heap.h"
 
-static field_element_t generator_roots[32 * sizeof(field_element_t)];
 
 // coeff must be of size nroots + 1
 // e.g. 2 roots (x + alpha)(x + alpha^2) yields a poly with 3 terms x^2 + g0*x + g1
@@ -14,7 +13,8 @@ static polynomial_t reed_solomon_build_generator(field_t field, unsigned int nro
     return polynomial_create_from_roots(field, nroots, roots);
 }
 
-correct_reed_solomon *correct_reed_solomon_create(correct_reed_solomon *rs, field_operation_t primitive_polynomial, field_logarithm_t first_consecutive_root, field_logarithm_t generator_root_gap, size_t num_roots) {
+correct_reed_solomon *correct_reed_solomon_create(field_operation_t primitive_polynomial, field_logarithm_t first_consecutive_root, field_logarithm_t generator_root_gap, size_t num_roots) {
+    correct_reed_solomon *rs = sysMalloc(sizeof(correct_reed_solomon));
     memset(rs, 0, sizeof(correct_reed_solomon));
     rs->field = field_create(primitive_polynomial);
 
@@ -25,7 +25,7 @@ correct_reed_solomon *correct_reed_solomon_create(correct_reed_solomon *rs, fiel
     rs->first_consecutive_root = first_consecutive_root;
     rs->generator_root_gap = generator_root_gap;
 
-    rs->generator_roots = generator_roots;
+    rs->generator_roots = sysMalloc(rs->min_distance * sizeof(field_element_t));
 
     rs->generator = reed_solomon_build_generator(rs->field, rs->min_distance, rs->first_consecutive_root, rs->generator_root_gap, rs->generator, rs->generator_roots);
 
@@ -35,6 +35,39 @@ correct_reed_solomon *correct_reed_solomon_create(correct_reed_solomon *rs, fiel
     rs->has_init_decode = false;
 
     return rs;
+}
+
+void correct_reed_solomon_destroy(correct_reed_solomon *rs) {
+    field_destroy(rs->field);
+    polynomial_destroy(rs->generator);
+    sysFreeMem(rs->generator_roots);
+    polynomial_destroy(rs->encoded_polynomial);
+    polynomial_destroy(rs->encoded_remainder);
+    if (rs->has_init_decode) {
+        sysFreeMem(rs->syndromes);
+        sysFreeMem(rs->modified_syndromes);
+        polynomial_destroy(rs->received_polynomial);
+        polynomial_destroy(rs->error_locator);
+        polynomial_destroy(rs->error_locator_log);
+        polynomial_destroy(rs->erasure_locator);
+        sysFreeMem(rs->error_roots);
+        sysFreeMem(rs->error_vals);
+        sysFreeMem(rs->error_locations);
+        polynomial_destroy(rs->last_error_locator);
+        polynomial_destroy(rs->error_evaluator);
+        polynomial_destroy(rs->error_locator_derivative);
+        for (unsigned int i = 0; i < rs->min_distance; i++) {
+            sysFreeMem(rs->generator_root_exp[i]);
+        }
+        sysFreeMem(rs->generator_root_exp);
+        for (field_operation_t i = 0; i < 256; i++) {
+            sysFreeMem(rs->element_exp[i]);
+        }
+        sysFreeMem(rs->element_exp);
+        polynomial_destroy(rs->init_from_roots_scratch[0]);
+        polynomial_destroy(rs->init_from_roots_scratch[1]);
+    }
+    sysFreeMem(rs);
 }
 
 void correct_reed_solomon_debug_print(correct_reed_solomon *rs) {

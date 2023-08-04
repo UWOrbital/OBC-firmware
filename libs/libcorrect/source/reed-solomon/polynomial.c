@@ -1,16 +1,16 @@
 #include "correct/reed-solomon/polynomial.h"
 #include "sys_heap.h"
 
-static field_element_t polynomial_coeff[sizeof(field_element_t) * 33] = {0};
-static field_element_t l_coeff[2 * sizeof(field_element_t)] = {0};
-static field_element_t r_0_coeff[33 * sizeof(field_element_t)]= {0};
-static field_element_t r_1_coeff[33 * sizeof(field_element_t)]= {0};
 
 polynomial_t polynomial_create(unsigned int order) {
     polynomial_t polynomial;
-    polynomial.coeff = polynomial_coeff;
+    polynomial.coeff = sysMalloc(sizeof(field_element_t) * (order + 1));
     polynomial.order = order;
     return polynomial;
+}
+
+void polynomial_destroy(polynomial_t polynomial) {
+    sysFreeMem(polynomial.coeff);
 }
 
 // if you want a full multiplication, then make res.order = l.order + r.order
@@ -217,14 +217,17 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
     unsigned int order = nroots;
     polynomial_t l;
     l.order = 1;
-    l.coeff = l_coeff;
+    l.coeff = sysMalloc(2 * sizeof(field_element_t));
+    memset(l.coeff, 0, 2 * sizeof(field_element_t));
 
     polynomial_t r[2];
     // we'll keep two temporary stores of rightside polynomial
     // each time through the loop, we take the previous result and use it as new rightside
     // swap back and forth (prevents the need for a copy)
-    r[0].coeff = r_0_coeff;
-    r[1].coeff = r_1_coeff;
+    r[0].coeff = sysMalloc((order + 1) * sizeof(field_element_t));
+    memset(r[0].coeff, 0, (order + 1) * sizeof(field_element_t));
+    r[1].coeff = sysMalloc((order + 1) * sizeof(field_element_t));
+    memset(r[1].coeff, 0, (order + 1) * sizeof(field_element_t));
     unsigned int rcoeffres = 0;
 
     // initialize the result with x + roots[0]
@@ -248,6 +251,10 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
 
     memcpy(poly.coeff, r[rcoeffres].coeff, (order + 1) * sizeof(field_element_t));
     poly.order = order;
+
+    sysFreeMem(l.coeff);
+    sysFreeMem(r[0].coeff);
+    sysFreeMem(r[1].coeff);
 
     return poly;
 }

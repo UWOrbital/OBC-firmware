@@ -1,14 +1,6 @@
 #include "correct/reed-solomon/encode.h"
 #include "sys_heap.h"
 
-static field_element_t syndromes[32] = {0};
-static field_element_t modified_syndromes[64] = {0};
-static field_element_t error_roots[64] = {0};
-static field_element_t error_vals[32] = {0};
-static field_logarithm_t error_locations[32] = {0};
-static field_logarithm_t generator_root_exp[32][255];
-static field_logarithm_t element_exp[256][32];
-static field_element_t syndrome_copy[32] = {0};
 
 // calculate all syndromes of the received polynomial at the roots of the generator
 // because we're evaluating at the roots of the generator, and because the transmitted
@@ -268,15 +260,18 @@ static void reed_solomon_find_modified_syndromes(correct_reed_solomon *rs, field
 
 void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     rs->has_init_decode = true;
-    rs->syndromes = syndromes;
-    rs->modified_syndromes = modified_syndromes;
+    rs->syndromes = sysMalloc(rs->min_distance*sizeof(field_element_t));
+    memset(rs->syndromes, 0, rs->min_distance*sizeof(field_element_t));
+    rs->modified_syndromes = sysMalloc(2 * rs->min_distance * sizeof(field_element_t));
+    memset(rs->modified_syndromes, 0, 2 * rs->min_distance * sizeof(field_element_t));
     rs->received_polynomial = polynomial_create(rs->block_length - 1);
     rs->error_locator = polynomial_create(rs->min_distance);
     rs->error_locator_log = polynomial_create(rs->min_distance);
     rs->erasure_locator = polynomial_create(rs->min_distance);
-    rs->error_roots = error_roots;
-    rs->error_vals = error_vals;
-    rs->error_locations = error_locations;
+    rs->error_roots = sysMalloc(2 * rs->min_distance * sizeof(field_element_t));
+    memset(rs->error_roots, 0, 2 * rs->min_distance * sizeof(field_element_t));
+    rs->error_vals = sysMalloc(rs->min_distance * sizeof(field_element_t));
+    rs->error_locations = sysMalloc(rs->min_distance * sizeof(field_logarithm_t));
 
     rs->last_error_locator = polynomial_create(rs->min_distance);
     rs->error_evaluator = polynomial_create(rs->min_distance - 1);
@@ -286,8 +281,9 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     // we would have to do this work in order to calculate the syndromes
     // if we save it, we can prevent the need to recalculate it on subsequent calls
     // total memory usage is min_distance * block_length bytes e.g. 32 * 255 ~= 8k
-    rs->generator_root_exp = generator_root_exp;
+    rs->generator_root_exp = sysMalloc(rs->min_distance * sizeof(field_logarithm_t *));
     for (unsigned int i = 0; i < rs->min_distance; i++) {
+        rs->generator_root_exp[i] = sysMalloc(rs->block_length * sizeof(field_logarithm_t));
         polynomial_build_exp_lut(rs->field, rs->generator_roots[i], rs->block_length - 1, rs->generator_root_exp[i]);
     }
 
@@ -295,8 +291,9 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     // we would have to do this for chien search anyway, and its size is only 256 * min_distance bytes
     // for min_distance = 32 this is 8k of memory, a pittance for the speedup we receive in exchange
     // we also get to reuse this work during error value calculation
-    rs->element_exp = element_exp;
+    rs->element_exp = sysMalloc(256 * sizeof(field_logarithm_t *));
     for (field_operation_t i = 0; i < 256; i++) {
+        rs->element_exp[i] = sysMalloc(rs->min_distance * sizeof(field_logarithm_t));
         polynomial_build_exp_lut(rs->field, i, rs->min_distance - 1, rs->element_exp[i]);
     }
 
@@ -452,6 +449,7 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
 
     reed_solomon_find_modified_syndromes(rs, rs->syndromes, rs->erasure_locator, rs->modified_syndromes);
 
+    field_element_t *syndrome_copy = sysMalloc(rs->min_distance * sizeof(field_element_t));
     memcpy(syndrome_copy, rs->syndromes, rs->min_distance * sizeof(field_element_t));
 
     for (unsigned int i = erasure_length; i < rs->min_distance; i++) {
@@ -481,6 +479,7 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
     if (!reed_solomon_factorize_error_locator(rs->field, erasure_length, rs->error_locator_log, rs->error_roots, rs->element_exp)) {
         // roots couldn't be found, so there were too many errors to deal with
         // RS has failed for this message
+        sysFreeMem(syndrome_copy);
         return -1;
     }
 
@@ -506,6 +505,9 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
     for (unsigned int i = 0; i < msg_length; i++) {
         msg[i] = rs->received_polynomial.coeff[encoded_length - (i + 1)];
     }
+
+    polynomial_destroy(temp_poly);
+    sysFreeMem(syndrome_copy);
 
     return msg_length;
 }
