@@ -3,6 +3,7 @@
 #include "obc_privilege.h"
 #include "obc_task_config.h"
 
+#include <os_event_groups.h>
 #include <system.h>
 #include <reg_rti.h>
 #include <rti.h>
@@ -36,6 +37,10 @@ static StackType_t watchdogStack[SW_WATCHDOG_STACK_SIZE];
 static StaticTask_t watchdogTaskBuffer;
 static TaskHandle_t watchdogTaskHandle;
 
+// Enable event flag and checks each crital task's status
+static EventGroupHandle_t watchdogEventHandle;
+static StaticEventGroup_t watchdogEventGroup;
+
 /**
  * @brief Software watchdog task
  */
@@ -46,10 +51,21 @@ static void swWatcdogFeeder(void* pvParameters);
  */
 static void feedSwWatchdog(void);
 
+/**
+ * @brief Initialize the watchdog event group
+ */
+static void initWatchdogEvent(void);
+
 void initSwWatchdog(void) {
   ASSERT((watchdogStack != NULL) && (&watchdogTaskBuffer != NULL));
   watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
                                          SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
+  initWatchdogEvent();
+}
+
+static void initWatchdogEvent(void) {
+  configASSERT(&watchdogEventGroup);
+  watchdogEventHandle = xEventGroupCreateStatic(&watchdogEventGroup);
 }
 
 static void swWatcdogFeeder(void* pvParameters) {
@@ -64,8 +80,14 @@ static void swWatcdogFeeder(void* pvParameters) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 
   while (1) {
-    feedSwWatchdog();
-    vTaskDelay(FEEDING_PERIOD);
+    // Check if all tasks has checked in
+    uint32_t taskCheckinTrue = (TASK1 | TASK2 | TASK3 | TASK4);
+    uint32_t result = xEventGroupWaitBits(watchdogEventHandle, taskCheckinTrue, pdTRUE, pdTRUE, FEEDING_PERIOD);
+
+    // True when all tasks checked in and all event bits are cleared
+    if (!result) {
+      feedSwWatchdog();
+    }
   }
 }
 
@@ -75,3 +97,7 @@ static void feedSwWatchdog(void) {
   rtiREG1->WDKEY = RESET_DWD_CMD2;
   portRESET_PRIVILEGE(xRunningPrivileged);
 }
+
+void taskCheckOut(uint32_t taskNum) { xEventGroupSetBits(watchdogTaskHandle, taskNum); }
+
+void taskCheckIn(uint32_t taskNum) { xEventGroupClearBits(watchdogTaskHandle, taskNum); }
