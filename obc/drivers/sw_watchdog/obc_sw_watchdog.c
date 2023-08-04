@@ -16,9 +16,6 @@
 
 #define DWD_CTRL_ENABLE 0xA98559DAUL
 
-// When all task checked in
-#define taskCheckinTrue (TASK1 | TASK2 | TASK3 | TASK4)
-
 // Preload value is used to set the timeout period
 #define MIN_PRELOAD_VAL 0
 #define MAX_PRELOAD_VAL 0xFFF

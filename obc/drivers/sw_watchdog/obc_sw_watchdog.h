@@ -6,10 +6,10 @@
  * After tasks check in, the bits will be cleared and set to 0.
  * */
 // To-do: Register some critical tasks instead of exa
-#define TASK1 0x01U
-#define TASK2 0x02U
-#define TASK3 0x04U
-#define TASK4 0x08U
+#define TASK1 0x01
+#define TASK2 0x02
+#define TASK3 0x04
+#define TASK4 0x08
 
 #define EvenGroupHandle_t watchdogTaskHandle
 /**
