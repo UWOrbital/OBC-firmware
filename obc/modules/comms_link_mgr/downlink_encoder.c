@@ -137,19 +137,14 @@ static void vTelemEncodeTask(void *pvParameters) {
       // TODO: Handle this if necessary
       continue;
     }
-    comms_event_t downlinkEvent = {0};
     transmit_event_t transmitEvent = {0};
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
-        downlinkEvent.eventID = BEGIN_DOWNLINK;
-        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
         transmitEvent.eventID = END_DOWNLINK;
         LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
-        downlinkEvent.eventID = BEGIN_DOWNLINK;
-        LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&downlinkEvent));
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         transmitEvent.eventID = END_DOWNLINK;

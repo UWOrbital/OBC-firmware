@@ -41,6 +41,8 @@ static QueueHandle_t supervisorQueueHandle = NULL;
 static StaticQueue_t supervisorQueue;
 static uint8_t supervisorQueueStack[SUPERVISOR_QUEUE_LENGTH * SUPERVISOR_QUEUE_ITEM_SIZE];
 
+static comms_state_t commsManagerState;
+
 /**
  * @brief	Supervisor task.
  * @param	pvParameters	Task parameters.
@@ -115,7 +117,7 @@ static void vSupervisorTask(void *pvParameters) {
 
   initTelemetry();
   initCommandManager();
-  initCommsManager();
+  initCommsManager((void *)&commsManagerState);
   initEPSManager();
   initPayloadManager();
   initHealthCollector();
