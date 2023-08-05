@@ -12,6 +12,10 @@
 
 #define SRC_CALLSIGN "\0\0\0\0\0\0\0"
 
+#define AX25_ADDRESS_SPACE_BYTE 0x40
+#define AX25_ADDRESS_RESERVE_BIT_MASK 0b01100000
+#define AX25_ADDRESS_END_FLAG 0x01
+
 static uint8_t pktSentNum = 0;
 static uint8_t pktReceiveNum = 0;
 
@@ -437,5 +441,85 @@ obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *st
   }
 
   *stuffedDataLen = ((stuffedOffset + 7) / 8) + 1;
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
+
+obc_gs_error_code_t ax25GetDestAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignLength, uint8_t ssid,
+                                       uint8_t controlBit) {
+  if (address == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (callSign == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (ssid > 16) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (controlBit > 2) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (callSignLength > CALL_SIGN_BYTES) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  for (uint8_t i = 0; i < callSignLength; ++i) {
+    address->data[i] = callSign[i] << 1;
+  }
+
+  for (uint8_t i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
+    address->data[i] = AX25_ADDRESS_SPACE_BYTE;
+  }
+
+  address->length = AX25_DEST_ADDR_BYTES;
+
+  controlBit = controlBit << 7;
+  ssid = ssid << 1;
+  ssid |= AX25_ADDRESS_RESERVE_BIT_MASK;
+  address->data[address->length - 1] = ssid | controlBit;
+
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
+
+obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[], uint8_t callSignLength, uint8_t ssid,
+                                         uint8_t controlBit) {
+  if (address == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (callSign == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (ssid > 16) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (controlBit > 2) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (callSignLength > CALL_SIGN_BYTES) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  for (uint8_t i = 0; i < callSignLength; ++i) {
+    address->data[i] = callSign[i] << 1;
+  }
+
+  for (uint8_t i = callSignLength; i < CALL_SIGN_BYTES; ++i) {
+    address->data[i] = AX25_ADDRESS_SPACE_BYTE;
+  }
+
+  address->length = AX25_SRC_ADDR_BYTES;
+
+  controlBit = controlBit << 7;
+  ssid = ssid << 1;
+  ssid |= AX25_ADDRESS_RESERVE_BIT_MASK;  // set R bits to 1 unless specified
+  address->data[address->length - 1] = ssid | controlBit | AX25_ADDRESS_END_FLAG;
+
   return OBC_GS_ERR_CODE_SUCCESS;
 }
