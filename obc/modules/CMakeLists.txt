@@ -23,8 +23,6 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/command_mgr/command_callbacks.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/comms_manager.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/comms_downlink_transmitter.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/comms_uplink_receiver.c
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/downlink_encoder.c
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/uplink_decoder.c
 
