@@ -86,11 +86,12 @@ TEST(TestAx25SendRecv, iFrameSomeStuff) {
   }
 }
 
-TEST(TestAx25SendRecv, uFrameSendRecv) {
+TEST(TestAx25SendRecv, uFrameSendRecvConn) {
   packed_ax25_u_frame_t ax25Data = {0};
   uint8_t pollFinalBit = 1;
 
-  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &cubesatCallsign), OBC_GS_ERR_CODE_SUCCESS);
+  setCurrentLinkDestAddress(&cubesatCallsign);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_CONN, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
@@ -98,6 +99,39 @@ TEST(TestAx25SendRecv, uFrameSendRecv) {
 
   u_frame_cmd_t command;
   ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(command, U_FRAME_CMD_CONN);
+}
+
+TEST(TestAx25SendRecv, uFrameSendRecvDisc) {
+  packed_ax25_u_frame_t ax25Data = {0};
+  uint8_t pollFinalBit = 1;
+
+  setCurrentLinkDestAddress(&cubesatCallsign);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_DISC, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
+
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+            OBC_GS_ERR_CODE_SUCCESS);
+
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(command, U_FRAME_CMD_DISC);
+}
+
+TEST(TestAx25SendRecv, uFrameSendRecvDisc) {
+  packed_ax25_u_frame_t ax25Data = {0};
+  uint8_t pollFinalBit = 1;
+
+  setCurrentLinkDestAddress(&cubesatCallsign);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
+
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+            OBC_GS_ERR_CODE_SUCCESS);
+
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(command, U_FRAME_CMD_ACK);
 }
 
 TEST(TestAx25SendRecV, Ax25SourceAddressGenerator) {
