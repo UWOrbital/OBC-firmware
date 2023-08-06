@@ -12,6 +12,7 @@
 #include "obc_reliance_fs.h"
 #include "telemetry_manager.h"
 #include "cc1120_txrx.h"
+#include "rffm6404.h"
 #include "obc_privilege.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
@@ -29,6 +30,7 @@
 #include <gio.h>
 
 #define COMMS_MAX_DOWNLINK_FRAMES 1000U
+#define RFFM6404_VAPC_REGULAR_POWER_VAL 1.9f
 
 /* Comms Manager event queue config */
 #define COMMS_MANAGER_QUEUE_LENGTH 10U
@@ -311,6 +313,11 @@ static void vCommsManagerTask(void *pvParameters) {
     }
 
     LOG_IF_ERROR_CODE(commsStateFns[commsState]());
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      rffm6404PowerOff();
+      comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
+      sendToCommsManagerQueue(&event);
+    }
   }
 }
 
@@ -335,37 +342,147 @@ obc_error_code_t sendToCC1120TransmitQueue(transmit_event_t *event) {
 }
 
 static obc_error_code_t handleDisconnectedState(void) {
-  // TODO: Fill this in
+  obc_error_code_t errCode;
+  clearCurrentLinkDestAddress();
+  RETURN_IF_ERROR_CODE(rffm6404PowerOff());
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleAwaitingConnState(void) {
-  // TODO: Fill this in
+  /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
+   * bypass decode task to allow for retries */
+  obc_error_code_t errCode;
+#if CSDC_DEMO_ENABLED == 1
+  comms_event_t event = {0};
+  event.eventID = BEGIN_UPLINK;
+  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
+#endif
+#if COMMS_PHY == COMMS_PHY_UART
+  uint8_t rxByte;
+
+  // Read first byte
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+
+  RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+
+  // Read the rest of the bytes until we stop uplinking
+  for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+
+    RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+  }
+#else
+  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
+  LOG_IF_ERROR_CODE(cc1120Receive());
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+#endif
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleSendingConnState(void) {
-  // TODO: Fill this in
+  packed_ax25_u_frame_t connCmdPkt = {0};
+  obc_gs_error_code_t interfaceErr = ax25SendUFrame(&connCmdPkt, U_FRAME_CMD_CONN, 0);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(rff6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+  RETURN_IF_ERROR_CODE(cc1120Send(connCmdPkt.data, (uint32_t)connCmdPkt.length));
+  comms_event_t connSentEvent = {.eventID = COMMS_EVENT_CONN_SENT};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&connSentEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleSendingDiscState(void) {
-  // TODO: Fill this in
+  packed_ax25_u_frame_t discCmdPkt = {0};
+  obc_gs_error_code_t interfaceErr = ax25SendUFrame(&discCmdPkt, U_FRAME_CMD_DISC, 0);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(rff6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+  RETURN_IF_ERROR_CODE(cc1120Send(discCmdPkt.data, discCmdPkt.length));
+  comms_event_t discSentEvent = {.eventID = COMMS_EVENT_DISC_SENT};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&discSentEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleSendingAckState(void) {
-  // TODO: Fill this in
+  packed_ax25_u_frame_t ackCmdPkt = {0};
+  obc_gs_error_code_t interfaceErr = ax25SendUFrame(&ackCmdPkt, U_FRAME_CMD_CONN, 0);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(rff6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+  RETURN_IF_ERROR_CODE(cc1120Send(ackCmdPkt.data, ackCmdPkt.length));
+  comms_event_t ackSentEvent = {.eventID = COMMS_EVENT_ACK_SENT};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&ackSentEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleAwaitingAckDiscState(void) {
-  // TODO: Fill this in
+  /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
+   * bypass decode task to allow for retries */
+  obc_error_code_t errCode;
+#if CSDC_DEMO_ENABLED == 1
+  comms_event_t event = {0};
+  event.eventID = BEGIN_UPLINK;
+  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
+#endif
+#if COMMS_PHY == COMMS_PHY_UART
+  uint8_t rxByte;
+
+  // Read first byte
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+
+  RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+
+  // Read the rest of the bytes until we stop uplinking
+  for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+
+    RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+  }
+#else
+  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
+  LOG_IF_ERROR_CODE(cc1120Receive());
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+#endif
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleAwaitingAckConnState(void) {
-  // TODO: Fill this in
+  /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
+   * bypass decode task to allow for retries */
+  obc_error_code_t errCode;
+#if CSDC_DEMO_ENABLED == 1
+  comms_event_t event = {0};
+  event.eventID = BEGIN_UPLINK;
+  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
+#endif
+#if COMMS_PHY == COMMS_PHY_UART
+  uint8_t rxByte;
+
+  // Read first byte
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+
+  RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+
+  // Read the rest of the bytes until we stop uplinking
+  for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+
+    RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
+  }
+#else
+  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
+  LOG_IF_ERROR_CODE(cc1120Receive());
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+#endif
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -395,6 +512,8 @@ static obc_error_code_t handleUplinkingState(void) {
   LOG_IF_ERROR_CODE(cc1120Receive());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
+  comms_event_t uplinkFinishedEvent = {.eventID = COMMS_EVENT_UPLINK_FINISHED};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&uplinkFinishedEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -418,11 +537,16 @@ static obc_error_code_t handleDownlinkingState(void) {
       LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
     }
   }
+  comms_event_t finishedDownlinkEvent = {.eventID = COMMS_EVENT_DOWNLINK_FINISHED};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&finishedDownlinkEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t handleEnterEmergencyState(void) {
-  // TODO: Fill this in
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(cc1120Init());
+  comms_event_t emergInitializedEvent = {.eventID = COMMS_EVENT_EMERG_INITIALIZED};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&emergInitializedEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 

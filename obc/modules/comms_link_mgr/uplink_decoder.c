@@ -10,6 +10,7 @@
 #include "command_manager.h"
 #include "obc_task_config.h"
 #include "obc_logging.h"
+#include "comms_manager.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -183,12 +184,30 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
       return OBC_ERR_CODE_FEC_DECODE_FAILURE;
     }
   }
+
+  obc_error_code_t errCode;
   // check for a valid ax25 frame and perform the command response if necessary
-  interfaceErr = ax25Recv(&unstuffedPacket);
+  u_frame_cmd_t recievedCmd = {0};
+  interfaceErr = ax25Recv(&unstuffedPacket, &recievedCmd);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
   }
-
+  if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
+    if (recievedCmd == U_FRAME_CMD_CONN) {
+      comms_event_t connEvent = {.eventID = COMMS_EVENT_CONN_RECEIVED};
+      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&connEvent));
+      return OBC_ERR_CODE_SUCCESS;
+    } else if (recievedCmd == U_FRAME_CMD_ACK) {
+      comms_event_t ackEvent = {.eventID = COMMS_EVENT_ACK_RECEIVED};
+      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&ackEvent));
+      return OBC_ERR_CODE_SUCCESS;
+    } else if (recievedCmd == U_FRAME_CMD_DISC) {
+      comms_event_t discEvent = {.eventID = COMMS_EVENT_DISC_RECEIVED};
+      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&discEvent));
+    } else {
+      return OBC_ERR_CODE_INVALID_AX25_PACKET;
+    }
+  }
   uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
   aesData->ciphertext = ciphertext;
 
@@ -203,7 +222,6 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
     return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
   }
 
-  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
 
   return OBC_ERR_CODE_SUCCESS;

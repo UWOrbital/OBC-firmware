@@ -140,11 +140,13 @@ static void vTelemEncodeTask(void *pvParameters) {
     transmit_event_t transmitEvent = {0};
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
+        setCurrentLinkDestAddress(&groundStationCallsign);
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
         transmitEvent.eventID = END_DOWNLINK;
         LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
+        setCurrentLinkDestAddress(&groundStationCallsign);
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         transmitEvent.eventID = END_DOWNLINK;
@@ -341,7 +343,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   obc_gs_error_code_t interfaceErr;
 
   // Perform AX.25 framing
-  interfaceErr = ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt, &groundStationCallsign);
+  interfaceErr = ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }

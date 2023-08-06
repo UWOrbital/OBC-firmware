@@ -79,7 +79,7 @@ typedef struct {
   uint8_t length;
 } ax25_addr_t;
 
-typedef enum { U_FRAME_CMD_CONN, U_FRAME_CMD_DISC, U_FRAME_CMD_ACK } u_frame_cmd_t;
+typedef enum { U_FRAME_CMD_CONN = 1, U_FRAME_CMD_DISC = 2, U_FRAME_CMD_ACK = 3 } u_frame_cmd_t;
 
 extern ax25_addr_t cubesatCallsign;
 extern ax25_addr_t groundStationCallsign;
@@ -94,10 +94,8 @@ extern "C" {
  * @param telemData data to send that needs ax.25 headers added onto it
  * @param telemDataLen length of the telemData array
  * @param ax25Data array to store the ax.25 frame
- * @param destAddress address of the destination for the ax25 packet
  */
-obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
-                                   const ax25_addr_t *destAddress);
+obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data);
 
 /**
  * @brief format a buffer into a U frame command such as connect, disconnect, or acknowledge
@@ -105,22 +103,19 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
  * @param ax25Data buffer to store the U frame to be sent
  * @param cmd the U frame command you want to send
  * @param pollFinalBit what to set the poll/final bit to in the U frame (either 1 or 0)
- * @param destAddress address of the destination for the ax25 packet
  *
  * @return obc_gs_error_code_t - whether or not the buffer was correctly formatted
  */
-obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit,
-                                   const ax25_addr_t *destAddress);
+obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit);
 
 /**
  * @brief checks for a valid ax25 frame and performs command handling if necessary
  *
- * @param ax25Data the received ax.25 frame
- * @param uplinkData 255 byte array to store the received data without ax.25 headers
- * @param uplinkDataLen length of the uplinkData array
+ * @param unstuffedPacket the received unstuffed ax.25 frame
+ * @param uFrameCmd buffer to store the received command if the frame was a U frame
  * @return obc_gs_error_code_t - whether or not the ax.25 headers were successfully stripped
  */
-obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket);
+obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command);
 
 /**
  * @brief performs bit unstuffing on a receive ax.25 packet
@@ -143,6 +138,17 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
  */
 obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *stuffedData, uint16_t *stuffedDataLen);
 
+/**
+ * @brief sets the address for the TNC we are communicating with in the current link session
+ *
+ * @param destAdress address of the TNC for the current link session
+ */
+void setCurrentLinkDestAddress(ax25_addr_t *destAddress);
+
+/**
+ * @brief clears the destination address for the current link once we have disconnected
+ */
+void clearCurrentLinkDestAddress(void);
 #ifdef __cplusplus
 }
 #endif
