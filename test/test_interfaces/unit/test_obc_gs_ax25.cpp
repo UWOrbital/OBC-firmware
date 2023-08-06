@@ -118,7 +118,7 @@ TEST(TestAx25SendRecv, uFrameSendRecvDisc) {
   EXPECT_EQ(command, U_FRAME_CMD_DISC);
 }
 
-TEST(TestAx25SendRecv, uFrameSendRecvDisc) {
+TEST(TestAx25SendRecv, uFrameSendRecvAck) {
   packed_ax25_u_frame_t ax25Data = {0};
   uint8_t pollFinalBit = 1;
 
