@@ -138,7 +138,7 @@ static void vCommsManagerTask(void *pvParameters) {
           }
           if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length));
+            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY));
 #else
             LOG_IF_ERROR_CODE(
                 cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, pdMS_TO_TICKS(5000)));
@@ -155,7 +155,7 @@ static void vCommsManagerTask(void *pvParameters) {
         uint8_t rxByte;
 
         // Read first byte
-        LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+        LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
 
         if (errCode == OBC_ERR_CODE_SUCCESS) {
           LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
@@ -164,7 +164,7 @@ static void vCommsManagerTask(void *pvParameters) {
         if (errCode == OBC_ERR_CODE_SUCCESS) {
           // Read the rest of the bytes until we stop uplinking
           for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-            LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+            LOG_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
 
             if (errCode == OBC_ERR_CODE_SUCCESS) {
               LOG_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));

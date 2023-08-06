@@ -13,7 +13,7 @@ int main(void) {
 
   while (1) {
     // Send a string of text via SCI
-    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20);
+    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20, portMAX_DELAY);
 
     // Test sciPrintf
     sciPrintf("Testing sciPrintf: %d %d %s\r\n", 0, 1, "Hello");

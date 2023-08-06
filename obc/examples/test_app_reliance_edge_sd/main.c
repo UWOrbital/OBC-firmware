@@ -107,7 +107,7 @@ void vTask1(void *pvParameters) {
   sciPrintf("Successfully read from %s\r\n", fname);
 
   sciPrintf("Text read from %s: \r\n", fname);
-  sciPrintText(readBuf, ret);
+  sciPrintText(readBuf, ret, portMAX_DELAY);
 
   ret = red_close(file);
   if (ret < 0) {

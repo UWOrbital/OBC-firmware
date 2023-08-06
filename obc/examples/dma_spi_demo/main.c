@@ -82,9 +82,9 @@ void task(void *pvParameters) {
 
       for (uint8_t i = 0; i < D_SIZE; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
 
   for (uint8_t i = 0; i < 50; ++i) {
     TX_DATA[i] = 0xff;
@@ -98,9 +98,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 50; ++i) {
     sprintf(str, "%u ", RX_DATA_SECOND[i + 1]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
 
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x55;
@@ -112,9 +112,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x33;
   }
@@ -125,9 +125,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x22;
   }
@@ -138,9 +138,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x11;
   }
@@ -151,9 +151,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x09;
   }
@@ -164,9 +164,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   for (uint8_t i = 0; i < 5; ++i) {
     TX_DATA[i] = 0x08;
   }
@@ -177,9 +177,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 5; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   for (uint8_t i = 0; i < 3; ++i) {
     TX_DATA[i] = 0x07;
   }
@@ -190,9 +190,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 3; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, portMAX_DELAY);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, portMAX_DELAY);
   while (1)
     ;
 }

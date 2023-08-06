@@ -24,7 +24,7 @@ int main(void) {
       continue;
     }
 
-    sciPrintText(buffer, NUM_CHARS_TO_READ);
+    sciPrintText(buffer, NUM_CHARS_TO_READ, portMAX_DELAY);
     sciPrintf("\r\n");
 
     // Toggle the LED.
