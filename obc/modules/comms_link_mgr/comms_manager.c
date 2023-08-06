@@ -387,8 +387,12 @@ static obc_error_code_t handleSendingConnState(void) {
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(rff6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+#if COMMS_PHY == COMMS_PHY_UART
+  RETURN_IF_ERROR_CODE(sciSendBytes(connCmdPkt.data, (uint32_t)connCmdPkt.length));
+#else
+  RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
   RETURN_IF_ERROR_CODE(cc1120Send(connCmdPkt.data, (uint32_t)connCmdPkt.length));
+#endif
   comms_event_t connSentEvent = {.eventID = COMMS_EVENT_CONN_SENT};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&connSentEvent));
   return OBC_ERR_CODE_SUCCESS;
@@ -401,8 +405,12 @@ static obc_error_code_t handleSendingDiscState(void) {
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(rff6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+#if COMMS_PHY == COMMS_PHY_UART
+  RETURN_IF_ERROR_CODE(sciSendBytes(discCmdPkt.data, discCmdPkt.length));
+#else
+  RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
   RETURN_IF_ERROR_CODE(cc1120Send(discCmdPkt.data, discCmdPkt.length));
+#endif
   comms_event_t discSentEvent = {.eventID = COMMS_EVENT_DISC_SENT};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&discSentEvent));
   return OBC_ERR_CODE_SUCCESS;
@@ -415,8 +423,13 @@ static obc_error_code_t handleSendingAckState(void) {
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(rff6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+
+#if COMMS_PHY == COMMS_PHY_UART
+  RETURN_IF_ERROR_CODE(sciSendBytes(ackCmdPkt.data, ackCmdPkt.length));
+#else
+  RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
   RETURN_IF_ERROR_CODE(cc1120Send(ackCmdPkt.data, ackCmdPkt.length));
+#endif
   comms_event_t ackSentEvent = {.eventID = COMMS_EVENT_ACK_SENT};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&ackSentEvent));
   return OBC_ERR_CODE_SUCCESS;
@@ -519,6 +532,9 @@ static obc_error_code_t handleUplinkingState(void) {
 
 static obc_error_code_t handleDownlinkingState(void) {
   obc_error_code_t errCode;
+#if COMMS_PHY != COMMS_PHY_UART
+  RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
+#endif
   for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
     transmit_event_t transmitEvent;
     // poll the transmit queue
