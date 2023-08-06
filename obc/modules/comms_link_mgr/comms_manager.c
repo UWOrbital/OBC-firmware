@@ -138,7 +138,8 @@ static void vCommsManagerTask(void *pvParameters) {
           }
           if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY));
+            LOG_IF_ERROR_CODE(
+                sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY));
 #else
             LOG_IF_ERROR_CODE(
                 cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, pdMS_TO_TICKS(5000)));
