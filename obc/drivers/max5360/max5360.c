@@ -31,7 +31,7 @@ obc_error_code_t max5360WriteVoltage(float analogVoltsOutput) {
   // round the value to the nearest integer before casting
   uint8_t dacCode = ((uint8_t)(analogVoltsOutput * DAC_STEP_VALUE / DAC_VREF_VALUE + 0.5)) << 2;
 
-  RETURN_IF_ERROR_CODE(i2cSendTo(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacCode));
+  RETURN_IF_ERROR_CODE(i2cSendTo(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacCode, pdMS_TO_TICKS(100), portMAX_DELAY));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -45,7 +45,8 @@ obc_error_code_t max5360PowerOff(void) {
   uint8_t dacRecvBuf;
   // Reading from the DAC will turn it off
   // See datasheet page 10
-  RETURN_IF_ERROR_CODE(i2cReceiveFrom(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf));
+  RETURN_IF_ERROR_CODE(
+      i2cReceiveFrom(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf, pdMS_TO_TICKS(100), portMAX_DELAY));
   // DAC should output all ones
   if (dacRecvBuf != UINT8_MAX) {
     return OBC_ERR_CODE_MAX5360_SHUTDOWN_FAILURE;

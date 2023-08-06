@@ -17,20 +17,26 @@ void initI2CMutex(void);
  * @param sAddr The slave address of the device to send to
  * @param size The number of bytes to send
  * @param buf The buffer to send
+ * @param transferTimeout The maximum time (in ticks) to wait for the transfer to complete
+ * @param mutexTimeout The maximum time (in ticks) to wait for the mutex to be acquired
  * @return OBC_ERR_CODE_SUCCESS if the bytes were sent, OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out,
  * OBC_ERR_CODE_INVALID_ARG if the buffer is NULL or the size is 0
  */
-obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf);
+obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_t transferTimeout,
+                           TickType_t mutexTimeout);
 
 /**
  * @brief Receive a buffer of bytes from a device on the I2C bus
  * @param sAddr The slave address of the device to receive from
  * @param size The number of bytes to receive
  * @param buf The buffer to receive into
+ * @param transferTimeout The maximum time (in ticks) to wait for the transfer to complete
+ * @param mutexTimeout The maximum time (in ticks) to wait for the mutex to be acquired
  * @return OBC_ERR_CODE_SUCCESS if the bytes were sent, OBC_ERR_CODE_MUTEX_TIMEOUT if the mutex timed out,
  * OBC_ERR_CODE_INVALID_ARG if the buffer is NULL or the size is 0
  */
-obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf);
+obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_t transferTimeout,
+                                TickType_t mutexTimeout);
 
 /**
  * @brief Read byte(s) from a device's register(s).

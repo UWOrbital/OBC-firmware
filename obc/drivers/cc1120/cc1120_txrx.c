@@ -176,9 +176,10 @@ obc_error_code_t cc1120Init(void) {
  *
  * @param data - The packet to transmit
  * @param len - The size of the provided packet in bytes
+ * @param txFifoTimeout - The amount of time to wait for the txFifoEmptySemaphore to become available
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Send(uint8_t *data, uint32_t len) {
+obc_error_code_t cc1120Send(uint8_t *data, uint32_t len, TickType_t txFifoTimeout) {
   obc_error_code_t errCode;
 
   if (txSemaphore == NULL) {
@@ -194,7 +195,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len) {
   }
 
   // wait on the semaphore to make sure tx fifo is empty
-  if (xSemaphoreTake(txFifoEmptySemaphore, TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT) != pdPASS) {
+  if (xSemaphoreTake(txFifoEmptySemaphore, txFifoTimeout) != pdPASS) {
     LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
@@ -302,11 +303,12 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len) 
  *
  * @param data - The packet to transmit
  * @param len - The size of the provided packet in bytes
+ * @param txTimeout - The amount of time to wait for the txSemaphore to become available
  * @return obc_error_code_t
  */
-static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len) {
+static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len, TickType_t txTimeout) {
   obc_error_code_t errCode;
-  if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) != pdPASS) {
+  if (xSemaphoreTake(txSemaphore, txTimeout) != pdPASS) {
     LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
@@ -337,10 +339,11 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
 
 /**
  * @brief Switches the cc1120 to RX mode to continuously receive bytes and send them to the decode task
- *
+ * @param syncTimeout - The amount of time to wait for the syncReceivedSemaphore to become available
+ * @param rxTimeout - The amount of time to wait for the rxSemaphore to become available
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Receive(void) {
+obc_error_code_t cc1120Receive(TickType_t syncTimeout, TickType_t rxTimeout) {
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
   if (rxSemaphore == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
@@ -370,7 +373,7 @@ obc_error_code_t cc1120Receive(void) {
   uint8_t dataBuffer[TXRX_INTERRUPT_THRESHOLD];
 
   // wait to receive sync word before continuing
-  if (xSemaphoreTake(syncReceivedSemaphore, SYNC_EVENT_SEMAPHORE_TIMEOUT) != pdPASS) {
+  if (xSemaphoreTake(syncReceivedSemaphore, syncTimeout) != pdPASS) {
     LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
@@ -381,9 +384,9 @@ obc_error_code_t cc1120Receive(void) {
   for (rxFifoReadCycles = 0;
        rxFifoReadCycles < (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD;
        ++rxFifoReadCycles) {
-    // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than RX_SEMAPHORE_TIMEOUT
+    // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than rxTimeout
     // before exiting this loop since that means we are no longer transmitting
-    if (xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS) {
+    if (xSemaphoreTake(rxSemaphore, rxTimeout) != pdPASS) {
       break;
     }
     RETURN_IF_ERROR_CODE(cc1120ReadFifo(dataBuffer, TXRX_INTERRUPT_THRESHOLD));
@@ -417,11 +420,11 @@ obc_error_code_t cc1120Receive(void) {
 
 /**
  * @brief block until the tx fifo is empty without decrementing the semaphore
- *
+ * @param txFifoTimeout - The amount of time to wait for the txFifoEmptySemaphore to become available
  * @return obc_error_code_t - whether the tx fifo empty semaphore became available without timing out or not
  */
-obc_error_code_t txFifoEmptyCheckBlocking(void) {
-  if (xSemaphoreTake(txFifoEmptySemaphore, TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT) != pdPASS) {
+obc_error_code_t txFifoEmptyCheckBlocking(TickType_t txFifoTimeout) {
+  if (xSemaphoreTake(txFifoEmptySemaphore, txFifoTimeout) != pdPASS) {
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
   xSemaphoreGive(txFifoEmptySemaphore);

@@ -57,14 +57,14 @@ obc_error_code_t camReadByte(uint8_t *byte, camera_t cam) {
 
 obc_error_code_t camWriteSensorReg16_8(uint32_t regID, uint8_t regDat) {
   uint8_t reg_tx_data[3] = {(regID >> 8), (regID & 0x00FF), regDat};
-  return i2cSendTo(CAM_I2C_WR_ADDR, 3, reg_tx_data);
+  return i2cSendTo(CAM_I2C_WR_ADDR, 3, reg_tx_data, pdMS_TO_TICKS(100), portMAX_DELAY);
 }
 
 obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t *regDat) {
   // Todo: regID is byteswapped for some reason so 0x3138 needs to be input as 0x3831
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(i2cSendTo(0x3C, 2, &regID));
-  RETURN_IF_ERROR_CODE(i2cReceiveFrom(0x3C, 1, regDat));
+  RETURN_IF_ERROR_CODE(i2cSendTo(0x3C, 2, &regID, pdMS_TO_TICKS(100), portMAX_DELAY));
+  RETURN_IF_ERROR_CODE(i2cReceiveFrom(0x3C, 1, regDat, pdMS_TO_TICKS(100), portMAX_DELAY));
   return errCode;
 }
 
@@ -85,7 +85,7 @@ obc_error_code_t tcaSelect(camera_t cam) {
   } else {
     tca = (1 << 1);
   }
-  return i2cSendTo(TCA_I2C_ADDR, 1, &tca);
+  return i2cSendTo(TCA_I2C_ADDR, 1, &tca, pdMS_TO_TICKS(100), portMAX_DELAY);
 }
 
 uint8_t getBit(uint8_t addr, uint8_t bit, camera_t cam) {

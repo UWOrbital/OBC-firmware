@@ -140,7 +140,8 @@ static void vCommsManagerTask(void *pvParameters) {
 #if COMMS_PHY == COMMS_PHY_UART
             LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length));
 #else
-            LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length));
+            LOG_IF_ERROR_CODE(
+                cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, pdMS_TO_TICKS(5000)));
 #endif
           } else if (transmitEvent.eventID == END_DOWNLINK) {
             break;
@@ -177,7 +178,7 @@ static void vCommsManagerTask(void *pvParameters) {
 #endif
 #else
         // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
-        LOG_IF_ERROR_CODE(cc1120Receive());
+        LOG_IF_ERROR_CODE(cc1120Receive(pdMS_TO_TICKS(30000), pdMS_TO_TICKS(100)));
         LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
         break;
