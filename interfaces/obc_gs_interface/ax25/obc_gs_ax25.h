@@ -57,7 +57,7 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 #define AX25_S_FRAME_REJ_CONTROL 0x09U
 #define AX25_S_FRAME_SREJ_CONTROL 0x0DU
 
-#define MAX_U_FRAME_CMD_VALUE 2
+#define MAX_U_FRAME_CMD_VALUE 3
 
 #define CALL_SIGN_BYTES 6
 
