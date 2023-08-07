@@ -48,6 +48,10 @@ static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_
 #define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(transmit_event_t)
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#define CC1120_SYNC_EVENT_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
+#define CC1120_TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
+
+#define RM46_UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
@@ -138,11 +142,11 @@ static void vCommsManagerTask(void *pvParameters) {
           }
           if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-            LOG_IF_ERROR_CODE(
-                sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY));
+            LOG_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
+                                           RM46_UART_MUTEX_BLOCK_TIME));
 #else
-            LOG_IF_ERROR_CODE(
-                cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, pdMS_TO_TICKS(5000)));
+            LOG_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
+                                         CC1120_TX_SEMAPHORE_TIMEOUT));
 #endif
           } else if (transmitEvent.eventID == END_DOWNLINK) {
             break;
@@ -179,7 +183,7 @@ static void vCommsManagerTask(void *pvParameters) {
 #endif
 #else
         // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
-        LOG_IF_ERROR_CODE(cc1120Receive(pdMS_TO_TICKS(30000), pdMS_TO_TICKS(100)));
+        LOG_IF_ERROR_CODE(cc1120Receive(CC1120_SYNC_EVENT_SEMAPHORE_TIMEOUT));
         LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
         break;

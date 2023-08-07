@@ -46,15 +46,15 @@ void initI2CMutex(void) {
   ASSERT(i2cTransferComplete != NULL);
 }
 
-obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_t mutexTimeout,
-                           TickType_t transferTimeout) {
+obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_t mutexTimeoutTicks,
+                           TickType_t transferTimeoutTicks) {
   obc_error_code_t errCode;
 
   ASSERT(i2cMutex != NULL);
 
   if (buf == NULL || size < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  if (xSemaphoreTake(i2cMutex, mutexTimeout) != pdTRUE) {
+  if (xSemaphoreTake(i2cMutex, mutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -67,7 +67,7 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_
 
   i2cSend(I2C_REG, size, buf);
 
-  if (xSemaphoreTake(i2cTransferComplete, transferTimeout) != pdTRUE) {
+  if (xSemaphoreTake(i2cTransferComplete, transferTimeoutTicks) != pdTRUE) {
     errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
     i2cSetStop(I2C_REG);
   } else {
@@ -80,15 +80,15 @@ obc_error_code_t i2cSendTo(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_
   return errCode;
 }
 
-obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_t mutexTimeout,
-                                TickType_t transferTimeout) {
+obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, TickType_t mutexTimeoutTicks,
+                                TickType_t transferTimeoutTicks) {
   obc_error_code_t errCode;
 
   ASSERT(i2cMutex != NULL);
 
   if (buf == NULL || size < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  if (xSemaphoreTake(i2cMutex, mutexTimeout) != pdTRUE) {
+  if (xSemaphoreTake(i2cMutex, mutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -101,7 +101,7 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, Tick
 
   i2cReceive(I2C_REG, size, buf);
 
-  if (xSemaphoreTake(i2cTransferComplete, transferTimeout) != pdTRUE) {
+  if (xSemaphoreTake(i2cTransferComplete, transferTimeoutTicks) != pdTRUE) {
     errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
     i2cSetStop(I2C_REG);
   } else {

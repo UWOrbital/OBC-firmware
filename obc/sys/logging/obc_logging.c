@@ -11,6 +11,8 @@
 // Extra 10 for the small extra pieces in "%s - %s\r\n"
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
 static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
 static log_level_t logLevel;
@@ -54,7 +56,7 @@ obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, c
   if ((uint32_t)ret >= MAX_LOG_SIZE) return OBC_ERR_CODE_BUFF_TOO_SMALL;
 
   if (outputLocation == LOG_TO_UART) {
-    obc_error_code_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf), portMAX_DELAY);
+    obc_error_code_t retSci = sciPrintText((unsigned char *)buf, sizeof(buf), UART_MUTEX_BLOCK_TIME);
     return retSci;
   } else if (outputLocation == LOG_TO_SDCARD) {
     // implement when SD card driver is written
