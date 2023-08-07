@@ -61,13 +61,13 @@ void initSciMutex(void) {
   sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
 }
 
-obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeout) {
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks) {
   if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
 
   SemaphoreHandle_t mutex = (UART_PRINT_REG == sciREG) ? sciMutex : sciLinMutex;
   configASSERT(mutex);
 
-  if (xSemaphoreTake(mutex, uartMutexTimeout) == pdTRUE) {
+  if (xSemaphoreTake(mutex, uartMutexTimeoutTicks) == pdTRUE) {
     obc_error_code_t err = sciSendString(text, length);
     xSemaphoreGive(mutex);
     return err;
@@ -131,7 +131,7 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 }
 */
 
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeout, size_t blockTimeTicks) {
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks) {
   obc_error_code_t errCode;
 
   SemaphoreHandle_t mutex = (UART_READ_REG == sciREG) ? sciMutex : sciLinMutex;
@@ -141,7 +141,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xSemaphoreTake(mutex, uartMutexTimeout) != pdTRUE) {
+  if (xSemaphoreTake(mutex, uartMutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -165,7 +165,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   return errCode;
 }
 
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeout) {
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks) {
   SemaphoreHandle_t mutex = (UART_PRINT_REG == sciREG) ? sciMutex : sciLinMutex;
   configASSERT(mutex != NULL);
 
@@ -173,7 +173,7 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xSemaphoreTake(mutex, uartMutexTimeout) != pdTRUE) {
+  if (xSemaphoreTake(mutex, uartMutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 

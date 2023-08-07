@@ -19,10 +19,10 @@ void initSciMutex(void);
  *
  * @param text The text to send.
  * @param length The length of the text to send.
- * @param uartMutexTimeout The number of ticks to wait for the mutex to become available.
+ * @param uartMutexTimeoutTicks The number of ticks to wait for the mutex to become available.
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeout);
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks);
 
 /**
  * @brief Printf via UART_PRINT_REG.
@@ -46,21 +46,21 @@ obc_error_code_t sciReadByte(unsigned char *character);
  *
  * @param numBytes Number of bytes to read
  * @param buf Buffer to store the bytes read
- * @param uartMutexTimeout Number of ticks to wait for the mutex to become available
+ * @param uartMutexTimeoutTicks Number of ticks to wait for the mutex to become available
  * @param blockTimeTicks Number of ticks to wait for async transfer to complete
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeout, size_t blockTimeTicks);
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks);
 
 /**
  * @brief Send raw bytes to UART_PRINT_REG (blocking).
  *
  * @param buf Buffer to send
  * @param numBytes Number of bytes to send
- * @param uartMutexTimeout Number of ticks to wait for the mutex to become available
+ * @param uartMutexTimeoutTicks Number of ticks to wait for the mutex to become available
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeout);
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks);
 
 /**
  * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.
