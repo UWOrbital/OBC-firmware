@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
 
 void wakeupMPU6050(void) {
   uint8_t data = 0x00;
@@ -16,7 +17,7 @@ void wakeupMPU6050(void) {
 
 uint8_t readAccelDataMPU6050(double *accX, double *accY, double *accZ) {
   uint8_t data[6];
-  if (i2cReadReg(MPU6050_DEFAULT_ADDRESS, MPU6050_REG_ACCEL_XOUT_H, data, 6) == 0) {
+  if (i2cReadReg(MPU6050_DEFAULT_ADDRESS, MPU6050_REG_ACCEL_XOUT_H, data, 6, I2C_TRANSFER_TIMEOUT) == 0) {
     sciPrintText((unsigned char *)"Failed to read acceleration data\r\n", 35, UART_MUTEX_BLOCK_TIME);
     return 0;
   }

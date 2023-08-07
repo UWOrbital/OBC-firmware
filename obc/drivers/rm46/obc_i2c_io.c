@@ -115,16 +115,17 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, Tick
   return errCode;
 }
 
-obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes) {
+obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes,
+                            TickType_t transferTimeoutTicks) {
   obc_error_code_t errCode;
 
   ASSERT(i2cMutex != NULL);
 
   if (data == NULL || numBytes < 1) return OBC_ERR_CODE_INVALID_ARG;
 
-  RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, 1, &reg, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
+  RETURN_IF_ERROR_CODE(i2cSendTo(sAddr, 1, &reg, I2C_MUTEX_TIMEOUT, transferTimeoutTicks));
 
-  RETURN_IF_ERROR_CODE(i2cReceiveFrom(sAddr, numBytes, data, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
+  RETURN_IF_ERROR_CODE(i2cReceiveFrom(sAddr, numBytes, data, I2C_MUTEX_TIMEOUT, transferTimeoutTicks));
 
   return OBC_ERR_CODE_SUCCESS;
 }

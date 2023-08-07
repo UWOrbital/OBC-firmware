@@ -44,10 +44,12 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, Tick
  * @param reg The register to read from
  * @param data The buffer to read into
  * @param numBytes The number of bytes to read
+ * @param transferTimeoutTicks The maximum time (in ticks) to wait for the transfer to complete
  * @note  You can read from consecutive registers by using numBytes > 1.
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes);
+obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes,
+                            TickType_t transferTimeoutTicks);
 
 /**
  * @brief Write byte(s) to a device's register(s).
