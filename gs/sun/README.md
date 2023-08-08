@@ -1,6 +1,6 @@
 # Sun Position
 
-Script for parsing data from the NASA Horizon API used by GNC for onboard algorithms
+Script for parsing data from the NASA Horizons API used by GNC for onboard algorithms
 
 ## Requirements:
 Check the requirements.txt file for the latest version of the requirements (pip install -r requirements.txt)
@@ -21,7 +21,7 @@ options:
 -  -h, --help           <br>
 show this help message and exit
 -  -s STEP_SIZE, --step-size STEP_SIZE <br>
-                        Step size in the same format as the horizontal API (e.g. 1m, 1h, 1d, 1y, 100). Default: 5m
+                        Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 1y, 100). Default: 5m
 -  -t TARGET, --target TARGET <br>
                         Target object (e.g. sun, moon, mars). Default: sun
 -  -o OUTPUT, --output OUTPUT <br>

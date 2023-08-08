@@ -88,7 +88,7 @@ def define_parser() -> argparse.ArgumentParser:
     parser.add_argument('start_time', type=str, help='Start time in the format YYYY-MM-DD or JD#')
     parser.add_argument('stop_time', type=str, help='Stop time in the format YYYY-MM-DD or JD#')
     parser.add_argument('-s', '--step-size', type=str, default=DEFAULT_STEP_SIZE,
-                        help=f'Step size in the same format as the horizontal API (e.g. 1m, 1h, 1d, 1y, 100). '
+                        help=f'Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 1y, 100). '
                              f'Default: {DEFAULT_STEP_SIZE}')
     parser.add_argument('-t', '--target', type=str, default=DEFAULT_TARGET,
                         help=f'Target object (e.g. sun, moon, mars). Default: {DEFAULT_TARGET}')
@@ -139,7 +139,7 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
 
     :param start_time: Start time in the format YYYY-MM-DD or JD#
     :param stop_time: Stop time in the format YYYY-MM-DD or JD#
-    :param step_size: Step size in the same format as the horizontal API (e.g. 1m, 1h, 1d, 1y, 100)
+    :param step_size: Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 1y, 100)
     :param output: Output file name in the format *.bin
     """
 
@@ -168,7 +168,7 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
 
 def check_version(data: dict) -> ErrorCode:
     """
-    Prints out a warning if the version is difference from the supported one
+    Prints out a warning if the version is different from the supported one
     :param data: response.txt
     """
     signature = data.get('signature')

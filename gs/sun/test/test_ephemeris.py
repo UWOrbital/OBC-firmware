@@ -75,6 +75,53 @@ def suppress_logging(caplog, *, level=logging.ERROR):
         caplog.set_level(level, logger=handler.name)
 
 
+# Test for suppress_logging function
+def test_suppress_logging1(caplog):
+    # Suppress logging messages during the test
+    suppress_logging(caplog, level=logging.CRITICAL)
+
+    # Test if logging is suppressed
+    logging.error("This message should not be logged")
+    assert len(caplog.records) == 0
+    assert '' == caplog.text
+
+
+@pytest.mark.parametrize("level, count, msg, func, expected", [
+    (logging.CRITICAL, 0, "This message should not be logged", logging.error, ''),
+    (logging.ERROR, 1, "This message should not be logged", logging.error, 'This message should not be logged'),
+    (logging.WARNING, 1, "This message should not be logged", logging.error, 'This message should not be logged'),
+    (logging.INFO, 1, "This message should not be logged", logging.error, 'This message should not be logged'),
+    (logging.DEBUG, 1, "This message should not be logged", logging.error, 'This message should not be logged'),
+    (logging.CRITICAL, 1, "This message should not be logged", logging.critical, 'This message should not be logged'),
+    (logging.ERROR, 1, "This message should not be logged", logging.critical, 'This message should not be logged'),
+    (logging.WARNING, 1, "This message should not be logged", logging.critical, 'This message should not be logged'),
+    (logging.INFO, 1, "This message should not be logged", logging.critical, 'This message should not be logged'),
+    (logging.DEBUG, 1, "This message should not be logged", logging.critical, 'This message should not be logged'),
+    (logging.CRITICAL, 0, "This message should not be logged", logging.warning, ''),
+    (logging.ERROR, 0, "This message should not be logged", logging.warning, ''),
+    (logging.WARNING, 1, "This message should not be logged", logging.warning,  'This message should not be logged'),
+    (logging.INFO, 1, "This message should not be logged", logging.warning, 'This message should not be logged'),
+    (logging.DEBUG, 1, "This message should not be logged", logging.warning, 'This message should not be logged'),
+    (logging.CRITICAL, 0, "This message should not be logged", logging.info, ''),
+    (logging.ERROR, 0, "This message should not be logged", logging.info, ''),
+    (logging.WARNING, 0, "This message should not be logged", logging.info, ''),
+    (logging.INFO, 1, "This message should not be logged", logging.info, 'This message should not be logged'),
+])
+def test_suppress_logging(caplog, level, count, msg, func, expected):
+    # Suppress logging messages during the test
+    suppress_logging(caplog, level=level)
+
+    # Test if logging is suppressed
+    func(msg)
+    assert len(caplog.records) == count
+
+    if expected:
+        assert expected in caplog.text
+    # Empty string case is handled separately
+    else:
+        assert expected == caplog.text
+
+
 # Test cases for validate_input function
 @pytest.mark.parametrize("start_time, stop_time, step_size, output, expected_result", [
     ("2023-07-20", "2023-07-25", "1d", "output.bin", ErrorCode.SUCCESS),
