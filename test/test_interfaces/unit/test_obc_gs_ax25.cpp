@@ -121,7 +121,7 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
 
   unstuffed_ax25_i_frame_t recvPacket = {0};
   memcpy(recvPacket.data, unstuffedPacket, AX25_MINIMUM_I_FRAME_LEN);
-  recvPacket.length = AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG;
+  recvPacket.length = AX25_MINIMUM_I_FRAME_LEN;
 
    ASSERT_EQ(ax25Recv(&recvPacket), OBC_GS_ERR_CODE_SUCCESS);
 //  ASSERT_EQ(ax25Recv(unstuffedPacket + AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG), OBC_GS_ERR_CODE_SUCCESS);
