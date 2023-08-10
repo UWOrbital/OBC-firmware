@@ -38,7 +38,7 @@
 // Decode Data task
 static TaskHandle_t decodeTaskHandle = NULL;
 static StaticTask_t decodeTaskBuffer;
-static StackType_t decodeTaskStack[COMMS_DECODE_STACK_SIZE];
+static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
 static bool isStartFlagReceived;
 
 
