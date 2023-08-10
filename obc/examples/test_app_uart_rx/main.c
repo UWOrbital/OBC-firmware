@@ -12,20 +12,20 @@ int main(void) {
   sciInit();
 
   // Initialize the SCI mutex.
-  initSciMutex();
+  initSciMutex(scilinREG);
 
-  sciPrintf("Demo started\r\n");
+  sciPrintf("Demo started\r\n", scilinREG);
 
   while (1) {
     unsigned char buffer[NUM_CHARS_TO_READ] = {'\0'};
     obc_error_code_t error = sciRead(buffer, NUM_CHARS_TO_READ);
     if (error != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error reading from SCI! - %d\r\n", (int)error);
+      sciPrintf("Error reading from SCI! - %d\r\n", (int)error, scilinREG);
       continue;
     }
 
     sciPrintText(buffer, NUM_CHARS_TO_READ);
-    sciPrintf("\r\n");
+    sciPrintf("\r\n", scilinREG);
 
     // Toggle the LED.
     gioToggleBit(gioPORTB, 1);

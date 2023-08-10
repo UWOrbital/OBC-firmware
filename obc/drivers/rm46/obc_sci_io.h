@@ -12,14 +12,14 @@
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
  */
-void initSciMutex(void);
+void initSciMutex(sciBASE_t *sciReg);
 
 /**
  * @brief Send a string of text via UART_PRINT_REG.
  *
  * @param text The text to send.
  * @param length The length of the text to send.
- * @param sciReg Pointer to SCI register to read from
+ * @param sciReg Pointer to SCI register to print to
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *sciReg);
@@ -28,7 +28,7 @@ obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *s
  * @brief Printf via UART_PRINT_REG.
  *
  * @param s The format string
- * @param sciReg Pointer to SCI register to read from
+ * @param sciReg Pointer to SCI register to print to
  * @param ... Arguments to use in format string
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
