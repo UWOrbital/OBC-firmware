@@ -107,7 +107,7 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
   uint16_t count = 0;
 
   for(int i = 0; i < 3; ++i){
-    EXPECT_EQ(ax25Data[((AX25_MINIMUM_I_FRAME_LEN) * i)], AX25_FLAG);
+    EXPECT_EQ(ax25Data[((AX25_MINIMUM_I_FRAME_LEN - 1) * i)], AX25_FLAG);
     ASSERT_EQ(ax25Stuff(ax25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), AX25_MINIMUM_I_FRAME_LEN, stuffedAx25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), &count),
               OBC_GS_ERR_CODE_SUCCESS);
   }
