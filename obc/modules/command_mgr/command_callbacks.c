@@ -5,6 +5,7 @@
 #include "obc_logging.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
+#include "downlink_encoder.h"
 #include "comms_manager.h"
 #include "telemetry_manager.h"
 
@@ -72,12 +73,13 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  comms_event_t queueMsg = {0};
-  queueMsg.eventID = DOWNLINK_DATA_BUFFER;
-  queueMsg.telemetryDataBuffer.bufferSize = 1;
-  queueMsg.telemetryDataBuffer.telemData[0] = (telemetry_data_t){.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
+  encode_event_t encodeQueueMsg = {0};
+  encodeQueueMsg.eventID = DOWNLINK_DATA_BUFFER;
+  encodeQueueMsg.telemetryDataBuffer.bufferSize = 1;
+  encodeQueueMsg.telemetryDataBuffer.telemData[0] =
+      (telemetry_data_t){.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
 
-  RETURN_IF_ERROR_CODE(sendToCommsQueue(&queueMsg));
+  RETURN_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeQueueMsg));
 
   return OBC_ERR_CODE_SUCCESS;
 }
