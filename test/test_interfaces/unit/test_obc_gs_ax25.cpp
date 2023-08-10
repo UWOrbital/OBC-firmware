@@ -111,4 +111,54 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
     ASSERT_EQ(ax25Stuff(ax25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), AX25_MINIMUM_I_FRAME_LEN, stuffedAx25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), &count),
               OBC_GS_ERR_CODE_SUCCESS);
   }
+//  uint8_t stuffedAx25Data[(3 * AX25_MAXIMUM_PKT_LEN)] = {0};
+//  uint16_t count = 0;
+//
+//  for(int i = 0; i < 3; ++i){
+//    EXPECT_EQ(ax25Data[((AX25_MINIMUM_I_FRAME_LEN - 1) * i)], AX25_FLAG);
+////    ASSERT_EQ(ax25Stuff(ax25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), AX25_MINIMUM_I_FRAME_LEN, stuffedAx25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), &count),
+////              OBC_GS_ERR_CODE_SUCCESS);
+//  }
+}
+
+TEST(TestAx25SendRecv, uFrameSendRecv) {
+  packed_ax25_u_frame_t ax25Data = {0};
+  uint8_t pollFinalBit = 1;
+
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &cubesatCallsign), OBC_GS_ERR_CODE_SUCCESS);
+
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+            OBC_GS_ERR_CODE_SUCCESS);
+  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
+}
+
+TEST(TestAx25SendRecV, Ax25SourceAddressGenerator) {
+  ax25_addr_t sourceAddress;
+  memset(sourceAddress.data, 0, 7);
+  sourceAddress.length = 7;
+
+  uint8_t expectedAddress[] = {0x9C, 0x6E, 0x98, 0x8A, 0x9A, 0x40, 0x61};  // Source subfield from documentation
+  uint8_t callSign[] = {'N', '7', 'L', 'E', 'M'};
+  uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
+
+  ASSERT_EQ(ax25GetSourceAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
+
+  ax25GetSourceAddress(&sourceAddress, callSign, 5, 0, 0);
+  ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
+}
+
+TEST(TestAx25SendRecV, Ax25DestAddressGenerator) {
+  ax25_addr_t sourceAddress;
+  memset(sourceAddress.data, 0, 7);
+  sourceAddress.length = 7;
+
+  uint8_t expectedAddress[] = {0x9C, 0x94, 0x6E, 0xA0, 0x40, 0x40, 0xE0};  // Source subfield from documentation
+  uint8_t callSign[] = {'N', 'J', '7', 'P'};
+  uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
+
+  ASSERT_EQ(ax25GetDestAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
+
+  ax25GetDestAddress(&sourceAddress, callSign, 4, 0, 1);
+  ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
 }
