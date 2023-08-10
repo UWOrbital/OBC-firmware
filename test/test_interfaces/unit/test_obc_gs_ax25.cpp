@@ -97,63 +97,19 @@ TEST(TestAx25SendRecv, iFrameSomeStuff) {
 //}
 
 TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
-  // uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
-  //                                   const ax25_addr_t *destAddress
-  unstuffed_ax25_i_frame_t ax25Data = {0};
-  uint8_t telemData[AX25_INFO_BYTES] = {0};
-  uint8_t telemDataLen = AX25_INFO_BYTES;
-  const ax25_addr_t *destAddress = &groundStationCallsign;
+  uint8_t ax25Data[(3 * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1] = {0};
+  uint8_t telemData[3 * AX25_INFO_BYTES] = {0};
+  uint16_t telemDataLen = (3 * AX25_INFO_BYTES);
+  uint16_t ax25DataLen = 0;
 
-  memset(ax25Data.data, 0, AX25_MINIMUM_I_FRAME_LEN);
-  ax25Data.length = AX25_MINIMUM_I_FRAME_LEN;
-  ax25Data.data[0] = AX25_FLAG;
-  memcpy(ax25Data.data + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
-  uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
-  memcpy(ax25Data.data + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
-  ax25Data.data[AX25_CONTROL_BYTES_POSITION] = 0;
-  ax25Data.data[AX25_CONTROL_BYTES_POSITION + 1] = 0;
-  ax25Data.data[AX25_MOD128_PID_POSITION] = AX25_PID;
-  memcpy(ax25Data.data + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
-  obc_gs_error_code_t errCode;
-  uint16_t fcs;
-  errCode = fcsCalculate(ax25Data.data, AX25_MINIMUM_I_FRAME_LEN, &fcs);
-  ax25Data.data[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
-  ax25Data.data[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
-  ax25Data.data[ax25Data.length - 1] = AX25_FLAG;
-  ax25Data.data[0] = AX25_FLAG;
+  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data, &ax25DataLen, &groundStationCallsign), OBC_GS_ERR_CODE_SUCCESS);
+//  uint8_t stuffedAx25Data[(3 * AX25_MAXIMUM_PKT_LEN)] = {0};
+//  uint16_t count = 0;
+//
+//  for(int i = 0; i < 3; ++i){
+//    EXPECT_EQ(ax25Data[((AX25_MINIMUM_I_FRAME_LEN - 1) * i)], AX25_FLAG);
+////    ASSERT_EQ(ax25Stuff(ax25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), AX25_MINIMUM_I_FRAME_LEN, stuffedAx25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), &count),
+////              OBC_GS_ERR_CODE_SUCCESS);
+//  }
 
-  ASSERT_EQ(ax25Data.data[0], AX25_FLAG);
-
-  uint8_t secondAx25Data[(2 * AX25_MINIMUM_I_FRAME_LEN) + 1];
-  uint8_t secondTelemData[2 * AX25_INFO_BYTES] = {0};
-  uint16_t secondTelemDataLen = 2 * AX25_INFO_BYTES;
-
-  memset(secondAx25Data, 0, (2 * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1);
-  secondAx25Data[0] = AX25_FLAG;
-  memcpy(secondAx25Data + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
-  memcpy(secondAx25Data + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
-  secondAx25Data[AX25_CONTROL_BYTES_POSITION] = 0;
-  secondAx25Data[AX25_CONTROL_BYTES_POSITION + 1] = 0;
-  secondAx25Data[AX25_MOD128_PID_POSITION] = AX25_PID;
-  memcpy(secondAx25Data + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
-  obc_gs_error_code_t errCodeOne;
-  uint16_t fcsOne;
-  errCodeOne = fcsCalculate(secondAx25Data, AX25_MINIMUM_I_FRAME_LEN, &fcsOne);
-  secondAx25Data[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
-  secondAx25Data[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
-
-  secondAx25Data[(2 * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG)] = AX25_FLAG;
-
-  memcpy(secondAx25Data + AX25_MINIMUM_I_FRAME_LEN + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
-  memcpy(secondAx25Data + AX25_MINIMUM_I_FRAME_LEN + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
-  secondAx25Data[AX25_MINIMUM_I_FRAME_LEN + AX25_CONTROL_BYTES_POSITION] = 0;
-  secondAx25Data[AX25_MINIMUM_I_FRAME_LEN + AX25_CONTROL_BYTES_POSITION + 1] = 0;
-  secondAx25Data[AX25_MINIMUM_I_FRAME_LEN + AX25_MOD128_PID_POSITION] = AX25_PID;
-  memcpy(secondAx25Data + AX25_MINIMUM_I_FRAME_LEN + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
-  obc_gs_error_code_t errCodeTwo;
-  uint16_t fcsTwo;
-  errCodeTwo = fcsCalculate(secondAx25Data + AX25_MINIMUM_I_FRAME_LEN - 1, AX25_MINIMUM_I_FRAME_LEN, &fcsTwo);
-  secondAx25Data[AX25_MINIMUM_I_FRAME_LEN + AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
-  secondAx25Data[AX25_MINIMUM_I_FRAME_LEN + AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
-  
 }
