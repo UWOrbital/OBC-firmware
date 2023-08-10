@@ -11,8 +11,9 @@
 
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
+ * 
  */
-void initSciMutex(sciBASE_t *sciReg);
+void initSciMutex();
 
 /**
  * @brief Send a string of text via UART_PRINT_REG.

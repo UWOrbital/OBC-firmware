@@ -12,7 +12,7 @@ int main(void) {
   sciInit();
 
   // Initialize the SCI mutex.
-  initSciMutex(scilinREG);
+  initSciMutex();
 
   sciPrintf("Demo started\r\n", scilinREG);
 

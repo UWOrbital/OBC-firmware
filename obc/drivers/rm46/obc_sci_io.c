@@ -39,7 +39,7 @@ static size_t sciRxBuffLen = 0;
  */
 static obc_error_code_t sciSendString(unsigned char *bytes, uint32_t length, sciBASE_t *sciReg);
 
-void initSciMutex(sciBASE_t *sciReg) {
+void initSciMutex() {
   if (sciMutex == NULL) {
     sciMutex = xSemaphoreCreateMutexStatic(&sciMutexBuffer);
   }
@@ -55,8 +55,7 @@ void initSciMutex(sciBASE_t *sciReg) {
   }
   configASSERT(sciTransferComplete);
 
-
-  sciSetBaudrate(sciReg, OBC_UART_BAUD_RATE);
+  sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
 }
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *sciReg) {
