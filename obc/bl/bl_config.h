@@ -16,7 +16,7 @@
 
 //*****************************************************************************
 // The address to store the update status of the application image
-// It contains Application Start Address, Application Image Size, etc
-//
 //*****************************************************************************
-#define APP_STATUS_ADDRESS (uint32_t)0x00010000
+// #define APP_HEADER_ADDRESS (uint32_t)0x00010000
+
+#define MAX_APP_SIZE_BYTES (uint32_t)(512 * 1024)

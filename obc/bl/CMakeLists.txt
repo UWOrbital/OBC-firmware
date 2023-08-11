@@ -6,9 +6,14 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/cmake/board_lib_defs.cmake)
 
-set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/launchpad/source/sys_link.ld")
+set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/bl_link.ld")
 
-add_executable(${BL_BIN} ${CMAKE_SOURCE_DIR}/obc/bl/bl_main.c)
+set(BL_SOURCES
+    ${CMAKE_SOURCE_DIR}/obc/bl/bl_main.c
+    ${CMAKE_SOURCE_DIR}/obc/bl/bl_flash.c
+)
+
+add_executable(${BL_BIN} ${BL_SOURCES})
 
 target_link_options(${BL_BIN} PRIVATE -specs=nosys.specs -T${LINKER_SCRIPT} -Wl,--print-memory-usage)
 target_link_options(${BL_BIN}
