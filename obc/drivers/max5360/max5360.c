@@ -14,6 +14,9 @@
   ((float)DAC_VREF_VALUE * 0b00111111 / \
    DAC_STEP_VALUE)  // the dac takes a 6 bit number for what to output so the max for that number is 0b00111111
 
+#define I2C_MUTEX_TIMEOUT portMAX_DELAY
+#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
+
 /**
  * @brief powers on the max5460 DAC and sets it to output a certain voltage
  *
@@ -31,7 +34,8 @@ obc_error_code_t max5360WriteVoltage(float analogVoltsOutput) {
   // round the value to the nearest integer before casting
   uint8_t dacCode = ((uint8_t)(analogVoltsOutput * DAC_STEP_VALUE / DAC_VREF_VALUE + 0.5)) << 2;
 
-  RETURN_IF_ERROR_CODE(i2cSendTo(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacCode));
+  RETURN_IF_ERROR_CODE(
+      i2cSendTo(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacCode, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -45,7 +49,8 @@ obc_error_code_t max5360PowerOff(void) {
   uint8_t dacRecvBuf;
   // Reading from the DAC will turn it off
   // See datasheet page 10
-  RETURN_IF_ERROR_CODE(i2cReceiveFrom(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf));
+  RETURN_IF_ERROR_CODE(
+      i2cReceiveFrom(DAC_ADDRESS, DAC_CODE_TRANSFER_BYTES, &dacRecvBuf, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
   // DAC should output all ones
   if (dacRecvBuf != UINT8_MAX) {
     return OBC_ERR_CODE_MAX5360_SHUTDOWN_FAILURE;
