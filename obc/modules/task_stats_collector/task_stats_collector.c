@@ -8,6 +8,8 @@
 #include <FreeRTOS.h>
 
 #define TASK_STATS_BUFFER_SIZE 1000U
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
 static StackType_t taskStatsCollectorStack[TASK_STATS_COLLECTOR_STACK_SIZE];
 static StaticTask_t taskStatsCollectorTaskBuffer;
 static TaskHandle_t taskStatsCollectorTaskHandle;
@@ -33,8 +35,8 @@ static void vTaskStatsCollector(void *pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(15000));
     char taskStatsString[TASK_STATS_BUFFER_SIZE] = {0};
     vTaskList(taskStatsString);
-    sciPrintText((unsigned char *)taskTableHeaderStr, strlen(taskTableHeaderStr));
-    sciPrintText((unsigned char *)taskStatsString, TASK_STATS_BUFFER_SIZE);
+    sciPrintText((unsigned char *)taskTableHeaderStr, strlen(taskTableHeaderStr), UART_MUTEX_BLOCK_TIME);
+    sciPrintText((unsigned char *)taskStatsString, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME);
   }
 }
 #endif
