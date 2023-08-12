@@ -68,3 +68,8 @@
 #define HEALTH_COLLECTOR_STACK_SIZE 256U
 #define HEALTH_COLLECTOR_NAME "health_collector"
 #define HEALTH_COLLECTOR_PRIORITY tskIDLE_PRIORITY + 1U
+
+/* Logging task config */
+#define LOGGER_STACK_SIZE 256U
+#define LOGGER_NAME "logger"
+#define LOGGER_PRIORITY tskIDLE_PRIORITY + 50U
