@@ -12,7 +12,7 @@
 #include <string.h>
 
 #define ERROR_LOG_FILE_NAME "error_file"
-/* Comms Manager event queue config */
+
 #define LOGGER_QUEUE_LENGTH 10U
 #define LOGGER_QUEUE_ITEM_SIZE sizeof(logger_event_t)
 #define LOGGER_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
