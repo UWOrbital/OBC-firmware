@@ -29,6 +29,10 @@ static StaticSemaphore_t sciTransferCompleteBuffer;
 static uint8_t *sciRxBuff = NULL;
 static size_t sciRxBuffLen = 0;
 
+STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG),
+              "UART_PRINT_REG must be sciREG or scilinREG");
+STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG), "UART_READ_REG must be sciREG or scilinREG");
+
 /**
  * @brief Iterate through an array of bytes and transmit them via UART_PRINT_REG.
  *
@@ -59,7 +63,7 @@ void initSciMutex() {
 }
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *sciReg) {
-
+ 
   if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
 
   SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciMutex : sciLinMutex;
@@ -236,17 +240,16 @@ obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
 }
 */
 
-obc_error_code_t sciNotification(sciBASE_t *sci, uint32 flags) {
+void sciNotification(sciBASE_t *sci, uint32 flags) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-  if (!(sciReg == scilinREG || sciReg == sciREG)){
-    return OBC_ERR_CODE_INVALID_ARG;
+  if (!(sci == scilinREG || sci == sciREG)){
+    return;
   }
 
   if (flags == SCI_RX_INT) {
     sciReceive(sci, sciRxBuffLen, sciRxBuff);
     xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken); 
-    return OBC_ERR_CODE_SUCCESS;
   }
 
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
