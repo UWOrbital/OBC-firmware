@@ -66,7 +66,7 @@ obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *s
   configASSERT(mutex);
 
   if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE) {
-    obc_error_code_t err = sciSendString(text, length);
+    obc_error_code_t err = sciSendString(text, length, sciReg);
     xSemaphoreGive(mutex);
     return err;
   }
@@ -104,14 +104,14 @@ obc_error_code_t sciPrintf(const char *s, sciBASE_t *sciReg, ...) {
   // n == MAX_PRINTF_SIZE invalid because null character isn't included in count
   if ((uint32_t)n >= MAX_PRINTF_SIZE) return OBC_ERR_CODE_INVALID_ARG;
 
-  return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE);
+  return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE, sciReg);
 }
 
 void uartAssertFailed(char *file, int line, char *expr) {
   if (file == NULL || line < 0 || expr == NULL)
     return;  // Only called by assert, so we can assume that the arguments are valid
 
-  sciPrintf("ASSERTION FAILED: %s, file %s, line %d\r\n", expr, file, line);
+  sciPrintf("ASSERTION FAILED: %s, file %s, line %d\r\n", UART_READ_REG, expr, file, line);
 }
 
 /*
@@ -236,19 +236,15 @@ obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
 }
 */
 
-obc_error_code_t sciNotification(sciBASE_t *sci, uint32 flags, sciBASE_t *sciReg) {
+obc_error_code_t sciNotification(sciBASE_t *sci, uint32 flags) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
   if (!(sciReg == scilinREG || sciReg == sciREG)){
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (sci != sciReg) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-
   if (flags == SCI_RX_INT) {
-    sciReceive(sciReg, sciRxBuffLen, sciRxBuff);
+    sciReceive(sci, sciRxBuffLen, sciRxBuff);
     xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken); 
     return OBC_ERR_CODE_SUCCESS;
   }
