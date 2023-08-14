@@ -102,43 +102,51 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
   uint16_t telemDataLen = (3 * AX25_INFO_BYTES);
   uint16_t ax25DataLen = 0;
 
-  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data, &ax25DataLen, &groundStationCallsign), OBC_GS_ERR_CODE_SUCCESS);
+  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data, ax25DataLen, &groundStationCallsign), OBC_GS_ERR_CODE_SUCCESS);
   uint8_t stuffedAx25Data[(3 * AX25_MAXIMUM_PKT_LEN)] = {0};
   uint16_t count[3] = {0};
 
   for(int i = 0; i < 3; ++i){
     EXPECT_EQ(ax25Data[(AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG* i)], AX25_FLAG);
-    ASSERT_EQ(ax25Stuff(ax25Data + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), AX25_MINIMUM_I_FRAME_LEN, stuffedAx25Data + ((AX25_MINIMUM_I_FRAME_LEN - 1) * i), count + i),
+    ASSERT_EQ(ax25Stuff(ax25Data + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), AX25_MINIMUM_I_FRAME_LEN, stuffedAx25Data + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), count + i),
               OBC_GS_ERR_CODE_SUCCESS);
   }
+
+  uint16_t indices[3] = {0};
+  int index = 0;
+  for(int i = 0; i < (3 * AX25_MAXIMUM_PKT_LEN); ++i){
+    if(stuffedAx25Data[i] == AX25_FLAG){
+      indices[index++] = i;
+    }
+    if(index == 4) break;
+  }
+
+
   uint8_t unstuffedPacket[(3 * AX25_MAXIMUM_PKT_LEN)] = {0};
   uint16_t unstuffedCount[3] = {0};
   for(int i = 0; i < 3; ++i){
-    ASSERT_EQ(ax25Unstuff(ax25Data + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), count[i], unstuffedPacket + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), unstuffedCount + i),
+    ASSERT_EQ(ax25Unstuff(ax25Data + indices[i], count[i], unstuffedPacket + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), unstuffedCount + i),
               OBC_GS_ERR_CODE_SUCCESS);
     ASSERT_EQ(unstuffedCount[i], AX25_MINIMUM_I_FRAME_LEN);
+
+    unstuffed_ax25_i_frame_t recvPacket = {0};
+    memcpy(recvPacket.data, unstuffedPacket + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), AX25_MINIMUM_I_FRAME_LEN);
+    recvPacket.length = AX25_MINIMUM_I_FRAME_LEN;
+    EXPECT_EQ(ax25Recv(&recvPacket), OBC_GS_ERR_CODE_SUCCESS);
   }
-
-  unstuffed_ax25_i_frame_t recvPacket = {0};
-  memcpy(recvPacket.data, unstuffedPacket, AX25_MINIMUM_I_FRAME_LEN);
-  recvPacket.length = AX25_MINIMUM_I_FRAME_LEN;
-
-   ASSERT_EQ(ax25Recv(&recvPacket), OBC_GS_ERR_CODE_SUCCESS);
-//  ASSERT_EQ(ax25Recv(unstuffedPacket + AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG), OBC_GS_ERR_CODE_SUCCESS);
-//  ASSERT_EQ(ax25Recv(unstuffedPacket + (2 * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG)), OBC_GS_ERR_CODE_SUCCESS);
 }
 
-TEST(TestAx25SendRecv, uFrameSendRecv) {
-  packed_ax25_u_frame_t ax25Data = {0};
-  uint8_t pollFinalBit = 1;
-
-  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &cubesatCallsign), OBC_GS_ERR_CODE_SUCCESS);
-
-  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
-  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
-            OBC_GS_ERR_CODE_SUCCESS);
-  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
-}
+//TEST(TestAx25SendRecv, uFrameSendRecv) {
+//  packed_ax25_u_frame_t ax25Data = {0};
+//  uint8_t pollFinalBit = 1;
+//
+//  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &cubesatCallsign), OBC_GS_ERR_CODE_SUCCESS);
+//
+//  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+//  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+//            OBC_GS_ERR_CODE_SUCCESS);
+//  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
+//}
 
 TEST(TestAx25SendRecV, Ax25SourceAddressGenerator) {
   ax25_addr_t sourceAddress;

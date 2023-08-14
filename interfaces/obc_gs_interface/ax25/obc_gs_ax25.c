@@ -24,6 +24,7 @@ static uint8_t pktReceiveNum = 0;
 ax25_addr_t cubesatCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};        // mock cubesat address
 ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};  // Mock Ground station address
 
+
 /**
  * @brief checks for a valid s frame and performs the necessary command responses
  *
@@ -73,17 +74,17 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
 
+static inline uint16_t flagShareLen(uint16_t telemDataLen){
+  return (ceil(telemDataLen / AX25_INFO_BYTES) * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1;
+}
+
 obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t telemDataLen, uint8_t *ax25Data,
-                                                  uint16_t *ax25DataLen, const ax25_addr_t *destAddress) {
+                                                  uint16_t ax25DataLen, const ax25_addr_t *destAddress) {
   if (telemData == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
   if (ax25Data == NULL) {
-    return OBC_GS_ERR_CODE_INVALID_ARG;
-  }
-
-  if (ax25DataLen == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
@@ -96,14 +97,16 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t t
   }
 
   uint8_t numOfFrames = ceil(telemDataLen / AX25_INFO_BYTES);  // Number of frames and rounding up
-  *ax25DataLen = (numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1;
+//  if (ax25DataLen != (numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1){
+//    return OBC_GS_ERR_CODE_INVALID_ARG;
+//  }
 
-  memset(ax25Data, 0, *ax25DataLen);
+  memset(ax25Data, 0, ax25DataLen);
 
   uint8_t remainingDataBytes = telemDataLen;
   uint8_t frameStart = 0;
 
-  for(frameStart = 0; frameStart < numOfFrames - 1; ++frameStart){
+  for(frameStart = 0; frameStart < numOfFrames; ++frameStart){
     ax25Data[frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG] = AX25_FLAG;
 
     memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
@@ -113,8 +116,12 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t t
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION + 1] = (pktSentNum << 1);
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_MOD128_PID_POSITION] = AX25_PID;
-
-    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION, telemData, AX25_INFO_BYTES);
+    if(remainingDataBytes >= AX25_INFO_BYTES){
+      memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION, telemData + (frameStart * AX25_INFO_BYTES), AX25_INFO_BYTES);
+    }
+    else{
+      memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION, telemData + (frameStart * AX25_INFO_BYTES), remainingDataBytes);
+    }
     obc_gs_error_code_t errCode;
 
     uint16_t fcs;
@@ -126,11 +133,8 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t t
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
     pktSentNum++;
+    remainingDataBytes -= AX25_INFO_BYTES;
   }
-
-  unstuffed_ax25_i_frame_t lastFrame = {0};
-  ax25SendIFrame(telemData + (pktSentNum * AX25_INFO_BYTES), remainingDataBytes, &lastFrame, destAddress);
-  memcpy((ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG)), lastFrame.data, lastFrame.length);
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
@@ -250,6 +254,7 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   if (unstuffedPacket == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
+  
   if (unstuffedPacket->length > AX25_MINIMUM_I_FRAME_LEN || unstuffedPacket->length < AX25_MINIMUM_U_FRAME_CMD_LENGTH) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }

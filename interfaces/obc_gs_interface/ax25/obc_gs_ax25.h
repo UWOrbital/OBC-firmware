@@ -93,6 +93,12 @@ extern ax25_addr_t groundStationCallsign;
 #ifdef __cplusplus
 extern "C" {
 #endif
+/**
+ * @brief returns the number of flag share bytes required depending on telemetry data length
+ *
+ * @param telemDataLen length of the telemData array
+ */
+static inline uint16_t flagShareBytes(uint16_t telemDataLen);
 
 /**
  * @brief prepares ax25data with appropriate I frames when utilizing flag-sharing
@@ -104,7 +110,7 @@ extern "C" {
  * @param destAddress address of the destination for the ax25 packet
  */
 obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t telemDataLen, uint8_t *ax25Data,
-                                                  uint16_t *ax25DataLen, const ax25_addr_t *destAddress);
+                                                  uint16_t ax25DataLen, const ax25_addr_t *destAddress);
 
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length

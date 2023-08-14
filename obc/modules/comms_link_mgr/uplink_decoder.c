@@ -134,7 +134,6 @@ static void vDecodeTask(void *pvParameters) {
         }
 
         if (byte == AX25_FLAG) {
-          if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_TIMEOUT_MILLISECONDS)) == pdPASS) {
             axData.data[axDataIndex++] = byte;
 
             // Decode packet if we have start flag, end flag, and at least 1 byte of data
@@ -159,9 +158,10 @@ static void vDecodeTask(void *pvParameters) {
           }
         }
         if (startFlagReceived) {
-          axData.data[axDataIndex++] = byte;
+          if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_TIMEOUT_MILLISECONDS)) == pdPASS) {
+            axData.data[axDataIndex++] = byte;
+          }
         }
-      }
   }
 }
 
