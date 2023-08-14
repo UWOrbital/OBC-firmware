@@ -3,6 +3,8 @@
 #include <gio.h>
 #include <sci.h>
 
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
 int main(void) {
   // Initialize hardware.
   gioInit();
@@ -13,7 +15,7 @@ int main(void) {
 
   while (1) {
     // Send a string of text via SCI
-    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20, scilinREG);
+    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20, UART_MUTEX_BLOCK_TIME, scilinREG);
 
     // Test sciPrintf
     sciPrintf("Testing sciPrintf: %d %d %s\r\n", scilinREG, 0, 1, "Hello");

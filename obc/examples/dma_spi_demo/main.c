@@ -26,6 +26,8 @@
 /* example data Pattern configuration */
 #define D_SIZE 127
 
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
 void task(void *pvParameters);
 
 static StackType_t stack[1024];
@@ -82,9 +84,9 @@ void task(void *pvParameters) {
 
       for (uint8_t i = 0; i < D_SIZE; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
 
   for (uint8_t i = 0; i < 50; ++i) {
     TX_DATA[i] = 0xff;
@@ -98,9 +100,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 50; ++i) {
     sprintf(str, "%u ", RX_DATA_SECOND[i + 1]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
 
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x55;
@@ -112,9 +114,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x33;
   }
@@ -125,9 +127,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x22;
   }
@@ -138,9 +140,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x11;
   }
@@ -151,9 +153,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x09;
   }
@@ -164,9 +166,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   for (uint8_t i = 0; i < 5; ++i) {
     TX_DATA[i] = 0x08;
   }
@@ -177,9 +179,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 5; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   for (uint8_t i = 0; i < 3; ++i) {
     TX_DATA[i] = 0x07;
   }
@@ -190,9 +192,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 3; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5, scilinREG);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME, scilinREG);
   }
-  sciPrintText(spaceStr, 20, scilinREG);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME, scilinREG);
   while (1)
     ;
 }

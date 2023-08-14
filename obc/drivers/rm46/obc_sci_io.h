@@ -21,9 +21,10 @@ void initSciMutex();
  * @param text The text to send.
  * @param length The length of the text to send.
  * @param sciReg Pointer to SCI register to print to
+ * @param uartMutexTimeoutTicks The number of ticks to wait for the mutex to become available.
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *sciReg);
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg);
 
 /**
  * @brief Printf via UART_PRINT_REG.
@@ -50,21 +51,23 @@ obc_error_code_t sciReadByte(unsigned char *character, sciBASE_t *sciReg);
  *
  * @param numBytes Number of bytes to read
  * @param buf Buffer to store the bytes read
+ * @param uartMutexTimeoutTicks Number of ticks to wait for the mutex to become available
  * @param blockTimeTicks Number of ticks to wait for async transfer to complete
  * @param sciReg Pointer to SCI register to read from
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks, sciBASE_t *sciReg);
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks, sciBASE_t *sciReg);
 
 /**
  * @brief Send raw bytes to UART_PRINT_REG (blocking).
  *
  * @param buf Buffer to send
  * @param numBytes Number of bytes to send
+ * @param uartMutexTimeoutTicks Number of ticks to wait for the mutex to become available
  * @param sciReg Pointer to SCI register to transmit bytes to
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, sciBASE_t *sciReg);
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg);
 
 /**
  * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.

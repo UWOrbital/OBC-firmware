@@ -17,7 +17,6 @@
 #include "obc_reliance_fs.h"
 #include "lm75bd.h"
 #include "obc_board_config.h"
-#include "comms_uplink_receiver.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -81,7 +80,8 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 static void sendStartupMessages(void) {
 #if CSDC_DEMO_ENABLED == 1
   obc_error_code_t errCode;
-  LOG_IF_ERROR_CODE(startUplink());
+  comms_event_t event = {.eventID = BEGIN_UPLINK};
+  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
 #endif
 }
 

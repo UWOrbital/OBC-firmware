@@ -11,6 +11,8 @@
 #include <redposix.h>
 #include <string.h>
 
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
@@ -106,7 +108,7 @@ void vTask1(void *pvParameters) {
   sciPrintf("Successfully read from %s\r\n", scilinREG, fname);
 
   sciPrintf("Text read from %s: \r\n", scilinREG, fname);
-  sciPrintText(readBuf, ret, scilinREG);
+  sciPrintText(readBuf, ret, UART_MUTEX_BLOCK_TIME, scilinREG);
 
   ret = red_close(file);
   if (ret < 0) {

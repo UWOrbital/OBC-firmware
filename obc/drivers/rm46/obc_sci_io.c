@@ -62,7 +62,7 @@ void initSciMutex() {
   sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
 }
 
-obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, sciBASE_t *sciReg) {
+obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg) {
  
   if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
 
@@ -108,7 +108,7 @@ obc_error_code_t sciPrintf(const char *s, sciBASE_t *sciReg, ...) {
   // n == MAX_PRINTF_SIZE invalid because null character isn't included in count
   if ((uint32_t)n >= MAX_PRINTF_SIZE) return OBC_ERR_CODE_INVALID_ARG;
 
-  return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE, sciReg);
+  return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE, UART_MUTEX_BLOCK_TIME, sciReg);
 }
 
 void uartAssertFailed(char *file, int line, char *expr) {
@@ -137,7 +137,7 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 }
 */
 
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTicks, sciBASE_t *sciReg) {
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks, sciBASE_t *sciReg) {
   obc_error_code_t errCode;
 
   if (!(sciReg == scilinREG || sciReg == sciREG)){
@@ -151,7 +151,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTic
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) != pdTRUE) {
+  if (xSemaphoreTake(mutex, uartMutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -175,7 +175,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, size_t blockTimeTic
   return errCode;
 }
 
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, sciBASE_t *sciReg) {
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg) {
 
   if (!(sciReg == scilinREG || sciReg == sciREG)){
     return OBC_ERR_CODE_INVALID_ARG;
@@ -188,7 +188,7 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, sciBASE_t *sciReg) 
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) != pdTRUE) {
+  if (xSemaphoreTake(mutex, uartMutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 

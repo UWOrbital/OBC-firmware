@@ -6,6 +6,8 @@
 
 #define NUM_CHARS_TO_READ 20U
 
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
 int main(void) {
   // Initialize hardware.
   gioInit();
@@ -24,7 +26,7 @@ int main(void) {
       continue;
     }
 
-    sciPrintText(buffer, NUM_CHARS_TO_READ);
+    sciPrintText(buffer, NUM_CHARS_TO_READ, UART_MUTEX_BLOCK_TIME, scilinREG);
     sciPrintf("\r\n", scilinREG);
 
     // Toggle the LED.
