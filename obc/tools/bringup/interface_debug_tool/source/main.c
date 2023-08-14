@@ -39,17 +39,17 @@ static const testFunc_t testFuncs[NUM_COMMANDS_MAX] = {
 void utilityCLI(void *pvParameters) {
   while (1) {
     unsigned char cmdChar;
-    sciPrintf("Enter a command: ");
-    sciRead(&cmdChar, 1);
-    sciPrintf("\r\n");
+    sciPrintf("Enter a command: ", scilinREG);
+    sciRead(&cmdChar, 1, scilinREG);
+    sciPrintf("\r\n", scilinREG);
 
     if (cmdChar >= NUM_COMMANDS_MAX) {
-      sciPrintf("Invalid command\r\n");
+      sciPrintf("Invalid command\r\n", scilinREG);
       continue;
     }
 
     if (testFuncs[cmdChar] == NULL) {
-      sciPrintf("Invalid command\r\n");
+      sciPrintf("Invalid command\r\n", scilinREG);
       continue;
     }
 
@@ -67,7 +67,7 @@ int main(void) {
   initSpiMutex();
   initI2CMutex();
 
-  sciPrintf("Starting Bringup Utility...\r\n");
+  sciPrintf("Starting Bringup Utility...\r\n", scilinREG);
 
   xTaskCreateStatic(utilityCLI, "Bringup Utility", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
