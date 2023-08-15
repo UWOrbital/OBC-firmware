@@ -4,12 +4,17 @@
 #include "cc1120_txrx.h"
 #include "alarm_handler.h"
 #include "obc_board_config.h"
+#include "tpl5010.h"
 
 void gioNotification(gioPORT_t *port, uint32 bit) {
   if (port == gioPORTA) {
     switch (bit) {
       case DS3232_INT_PIN:
         alarmInterruptCallback();
+        break;
+
+      case TPL5010_WAKE_PIN:
+        tpl5010Reset();
         break;
     }
   } else if (port == gioPORTB) {
