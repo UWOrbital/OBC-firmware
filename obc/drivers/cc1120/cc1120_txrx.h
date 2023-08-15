@@ -75,9 +75,10 @@ obc_error_code_t cc1120Init(void);
  *
  * @param data - An array of 8-bit data to transmit
  * @param len - The size of the provided array
+ * @param txFifoEmptyTimeoutTicks - The amount of time to wait for the txFifoEmptySemaphore to become available
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Send(uint8_t *data, uint32_t len);
+obc_error_code_t cc1120Send(uint8_t *data, uint32_t len, TickType_t txFifoEmptyTimeoutTicks);
 
 /* RX functions */
 /**
@@ -90,10 +91,10 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes);
 
 /**
  * @brief Switches the cc1120 to RX mode to continuously receive bytes and send them to the decode task
- *
+ * @param syncWordTimeoutTicks - The amount of time to wait for the syncReceivedSemaphore to become available
  * @return obc_error_code_t
  */
-obc_error_code_t cc1120Receive(void);
+obc_error_code_t cc1120Receive(TickType_t syncWordTimeoutTicks);
 
 /**
  * @brief block until the tx fifo is empty without decrementing the semaphore
