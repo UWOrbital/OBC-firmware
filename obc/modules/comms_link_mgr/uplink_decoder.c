@@ -41,7 +41,6 @@ static StaticTask_t decodeTaskBuffer;
 static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
 static bool isStartFlagReceived;
 
-
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
@@ -123,45 +122,45 @@ static void vDecodeTask(void *pvParameters) {
   bool startFlagReceived = false;
 
   while (1) {
-      if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
-        if (axDataIndex >= sizeof(axData.data)) {
-          LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+    if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
+      if (axDataIndex >= sizeof(axData.data)) {
+        LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+
+        // Restart the decoding process
+        memset(&axData, 0, sizeof(axData));
+        axDataIndex = 0;
+        startFlagReceived = false;
+      }
+
+      if (byte == AX25_FLAG) {
+        axData.data[axDataIndex++] = byte;
+
+        // Decode packet if we have start flag, end flag, and at least 1 byte of data
+        // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
+        // axData.data[1] must be something other than AX25_FLAG
+        if (axDataIndex > 2) {
+          axData.length = axDataIndex;
+
+          packed_rs_packet_t rsData = {0};
+          aes_data_t aesData = {0};
+          LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
 
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
           axDataIndex = 0;
-          startFlagReceived = false;
+          axData.data[axDataIndex++] = AX25_FLAG;
+        } else {
+          startFlagReceived = true;
+          axDataIndex = 1;
         }
-
-        if (byte == AX25_FLAG) {
-            axData.data[axDataIndex++] = byte;
-
-            // Decode packet if we have start flag, end flag, and at least 1 byte of data
-            // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
-            // axData.data[1] must be something other than AX25_FLAG
-            if (axDataIndex > 2) {
-              axData.length = axDataIndex;
-
-              packed_rs_packet_t rsData = {0};
-              aes_data_t aesData = {0};
-              LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
-
-              // Restart the decoding process
-              memset(&axData, 0, sizeof(axData));
-              axDataIndex = 0;
-              axData.data[axDataIndex++] = AX25_FLAG;
-            } else {
-              startFlagReceived = true;
-              axDataIndex = 1;
-            }
-            continue;
-          }
-        }
-        if (startFlagReceived) {
-          if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_TIMEOUT_MILLISECONDS)) == pdPASS) {
-            axData.data[axDataIndex++] = byte;
-          }
-        }
+        continue;
+      }
+    }
+    if (startFlagReceived) {
+      if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_TIMEOUT_MILLISECONDS)) == pdPASS) {
+        axData.data[axDataIndex++] = byte;
+      }
+    }
   }
 }
 
