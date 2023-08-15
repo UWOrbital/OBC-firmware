@@ -27,13 +27,13 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (outputBufferLen != aesData->ciphertextLen) {
+  if (outputBufferLen != aesData->textLen) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  memcpy(output, aesData->ciphertext, aesData->ciphertextLen);
+  memcpy(output, aesData->ciphertext, aesData->textLen);
   AES_ctx_set_iv(&ctx, aesData->iv);
-  AES_CTR_xcrypt_buffer(&ctx, output, aesData->ciphertextLen);
+  AES_CTR_xcrypt_buffer(&ctx, output, aesData->textLen);
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
@@ -52,4 +52,22 @@ obc_gs_error_code_t initializeAesCtx(const uint8_t *key) {
   AES_init_ctx(&ctx, key);
 
   return OBC_GS_ERR_CODE_SUCCESS;
+}
+
+obc_gs_error_code_t aes128Encrypt(aes_data_t * aesData, uint8_t *input, uint8_t outputBufferLen) {
+    if (aesData == NULL) {
+        return OBC_GS_ERR_CODE_INVALID_ARG;
+    }
+    if (input == NULL) {
+        return OBC_GS_ERR_CODE_INVALID_ARG;
+    }
+    if (aesData->textLen != outputBufferLen) {
+        return OBC_GS_ERR_CODE_INVALID_ARG;
+    }
+
+    memcpy(input, aesData->plaintext, aesData->textLen);
+    AES_ctx_set_iv(&ctx, aesData->iv);
+    AES_CTR_xcrypt_buffer(&ctx, input, aesData->textLen);
+
+    return OBC_GS_ERR_CODE_SUCCESS;
 }
