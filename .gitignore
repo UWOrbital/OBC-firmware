@@ -64,7 +64,6 @@ dkms.conf
 
 .venv/
 venv/
-/cmake-build-debug/
 
 # Python
 __pycache__/
