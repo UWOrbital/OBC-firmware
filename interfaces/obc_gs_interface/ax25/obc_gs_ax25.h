@@ -98,7 +98,7 @@ extern "C" {
  *
  * @param telemDataLen length of the telemData array
  */
-static inline uint16_t flagShareBytes(uint16_t telemDataLen);
+static inline uint16_t flagShareLen(uint16_t telemDataLen);
 
 /**
  * @brief prepares ax25data with appropriate I frames when utilizing flag-sharing

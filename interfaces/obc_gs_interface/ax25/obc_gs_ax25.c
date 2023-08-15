@@ -97,9 +97,9 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t t
   }
 
   uint8_t numOfFrames = ceil(telemDataLen / AX25_INFO_BYTES);  // Number of frames and rounding up
-//  if (ax25DataLen != (numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1){
-//    return OBC_GS_ERR_CODE_INVALID_ARG;
-//  }
+  if (ax25DataLen != ((numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)){
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
 
   memset(ax25Data, 0, ax25DataLen);
 
@@ -265,7 +265,6 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   }
 
   obc_gs_error_code_t errCode;
-
   // Check FCS
   uint16_t fcs = unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES] << 8;
   fcs |= unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES + 1];
