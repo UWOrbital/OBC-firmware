@@ -34,7 +34,7 @@ typedef enum { DOWNLINK_PACKET, END_DOWNLINK } transmit_event_id_t;
 
 typedef struct {
   transmit_event_id_t eventID;
-  packed_ax25_i_frame_t *ax25Pkt;
+  packed_ax25_i_frame_t ax25Pkt;
 } transmit_event_t;
 
 /**

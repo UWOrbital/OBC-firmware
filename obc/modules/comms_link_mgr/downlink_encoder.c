@@ -341,7 +341,7 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
 static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) {
   packed_rs_packet_t fecPkt = {0};  // Holds a 255B RS packet
   unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
-  packed_ax25_i_frame_t ax25Pkt = {0};  // Holds an AX.25 packet
+  transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET};
 
   obc_gs_error_code_t interfaceErr;
 
@@ -359,17 +359,17 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
 
   memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
 
-  interfaceErr = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, ax25Pkt.data, &ax25Pkt.length);
+  interfaceErr = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, transmitEvent.ax25Pkt.data,
+                           &transmitEvent.ax25Pkt.length);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_BIT_STUFF_FAILURE;
   }
 
-  ax25Pkt.data[0] = AX25_FLAG;
-  ax25Pkt.data[ax25Pkt.length - 1] = AX25_FLAG;
+  transmitEvent.ax25Pkt.data[0] = AX25_FLAG;
+  transmitEvent.ax25Pkt.data[transmitEvent.ax25Pkt.length - 1] = AX25_FLAG;
 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
-  transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET, .ax25Pkt = &ax25Pkt};
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
 
   return OBC_ERR_CODE_SUCCESS;
