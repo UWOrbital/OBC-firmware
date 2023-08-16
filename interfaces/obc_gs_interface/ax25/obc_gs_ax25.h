@@ -94,14 +94,14 @@ extern ax25_addr_t groundStationCallsign;
 extern "C" {
 #endif
 /**
- * @brief returns the number of flag share bytes required depending on telemetry data length
+ * @brief returns the number of unstuffed flag share bytes required depending on information length
  *
- * @param telemDataLen length of the telemData array
+ * @param infoBytesLen length of the information data array
  */
-static inline uint16_t flagShareLen(uint16_t telemDataLen);
+static inline uint32_t ax25UnstuffedWithFlagShareLen(uint32_t infoBytesLen);
 
 /**
- * @brief prepares ax25data with appropriate I frames when utilizing flag-sharing
+ * @brief prepares ax25data with appropriate number of I frames when utilizing flag-sharing
  *
  * @param telemData data to send that needs ax.25 headers added onto it
  * @param telemDataLen length of the telemData array
@@ -109,8 +109,8 @@ static inline uint16_t flagShareLen(uint16_t telemDataLen);
  * @param ax25DataLen ax.25 array length
  * @param destAddress address of the destination for the ax25 packet
  */
-obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t telemDataLen, uint8_t *ax25Data,
-                                                  uint16_t ax25DataLen, const ax25_addr_t *destAddress);
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t telemDataLen, uint8_t *ax25Data,
+                                                  uint32_t ax25DataLen, const ax25_addr_t *destAddress);
 
 /**
  * @brief adds ax.25 headers onto telemetry being downlinked and stores the length of the packet in az25Data->length

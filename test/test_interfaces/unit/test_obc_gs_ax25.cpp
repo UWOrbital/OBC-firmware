@@ -90,8 +90,8 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
   uint16_t telemDataLen = (3 * AX25_INFO_BYTES);
   uint16_t ax25DataLen = 0;
 
-  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data, flagShareLen(telemDataLen),
-                                          &groundStationCallsign),
+  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data,
+                                          ax25UnstuffedWithFlagShareLen(telemDataLen), &groundStationCallsign),
             OBC_GS_ERR_CODE_SUCCESS);
   uint8_t stuffedAx25Data[(3 * AX25_MAXIMUM_PKT_LEN)] = {0};
   uint16_t count[3] = {0};
@@ -134,8 +134,8 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShareStuff) {
   uint16_t telemDataLen = (3 * AX25_INFO_BYTES);
   uint16_t ax25DataLen = 0;
 
-  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data, flagShareLen(telemDataLen),
-                                          &groundStationCallsign),
+  ASSERT_EQ(ax25SendIFrameWithFlagSharing(telemData, telemDataLen, ax25Data,
+                                          ax25UnstuffedWithFlagShareLen(telemDataLen), &groundStationCallsign),
             OBC_GS_ERR_CODE_SUCCESS);
   uint8_t stuffedAx25Data[(3 * AX25_MAXIMUM_PKT_LEN)] = {0};
   uint16_t count[3] = {0};

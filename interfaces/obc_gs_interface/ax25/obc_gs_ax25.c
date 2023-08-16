@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <math.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
 #define AX25_U_FRAME_DISC_CMD_CONTROL 0b01000011
@@ -73,12 +72,12 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
 
-static inline uint16_t flagShareLen(uint16_t telemDataLen) {
-  return (ceil(telemDataLen / AX25_INFO_BYTES) * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1;
+static inline uint32_t ax25UnstuffedWithFlagShareLen(uint32_t infoBytesLen) {
+  return (((infoBytesLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES) * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1;
 }
 
-obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t telemDataLen, uint8_t *ax25Data,
-                                                  uint16_t ax25DataLen, const ax25_addr_t *destAddress) {
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t telemDataLen, uint8_t *ax25Data,
+                                                  uint32_t ax25DataLen, const ax25_addr_t *destAddress) {
   if (telemData == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -96,7 +95,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint16_t t
   }
 
   uint8_t numOfFrames = (telemDataLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES;  // Number of frames and rounding up
-  if (ax25DataLen != ((numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)) {
+  if (ax25DataLen < ((numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
@@ -269,6 +268,7 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
   }
 
   obc_gs_error_code_t errCode;
+
   // Check FCS
   uint16_t fcs = unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES] << 8;
   fcs |= unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES + 1];

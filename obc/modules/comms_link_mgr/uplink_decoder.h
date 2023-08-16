@@ -6,11 +6,6 @@
 #include <stdbool.h>
 
 /**
- * @brief flag timeout callback that sets isFlagReceived to false due to a timeout
- */
-static void flagTimeoutCallback();
-
-/**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
  *
  * @param cmdBytes 223B-AES_IV_SIZE array storing the completely decoded data
