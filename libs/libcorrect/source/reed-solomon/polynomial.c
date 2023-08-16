@@ -1,10 +1,22 @@
 #include "correct/reed-solomon/polynomial.h"
 #include "sys_heap.h"
 
+field_element_t copy_coeffs(field_element_t * src, field_element_t * dest, field_element_t len) {
+    if (src == NULL || dest == NULL) {
+        return -1;
+    }
+
+    field_element_t i = 0;
+    for (i = 0; i < len; i++) {
+        dest[i] = src[i];
+    }
+    return i + 1;
+}
 
 polynomial_t polynomial_create(unsigned int order) {
     polynomial_t polynomial;
-    polynomial.coeff = sysMalloc(sizeof(field_element_t) * (order + 1));
+    //polynomial.coeff = sysMalloc(sizeof(field_element_t) * (order + 1));
+
     polynomial.order = order;
     return polynomial;
 }
@@ -175,9 +187,9 @@ void polynomial_build_exp_lut(field_t field, field_element_t val, unsigned int o
 polynomial_t polynomial_init_from_roots(field_t field, unsigned int nroots, field_element_t *roots, polynomial_t poly, polynomial_t *scratch) {
     unsigned int order = nroots;
     polynomial_t l;
-    field_element_t l_coeff[2];
+    //field_element_t l_coeff[2];
     l.order = 1;
-    l.coeff = l_coeff;
+    //l.coeff = l_coeff;
 
     // we'll keep two temporary stores of rightside polynomial
     // each time through the loop, we take the previous result and use it as new rightside
@@ -213,20 +225,22 @@ polynomial_t polynomial_init_from_roots(field_t field, unsigned int nroots, fiel
 }
 
 polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, field_element_t *roots) {
-    polynomial_t poly = polynomial_create(nroots);
+    //polynomial_t poly = polynomial_create(nroots);
+    polynomial_t poly = {.order = nroots};
     unsigned int order = nroots;
     polynomial_t l;
     l.order = 1;
-    l.coeff = sysMalloc(2 * sizeof(field_element_t));
+    //l.coeff = sysMalloc(2 * sizeof(field_element_t));
     memset(l.coeff, 0, 2 * sizeof(field_element_t));
 
     polynomial_t r[2];
     // we'll keep two temporary stores of rightside polynomial
     // each time through the loop, we take the previous result and use it as new rightside
     // swap back and forth (prevents the need for a copy)
-    r[0].coeff = sysMalloc((order + 1) * sizeof(field_element_t));
+
+    //r[0].coeff = sysMalloc((order + 1) * sizeof(field_element_t));
     memset(r[0].coeff, 0, (order + 1) * sizeof(field_element_t));
-    r[1].coeff = sysMalloc((order + 1) * sizeof(field_element_t));
+    //r[1].coeff = sysMalloc((order + 1) * sizeof(field_element_t));
     memset(r[1].coeff, 0, (order + 1) * sizeof(field_element_t));
     unsigned int rcoeffres = 0;
 
@@ -252,9 +266,11 @@ polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, fi
     memcpy(poly.coeff, r[rcoeffres].coeff, (order + 1) * sizeof(field_element_t));
     poly.order = order;
 
+    /*
     sysFreeMem(l.coeff);
     sysFreeMem(r[0].coeff);
     sysFreeMem(r[1].coeff);
+    */
 
     return poly;
 }

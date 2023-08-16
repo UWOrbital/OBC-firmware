@@ -10,6 +10,8 @@
 #include "correct.h"
 #include "correct/portable.h"
 
+#define MAX_POLY_ORDER 32
+
 // an element in GF(2^8)
 typedef uint8_t field_element_t;
 
@@ -28,6 +30,11 @@ typedef struct {
 
 typedef struct {
     field_element_t *coeff;
+    unsigned int order;
+} dynamic_polynomial_t;
+
+typedef struct {
+    field_element_t coeff[MAX_POLY_ORDER + 1];
     unsigned int order;
 } polynomial_t;
 
