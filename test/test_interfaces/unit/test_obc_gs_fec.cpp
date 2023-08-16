@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(TestFecEncodeDecode, EncodeDecode) {
+TEST(TestFecEncodeDecode, EncodeDecodeZeroData) {
   packed_rs_packet_t encodedData = {0};
   uint8_t data[RS_DECODED_SIZE];
   memset(data, 0xFF, RS_DECODED_SIZE);
@@ -17,4 +17,19 @@ TEST(TestFecEncodeDecode, EncodeDecode) {
   uint8_t decodedData[RS_DECODED_SIZE];
   ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), 0);
   ASSERT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
+}
+
+TEST(TestFecEncodeDecode, EncodeDecodeNonZero) {
+  packed_rs_packet_t encodedData = {0};
+  uint8_t data[RS_DECODED_SIZE];
+  memset(data, 0xFF, RS_DECODED_SIZE);
+  initRs();
+  ASSERT_EQ(rsEncode(data, &encodedData), 0);
+  // flip some bits
+  encodedData.data[0] ^= 0b10000001;
+  encodedData.data[222] ^= 0b10100011;
+  uint8_t decodedData[RS_DECODED_SIZE];
+  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), 0);
+  ASSERT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
+  destroyRs();
 }
