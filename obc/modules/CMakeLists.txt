@@ -12,6 +12,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/supervisor
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper
+    ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector
 )
 
 target_sources(OBC-firmware.out PUBLIC
@@ -36,4 +37,6 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_mgr/telemetry_fs_utils.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper/timekeeper.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/task_stats_collector.c
 )
