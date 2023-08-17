@@ -32,7 +32,7 @@
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 #define AX25_TIMEOUT_MILLISECONDS 330000
-#define TIMER_TIMEOUT_MILLISECONDS 100
+#define TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS 500
 #define TIMER_NAME "flag_timeout"
 
 // Decode Data task
@@ -150,10 +150,13 @@ static void vDecodeTask(void *pvParameters) {
           axDataIndex = 0;
           axData.data[axDataIndex++] = AX25_FLAG;
         } else {
-          if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_TIMEOUT_MILLISECONDS)) == pdPASS) {
-            startFlagReceived = true;
-            axDataIndex = 1;
+          if (!startFlagReceived) {
+            if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS)) != pdPASS) {
+              LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_FULL);
+            }
           }
+          startFlagReceived = true;
+          axDataIndex = 1;
         }
         continue;
       }
