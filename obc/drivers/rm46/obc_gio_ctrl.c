@@ -12,10 +12,6 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
       case DS3232_INT_PIN:
         alarmInterruptCallback();
         break;
-
-      case TPL5010_WAKE_PIN:
-        tpl5010Reset();
-        break;
     }
   } else if (port == gioPORTB) {
     switch (bit) {
@@ -24,6 +20,10 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
       // is asserted to avoid a FIFO overflow
       case CC1120_RX_THR_PKT_gioPORTB_PIN:
         rxFifoReadyCallback();
+        break;
+
+      case TPL5010_WAKE_PIN:
+        feedHardwareWatchdog();
         break;
     }
   }

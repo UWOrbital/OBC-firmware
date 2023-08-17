@@ -142,6 +142,9 @@
 #define RFFM6404_EN_PIN_PORT gioPORTA
 #define RFFM6404_BYP_PIN_PORT gioPORTB
 
+// TPL5010 pin numbers
+#define TPL5010_WAKE_PIN 0
+#define TPL5010_DONE_PIN 1
 #else
 #error Board configuration not defined
 #endif

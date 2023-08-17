@@ -5,6 +5,12 @@
 #define TPL5010_WAKE_PIN 0
 #define TPL5010_DONE_PIN 1
 
-obc_error_code_t tpl5010Init(void);
+/**
+ * @brief Initialize HW Watchdog driver
+ */
+void tpl5010Init(void);
 
-obc_error_code_t tpl5010Reset(void);
+/**
+ * @brief Reset the done signal on interrupt
+ */
+void feedHardwareWatchdog(void);
