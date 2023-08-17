@@ -5,6 +5,8 @@
 #include "obc_logging.h"
 #include "obc_task_config.h"
 #include "ds3232_mz.h"
+#include "obc_persistent_store.h"
+#include "obc_persistent_data_config.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -44,19 +46,31 @@ static void timekeeperTask(void *pvParameters) {
    */
 
   obc_error_code_t errCode;
-
+  fram_time_data_t unixTime;
+  obc_error_code_t syncResult;
   uint8_t syncPeriodCounter = 0;  // Sync whenever this counter is 0
 
   while (1) {
     if (syncPeriodCounter == 0) {
       // Sync the local time with the RTC every LOCAL_TIME_SYNC_PERIOD_S seconds.
-      // TODO: Deal with errors
-      LOG_IF_ERROR_CODE(syncUnixTime());
+
+      syncResult = syncUnixTime();
+      if(syncResult != OBC_ERR_CODE_SUCCESS){
+        LOG_ERROR("Time synchronization failed, &d", syncResult);
+      }
     } else {
       incrementCurrentUnixTime();
     }
 
     LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
+
+    //Send Unix time to fram
+    unixTime.unix_time = getCurrentUnixTime();
+    errCode = setPersistentTimeData(unixTime);
+
+    if(errCode != OBC_ERR_CODE_SUCCESS){
+      LOG_ERROR("Error storing Unix time in persistant storage, &d", errCode);
+    }
 
     syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
     vTaskDelay(pdMS_TO_TICKS(1000));
