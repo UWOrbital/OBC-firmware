@@ -72,6 +72,11 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
 
+/**
+ * @brief returns the number of unstuffed flag share bytes required depending on information length
+ *
+ * @param infoBytesLen length of the information data array
+ */
 static inline uint32_t ax25UnstuffedWithFlagShareLen(uint32_t infoBytesLen) {
   return (((infoBytesLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES) * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1;
 }
