@@ -100,7 +100,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
   }
 
   uint8_t numOfFrames = (telemDataLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES;  // Number of frames and rounding up
-  if (ax25DataLen < ((numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)) {
+  if (ax25DataLen < ((uint32_t)(numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
