@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#define PACKET_LENGTH 40
+
 /**
  * @brief Break an image into packets, cannot process the entire image at once due to memory constraints
  * @param image The image to break into packets
@@ -31,9 +33,8 @@ uint32_t breakImageIntoPackets(image_t *image, image_t **packets, uint32_t packe
  * @param packet The image packet to search through
  * @param x The x coordinate of the brightest pixel
  * @param y The y coordinate of the brightest pixel
- * @param threshold Brightest pixel found so far, used to speed up search by only looking at pixels brighter than this
- * @param packetStartingY The y coordinate of the top left corner of the packet, used to calculate the actual y
- * coordinate of the brightest pixel
+ * @param brightness The brightness of the brightest pixel
+ * @param packetStartingY The y coordinate of the top left corner of the packet
  */
 void findBrightestPixelInPacket(image_t *packet, uint32_t *x, uint32_t *y, uint8_t *brightness,
                                 uint32_t packetStartingY) {
@@ -55,17 +56,20 @@ void findBrightestPixelInPacket(image_t *packet, uint32_t *x, uint32_t *y, uint8
  * @param y The y coordinate of the brightest pixel
  */
 void findBrightestPixel(image_t *image, uint32_t *x, uint32_t *y) {
-  uint32_t num_chunks = 0;
-  uint32_t packetLength = 100;
+  uint32_t packetLength = PACKET_LENGTH;
   image_t *packets;
 
-  num_chunks = breakImageIntoPackets(image, &packets, packetLength);
+  uint32_t num_chunks = breakImageIntoPackets(image, &packets, packetLength);
 
   uint8_t brightness = 0;
   uint32_t brightestX = 0;
   uint32_t brightestY = 0;
 
   for (uint32_t i = 0; i < num_chunks; i++) {
+    /**
+     * use adaptive thresholding to find the brightest pixel, only
+     * look for pixels brighter than the current brightest pixel found
+     */
     findBrightestPixelInPacket(&packets[i], &brightestX, &brightestY, &brightness, i * packetLength);
   }
 

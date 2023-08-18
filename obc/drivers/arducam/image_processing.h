@@ -32,9 +32,8 @@ uint32_t breakImageIntoPackets(image_t *image, image_t **packets, uint32_t packe
  * @param packet The image packet to search through
  * @param x The x coordinate of the brightest pixel
  * @param y The y coordinate of the brightest pixel
- * @param threshold Brightest pixel found so far, used to speed up search to only look at pixels brighter than this
- * @param packetStartingY The y coordinate of the top left corner of the packet, used to calculate the actual y
- * coordinate of the brightest pixel
+ * @param brightess The brightness of the brightest pixel
+ * @param packetStartingY The y coordinate of the top left corner of the packet
  */
 void findBrightestPixelInPacket(image_t *packet, uint32_t *x, uint32_t *y, uint8_t *brightness,
                                 uint32_t packetStartingY);
