@@ -7,6 +7,7 @@
 #include "payload_manager.h"
 #include "alarm_handler.h"
 #include "health_collector.h"
+#include "task_stats_collector.h"
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -119,6 +120,9 @@ static void vSupervisorTask(void *pvParameters) {
   initEPSManager();
   initPayloadManager();
   initHealthCollector();
+#if (DEBUG == 1)
+  initTaskStatsCollector();
+#endif
 
   taskEXIT_CRITICAL();
 
