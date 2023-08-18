@@ -8,7 +8,7 @@
  * @brief Break an image into packets, cannot process the entire image at once due to memory constraints
  * @param image The image to break into packets
  * @param packets The array to store the packets in
- * @param packetLength The height of each packet, the width of each packet is the same as the image
+ * @param packetHeight The height of each packet, the width of each packet is the same as the image
  * @return The number of packets created
  */
 uint32_t breakImageIntoPackets(image_t *image, image_t **packets, uint32_t packetHeight) {
@@ -33,7 +33,7 @@ uint32_t breakImageIntoPackets(image_t *image, image_t **packets, uint32_t packe
  * @param packet The image packet to search through
  * @param x The x coordinate of the brightest pixel
  * @param y The y coordinate of the brightest pixel
- * @param brightness The brightness of the brightest pixel
+ * @param brightess The brightness of the brightest pixel
  * @param packetStartingY The y coordinate of the top left corner of the packet
  */
 void findBrightestPixelInPacket(image_t *packet, uint32_t *x, uint32_t *y, uint8_t *brightness,
