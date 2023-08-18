@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#define PACKET_LENGTH 40
+#define PACKET_HEIGHT 40
 
 /**
  * @brief Break an image into packets, cannot process the entire image at once due to memory constraints
@@ -56,10 +56,10 @@ void findBrightestPixelInPacket(image_t *packet, uint32_t *x, uint32_t *y, uint8
  * @param y The y coordinate of the brightest pixel
  */
 void findBrightestPixel(image_t *image, uint32_t *x, uint32_t *y) {
-  uint32_t packetLength = PACKET_LENGTH;
+  uint32_t packetHeight = PACKET_HEIGHT;
   image_t *packets;
 
-  uint32_t num_chunks = breakImageIntoPackets(image, &packets, packetLength);
+  uint32_t num_chunks = breakImageIntoPackets(image, &packets, packetHeight);
 
   uint8_t brightness = 0;
   uint32_t brightestX = 0;
