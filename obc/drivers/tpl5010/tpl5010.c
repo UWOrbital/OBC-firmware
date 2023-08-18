@@ -10,11 +10,7 @@
 #define DONE_SIGNAL_OFF 0
 #define TPL5010_GIO_PORT gioPORTB
 
-void tpl5010Init(void) {
-  gioEnableNotification(TPL5010_GIO_PORT, TPL5010_WAKE_PIN);
-
-  return OBC_ERR_CODE_SUCCESS;
-}
+void tpl5010Init(void) { gioEnableNotification(TPL5010_GIO_PORT, TPL5010_WAKE_PIN); }
 
 void feedHardwareWatchdog(void) {
   gioSetPort(TPL5010_GIO_PORT, DONE_SIGNAL_ON);  // pull high then low
