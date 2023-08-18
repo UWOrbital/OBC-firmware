@@ -43,6 +43,9 @@ TEST(TestObcImageProcessing, findBrightestPixelInPacket) {
   EXPECT_EQ(brightness, 255);
   EXPECT_EQ(brightestX, 320);
   EXPECT_EQ(brightestY, 25);
+
+  delete packet.data;
+  packet.data = NULL;
 }
 
 TEST(TestObcImageProcessing, findBrightestPixel) {

@@ -70,7 +70,7 @@ void findBrightestPixel(image_t *image, uint32_t *x, uint32_t *y) {
      * use adaptive thresholding to find the brightest pixel, only
      * look for pixels brighter than the current brightest pixel found
      */
-    findBrightestPixelInPacket(&packets[i], &brightestX, &brightestY, &brightness, i * packetLength);
+    findBrightestPixelInPacket(&packets[i], &brightestX, &brightestY, &brightness, i * packetHeight);
   }
 
   *x = brightestX;
