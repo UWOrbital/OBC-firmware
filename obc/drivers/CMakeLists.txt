@@ -50,5 +50,5 @@ target_sources(OBC-firmware.out PUBLIC
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/tpl5010.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010/tpl5010.c
 )
