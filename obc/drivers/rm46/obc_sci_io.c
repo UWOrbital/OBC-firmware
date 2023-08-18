@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define MAX_PRINTF_SIZE 128U
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static SemaphoreHandle_t sciMutex = NULL;
@@ -33,17 +32,7 @@ STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG),
               "UART_PRINT_REG must be sciREG or scilinREG");
 STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG), "UART_READ_REG must be sciREG or scilinREG");
 
-/**
- * @brief Iterate through an array of bytes and transmit them via UART_PRINT_REG.
- *
- * @param bytes The array of bytes to transmit.
- * @param length The length of the array of bytes to transmit.
- * @param sciReg Pointer to SCI register to send string to
- * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
-static obc_error_code_t sciSendString(unsigned char *bytes, uint32_t length, sciBASE_t *sciReg);
-
-void initSciMutex() {
+void initSciMutex(void) {
   if (sciMutex == NULL) {
     sciMutex = xSemaphoreCreateMutexStatic(&sciMutexBuffer);
   }
@@ -60,62 +49,6 @@ void initSciMutex() {
   configASSERT(sciTransferComplete);
 
   sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
-}
-
-obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg) {
- 
-  if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
-
-  SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciMutex : sciLinMutex;
-  configASSERT(mutex);
-
-  if (xSemaphoreTake(mutex, UART_MUTEX_BLOCK_TIME) == pdTRUE) {
-    obc_error_code_t err = sciSendString(text, length, sciReg);
-    xSemaphoreGive(mutex);
-    return err;
-  }
-
-  return OBC_ERR_CODE_MUTEX_TIMEOUT;
-}
-
-static obc_error_code_t sciSendString(unsigned char *bytes, uint32_t length, sciBASE_t *sciReg) {
-  if (bytes == NULL || length == 0U) return OBC_ERR_CODE_INVALID_ARG;
-  
-  if (!((sciReg  == sciREG) || (sciReg == scilinREG))){
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-
-  for (uint32_t i = 0; i < length; i++) {
-    if (bytes[i] == '\0') break;
-    // sciSendByte waits for the transmit buffer to be empty before sending
-    sciSendByte(sciReg, bytes[i]);
-  }
-  return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t sciPrintf(const char *s, sciBASE_t *sciReg, ...) {
-  if (s == NULL) return OBC_ERR_CODE_INVALID_ARG;
-
-  char buf[MAX_PRINTF_SIZE] = {0};
-
-  va_list args;
-  va_start(args, s);
-  int n = vsnprintf(buf, MAX_PRINTF_SIZE, s, args);
-  va_end(args);
-
-  if (n < 0) return OBC_ERR_CODE_INVALID_ARG;
-
-  // n == MAX_PRINTF_SIZE invalid because null character isn't included in count
-  if ((uint32_t)n >= MAX_PRINTF_SIZE) return OBC_ERR_CODE_INVALID_ARG;
-
-  return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE, UART_MUTEX_BLOCK_TIME, sciReg);
-}
-
-void uartAssertFailed(char *file, int line, char *expr) {
-  if (file == NULL || line < 0 || expr == NULL)
-    return;  // Only called by assert, so we can assume that the arguments are valid
-
-  sciPrintf("ASSERTION FAILED: %s, file %s, line %d\r\n", UART_READ_REG, expr, file, line);
 }
 
 /*
@@ -144,7 +77,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     return OBC_ERR_CODE_INVALID_ARG;
   }
   
-  SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciMutex : sciLinMutex;
+  SemaphoreHandle_t mutex = (sciReg == UART_READ_REG) ? sciMutex : sciLinMutex;
   configASSERT(mutex != NULL);
 
   if (buf == NULL || numBytes < 1) {
@@ -181,7 +114,7 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciMutex : sciLinMutex;
+  SemaphoreHandle_t mutex = (sciReg == UART_PRINT_REG) ? sciMutex : sciLinMutex;
   configASSERT(mutex != NULL);
 
   if (buf == NULL || numBytes < 1) {

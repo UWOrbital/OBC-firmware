@@ -13,28 +13,7 @@
  * @brief Initialize mutexes protecting SCI and SCI2.
  * 
  */
-void initSciMutex();
-
-/**
- * @brief Send a string of text via UART_PRINT_REG.
- *
- * @param text The text to send.
- * @param length The length of the text to send.
- * @param sciReg Pointer to SCI register to print to
- * @param uartMutexTimeoutTicks The number of ticks to wait for the mutex to become available.
- * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
-obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg);
-
-/**
- * @brief Printf via UART_PRINT_REG.
- *
- * @param s The format string
- * @param sciReg Pointer to SCI register to print to
- * @param ... Arguments to use in format string
- * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
-obc_error_code_t sciPrintf(const char *s, sciBASE_t *sciReg, ...);
+void initSciMutex(void);
 
 /**
  * @brief Read a byte from UART_READ_REG by polling.
