@@ -112,7 +112,7 @@ void initDecodeTask(void) {
  */
 static void vDecodeTask(void *pvParameters) {
   TimerHandle_t flagTimeoutTimer =
-      xTimerCreate(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdTRUE, (void *)0, flagTimeoutCallback);
+      xTimerCreateStatic(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdFALSE, (void *)0, flagTimeoutCallback);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
