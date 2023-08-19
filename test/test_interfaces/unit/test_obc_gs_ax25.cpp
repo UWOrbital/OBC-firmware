@@ -1,5 +1,4 @@
 #include "obc_gs_ax25.h"
-#include "obc_gs_ax25.c"
 #include "obc_gs_fec.h"
 #include "obc_gs_errors.h"
 

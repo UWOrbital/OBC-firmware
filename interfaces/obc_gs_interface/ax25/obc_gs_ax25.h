@@ -95,6 +95,15 @@ extern "C" {
 #endif
 
 /**
+ * @brief returns the number of unstuffed flag share bytes required depending on information length
+ *
+ * @param infoBytesLen length of the information data array
+ */
+static inline uint32_t ax25UnstuffedWithFlagShareLen(uint32_t infoBytesLen) {
+  return (((infoBytesLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES) * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1;
+}
+
+/**
  * @brief prepares ax25data with appropriate number of I frames when utilizing flag-sharing
  *
  * @param telemData data to send that needs ax.25 headers added onto it
