@@ -2,10 +2,6 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief A struct to store an image
  * @param width The width of the image
@@ -13,38 +9,25 @@ extern "C" {
  * @param data The image data
  */
 typedef struct image_t {
-  uint32_t width;
-  uint32_t height;
+  uint16_t width;
+  uint16_t height;
   uint8_t *data;
 } image_t;
 
-/**
- * @brief Break an image into packets, cannot process the entire image at once due to memory constraints
- * @param image The image to break into packets
- * @param packets The array to store the packets in
- * @param packetHeight The height of each packet, the width of each packet is the same as the image
- * @return The number of packets created
- */
-uint32_t breakImageIntoPackets(image_t *image, image_t **packets, uint32_t packetHeight);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Find the brightest pixel in an image
+ * @brief Find the brightest pixel in an image packet
  * @param packet The image packet to search through
  * @param x The x coordinate of the brightest pixel
  * @param y The y coordinate of the brightest pixel
  * @param brightess The brightness of the brightest pixel
- * @param packetStartingY The y coordinate of the top left corner of the packet
+ * @param packetStartY The y coordinate of the top left corner of the packet, the width of the packet is assumed to be
+ *                     the width of the image
  */
-void findBrightestPixelInPacket(image_t *packet, uint32_t *x, uint32_t *y, uint8_t *brightness,
-                                uint32_t packetStartingY);
-
-/**
- * @brief Find the brightest pixel in an image
- * @param image The image to search through
- * @param x The x coordinate of the brightest pixel
- * @param y The y coordinate of the brightest pixel
- */
-void findBrightestPixel(image_t *image, uint32_t *x, uint32_t *y);
+void findBrightestPixelInPacket(image_t *packet, uint16_t *x, uint16_t *y, uint8_t *brightness, uint16_t packetStartY);
 
 #ifdef __cplusplus
 }
