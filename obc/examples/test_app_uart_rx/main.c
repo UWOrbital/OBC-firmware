@@ -1,4 +1,5 @@
 #include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_errors.h"
 
 #include <gio.h>
@@ -16,18 +17,18 @@ int main(void) {
   // Initialize the SCI mutex.
   initSciMutex();
 
-  sciPrintf("Demo started\r\n", scilinREG);
+  sciPrintf("Demo started\r\n");
 
   while (1) {
     unsigned char buffer[NUM_CHARS_TO_READ] = {'\0'};
-    obc_error_code_t error = sciRead(buffer, NUM_CHARS_TO_READ, scilinREG);
+    obc_error_code_t error = sciRead(buffer, NUM_CHARS_TO_READ, UART_PRINT_REG);
     if (error != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error reading from SCI! - %d\r\n", (int)error, scilinREG);
+      sciPrintf("Error reading from SCI! - %d\r\n", (int)error);
       continue;
     }
 
-    sciPrintText(buffer, NUM_CHARS_TO_READ, UART_MUTEX_BLOCK_TIME, scilinREG);
-    sciPrintf("\r\n", scilinREG);
+    sciPrintText(buffer, NUM_CHARS_TO_READ, UART_MUTEX_BLOCK_TIME);
+    sciPrintf("\r\n");
 
     // Toggle the LED.
     gioToggleBit(gioPORTB, 1);

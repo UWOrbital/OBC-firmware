@@ -1,6 +1,7 @@
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
+#include "obc_print.h"
 #include "lm75bd.h"
 
 #include <FreeRTOS.h>

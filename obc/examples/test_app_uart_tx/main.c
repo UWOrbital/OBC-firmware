@@ -15,10 +15,10 @@ int main(void) {
 
   while (1) {
     // Send a string of text via SCI
-    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20, UART_MUTEX_BLOCK_TIME, scilinREG);
+    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20, UART_MUTEX_BLOCK_TIME);
 
     // Test sciPrintf
-    sciPrintf("Testing sciPrintf: %d %d %s\r\n", scilinREG, 0, 1, "Hello");
+    sciPrintf("Testing sciPrintf: %d %d %s\r\n", 0, 1, "Hello");
 
     // Toggle the LED.
     gioToggleBit(gioPORTB, 1);

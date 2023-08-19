@@ -1,24 +1,25 @@
-#include "obc_sci_io.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_board_config.h"
+#include "obc_print.h"
+#include "obc_logging.h"
 
 #include <sci.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 #define MAX_PRINTF_SIZE 128U
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks) {
- 
   if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
 
-    obc_error_code_t err = sciSendBytes(text, length, uartMutexTimeoutTicks, UART_PRINT_REG);
-    if (err != OBC_ERR_CODE_SUCCESS) {
-      LOG_ERROR_CODE(err);
-    }
-    return err;
+  obc_error_code_t err = sciSendBytes(text, length, uartMutexTimeoutTicks, UART_PRINT_REG);
+  if (err != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(err);
+  }
+  return err;
 }
 
 obc_error_code_t sciPrintf(const char *s, ...) {
