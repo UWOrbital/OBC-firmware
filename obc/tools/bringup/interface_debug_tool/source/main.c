@@ -61,6 +61,7 @@ int main(void) {
   sciInit();
   spiInit();
   i2cInit();
+  gioInit();
 
   initSciMutex();
   initSpiMutex();

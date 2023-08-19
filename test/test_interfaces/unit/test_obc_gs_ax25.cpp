@@ -94,3 +94,33 @@ TEST(TestAx25SendRecv, uFrameSendRecv) {
             OBC_GS_ERR_CODE_SUCCESS);
   ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
 }
+
+TEST(TestAx25SendRecV, Ax25SourceAddressGenerator) {
+  ax25_addr_t sourceAddress;
+  memset(sourceAddress.data, 0, 7);
+  sourceAddress.length = 7;
+
+  uint8_t expectedAddress[] = {0x9C, 0x6E, 0x98, 0x8A, 0x9A, 0x40, 0x61};  // Source subfield from documentation
+  uint8_t callSign[] = {'N', '7', 'L', 'E', 'M'};
+  uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
+
+  ASSERT_EQ(ax25GetSourceAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
+
+  ax25GetSourceAddress(&sourceAddress, callSign, 5, 0, 0);
+  ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
+}
+
+TEST(TestAx25SendRecV, Ax25DestAddressGenerator) {
+  ax25_addr_t sourceAddress;
+  memset(sourceAddress.data, 0, 7);
+  sourceAddress.length = 7;
+
+  uint8_t expectedAddress[] = {0x9C, 0x94, 0x6E, 0xA0, 0x40, 0x40, 0xE0};  // Source subfield from documentation
+  uint8_t callSign[] = {'N', 'J', '7', 'P'};
+  uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
+
+  ASSERT_EQ(ax25GetDestAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
+
+  ax25GetDestAddress(&sourceAddress, callSign, 4, 0, 1);
+  ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
+}
