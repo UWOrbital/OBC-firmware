@@ -7,7 +7,8 @@
 #include <stdlib.h>
 
 TEST(TestObcImageProcessing, findBrightestPixelInPacket) {
-  image_t image = {640, 480, (uint8_t[640 * 480]){0}};
+  uint8_t data[640 * 480] = {0};
+  image_t image = {.width = 640, .height = 480, .data = data};
 
   image_t topPacket = {640, 240, image.data};
   image_t bottomPacket = {640, 240, image.data + 640 * 240};
