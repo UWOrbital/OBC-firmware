@@ -7,6 +7,7 @@
 #include "payload_manager.h"
 #include "alarm_handler.h"
 #include "health_collector.h"
+#include "task_stats_collector.h"
 #include "obc_sw_watchdog.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -82,7 +83,8 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 static void sendStartupMessages(void) {
 #if CSDC_DEMO_ENABLED == 1
   obc_error_code_t errCode;
-  LOG_IF_ERROR_CODE(startUplink());
+  comms_event_t event = {.eventID = BEGIN_UPLINK};
+  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
 #endif
 }
 
@@ -122,6 +124,9 @@ static void vSupervisorTask(void *pvParameters) {
   initEPSManager();
   initPayloadManager();
   initHealthCollector();
+#if (DEBUG == 1)
+  initTaskStatsCollector();
+#endif
 
   taskEXIT_CRITICAL();
 
