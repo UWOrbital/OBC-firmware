@@ -2,7 +2,7 @@
 
 #include "obc_spi_io.h"
 #include "obc_sci_io.h"
-#include "fram.h"
+#include "fm25v20a.h"
 
 #include <gio.h>
 #include <sci.h>

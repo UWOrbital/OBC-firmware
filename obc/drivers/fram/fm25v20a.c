@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "fram.h"
+#include "fm25v20a.h"
 #include <FreeRTOS.h>
 
 #include "spi.h"

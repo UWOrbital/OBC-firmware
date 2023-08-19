@@ -18,8 +18,7 @@
 #include "obc_reliance_fs.h"
 #include "lm75bd.h"
 #include "obc_board_config.h"
-#include "comms_uplink_receiver.h"
-#include "fram.h"
+#include "fm25v20a.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
