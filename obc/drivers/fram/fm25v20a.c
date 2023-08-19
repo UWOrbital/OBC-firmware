@@ -25,8 +25,9 @@ static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = F
 #define OP_SLEEP 0xB9U
 #define OP_GET_ID 0x9FU
 
-#define FRAM_WAKE_BUSY_WAIT 99000U  // Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay
-#define FRAM_WAKE_TIME_MS 1U        // Not woken up often, so ok to use minimum task delay of 1 ms
+#define FRAM_WAKE_BUSY_WAIT \
+  99000U  // Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay (datasheet pg.15)
+#define FRAM_WAKE_TIME_MS 1U  // Not woken up often, so ok to use minimum task delay of 1 ms
 static bool isAsleep = false;
 
 typedef enum cmd {
@@ -97,27 +98,22 @@ obc_error_code_t framReadStatusReg(uint8_t *status) {
   }
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
+
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_READ_STATUS_REG));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
 
-  LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, status));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_READ_STATUS_REG));
+  }
+
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, status));
   }
 
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
@@ -130,39 +126,35 @@ obc_error_code_t framWriteStatusReg(uint8_t status) {
   obc_error_code_t errCode;
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
+
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
   // Send WREN
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE_EN));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
-  // error implies we never had mutex to begin with, ok to return
-  // without release of recursive mutex
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE_EN));
+  }
 
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE_STATUS_REG));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
+  // Deassert and assert needed for write operations (datasheet pg. 9)
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
   }
-  LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, status));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE_STATUS_REG));
+  }
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, status));
+  }
+
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
   return OBC_ERR_CODE_SUCCESS;
@@ -176,47 +168,37 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
 
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
+
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_FAST_READ));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
 
-  LOG_IF_ERROR_CODE(framTransmitAddress(addr));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_FAST_READ));
+  }
+
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitAddress(addr));
   }
 
   // Send dummy byte
-  LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, 0xFF));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, 0xFF));
   }
+
   for (uint32_t i = 0; i < nBytes; i++) {
-    uint8_t receiveByte;
-    LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      obc_error_code_t transmitErrCode = errCode;
-      LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-      LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-      return transmitErrCode;
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      uint8_t receiveByte;
+      LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
+      buffer[i] = receiveByte;
+    } else {
+      break;
     }
-    buffer[i] = receiveByte;
   }
 
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
@@ -232,38 +214,32 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
 
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
+
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_READ));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
 
-  LOG_IF_ERROR_CODE(framTransmitAddress(addr));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_READ));
   }
+
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitAddress(addr));
+  }
+
   for (uint32_t i = 0; i < nBytes; i++) {
-    uint8_t receiveByte;
-    LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      obc_error_code_t transmitErrCode = errCode;
-      LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-      LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-      return transmitErrCode;
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      uint8_t receiveByte;
+      LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
+      buffer[i] = receiveByte;
+    } else {
+      break;
     }
-    buffer[i] = receiveByte;
   }
 
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
@@ -276,48 +252,44 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
   if (data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
+
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
+
   // Send WREN
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE_EN));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
-  // error implies we never had mutex to begin with, ok to return
-  // without release of recursive mutex
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
 
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE_EN));
+  }
 
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
+  // Deassert and assert needed for write operations (datasheet pg. 9)
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
   }
-  LOG_IF_ERROR_CODE(framTransmitAddress(addr));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_WRITE));
+  }
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitAddress(addr));
+  }
+
   for (uint32_t i = 0; i < nBytes; i++) {
-    LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, data[i]));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      obc_error_code_t transmitErrCode = errCode;
-      LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-      LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-      return transmitErrCode;
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, data[i]));
+    } else {
+      break;
     }
   }
 
@@ -331,19 +303,21 @@ obc_error_code_t framSleep(void) {
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_SLEEP));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_SLEEP));
+  }
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
   }
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-  isAsleep = true;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    isAsleep = true;
+  }
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -371,27 +345,24 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
   }
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
   if (isAsleep) {
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
-  RETURN_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
-  LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_READ_ID));
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    obc_error_code_t transmitErrCode = errCode;
-    LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-    LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-    return transmitErrCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(framTransmitOpCode(FRAM_READ_ID));
+  }
+
   for (uint32_t i = 0; i < nBytes && i < FRAM_ID_LEN; i++) {
-    uint8_t receiveByte;
-    LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      obc_error_code_t transmitErrCode = errCode;
-      LOG_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
-      LOG_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-      return transmitErrCode;
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      uint8_t receiveByte;
+      LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, &receiveByte));
+      id[i] = receiveByte;
+    } else {
+      break;
     }
-    id[i] = receiveByte;
   }
 
   RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
