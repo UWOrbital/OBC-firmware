@@ -213,8 +213,7 @@ static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
   }
 
   obc_error_code_t errCode;
-  memcpy(buffer, &value, 2);
-  RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(address, buffer, 2));
+  RETURN_IF_ERROR_CODE(writeValueBmsBlockRegister(address, value));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -233,8 +232,15 @@ static obc_error_code_t checkStatusBitfield(uint16_t address, uint16_t bitMask, 
 
 static obc_error_code_t isValidMemoryAddress(uint16_t* addr, uint16_t* slaveAddr) {
   uint16_t addrTmp = *addr;
-  bool isValid = (((addrTmp >= BMS_VOLATILE_LOWER) && (addrTmp <= BMS_VOLATILE_UPPER)) ||
-                  ((addrTmp >= BMS_NONVOLATILE_LOWER) && (addrTmp <= BMS_NONVOLATILE_UPPER)));
+  bool isValid;
+
+#if (BMS_VOLATILE_LOWER > 0x0000)
+  isValid = (((addrTmp >= BMS_VOLATILE_LOWER) && (addrTmp <= BMS_VOLATILE_UPPER)) ||
+             ((addrTmp >= BMS_NONVOLATILE_LOWER) && (addrTmp <= BMS_NONVOLATILE_UPPER)));
+#else
+  isValid =
+      ((addrTmp <= BMS_VOLATILE_UPPER)) || ((addrTmp >= BMS_NONVOLATILE_LOWER) && (addrTmp <= BMS_NONVOLATILE_UPPER));
+#endif
 
   if (!isValid) {
     return OBC_ERR_CODE_INVALID_ARG;
