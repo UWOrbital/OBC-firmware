@@ -21,6 +21,7 @@
 #define ENABLE_WRITE_PROTECTION_VAL 0x00F9
 #define COMM_STAT_REGISTER_ADDRESS 0x0061
 #define COMM_STAT_REGISTER_WRITE_MASK 0x01FF
+#define COMM_STAT_NV_ERR_BIT_MASK (0x0001 << 2)
 
 #define BMS_NONVOLATILE_COMMAND_REGISTER 0x060
 #define COPY_NV_BLOCK_COMMAND_VAL 0xE904
@@ -40,6 +41,8 @@ static obc_error_code_t enableWriteProtection();
 static obc_error_code_t writeToBmsBlockRegister(uint16_t startAddr, uint8_t* data, uint16_t size);
 static obc_error_code_t readFromBmsBlockRegister(uint16_t startAddr, uint8_t* buf, uint16_t size);
 
+obc_error_code_t initalizeConfigurationRegisters() {}
+
 static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
   uint8_t buffer[2] = {0};
 
@@ -54,9 +57,23 @@ static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(BMS_NONVOLATILE_COMMAND_REGISTER, buffer, 2));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t initalizeConfigurationRegisters() {}
+static obc_error_code_t checkNVStatusBit(bool* bit) {
+  if (bit == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  uint8_t buffer[2] = {0};
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(readFromBmsBlockRegister(COMM_STAT_REGISTER_ADDRESS, buffer, 2));
+  uint16_t commStatRegister = {0};
+  memcpy(&commStatRegister, buffer, 2);
+  *bit = commStatRegister & COMM_STAT_NV_ERR_BIT_MASK;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
 
 static obc_error_code_t isValidMemoryAddress(uint16_t* addr, uint16_t* slaveAddr) {
   bool isValid = (((addr >= BMS_VOLATILE_LOWER) && (addr <= BMS_VOLATILE_UPPER)) ||
@@ -119,6 +136,7 @@ static obc_error_code_t disableWriteProtection() {
   uint8_t buffer[] = {(uint8_t)(DISABLE_WRITE_PROTECTION_VAL >> 8), (uint8_t)(DISABLE_WRITE_PROTECTION_VAL & 0x00FF)};
   RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(COMM_STAT_REGISTER_ADDRESS, buffer, 2));
   RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(COMM_STAT_REGISTER_ADDRESS, buffer, 2));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t enableWriteProtection() {
@@ -127,4 +145,5 @@ static obc_error_code_t enableWriteProtection() {
   uint8_t buffer[] = {(uint8_t)(ENABLE_WRITE_PROTECTION_VAL >> 8), (uint8_t)(ENABLE_WRITE_PROTECTION_VAL & 0x00FF)};
   RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(COMM_STAT_REGISTER_ADDRESS, buffer, 2));
   RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(COMM_STAT_REGISTER_ADDRESS, buffer, 2));
+  return OBC_ERR_CODE_SUCCESS;
 }
