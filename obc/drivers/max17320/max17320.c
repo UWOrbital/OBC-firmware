@@ -6,10 +6,10 @@
 
 #include <stdint.h>
 
-#define BMS_VOLATILE_LOWER 0x000
-#define BMS_VOLATILE_UPPER 0x0FF
-#define BMS_NONVOLATILE_LOWER 0x180
-#define BMS_NONVOLATILE_UPPER 0x1FF
+#define BMS_VOLATILE_LOWER 0x0000
+#define BMS_VOLATILE_UPPER 0x00FF
+#define BMS_NONVOLATILE_LOWER 0x0180
+#define BMS_NONVOLATILE_UPPER 0x01FF
 
 #define BMS_INTERNAL_MEM_MASK 0x00FF
 #define BMS_SLAVE_BIT_MASK (1 << 8)
@@ -107,6 +107,7 @@ obc_error_code_t initalizeConfigurationRegisters() {
     }
   }
   RETURN_IF_ERROR_CODE(enableWriteProtection());
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t writeDefaultNVConfiguration(uint16_t* indices, uint8_t size) {
@@ -150,6 +151,7 @@ static obc_error_code_t readValueFromBmsBlockRegister(uint16_t addr, uint16_t* v
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(readFromBmsBlockRegister(addr, buffer, 2));
   *value = (((uint16_t)(buffer[1]) << 8) | ((uint16_t)buffer[0]));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t writeValueBmsBlockRegister(uint16_t addr, uint16_t value) {
@@ -201,6 +203,7 @@ static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
     case AVAILABLE_UPDATES_CHECK:
       value = AVAILABLE_UPDATES_VAL;
       address = BMS_NONVOLATILE_COMMAND_REGISTER_ADDRESS;
+      break;
     case FIRMWARE_RESET:
       value = BMS_FIRMWARE_RESET_COMMAND;
       address = BMS_CONFIG2_REGISTER_ADDRESS;
@@ -229,7 +232,7 @@ static obc_error_code_t checkStatusBitfield(uint16_t address, uint16_t bitMask, 
 }
 
 static obc_error_code_t isValidMemoryAddress(uint16_t* addr, uint16_t* slaveAddr) {
-  uint16_t addrTmp = addr;
+  uint16_t addrTmp = *addr;
   bool isValid = (((addrTmp >= BMS_VOLATILE_LOWER) && (addrTmp <= BMS_VOLATILE_UPPER)) ||
                   ((addrTmp >= BMS_NONVOLATILE_LOWER) && (addrTmp <= BMS_NONVOLATILE_UPPER)));
 
@@ -251,8 +254,6 @@ static obc_error_code_t memoryAddressMatchesSlaveAddr(uint16_t addr, uint16_t sl
 }
 
 static obc_error_code_t isValidTransaction(uint16_t* startAddr, uint16_t* slaveAddr, uint16_t size) {
-  bool isValid = 0;
-
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidMemoryAddress(startAddr, slaveAddr));
 
@@ -271,7 +272,8 @@ static obc_error_code_t writeToBmsBlockRegister(uint16_t startAddr, uint8_t* dat
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidTransaction(&startCommAddr, &slaveAddr, size));
-  return (i2cWriteReg(slaveAddr, startCommAddr, data, size));
+  return (i2cWriteReg((uint8_t)slaveAddr, (uint8_t)startCommAddr, data, size));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t readFromBmsBlockRegister(uint16_t startAddr, uint8_t* buf, uint16_t size) {
@@ -280,7 +282,8 @@ static obc_error_code_t readFromBmsBlockRegister(uint16_t startAddr, uint8_t* bu
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidTransaction(&startCommAddr, &slaveAddr, size));
-  return (i2cReadReg(slaveAddr, startCommAddr, buf, size));
+  return (i2cReadReg((uint8_t)slaveAddr, (uint8_t)startCommAddr, buf, size));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t disableWriteProtection() {
