@@ -1,5 +1,5 @@
 #pragma once
-
+#include <stdint.h>
 typedef struct {
   uint16_t address;
   uint16_t value;
