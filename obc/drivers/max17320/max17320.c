@@ -30,13 +30,16 @@
 #define COPY_NV_BLOCK_COMMAND_VAL 0xE904
 #define WRITE_RESET_COMMAND_VAL 0x000F
 #define NV_RECALL_COMMAND_VAL 0xE001
+#define AVAILABLE_UPDATES_VAL 0xE29B
 
 /* ---------------- BMS Config2 Regsiters & Macros -----------------------*/
 #define BMS_CONFIG2_REGISTER_ADDRESS 0x00AB
 #define BMS_FIRMWARE_RESET_COMMAND 0x8000
 #define POR_CMD_MASK (0x0001 << 15)
 
-typedef enum { COPY_NV, NV_RECALL, WRITE_RESET, FIRMWARE_RESET } nonvolatile_cmd_t;
+#define AVAILABLE_UPDATE_REGISTER_ADDRESS 0x01FD
+
+typedef enum { COPY_NV, NV_RECALL, WRITE_RESET, FIRMWARE_RESET, AVAILABLE_UPDATES_CHECK } nonvolatile_cmd_t;
 
 static obc_error_code_t isValidMemoryAddress(uint16_t* addr, uint16_t* slaveAddr);
 static obc_error_code_t memoryAddressMatchesSlaveAddr(uint16_t addr, uint16_t slaveAddr);
@@ -50,27 +53,30 @@ static obc_error_code_t readDefaultNVConfiguration(uint16_t* addresses, uint8_t*
 static obc_error_code_t writeDefaultNVConfiguration(uint16_t* indices, uint8_t Size);
 
 static obc_error_code_t writeToBmsBlockRegister(uint16_t startAddr, uint8_t* data, uint16_t size);
-static obc_error_code_t readFromBmsBlockRegister(uint16_t startAddr, uint8_t* buf, uint16_t size);
+static obc_error_code_t readFromBmsBlockRegister(uint16_t addr, uint8_t* buf, uint16_t size);
+static obc_error_code_t readValueFromBmsBlockRegister(uint16_t addr, uint16_t* value);
+static obc_error_code_t writeValueBmsBlockRegister(uint16_t startAddr, uint16_t value);
+static obc_error_code_t availableUpdatesStatusCheck();
 
 obc_error_code_t readConfigurationRegister(uint16_t address, uint16_t* returnDataPtr) {
   if (returnDataPtr == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  uint8_t buffer[2] = {0};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(readFromBmsBlockRegister(address, buffer, 2));
-  memcpy(returnDataPtr, buffer, 2);
+  RETURN_IF_ERROR_CODE(readValueFromBmsBlockRegister(address, returnDataPtr));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t initalizeConfigurationRegisters() {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
+
   uint16_t addressIndices[BMS_CONFIGURATION_REGISTER_COUNT] = {0};
   uint8_t size = 0;
   readDefaultNVConfiguration(addressIndices, &size);
 
   bool statusBit = 1;
-  obc_error_code_t errCode;
   uint8_t count = 0;
   do {
     RETURN_IF_ERROR_CODE(disableWriteProtection());
@@ -114,11 +120,8 @@ static obc_error_code_t writeDefaultNVConfiguration(uint16_t* indices, uint8_t s
   }
   for (uint8_t i = 0; i < size; ++i) {
     configuration_value_map_t addressMap = configurationAddresses[indices[i]];
-    uint8_t buffer[2] = {0};
-    memcpy(buffer, addressMap.value, 2);
-
     obc_error_code_t errCode;
-    RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(addressMap.address, buffer, 2));
+    RETURN_IF_ERROR_CODE(writeValueBmsBlockRegister(addressMap.address, &addressMap.value));
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -142,6 +145,49 @@ static obc_error_code_t readDefaultNVConfiguration(uint16_t* buffer, uint8_t* re
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t readValueFromBmsBlockRegister(uint16_t addr, uint16_t* value) {
+  if (value == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  uint8_t buffer[2] = {0};
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(readFromBmsBlockRegister(addr, buffer, 2));
+  *value = (((uint16_t)(buffer[1]) << 8) | ((uint16_t)buffer[0]));
+}
+
+static obc_error_code_t writeValueBmsBlockRegister(uint16_t addr, uint16_t value) {
+  if (value == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  uint8_t buffer[2] = {0};
+  memcpy(buffer, &value, 2);
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(writeToBmsBlockRegister(addr, buffer, 2));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t availableUpdatesStatusCheck() {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(disableWriteProtection());
+  RETURN_IF_ERROR_CODE(transmitCommand(AVAILABLE_UPDATES_CHECK));
+  // Delay
+  uint16_t value = 0;
+  RETURN_IF_ERROR_CODE(readValueFromBmsBlockRegister(AVAILABLE_UPDATE_REGISTER_ADDRESS, &value));
+  RETURN_IF_ERROR_CODE(enableWriteProtection());
+
+  uint8_t countValue = ((uint8_t)(value >> 8) ^ (uint8_t)(value & 0x00FF));
+  uint8_t count = 0;
+  for (uint8_t mask = 1; mask > 0; mask = mask << 1) {
+    if (mask * countValue) {
+      ++count;
+    }
+  }
+  if (count == 8) return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_CONFIG_UPDATES;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
   uint8_t buffer[2] = {0};
   uint16_t address = {0};
@@ -159,6 +205,9 @@ static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
       memcpy(buffer, WRITE_RESET_COMMAND_VAL, 2);
       address = BMS_NONVOLATILE_COMMAND_REGISTER_ADDRESS;
       break;
+    case AVAILABLE_UPDATES_CHECK:
+      memcpy(buffer, AVAILABLE_UPDATES_VAL, 2);
+      address = BMS_NONVOLATILE_COMMAND_REGISTER_ADDRESS;
     case FIRMWARE_RESET:
       memcpy(buffer, BMS_FIRMWARE_RESET_COMMAND, 2);
       address = BMS_CONFIG2_REGISTER_ADDRESS;
@@ -177,11 +226,9 @@ static obc_error_code_t checkStatusBitfield(uint16_t address, uint16_t bitMask, 
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  uint8_t buffer[2] = {0};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(readFromBmsBlockRegister(address, buffer, 2));
   uint16_t bitfield = {0};
-  memcpy(&bitfield, buffer, 2);
+  RETURN_IF_ERROR_CODE(readValueFromBmsBlockRegister(address, &bitfield));
   *bit = bitfield & bitMask;
 
   return OBC_ERR_CODE_SUCCESS;
