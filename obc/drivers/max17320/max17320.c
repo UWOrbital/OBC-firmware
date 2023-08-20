@@ -184,8 +184,7 @@ static obc_error_code_t availableUpdatesStatusCheck() {
 }
 
 static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd) {
-  uint8_t buffer[2] = {0};
-  uint16_t address = {0};
+  uint16_t address = 0;
   uint16_t value = 0;
   switch (cmd) {
     case COPY_NV:
@@ -278,7 +277,7 @@ static obc_error_code_t writeToBmsBlockRegister(uint16_t startAddr, uint8_t* dat
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidTransaction(&startCommAddr, &slaveAddr, size));
-  return (i2cWriteReg((uint8_t)slaveAddr, (uint8_t)startCommAddr, data, size));
+  return i2cWriteReg((uint8_t)slaveAddr, (uint8_t)startCommAddr, data, size);
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -288,7 +287,7 @@ static obc_error_code_t readFromBmsBlockRegister(uint16_t startAddr, uint8_t* bu
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidTransaction(&startCommAddr, &slaveAddr, size));
-  return (i2cReadReg((uint8_t)slaveAddr, (uint8_t)startCommAddr, buf, size));
+  return i2cReadReg((uint8_t)slaveAddr, (uint8_t)startCommAddr, buf, size);
   return OBC_ERR_CODE_SUCCESS;
 }
 
