@@ -51,7 +51,7 @@ static obc_error_code_t disableWriteProtection();
 static obc_error_code_t enableWriteProtection();
 static obc_error_code_t readDefaultNVConfiguration(uint16_t* addresses, uint8_t* returnSize);
 static obc_error_code_t writeDefaultNVConfiguration(uint16_t* indices, uint8_t Size);
-
+static obc_error_code_t checkStatusBitfield(uint16_t address, uint16_t bitMask, bool* bit);
 static obc_error_code_t writeToBmsBlockRegister(uint16_t startAddr, uint8_t* data, uint16_t size);
 static obc_error_code_t readFromBmsBlockRegister(uint16_t addr, uint8_t* buf, uint16_t size);
 static obc_error_code_t readValueFromBmsBlockRegister(uint16_t addr, uint16_t* value);
