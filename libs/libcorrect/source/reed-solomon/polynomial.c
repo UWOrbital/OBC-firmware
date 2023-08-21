@@ -226,7 +226,7 @@ polynomial_t polynomial_init_from_roots(field_t field, unsigned int nroots, fiel
 
 polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, field_element_t *roots) {
     //polynomial_t poly = polynomial_create(nroots);
-    polynomial_t poly = {.order = nroots};
+    polynomial_t poly = {.coeff = {0}, .order = nroots};
     unsigned int order = nroots;
     polynomial_t l;
     l.order = 1;

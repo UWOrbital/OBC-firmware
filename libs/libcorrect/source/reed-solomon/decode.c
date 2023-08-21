@@ -268,12 +268,16 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     rs->modified_syndromes = sysMalloc(2 * rs->min_distance * sizeof(field_element_t));
     memset(rs->modified_syndromes, 0, 2 * rs->min_distance * sizeof(field_element_t));
     //rs->received_polynomial = polynomial_create(rs->block_length - 1);
+    memset(rs->received_polynomial.coeff, 0, MAX_POLY_ORDER + 1);
     rs->received_polynomial.order = rs->block_length - 1;
     //rs->error_locator = polynomial_create(rs->min_distance);
+    memset(rs->error_locator.coeff, 0, MAX_POLY_ORDER + 1);
     rs->error_locator.order = rs->min_distance;
     //rs->error_locator_log = polynomial_create(rs->min_distance);
+    memset(rs->error_locator_log.coeff, 0, MAX_POLY_ORDER + 1);
     rs->error_locator_log.order = rs->min_distance;
     //rs->erasure_locator = polynomial_create(rs->min_distance);
+    memset(rs->erasure_locator.coeff, 0, MAX_POLY_ORDER + 1);
     rs->erasure_locator.order = rs->min_distance;
     rs->error_roots = sysMalloc(2 * rs->min_distance * sizeof(field_element_t));
     memset(rs->error_roots, 0, 2 * rs->min_distance * sizeof(field_element_t));
@@ -281,10 +285,13 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     rs->error_locations = sysMalloc(rs->min_distance * sizeof(field_logarithm_t));
 
     //rs->last_error_locator = polynomial_create(rs->min_distance);
+    memset(rs->last_error_locator.coeff, 0, MAX_POLY_ORDER + 1);
     rs->last_error_locator.order = rs->min_distance;
     //rs->error_evaluator = polynomial_create(rs->min_distance - 1);
+    memset(rs->error_evaluator.coeff, 0, MAX_POLY_ORDER + 1);
     rs->error_evaluator.order = rs->min_distance - 1;
     //rs->error_locator_derivative = polynomial_create(rs->min_distance - 1);
+    memset(rs->error_locator_derivative.coeff, 0, MAX_POLY_ORDER + 1);
     rs->error_locator_derivative.order = rs->min_distance - 1;
 
     // calculate and store the first block_length powers of every generator root
@@ -308,8 +315,10 @@ void correct_reed_solomon_decoder_create(correct_reed_solomon *rs) {
     }
 
     //rs->init_from_roots_scratch[0] = polynomial_create(rs->min_distance);
+    memset(rs->init_from_roots_scratch[0].coeff, 0, MAX_POLY_ORDER + 1);
     rs->init_from_roots_scratch[0].order = rs->min_distance;
     //rs->init_from_roots_scratch[1] = polynomial_create(rs->min_distance);
+    memset(rs->init_from_roots_scratch[1].coeff, 0, MAX_POLY_ORDER + 1);
     rs->init_from_roots_scratch[1].order = rs->min_distance;
 }
 
@@ -497,6 +506,7 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
 
     //polynomial_t temp_poly = polynomial_create(rs->error_locator.order + erasure_length);
     polynomial_t temp_poly = {.order = rs->error_locator.order + erasure_length};
+    memset(&temp_poly.coeff, 0, MAX_POLY_ORDER + 1);
     polynomial_mul(rs->field, rs->erasure_locator, rs->error_locator, temp_poly);
     polynomial_t placeholder_poly = rs->error_locator;
     rs->error_locator = temp_poly;
@@ -519,7 +529,7 @@ ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, cons
         msg[i] = rs->received_polynomial.coeff[encoded_length - (i + 1)];
     }
 
-    polynomial_destroy(temp_poly);
+    //polynomial_destroy(temp_poly);
     sysFreeMem(syndrome_copy);
 
     return msg_length;

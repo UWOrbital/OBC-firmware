@@ -2,10 +2,11 @@
 #include "obc_gs_errors.h"
 
 #include <string.h>
-
+#include <stdio.h>
 #include <gtest/gtest.h>
 
 TEST(TestFecEncodeDecode, EncodeDecodeZeroData) {
+  printf("Reached!\n");
   packed_rs_packet_t encodedData = {0};
   uint8_t data[RS_DECODED_SIZE];
   memset(data, 0xFF, RS_DECODED_SIZE);

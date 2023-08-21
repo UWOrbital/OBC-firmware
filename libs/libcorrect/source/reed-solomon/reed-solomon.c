@@ -32,6 +32,9 @@ correct_reed_solomon *correct_reed_solomon_create(field_operation_t primitive_po
     //rs->encoded_polynomial = polynomial_create(rs->block_length - 1);
     //rs->encoded_remainder = polynomial_create(rs->block_length - 1);
 
+    memset(rs->encoded_polynomial.coeff, 0, MAX_POLY_ORDER + 1);
+    memset(rs->encoded_remainder.coeff, 0, MAX_POLY_ORDER + 1);
+
     rs->encoded_polynomial.order = rs->block_length - 1;
     rs->encoded_remainder.order = rs->block_length - 1;
 
@@ -42,23 +45,23 @@ correct_reed_solomon *correct_reed_solomon_create(field_operation_t primitive_po
 
 void correct_reed_solomon_destroy(correct_reed_solomon *rs) {
     field_destroy(rs->field);
-    polynomial_destroy(rs->generator);
+    //polynomial_destroy(rs->generator);
     sysFreeMem(rs->generator_roots);
-    polynomial_destroy(rs->encoded_polynomial);
-    polynomial_destroy(rs->encoded_remainder);
+    //polynomial_destroy(rs->encoded_polynomial);
+    //polynomial_destroy(rs->encoded_remainder);
     if (rs->has_init_decode) {
         sysFreeMem(rs->syndromes);
         sysFreeMem(rs->modified_syndromes);
-        polynomial_destroy(rs->received_polynomial);
-        polynomial_destroy(rs->error_locator);
-        polynomial_destroy(rs->error_locator_log);
-        polynomial_destroy(rs->erasure_locator);
+        //polynomial_destroy(rs->received_polynomial);
+        //polynomial_destroy(rs->error_locator);
+        //polynomial_destroy(rs->error_locator_log);
+        //polynomial_destroy(rs->erasure_locator);
         sysFreeMem(rs->error_roots);
         sysFreeMem(rs->error_vals);
         sysFreeMem(rs->error_locations);
-        polynomial_destroy(rs->last_error_locator);
-        polynomial_destroy(rs->error_evaluator);
-        polynomial_destroy(rs->error_locator_derivative);
+        //polynomial_destroy(rs->last_error_locator);
+        //polynomial_destroy(rs->error_evaluator);
+        //polynomial_destroy(rs->error_locator_derivative);
         for (unsigned int i = 0; i < rs->min_distance; i++) {
             sysFreeMem(rs->generator_root_exp[i]);
         }
@@ -67,8 +70,8 @@ void correct_reed_solomon_destroy(correct_reed_solomon *rs) {
             sysFreeMem(rs->element_exp[i]);
         }
         sysFreeMem(rs->element_exp);
-        polynomial_destroy(rs->init_from_roots_scratch[0]);
-        polynomial_destroy(rs->init_from_roots_scratch[1]);
+        //polynomial_destroy(rs->init_from_roots_scratch[0]);
+        //polynomial_destroy(rs->init_from_roots_scratch[1]);
     }
     sysFreeMem(rs);
 }
