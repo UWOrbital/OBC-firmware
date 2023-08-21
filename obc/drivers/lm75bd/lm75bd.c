@@ -9,6 +9,8 @@
 
 #define LM75BD_I2C_BASE_ADDR 0x9U
 
+#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
+
 STATIC_ASSERT_EQ(LM75BD_OBC_I2C_ADDR >> 3, LM75BD_I2C_BASE_ADDR);
 
 /* LM75BD Registers (p.8) */
@@ -60,7 +62,7 @@ obc_error_code_t readTempLM75BD(uint8_t devAddr, float *temp) {
 
   if (temp == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  RETURN_IF_ERROR_CODE(i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, LM75BD_TEMP_BUFF_SIZE));
+  RETURN_IF_ERROR_CODE(i2cReadReg(devAddr, LM75BD_REG_TEMP, tempBuff, LM75BD_TEMP_BUFF_SIZE, I2C_TRANSFER_TIMEOUT));
 
   /* Combine the 11 MSB into a 16-bit signed integer */
   int16_t value = ((int8_t)tempBuff[0] << 3) | (tempBuff[1] >> 5);
@@ -79,7 +81,8 @@ obc_error_code_t readConfigLM75BD(lm75bd_config_t *config) {
 
   if (config == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  RETURN_IF_ERROR_CODE(i2cReadReg(config->devAddr, LM75BD_REG_CONF, configBuff, LM75BD_CONF_BUFF_SIZE));
+  RETURN_IF_ERROR_CODE(
+      i2cReadReg(config->devAddr, LM75BD_REG_CONF, configBuff, LM75BD_CONF_BUFF_SIZE, I2C_TRANSFER_TIMEOUT));
 
   uint8_t osFaltQueueRegData = (configBuff[0] & LM75BD_OS_FAULT_QUEUE_MASK) >> 3;
   if (osFaltQueueRegData > 3) return OBC_ERR_CODE_I2C_FAILURE;
@@ -130,7 +133,7 @@ obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCels
 
   if (hysteresisThresholdCelsius == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  RETURN_IF_ERROR_CODE(i2cReadReg(devAddr, LM75BD_REG_THYST, thystBuff, LM75BD_THYST_BUFF_SIZE));
+  RETURN_IF_ERROR_CODE(i2cReadReg(devAddr, LM75BD_REG_THYST, thystBuff, LM75BD_THYST_BUFF_SIZE, I2C_TRANSFER_TIMEOUT));
 
   /* Combine the 9 MSB into a 16-bit signed integer */
   int16_t value = ((int8_t)thystBuff[0] << 1) | (thystBuff[1] >> 7);
@@ -165,7 +168,7 @@ obc_error_code_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius)
 
   if (overTempThresholdCelsius == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  RETURN_IF_ERROR_CODE(i2cReadReg(devAddr, LM75BD_REG_TOS, tosBuff, LM75BD_TOS_BUFF_SIZE));
+  RETURN_IF_ERROR_CODE(i2cReadReg(devAddr, LM75BD_REG_TOS, tosBuff, LM75BD_TOS_BUFF_SIZE, I2C_TRANSFER_TIMEOUT));
 
   /* Combine the 9 MSB into a 16-bit signed integer */
   int16_t value = ((int8_t)tosBuff[0] << 1) | (tosBuff[1] >> 7);

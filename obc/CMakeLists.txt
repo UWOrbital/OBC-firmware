@@ -15,8 +15,6 @@ else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
-add_link_options(-specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT})
-
 add_executable(OBC-firmware.out main.c)
 
 if (DEBUG MATCHES 1)

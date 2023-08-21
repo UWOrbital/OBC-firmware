@@ -107,7 +107,7 @@ static REDSTATUS DiskClose(uint8_t bVolNum) {
     @retval -RED_EIO    A disk I/O or driver error occurred.
 */
 static REDSTATUS DiskGetGeometry(uint8_t bVolNum, BDEVINFO *pInfo) {
-  REDSTATUS ret;
+  REDSTATUS ret = 0;
   uint16_t wSectorSize;
   uint32_t dwSectorCount;
   DRESULT result;

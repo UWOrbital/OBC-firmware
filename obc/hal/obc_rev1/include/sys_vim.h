@@ -98,6 +98,7 @@ extern void linHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")))
 extern void vPortYeildWithinAPI(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void gioLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void linLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
+extern void dmaBTCAInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void sciHighLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void i2cInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
 extern void sciLowLevelInterrupt(void) __attribute__ ((weak, interrupt("IRQ")));
@@ -306,7 +307,7 @@ typedef struct vim_config_reg
                                     |(uint32)((uint32)0U << 5U)\
                                     |(uint32)((uint32)0U << 6U)\
                                     |(uint32)((uint32)0U << 7U)\
-                                    |(uint32)((uint32)0U << 8U)\
+                                    |(uint32)((uint32)1U << 8U)\
                                     |(uint32)((uint32)0U << 9U)\
                                     |(uint32)((uint32)0U << 10U)\
                                     |(uint32)((uint32)0U << 11U)\
