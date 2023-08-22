@@ -134,6 +134,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
     pktSentNum++;
     remainingDataBytes -= AX25_INFO_BYTES;
   }
+  ax25Data[frameStart + AX25_MINIMUM_I_FRAME_LEN] = AX25_FLAG;
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 

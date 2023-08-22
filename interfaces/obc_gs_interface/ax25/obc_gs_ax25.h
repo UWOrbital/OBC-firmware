@@ -104,6 +104,15 @@ static inline uint32_t ax25UnstuffedWithFlagShareLen(uint32_t infoBytesLen) {
 }
 
 /**
+ * @brief returns the number of stuffed flag share bytes required depending on information length
+ *
+ * @param infoBytesLen length of the information data array
+ */
+static inline uint32_t ax25StuffedWithFlagShareLen(uint32_t infoBytesLen) {
+  return (((infoBytesLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES) * (AX25_MAXIMUM_PKT_LEN - 1)) + 1;
+}
+
+/**
  * @brief prepares ax25data with appropriate number of I frames when utilizing flag-sharing
  *
  * @param telemData data to send that needs ax.25 headers added onto it
