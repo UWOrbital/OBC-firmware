@@ -90,9 +90,9 @@ int main(void) {
   sciPrintText((unsigned char *)"Going to sleep\r\n", strlen("Going to sleep\r\n"), UART_MUTEX_BLOCK_TIME);
   framSleep();
   if (framRead(addr, hello_world, sizeof(hello_world)) == OBC_ERR_CODE_FRAM_IS_ASLEEP) {
-    sciPrintText((unsigned char *)"FRAM is asleep\r\n", strlen("FRAM is asleep\r\n"));
+    sciPrintText((unsigned char *)"FRAM is asleep\r\n", strlen("FRAM is asleep\r\n"), UART_MUTEX_BLOCK_TIME);
   } else {
-    sciPrintText((unsigned char *)"FRAM is not asleep!\r\n", strlen("FRAM is not asleep!\r\n"));
+    sciPrintText((unsigned char *)"FRAM is not asleep!\r\n", strlen("FRAM is not asleep!\r\n"), UART_MUTEX_BLOCK_TIME);
   }
   framWakeUp();
   // Read Hello World from 0x1234
