@@ -106,9 +106,9 @@ obc_error_code_t initBmsInterface() {
   for (uint16_t i = 0; i < BMS_MAXIMUM_WRITE_ATTEMPT_COUNT; ++i) {
     RETURN_IF_ERROR_CODE(statusCheckBitfield(BMS_CONFIG2_REGISTER_ADDRESS, POR_CMD_MASK, &statusBit));
     if (statusBit == 0) break;
-    if (i == BMS_MAXIMUM_WRITE_ATTEMPT_COUNT) {
-      return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_COUNT;
-    }
+  }
+  if (statusBit == 1) {
+    return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_COUNT;
   }
   RETURN_IF_ERROR_CODE(enableWriteProtection());
   return OBC_ERR_CODE_SUCCESS;
@@ -257,4 +257,16 @@ static obc_error_code_t enableWriteProtection() {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* slaveAddr) {}
+static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* slaveAddr) {
+  bool isValid;
+#if (BMS_VOLATILE_LOWER > 0)
+  isValid = ((addr >= BMS_VOLATILE_LOWER) && (addr <= BMS_VOLATILE_UPPER)) ||
+            ((addr >= BMS_NONVOLATILE_LOWER) && (addr <= BMS_NONVOLATILE_UPPER));
+#else
+  isValid = ((addr >= BMS_VOLATILE_LOWER) && (addr <= BMS_VOLATILE_UPPER)) ||
+            ((addr >= BMS_NONVOLATILE_LOWER) && (addr <= BMS_NONVOLATILE_UPPER));
+#endif
+  if (!isValid) return OBC_ERR_CODE_INVALID_ARG;
+  *slaveAddr = addr & BMS_MEM_MAP_MASK;
+  return OBC_ERR_CODE_SUCCESS;
+}
