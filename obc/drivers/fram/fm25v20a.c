@@ -48,28 +48,41 @@ static obc_error_code_t framTransmitAddress(uint32_t addr);
 
 // CS assumed to be asserted
 static obc_error_code_t framTransmitOpCode(cmd_t cmd) {
+  obc_error_code_t errCode;
   switch (cmd) {
     case FRAM_READ:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_READ);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_READ));
+      break;
     case FRAM_FAST_READ:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_FREAD);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_FREAD));
+      break;
     case FRAM_READ_STATUS_REG:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_READ_STAT_REG);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_READ_STAT_REG));
+      break;
     case FRAM_READ_ID:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_GET_ID);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_GET_ID));
+      break;
     case FRAM_WRITE_EN:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE_ENABLE);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE_ENABLE));
+      break;
     case FRAM_WRITE_EN_RESET:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE_RESET);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE_RESET));
+      break;
     case FRAM_WRITE_STATUS_REG:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE_STAT_REG);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE_STAT_REG));
+      break;
     case FRAM_WRITE:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_WRITE));
+      break;
     case FRAM_SLEEP:
-      return spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_SLEEP);
+      LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_SLEEP));
+      break;
+    default:
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+      errCode = OBC_ERR_CODE_INVALID_ARG;
   }
 
-  return OBC_ERR_CODE_INVALID_ARG;
+  return errCode;
 }
 
 // CS assumed to be asserted
