@@ -33,7 +33,8 @@ TEST(TestObcGsAes128, testingEncryptDecryptSameMsg) {
   // initalize ctx
   const uint8_t key[AES_BLOCK_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-  initializeAesCtx(key);
+  obc_gs_error_code_t checkInitialize = initializeAesCtx(key);
+  ASSERT_EQ(checkInitialize, OBC_GS_ERR_CODE_SUCCESS);
 
   // setting up variables
   aes_data_t test1;
@@ -66,8 +67,8 @@ TEST(TestObcGsAes128, testingEncryptDecryptMultipleBlocks) {
   // initalize ctx
   const uint8_t key[AES_BLOCK_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-  obc_gs_error_code_t initializeCheck = initializeAesCtx(key);
-  ASSERT_EQ(initializeCheck, OBC_GS_ERR_CODE_SUCCESS);
+  obc_gs_error_code_t checkInitialize = initializeAesCtx(key);
+  ASSERT_EQ(checkInitialize, OBC_GS_ERR_CODE_SUCCESS);
 
   // setting up variables
   aes_data_t test1;
