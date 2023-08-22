@@ -23,10 +23,10 @@ TEST(TestObcGsAes128, testingFailConditions) {
   uint8_t outputBufferLenGreaterThan = 17U;  // 1U greater than AES_BLOCK_SIZE
   errCode = aes128Decrypt(&test1, inputArray, outputBufferLenGreaterThan);
   EXPECT_EQ(errCode, OBC_GS_ERR_CODE_INVALID_ARG);
-  /*
-      test1.ciphertext = NULL;
-      errCode = aes128Decrypt(&test1, inputArray, outputBufferLen);
-      EXPECT_EQ(errCode, OBC_GS_ERR_CODE_INVALID_ARG); */
+
+  test1.ciphertext = NULL;
+  errCode = aes128Decrypt(&test1, inputArray, outputBufferLen);
+  EXPECT_EQ(errCode, OBC_GS_ERR_CODE_INVALID_ARG);
 }
 
 TEST(TestObcGsAes128, testingEncryptDecryptSameMsg) {
