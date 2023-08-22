@@ -54,34 +54,34 @@ static obc_error_code_t availableUpdatesStatusCheck();
 
 /*----------------------Register/Bitfield status check helper function ------------------ */
 static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd);
-static obc_error_code_t verifyDefaultConfiguration(uint16_t* addresses, uint8_t* returnSize);
-static obc_error_code_t writeDefaultConfiguration(uint16_t* indices, uint8_t Size);
+static obc_error_code_t verifyDefaultConfiguration(configuration_value_map_t* config, uint16_t size,
+                                                   configuration_value_map_t* buffer, uint8_t* returnSize);
+static obc_error_code_t writeDefaultConfiguration(configuration_value_map_t* indices, uint8_t Size);
 static obc_error_code_t statusCheckBitfield(uint16_t address, uint16_t bitMask, bool* bit);
 
 /* ---------------------- Read/write functions --------------- */
 static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value);
 static obc_error_code_t initiateWrite(uint16_t addr, uint16_t value);
 static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* slaveAddr);
+static obc_error_code_t validateBmsRegister(bms_register_t address);
 
-obc_error_code_t readAnalogValue(bms_analog_register_t address, uint16_t data) { return OBC_ERR_CODE_SUCCESS; }
-
-obc_error_code_t readConfigurationRegister(uint16_t address, uint16_t* returnDataPtr) {
-  if (returnDataPtr == NULL) {
+obc_error_code_t readBmsRegister(bms_register_t address, uint16_t* data) {
+  if (data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(initiateRead(address, returnDataPtr));
-  return OBC_ERR_CODE_SUCCESS;
+  RETURN_IF_ERROR_CODE(validateBmsRegister(address));
+  return initiateRead(address, data);
 }
 
-obc_error_code_t initBmsInterface() {
+obc_error_code_t initBmsNVInterface() {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
 
-  uint16_t addressIndices[BMS_CONFIGURATION_REGISTER_COUNT] = {0};
+  configuration_value_map_t* addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT] = {0};
   uint8_t size = 0;
-  verifyDefaultConfiguration(addressIndices, &size);
+  verifyDefaultConfiguration(nonVolatileConfiguration, BMS_NV_CONFIGURATION_REGISTER_COUNT, addressIndices, &size);
 
   bool statusBit = {1};
   for (uint8_t i = 0; i < BMS_MAXIMUM_WRITE_ATTEMPT_COUNT; ++i) {
@@ -114,32 +114,33 @@ obc_error_code_t initBmsInterface() {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t writeDefaultConfiguration(uint16_t* indices, uint8_t size) {
-  if (indices == NULL) {
+static obc_error_code_t writeDefaultConfiguration(configuration_value_map_t* config, uint8_t size) {
+  if (config == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   for (uint8_t i = 0; i < size; ++i) {
-    configuration_value_map_t addressMap = configurationAddresses[indices[i]];
+    configuration_value_map_t addressMap = config[i];
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(initiateWrite(addressMap.address, addressMap.value));
   }
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t verifyDefaultConfiguration(uint16_t* buffer, uint8_t* returnSize) {
+static obc_error_code_t verifyDefaultConfiguration(configuration_value_map_t* config, uint16_t size,
+                                                   configuration_value_map_t* buffer, uint8_t* returnSize) {
   if ((buffer == NULL) || (returnSize == NULL)) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   uint8_t size = 0;
-  for (uint16_t i = 0; i < BMS_CONFIGURATION_REGISTER_COUNT; ++i) {
-    configuration_value_map_t map = configurationAddresses[i];
+  for (uint16_t i = 0; i < size; ++i) {
+    configuration_value_map_t map = config[i];
 
     uint16_t returnData;
     readConfigurationRegister(map.address, &returnData);
     if (returnData != map.value) {
-      buffer[size] = i;
+      buffer[size] = map;
       ++size;
     }
   }
@@ -267,5 +268,19 @@ static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* slaveAdd
 #endif
   if (!isValid) return OBC_ERR_CODE_INVALID_ARG;
   *slaveAddr = addr & BMS_MEM_MAP_MASK;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t validateBmsRegister(bms_register_t address) {
+  switch (address) {
+    case Status:
+      break;
+    case RepCap:
+      break;
+    case RepSOC:
+      break;
+    default:
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
   return OBC_ERR_CODE_SUCCESS;
 }

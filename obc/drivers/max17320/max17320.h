@@ -5,6 +5,6 @@
 
 #include <stdint.h>
 
-obc_error_code_t readAnalogValue(bms_analog_register_t address, uint16_t data);
-obc_error_code_t initBmsInterface();
-obc_error_code_t readConfigurationRegister(uint16_t address, uint16_t* returnData);
+obc_error_code_t readBmsRegister(bms_register_t address, uint16_t* data);
+obc_error_code_t initBmsNVInterface();
+obc_error_code_t initBmsVolatileInterface();
