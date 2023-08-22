@@ -145,6 +145,9 @@
 // TPL5010 pin numbers
 #define TPL5010_WAKE_PIN 0
 #define TPL5010_DONE_PIN 1
+#define TPL5010_GIO_PORT gioPORTB
+#define DONE_SIGNAL_ON 1
+#define DONE_SIGNAL_OFF 0
 #else
 #error Board configuration not defined
 #endif

@@ -22,9 +22,11 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
         rxFifoReadyCallback();
         break;
 
+#ifdef OBC_REVISION_2
       case TPL5010_WAKE_PIN:
         feedHardwareWatchdog();
         break;
+#endif
     }
   }
 }
