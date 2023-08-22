@@ -44,7 +44,7 @@ TEST(TestObcGsAes128, testingEncryptDecryptSameMsg) {
   uint8_t initializationVector[AES_IV_SIZE] = {0xC1, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
                                                0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
   memcpy(test1.iv, initializationVector, sizeof(initializationVector));
-  test1.textLen = BufferLen;
+  test1.ciphertextLen = BufferLen;
   test1.ciphertext = &message[0];
   // testing
 
@@ -98,7 +98,7 @@ TEST(TestObcGsAes128, testingEncryptDecryptMultipleBlocks) {
   memcpy(test2.iv, initializationVector, sizeof(initializationVector));
   memcpy(test3.iv, initializationVector, sizeof(initializationVector));
 
-  test1.textLen = test2.textLen = test3.textLen = BufferLen;
+  test1.ciphertextLen = test2.ciphertextLen = test3.ciphertextLen = BufferLen;
   test1.ciphertext = &message1[0];
   test2.ciphertext = &message2[0];
   test3.ciphertext = &message3[0];

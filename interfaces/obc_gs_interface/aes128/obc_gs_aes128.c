@@ -31,7 +31,7 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  memcpy(output, aesData->ciphertext, aesData->textLen);
+  memcpy(output, aesData->ciphertextLen, aesData->textLen);
   AES_ctx_set_iv(&ctx, aesData->iv);
   AES_CTR_xcrypt_buffer(&ctx, output, aesData->textLen);
 
@@ -73,7 +73,7 @@ obc_gs_error_code_t aes128Encrypt(aes_data_t *aesData, uint8_t *input, uint8_t B
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  memcpy(input, aesData->ciphertext, aesData->textLen);
+  memcpy(input, aesData->ciphertextLen, aesData->textLen);
   AES_ctx_set_iv(&ctx, aesData->iv);
   AES_CTR_xcrypt_buffer(&ctx, input, aesData->textLen);
 

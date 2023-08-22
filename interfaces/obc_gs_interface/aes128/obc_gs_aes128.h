@@ -19,7 +19,7 @@ typedef struct {
 
   uint8_t *ciphertext;
 
-  size_t textLen;
+  size_t ciphertextLen;
 } aes_data_t;
 
 /**
