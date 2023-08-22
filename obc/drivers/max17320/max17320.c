@@ -75,8 +75,9 @@ obc_error_code_t readBmsRegister(bms_register_t address, uint16_t* data) {
   return initiateRead(address, data);
 }
 
-obc_error_code_t initBmsNVInterface() {
+obc_error_code_t initBmsInterface() {
   obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(writeDefaultConfiguration(volatileConfiguration, BMS_VOL_CONFIGURATION_REGISTER_COUNT));
   RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
 
   configuration_value_map_t* addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT] = {0};
@@ -192,7 +193,8 @@ static obc_error_code_t availableUpdatesStatusCheck() {
     }
   }
 
-  if (count == 8) return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_CONFIG_UPDATES;
+  if ((count == 8) && (BMS_NV_CONFIGURATION_REGISTER_COUNT != 0))
+    return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_CONFIG_UPDATES;
   return OBC_ERR_CODE_SUCCESS;
 }
 
