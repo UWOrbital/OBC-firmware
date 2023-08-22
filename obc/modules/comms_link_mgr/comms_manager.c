@@ -111,15 +111,15 @@ static const comms_state_func_t commsStateFns[] = {
     [COMMS_STATE_UPLINKING] = handleUplinkingState,
     [COMMS_STATE_DOWNLINKING] = handleDownlinkingState,
     [COMMS_STATE_ENTERING_EMERGENCY] = handleEnterEmergencyState,
-    [COMMS_STATE_EMERG_UPLINK] = handleEmergUplinkState
+    [COMMS_STATE_EMERGENCY_UPLINK] = handleEmergUplinkState
     // Add more functions for other states as needed
 };
 
-void initCommsManager(void *pvParameters) {
+void initCommsManager(comms_state_t *commsState) {
   ASSERT((commsTaskStack != NULL) && (&commsTaskBuffer != NULL));
   if (commsTaskHandle == NULL) {
-    commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE, pvParameters,
-                                        COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
+    commsTaskHandle = xTaskCreateStatic(vCommsManagerTask, COMMS_MANAGER_NAME, COMMS_MANAGER_STACK_SIZE,
+                                        (void *)commsState, COMMS_MANAGER_PRIORITY, commsTaskStack, &commsTaskBuffer);
   }
 
   ASSERT((commsQueueStack != NULL) && (&commsQueue != NULL));
@@ -144,6 +144,9 @@ void initCommsManager(void *pvParameters) {
 }
 
 static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t *state) {
+  if (state == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
   switch (*state) {
     case COMMS_STATE_DISCONNECTED:
       switch (event) {
@@ -214,7 +217,7 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
     case COMMS_STATE_AWAITING_ACK_CONN:
       switch (event) {
         case COMMS_EVENT_ACK_RECEIVED:
-          *state = COMMS_STATE_EMERG_UPLINK;
+          *state = COMMS_STATE_EMERGENCY_UPLINK;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_NO_ACK:
           *state = COMMS_STATE_SENDING_CONN;
@@ -301,14 +304,20 @@ static void vCommsManagerTask(void *pvParameters) {
       continue;
     }
 
-    errCode = getNextCommsState(queueMsg.eventID, &commsState);
+    LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-      LOG_ERROR_CODE(errCode);
       continue;
     }
 
     if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
       LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+      commsState = COMMS_STATE_DISCONNECTED;
+      continue;
+    }
+
+    if (commsStateFns[commsState] == NULL) {
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+      commsState = COMMS_STATE_DISCONNECTED;
       continue;
     }
 
@@ -550,7 +559,7 @@ static obc_error_code_t handleDownlinkingState(void) {
     } else if (transmitEvent.eventID == END_DOWNLINK) {
       break;
     } else {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+      LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
     }
   }
   comms_event_t finishedDownlinkEvent = {.eventID = COMMS_EVENT_DOWNLINK_FINISHED};

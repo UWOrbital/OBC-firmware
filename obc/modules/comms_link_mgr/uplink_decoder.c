@@ -173,7 +173,8 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
     return OBC_ERR_CODE_AX25_DECODE_FAILURE;
   }
 
-  if (unstuffedPacket.length == AX25_MINIMUM_I_FRAME_LEN) {
+  if (unstuffedPacket.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
+    // If the second least significant bit was a 1 it is a U Frame
     // copy the unstuffed data into rsData
     memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
     // clear the info field of the unstuffed packet
