@@ -63,7 +63,7 @@ static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value);
 static obc_error_code_t initiateWrite(uint16_t addr, uint16_t value);
 static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* slaveAddr);
 
-obc_error_code_t readAnalogRegister(bms_analog_register_t register, uint16_t data) {}
+obc_error_code_t readAnalogValue(bms_analog_register_t address, uint16_t data) { return OBC_ERR_CODE_SUCCESS; }
 
 obc_error_code_t readConfigurationRegister(uint16_t address, uint16_t* returnDataPtr) {
   if (returnDataPtr == NULL) {
@@ -263,8 +263,7 @@ static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* slaveAdd
   isValid = ((addr >= BMS_VOLATILE_LOWER) && (addr <= BMS_VOLATILE_UPPER)) ||
             ((addr >= BMS_NONVOLATILE_LOWER) && (addr <= BMS_NONVOLATILE_UPPER));
 #else
-  isValid = ((addr >= BMS_VOLATILE_LOWER) && (addr <= BMS_VOLATILE_UPPER)) ||
-            ((addr >= BMS_NONVOLATILE_LOWER) && (addr <= BMS_NONVOLATILE_UPPER));
+  isValid = ((addr <= BMS_VOLATILE_UPPER)) || ((addr >= BMS_NONVOLATILE_LOWER) && (addr <= BMS_NONVOLATILE_UPPER));
 #endif
   if (!isValid) return OBC_ERR_CODE_INVALID_ARG;
   *slaveAddr = addr & BMS_MEM_MAP_MASK;
