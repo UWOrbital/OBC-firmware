@@ -1,5 +1,8 @@
 #pragma once
 
+#include "obc_errors.h"
+
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -27,7 +30,8 @@ extern "C" {
  * @param packetStartY The y coordinate of the top left corner of the packet, the width of the packet is assumed to be
  *                     the width of the image
  */
-void findBrightestPixelInPacket(image_t *packet, uint16_t *x, uint16_t *y, uint8_t *brightness, uint16_t packetStartY);
+obc_error_code_t findBrightestPixelInPacket(image_t *packet, uint16_t *x, uint16_t *y, uint8_t *brightness,
+                                            uint16_t packetStartY);
 
 #ifdef __cplusplus
 }
