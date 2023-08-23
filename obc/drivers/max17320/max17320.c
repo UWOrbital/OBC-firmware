@@ -130,6 +130,7 @@ static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, 
   if (statusBit == 1) {
     return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_COUNT;
   }
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
