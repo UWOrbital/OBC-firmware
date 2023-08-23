@@ -76,7 +76,6 @@ obc_error_code_t readBmsRegister(bms_register_t address, uint16_t* data) {
 obc_error_code_t initBmsInterface(max17320_config_t config) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(writeConfiguration(config.volatileConfiguration, config.volatileConfigSize));
-  RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
 
   configuration_value_map_t addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT];
   uint8_t size = 0;
@@ -133,6 +132,7 @@ static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, 
   bool statusBit = {1};
   for (uint8_t i = 0; i < BMS_MAXIMUM_WRITE_ATTEMPT_COUNT; ++i) {
     obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
     RETURN_IF_ERROR_CODE(disableWriteProtection());
     RETURN_IF_ERROR_CODE(writeConfiguration(config, size));
     RETURN_IF_ERROR_CODE(writeThresholdRegisters(thresholdConfig, thresholdSize));
@@ -296,8 +296,7 @@ static obc_error_code_t availableUpdatesStatusCheck() {
     }
   }
 
-  if ((count == 8) && (BMS_NV_CONFIGURATION_REGISTER_COUNT != 0))
-    return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_CONFIG_UPDATES;
+  if (count == 8) return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_CONFIG_UPDATES;
   return OBC_ERR_CODE_SUCCESS;
 }
 
