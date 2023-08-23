@@ -130,7 +130,7 @@ static obc_error_code_t setMotorPwm(const DC_motor_t* motor, int32_t duty, float
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static bool isValidPwm(uint32_t pwm) { return ((pwm >= pwm0) && (pwm <= pwm7)); }
+static bool isValidPwm(uint32_t pwm) { return (pwm <= pwm7); }
 static bool isValidHetBase(hetRAMBASE_t* hetRam) { return (hetRam == hetRAM1 || hetRam == hetRAM2); }
 
 static bool isValidMotorParameters(const DC_motor_t* motor) {
