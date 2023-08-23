@@ -39,11 +39,13 @@
 #define BMS_RECALL_WAIT_MS 5u
 #define BMS_BLOCK_COPY_WAIT_MS 7360u
 #define BMS_UPDATE_PAGE_WAIT_MS 1280u
+#define BMS_FIRMWARE_RESET_WAIT_MS 5u
 
 /*---------------------- Read/Write protection helper functions ------------------ */
 static obc_error_code_t disableWriteProtection();
 static obc_error_code_t enableWriteProtection();
 static obc_error_code_t availableUpdatesStatusCheck();
+static obc_error_code_t resetFirmware();
 
 /*----------------------Register/Bitfield status check helper function ------------------ */
 static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd);
@@ -54,6 +56,7 @@ static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, 
                                              threshold_config_t* thresholdConfig, uint8_t thresholdSize);
 static obc_error_code_t statusCheckBitfield(uint16_t address, uint16_t bitMask, bool* bit);
 static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint8_t size);
+
 /* ---------------------- Read/write functions --------------- */
 static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value);
 static obc_error_code_t initiateWrite(uint16_t addr, uint16_t value);
@@ -89,19 +92,31 @@ obc_error_code_t initBmsInterface(max17320_config_t config) {
   RETURN_IF_ERROR_CODE(transmitCommand(BMS_WRITE_RESET_COMMAND_VAL));
   vTaskDelay(pdMS_TO_TICKS(BMS_IC_RESET_WAIT_MS));
   RETURN_IF_ERROR_CODE(disableWriteProtection());
+  RETURN_IF_ERROR_CODE(resetFirmware());
+  RETURN_IF_ERROR_CODE(enableWriteProtection());
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Helper function to reset firmware and continously check the CONFIG2 register
+ * until the reset is confirmed.
+ * @return Error code.
+ * OBC_ERR_CODE_SUCCESS if successful.
+ * OBC_ERR_CODE_BMS_REACHED_MAXIMUM_COUNT if maximum allowed check attempts have been made.
+ */
+static obc_error_code_t resetFirmware() {
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(transmitCommand(FIRMWARE_RESET));
 
   bool statusBit = 1;
   for (uint16_t i = 0; i < BMS_MAXIMUM_WRITE_ATTEMPT_COUNT; ++i) {
     RETURN_IF_ERROR_CODE(statusCheckBitfield(BMS_CONFIG2_REGISTER_ADDRESS, BMS_POR_CMD_MASK, &statusBit));
     if (statusBit == 0) break;
+    vTaskDelay(pdMS_TO_TICKS(BMS_FIRMWARE_RESET_WAIT_MS));
   }
   if (statusBit == 1) {
     return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_COUNT;
   }
-
-  RETURN_IF_ERROR_CODE(enableWriteProtection());
-  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -187,7 +202,21 @@ static obc_error_code_t verifyConfiguration(configuration_value_map_t* config, u
   return OBC_ERR_CODE_SUCCESS;
 }
 
+/**
+ * @brief Iteratively converts each member of type threshold_config_t into configuration_value_map_t
+ * and programs it into the BMS IC.
+ * @param config An array of type threshold_config_t that need to be programmed in the IC.
+ * @param size The size of the config array.
+ * @return Error code.
+ * OBC_ERR_CODE_SUCCESS if successful.
+ * OBC_ERR_CODE_INVALID_ARG if the config points to NULL or an address in a threshold_config_t
+ * is invalid.
+ */
 static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint8_t size) {
+  if (config == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
   configuration_value_map_t configRegisters[BMS_THRESHOLD_CONFIGURATION_REGISTER_COUNT] = {0};
   for (uint8_t i = 0; i < size; ++i) {
     configRegisters[i].address = config[i].address;
