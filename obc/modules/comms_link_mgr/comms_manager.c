@@ -361,11 +361,6 @@ static obc_error_code_t handleAwaitingConnState(void) {
   /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
    * bypass decode task to allow for retries */
   obc_error_code_t errCode;
-#if CSDC_DEMO_ENABLED == 1
-  comms_event_t event = {0};
-  event.eventID = BEGIN_UPLINK;
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
 
@@ -448,11 +443,6 @@ static obc_error_code_t handleAwaitingAckDiscState(void) {
   /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
    * bypass decode task to allow for retries */
   obc_error_code_t errCode;
-#if CSDC_DEMO_ENABLED == 1
-  comms_event_t event = {0};
-  event.eventID = BEGIN_UPLINK;
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
 
@@ -480,11 +470,6 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
   /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
    * bypass decode task to allow for retries */
   obc_error_code_t errCode;
-#if CSDC_DEMO_ENABLED == 1
-  comms_event_t event = {0};
-  event.eventID = BEGIN_UPLINK;
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
 
@@ -510,11 +495,6 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
 
 static obc_error_code_t handleUplinkingState(void) {
   obc_error_code_t errCode;
-#if CSDC_DEMO_ENABLED == 1
-  comms_event_t event = {0};
-  event.eventID = BEGIN_UPLINK;
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
 

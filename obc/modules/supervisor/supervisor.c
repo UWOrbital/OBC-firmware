@@ -79,13 +79,7 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static void sendStartupMessages(void) {
-#if CSDC_DEMO_ENABLED == 1
-  obc_error_code_t errCode;
-  comms_event_t event = {.eventID = BEGIN_UPLINK};
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
-}
+static void sendStartupMessages(void) {}
 
 static void vSupervisorTask(void *pvParameters) {
   obc_error_code_t errCode;
