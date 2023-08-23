@@ -50,6 +50,10 @@ static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_
 #define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(transmit_event_t)
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#define CC1120_SYNC_EVENT_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(30000)
+#define CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
+
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
@@ -365,13 +369,13 @@ static obc_error_code_t handleAwaitingConnState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -392,10 +396,11 @@ static obc_error_code_t handleSendingConnState(void) {
   }
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
-  RETURN_IF_ERROR_CODE(sciSendBytes(connCmdPkt.data, (uint32_t)connCmdPkt.length));
+  RETURN_IF_ERROR_CODE(sciSendBytes(connCmdPkt.data, (uint32_t)connCmdPkt.length, portMAX_DELAY));
 #else
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
-  RETURN_IF_ERROR_CODE(cc1120Send(connCmdPkt.data, (uint32_t)connCmdPkt.length));
+  RETURN_IF_ERROR_CODE(
+      cc1120Send(connCmdPkt.data, (uint32_t)connCmdPkt.length, CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
 #endif
   comms_event_t connSentEvent = {.eventID = COMMS_EVENT_CONN_SENT};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&connSentEvent));
@@ -410,10 +415,10 @@ static obc_error_code_t handleSendingDiscState(void) {
   }
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
-  RETURN_IF_ERROR_CODE(sciSendBytes(discCmdPkt.data, discCmdPkt.length));
+  RETURN_IF_ERROR_CODE(sciSendBytes(discCmdPkt.data, discCmdPkt.length, portMAX_DELAY));
 #else
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
-  RETURN_IF_ERROR_CODE(cc1120Send(discCmdPkt.data, discCmdPkt.length));
+  RETURN_IF_ERROR_CODE(cc1120Send(discCmdPkt.data, discCmdPkt.length, CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
 #endif
   comms_event_t discSentEvent = {.eventID = COMMS_EVENT_DISC_SENT};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&discSentEvent));
@@ -429,10 +434,10 @@ static obc_error_code_t handleSendingAckState(void) {
   obc_error_code_t errCode;
 
 #if COMMS_PHY == COMMS_PHY_UART
-  RETURN_IF_ERROR_CODE(sciSendBytes(ackCmdPkt.data, ackCmdPkt.length));
+  RETURN_IF_ERROR_CODE(sciSendBytes(ackCmdPkt.data, ackCmdPkt.length, portMAX_DELAY));
 #else
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
-  RETURN_IF_ERROR_CODE(cc1120Send(ackCmdPkt.data, ackCmdPkt.length));
+  RETURN_IF_ERROR_CODE(cc1120Send(ackCmdPkt.data, ackCmdPkt.length, CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
 #endif
   comms_event_t ackSentEvent = {.eventID = COMMS_EVENT_ACK_SENT};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&ackSentEvent));
@@ -447,13 +452,13 @@ static obc_error_code_t handleAwaitingAckDiscState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -474,13 +479,13 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -499,13 +504,13 @@ static obc_error_code_t handleUplinkingState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -532,9 +537,11 @@ static obc_error_code_t handleDownlinkingState(void) {
     }
     if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-      RETURN_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length));
+      RETURN_IF_ERROR_CODE(
+          sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY));
 #else
-      RETURN_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length));
+      RETURN_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
+                                      CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
 #endif
     } else if (transmitEvent.eventID == END_DOWNLINK) {
       break;
