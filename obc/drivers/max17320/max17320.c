@@ -51,7 +51,7 @@ static obc_error_code_t verifyConfiguration(configuration_value_map_t* config, u
                                             configuration_value_map_t* buffer, uint8_t* returnSize);
 static obc_error_code_t writeConfiguration(configuration_value_map_t* indices, uint8_t size);
 static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, uint8_t size,
-                                             configuration_value_map_t* thresholdConfig, uint8_t thresholdSize);
+                                             threshold_config_t* thresholdConfig, uint8_t thresholdSize);
 static obc_error_code_t statusCheckBitfield(uint16_t address, uint16_t bitMask, bool* bit);
 static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint8_t size);
 /* ---------------------- Read/write functions --------------- */
@@ -113,7 +113,7 @@ obc_error_code_t initBmsInterface(max17320_config_t config) {
  * OBC_ERR_CODE_INVALID_ARG if the config is NULL or contains an invalid address not of enum type bms_register_t.
  */
 static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, uint8_t size,
-                                             configuration_value_map_t* thresholdConfig, uint8_t thresholdSize) {
+                                             threshold_config_t* thresholdConfig, uint8_t thresholdSize) {
   bool statusBit = {1};
   for (uint8_t i = 0; i < BMS_MAXIMUM_WRITE_ATTEMPT_COUNT; ++i) {
     obc_error_code_t errCode;
@@ -193,7 +193,7 @@ static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint
     configRegisters[i].value = ((uint16_t)(config[i].upperTh << 8)) | ((uint16_t)(config[i].lowerTh));
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(writeConfiguration(configRegisters, size));
+  return writeConfiguration(configRegisters, size);
 }
 
 /**
