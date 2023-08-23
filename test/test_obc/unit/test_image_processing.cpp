@@ -29,11 +29,11 @@ TEST(TestObcImageProcessing, findBrightestPixelInPacket) {
   uint16_t brightestX = 0;
   uint16_t brightestY = 0;
   uint8_t brightess = 0;
-  EXPECT_EQ(findBrightestPixelInPacket(&topPacket, &brightestX, &brightestY, &brightess, 0), OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(findBrightestPixelInPacket(&topPacket, &brightestX, &brightestY, &brightess, 0), OBC_ERR_CODE_SUCCESS);
   EXPECT_EQ(brightestX, 20);
   EXPECT_EQ(brightestY, 40);
   EXPECT_EQ(brightess, 254);
-  EXPECT_EQ(findBrightestPixelInPacket(&bottomPacket, &brightestX, &brightestY, &brightess, 240), OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(findBrightestPixelInPacket(&bottomPacket, &brightestX, &brightestY, &brightess, 240), OBC_ERR_CODE_SUCCESS);
   EXPECT_EQ(brightestX, 560);
   EXPECT_EQ(brightestY, 400);
   EXPECT_EQ(brightess, 255);
@@ -43,7 +43,7 @@ TEST(TestObcImageProcessing, findBrightestPixelInPacket) {
   brightestX = 0;
   brightestY = 0;
   brightess = 0;
-  EXPECT_EQ(findBrightestPixelInPacket(&image, &brightestX, &brightestY, &brightess, 0), OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(findBrightestPixelInPacket(&image, &brightestX, &brightestY, &brightess, 0), OBC_ERR_CODE_SUCCESS);
   EXPECT_EQ(brightestX, 0);
   EXPECT_EQ(brightestY, 0);
   EXPECT_EQ(brightess, 0);
@@ -53,7 +53,7 @@ TEST(TestObcImageProcessing, findBrightestPixelInPacket) {
   brightestX = 0;
   brightestY = 0;
   brightess = 0;
-  EXPECT_EQ(findBrightestPixelInPacket(&image, &brightestX, &brightestY, &brightess, 0), OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(findBrightestPixelInPacket(&image, &brightestX, &brightestY, &brightess, 0), OBC_ERR_CODE_SUCCESS);
   EXPECT_EQ(brightestX, 0);
   EXPECT_EQ(brightestY, 0);
   EXPECT_EQ(brightess, 255);
