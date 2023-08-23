@@ -70,13 +70,14 @@ obc_error_code_t sciReadByte(unsigned char *character) {
 }
 */
 
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks, sciBASE_t *sciReg) {
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks,
+                              sciBASE_t *sciReg) {
   obc_error_code_t errCode;
 
-  if (!(sciReg == scilinREG || sciReg == sciREG)){
+  if (!(sciReg == scilinREG || sciReg == sciREG)) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  
+
   SemaphoreHandle_t mutex = (sciReg == UART_READ_REG) ? sciMutex : sciLinMutex;
   configASSERT(mutex != NULL);
 
@@ -109,8 +110,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
 }
 
 obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg) {
-
-  if (!(sciReg == scilinREG || sciReg == sciREG)){
+  if (!(sciReg == scilinREG || sciReg == sciREG)) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -176,13 +176,13 @@ obc_error_code_t sciRead(unsigned char *text, uint32_t length) {
 void sciNotification(sciBASE_t *sci, uint32 flags) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-  if (!(sci == scilinREG || sci == sciREG)){
+  if (!(sci == scilinREG || sci == sciREG)) {
     return;
   }
 
   if (flags == SCI_RX_INT) {
     sciReceive(sci, sciRxBuffLen, sciRxBuff);
-    xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken); 
+    xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken);
   }
 
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);

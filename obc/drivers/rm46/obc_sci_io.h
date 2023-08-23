@@ -11,7 +11,7 @@
 
 /**
  * @brief Initialize mutexes protecting SCI and SCI2.
- * 
+ *
  */
 void initSciMutex(void);
 
@@ -35,7 +35,8 @@ obc_error_code_t sciReadByte(unsigned char *character, sciBASE_t *sciReg);
  * @param sciReg Pointer to SCI register to read from
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks, sciBASE_t *sciReg);
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks,
+                              sciBASE_t *sciReg);
 
 /**
  * @brief Send raw bytes to UART_PRINT_REG (blocking).
@@ -60,4 +61,3 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
  * A null terminator will be added to the end of the string.
  */
 obc_error_code_t sciRead(unsigned char *text, uint32_t length, sciBASE_t *sciReg);
-
