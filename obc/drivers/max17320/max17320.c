@@ -117,6 +117,7 @@ static obc_error_code_t resetFirmware() {
   if (statusBit == 1) {
     return OBC_ERR_CODE_BMS_REACHED_MAXIMUM_COUNT;
   }
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /**
@@ -222,7 +223,7 @@ static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint
     configRegisters[i].address = config[i].address;
     configRegisters[i].value = ((uint16_t)(config[i].upperTh << 8)) | ((uint16_t)(config[i].lowerTh));
   }
-  obc_error_code_t errCode;
+
   return writeConfiguration(configRegisters, size);
 }
 
