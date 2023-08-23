@@ -50,9 +50,10 @@ static obc_error_code_t transmitCommand(nonvolatile_cmd_t cmd);
 static obc_error_code_t verifyConfiguration(configuration_value_map_t* config, uint8_t size,
                                             configuration_value_map_t* buffer, uint8_t* returnSize);
 static obc_error_code_t writeConfiguration(configuration_value_map_t* indices, uint8_t size);
-static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* indices, uint8_t size);
+static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, uint8_t size,
+                                             configuration_value_map_t* thresholdConfig, uint8_t thresholdSize);
 static obc_error_code_t statusCheckBitfield(uint16_t address, uint16_t bitMask, bool* bit);
-
+static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint8_t size);
 /* ---------------------- Read/write functions --------------- */
 static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value);
 static obc_error_code_t initiateWrite(uint16_t addr, uint16_t value);
@@ -74,11 +75,13 @@ obc_error_code_t initBmsInterface(max17320_config_t config) {
   RETURN_IF_ERROR_CODE(writeConfiguration(config.volatileConfiguration, config.volatileConfigSize));
   RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
 
-  configuration_value_map_t addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT];
+  configuration_value_map_t
+      addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT + BMS_THRESHOLD_CONFIGURATION_REGISTER_COUNT];
   uint8_t size = 0;
   verifyConfiguration(config.nonVolatileConfiguration, config.nonVolatileConfigSize, addressIndices, &size);
   if (size != 0) {
-    RETURN_IF_ERROR_CODE(unlockAndWriteConfig(addressIndices, size));
+    RETURN_IF_ERROR_CODE(
+        unlockAndWriteConfig(addressIndices, size, config.measurementThresholds, config.thresholdConfigSize));
   }
 
   RETURN_IF_ERROR_CODE(transmitCommand(BMS_WRITE_RESET_COMMAND_VAL));
@@ -107,12 +110,14 @@ obc_error_code_t initBmsInterface(max17320_config_t config) {
  * OBC_ERR_CODE_SUCCESS if successful.
  * OBC_ERR_CODE_INVALID_ARG if the config is NULL or contains an invalid address not of enum type bms_register_t.
  */
-static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, uint8_t size) {
+static obc_error_code_t unlockAndWriteConfig(configuration_value_map_t* config, uint8_t size,
+                                             configuration_value_map_t* thresholdConfig, uint8_t thresholdSize) {
   bool statusBit = {1};
   for (uint8_t i = 0; i < BMS_MAXIMUM_WRITE_ATTEMPT_COUNT; ++i) {
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(disableWriteProtection());
     RETURN_IF_ERROR_CODE(writeConfiguration(config, size));
+    RETURN_IF_ERROR_CODE(writeThresholdRegisters(thresholdConfig, thresholdSize));
     RETURN_IF_ERROR_CODE(disableWriteProtection());
     RETURN_IF_ERROR_CODE(transmitCommand(COPY_NV));
     vTaskDelay(pdMS_TO_TICKS(BMS_BLOCK_COPY_WAIT_MS));
@@ -179,7 +184,18 @@ static obc_error_code_t verifyConfiguration(configuration_value_map_t* config, u
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t writeThresholdRegisters(threshold_config_t* config, uint8_t size) {
+  configuration_value_map_t configRegisters[BMS_THRESHOLD_CONFIGURATION_REGISTER_COUNT] = {0};
+  for (uint8_t i = 0; i < size; ++i) {
+    configRegisters[i].address = config[i].address;
+    configRegisters[i].value = ((uint16_t)(config[i].upperTh << 8)) | ((uint16_t)(config[i].lowerTh));
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(writeConfiguration(configRegisters, size));
+}
+
 /**
+ *
  * @brief Initiates a register read using the I2C bus.
  * @param addr 16-bit internal memory addrrss of the register that needs to be read.
  * @param value The value read from the register.
