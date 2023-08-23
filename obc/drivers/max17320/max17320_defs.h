@@ -2,6 +2,7 @@
 
 #include "obc_errors.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 #define BMS_NV_CONFIGURATION_REGISTER_COUNT 15u
 #define BMS_VOL_CONFIGURATION_REGISTER_COUNT 15u
@@ -41,6 +42,7 @@ typedef struct {
  * BMS_VOL_CONFIGURATION_REGISTER_COUNT.
  * @param thresholdConfigSize  Size of the measurement thresholds array. Must be at most
  * BMS_THRESHOLD_CONFIGURATION_REGISTER_COUNT
+ * @param thresholdIsNonVolatile A bit indicating if the threshold registers are volatile or non-volatile memory.
  */
 typedef struct {
   configuration_value_map_t* nonVolatileConfiguration;
@@ -49,6 +51,7 @@ typedef struct {
   uint8_t nonVolatileConfigSize;
   uint8_t volatileConfigSize;
   uint8_t thresholdConfigSize;
+  bool thresholdIsNonVolatile;
 } max17320_config_t;
 
 /**

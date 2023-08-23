@@ -75,13 +75,15 @@ obc_error_code_t initBmsInterface(max17320_config_t config) {
   RETURN_IF_ERROR_CODE(writeConfiguration(config.volatileConfiguration, config.volatileConfigSize));
   RETURN_IF_ERROR_CODE(availableUpdatesStatusCheck());
 
-  configuration_value_map_t
-      addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT + BMS_THRESHOLD_CONFIGURATION_REGISTER_COUNT];
+  configuration_value_map_t addressIndices[BMS_NV_CONFIGURATION_REGISTER_COUNT];
   uint8_t size = 0;
   verifyConfiguration(config.nonVolatileConfiguration, config.nonVolatileConfigSize, addressIndices, &size);
-  if (size != 0) {
+
+  if (size != 0 || (config.thresholdIsNonVolatile == 1)) {
     RETURN_IF_ERROR_CODE(
         unlockAndWriteConfig(addressIndices, size, config.measurementThresholds, config.thresholdConfigSize));
+  } else {
+    writeThresholdRegisters(config.measurementThresholds, config.thresholdConfigSize);
   }
 
   RETURN_IF_ERROR_CODE(transmitCommand(BMS_WRITE_RESET_COMMAND_VAL));
