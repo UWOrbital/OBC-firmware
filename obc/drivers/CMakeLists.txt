@@ -37,7 +37,7 @@ target_sources(OBC-firmware.out PUBLIC
 
     ${CMAKE_CURRENT_SOURCE_DIR}/ds3232/ds3232_mz.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/fram/fram.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/fram/fm25v20a.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/lm75bd/lm75bd.c
 
