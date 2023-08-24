@@ -23,6 +23,8 @@ static uint8_t pktReceiveNum = 0;
 ax25_addr_t cubesatCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};        // mock cubesat address
 ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};  // Mock Ground station address
 
+static ax25_addr_t currentLinkDestAddr;
+
 /**
  * @brief checks for a valid s frame and performs the necessary command responses
  *
@@ -45,10 +47,11 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
  * @brief recieves a U frame and performs the necessary next action
  *
  * @param unstuffedPacket unstuffed ax.25 packet
+ * @param uFrameCmd buffer to store the received command if the frame was a U frame
  *
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket);
+static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command);
 
 /**
  * @brief calculates the FCS for an ax.25 packet
@@ -72,8 +75,7 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
 
-obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
-                                   const ax25_addr_t *destAddress) {
+obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data) {
   if (telemData == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -82,10 +84,10 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (destAddress == NULL) {
+  if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
-  if (destAddress->length < AX25_DEST_ADDR_BYTES) {
+  if (currentLinkDestAddr.length < AX25_DEST_ADDR_BYTES) {
     /* TODO: technically not an error, should be filled with spaces */
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -95,7 +97,7 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
 
   ax25Data->data[0] = AX25_FLAG;
   // ax25Data->data[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
-  memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
+  memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
   uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   memcpy(ax25Data->data + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
   ax25Data->data[AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
@@ -120,8 +122,7 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit,
-                                   const ax25_addr_t *destAddress) {
+obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit) {
   if (cmd > MAX_U_FRAME_CMD_VALUE) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -130,7 +131,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (destAddress == NULL) {
+  if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
@@ -146,7 +147,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
 
   ax25PacketUnstuffed[0] = AX25_FLAG;
 
-  memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
+  memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
 
   uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   memcpy(ax25PacketUnstuffed + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
@@ -184,7 +185,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command) {
   if (unstuffedPacket == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -212,7 +213,7 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
     errCode = iFrameRecv(unstuffedPacket);
   } else if (unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
     // If the LSB was 1, check if the next bit is a 1 to see if it is a U Frame
-    errCode = uFrameRecv(unstuffedPacket);
+    errCode = uFrameRecv(unstuffedPacket, command);
   } else {
     // Must be an S Frame if we reach this point
     errCode = sFrameRecv(unstuffedPacket);
@@ -268,6 +269,9 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
 }
 
 static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+    return OBC_GS_ERR_CODE_INVALID_TNC;
+  }
   if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
@@ -293,6 +297,9 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
   // first control byte will be the the after the flag and the address bytes
   // next control byte will be immediately after the previous one
   // See AX.25 standard
+  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+    return OBC_GS_ERR_CODE_INVALID_TNC;
+  }
   if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
@@ -316,44 +323,49 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command) {
   if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
 
   uint8_t controlByte = unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION];
-  uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK;
+  // uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK; TODO: figure out how to handle poll/control bits
 
   // clear the poll/final bit from controlByte
   controlByte &= ~POLL_FINAL_BIT_MASK;
 
-  ax25_addr_t destAddress = {0};
+  ax25_addr_t destAddress = {.length = AX25_DEST_ADDR_BYTES};
 
   // the destination address for the packet we send will be the src address of the packet we just received
   memcpy(destAddress.data, unstuffedPacket->data + AX25_SRC_ADDR_POSITION, AX25_DEST_ADDR_BYTES);
-  if (controlByte == U_FRAME_CMD_CONN) {
-    // Send an unnumbered acknowledgement
-    packed_ax25_u_frame_t ax25Data = {0};
+  if (controlByte == AX25_U_FRAME_SABME_CMD_CONTROL) {
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;
-    ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
-    // Future PR will handle sending this to the proper queue
-  } else if (controlByte == U_FRAME_CMD_DISC) {
-    // Send an unnumbered acknowledgement
-    packed_ax25_u_frame_t ax25Data = {0};
-    ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
-    // Future PR will handle sending this to the proper queue
-  } else if (controlByte == U_FRAME_CMD_ACK) {
+    if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
+      setCurrentLinkDestAddress(&destAddress);
+    }
+    *command = U_FRAME_CMD_CONN;
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (controlByte == AX25_U_FRAME_DISC_CMD_CONTROL) {
+    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+      return OBC_GS_ERR_CODE_INVALID_TNC;
+    }
+    *command = U_FRAME_CMD_DISC;
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (controlByte == AX25_U_FRAME_ACK_CMD_CONTROL) {
+    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+      return OBC_GS_ERR_CODE_INVALID_TNC;
+    }
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;
-    // acknowledgeFlag == true
-    // Future PR will handle what to do here most likely some kind of state variable change
+    *command = U_FRAME_CMD_ACK;
+    return OBC_GS_ERR_CODE_SUCCESS;
   }
 
   // Add more command actions as our architecture changes to need different commands
-  return OBC_GS_ERR_CODE_SUCCESS;
+  return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
 }
 
 static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
@@ -523,3 +535,9 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
+
+void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
+  memcpy(&currentLinkDestAddr, destAddress, sizeof(ax25_addr_t));
+}
+
+void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
