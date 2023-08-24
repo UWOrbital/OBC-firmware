@@ -43,6 +43,8 @@
 #include "het.h"
 #include "sys_vim.h"
 /* USER CODE BEGIN (0) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow="
 /* USER CODE END */
 
 /*----------------------------------------------------------------------------*/
@@ -1933,6 +1935,7 @@ void het1GetConfigValue(het_config_reg_t *config_reg, config_value_type_t type)
 }
 
 /* USER CODE BEGIN (5) */
+#pragma GCC diagnostic pop
 /* USER CODE END */
 
 /** @fn void het1HighLevelInterrupt(void)

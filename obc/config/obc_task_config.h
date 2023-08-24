@@ -26,27 +26,18 @@
 /* Comms Manager task config */
 #define COMMS_MANAGER_STACK_SIZE 1024U
 #define COMMS_MANAGER_NAME "comms_manager"
-#define COMMS_MANAGER_PRIORITY tskIDLE_PRIORITY + 1U
-
-/* Comms transceiver transmit task config */
-#define CC1120_TRANSMIT_STACK_SIZE 512U
-#define CC1120_TRANSMIT_TASK_NAME "comms_transmit"
-#define CC1120_TRANSMIT_TASK_PRIORITY tskIDLE_PRIORITY + 4U
+#define COMMS_MANAGER_PRIORITY tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* Comms telemetry encode task config */
-#define COMMS_TELEM_ENCODE_STACK_SIZE 512U
-#define COMMS_TELEM_ENCODE_TASK_NAME "comms_telemetry_encode"
-#define COMMS_TELEM_ENCODE_TASK_PRIORITY tskIDLE_PRIORITY + 3U
-
-/* Comms Recv task config */
-#define COMMS_RECV_TASK_NAME "cc1120_receive_task"
-#define COMMS_RECV_STACK_SIZE 1024U
-#define COMMS_RECV_PRIORITY tskIDLE_PRIORITY + 1U
+#define COMMS_DOWNLINK_ENCODE_STACK_SIZE 512U
+#define COMMS_DOWNLINK_ENCODE_NAME "comms_telemetry_encode"
+#define COMMS_DOWNLINK_ENCODE_PRIORITY \
+  tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* Comms Decode task config */
-#define COMMS_DECODE_TASK_NAME "decode_task"
-#define COMMS_DECODE_STACK_SIZE 1024U
-#define COMMS_DECODE_PRIORITY tskIDLE_PRIORITY + 1U
+#define COMMS_UPLINK_DECODE_NAME "decode_task"
+#define COMMS_UPLINK_DECODE_STACK_SIZE 1024U
+#define COMMS_UPLINK_DECODE_PRIORITY tskIDLE_PRIORITY + 5U  // Should be same priority as the other comms_link_mgr tasks
 
 /* EPS Manager task config */
 #define EPS_MANAGER_STACK_SIZE 1024U
@@ -77,3 +68,10 @@
 #define HEALTH_COLLECTOR_STACK_SIZE 256U
 #define HEALTH_COLLECTOR_NAME "health_collector"
 #define HEALTH_COLLECTOR_PRIORITY tskIDLE_PRIORITY + 1U
+
+/* Task debug stats collector task config */
+#if (DEBUG == 1)
+#define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
+#define TASK_STATS_COLLECTOR_NAME "task_stats_collector"
+#define TASK_STATS_COLLECTOR_PRIORITY tskIDLE_PRIORITY + 50U
+#endif

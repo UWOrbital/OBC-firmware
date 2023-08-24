@@ -39,6 +39,8 @@
 */
 
 /* USER CODE BEGIN (0) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 /* USER CODE END */
 
 #include "spi.h"
@@ -1212,6 +1214,7 @@ void spiDisableNotification(spiBASE_t *spi, uint32 flags)
     spi->INT0 = (spi->INT0 & (~(flags)));
 
 /* USER CODE BEGIN (33) */
+#pragma GCC diagnostic pop
 /* USER CODE END */
 }
 
