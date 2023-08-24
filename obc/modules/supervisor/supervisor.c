@@ -42,6 +42,8 @@ static QueueHandle_t supervisorQueueHandle = NULL;
 static StaticQueue_t supervisorQueue;
 static uint8_t supervisorQueueStack[SUPERVISOR_QUEUE_LENGTH * SUPERVISOR_QUEUE_ITEM_SIZE];
 
+static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
+
 /**
  * @brief	Supervisor task.
  * @param	pvParameters	Task parameters.
@@ -78,13 +80,7 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static void sendStartupMessages(void) {
-#if CSDC_DEMO_ENABLED == 1
-  obc_error_code_t errCode;
-  comms_event_t event = {.eventID = BEGIN_UPLINK};
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
-}
+static void sendStartupMessages(void) {}
 
 static void vSupervisorTask(void *pvParameters) {
   obc_error_code_t errCode;
@@ -116,7 +112,7 @@ static void vSupervisorTask(void *pvParameters) {
 
   initTelemetry();
   initCommandManager();
-  initCommsManager();
+  initCommsManager(&commsManagerState);
   initEPSManager();
   initPayloadManager();
   initHealthCollector();

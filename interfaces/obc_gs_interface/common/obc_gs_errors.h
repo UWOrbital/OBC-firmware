@@ -18,5 +18,6 @@ typedef enum {
   /* AX25 error codes 400-500 */
   OBC_GS_ERR_CODE_INVALID_AX25_PACKET = 400,
   OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG = 401,
+  OBC_GS_ERR_CODE_INVALID_TNC = 402,
 
 } obc_gs_error_code_t;
