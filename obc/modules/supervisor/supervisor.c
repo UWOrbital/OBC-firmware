@@ -18,6 +18,7 @@
 #include "obc_reliance_fs.h"
 #include "lm75bd.h"
 #include "obc_board_config.h"
+#include "fm25v20a.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -41,6 +42,8 @@ static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
 static QueueHandle_t supervisorQueueHandle = NULL;
 static StaticQueue_t supervisorQueue;
 static uint8_t supervisorQueueStack[SUPERVISOR_QUEUE_LENGTH * SUPERVISOR_QUEUE_ITEM_SIZE];
+
+static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 
 /**
  * @brief	Supervisor task.
@@ -78,13 +81,7 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static void sendStartupMessages(void) {
-#if CSDC_DEMO_ENABLED == 1
-  obc_error_code_t errCode;
-  comms_event_t event = {.eventID = BEGIN_UPLINK};
-  LOG_IF_ERROR_CODE(sendToCommsManagerQueue(&event));
-#endif
-}
+static void sendStartupMessages(void) {}
 
 static void vSupervisorTask(void *pvParameters) {
   obc_error_code_t errCode;
@@ -107,6 +104,8 @@ static void vSupervisorTask(void *pvParameters) {
 
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
+  initFRAM();  // FRAM storage (OBC)
+
   /* Initialize other tasks */
   // Don't start running any tasks until all tasks are initialized
   taskENTER_CRITICAL();
@@ -116,7 +115,7 @@ static void vSupervisorTask(void *pvParameters) {
 
   initTelemetry();
   initCommandManager();
-  initCommsManager();
+  initCommsManager(&commsManagerState);
   initEPSManager();
   initPayloadManager();
   initHealthCollector();

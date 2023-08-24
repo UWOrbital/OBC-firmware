@@ -27,7 +27,7 @@ obc_error_code_t rffm6404ActivateRx(void) {
  *
  * @return obc_err_code_t - whether or not the chip was successfully turned on
  */
-obc_error_code_t rff6404ActivateTx(float voltagePowerControl) {
+obc_error_code_t rffm6404ActivateTx(float voltagePowerControl) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(max5360WriteVoltage(voltagePowerControl));
   gioSetBit(RFFM6404_TR_PIN_PORT, RFFM6404_TR_PIN_NUM, 1);
