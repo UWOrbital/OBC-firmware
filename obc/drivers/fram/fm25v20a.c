@@ -87,6 +87,7 @@ static obc_error_code_t framTransmitOpCode(cmd_t cmd) {
 
 // CS assumed to be asserted
 static obc_error_code_t framTransmitAddress(uint32_t addr) {
+  obc_error_code_t errCode;
   if (addr > FRAM_MAX_ADDRESS) {
     return OBC_ERR_CODE_FRAM_ADDRESS_OUT_OF_RANGE;
   }
@@ -94,10 +95,7 @@ static obc_error_code_t framTransmitAddress(uint32_t addr) {
   // Send last 3 bytes MSB first
   for (int i = 2; i >= 0; i--) {
     uint8_t byte = (addr >> (i * 8)) & (0xFF);
-    obc_error_code_t ret = spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, (unsigned char)byte);
-    if (ret != OBC_ERR_CODE_SUCCESS) {
-      return ret;
-    }
+    RETURN_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, byte));
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -316,8 +314,7 @@ obc_error_code_t framSleep(void) {
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
   if (isAsleep) {
-    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
-    errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
+    return OBC_ERR_CODE_SUCCESS;
   }
   if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(assertChipSelect(FRAM_spiPORT, FRAM_CS));
