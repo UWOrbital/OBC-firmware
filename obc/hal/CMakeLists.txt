@@ -148,6 +148,6 @@ target_sources(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_SOURCES})
 # Higher optimization levels on some hal files will break firmware for some reason
 # Compile them with no optimizations
 add_library(${HAL_LIB_NO_OPTIMIZE} OBJECT)
-target_sources(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_SOURCES})
 target_include_directories(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
-target_compile_options(${HAL_LIB_NO_OPTIMIZE} PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
+target_sources(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_SOURCES})
+target_compile_options(${HAL_LIB_NO_OPTIMIZE} PRIVATE -O0)
