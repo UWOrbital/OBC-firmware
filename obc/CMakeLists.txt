@@ -17,6 +17,12 @@ endif()
 
 add_executable(OBC-firmware.out main.c)
 
+target_link_options(OBC-firmware.out PRIVATE
+    -specs=nosys.specs
+    -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT}
+    -Wl,--print-memory-usage
+)
+
 if (DEBUG MATCHES 1)
     target_compile_options(OBC-firmware.out PRIVATE -Og -g -gdwarf-3 -gstrict-dwarf)
 else()
@@ -49,6 +55,6 @@ target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
-    ${HAL_LIB_ARCHIVE}
+    ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )

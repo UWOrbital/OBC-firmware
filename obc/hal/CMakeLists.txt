@@ -138,16 +138,16 @@ else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
-add_library(${HAL_LIB} STATIC)
-target_include_directories(${HAL_LIB} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
-target_sources(${HAL_LIB} PRIVATE ${HAL_SOURCES})
+# target_sources(OBC-firmware.out PRIVATE ${HAL_SOURCES})
+# target_include_directories(OBC-firmware.out PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 
-add_library(${HAL_LIB_ARCHIVE} INTERFACE)
-target_link_libraries(${HAL_LIB_ARCHIVE} INTERFACE "-Wl,--whole-archive" ${HAL_LIB} "-Wl,--no-whole-archive")
+add_library(${HAL_LIB_OPTIMIZE} STATIC)
+target_include_directories(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+target_sources(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_SOURCES})
 
 # Higher optimization levels on some hal files will break firmware for some reason
 # Compile them with no optimizations
 add_library(${HAL_LIB_NO_OPTIMIZE} OBJECT)
 target_sources(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_SOURCES})
 target_include_directories(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
-target_compile_options(${HAL_LIB_NO_OPTIMIZE} PRIVATE -O0)
+target_compile_options(${HAL_LIB_NO_OPTIMIZE} PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
