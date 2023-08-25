@@ -138,9 +138,6 @@ else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
-# target_sources(OBC-firmware.out PRIVATE ${HAL_SOURCES})
-# target_include_directories(OBC-firmware.out PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
-
 add_library(${HAL_LIB_OPTIMIZE} STATIC)
 target_include_directories(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 target_sources(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_SOURCES})
