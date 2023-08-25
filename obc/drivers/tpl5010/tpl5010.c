@@ -5,6 +5,7 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
+#include "obc_board_config.h"
 
 #define DONE_SIGNAL_ON 1
 #define DONE_SIGNAL_OFF 0
