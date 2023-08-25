@@ -33,13 +33,24 @@ static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
 static void vLoggerTask(void *pvParameters);
 
 /**
- * @brief Initialize the logger task for logging to the sd card
+ * @brief logs a received message to log
+ *
+ * @param logMsg string that needs to be logged
+ * @param fname name of the file to write to
  */
-void initLoggerTask(void) {
+static obc_error_code_t logMsg(const char *logMsg, const char *fname);
+
+/**
+ * @brief Initialize the logger task for logging to the sd card
+ *
+ * @param currentNumLogFiles pointer to current number of existing log files
+ */
+void initLoggerTask(uint8_t *currentNumLogFiles) {
   ASSERT((loggerTaskStack != NULL) && (&loggerTaskBuffer != NULL));
   if (loggerTaskHandle == NULL) {
-    loggerTaskHandle = xTaskCreateStatic(vLoggerTask, LOGGER_NAME, LOGGER_STACK_SIZE, NULL, LOGGER_PRIORITY,
-                                         loggerTaskStack, &loggerTaskBuffer);
+    loggerTaskHandle =
+        xTaskCreateStatic(vLoggerTask, LOGGER_TASK_NAME, LOGGER_TASK_STACK_SIZE, (void *)currentNumLogFiles,
+                          LOGGER_TASK_PRIORITY, loggerTaskStack, &loggerTaskBuffer);
   }
 
   ASSERT((loggerQueueStack != NULL) && (&loggerQueue != NULL));
@@ -49,16 +60,16 @@ void initLoggerTask(void) {
 }
 
 static void vLoggerTask(void *pvParameters) {
+  uint8_t currentNumLogFiles = *((uint8_t *)pvParameters);
   const char *fname = ERROR_LOG_FILE_NAME;
   while (1) {
     logger_event_t queueMsg;
     if (xQueueReceive(loggerQueueHandle, &queueMsg, LOGGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_EMPTY);
       continue;
     }
     switch (queueMsg.logType) {
-      case LOG_TYPE_ERROR:
-        int32_t fdescriptor = red_open(fname, RED_O_RDWR | RED_O_APPEND | RED_O_CREAT);
+      case LOG_ERROR:
+        int32_t fdescriptor = red_open(fname, RED_O_WRONLY | RED_O_APPEND | RED_O_CREAT);
         if (fdescriptor == -1) {
           // TODO: figure out best way to deal with this
           // If we tried logging the error code we coule just end up in an infinite loop where we keep failing and
@@ -79,7 +90,7 @@ static void vLoggerTask(void *pvParameters) {
         }
         break;
       default:
-        LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
     }
   }
 }
@@ -100,6 +111,29 @@ obc_error_code_t sendToLoggerQueue(logger_event_t *event) {
   if (xQueueSend(loggerQueueHandle, (void *)event, LOGGER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
+
+  return OBC_ERR_CODE_QUEUE_FULL;
+}
+
+/**
+ * @brief Sends an event to the logger queue from an ISR
+ *
+ * @param event Pointer to the event to send
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
+ */
+obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
+  if (loggerQueueHandle == NULL) {
+    return OBC_ERR_CODE_INVALID_STATE;
+  }
+
+  if (event == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
+
+  xQueueSendFromISR(loggerQueueHandle, (void *)event, xHigherPriorityTaskAwoken);
+
+  portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 
   return OBC_ERR_CODE_QUEUE_FULL;
 }

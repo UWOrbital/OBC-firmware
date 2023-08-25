@@ -8,6 +8,7 @@
 #include "alarm_handler.h"
 #include "health_collector.h"
 #include "obc_sw_watchdog.h"
+#include "logger.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_state_handle.h"
@@ -32,6 +33,8 @@
 #define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_t)
 #define SUPERVISOR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define SUPERVISOR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+
+static uint8_t currentNumLogFiles;
 
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
@@ -112,6 +115,8 @@ static void vSupervisorTask(void *pvParameters) {
 
   initTimekeeper();
   initAlarmHandler();
+
+  initLogger(&currentNumLogFiles);
 
   initTelemetry();
   initCommandManager();
