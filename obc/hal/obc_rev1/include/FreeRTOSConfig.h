@@ -100,10 +100,10 @@
 #define configUSE_16_BIT_TICKS		  0
 #define configCPU_CLOCK_HZ			  ( ( unsigned portLONG ) 73333000 ) /* Timer clock. */
 #define configTICK_RATE_HZ			  ( ( TickType_t ) 1000 )
-#define configMAX_PRIORITIES		  ( 5 )
+#define configMAX_PRIORITIES		  ( 32 )
 #define configMINIMAL_STACK_SIZE	  ( ( unsigned portSHORT ) 128 )
 #define configTOTAL_HEAP_SIZE		  ( ( size_t ) 24576 )
-#define configMAX_TASK_NAME_LEN		  ( 16 )
+#define configMAX_TASK_NAME_LEN		  ( 24 )
 #define configIDLE_SHOULD_YIELD		  1
 #define configGENERATE_RUN_TIME_STATS 0
 #define configUSE_MALLOC_FAILED_HOOK  0
