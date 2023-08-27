@@ -76,17 +76,16 @@ static void swWatcdogFeeder(void* pvParameters) {
     // Check if all tasks has checked in
     uint32_t taskCheckinTrue = 0x1111;
     uint32_t result = xEventGroupWaitBits(watchdogEventHandle, taskCheckinTrue, pdTRUE, pdTRUE, FEEDING_PERIOD);
-    for(uint8_t i = 0; i<(sizeof(taskArray)/sizeof(taskArray[0])); i++){
-
+    for (uint8_t i = 0; i < (sizeof(taskArray) / sizeof(taskArray[0])); i++) {
       TickType_t currentTick = xTaskGetTickCount();
       TickType_t tickDiff = currentTick - taskArray[i].taskLastCheckIn;
       bool checkInStat = result & (1 << taskArray[i].taskNum);
-      
-      if(!(taskArray[i].taskTimeOut < tickDiff)){
+
+      if (!(taskArray[i].taskTimeOut < tickDiff)) {
         break;
       }
 
-      if(checkInStat){
+      if (checkInStat) {
         taskArray[i].taskLastCheckIn = currentTick;
       }
       feedSwWatchdog();
@@ -101,7 +100,7 @@ static void feedSwWatchdog(void) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 }
 
-void taskRegister(uint32_t taskNum, TickType_t taskTimeOut){  
+void taskRegister(uint32_t taskNum, TickType_t taskTimeOut) {
   watchdog_task_t task;
   task.taskNum = taskNum;
   task.taskLastCheckIn = 0;

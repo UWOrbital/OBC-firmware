@@ -7,7 +7,7 @@
  * After tasks check in, the bits will be cleared and set to 0.
  * */
 
-typedef struct{
+typedef struct {
   TickType_t taskTimeOut;
   TickType_t taskLastCheckIn;
   uint8_t taskNum;
