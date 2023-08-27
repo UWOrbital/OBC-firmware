@@ -10,8 +10,8 @@ TEST(TestAx25SendRecv, iFrameNoStuff) {
   uint8_t telemData[RS_ENCODED_SIZE] = {0};
 
   unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
-  ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign),
-            OBC_GS_ERR_CODE_SUCCESS);
+  setCurrentLinkDestAddress(&groundStationCallsign);
+  ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data), OBC_GS_ERR_CODE_SUCCESS);
 
   packed_ax25_i_frame_t ax25Data = {0};
   ASSERT_EQ(ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length),
@@ -23,7 +23,8 @@ TEST(TestAx25SendRecv, iFrameNoStuff) {
             OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(unstuffedPacket.length, AX25_MINIMUM_I_FRAME_LEN);
 
-  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
   for (uint16_t i = 0; i < RS_ENCODED_SIZE; ++i) {
     EXPECT_EQ(telemData[i], unstuffedPacket.data[AX25_INFO_FIELD_POSITION + i]);
   }
@@ -34,8 +35,8 @@ TEST(TestAx25SendRecv, iFrameMaxStuff) {
   memset(telemData, 0xFF, RS_ENCODED_SIZE);
 
   unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
-  ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign),
-            OBC_GS_ERR_CODE_SUCCESS);
+  setCurrentLinkDestAddress(&groundStationCallsign);
+  ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data), OBC_GS_ERR_CODE_SUCCESS);
 
   packed_ax25_i_frame_t ax25Data = {0};
   ASSERT_EQ(ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length),
@@ -47,7 +48,8 @@ TEST(TestAx25SendRecv, iFrameMaxStuff) {
             OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(unstuffedPacket.length, AX25_MINIMUM_I_FRAME_LEN);
 
-  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
   for (uint16_t i = 0; i < RS_ENCODED_SIZE; ++i) {
     EXPECT_EQ(telemData[i], unstuffedPacket.data[AX25_INFO_FIELD_POSITION + i]);
   }
@@ -63,8 +65,8 @@ TEST(TestAx25SendRecv, iFrameSomeStuff) {
   }
 
   unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
-  ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data, &groundStationCallsign),
-            OBC_GS_ERR_CODE_SUCCESS);
+  setCurrentLinkDestAddress(&groundStationCallsign);
+  ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data), OBC_GS_ERR_CODE_SUCCESS);
 
   packed_ax25_i_frame_t ax25Data = {0};
   ASSERT_EQ(ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length),
@@ -77,22 +79,59 @@ TEST(TestAx25SendRecv, iFrameSomeStuff) {
             OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(unstuffedPacket.length, AX25_MINIMUM_I_FRAME_LEN);
 
-  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
   for (uint16_t i = 0; i < RS_ENCODED_SIZE; ++i) {
     EXPECT_EQ(telemData[i], unstuffedPacket.data[AX25_INFO_FIELD_POSITION + i]);
   }
 }
 
-TEST(TestAx25SendRecv, uFrameSendRecv) {
+TEST(TestAx25SendRecv, uFrameSendRecvConn) {
   packed_ax25_u_frame_t ax25Data = {0};
   uint8_t pollFinalBit = 1;
 
-  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &cubesatCallsign), OBC_GS_ERR_CODE_SUCCESS);
+  setCurrentLinkDestAddress(&cubesatCallsign);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_CONN, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
             OBC_GS_ERR_CODE_SUCCESS);
-  ASSERT_EQ(ax25Recv(&unstuffedPacket), OBC_GS_ERR_CODE_SUCCESS);
+
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(command, U_FRAME_CMD_CONN);
+}
+
+TEST(TestAx25SendRecv, uFrameSendRecvDisc) {
+  packed_ax25_u_frame_t ax25Data = {0};
+  uint8_t pollFinalBit = 1;
+
+  setCurrentLinkDestAddress(&cubesatCallsign);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_DISC, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
+
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+            OBC_GS_ERR_CODE_SUCCESS);
+
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(command, U_FRAME_CMD_DISC);
+}
+
+TEST(TestAx25SendRecv, uFrameSendRecvAck) {
+  packed_ax25_u_frame_t ax25Data = {0};
+  uint8_t pollFinalBit = 1;
+
+  setCurrentLinkDestAddress(&cubesatCallsign);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
+
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+            OBC_GS_ERR_CODE_SUCCESS);
+
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(command, U_FRAME_CMD_ACK);
 }
 
 TEST(TestAx25SendRecV, Ax25SourceAddressGenerator) {
