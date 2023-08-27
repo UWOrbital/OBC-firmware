@@ -41,6 +41,8 @@ static TaskHandle_t watchdogTaskHandle;
 static EventGroupHandle_t watchdogEventHandle;
 static StaticEventGroup_t watchdogEventGroup;
 
+static watchdog_task_t taskArray[8];
+
 /**
  * @brief Software watchdog task
  */
@@ -51,21 +53,12 @@ static void swWatcdogFeeder(void* pvParameters);
  */
 static void feedSwWatchdog(void);
 
-/**
- * @brief Initialize the watchdog event group
- */
-static void initWatchdogEvent(void);
-
 void initSwWatchdog(void) {
   ASSERT((watchdogStack != NULL) && (&watchdogTaskBuffer != NULL));
+  ASSERT(&watchdogEventGroup != NULL);
+  watchdogEventHandle = xEventGroupCreateStatic(&watchdogEventGroup);
   watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
                                          SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
-  initWatchdogEvent();
-}
-
-static void initWatchdogEvent(void) {
-  configASSERT(&watchdogEventGroup);
-  watchdogEventHandle = xEventGroupCreateStatic(&watchdogEventGroup);
 }
 
 static void swWatcdogFeeder(void* pvParameters) {
@@ -81,11 +74,21 @@ static void swWatcdogFeeder(void* pvParameters) {
 
   while (1) {
     // Check if all tasks has checked in
-    uint32_t taskCheckinTrue = (TASK1 | TASK2 | TASK3 | TASK4);
+    uint32_t taskCheckinTrue = 0x1111;
     uint32_t result = xEventGroupWaitBits(watchdogEventHandle, taskCheckinTrue, pdTRUE, pdTRUE, FEEDING_PERIOD);
+    for(uint8_t i = 0; i<(sizeof(taskArray)/sizeof(taskArray[0])); i++){
 
-    // True when all tasks checked in and all event bits are cleared
-    if (!result) {
+      TickType_t currentTick = xTaskGetTickCount();
+      TickType_t tickDiff = currentTick - taskArray[i].taskLastCheckIn;
+      bool checkInStat = result & (1 << taskArray[i].taskNum);
+      
+      if(!(taskArray[i].taskTimeOut < tickDiff)){
+        break;
+      }
+
+      if(checkInStat){
+        taskArray[i].taskLastCheckIn = currentTick;
+      }
       feedSwWatchdog();
     }
   }
@@ -98,6 +101,12 @@ static void feedSwWatchdog(void) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 }
 
-void taskCheckOut(uint32_t taskNum) { xEventGroupSetBits(watchdogTaskHandle, taskNum); }
+void taskRegister(uint32_t taskNum, TickType_t taskTimeOut){  
+  watchdog_task_t task;
+  task.taskNum = taskNum;
+  task.taskLastCheckIn = 0;
+  task.taskTimeOut = taskTimeOut;
+  taskArray[taskNum] = task;
+}
 
-void taskCheckIn(uint32_t taskNum) { xEventGroupClearBits(watchdogTaskHandle, taskNum); }
+void taskCheckIn(uint32_t taskNum) { xEventGroupSetBits(watchdogTaskHandle, taskNum); }
