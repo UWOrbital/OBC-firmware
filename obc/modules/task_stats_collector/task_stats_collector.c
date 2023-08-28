@@ -36,7 +36,7 @@ static void vTaskStatsCollector(void *pvParameters) {
   while (1) {
     vTaskDelay(pdMS_TO_TICKS(15000));
     char taskStatsString[TASK_STATS_BUFFER_SIZE] = {0};
-    char taskStatsBuffer[200] = {0};
+    char taskStatsBuffer[500] = {0};
 
     vTaskList(taskStatsString);
     vTaskGetRunTimeStats(taskStatsBuffer);
