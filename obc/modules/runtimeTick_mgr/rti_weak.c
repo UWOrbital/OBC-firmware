@@ -23,7 +23,7 @@ uint32_t rtiGetCounterTick() {
 }
 
 __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
-  if (counter != rtiCOUNTER_BLOCK1) return;
+  if (counter != rtiCOUNTER_BLOCK1) return 1;
 
   //Disable the timer Counter 1
   RTI_GCTRL_REG &= ~(RTI_GLCTRL_COUNTER1_MASK);
@@ -38,6 +38,7 @@ __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
 
   //Disable future Counter 1 overflow interrupts
   RTI_CLEARINTENA_REG = (0x00000001 << 18);
+  return 0;
 }
 
 __attribute__((weak)) void rtiInit(void) {
