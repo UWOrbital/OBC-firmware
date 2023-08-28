@@ -1,3 +1,5 @@
+#if (DEBUG == 1)
+
 #include "runtimeTick_mgr.h"
 
 #include <rti_weak.h>
@@ -12,3 +14,5 @@ void vConfigureRuntimeStats(void) {
 uint32_t vSystemTickGet(void) {
   return rtiGetCounterTick();
 }
+
+#endif

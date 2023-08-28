@@ -1,3 +1,5 @@
+#if (DEBUG == 1)
+
 #include <FreeRTOSConfig.h>
 
 #include <rti.h>
@@ -7,7 +9,7 @@
 #define RTI_GLCTRL_COUNTER1_MASK        0x00000002u
 
 #define RTI_RTOS_TICK_COMPARE_CNT       (configCPU_CLOCK_HZ / configTICK_RATE_HZ)
-#define RTI_RUNTIME_STATS_COMPARE_CNT   (RTI_RTOS_TICK_COMPARE_CNT/20)
+#define RTI_RUNTIME_STATS_COMPARE_CNT   (RTI_RTOS_TICK_COMPARE_CNT/50)
 
 #define RTIFRC1   *((volatile uint32_t*) (RTI_BASE_MEMORY_ADDRESS + 0x00000030u))
 #define RTIUC1    *((volatile uint32_t*) (RTI_BASE_MEMORY_ADDRESS + 0x00000034u))
@@ -18,8 +20,7 @@
 #define RTI_CLEARINTENA_REG *((volatile uint32_t*) 0xFFFFFC84)
 #define RTI_INTFLAG_REG  	  *((volatile uint32_t*) 0xFFFFFC88)
 
-
-#define  ADDR *((volatile uint32_t*) 0xFFFFFC10)
+//#define  ADDR *((volatile uint32_t*) 0xFFFFFC10)
 
 uint32_t rtiGetCounterTick() {
   return RTIFRC1;
@@ -65,5 +66,5 @@ __attribute__((weak)) void rtiStopCounter(uint32_t counter) {
   RTI_GCTRL_REG &= ~(RTI_GLCTRL_COUNTER1_MASK);
 }
 
-
+#endif
 
