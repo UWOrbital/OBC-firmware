@@ -38,7 +38,7 @@ void vConfigureTimerForRunTimeStats(void);
 #define configUSE_CO_ROUTINES 0
 #define configMAX_CO_ROUTINE_PRIORITIES (2)
 
-#define configUSE_STATS_FORMATTING_FUNCTIONS 0
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
 
 #define configSTACK_DEPTH_TYPE uint32_t
 

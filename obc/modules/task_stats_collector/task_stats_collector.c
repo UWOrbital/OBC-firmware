@@ -36,7 +36,10 @@ static void vTaskStatsCollector(void *pvParameters) {
   while (1) {
     vTaskDelay(pdMS_TO_TICKS(15000));
     char taskStatsString[TASK_STATS_BUFFER_SIZE] = {0};
+    char taskStatsBuffer[400] = {0};
+
     vTaskList(taskStatsString);
+    vTaskGetRunTimeStats(taskStatsBuffer);
     LOG_IF_ERROR_CODE(
         sciPrintText((unsigned char *)taskTableHeaderStr, strlen(taskTableHeaderStr), UART_MUTEX_BLOCK_TIME));
     LOG_IF_ERROR_CODE(sciPrintText((unsigned char *)taskStatsString, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME));
