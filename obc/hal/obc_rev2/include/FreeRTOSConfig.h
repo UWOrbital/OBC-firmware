@@ -111,7 +111,7 @@
 #if (configGENERATE_RUN_TIME_STATS == 1)
     #include <stdint.h>
     extern void vConfigureRuntimeStats(void);
-    extern uint64_t vSystemTickGet(void);
+    extern uint32_t vSystemTickGet(void);
 
     #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureRuntimeStats()
     #define portGET_RUN_TIME_COUNTER_VALUE() vSystemTickGet()
