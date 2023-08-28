@@ -158,7 +158,7 @@
 
 /* USER CODE BEGIN (4) */
 /* USER CODE END */
-#if (configGENERATE_RUN_TIME_STATS == 1)
+#if ((configGENERATE_RUN_TIME_STATS == 1) && (DEBUG ==1))
     #include <stdint.h>
     extern void vConfigureRuntimeStats(void);
     extern uint32_t vSystemTickGet(void);

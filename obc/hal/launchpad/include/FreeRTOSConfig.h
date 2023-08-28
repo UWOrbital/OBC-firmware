@@ -108,8 +108,7 @@
 #define configGENERATE_RUN_TIME_STATS 1
 #define configUSE_MALLOC_FAILED_HOOK  0
 
-
-#if (configGENERATE_RUN_TIME_STATS == 1)
+#if ((configGENERATE_RUN_TIME_STATS == 1) && (DEBUG ==1))
     #include <stdint.h>
     extern void vConfigureRuntimeStats(void);
     extern uint32_t vSystemTickGet(void);
@@ -117,6 +116,7 @@
     #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureRuntimeStats()
     #define portGET_RUN_TIME_COUNTER_VALUE() vSystemTickGet()
 #endif
+
 /* USER CODE BEGIN (1) */
 /* USER CODE END */
 
