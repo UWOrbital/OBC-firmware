@@ -22,7 +22,7 @@ uint32_t rtiGetCounterTick() {
   return RTIFRC1;
 }
 
-__weak uint32_t rtiResetCounter(uint32_t counter) {
+__attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 
   //Disable the timer Counter 1
@@ -40,21 +40,21 @@ __weak uint32_t rtiResetCounter(uint32_t counter) {
   RTI_CLEARINTENA_REG = (0x00000001 << 18);
 }
 
-__weak void rtiInit(void) {
+__attribute__((weak)) void rtiInit(void) {
   rtiResetCounter(1);
 
   //Set the prescaler for Counter Block 1
   RTICPUC1 = RTI_RUNTIME_STATS_COMPARE_CNT;
 }
 
-__weak void rtiStartCounter(uint32_t counter) {
+__attribute__((weak)) void rtiStartCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 
   // Start the timer 
   RTI_GCTRL_REG |= RTI_GLCTRL_COUNTER1_MASK;
 }
 
-__weak void rtiStopCounter(uint32_t counter) {
+__attribute__((weak)) void rtiStopCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 
   // Disable the timer
