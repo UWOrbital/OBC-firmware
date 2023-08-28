@@ -18,8 +18,11 @@
 #define RTI_CLEARINTENA_REG *((volatile uint32_t*) 0xFFFFFC84)
 #define RTI_INTFLAG_REG  	  *((volatile uint32_t*) 0xFFFFFC88)
 
+
+#define  ADDR *((volatile uint32_t*) 0xFFFFFC10)
+
 uint32_t rtiGetCounterTick() {
-  return RTIFRC1;
+  return ADDR;
 }
 
 __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
@@ -42,7 +45,7 @@ __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
 }
 
 __attribute__((weak)) void rtiInit(void) {
-  rtiResetCounter(1);
+  rtiResetCounter(rtiCOUNTER_BLOCK1);
 
   //Set the prescaler for Counter Block 1
   RTICPUC1 = RTI_RUNTIME_STATS_COMPARE_CNT;

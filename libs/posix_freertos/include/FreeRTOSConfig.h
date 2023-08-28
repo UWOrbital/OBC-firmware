@@ -31,8 +31,6 @@
 
 #define configMAX_PRIORITIES (7)
 
-unsigned long ulGetRunTimeCounterValue(void);
-void vConfigureTimerForRunTimeStats(void);
 #define configGENERATE_RUN_TIME_STATS 1
 
 #define configUSE_CO_ROUTINES 0
