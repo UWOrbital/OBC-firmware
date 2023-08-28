@@ -42,6 +42,7 @@ static void vTaskStatsCollector(void *pvParameters) {
     uint32_t tick = vSystemTickGet();
     memcpy(taskStatsBuffer, &tick, 4);
     vTaskList(taskStatsString);
+    
     vTaskGetRunTimeStats(taskStatsBuffer);
     LOG_IF_ERROR_CODE(
         sciPrintText((unsigned char *)taskTableHeaderStr, strlen(taskTableHeaderStr), UART_MUTEX_BLOCK_TIME));
