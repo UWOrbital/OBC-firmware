@@ -9,9 +9,9 @@
 #define RTI_RTOS_TICK_COMPARE_CNT       (configCPU_CLOCK_HZ / configTICK_RATE_HZ)
 #define RTI_RUNTIME_STATS_COMPARE_CNT   (RTI_RTOS_TICK_COMPARE_CNT/20)
 
-#define RTIFRC1   *((volatile uint32_t*) RTI_BASE_MEMORY_ADDRESS + 0x00000030u)
-#define RTIUC1    *((volatile uint32_t*) RTI_BASE_MEMORY_ADDRESS + 0x00000034u)
-#define RTICPUC1  *((volatile uint32_t*) RTI_BASE_MEMORY_ADDRESS + 0x00000038u)
+#define RTIFRC1   *((volatile uint32_t*) (RTI_BASE_MEMORY_ADDRESS + 0x00000030u))
+#define RTIUC1    *((volatile uint32_t*) (RTI_BASE_MEMORY_ADDRESS + 0x00000034u))
+#define RTICPUC1  *((volatile uint32_t*) (RTI_BASE_MEMORY_ADDRESS + 0x00000038u))
 
 #define RTI_GCTRL_REG  		  *((volatile uint32_t*) 0xFFFFFC00)
 #define RTI_SETINTENA_REG  	*((volatile uint32_t*) 0xFFFFFC80)
@@ -22,7 +22,7 @@
 #define  ADDR *((volatile uint32_t*) 0xFFFFFC10)
 
 uint32_t rtiGetCounterTick() {
-  return ADDR;
+  return RTIFRC1;
 }
 
 __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
