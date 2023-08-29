@@ -41,11 +41,8 @@ static void vTaskStatsCollector(void *pvParameters) {
     
     vTaskList(taskStatsString);
 
-    #if (configGENERATE_RUN_TIME_STATS == 1)
     vTaskGetRunTimeStats(taskStatsBuffer);
     LOG_IF_ERROR_CODE(sciPrintText((unsigned char *) taskStatsBuffer, 500, UART_MUTEX_BLOCK_TIME ));
-    #endif
-
     LOG_IF_ERROR_CODE(
         sciPrintText((unsigned char *)taskTableHeaderStr, strlen(taskTableHeaderStr), UART_MUTEX_BLOCK_TIME));
     LOG_IF_ERROR_CODE(sciPrintText((unsigned char *)taskStatsString, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME));
