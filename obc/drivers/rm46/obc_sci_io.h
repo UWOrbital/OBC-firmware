@@ -16,16 +16,6 @@
 void initSciMutex(void);
 
 /**
- * @brief Read a byte from UART_READ_REG by polling.
- *
- * @param character The character that is read
- * @param readReg   Register to recieve the byte from
- * @param sciReg Pointer to SCI register to read from
- * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
- */
-obc_error_code_t sciReadByte(unsigned char *character, sciBASE_t *sciReg);
-
-/**
  * @brief Read raw bytes from UART_READ_REG (blocking).
  *
  * @param numBytes Number of bytes to read
@@ -48,16 +38,3 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg);
-
-/**
- * @brief Read a string from UART_READ_REG by polling and store it in the text buffer.
- *
- * @param text The text that stores the characters read
- * @param length The number of bytes to read
- * @param sciReg Pointer to SCI register to read from
- * @return OBC_ERR_CODE_SUCCESS on success OBC_ERR_CODE_INVALID_ARG or OBC_ERR_CODE_UNKOWN on fail
- *
- * @note Bytes will be read until a newline character or (length - 1) characters are received.
- * A null terminator will be added to the end of the string.
- */
-obc_error_code_t sciRead(unsigned char *text, uint32_t length, sciBASE_t *sciReg);

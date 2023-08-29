@@ -15,11 +15,9 @@
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks) {
   if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
 
-  obc_error_code_t err = sciSendBytes(text, length, uartMutexTimeoutTicks, UART_PRINT_REG);
-  if (err != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR_CODE(err);
-  }
-  return err;
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(sciSendBytes(text, length, uartMutexTimeoutTicks, UART_PRINT_REG));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t sciPrintf(const char *s, ...) {
@@ -38,6 +36,12 @@ obc_error_code_t sciPrintf(const char *s, ...) {
   if ((uint32_t)n >= MAX_PRINTF_SIZE) return OBC_ERR_CODE_INVALID_ARG;
 
   return sciPrintText((unsigned char *)buf, MAX_PRINTF_SIZE, UART_MUTEX_BLOCK_TIME);
+}
+
+obc_error_code_t sciPrintSetBaudrate(uint32_t baudrate) {
+  // TODO: create a function that checks if baudrate is valid
+  sciSetBaudrate(UART_PRINT_REG, baudrate);
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 void uartAssertFailed(char *file, int line, char *expr) {
