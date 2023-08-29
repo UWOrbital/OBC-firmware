@@ -41,7 +41,7 @@ static TaskHandle_t watchdogTaskHandle;
 static EventGroupHandle_t watchdogEventHandle;
 static StaticEventGroup_t watchdogEventGroup;
 
-static watchdog_task_t taskArray[8];
+static watchdog_task_t taskArray[4];
 
 /**
  * @brief Software watchdog task
@@ -76,15 +76,19 @@ static void swWatcdogFeeder(void* pvParameters) {
     // Check if all tasks has checked in
     uint32_t taskCheckinTrue = 0x1111;
     uint32_t result = xEventGroupWaitBits(watchdogEventHandle, taskCheckinTrue, pdTRUE, pdTRUE, FEEDING_PERIOD);
+
     for (uint8_t i = 0; i < (sizeof(taskArray) / sizeof(taskArray[0])); i++) {
       TickType_t currentTick = xTaskGetTickCount();
-      TickType_t tickDiff = currentTick - taskArray[i].taskLastCheckIn;
-      bool checkInStat = result & (1 << taskArray[i].taskNum);
+      TickType_t tickDiff =
+          currentTick - taskArray[i].taskLastCheckIn;  // Calculate the tick between last checkin and current tick
+      bool checkInStat = result & (1 << taskArray[i].taskNum);  // check if the task has checked in
 
+      // The task does not respond after timeout period
       if (!(taskArray[i].taskTimeOut < tickDiff)) {
         break;
       }
 
+      // The task has checked in
       if (checkInStat) {
         taskArray[i].taskLastCheckIn = currentTick;
       }
@@ -108,4 +112,4 @@ void taskRegister(uint32_t taskNum, TickType_t taskTimeOut) {
   taskArray[taskNum] = task;
 }
 
-void taskCheckIn(uint32_t taskNum) { xEventGroupSetBits(watchdogTaskHandle, taskNum); }
+void taskCheckIn(uint32_t taskNum) { xEventGroupSetBits(watchdogTaskHandle, (1 << taskNum)); }
