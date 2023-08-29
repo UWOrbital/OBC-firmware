@@ -24,6 +24,8 @@ static StaticSemaphore_t sciLinMutexBuffer;
 // Semaphore to signal when an async transfer is complete
 static SemaphoreHandle_t sciTransferComplete = NULL;
 static StaticSemaphore_t sciTransferCompleteBuffer;
+static SemaphoreHandle_t sciLinTransferComplete = NULL;
+static StaticSemaphore_t sciLinTransferCompleteBuffer;
 
 STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG),
               "UART_PRINT_REG must be sciREG or scilinREG");
@@ -45,6 +47,10 @@ void initSciMutex(void) {
   }
   configASSERT(sciTransferComplete);
 
+  if (sciLinTransferComplete == NULL) {
+    sciLinTransferComplete = xSemaphoreCreateBinaryStatic(&sciLinTransferCompleteBuffer);
+  }
+
   sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
 }
 
@@ -56,7 +62,17 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciMutex : sciLinMutex;
+  SemaphoreHandle_t mutex = NULL;
+  SemaphoreHandle_t semaphore = NULL;
+
+  if (sciReg == sciREG) {
+    mutex = sciMutex;
+    semaphore = sciTransferComplete;
+  }
+  else {
+    mutex = sciLinMutex;
+    semaphore = sciLinTransferComplete;
+  }
   configASSERT(mutex != NULL);
 
   if (buf == NULL || numBytes < 1) {
@@ -71,7 +87,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   sciReceive(sciReg, numBytes, buf);
 
   // Wait for transfer to complete
-  if (xSemaphoreTake(sciTransferComplete, blockTimeTicks) != pdTRUE) {
+  if (xSemaphoreTake(semaphore, blockTimeTicks) != pdTRUE) {
     errCode = OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   } else {
     errCode = OBC_ERR_CODE_SUCCESS;
@@ -111,8 +127,10 @@ void sciNotification(sciBASE_t *sci, uint32 flags) {
     return;
   }
 
-  if (flags == SCI_RX_INT) {
-    xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken);
+  SemaphoreHandle_t semaphore = (sci == sciREG) ? sciTransferComplete : sciLinTransferComplete;
+
+  if (flags == SCI_RX_INT) {  
+    xSemaphoreGiveFromISR(semaphore, &xHigherPriorityTaskWoken);
   }
 
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
