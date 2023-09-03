@@ -1,4 +1,4 @@
-#if (DEBUG == 1)
+#if (configGENERATE_RUN_TIME_STATS == 1)
 
 #include <FreeRTOSConfig.h>
 
@@ -20,12 +20,17 @@
 #define RTI_CLEARINTENA_REG *((volatile uint32_t*) 0xFFFFFC84)
 #define RTI_INTFLAG_REG  	  *((volatile uint32_t*) 0xFFFFFC88)
 
-//#define  ADDR *((volatile uint32_t*) 0xFFFFFC10)
 
 uint32_t rtiGetCounterTick() {
   return RTIFRC1;
 }
 
+/**
+ * @brief Resets all of RTI Counter 1
+ *
+ * @param counter The counter to reset. Must be 1 for succesful reset. 
+ * @return A 32-bit value of 0 to indicate success. 
+ */
 __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return 1;
 
@@ -45,6 +50,11 @@ __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
   return 0;
 }
 
+/**
+ * @brief Resets all of RTI Counter 1 and sets the prescaler value to 
+ * a predefined macro.
+ * @return Returns void 
+ */
 __attribute__((weak)) void rtiInit(void) {
   rtiResetCounter(rtiCOUNTER_BLOCK1);
 
@@ -52,6 +62,11 @@ __attribute__((weak)) void rtiInit(void) {
   RTICPUC1 = RTI_RUNTIME_STATS_COMPARE_CNT;
 }
 
+/**
+ * @brief Renables the counter. 
+ * @param counter The counter to start. Must be 1 for succesful enable. 
+ * @return Returns void 
+ */
 __attribute__((weak)) void rtiStartCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 
@@ -59,6 +74,11 @@ __attribute__((weak)) void rtiStartCounter(uint32_t counter) {
   RTI_GCTRL_REG |= RTI_GLCTRL_COUNTER1_MASK;
 }
 
+/**
+ * @brief Disables the counter block RTI 1.
+ * @param counter The counter to stop. Must be 1 for succesful disable 
+ * @return Returns void 
+ */
 __attribute__((weak)) void rtiStopCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 

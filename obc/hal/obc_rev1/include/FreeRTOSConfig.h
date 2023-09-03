@@ -162,14 +162,7 @@
 
 /* USER CODE BEGIN (4) */
 /* USER CODE END */
-#if ((configGENERATE_RUN_TIME_STATS == 1) && (DEBUG ==1))
-    #include <stdint.h>
-    extern void vConfigureRuntimeStats(void);
-    extern uint32_t vSystemTickGet(void);
 
-    #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureRuntimeStats()
-    #define portGET_RUN_TIME_COUNTER_VALUE() vSystemTickGet()
-#endif
 
 /* debug ASSERT */
 #define configASSERT( x ) if( ( x ) == pdFALSE ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
