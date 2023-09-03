@@ -68,8 +68,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   if (sciReg == sciREG) {
     mutex = sciMutex;
     semaphore = sciTransferComplete;
-  }
-  else {
+  } else {
     mutex = sciLinMutex;
     semaphore = sciLinTransferComplete;
   }
@@ -129,7 +128,7 @@ void sciNotification(sciBASE_t *sci, uint32 flags) {
 
   SemaphoreHandle_t semaphore = (sci == sciREG) ? sciTransferComplete : sciLinTransferComplete;
 
-  if (flags == SCI_RX_INT) {  
+  if (flags == SCI_RX_INT) {
     xSemaphoreGiveFromISR(semaphore, &xHigherPriorityTaskWoken);
   }
 

@@ -25,11 +25,10 @@ obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t u
 obc_error_code_t sciPrintf(const char *s, ...);
 
 /**
- * @brief Set the baudrate for the printing register 
+ * @brief Set the baudrate for the printing register
  *
  * @param baudrate The baudrate that you want to set the SCI register to read from
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 
 obc_error_code_t sciPrintSetBaudrate(uint32_t baudrate);
-
