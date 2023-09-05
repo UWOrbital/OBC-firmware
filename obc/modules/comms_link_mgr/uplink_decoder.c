@@ -162,9 +162,9 @@ static void vDecodeTask(void *pvParameters) {
         }
         continue;
       }
-    }
-    if (startFlagReceived) {
-      axData.data[axDataIndex++] = byte;
+      if (startFlagReceived) {
+        axData.data[axDataIndex++] = byte;
+      }
     }
   }
 }
