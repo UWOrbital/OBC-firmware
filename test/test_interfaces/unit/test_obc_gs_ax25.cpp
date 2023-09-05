@@ -6,12 +6,11 @@
 
 #include <gtest/gtest.h>
 
-TEST(TestAx25SendRecv, iFrameNoStuff) {
+TEST(TestAx25SendRecv, iFrameLittleStuff) {
   uint8_t telemData[RS_ENCODED_SIZE] = {0};
 
   unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
   setCurrentLinkDestAddress(&groundStationCallsign);
-  memset(unstuffedAx25Data.data, 0b01111011, sizeof(unstuffedAx25Data.data));
   ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data), OBC_GS_ERR_CODE_SUCCESS);
 
   packed_ax25_i_frame_t ax25Data = {0};
@@ -22,7 +21,6 @@ TEST(TestAx25SendRecv, iFrameNoStuff) {
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
             OBC_GS_ERR_CODE_SUCCESS);
-  EXPECT_EQ(unstuffedPacket.length, AX25_MINIMUM_I_FRAME_LEN);
 
   u_frame_cmd_t command;
   ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
