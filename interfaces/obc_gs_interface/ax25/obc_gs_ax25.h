@@ -131,8 +131,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
  * @param telemDataLen length of the telemData array
  * @param ax25Data array to store the ax.25 frame
  */
-obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
-                                   const ax25_addr_t *destAddress);
+obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data);
 
 /**
  * @brief format a buffer into a U frame command such as connect, disconnect, or acknowledge

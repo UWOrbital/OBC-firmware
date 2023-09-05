@@ -141,8 +141,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
-                                   const ax25_addr_t *destAddress) {
+obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data) {
   if (telemData == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
