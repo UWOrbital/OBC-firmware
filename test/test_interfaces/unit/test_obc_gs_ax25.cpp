@@ -11,7 +11,7 @@ TEST(TestAx25SendRecv, iFrameNoStuff) {
 
   unstuffed_ax25_i_frame_t unstuffedAx25Data = {0};
   setCurrentLinkDestAddress(&groundStationCallsign);
-  memset(unstuffedAx25Data.data, 0b01010101, sizeof(unstuffedAx25Data.data));
+  memset(unstuffedAx25Data.data, 0b01111011, sizeof(unstuffedAx25Data.data));
   ASSERT_EQ(ax25SendIFrame(telemData, RS_ENCODED_SIZE, &unstuffedAx25Data), OBC_GS_ERR_CODE_SUCCESS);
 
   packed_ax25_i_frame_t ax25Data = {0};
