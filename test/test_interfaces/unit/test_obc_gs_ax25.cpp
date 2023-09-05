@@ -121,7 +121,8 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShare) {
         unstuffed_ax25_i_frame_t recvPacket = {0};
         memcpy(recvPacket.data, unstuffedPacket + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), AX25_MINIMUM_I_FRAME_LEN);
         recvPacket.length = AX25_MINIMUM_I_FRAME_LEN;
-        EXPECT_EQ(ax25Recv(&recvPacket), OBC_GS_ERR_CODE_SUCCESS);
+        u_frame_cmd_t command;
+        EXPECT_EQ(ax25Recv(&recvPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
         flagCount++;
       }
       if (flagCount == 4) break;
@@ -165,7 +166,8 @@ TEST(TestAx25SendRecv, iFrameSendRecvFlagShareStuff) {
         unstuffed_ax25_i_frame_t recvPacket = {0};
         memcpy(recvPacket.data, unstuffedPacket + (AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG * i), AX25_MINIMUM_I_FRAME_LEN);
         recvPacket.length = AX25_MINIMUM_I_FRAME_LEN;
-        EXPECT_EQ(ax25Recv(&recvPacket), OBC_GS_ERR_CODE_SUCCESS);
+        u_frame_cmd_t command;
+        EXPECT_EQ(ax25Recv(&recvPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
         flagCount++;
       }
       if (flagCount == 4) break;
