@@ -16,11 +16,11 @@ TEST(TestAx25SendRecv, iFrameLittleStuff) {
   packed_ax25_i_frame_t ax25Data = {0};
   ASSERT_EQ(ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length),
             OBC_GS_ERR_CODE_SUCCESS);
-  EXPECT_EQ(ax25Data.length, AX25_MINIMUM_I_FRAME_LEN);
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
             OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(unstuffedPacket.length, AX25_MINIMUM_I_FRAME_LEN);
 
   u_frame_cmd_t command;
   ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
