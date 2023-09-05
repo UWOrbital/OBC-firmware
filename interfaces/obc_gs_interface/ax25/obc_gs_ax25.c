@@ -436,22 +436,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
 }
 
 static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
-  /* TODO: look into this more and make sure this is the right implementation */
-  *calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
-
-  for (uint16_t i = 0; i < (dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
-    *calculatedFcs ^= (uint16_t)data[i] << 8;
-
-    for (uint8_t j = 0; j < 8; ++j) {
-      if (*calculatedFcs & 0x8000) {
-        *calculatedFcs = (*calculatedFcs << 1) ^ 0x8408;  // Polynomial X^16 + X^12 + X^5 + 1
-      } else {
-        *calculatedFcs <<= 1;
-      }
-    }
-  }
-
-  *calculatedFcs ^= 0xFFFF;
+  *calculatedFcs = calculateCrcCcitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
   // reverse order so that FCS can be transmitted with most significant bit first as per AX25 standard
   uint16_t reverse_num = 0;
@@ -471,21 +456,9 @@ static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint1
     if ((fcs & (1 << i))) reverse_num |= 1 << ((sizeof(fcs) * 8 - 1) - i);
   }
   fcs = reverse_num;
-  uint16_t calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
 
-  for (uint16_t i = 0; i < (dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
-    calculatedFcs ^= (uint16_t)data[i] << 8;
+  uint16_t calculatedFcs = calculateCrcCcitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
-    for (uint8_t j = 0; j < 8; ++j) {
-      if (calculatedFcs & 0x8000) {
-        calculatedFcs = (calculatedFcs << 1) ^ 0x8408;  // Polynomial X^16 + X^12 + X^5 + 1
-      } else {
-        calculatedFcs <<= 1;
-      }
-    }
-  }
-
-  calculatedFcs ^= 0xFFFF;  // XOR with 0xFFFF at the end
   if (fcs != calculatedFcs) {
     return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
   }
@@ -608,3 +581,17 @@ void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
 }
 
 void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
+
+uint16_t calculateCrcCcitt(uint8_t *data, uint16_t dataLen) {
+  // See VN100 datasheet or ISO standard for CRC-16-CCITT
+  register uint16_t crc = 0;
+  for (uint16_t i = 0; i < dataLen; ++i) {
+    crc = (unsigned char)(char >> 8) | (crc << 8);
+    crc ^= data[i];
+    crc ^= (unsigned char)(crc & 0xFF) >> 4;
+    crc ^= crc << 12;
+    crc ^= (crc & 0x00FF) << 5;
+  }
+
+  return crc;
+}

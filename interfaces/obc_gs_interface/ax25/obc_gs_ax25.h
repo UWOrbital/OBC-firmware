@@ -203,6 +203,16 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
                                          uint8_t controlBit);
 
 /**
+ * @brief generates a checksum using CRC-16-CCITT
+ *
+ * @param data: the data that the checksum should be calculated over
+ * @param dataLen: length of the data to calculate the checksum over
+ *
+ * @return calculated checksum
+ */
+uint16_t calculateCrcCcitt(uint8_t *data, uint16_t dataLen);
+
+/**
  * @brief sets the address for the TNC we are communicating with in the current link session
  *
  * @param destAdress address of the TNC for the current link session
