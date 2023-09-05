@@ -582,11 +582,11 @@ void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
 
 void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
 
-uint16_t calculateCrcCcitt(uint8_t *data, uint16_t dataLen) {
-  // See VN100 datasheet or ISO standard for CRC-16-CCITT
+uint16_t calculateCrcCcitt(const uint8_t *data, uint16_t dataLen) {
+  // See VN100 datasheet or ISO standard for CRC16-CCITT algorithm
   register uint16_t crc = 0;
   for (uint16_t i = 0; i < dataLen; ++i) {
-    crc = (unsigned char)(char >> 8) | (crc << 8);
+    crc = (unsigned char)(crc >> 8) | (crc << 8);
     crc ^= data[i];
     crc ^= (unsigned char)(crc & 0xFF) >> 4;
     crc ^= crc << 12;
