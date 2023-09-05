@@ -13,6 +13,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
+    ${CMAKE_CURRENT_SOURCE_DIR}/vn100
     # TODO: Update cc1120 driver so that it doesn't need to include this
     ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
@@ -26,7 +27,6 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_sci_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_dma.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_vn100.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam.c
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/camera_reg.c
@@ -51,4 +51,6 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x/bd621x.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100.c
 )
