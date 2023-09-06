@@ -14,7 +14,7 @@
 #define RTIUC1 *((volatile uint32_t*)(RTI_BASE_MEMORY_ADDRESS + 0x00000034u))
 #define RTICPUC1 *((volatile uint32_t*)(RTI_BASE_MEMORY_ADDRESS + 0x00000038u))
 
-#define RTI_GCTRL_REG *((volatile uint32_t*)0xFFFFFC00)
+#define RTI_GCTRL_REG *((volatile uint32_t*)0xFFFFFC00)    // Used to disable/enable the counter and timer
 #define RTI_SETINTENA_REG *((volatile uint32_t*)0xFFFFFC80)
 #define RTI_CLEARINTENA_REG *((volatile uint32_t*)0xFFFFFC84)
 #define RTI_INTFLAG_REG *((volatile uint32_t*)0xFFFFFC88)
@@ -22,8 +22,8 @@
 uint32_t rtiGetCounterTick() { return RTIFRC1; }
 
 /**
- * @brief Resets all of RTI Counter 1
- *
+ * @brief Resets all of RTI Counter 1. Disables the counter until enabled again 
+ * using rtiStartCounter.
  * @param counter The counter to reset. Must be 1 for succesful reset.
  * @return A 32-bit value of 0 to indicate success.
  */
