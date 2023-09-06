@@ -1,4 +1,5 @@
 #include "obc_sci_io.h"
+#include "obc_print.h"
 
 #include <gio.h>
 #include <sci.h>
