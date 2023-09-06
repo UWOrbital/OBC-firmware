@@ -24,5 +24,4 @@ uint32_t systemTickGet(void) {
   return rtiGetCounterTick();
 }
 
-
 #endif
