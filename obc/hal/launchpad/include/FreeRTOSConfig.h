@@ -96,7 +96,7 @@
 #define configUSE_FPU							1
 #define configUSE_IDLE_HOOK			  0
 #define configUSE_TICK_HOOK			  0
-#define configUSE_TRACE_FACILITY	  1
+#define configUSE_TRACE_FACILITY	  0
 #define configUSE_16_BIT_TICKS		  0
 #define configCPU_CLOCK_HZ			  ( ( unsigned portLONG ) 73333000 ) /* Timer clock. */
 #define configTICK_RATE_HZ			  ( ( TickType_t ) 1000 )
@@ -106,9 +106,7 @@
 #define configMAX_TASK_NAME_LEN		  ( 16 )
 #define configIDLE_SHOULD_YIELD		  1
 #define configGENERATE_RUN_TIME_STATS 1
-
 #define configUSE_MALLOC_FAILED_HOOK  0
-
 
 /* USER CODE BEGIN (1) */
 #if (configGENERATE_RUN_TIME_STATS == 1)
@@ -174,6 +172,7 @@
 
 /* USER CODE BEGIN (4) */
 /* USER CODE END */
+
 
 /* debug ASSERT */
 #define configASSERT( x ) if( ( x ) == pdFALSE ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
