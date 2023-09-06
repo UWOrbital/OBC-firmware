@@ -105,12 +105,26 @@
 #define configTOTAL_HEAP_SIZE		  ( ( size_t ) 24576 )
 #define configMAX_TASK_NAME_LEN		  ( 16 )
 #define configIDLE_SHOULD_YIELD		  1
-#define configGENERATE_RUN_TIME_STATS 0
+#define configGENERATE_RUN_TIME_STATS 1
 
 #define configUSE_MALLOC_FAILED_HOOK  0
 
 
 /* USER CODE BEGIN (1) */
+#if (configGENERATE_RUN_TIME_STATS == 1)
+    #include <stdint.h>
+    extern void vConfigureRuntimeStats();
+    extern uint32_t systemTickGet();
+    
+    #ifndef portCONFIGURE_TIMER_FOR_RUN_TIME_STATS
+        #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS vConfigureRuntimeStats
+    #endif
+
+    #ifndef portGET_RUN_TIME_COUNTER_VALUE
+        #define portGET_RUN_TIME_COUNTER_VALUE systemTickGet
+    #endif
+#endif /* configGENERATE_RUN_TIME_STATS */
+
 /* USER CODE END */
 
 #define configSUPPORT_STATIC_ALLOCATION			0
@@ -160,7 +174,6 @@
 
 /* USER CODE BEGIN (4) */
 /* USER CODE END */
-
 
 /* debug ASSERT */
 #define configASSERT( x ) if( ( x ) == pdFALSE ) { taskDISABLE_INTERRUPTS(); for( ;; ); }

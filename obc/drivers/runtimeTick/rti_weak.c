@@ -1,6 +1,5 @@
-#if (configGENERATE_RUN_TIME_STATS == 1)
-
 #include <FreeRTOSConfig.h>
+#if (configGENERATE_RUN_TIME_STATS == 1)
 
 #include <rti.h>
 #include <rti_weak.h>

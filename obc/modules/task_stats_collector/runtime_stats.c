@@ -1,11 +1,11 @@
+#include <FreeRTOSConfig.h>
+
 #if (configGENERATE_RUN_TIME_STATS == 1)
 
 #include "runtime_stats.h"
-
 #include <rti_weak.h>
 #include <rti.h>
 #include <stdint.h>
-
 
 /**
  * @brief Helper function to configure the stats collecter.
