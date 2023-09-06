@@ -36,6 +36,7 @@ set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_pmu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_vim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/system.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/rti_weak.c
 )
 
 set(RM46_LAUNCHPAD_NO_OPTIMIZE_SOURCES
@@ -76,6 +77,7 @@ set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_pmu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_vim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/system.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/rti_weak.c
 )
 
 set(OBC_REV1_NO_OPTIMIZE_SOURCES
@@ -116,6 +118,7 @@ set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_pmu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_vim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/system.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/rti_weak.c
 )
 
 set(OBC_REV2_NO_OPTIMIZE_SOURCES
