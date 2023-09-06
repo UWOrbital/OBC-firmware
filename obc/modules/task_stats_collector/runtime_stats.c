@@ -9,7 +9,7 @@
 
 /**
  * @brief Helper function to configure the stats collecter.
- * @return Returns void 
+ * @return Returns void
  */
 void vConfigureRuntimeStats(void) {
   rtiInit();
@@ -17,11 +17,9 @@ void vConfigureRuntimeStats(void) {
 }
 
 /**
- * @brief Returns the tick count.  
- * @return Returns the configured timer tick. 
+ * @brief Returns the tick count.
+ * @return Returns the configured timer tick.
  */
-uint32_t systemTickGet(void) {
-  return rtiGetCounterTick();
-}
+uint32_t systemTickGet(void) { return rtiGetCounterTick(); }
 
 #endif
