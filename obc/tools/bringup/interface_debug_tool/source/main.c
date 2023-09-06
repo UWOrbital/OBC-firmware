@@ -1,5 +1,6 @@
 #include "obc_spi_io.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_i2c_io.h"
 #include "obc_logging.h"
 
@@ -39,17 +40,17 @@ static const testFunc_t testFuncs[NUM_COMMANDS_MAX] = {
 void utilityCLI(void *pvParameters) {
   while (1) {
     unsigned char cmdChar;
-    sciPrintf("Enter a command: ", scilinREG);
-    sciRead(&cmdChar, 1, scilinREG);
-    sciPrintf("\r\n", scilinREG);
+    sciPrintf("Enter a command: ");
+    sciRead(&cmdChar, 1);
+    sciPrintf("\r\n");
 
     if (cmdChar >= NUM_COMMANDS_MAX) {
-      sciPrintf("Invalid command\r\n", scilinREG);
+      sciPrintf("Invalid command\r\n");
       continue;
     }
 
     if (testFuncs[cmdChar] == NULL) {
-      sciPrintf("Invalid command\r\n", scilinREG);
+      sciPrintf("Invalid command\r\n");
       continue;
     }
 
@@ -67,7 +68,7 @@ int main(void) {
   initSpiMutex();
   initI2CMutex();
 
-  sciPrintf("Starting Bringup Utility...\r\n", scilinREG);
+  sciPrintf("Starting Bringup Utility...\r\n");
 
   xTaskCreateStatic(utilityCLI, "Bringup Utility", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
