@@ -13,7 +13,6 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
-    ${CMAKE_CURRENT_SOURCE_DIR}/runtimeTick
     # TODO: Update cc1120 driver so that it doesn't need to include this
     ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
@@ -49,6 +48,5 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdc_bdev.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x/bd621x.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/runtimeTick/rti_weak.c
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
 )
