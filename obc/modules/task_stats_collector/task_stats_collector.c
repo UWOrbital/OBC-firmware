@@ -20,6 +20,10 @@ static char taskTableHeaderStr[] =
     "***********************************************\r\nTask           State   Prio    Stack    "
     "Num\r\n***********************************************\r\n";
 
+static char taskTableOccupiedTime[] =
+    "***********************************************\r\nTask           Ticks          Percent Ticks    "
+    "   \r\n***********************************************\r\n";
+
 static void vTaskStatsCollector(void *pvParameters);
 /**
  * @brief Initialize the task stats collector for debug
@@ -41,6 +45,8 @@ static void vTaskStatsCollector(void *pvParameters) {
 
     vTaskList(taskStatsString);
 
+    LOG_IF_ERROR_CODE(
+        sciPrintText((unsigned char *)taskTableOccupiedTime, strlen(taskTableOccupiedTime), UART_MUTEX_BLOCK_TIME));
     vTaskGetRunTimeStats(taskStatsBuffer);
     LOG_IF_ERROR_CODE(sciPrintText((unsigned char *)taskStatsBuffer, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME));
     LOG_IF_ERROR_CODE(

@@ -5,7 +5,7 @@
 #include <rti_weak.h>
 
 #define RTI_BASE_MEMORY_ADDRESS 0xFFFFFC00u
-#define RTI_GLCTRL_COUNTER1_MASK 0x00000002u
+#define RTI_GLCTRL_ENABLE_COUNTER1_MASK 0x00000002u
 
 #define RTI_RTOS_TICK_COMPARE_CNT (configCPU_CLOCK_HZ / configTICK_RATE_HZ)
 #define RTI_RUNTIME_STATS_COMPARE_CNT (RTI_RTOS_TICK_COMPARE_CNT / 50)
@@ -31,7 +31,7 @@ __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return 1;
 
   // Disable the timer Counter 1
-  RTI_GCTRL_REG &= ~(RTI_GLCTRL_COUNTER1_MASK);
+  RTI_GCTRL_REG &= ~(RTI_GLCTRL_ENABLE_COUNTER1_MASK);
 
   // Preset Free Counting Register and Up Counter.
   RTIFRC1 = 0x00000000;
@@ -67,7 +67,7 @@ __attribute__((weak)) void rtiStartCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 
   // Start the timer
-  RTI_GCTRL_REG |= RTI_GLCTRL_COUNTER1_MASK;
+  RTI_GCTRL_REG |= RTI_GLCTRL_ENABLE_COUNTER1_MASK;
 }
 
 /**
@@ -79,7 +79,7 @@ __attribute__((weak)) void rtiStopCounter(uint32_t counter) {
   if (counter != rtiCOUNTER_BLOCK1) return;
 
   // Disable the timer
-  RTI_GCTRL_REG &= ~(RTI_GLCTRL_COUNTER1_MASK);
+  RTI_GCTRL_REG &= ~(RTI_GLCTRL_ENABLE_COUNTER1_MASK);
 }
 
 #endif
