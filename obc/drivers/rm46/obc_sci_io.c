@@ -90,7 +90,6 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     errCode = OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   } else {
     errCode = OBC_ERR_CODE_SUCCESS;
-    sciReceive(sciReg, numBytes, buf);
   }
 
   xSemaphoreGive(mutex);
