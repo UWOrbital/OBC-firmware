@@ -199,15 +199,15 @@ static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN10
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket) {
+obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   /* Parsing for error */
   char errorCodePacket[] = VN100_ERR_CODE_STRING;
   if (!memcmp(packet, errorCodePacket, sizeof(errorCodePacket) - 1)) {
-    VN100_error_t error = 0;
     obc_error_code_t errCode = 0;
-    RETURN_IF_ERROR_CODE(recoverErrorCodeFromPacket(packet, &error));
+    RETURN_IF_ERROR_CODE(recoverErrorCodeFromPacket(packet, error));
+    return OBC_ERR_CODE_VN100_RESPONSE_ERROR;
   }
 
   VN100_decoded_packet_t packet = {0};
@@ -269,7 +269,9 @@ obc_error_code_t retrieveYPR(vn_ypr_packet_t* packet) {
   obc_error_code_t errCode;
   unsigned char unparsedPacket[YPR_PACKET_SIZE];
   RETURN_IF_ERROR_CODE(serialRequestCMD(VN_YPR, unparsedPacket));
-  RETURN_IF_ERROR_CODE(parsePacket(VN_YPR, unparsedPacket, packet));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_YPR, unparsedPacket, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -280,7 +282,9 @@ obc_error_code_t retrieveMAG(vn_mag_packet_t* packet) {
   obc_error_code_t errCode;
   unsigned char unparsedPacket[MAG_PACKET_SIZE];
   RETURN_IF_ERROR_CODE(serialRequestCMD(VN_MAG, unparsedPacket));
-  RETURN_IF_ERROR_CODE(parsePacket(VN_MAG, unparsedPacket, packet));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_MAG, unparsedPacket, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -291,7 +295,8 @@ obc_error_code_t retrieveACCEL(vn_accel_packet_t* packet) {
   obc_error_code_t errCode;
   unsigned char unparsedPacket[ACCEL_PACKET_SIZE];
   RETURN_IF_ERROR_CODE(serialRequestCMD(VN_ACC, unparsedPacket));
-  RETURN_IF_ERROR_CODE(parsePacket(VN_ACC, unparsedPacket, packet));
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_ACC, unparsedPacket, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -310,7 +315,9 @@ obc_error_code_t retrieveYMR(vn_ymr_packet_t* packet) {
   obc_error_code_t errCode;
   unsigned char unparsedPacket[YPR_PACKET_SIZE];
   RETURN_IF_ERROR_CODE(serialRequestCMD(VN_YMR, unparsedPacket));
-  RETURN_IF_ERROR_CODE(parsePacket(VN_YMR, unparsedPacket, packet));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_YMR, unparsedPacket, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }
 obc_error_code_t setASYNCOutputs(vn_cmd_t cmd) {
