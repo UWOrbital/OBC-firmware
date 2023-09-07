@@ -68,7 +68,9 @@ typedef struct {
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 
-static obc_error_code_t requestCMD (vn_cmd_t cmd);
+static obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet);
+static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN100_decoded_packet_t* parsedPacket);
+static obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error);
 
 void initVN100(void) {
     /* TODO:
