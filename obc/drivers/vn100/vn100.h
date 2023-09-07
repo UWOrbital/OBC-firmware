@@ -12,30 +12,30 @@ typedef enum {
 } vn_cmd_t;
 
 typedef struct {
-  double yaw;
-  double pitch;
-  double roll;
+  float yaw;
+  float pitch;
+  float roll;
 } vn_ypr_packet_t;
 
 typedef struct {
-  double magnet;
+  float magnet;
 } vn_mag_packet_t;
 
 typedef struct {
-  double accel;
+  float accel;
 } vn_accel_packet_t;
 
 typedef struct {
-  double gyro;
+  float gyro;
 } vn_gyro_packet_t;
 
 typedef struct {
-  double yaw;
-  double pitch;
-  double roll;
-  double magnet;
-  double accel;
-  double gyro;
+  float yaw;
+  float pitch;
+  float roll;
+  float magnet;
+  float accel;
+  float gyro;
 } vn_ymr_packet_t;
 
 /**
