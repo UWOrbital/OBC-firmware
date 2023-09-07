@@ -93,10 +93,30 @@ obc_error_code_t requestCMD (vn_cmd_t cmd) {
     case VN_YMR:
         break;
     default:
-        break;
-    }
-    sciSendBytes(&req, MAX_COMMAND_SIZE, TICK_TIMEOUT, UART_VN100_REG);
-    return OBC_ERR_CODE_SUCCESS;
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  memcpy(&decodedPacket.data, data, packetSize);
+  memcpy(&decodedPacket.crc, data[packetSize], sizeof(decodedPacket.crc));
+  *parsedPacket = decodedPacket;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
+  if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
+
+  /* Parsing for error */
+  char errorCodePacket[] = VN100_ERR_CODE_STRING;
+  if (!memcmp(packet, errorCodePacket, sizeof(errorCodePacket) - 1)) {
+    obc_error_code_t errCode = 0;
+    RETURN_IF_ERROR_CODE(recoverErrorCodeFromPacket(packet, error));
+    return OBC_ERR_CODE_VN100_RESPONSE_ERROR;
+  }
+
+  VN100_decoded_packet_t packet = {0};
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(__decodePacket(cmd, packet, &parsedPacket));
 }
 
 obc_error_code_t resetModule() {
@@ -116,6 +136,54 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t retrieveYPR(vn_ypr_packet_t* packet) {
+  /*  TODO:
+      - Call serialRequest for YPR
+      - Wait until flag has set and the response packet is ready to be retrieved
+  */
+  if (packet == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  unsigned char unparsedPacket[YPR_PACKET_SIZE];
+  RETURN_IF_ERROR_CODE(serialRequestCMD(VN_YPR, unparsedPacket));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_YPR, unparsedPacket, packet, &error));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t retrieveMAG(vn_mag_packet_t* packet) {
+  if (packet == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  unsigned char unparsedPacket[MAG_PACKET_SIZE];
+  RETURN_IF_ERROR_CODE(serialRequestCMD(VN_MAG, unparsedPacket));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_MAG, unparsedPacket, packet, &error));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t retrieveACCEL(vn_accel_packet_t* packet) {
+  if (packet == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  unsigned char unparsedPacket[ACCEL_PACKET_SIZE];
+  RETURN_IF_ERROR_CODE(serialRequestCMD(VN_ACC, unparsedPacket));
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_ACC, unparsedPacket, packet, &error));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t retrieveGYRO(vn_gyro_packet_t* packet) {
+  if (packet == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  serialRequestCMD(VN_GYR);
+  return OBC_ERR_CODE_SUCCESS;
 obc_error_code_t requestYPR() {
     // use sciSendByte, to transmit a request command to the VN-100
     char req [MAX_COMMAND_SIZE] = "$VNWRG,75,2,16,01,0029*XX\r\n";
@@ -135,3 +203,32 @@ obc_error_code_t retrieveYPR(vn_ypr_packet_t * packet) {
     return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t retrieveYMR(vn_ymr_packet_t* packet) {
+  if (packet == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  unsigned char unparsedPacket[YPR_PACKET_SIZE];
+  RETURN_IF_ERROR_CODE(serialRequestCMD(VN_YMR, unparsedPacket));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(VN_YMR, unparsedPacket, packet, &error));
+  return OBC_ERR_CODE_SUCCESS;
+}
+obc_error_code_t setASYNCOutputs(vn_cmd_t cmd) {
+  /* TODO:
+     - Let the user choose from the defined packet types to configure the asyncronous output register with a particular
+     packet type
+     - See Example Case 1 in section 4.2.4 of the user manual
+  */
+
+  switch (cmd) {
+    case VN_YPR:
+      // unsigned char req [MAX_COMMAND_SIZE] = "$VNWRG,75,2,16,01,0009*XX\r\n";
+      // sciSendBytes(&req, MAX_COMMAND_SIZE, TICK_TIMEOUT, UART_VN100_REG);
+      break;
+    default:
+      break;
+  }
+  return OBC_ERR_CODE_SUCCESS;
+}
