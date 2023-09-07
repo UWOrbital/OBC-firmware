@@ -2,7 +2,7 @@
 #if (configGENERATE_RUN_TIME_STATS == 1)
 
 #include <rti.h>
-#include <rti_weak.h>
+
 
 #define RTI_BASE_MEMORY_ADDRESS 0xFFFFFC00u
 #define RTI_GLCTRL_ENABLE_COUNTER1_MASK 0x00000002u

@@ -316,6 +316,20 @@ void rtiGetConfigValue(rti_config_reg_t *config_reg, config_value_type_t type);
 void rtiNotification(uint32 notification);
 
 /* USER CODE BEGIN (6) */
+#include <FreeRTOSConfig.h>
+
+#if (configGENERATE_RUN_TIME_STATS == 1)
+
+#include <stdint.h>
+
+/**
+ * @brief Returns the free counter tick for RTI 1
+ *
+ * @return A 32-bit tick value for the Free Counter RTI 1
+ */
+uint32_t rtiGetCounterTick();
+
+#endif
 /* USER CODE END */
 
 /**@}*/
