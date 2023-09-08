@@ -2,6 +2,7 @@
 
 #include "sun_utils.h"
 #include "obc_errors.h"
+#include "obc_logging.h"
 
 #include <stdint.h>
 

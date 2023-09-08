@@ -45,7 +45,7 @@ static obc_error_code_t initSunPositionManager(position_data_manager_t *manager)
 
     for (uint8_t i = 0; i < ADCS_POSITION_DATA_MANAGER_SIZE; i++) {
         position_data_t data = {ADCS_INVALID_JULIAN_DATE, 0, 0, 0};
-        manager->data[i] = data;
+        memcpy(&(manager->data[i]), &data, sizeof(position_data_t));
     }
 
     return OBC_ERR_CODE_SUCCESS;
@@ -93,11 +93,8 @@ static obc_error_code_t managerGetJulianDateByIndex(position_data_manager_t *man
     }
 
     position_data_t tmpData;
-    obc_error_code_t errCode = managerGetPositionDataByIndex(manager, index, &tmpData);
-
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-        return errCode;
-    }
+    obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(managerGetPositionDataByIndex(manager, index, &tmpData));
 
     *buffer = tmpData.julianDate;
     return OBC_ERR_CODE_SUCCESS;
@@ -157,13 +154,11 @@ static obc_error_code_t managerWriteData(position_data_manager_t *manager, posit
     if (manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
+    obc_error_code_t errCode;
 
     // Check if the julian date is unique
     julian_date_t maxJulianDate;
-    obc_error_code_t errCode = managerGetMaxJulianDate(manager, &maxJulianDate);
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-        return errCode;
-    }
+    RETURN_IF_ERROR_CODE(managerGetMaxJulianDate(manager, &maxJulianDate)) ;
     if (data.julianDate <= maxJulianDate) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -214,11 +209,9 @@ static obc_error_code_t managerSearch(const position_data_manager_t *manager, ju
 
     // Get the data for the high and low indices (edge cases)
     manager_size_t highJD, lowJD;
-    obc_error_code_t errCode = managerGetJulianDateByIndex(manager, high, &highJD);
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-        return errCode;
-    }
-    errCode = managerGetJulianDateByIndex(manager, low, &lowJD);
+    obc_error_code_t errCode;
+    RETURN_IF_ERROR_CODE(managerGetJulianDateByIndex(manager, high, &highJD));
+    RETURN_IF_ERROR_CODE(managerGetJulianDateByIndex(manager, low, &lowJD));
 
     // Handle edge cases
     if (julianDate >= highJD) {
@@ -237,7 +230,7 @@ static obc_error_code_t managerSearch(const position_data_manager_t *manager, ju
         } else {
             // low == high
             julian_date_t julianDate;
-            errCode = managerGetJulianDateByIndex(manager, low, &julianDate);
+            RETURN_IF_ERROR_CODE(managerGetJulianDateByIndex(manager, low, &julianDate));
             if (julianDate <= julianDate) {
                 *buffer = low;
                 return OBC_ERR_CODE_SUCCESS;
@@ -248,10 +241,7 @@ static obc_error_code_t managerSearch(const position_data_manager_t *manager, ju
         }
 
         julian_date_t foundJulianDate;
-        errCode = managerGetJulianDateByIndex(manager, mid, &foundJulianDate);
-        if (errCode != OBC_ERR_CODE_SUCCESS) {
-            return errCode;
-        }
+        RETURN_IF_ERROR_CODE(managerGetJulianDateByIndex(manager, mid, &foundJulianDate));
 
         if (foundJulianDate == julianDate) {
             *buffer = mid;
@@ -280,29 +270,21 @@ static obc_error_code_t managerGetPositionData(position_data_manager_t *manager,
     if (buffer == NULL || julianDate <= ADCS_INVALID_JULIAN_DATE || manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
+    obc_error_code_t errCode;
 
     // Check that the julian date is greater than or equal to than the min julian date
     julian_date_t minJulianDate;
-    obc_error_code_t errorCode = managerGetMinJulianDate(manager, &minJulianDate);
-    if(errorCode != OBC_ERR_CODE_SUCCESS) {
-        return errorCode;
-    }
+    RETURN_IF_ERROR_CODE(managerGetMinJulianDate(manager, &minJulianDate));
     if (julianDate < minJulianDate) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
 
     // Search for the index of the closest julian date
     manager_size_t index;
-    errorCode = managerSearch(manager, julianDate, &index);
-    if (errorCode != OBC_ERR_CODE_SUCCESS) {
-        return errorCode;
-    }
+    RETURN_IF_ERROR_CODE(managerSearch(manager, julianDate, &index));
 
     position_data_t dataHigher;
-    errorCode = managerGetPositionDataByIndex(manager, index, &dataHigher);
-    if (errorCode != OBC_ERR_CODE_SUCCESS) {
-        return errorCode;
-    }
+    RETURN_IF_ERROR_CODE(managerGetPositionDataByIndex(manager, index, &dataHigher));
 
     // Main logic starts here
 
@@ -312,22 +294,15 @@ static obc_error_code_t managerGetPositionData(position_data_manager_t *manager,
     } 
 
     position_data_t dataLower;
-    errorCode = managerGetPositionDataByIndex(manager, index - 1 + ADCS_POSITION_DATA_MANAGER_SIZE, &dataLower);
-    if (errorCode != OBC_ERR_CODE_SUCCESS) {
-        return errorCode;
-    }
+    RETURN_IF_ERROR_CODE(managerGetPositionDataByIndex(manager, index - 1 + ADCS_POSITION_DATA_MANAGER_SIZE, &dataLower));
 
-    // Shouldn't happen as we need to linearly interpolate between these two points
-    if (dataLower.julianDate == dataHigher.julianDate) {
-        return OBC_ERR_CODE_INVALID_STATE;
-    }
-
+    // Linearly interpolate the 2 closest data points
     position_data_t newData = {julianDate, 0, 0, 0};
-    // Buffer is valid so no need to check it
-    (void) linearlyInterpolate(julianDate, dataLower.x, dataHigher.x, dataLower.julianDate, dataHigher.julianDate, &(newData.x));
-    (void) linearlyInterpolate(julianDate, dataLower.y, dataHigher.y, dataLower.julianDate, dataHigher.julianDate, &(newData.y));
-    (void) linearlyInterpolate(julianDate, dataLower.z, dataHigher.z, dataLower.julianDate, dataHigher.julianDate, &(newData.z));
+    RETURN_IF_ERROR_CODE(linearlyInterpolate(julianDate, dataLower.x, dataHigher.x, dataLower.julianDate, dataHigher.julianDate, &(newData.x)));
+    RETURN_IF_ERROR_CODE(linearlyInterpolate(julianDate, dataLower.y, dataHigher.y, dataLower.julianDate, dataHigher.julianDate, &(newData.y)));
+    RETURN_IF_ERROR_CODE(linearlyInterpolate(julianDate, dataLower.z, dataHigher.z, dataLower.julianDate, dataHigher.julianDate, &(newData.z)));
     memcpy(buffer, &newData, sizeof(position_data_t));
+
     return OBC_ERR_CODE_SUCCESS;
 }
 
