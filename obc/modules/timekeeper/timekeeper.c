@@ -47,7 +47,6 @@ static void timekeeperTask(void *pvParameters) {
 
   obc_error_code_t errCode;
   fram_time_data_t unixTime;
-  obc_error_code_t syncResult;
   uint8_t syncPeriodCounter = 0;  // Sync whenever this counter is 0
 
   while (1) {
