@@ -1,25 +1,42 @@
 #pragma once
 
 #include "data_point.h"
+#include "obc_errors.h"
+
 #include <stdint.h>
 
-#define ADCS_POSITION_DATA_MANAGER_SIZE 10U
-#define ADCS_INVALID_JULIAN_DATE 0U
-
-// uint8_t are used as the data manager will never exceed 256 data points as that is nearly 3 kb of data
-/**
- * @struct	position_data_manager_t
- * @brief	Holds the position data and read/write indices. 
- * Read/write indices are the next indices to read from or write to
-*/
-typedef struct position_data_manager_t {
-    uint8_t readIndex;  // Will not exceed writeIndex
-    uint8_t writeIndex;
-    position_data_t data[ADCS_POSITION_DATA_MANAGER_SIZE];
-} position_data_manager_t;
+#define ADCS_POSITION_DATA_MANAGER_SIZE 25U
 
 /**
  * @brief	Initializes the sun position module
 */
 void initSunPosition(void);
+
+/**
+ * @brief Gets the sun position at the given julian date
+ * @attention jd must be greater than 0
+ * @attention buffer must be a valid pointer
+ * @param jd The julian date (or close to it) to get the sun position at
+ * @param buffer The buffer to store the sun position in
+ * 
+ * @details May modify the file used for storing the data points
+*/
+obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer);
+
+/**
+ * @brief Copies the next data point from the manager into the buffer and shifts the manager over
+ * @attention buffer must be a valid pointer
+ * @param buffer The buffer to store the next data point in
+ * @details May modify the file and manager used for storing the data points
+*/
+obc_error_code_t sunPositionNext(position_data_t *buffer);
+
+/**
+ * @brief Shifts all the data points of the manager to start at the given julian date
+ * @param jd The julian date to shift the data points to start at (the manager will choose the 
+ * closest julian date stored in the file)
+ * @attention jd must be greater than 0 and less than largest julian date that has the length of the data
+ * manager number of points after it (including this julian date) 
+*/
+obc_error_code_t sunPositionShiftTo(julian_date_t jd);
 
