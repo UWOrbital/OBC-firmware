@@ -21,7 +21,8 @@ int main(void) {
 
   while (1) {
     unsigned char buffer[NUM_CHARS_TO_READ] = {'\0'};
-    obc_error_code_t error = sciRead(buffer, NUM_CHARS_TO_READ, UART_PRINT_REG);
+    obc_error_code_t error =
+        sciReadBytes(buffer, NUM_CHARS_TO_READ, UART_MUTEX_BLOCK_TIME, pdMS_TO_TICKS(10), UART_PRINT_REG);
     if (error != OBC_ERR_CODE_SUCCESS) {
       sciPrintf("Error reading from SCI! - %d\r\n", (int)error);
       continue;
