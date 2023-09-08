@@ -34,7 +34,6 @@
 #define GYRO_REQUEST_CMD "$VNRRG,19*XX\r\n"
 #define YMR_REQUEST_CMD "$VNRRG,27*XX\r\n"
 
-
 /**
  * @brief Generalized request function to handle mulitple different packet types
  * @param cmd the input command to determine what packet to request
@@ -125,10 +124,6 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
 }
 
 obc_error_code_t retrieveYPR(vn_ypr_packet_t* packet) {
-  /*  TODO:
-      - Call serialRequest for YPR
-      - Wait until flag has set and the response packet is ready to be retrieved
-  */
   if (packet == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
