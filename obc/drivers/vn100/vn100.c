@@ -73,7 +73,7 @@ obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
     case VN_YPR: {
       unsigned char YPRRequest[] = YPR_REQUEST_CMD;
       numBytesToRead = YPR_PACKET_SIZE;
-      RETURN_IF_ERROR_CODE((sciSendBytes(YPRRequest, sizeof(YPRRequest), TICK_TIMEOUT, UART_VN100_REG)));
+      RETURN_IF_ERROR_CODE(sciSendBytes(YPRRequest, sizeof(YPRRequest), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_MAG: {
@@ -103,13 +103,12 @@ obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
-  unsigned char received[MAX_COMMAND_SIZE];
-  sciReadBytes(received, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10));
 
   /* TODO:
-      - Add sciReadBytes with the appropriate bytes to read
-      - error checking
+    - Add something to wait for a response here from the peripheral?
   */
+  unsigned char received[MAX_COMMAND_SIZE];
+  RETURN_IF_ERROR_CODE(sciReadBytes(received, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
   return errCode;
 }
 
@@ -117,8 +116,9 @@ obc_error_code_t resetModule() {
   /* TODO:
     - Confirm that the right response message is received from the module, otherwise throw an error
   */
+  obc_error_code_t errCode;
   unsigned char req[MAX_COMMAND_SIZE] = "$VNRST*4D\r\n";
-  sciSendBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, UART_VN100_REG);
+  RETURN_IF_ERROR_CODE(sciReadBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
