@@ -1,7 +1,9 @@
 #include "vn100_parsing.h"
+#include "obc_logging.h"
 
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #define VN100_ERR_CODE_STRING "$VNERR,"
 #define VALID_RESPONSE_STRING "$VNWRG,75"
@@ -28,7 +30,7 @@ static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN10
 static uint16_t calculateCRC(unsigned char data[], unsigned int length);
 static obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error);
 
-static obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
+obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   /* Parsing for error */
