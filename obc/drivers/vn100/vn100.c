@@ -149,14 +149,11 @@ obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t
   if (packet == NULL || error == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   char errorCodePacket[] = VN100_ERR_CODE_STRING;
-  if (!memcmp(packet, errorCodePacket, sizeof(errorCodePacket) - 1)) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-
   const uint8_t errorCodeIndex = sizeof(errorCodePacket) - 1;
   const errorCode = packet[errorCodeIndex];
+
   if (!((errorCode <= INSUFFICIENT_BAUD_RATE) || (errorCode == ERROR_BUFFER_OVERFLOW))) {
-    return OBC_ERR_CODE_INVALID_ARG;
+    return OBC_ERR_CODE_VN100_PARSE_ERROR;
   }
   *error = errorCode;
   return OBC_ERR_CODE_SUCCESS;
@@ -210,9 +207,29 @@ obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPa
     return OBC_ERR_CODE_VN100_RESPONSE_ERROR;
   }
 
-  VN100_decoded_packet_t packet = {0};
+  VN100_decoded_packet_t decodedPacket = {0};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(__decodePacket(cmd, packet, &parsedPacket));
+  RETURN_IF_ERROR_CODE(__decodePacket(cmd, packet, &decodedPacket));
+
+  switch (cmd) {
+    case VN_YPR:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_ypr_packet_t));
+      break;
+    case VN_MAG:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_mag_packet_t));
+      break;
+    case VN_ACC:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_accel_packet_t));
+      break;
+    case VN_GYR:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_gyro_packet_t));
+      break;
+    case VN_YMR:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_ymr_packet_t));
+      break;
+    default:
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
 }
 
 obc_error_code_t resetModule() {
