@@ -80,10 +80,81 @@ void initVN100(void) {
     */
 }
 
-obc_error_code_t requestCMD (vn_cmd_t cmd) {
-    unsigned char req [MAX_COMMAND_SIZE] = "";
-    switch (cmd)
-    {
+obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
+  obc_error_code_t errCode;
+  size_t numBytesToRead;
+  // Send a request command to the IMU depending on what packet we want to retrieve
+  // Need to make this more generalized, currently kinda looks sucky
+  switch (cmd) {
+    case VN_YPR: {
+      unsigned char YPRRequest[] = "$VNRRG,8*XX\r\n";
+      numBytesToRead = YPR_PACKET_SIZE;
+      errCode = sciSendBytes(YPRRequest, sizeof(YPRRequest), TICK_TIMEOUT, UART_VN100_REG);
+      break;
+    }
+    case VN_MAG: {
+      unsigned char MAGRequest[] = "$VNRRG,17*XX\r\n";
+      numBytesToRead = MAG_PACKET_SIZE;
+      errCode = sciSendBytes(MAGRequest, sizeof(MAGRequest), TICK_TIMEOUT, UART_VN100_REG);
+      break;
+    }
+    case VN_ACC: {
+      unsigned char ACCELRequest[] = "$VNRRG,18*XX\r\n";
+      numBytesToRead = ACCEL_PACKET_SIZE;
+      errCode = sciSendBytes(ACCELRequest, sizeof(ACCELRequest), TICK_TIMEOUT, UART_VN100_REG);
+      break;
+    }
+    case VN_GYR: {
+      unsigned char GYRORequest[] = "$VNRRG,19*XX\r\n";
+      numBytesToRead = GYRO_PACKET_SIZE;
+      errCode = sciSendBytes(GYRORequest, sizeof(GYRORequest), TICK_TIMEOUT, UART_VN100_REG);
+      break;
+    }
+    case VN_YMR: {
+      unsigned char YMRRequest[] = "$VNRRG,27*XX\r\n";
+      numBytesToRead = YMR_PACKET_SIZE;
+      errCode = sciSendBytes(YMRRequest, sizeof(YMRRequest), TICK_TIMEOUT, UART_VN100_REG);
+      break;
+    }
+    default:
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
+  unsigned char received[MAX_COMMAND_SIZE];
+
+  sciReadBytes(received, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10));
+
+  /* TODO:
+      - Add sciReadBytes with the appropriate bytes to read
+      - error checking
+  */
+  return errCode;
+}
+
+obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error) {
+  if (packet == NULL || error == NULL) return OBC_ERR_CODE_INVALID_ARG;
+
+  char errorCodePacket[] = VN100_ERR_CODE_STRING;
+  const uint8_t errorCodeIndex = sizeof(errorCodePacket) - 1;
+  const errorCode = packet[errorCodeIndex];
+
+  if (!((errorCode <= INSUFFICIENT_BAUD_RATE) || (errorCode == ERROR_BUFFER_OVERFLOW))) {
+    return OBC_ERR_CODE_VN100_PARSE_ERROR;
+  }
+  *error = errorCode;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN100_decoded_packet_t* parsedPacket) {
+  if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
+
+  unsigned char* payload = packet[PAYLOAD_OFFSET];  // The main payload
+
+  VN100_decoded_packet_t decodedPacket = {0};
+  memcpy(&decodedPacket.header, payload, sizeof(decodedPacket.header));
+
+  unsigned char* data = payload[sizeof(decodedPacket.header)];
+  uint16_t packetSize = 0;
+  switch (cmd) {
     case VN_YPR:
         break;
     case VN_MAG:
@@ -116,9 +187,29 @@ obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPa
     return OBC_ERR_CODE_VN100_RESPONSE_ERROR;
   }
 
-  VN100_decoded_packet_t packet = {0};
+  VN100_decoded_packet_t decodedPacket = {0};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(__decodePacket(cmd, packet, &parsedPacket));
+  RETURN_IF_ERROR_CODE(__decodePacket(cmd, packet, &decodedPacket));
+
+  switch (cmd) {
+    case VN_YPR:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_ypr_packet_t));
+      break;
+    case VN_MAG:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_mag_packet_t));
+      break;
+    case VN_ACC:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_accel_packet_t));
+      break;
+    case VN_GYR:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_gyro_packet_t));
+      break;
+    case VN_YMR:
+      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_ymr_packet_t));
+      break;
+    default:
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
 }
 
 obc_error_code_t resetModule() {
