@@ -1,3 +1,5 @@
+#ifdef OBC_REVISION_2
+
 #include "tpl5010.h"
 #include "gio.h"
 
@@ -17,3 +19,4 @@ void feedHardwareWatchdog(void) {
 
   gioSetPort(TPL5010_GIO_PORT, DONE_SIGNAL_OFF);
 }
+#endif
