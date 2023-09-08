@@ -53,23 +53,18 @@ static void timekeeperTask(void *pvParameters) {
   while (1) {
     if (syncPeriodCounter == 0) {
       // Sync the local time with the RTC every LOCAL_TIME_SYNC_PERIOD_S seconds.
-
-      syncResult = syncUnixTime();
-      if(syncResult != OBC_ERR_CODE_SUCCESS){
-        LOG_ERROR("Time synchronization failed, &d", syncResult);
-      }
+      // TODO: Deal with errors
+      LOG_IF_ERROR_CODE(syncUnixTime());
     } else {
       incrementCurrentUnixTime();
     }
 
     LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
-
-    //Send Unix time to fram
+    // Send Unix time to fram
     unixTime.unix_time = getCurrentUnixTime();
-    errCode = setPersistentTimeData(unixTime);
 
-    if(errCode != OBC_ERR_CODE_SUCCESS){
-      LOG_ERROR("Error storing Unix time in persistant storage, &d", errCode);
+    if (unixTime.unix_time) {
+      LOG_IF_ERROR_CODE(setPersistentTimeData(unixTime));
     }
 
     syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
