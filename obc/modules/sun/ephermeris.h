@@ -1,12 +1,12 @@
 #pragma once
 
 #include "sun_utils.h"
+#include "sun_mgr.h"
+
 #include "obc_errors.h"
 #include "obc_logging.h"
 
 #include <stdint.h>
-
-#define ADCS_POSITION_DATA_MANAGER_SIZE 25U
 
 /**
  * @brief	Initializes the sun position module

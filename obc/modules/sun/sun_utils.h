@@ -3,6 +3,8 @@
 #include "obc_errors.h"
 #include <stdint.h>
 
+#define ADCS_INVALID_JULIAN_DATE 0U
+
 typedef double julian_date_t;
 typedef float position_t;
 
