@@ -190,10 +190,28 @@ static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN10
   }
 
   memcpy(&decodedPacket.data, data, packetSize);
-  memcpy(&decodedPacket.crc, data[packetSize], sizeof(decodedPacket.crc));
-  *parsedPacket = decodedPacket;
+  uint16_t checksum = calculateCRC(data, packetSize);
 
+  memcpy(&decodedPacket.crc, data[packetSize], sizeof(decodedPacket.crc));
+  if (checksum != decodedPacket.crc) {
+    return OBC_ERR_CODE_VN100_PARSE_ERROR;
+  }
+
+  *parsedPacket = decodedPacket;
   return OBC_ERR_CODE_SUCCESS;
+}
+static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
+  unsigned int i;
+  uint16_t crc = 0;
+
+  for (i = 0; i < length; i++) {
+    crc = (unsigned char)(crc >> 8) | (crc << 8);
+    crc ^= data[i];
+    crc ^= (unsigned char)(crc & 0xff) >> 4;
+    crc ^= crc << 12;
+    crc ^= (crc & 0x00ff) << 5;
+  }
+  return crc;
 }
 
 obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
