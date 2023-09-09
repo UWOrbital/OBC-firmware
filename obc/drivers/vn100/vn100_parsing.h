@@ -19,22 +19,4 @@ typedef enum {
   ERROR_BUFFER_OVERFLOW = 255
 } VN100_error_t;
 
-/**
- * @brief Parse the packets into their respective packet types
- * @param cmd Command that denotes which packet type it is
- * @param packet Unparsed packet in the form of a string
- * @param parsedPacket Buffer with the correct packet type
- * @param error Error code in case an error occurs
- *
- * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
 obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error);
-
-/**
- * @brief If there is an error thrown by the VN-100, parse the error message and return the corresponding error
- * @param packet Unparsed packet in the form of a string
- * @param error Error code in case an error occurs
- *
- * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
-obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error);
