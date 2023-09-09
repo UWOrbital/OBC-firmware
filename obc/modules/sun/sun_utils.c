@@ -15,19 +15,9 @@ obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// For testing purposes only
-obc_error_code_t printPositionData(const position_data_t *data) {
-  if (data == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-
-  printf("Julian Date: %f, X: %f, Y: %f, Z:%f\n", data->julianDate, data->x, data->y, data->z);
-  return OBC_ERR_CODE_SUCCESS;
-}
-
 // Close functions
 
-uint8_t doubleClose(double a, double b) { return doubleClose(a, b, RELATIVE_TOLERANCE); }
+uint8_t doubleCloseDefault(double a, double b) { return doubleClose(a, b, RELATIVE_TOLERANCE); }
 
 uint8_t doubleClose(double a, double b, double relativeTolerance) {
   return doubleAbs(a - b) <= relativeTolerance * doubleMax(doubleAbs(a), doubleAbs(b));

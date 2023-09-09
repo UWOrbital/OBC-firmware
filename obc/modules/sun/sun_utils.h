@@ -52,9 +52,6 @@ int equalsPositionData(const position_data_t data1, const position_data_t data2)
 obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t point1, position_t point2,
                                      julian_date_t jd1, julian_date_t jd2, position_t *buffer);
 
-// For testing purposes only
-obc_error_code_t printPositionData(const position_data_t *data);
-
 // These are place here as doubles are 64-bit thus these operations may not be atomic
 
 /**
@@ -74,14 +71,14 @@ static inline double doubleMax(double a, double b) { return (a) > (b) ? (a) : (b
 static inline double doubleAbs(double num) { return (num) < 0 ? -(num) : (num); }
 
 /**
- * @brief Checks whether the numbers a and b are close within the given
+ * @brief Checks whether the numbers a and b are close within the default tolerance
  * interval. Formula is the same as the python math.isclose() function except that absolute tolerance is not used
  * (abs (a-b) <= RELATIVE_TOLERANCE * max(abs(a), abs(b)))
  * @param a: first double number to check
  * @param b: second double number to check
  * @warning This operation is not atomic. It is the responsibility of the caller to setup the appropriate locks
  */
-uint8_t doubleClose(double a, double b);
+uint8_t doubleCloseDefault(double a, double b);
 
 /**
  * @brief Checks whether the numbers a and b are close within the given

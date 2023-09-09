@@ -110,7 +110,7 @@ obc_error_code_t sunManagerReadData(position_data_manager_t *manager, position_d
 }
 
 obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_data_t data) {
-  if (manager == NULL) {
+  if (manager == NULL || data.julianDate <= ADCS_INVALID_JULIAN_DATE) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -233,7 +233,7 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
     RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, mid, &foundJulianDate));
 
     // Check if the foundJulianDate is close enough to the julianDate
-    if (doubleClose(foundJulianDate, julianDate)) {
+    if (doubleCloseDefault(foundJulianDate, julianDate)) {
       *buffer = mid;
       return OBC_ERR_CODE_SUCCESS;
     } else if (foundJulianDate < julianDate) {
@@ -252,10 +252,10 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
   }
   obc_error_code_t errCode;
 
-  // Check that the julian date is greater than or equal to than the min julian date
-  julian_date_t minJulianDate;
-  RETURN_IF_ERROR_CODE(sunManagerGetMinJulianDate(manager, &minJulianDate));
-  if (julianDate < minJulianDate) {
+  // Check that the julian date is within the range of the manager
+  uint8_t isInRange;
+  RETURN_IF_ERROR_CODE(sunManagerCheckJD(manager, julianDate, &isInRange));
+  if (!isInRange) {
     return OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE;
   }
 
@@ -265,15 +265,15 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
 
   // If the binary search fails, search linearly
   if (errCode == OBC_ERR_CODE_SUN_POSITION_MGR_SEARCH_TIMEOUT) {
-    sunManagerSearchLinear(manager, julianDate, &index);
+    RETURN_IF_ERROR_CODE(sunManagerSearchLinear(manager, julianDate, &index));
   }
 
   position_data_t dataHigher;
   RETURN_IF_ERROR_CODE(sunManagerGetPositionDataByIndex(manager, index, &dataHigher));
 
   // Main logic starts here
-
-  if (dataHigher.julianDate == julianDate) {
+  // If the julian dates are close, return the data point
+  if (doubleAbs(dataHigher.julianDate - julianDate) < RELATIVE_TOLERANCE) {
     memcpy(buffer, &dataHigher, sizeof(position_data_t));
     return OBC_ERR_CODE_SUCCESS;
   }

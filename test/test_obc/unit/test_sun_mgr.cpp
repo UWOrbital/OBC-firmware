@@ -24,7 +24,8 @@ TEST(TestObcSunMgr, writeUntilEnd) {
   ASSERT_EQ(count, ADCS_POSITION_DATA_MANAGER_SIZE);
 
   // Invalid JD test
-  data.julianDate = 0 ASSERT_EQ(sunManagerWriteData(&manager, data), OBC_ERR_CODE_INVALID_ARG);
+  data.julianDate = 0;
+  ASSERT_EQ(sunManagerWriteData(&manager, data), OBC_ERR_CODE_INVALID_ARG);
 }
 
 TEST(TestObcSunMgr, readUntilEnd) {
@@ -52,14 +53,13 @@ TEST(TestObcSunMgr, readUntilEnd) {
     position_t d2 = (position_t)countRead;
     position_data_t dataExpect = {(julian_date_t)(countRead + 1), d2, d2, d2};
     countRead++;
-    ASSERT_EQ(equalsPositionData(dataRead, dataExpect), 1);
+    ASSERT_TRUE(equalsPositionData(dataRead, dataExpect));
   }
 
   ASSERT_EQ(countRead, ADCS_POSITION_DATA_MANAGER_SIZE);
 
-  ASSERT_EQ(sunManagerWriteData(&manager, nullptr), OBC_ERR_CODE_INVALID_ARG);
   position_data_t d;
-  ASSERT_EQ(sunManagerWriteData(nullptr, &d), OBC_ERR_CODE_INVALID_ARG);
+  ASSERT_EQ(sunManagerWriteData(nullptr, d), OBC_ERR_CODE_INVALID_ARG);
 }
 
 TEST(TestObcSunMgr, readWriteTwiceLength) {
@@ -157,7 +157,6 @@ TEST(TestObcSunMgr, getPositionDataManagerPartial) {
   position_data_t data2 = {5, 10, 15, -5};
   position_data_t data3 = {6.9, 13.8, 20.7, -6.9};
   position_data_t data4 = {13, 26, 39, -13};
-  position_data_t data5 = {14, 28, 42, -14};
 
   position_data_t dataRead;
 
@@ -172,7 +171,33 @@ TEST(TestObcSunMgr, getPositionDataManagerPartial) {
 
   ASSERT_EQ(sunManagerGetPositionData(&manager, 13, &dataRead), OBC_ERR_CODE_SUCCESS);
   ASSERT_TRUE(equalsPositionData(dataRead, data4));
+}
 
-  ASSERT_EQ(sunManagerGetPositionData(&manager, 14, &dataRead), OBC_ERR_CODE_SUCCESS);
-  ASSERT_TRUE(equalsPositionData(dataRead, data5));
+TEST(TestObcSunMgr, getPositionDataManagerOutOfRange) {
+  // Setup manager
+  position_data_manager_t manager = {0};
+  ASSERT_EQ(sunManagerInit(&manager), OBC_ERR_CODE_SUCCESS);
+
+  // Fill the manager with data
+  for (int i = 1; i <= ADCS_POSITION_DATA_MANAGER_SIZE; ++i) {
+    position_data_t dataWrite = {(julian_date_t)i, 0, 0, 0};
+    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+  }
+
+  // Shift manager move by 2
+  for (int i = 1; i <= 2; ++i) {
+    position_data_t dataRead;
+    ASSERT_EQ(sunManagerReadData(&manager, &dataRead), OBC_ERR_CODE_SUCCESS);
+
+    position_data_t dataWrite = {(julian_date_t)(i + ADCS_POSITION_DATA_MANAGER_SIZE), 0, 0, 0};
+    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+  }
+
+  position_data_t buffer;
+  // Smaller
+  ASSERT_EQ(sunManagerGetPositionData(&manager, 1, &buffer), OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE);
+
+  // Larger
+  ASSERT_EQ(sunManagerGetPositionData(&manager, ADCS_POSITION_DATA_MANAGER_SIZE * 2, &buffer),
+            OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE);
 }
