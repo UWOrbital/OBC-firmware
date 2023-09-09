@@ -7,9 +7,9 @@
 
 TEST(VN100_PARSING_SUITE, EXPECT_SERIAL_ERROR_CODE) {
   const char[] errorStringValid = "$VNERR,C";
-  const char[] errorStringInvalid = "$VNERR,E"
+  const char[] errorStringInvalid = "$VNERR,E";
 
-      VN100_error_t error = 0;
+  VN100_error_t error = 0;
   ASSERT_EQ(parsePacket(VN_YMR, errorStringValid, &error), OBC_ERR_CODE_VN100_RESPONSE_ERROR);
   ASSERT_EQ(error, INSUFFICIENT_BAUD_RATE);
 
