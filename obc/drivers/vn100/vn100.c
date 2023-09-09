@@ -30,6 +30,13 @@
 #define GYRO_PACKET_SIZE 12U
 #define YMR_PACKET_SIZE 48U
 
+/* ---------------------------- Request Commands ------------------------------------- */
+#define YPR_REQUEST_CMD "$VNRRG,8*XX\r\n"
+#define MAG_REQUEST_CMD "$VNRRG,17*XX\r\n"
+#define ACCEL_REQUEST_CMD "$VNRRG,18*XX\r\n"
+#define GYRO_REQUEST_CMD "$VNRRG,19*XX\r\n"
+#define YMR_REQUEST_CMD "$VNRRG,27*XX\r\n"
+
 /**
  * @brief Generalized request function to handle mulitple different packet types
  * @param cmd the input command to determine what packet to request
@@ -64,46 +71,44 @@ obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
   // Need to make this more generalized, currently kinda looks sucky
   switch (cmd) {
     case VN_YPR: {
-      unsigned char YPRRequest[] = "$VNRRG,8*XX\r\n";
+      unsigned char YPRRequest[] = YPR_REQUEST_CMD;
       numBytesToRead = YPR_PACKET_SIZE;
-      errCode = sciSendBytes(YPRRequest, sizeof(YPRRequest), TICK_TIMEOUT, UART_VN100_REG);
+      RETURN_IF_ERROR_CODE(sciSendBytes(YPRRequest, sizeof(YPRRequest), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_MAG: {
-      unsigned char MAGRequest[] = "$VNRRG,17*XX\r\n";
+      unsigned char MAGRequest[] = MAG_REQUEST_CMD;
       numBytesToRead = MAG_PACKET_SIZE;
-      errCode = sciSendBytes(MAGRequest, sizeof(MAGRequest), TICK_TIMEOUT, UART_VN100_REG);
+      RETURN_IF_ERROR_CODE(sciSendBytes(MAGRequest, sizeof(MAGRequest), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_ACC: {
-      unsigned char ACCELRequest[] = "$VNRRG,18*XX\r\n";
+      unsigned char ACCELRequest[] = ACCEL_REQUEST_CMD;
       numBytesToRead = ACCEL_PACKET_SIZE;
-      errCode = sciSendBytes(ACCELRequest, sizeof(ACCELRequest), TICK_TIMEOUT, UART_VN100_REG);
+      RETURN_IF_ERROR_CODE(sciSendBytes(ACCELRequest, sizeof(ACCELRequest), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_GYR: {
-      unsigned char GYRORequest[] = "$VNRRG,19*XX\r\n";
+      unsigned char GYRORequest[] = GYRO_REQUEST_CMD;
       numBytesToRead = GYRO_PACKET_SIZE;
-      errCode = sciSendBytes(GYRORequest, sizeof(GYRORequest), TICK_TIMEOUT, UART_VN100_REG);
+      RETURN_IF_ERROR_CODE(sciSendBytes(GYRORequest, sizeof(GYRORequest), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_YMR: {
-      unsigned char YMRRequest[] = "$VNRRG,27*XX\r\n";
+      unsigned char YMRRequest[] = YMR_REQUEST_CMD;
       numBytesToRead = YMR_PACKET_SIZE;
-      errCode = sciSendBytes(YMRRequest, sizeof(YMRRequest), TICK_TIMEOUT, UART_VN100_REG);
+      RETURN_IF_ERROR_CODE(sciSendBytes(YMRRequest, sizeof(YMRRequest), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
-  unsigned char received[MAX_COMMAND_SIZE];
-
-  sciReadBytes(received, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10));
 
   /* TODO:
-      - Add sciReadBytes with the appropriate bytes to read
-      - error checking
+    - Add something to wait for a response here from the peripheral?
   */
+  unsigned char received[MAX_COMMAND_SIZE];
+  RETURN_IF_ERROR_CODE(sciReadBytes(received, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
   return errCode;
 }
 
@@ -111,8 +116,9 @@ obc_error_code_t resetModule() {
   /* TODO:
     - Confirm that the right response message is received from the module, otherwise throw an error
   */
+  obc_error_code_t errCode;
   unsigned char req[MAX_COMMAND_SIZE] = "$VNRST*4D\r\n";
-  sciSendBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, UART_VN100_REG);
+  RETURN_IF_ERROR_CODE(sciReadBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -151,10 +157,6 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
 }
 
 obc_error_code_t retrieveYPR(vn_ypr_packet_t* packet) {
-  /*  TODO:
-      - Call serialRequest for YPR
-      - Wait until flag has set and the response packet is ready to be retrieved
-  */
   if (packet == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

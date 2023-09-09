@@ -1,4 +1,5 @@
 #include "vn100_parsing.h"
+#include "obc_logging.h"
 
 #include <stdint.h>
 #include <stdarg.h>
