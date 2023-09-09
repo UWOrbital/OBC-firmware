@@ -2,8 +2,7 @@ set(TEST_BINARY obc-firmware-tests)
 
 set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/sys/time/obc_time_utils.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100/vn100.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100/vn100_parsing.c
+    ${CMAKE_SOURCE_DIR}/obc/sys/logging/obc_logging.c
 )
 
 set(TEST_MOCKS
@@ -13,7 +12,6 @@ set(TEST_MOCKS
 set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/main.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_obc_time_utils.cpp
-    ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_vn100_packet_parsing.cpp
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
