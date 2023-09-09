@@ -24,7 +24,14 @@ typedef struct position_data_manager_t {
   manager_size_t readIndex;  // Will not exceed writeIndex
   manager_size_t writeIndex;
   position_data_t data[ADCS_POSITION_DATA_MANAGER_SIZE];
+  uint8_t state;
 } position_data_manager_t;
+
+// State has the following bit expression:
+//  state: 8 7 6 5 4 3 2 1
+//  state: 0 0 0 0 0 0 R W
+//  W indicates the write bit will fail
+//  R indicates the read bit will fail
 
 /**
  * @brief	Initializes the position data manager
@@ -40,7 +47,7 @@ obc_error_code_t sunManagerInit(position_data_manager_t *manager);
  * @param	manager: The manager to check
  * @param	jd: The julian date to check
  * @param   buffer: Stores the boolean value of whether the JD is within the range of the manager
- * @attention Requires that the manager and buffer are not NULL, JD is greater than 0
+ * @attention Requires that the manager and buffer are not NULL
  */
 obc_error_code_t sunManagerCheckJD(const position_data_manager_t *manager, julian_date_t jd, uint8_t *buffer);
 

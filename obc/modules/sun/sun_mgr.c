@@ -16,6 +16,10 @@ obc_error_code_t sunManagerInit(position_data_manager_t *manager) {
     memcpy(&(manager->data[i]), &data, sizeof(position_data_t));
   }
 
+  // Set the state to 0b1 to indicate that the manager can write when the
+  // write and read index are the same
+  manager->state = 0b1;
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -84,8 +88,19 @@ obc_error_code_t sunManagerReadData(position_data_manager_t *manager, position_d
   }
 
   // Read index is at the smallest julian date in manager which is where the data is to be written
-  if (manager->readIndex == manager->writeIndex) {
+  // Read bit is not set so we can't read
+  if (manager->readIndex == manager->writeIndex && !(manager->state & 0b10)) {
     return OBC_ERR_CODE_SUN_POSITION_MGR_READ_FAIL;
+  }
+
+  // Unset the read bit so that the manager will not read when the write and read index are the same
+  manager->state &= 0b01;
+
+  // Set the write index to indicate that the manager can write when the write and read index are the same
+  if (manager->writeIndex == (manager->readIndex + 1) % ADCS_POSITION_DATA_MANAGER_SIZE) {
+    manager->state |= 0b1;
+  } else {
+    manager->state &= 0b10;
   }
 
   manager_size_t index = manager->readIndex;
@@ -100,17 +115,29 @@ obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_
   }
 
   // Next write index is the same as the read index so we don't want to override the data at the read index
-  if ((manager->writeIndex + 1) % ADCS_POSITION_DATA_MANAGER_SIZE == manager->readIndex) {
+  // Write bit is not set so we can't write
+  if (manager->writeIndex == manager->readIndex && !(manager->state & 0b1)) {
     return OBC_ERR_CODE_SUN_POSITION_MGR_WRITE_FAIL;
   }
 
   obc_error_code_t errCode;
-
   // Check if the julian date is unique, all data must be sorted by the JD in ascending order
   julian_date_t maxJulianDate;
   RETURN_IF_ERROR_CODE(sunManagerGetMaxJulianDate(manager, &maxJulianDate));
   if (data.julianDate <= maxJulianDate) {
     return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // Modify the state of the manager only after checking that the data and manager are valid
+
+  // Unset the write bit so that the manager will not write when the write and read index are the same
+  manager->state &= 0b10;
+
+  // Set the read bit to indicate that the manager can read when the write and read index are the same
+  if ((manager->writeIndex + 1) % ADCS_POSITION_DATA_MANAGER_SIZE == manager->readIndex) {
+    manager->state |= 0b10;
+  } else {
+    manager->state &= 0b01;
   }
 
   // Write the data
@@ -149,6 +176,8 @@ static obc_error_code_t sunManagerSearchLinear(const position_data_manager_t *ma
  * @brief Searchs for the julianDate in the manager and returns the index of the julian date in the manager that
  * is greater or equal to the julianDate
  * @attention manager must be a valid pointer and julianData is greater than 0
+ * @warning This function will not work if the manager is not sorted by the julian date in ascending order; This
+ * function may fail so be sure to check the return value (OBC_ERR_CODE_SUN_POSITION_MGR_SEARCH_TIMEOUT)
  */
 static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager, julian_date_t julianDate,
                                          manager_size_t *buffer) {
@@ -175,16 +204,23 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
     return OBC_ERR_CODE_SUCCESS;
   }
 
-  while (1) {
+  // Only want to run it ADCS_POSITION_DATA_MANAGER_SIZE times to prevent infinite loop
+  uint8_t runCount = 0;
+
+  // Binary search
+  while (runCount < ADCS_POSITION_DATA_MANAGER_SIZE) {
+    runCount++;
+
     if (low > high) {
       mid = ((low + high + ADCS_POSITION_DATA_MANAGER_SIZE) / 2) % ADCS_POSITION_DATA_MANAGER_SIZE;
     } else if (low < high) {
       mid = (low + high) / 2;
     } else {
       // low == high
-      julian_date_t julianDate;
-      RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, low, &julianDate));
-      if (julianDate <= julianDate) {
+      julian_date_t currentJD;
+      RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, low, &currentJD));
+
+      if (julianDate <= currentJD) {
         *buffer = low;
         return OBC_ERR_CODE_SUCCESS;
       } else {
@@ -196,7 +232,8 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
     julian_date_t foundJulianDate;
     RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, mid, &foundJulianDate));
 
-    if (foundJulianDate == julianDate) {
+    // Check if the foundJulianDate is close enough to the julianDate
+    if (doubleClose(foundJulianDate, julianDate)) {
       *buffer = mid;
       return OBC_ERR_CODE_SUCCESS;
     } else if (foundJulianDate < julianDate) {
@@ -205,6 +242,7 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
       high = (mid - 1 + ADCS_POSITION_DATA_MANAGER_SIZE) % ADCS_POSITION_DATA_MANAGER_SIZE;
     }
   }
+  return OBC_ERR_CODE_SUN_POSITION_MGR_SEARCH_TIMEOUT;
 }
 
 obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manager, julian_date_t julianDate,
@@ -218,12 +256,17 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
   julian_date_t minJulianDate;
   RETURN_IF_ERROR_CODE(sunManagerGetMinJulianDate(manager, &minJulianDate));
   if (julianDate < minJulianDate) {
-    return OBC_ERR_CODE_INVALID_ARG;
+    return OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE;
   }
 
   // Search for the index of the closest julian date
   manager_size_t index;
-  RETURN_IF_ERROR_CODE(sunManagerSearch(manager, julianDate, &index));
+  errCode = sunManagerSearch(manager, julianDate, &index);
+
+  // If the binary search fails, search linearly
+  if (errCode == OBC_ERR_CODE_SUN_POSITION_MGR_SEARCH_TIMEOUT) {
+    sunManagerSearchLinear(manager, julianDate, &index);
+  }
 
   position_data_t dataHigher;
   RETURN_IF_ERROR_CODE(sunManagerGetPositionDataByIndex(manager, index, &dataHigher));
@@ -253,14 +296,21 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
 }
 
 obc_error_code_t sunManagerCheckJD(const position_data_manager_t *manager, julian_date_t jd, uint8_t *buffer) {
-  if (manager == NULL || jd <= ADCS_INVALID_JULIAN_DATE || buffer == NULL) {
+  if (manager == NULL || buffer == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // Will never be in the manager
+  if (jd <= ADCS_INVALID_JULIAN_DATE) {
+    *buffer = 0;
+    return OBC_ERR_CODE_SUCCESS;
   }
 
   obc_error_code_t errCode;
 
   julian_date_t minJulianDate;
   RETURN_IF_ERROR_CODE(sunManagerGetMinJulianDate(manager, &minJulianDate));
+
   julian_date_t maxJulianDate;
   RETURN_IF_ERROR_CODE(sunManagerGetMaxJulianDate(manager, &maxJulianDate));
 

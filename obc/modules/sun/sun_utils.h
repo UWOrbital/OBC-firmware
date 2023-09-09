@@ -1,3 +1,7 @@
+// This file contains utility functions that MUST ONLY be used in the
+// sun position project files
+// None of the operations can be assumed to be atomic,
+// it is the responsibility of the caller to setup the appropriate locks
 #pragma once
 
 #include "obc_errors.h"
@@ -6,6 +10,7 @@
 #include <stddef.h>
 
 #define ADCS_INVALID_JULIAN_DATE 0U
+#define RELATIVE_TOLERANCE 1e-9f
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +33,7 @@ typedef struct position_data_t {
 /**
  * @brief Returns true if the data points 1 and 2 have the same coordinates and julian date
  */
-int equalsDataPoint(const position_data_t data1, const position_data_t data2);
+int equalsPositionData(const position_data_t data1, const position_data_t data2);
 
 /**
  * @brief Calculates the value of the point based on the target JD using the point1 as the lower value in the linear
@@ -46,6 +51,48 @@ int equalsDataPoint(const position_data_t data1, const position_data_t data2);
  */
 obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t point1, position_t point2,
                                      julian_date_t jd1, julian_date_t jd2, position_t *buffer);
+
+// For testing purposes only
+obc_error_code_t printPositionData(const position_data_t *data);
+
+// These are place here as doubles are 64-bit thus these operations may not be atomic
+
+/**
+ * @brief returns the maximum of 2 double numbers
+ *
+ * @param a - first double number to compare
+ * @param b - second double number to compare
+ * @return the maximum of the 2 numbers
+ */
+static inline double doubleMax(double a, double b) { return (a) > (b) ? (a) : (b); }
+
+/**
+ * @brief returns the absolute value of a double number
+ * @param num - the double number to get the absolute value of
+ * @return the absolute value of the double number
+ */
+static inline double doubleAbs(double num) { return (num) < 0 ? -(num) : (num); }
+
+/**
+ * @brief Checks whether the numbers a and b are close within the given
+ * interval. Formula is the same as the python math.isclose() function except that absolute tolerance is not used
+ * (abs (a-b) <= RELATIVE_TOLERANCE * max(abs(a), abs(b)))
+ * @param a: first double number to check
+ * @param b: second double number to check
+ * @warning This operation is not atomic. It is the responsibility of the caller to setup the appropriate locks
+ */
+uint8_t doubleClose(double a, double b);
+
+/**
+ * @brief Checks whether the numbers a and b are close within the given
+ * interval. Formula is the same as the python math.isclose() function except that absolute tolerance is not used
+ * (abs (a-b) <= relativeTolerance * max(abs(a), abs(b)))
+ * @param a: first double number to check
+ * @param b: second double number to check
+ * @param relativeTolerance: Relative tolerance decimal
+ * @warning This operation is not atomic. It is the responsibility of the caller to setup the appropriate locks
+ */
+uint8_t doubleClose(double a, double b, double relativeTolerance);
 
 #ifdef __cplusplus
 }
