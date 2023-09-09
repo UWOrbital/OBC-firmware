@@ -8,7 +8,7 @@
 
 #define VN100_ERR_CODE_STRING "$VNERR,"
 #define VALID_RESPONSE_STRING "$VNWRG,75"
-
+#define SYNC_HEADER_LENGTH 1
 typedef struct {
   uint8_t groups;
   uint16_t groupField;
@@ -124,7 +124,7 @@ static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN10
   }
 
   memcpy(&decodedPacket.data, data, packetSize);
-  uint16_t checksum = calculateCRC(data, packetSize);
+  uint16_t checksum = calculateCRC(&data[SYNC_HEADER_LENGTH], packetSize);
 
   memcpy(&decodedPacket.crc, &data[packetSize], sizeof(decodedPacket.crc));
   if (checksum != decodedPacket.crc) {
