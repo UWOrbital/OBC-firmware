@@ -3,8 +3,10 @@
 #pragma once
 
 #include "sun_utils.h"
+#include "obc_logging.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #define ADCS_POSITION_DATA_MANAGER_SIZE 25U
 

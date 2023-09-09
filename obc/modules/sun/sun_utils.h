@@ -1,7 +1,9 @@
 #pragma once
 
 #include "obc_errors.h"
+
 #include <stdint.h>
+#include <stddef.h>
 
 #define ADCS_INVALID_JULIAN_DATE 0U
 
@@ -19,7 +21,10 @@ typedef struct position_data_t {
     position_t z;
 } position_data_t;
 
-int equalsDataPoint(const position_data_t a, const position_data_t b);
+/**
+ * @brief Returns true if the data points 1 and 2 have the same coordinates. JDs are ignored
+*/
+int equalsDataPoint(const position_data_t data1, const position_data_t data2);
 
 /**
  * @brief Calculates the value of the point based on the target JD using the point1 as the lower value in the linear 

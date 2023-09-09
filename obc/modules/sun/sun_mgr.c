@@ -20,7 +20,7 @@ obc_error_code_t sunManagerInit(position_data_manager_t *manager) {
  * @brief Stores the data position at the given index % ADCS_POSITION_DATA_SIZE of the manager
  * @attention Requires buffer and manager must be valid pointers
 */
-static obc_error_code_t sunManagerGetPositionDataByIndex(position_data_manager_t *manager, manager_size_t index, position_data_t *buffer) {
+static obc_error_code_t sunManagerGetPositionDataByIndex(const position_data_manager_t *manager, manager_size_t index, position_data_t *buffer) {
     if (buffer == NULL || manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -33,7 +33,7 @@ static obc_error_code_t sunManagerGetPositionDataByIndex(position_data_manager_t
  * @brief Stores the julian date into the buffer at the given index in the manager
  * @attention Requires buffer and manager must be valid pointers
 */
-static obc_error_code_t sunManagerGetJulianDateByIndex(position_data_manager_t *manager, manager_size_t index, julian_date_t *buffer) {
+static obc_error_code_t sunManagerGetJulianDateByIndex(const position_data_manager_t *manager, manager_size_t index, julian_date_t *buffer) {
     if (buffer == NULL || manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -50,7 +50,7 @@ static obc_error_code_t sunManagerGetJulianDateByIndex(position_data_manager_t *
  * @brief Stores the minimum julian date into the buffer from the manager
  * @attention Requires buffer and manager must be valid pointers
 */
-static obc_error_code_t sunManagerGetMinJulianDate(position_data_manager_t *manager, julian_date_t *buffer) {
+static obc_error_code_t sunManagerGetMinJulianDate(const position_data_manager_t *manager, julian_date_t *buffer) {
     if (buffer == NULL || manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -63,7 +63,7 @@ static obc_error_code_t sunManagerGetMinJulianDate(position_data_manager_t *mana
  * @brief Stores the maximum julian date into the buffer from the manager
  * @attention Requires buffer and manager must be valid pointers
 */
-static obc_error_code_t sunManagerGetMaxJulianDate(position_data_manager_t *manager, julian_date_t *buffer) {
+static obc_error_code_t sunManagerGetMaxJulianDate(const position_data_manager_t *manager, julian_date_t *buffer) {
     if (buffer == NULL || manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -73,9 +73,14 @@ static obc_error_code_t sunManagerGetMaxJulianDate(position_data_manager_t *mana
     return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t sunManagerReadData(position_data_manager_t *manager, position_data_t *buffer) {
+obc_error_code_t sunManagerReadData(position_data_manager_t *manager, position_data_t *buffer) {
     if (buffer == NULL || manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
+    }
+
+    // Read index is at the smallest julian date in manager which is where the data is to be written
+    if (manager->readIndex == manager->writeIndex) {
+        return OBC_ERR_CODE_SUN_POSITION_MGR_READ_FAIL;
     }
 
     manager_size_t index = manager->readIndex;
@@ -88,11 +93,17 @@ obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_
     if (manager == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
+
+    // Next write index is the same as the read index so we don't want to override the data at the read index 
+    if ((manager->writeIndex + 1) % ADCS_POSITION_DATA_MANAGER_SIZE == manager->readIndex) {
+        return OBC_ERR_CODE_SUN_POSITION_MGR_WRITE_FAIL;
+    }
+
     obc_error_code_t errCode;
 
     // Check if the julian date is unique, all data must be sorted by the JD in ascending order
     julian_date_t maxJulianDate;
-    RETURN_IF_ERROR_CODE(sunManagerGetMaxJulianDate(manager, &maxJulianDate)) ;
+    RETURN_IF_ERROR_CODE(sunManagerGetMaxJulianDate(manager, &maxJulianDate));
     if (data.julianDate <= maxJulianDate) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
@@ -142,7 +153,7 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
     manager_size_t mid;  // Will be set later
 
     // Get the data for the high and low indices (edge cases)
-    manager_size_t highJD, lowJD;
+    julian_date_t highJD, lowJD;
     obc_error_code_t errCode;
     RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, high, &highJD));
     RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, low, &lowJD));
@@ -233,6 +244,8 @@ obc_error_code_t sunManagerCheckJD(const position_data_manager_t *manager, julia
     if (manager == NULL || jd <= ADCS_INVALID_JULIAN_DATE || buffer == NULL) {
         return OBC_ERR_CODE_INVALID_ARG;
     }
+
+    obc_error_code_t errCode;
 
     julian_date_t minJulianDate;
     RETURN_IF_ERROR_CODE(sunManagerGetMinJulianDate(manager, &minJulianDate));
