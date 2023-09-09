@@ -19,4 +19,4 @@ typedef enum {
   ERROR_BUFFER_OVERFLOW = 255
 } VN100_error_t;
 
-obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error);
+obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error);
