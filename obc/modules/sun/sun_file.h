@@ -3,3 +3,13 @@
 #pragma once
 
 #include "sun_utils.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Function declarations go here
+
+#ifdef __cplusplus
+}
+#endif

@@ -8,7 +8,7 @@ set(TEST_DEPENDENCIES
 )
 
 set(TEST_MOCKS
-
+    ${CMAKE_SOURCE_DIR}/test/mocks/mock_logging.c
 )
 
 set(TEST_SOURCES
