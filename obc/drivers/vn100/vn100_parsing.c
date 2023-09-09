@@ -96,7 +96,7 @@ static obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_
 static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN100_decoded_packet_t* parsedPacket) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  unsigned char* payload = packet[PAYLOAD_OFFSET];  // The main payload
+  unsigned char* payload = &packet[PAYLOAD_OFFSET];  // The main payload
 
   VN100_decoded_packet_t decodedPacket = {0};
   memcpy(&decodedPacket.header, payload, sizeof(decodedPacket.header));
