@@ -166,7 +166,8 @@ int main(int argc, char *argv[]) {
     unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
 
     // Perform AX.25 framing
-    obcGsErrCode = ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt, &groundStationCallsign);
+    setCurrentLinkDestAddress(&groundStationCallsign);
+    obcGsErrCode = ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt);
     if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
       printf("Failed to send AX.25 I-Frame!");
       exit(1);
@@ -284,7 +285,8 @@ static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_p
   }
 
   // check for a valid ax25 frame and perform the command response if necessary
-  interfaceErr = ax25Recv(&unstuffedPacket);
+  u_frame_cmd_t receivedCmd = {0};
+  interfaceErr = ax25Recv(&unstuffedPacket, &receivedCmd);
 
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
   memcpy(decodedData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);

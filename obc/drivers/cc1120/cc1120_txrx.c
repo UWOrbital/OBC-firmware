@@ -147,6 +147,8 @@ obc_error_code_t cc1120GetState(cc1120_state_t *stateNum) {
 obc_error_code_t cc1120Init(void) {
   obc_error_code_t errCode;
 
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRES));
+
   // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
   // see chapter 3.4 in the datasheet for more info
   gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);

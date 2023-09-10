@@ -1,6 +1,8 @@
 #include "obc_persistent_store.h"
 #include "obc_persistent_sections.h"
-#include "fram.h"
+
+#include "fm25v20a.h"
+#include "obc_assert.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_crc.h"
