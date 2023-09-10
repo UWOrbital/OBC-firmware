@@ -24,7 +24,7 @@
 #define SPI_FLAG_BITERR 0x10U     // Bit error
 #define SPI_FLAG_RXOVRNINT 0x40U  // Receive overrun interrupt flag
 
-#define SPI_BLOCKING_TIMEOUT pdMS_TO_TICKS(1000)
+#define SPI_BLOCKING_TIMEOUT portMAX_DELAY
 
 #define CS_ASSERTED 0
 #define CS_DEASSERTED 1

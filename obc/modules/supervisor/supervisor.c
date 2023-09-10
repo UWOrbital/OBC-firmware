@@ -89,8 +89,8 @@ static void vSupervisorTask(void *pvParameters) {
   ASSERT(supervisorQueueHandle != NULL);
 
   /* Initialize critical peripherals */
-  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
-  LOG_IF_ERROR_CODE(initTime());         // RTC
+  // LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
+  LOG_IF_ERROR_CODE(initTime());  // RTC
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
