@@ -51,7 +51,7 @@ int main(void) {
   sciInit();
   i2cInit();
 
-  initSciMutex();
+  initsciPrint();
   initI2CMutex();
 
   xTaskCreateStatic(vTask1, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);

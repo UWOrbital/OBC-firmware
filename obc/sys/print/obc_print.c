@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define OBC_UART_BAUD_RATE 115200
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 #define MAX_PRINTF_SIZE 128U
 
@@ -27,6 +28,11 @@ static obc_error_code_t isValidBaudRate(int baudRate) {
     }
   }
   return OBC_ERR_CODE_INVALID_ARG;
+}
+
+void initSciPrint() {
+  initSciMutex();
+  sciPrintSetBaudrate(OBC_UART_BAUD_RATE);
 }
 
 obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t uartMutexTimeoutTicks) {

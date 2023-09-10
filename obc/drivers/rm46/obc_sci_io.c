@@ -50,8 +50,6 @@ void initSciMutex(void) {
   if (sciLinTransferComplete == NULL) {
     sciLinTransferComplete = xSemaphoreCreateBinaryStatic(&sciLinTransferCompleteBuffer);
   }
-
-  sciSetBaudrate(UART_READ_REG, OBC_UART_BAUD_RATE);
 }
 
 obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks,

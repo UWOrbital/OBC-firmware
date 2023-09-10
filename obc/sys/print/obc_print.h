@@ -6,6 +6,13 @@
 // ----------------------------------------- Functions ---------------------------------------- //
 
 /**
+ * @brief Initialize baudrate and sci Mutexes
+ *
+ */
+
+void initsciPrint();
+
+/**
  * @brief Send a string of text via UART_PRINT_REG.
  *
  * @param text The text to send.

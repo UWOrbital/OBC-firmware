@@ -56,7 +56,7 @@ int main(void) {
   dmaEnable();
   initDmaSpiSemaphores();
 
-  initSciMutex();
+  initsciPrint();
   initSpiMutex();
 
   _enable_interrupt_();
