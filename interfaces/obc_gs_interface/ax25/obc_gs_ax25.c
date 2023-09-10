@@ -10,7 +10,7 @@
 #define POLL_FINAL_BIT_OFFSET 4
 #define POLL_FINAL_BIT_MASK (0x01 << POLL_FINAL_BIT_OFFSET)
 
-#define SRC_CALLSIGN "\0\0\0\0\0\0\0"
+#define SRC_CALLSIGN "\0\0\0\0\0\0"
 
 #define AX25_ADDRESS_SPACE_BYTE 0x40
 #define AX25_ADDRESS_RESERVE_BIT_MASK 0b01100000
@@ -74,6 +74,72 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if it was a valid fcs and error code if not
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
+
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t telemDataLen, uint8_t *ax25Data,
+                                                  uint32_t ax25DataLen, const ax25_addr_t *destAddress) {
+  if (telemData == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (ax25Data == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (destAddress == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (destAddress->length < AX25_DEST_ADDR_BYTES) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  uint8_t numOfFrames = (telemDataLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES;  // Number of frames and rounding up
+  if (ax25DataLen < ((uint32_t)(numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  memset(ax25Data, 0, ax25DataLen);
+
+  uint8_t remainingDataBytes = telemDataLen;
+  uint8_t frameStart = 0;
+
+  for (frameStart = 0; frameStart < numOfFrames; ++frameStart) {
+    ax25Data[frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG] = AX25_FLAG;
+
+    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_DEST_ADDR_POSITION, destAddress->data,
+           AX25_DEST_ADDR_BYTES);
+    uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
+    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_SRC_ADDR_POSITION, srcAddress,
+           AX25_SRC_ADDR_BYTES);
+
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION + 1] = (pktSentNum << 1);
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_MOD128_PID_POSITION] = AX25_PID;
+    if (remainingDataBytes >= AX25_INFO_BYTES) {
+      memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION,
+             telemData + (frameStart * AX25_INFO_BYTES), AX25_INFO_BYTES);
+    } else {
+      memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION,
+             telemData + (frameStart * AX25_INFO_BYTES), remainingDataBytes);
+    }
+    obc_gs_error_code_t errCode;
+
+    uint16_t fcs;
+    errCode =
+        fcsCalculate(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG), AX25_MINIMUM_I_FRAME_LEN, &fcs);
+    if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
+      return errCode;
+    }
+
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION + 1] =
+        (uint8_t)(fcs & 0xFF);
+    pktSentNum++;
+    remainingDataBytes -= AX25_INFO_BYTES;
+  }
+  ax25Data[frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG] = AX25_FLAG;
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
 
 obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data) {
   if (telemData == NULL) {
@@ -189,6 +255,7 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_
   if (unstuffedPacket == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
+
   if (unstuffedPacket->length > AX25_MINIMUM_I_FRAME_LEN || unstuffedPacket->length < AX25_MINIMUM_U_FRAME_CMD_LENGTH) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
