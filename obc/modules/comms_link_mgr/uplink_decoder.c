@@ -19,6 +19,7 @@
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
+#include <os_timer.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -31,11 +32,15 @@
 #define DECODE_DATA_QUEUE_ITEM_SIZE sizeof(uint8_t)
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#define AX25_TIMEOUT_MILLISECONDS 330000
+#define TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS 500
+#define TIMER_NAME "flag_timeout"
 
 // Decode Data task
 static TaskHandle_t decodeTaskHandle = NULL;
 static StaticTask_t decodeTaskBuffer;
 static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
+static bool isStartFlagReceived;
 
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
@@ -77,6 +82,11 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
 }
 
 /**
+ * @brief flag timeout callback that sets isFlagReceived to false due to a timeout
+ */
+static void flagTimeoutCallback() { isStartFlagReceived = false; }
+
+/**
  * @brief initializes the decode data pipeline task
  *
  * @return void
@@ -102,6 +112,9 @@ void initDecodeTask(void) {
  * @return void
  */
 static void vDecodeTask(void *pvParameters) {
+  StaticTimer_t timerBuffer = {0};
+  TimerHandle_t flagTimeoutTimer = xTimerCreateStatic(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdFALSE,
+                                                      (void *)0, flagTimeoutCallback, &timerBuffer);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
@@ -137,15 +150,18 @@ static void vDecodeTask(void *pvParameters) {
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
           axDataIndex = 0;
-          startFlagReceived = false;
+          axData.data[axDataIndex++] = AX25_FLAG;
         } else {
+          if (!startFlagReceived) {
+            if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS)) != pdPASS) {
+              LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_FULL);
+            }
+          }
           startFlagReceived = true;
           axDataIndex = 1;
         }
-
         continue;
       }
-
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
       }
