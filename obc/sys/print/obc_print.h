@@ -10,7 +10,7 @@
  *
  */
 
-void initsciPrint();
+void initSciPrint();
 
 /**
  * @brief Send a string of text via UART_PRINT_REG.

@@ -59,7 +59,7 @@ int main(void) {
   sciInit();
   spiInit();
 
-  initsciPrint();
+  initSciPrint();
   initSpiMutex();
 
   xTaskCreateStatic(vTask1, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);

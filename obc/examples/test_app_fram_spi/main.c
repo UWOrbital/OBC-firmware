@@ -20,7 +20,7 @@ int main(void) {
   spiInit();
 
   // Initialize the SCI mutex.
-  initsciPrint();
+  initSciPrint();
   initSpiMutex();
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};

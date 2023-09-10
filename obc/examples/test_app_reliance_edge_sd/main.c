@@ -135,7 +135,7 @@ int main(void) {
   sciInit();
   spiInit();
 
-  initsciPrint();
+  initSciPrint();
   initSpiMutex();
 
   sciPrintf("Starting Reliance Edge Demo\r\n");

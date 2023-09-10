@@ -64,7 +64,7 @@ int main(void) {
   i2cInit();
   gioInit();
 
-  initsciPrint();
+  initSciPrint();
   initSpiMutex();
   initI2CMutex();
 

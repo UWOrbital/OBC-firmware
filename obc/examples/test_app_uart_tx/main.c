@@ -12,7 +12,7 @@ int main(void) {
   sciInit();
 
   // Initialize the SCI mutex.
-  initsciPrint();
+  initSciPrint();
 
   while (1) {
     // Send a string of text via SCI

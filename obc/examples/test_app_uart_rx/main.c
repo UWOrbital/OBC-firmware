@@ -15,7 +15,7 @@ int main(void) {
   sciInit();
 
   // Initialize the SCI mutex.
-  initsciPrint();
+  initSciPrint();
 
   sciPrintf("Demo started\r\n");
 
