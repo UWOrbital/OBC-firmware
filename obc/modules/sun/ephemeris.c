@@ -16,32 +16,28 @@ static uint8_t initialized = 0;  // There's probably a better way to do this
 static position_data_manager_t manager;
 
 void initSunPosition(void) {
-    if (managerMutex == NULL) {
-        managerMutex = xSemaphoreCreateBinaryStatic(&managerBuffer);
-    }
+  if (managerMutex == NULL) {
+    managerMutex = xSemaphoreCreateBinaryStatic(&managerBuffer);
+  }
 
-    ASSERT(managerMutex != NULL);
+  ASSERT(managerMutex != NULL);
 
-    if (fileMutex == NULL) {
-        fileMutex = xSemaphoreCreateBinaryStatic(&fileBuffer);
-    }
+  if (fileMutex == NULL) {
+    fileMutex = xSemaphoreCreateBinaryStatic(&fileBuffer);
+  }
 
-    ASSERT(fileMutex != NULL);
+  ASSERT(fileMutex != NULL);
 
-    if (!initialized) {
-        ASSERT(sunManagerInit(&manager) == OBC_ERR_CODE_SUCCESS);
-        initialized = 1;
-    }
-}   
+  if (!initialized) {
+    ASSERT(sunManagerInit(&manager) == OBC_ERR_CODE_SUCCESS);
+    initialized = 1;
+  }
+}
 
 obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer) {
-    return OBC_ERR_CODE_SUN_POSITION_NOT_IMPLEMENTED;
+  return OBC_ERR_CODE_SUN_POSITION_NOT_IMPLEMENTED;
 }
 
-obc_error_code_t sunPositionNext(position_data_t *buffer) {
-    return OBC_ERR_CODE_SUN_POSITION_NOT_IMPLEMENTED;
-}
+obc_error_code_t sunPositionNext(position_data_t *buffer) { return OBC_ERR_CODE_SUN_POSITION_NOT_IMPLEMENTED; }
 
-obc_error_code_t sunPositionShiftTo(julian_date_t jd) {
-    return OBC_ERR_CODE_SUN_POSITION_NOT_IMPLEMENTED;
-}
+obc_error_code_t sunPositionShiftTo(julian_date_t jd) { return OBC_ERR_CODE_SUN_POSITION_NOT_IMPLEMENTED; }
