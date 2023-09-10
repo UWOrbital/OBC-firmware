@@ -17,7 +17,7 @@
 /* Supervisor task config */
 #define SUPERVISOR_STACK_SIZE 1024U
 #define SUPERVISOR_NAME "supervisor"
-#define SUPERVISOR_PRIORITY tskIDLE_PRIORITY + 5U
+#define SUPERVISOR_PRIORITY tskIDLE_PRIORITY + 4U
 
 /* Telemetry task config */
 #define TELEMETRY_STACK_SIZE 1024U
