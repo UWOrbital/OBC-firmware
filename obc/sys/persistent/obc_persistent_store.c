@@ -68,7 +68,7 @@ obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *data) {
 
   // Read entire section (including header)
   RETURN_IF_ERROR_CODE(
-      getPersistentSection(FRAM_ADDRESS_OF(obcTime), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+      getPersistentSection(OBC_PERSIST_ADDR_OF(obcTime), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
 
   // Strip header from section buffer
   RETURN_IF_ERROR_CODE(
@@ -87,7 +87,7 @@ obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data) {
 
   // Write entire section (including header)
   RETURN_IF_ERROR_CODE(
-      setPersistentSection(FRAM_ADDRESS_OF(obcTime), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+      setPersistentSection(OBC_PERSIST_ADDR_OF(obcTime), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
 
   return OBC_ERR_CODE_SUCCESS;
 }

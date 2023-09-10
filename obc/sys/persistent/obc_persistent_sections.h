@@ -24,4 +24,4 @@ typedef struct {
   obc_time_persist_t obcTime;
 } obc_persist_t;
 
-#define FRAM_ADDRESS_OF(data) (0x0 + offsetof(obc_persist_t, data))
+#define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))

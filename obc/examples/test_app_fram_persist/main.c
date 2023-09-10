@@ -35,9 +35,12 @@ void vTask1(void *pvParameters) {
     sciPrintf("Time data: %x\r\n", readTimeData.unixTime);
   }
 
+  sciPrintf("Corrupting FRAM\r\n");
+
   // Corrupt time data (As of 2023-05-28, address 0x9 is in the obc_time section of FRAM)
   uint8_t corrupt = 0xFF;
-  framWrite(0x9, &corrupt, 1);
+  uint32_t unixTimeAddr = OBC_PERSIST_ADDR_OF(obcTime.data);
+  framWrite(unixTimeAddr, &corrupt, 1);
 
   errCode = getPersistentObcTime(&readTimeData);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
