@@ -17,7 +17,7 @@
 /* Supervisor task config */
 #define SUPERVISOR_STACK_SIZE 1024U
 #define SUPERVISOR_NAME "supervisor"
-#define SUPERVISOR_PRIORITY tskIDLE_PRIORITY + 4U
+#define SUPERVISOR_PRIORITY tskIDLE_PRIORITY + 5U
 
 /* Telemetry task config */
 #define TELEMETRY_STACK_SIZE 1024U
@@ -61,7 +61,7 @@ STATIC_ASSERT_EQ(COMMS_MANAGER_PRIORITY, COMMS_DOWNLINK_ENCODE_PRIORITY);
 /* Timekeeper task config */
 #define TIMEKEEPER_STACK_SIZE 1024U
 #define TIMEKEEPER_NAME "timekeeper"
-#define TIMEKEEPER_PRIORITY tskIDLE_PRIORITY + 5U
+#define TIMEKEEPER_PRIORITY tskIDLE_PRIORITY + 6U
 
 /* OBC Sw Watchdog task config */
 #define SW_WATCHDOG_STACK_SIZE 128U
