@@ -23,7 +23,6 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/sys
     ${CMAKE_SOURCE_DIR}/obc/sys/time
     ${CMAKE_SOURCE_DIR}/obc/drivers/ds3232
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100
 )
 
 target_link_libraries(${TEST_BINARY}
