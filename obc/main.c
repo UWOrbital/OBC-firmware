@@ -7,6 +7,7 @@
 
 #include <FreeRTOS.h>
 #include <os_task.h>
+#include "obc_board_config.h"
 
 #include <sys_common.h>
 #include <sys_core.h>
@@ -32,8 +33,12 @@ int main(void) {
   spiInit();
   canInit();
   hetInit();
-
+  gioSetBit(gioPORTA, 1, 1);
+  gioSetBit(gioPORTA, 0, 1);
   _enable_interrupt_();
+  gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
+  gioDisableNotification(gioPORTA, CC1120_TX_THR_PKT_gioPORTA_PIN);
+  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
 
   // Initialize logger
   initLogger();

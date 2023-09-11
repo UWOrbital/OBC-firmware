@@ -159,15 +159,15 @@ obc_error_code_t cc1120Init(void) {
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1));
   }
 
+  //  for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++) {
+  //    RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
+  //  }
+
+  initAllTxRxSemaphores();
   // enable interrupts again now that the gpio signals are set
   gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
   gioEnableNotification(gioPORTA, CC1120_TX_THR_PKT_gioPORTA_PIN);
   gioEnableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
-  for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++) {
-    RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
-  }
-
-  initAllTxRxSemaphores();
 
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
   return OBC_ERR_CODE_SUCCESS;

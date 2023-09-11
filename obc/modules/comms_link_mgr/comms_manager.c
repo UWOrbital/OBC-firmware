@@ -396,14 +396,18 @@ static void vCommsManagerTask(void *pvParameters) {
   obc_error_code_t errCode;
 
   comms_state_t commsState = *((comms_state_t *)pvParameters);
+  gioSetBit(gioPORTA, 0, 0);
+  gioSetBit(gioPORTA, 0, 1);
   LOG_IF_ERROR_CODE(cc1120Init());
 
   char buf[300] = {0};
   memset(buf, 0x55, sizeof(buf));
 
+  // LOG_IF_ERROR_CODE(cc1120TestSpiRead());
+  // LOG_IF_ERROR_CODE(cc1120TestSpiRead());
+
   while (1) {
-    // cc1120Send(buf, sizeof(buf), pdMS_TO_TICKS(1000));
-    LOG_IF_ERROR_CODE(cc1120TestSpiRead());
+    cc1120Send(buf, sizeof(buf), pdMS_TO_TICKS(1000));
   }
 }
 

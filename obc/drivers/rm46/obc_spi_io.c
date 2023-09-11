@@ -252,7 +252,7 @@ bool isSpiBusOwner(SemaphoreHandle_t spiMutex) {
   TaskHandle_t owner = xSemaphoreGetMutexHolder(spiMutex);
   portEXIT_CRITICAL();
 
-  return xSemaphoreGetMutexHolder(spiMutex) == owner;
+  return xTaskGetCurrentTaskHandle() == owner;
 }
 
 obc_error_code_t getSpiMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex) {
