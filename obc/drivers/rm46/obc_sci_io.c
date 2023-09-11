@@ -50,6 +50,7 @@ void initSciMutex(void) {
   if (sciLinTransferComplete == NULL) {
     sciLinTransferComplete = xSemaphoreCreateBinaryStatic(&sciLinTransferCompleteBuffer);
   }
+  configASSERT(sciLinTransferComplete);
 }
 
 obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks,
@@ -70,7 +71,9 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     mutex = sciLinMutex;
     semaphore = sciLinTransferComplete;
   }
+  
   configASSERT(mutex != NULL);
+  configASSERT(semaphore != NULL);
 
   if (buf == NULL || numBytes < 1) {
     return OBC_ERR_CODE_INVALID_ARG;
