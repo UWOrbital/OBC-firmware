@@ -132,10 +132,11 @@ obc_error_code_t framReadStatusReg(uint8_t *status) {
     // Do not deassert since never asserted in the first place
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  obc_error_code_t prev_errCode = errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-  // RETURN_IF_ERROR_CODE will overwrite errCode OBC_ERR_CODE_FRAM_IS_ASLEEP value
+  // RETURN_IF_ERROR_CODE will overwrite errCode value
   // Need to recheck to return correct errCode
-  return (isAsleep) ? OBC_ERR_CODE_FRAM_IS_ASLEEP : errCode;
+  return (prev_errCode != errCode) ? prev_errCode : OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t framWriteStatusReg(uint8_t status) {
@@ -175,10 +176,11 @@ obc_error_code_t framWriteStatusReg(uint8_t status) {
     // Do not deassert since never asserted in the first place
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  obc_error_code_t prev_errCode = errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-  // RETURN_IF_ERROR_CODE will overwrite errCode OBC_ERR_CODE_FRAM_IS_ASLEEP value
+  // RETURN_IF_ERROR_CODE will overwrite errCode value
   // Need to recheck to return correct errCode
-  return (isAsleep) ? OBC_ERR_CODE_FRAM_IS_ASLEEP : errCode;
+  return (prev_errCode != errCode) ? prev_errCode : OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
@@ -226,10 +228,11 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
     // Do not deassert since never asserted in the first place
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  obc_error_code_t prev_errCode = errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-  // RETURN_IF_ERROR_CODE will overwrite errCode OBC_ERR_CODE_FRAM_IS_ASLEEP value
+  // RETURN_IF_ERROR_CODE will overwrite errCode value
   // Need to recheck to return correct errCode
-  return (isAsleep) ? OBC_ERR_CODE_FRAM_IS_ASLEEP : errCode;
+  return (prev_errCode != errCode) ? prev_errCode : OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
@@ -272,10 +275,11 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
     // Do not deassert since never asserted in the first place
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  obc_error_code_t prev_errCode = errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-  // RETURN_IF_ERROR_CODE will overwrite errCode OBC_ERR_CODE_FRAM_IS_ASLEEP value
+  // RETURN_IF_ERROR_CODE will overwrite errCode value
   // Need to recheck to return correct errCode
-  return (isAsleep) ? OBC_ERR_CODE_FRAM_IS_ASLEEP : errCode;
+  return (prev_errCode != errCode) ? prev_errCode : OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
@@ -328,10 +332,11 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
     // Do not deassert since never asserted in the first place
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  obc_error_code_t prev_errCode = errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-  // RETURN_IF_ERROR_CODE will overwrite errCode OBC_ERR_CODE_FRAM_IS_ASLEEP value
+  // RETURN_IF_ERROR_CODE will overwrite errCode value
   // Need to recheck to return correct errCode
-  return (isAsleep) ? OBC_ERR_CODE_FRAM_IS_ASLEEP : errCode;
+  return (prev_errCode != errCode) ? prev_errCode : OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t framSleep(void) {
@@ -405,8 +410,9 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
     // Do not deassert since never asserted in the first place
     RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
   }
+  obc_error_code_t prev_errCode = errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-  // RETURN_IF_ERROR_CODE will overwrite errCode OBC_ERR_CODE_FRAM_IS_ASLEEP value
+  // RETURN_IF_ERROR_CODE will overwrite errCode value
   // Need to recheck to return correct errCode
-  return (isAsleep) ? OBC_ERR_CODE_FRAM_IS_ASLEEP : errCode;
+  return (prev_errCode != errCode) ? prev_errCode : OBC_ERR_CODE_SUCCESS;
 }
