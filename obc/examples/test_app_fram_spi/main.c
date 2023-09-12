@@ -13,16 +13,10 @@
 
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
-int main(void) {
-  // Initialize hardware.
+static StaticTask_t taskBuffer;
+static StackType_t taskStack[1024];
 
-  gioInit();
-  sciInit();
-  spiInit();
-
-  // Initialize the SCI mutex.
-  initSciMutex();
-  initSpiMutex();
+void vTask1(void *pvParameters) {
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};
 
@@ -100,6 +94,29 @@ int main(void) {
   framRead(addr, hello_world, sizeof(hello_world));
   snprintf(msg, 50, "Read %s from %lX after wakeup\r\n", hello_world, addr);
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
+
+  while (1)
+    ;
+}
+int main(void) {
+  // Initialize hardware.
+
+  gioInit();
+  sciInit();
+  spiInit();
+
+  // Initialize the SCI mutex.
+  initSciMutex();
+  initSpiMutex();
+
+  sciPrintf("Starting FRAM Demo\r\n");
+
+  xTaskCreateStatic(vTask1, "FRAMDemo", 1024, NULL, 1, taskStack, &taskBuffer);
+
+  vTaskStartScheduler();
+
+  while (1)
+    ;
 
   return 0;
 }
