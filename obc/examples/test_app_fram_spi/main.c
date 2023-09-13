@@ -29,9 +29,6 @@ void vTask1(void *pvParameters) {
   // Note: This will send through the USB port on the LaunchPad
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
 
-  // Toggle the LED.
-  gioToggleBit(gioPORTB, 1);
-
   // Write 1 byte to 0x31415
 
   uint32_t addr = 0x31415;
@@ -48,11 +45,11 @@ void vTask1(void *pvParameters) {
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
 
   // Multipe Bytes
+  addr = 0x12345;
   unsigned char hello_world[12] = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
   snprintf(msg, 50, "Writting %s to %lX\r\n", hello_world, addr);
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
   // Write Hello World to 0x12345
-  addr = 0x12345;
   framWrite(addr, hello_world, sizeof(hello_world));
 
   // Read Hello World from 0x12345
