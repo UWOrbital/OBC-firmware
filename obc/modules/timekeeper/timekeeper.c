@@ -61,7 +61,7 @@ static void timekeeperTask(void *pvParameters) {
     LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
     // Send Unix time to fram
     unixTime.unixTime = getCurrentUnixTime();
-    LOG_IF_ERROR_CODE(setPersistentTimeData(&unixTime));
+    LOG_IF_ERROR_CODE(setPersistentObcTime(&unixTime));
     syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
