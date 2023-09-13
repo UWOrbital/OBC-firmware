@@ -6,7 +6,7 @@
 #include "obc_task_config.h"
 #include "ds3232_mz.h"
 #include "obc_persistent_store.h"
-#include "obc_persistent_data_config.h"
+#include "obc_persistent_sections.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
