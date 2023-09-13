@@ -46,7 +46,7 @@ static void timekeeperTask(void *pvParameters) {
    */
 
   obc_error_code_t errCode;
-  fram_time_data_t unixTime;
+  obc_time_persist_data_t unixTime;
   uint8_t syncPeriodCounter = 0;  // Sync whenever this counter is 0
 
   while (1) {
@@ -60,8 +60,8 @@ static void timekeeperTask(void *pvParameters) {
 
     LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
     // Send Unix time to fram
-    unixTime.unix_time = getCurrentUnixTime();
-    LOG_IF_ERROR_CODE(setPersistentTimeData(unixTime));
+    unixTime.unixTime = getCurrentUnixTime();
+    LOG_IF_ERROR_CODE(setPersistentTimeData(&unixTime));
     syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
