@@ -111,7 +111,6 @@ obc_error_code_t cc1120TestSpiRead(void) {
   uint8_t burstData[CC1120_REGS_EXT_ADDR];
   errCode = cc1120ReadSpi(addr, burstData, CC1120_REGS_EXT_ADDR);
 
-  LOG_IF_ERROR_CODE(errCode);
   RETURN_IF_ERROR_CODE(errCode);
 
   if (memcmp(CC1120_REGS_DEFAULTS, burstData, CC1120_REGS_EXT_ADDR)) {
