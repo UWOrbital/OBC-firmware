@@ -3,10 +3,6 @@
 #include "tpl5010.h"
 #include "gio.h"
 
-#include "obc_i2c_io.h"
-#include "obc_logging.h"
-#include "obc_errors.h"
-#include "obc_assert.h"
 #include "obc_board_config.h"
 
 #define DONE_SIGNAL_ON 1
