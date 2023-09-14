@@ -107,7 +107,7 @@ obc_error_code_t cc1120TestSpiRead(void) {
   obc_error_code_t errCode;
   uint8_t addr = 0x00U;
   uint8_t data;
-
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRES));
   uint8_t burstData[CC1120_REGS_EXT_ADDR];
   errCode = cc1120ReadSpi(addr, burstData, CC1120_REGS_EXT_ADDR);
 
@@ -407,7 +407,8 @@ static void vCommsManagerTask(void *pvParameters) {
   // LOG_IF_ERROR_CODE(cc1120TestSpiRead());
 
   while (1) {
-    cc1120Send(buf, sizeof(buf), pdMS_TO_TICKS(1000));
+    errCode = cc1120Send(buf, sizeof(buf), pdMS_TO_TICKS(1000));
+    LOG_INFO("errCode %d", errCode);
   }
 }
 

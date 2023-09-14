@@ -46,8 +46,8 @@ static register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_IOCFG1, 0x30U},
     // Set GPIO 2 to PKT_SYNC_RXTX
     {CC1120_REGS_IOCFG2, 0x06U},
-    // Set GPIO 3 to TXFIFO_THR_PKT
-    {CC1120_REGS_IOCFG3, 0x03U},
+    // Set GPIO 3 to TXFIFO_THR
+    {CC1120_REGS_IOCFG3, 0x02U},
     // Set the sync word as 16 bits and allow for < 2 bit error on sync word
     {CC1120_REGS_SYNC_CFG0, 0x09U},
     // Set sync word qualifier value threshold similar to the one talked about for preamble in section 6.8
