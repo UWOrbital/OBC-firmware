@@ -27,6 +27,15 @@ ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES
 static ax25_addr_t currentLinkDestAddr;
 
 /**
+ * @brief reverses the given number and returns the reversed number
+ *
+ * @param numToReverse: the number that should be reversed
+ *
+ * @return uint16_t - the reversed number
+ */
+static inline uint16_t reverseUint16(uint16_t numToReverse);
+
+/**
  * @brief checks for a valid s frame and performs the necessary command responses
  *
  * @param unstuffedPacket unstuffed ax.25 packet
@@ -425,21 +434,12 @@ static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calcul
   *calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
   // reverse order so that FCS can be transmitted with most significant bit first as per AX25 standard
-  uint16_t reverse_num = 0;
-  for (uint8_t i = 0; i < sizeof(*calculatedFcs) * 8; i++) {
-    if ((*calculatedFcs & (1 << i))) reverse_num |= 1 << ((sizeof(*calculatedFcs) * 8 - 1) - i);
-  }
-
-  *calculatedFcs = reverse_num;
+  *calculatedFcs = reverseUint16(*calculatedFcs);
 }
 
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs) {
   // reverse bit order of fcs to account for the fact that it was transmitted in the reverse order as the other bytes
-  uint16_t reverse_num = 0;
-  for (uint8_t i = 0; i < sizeof(fcs) * 8; i++) {
-    if ((fcs & (1 << i))) reverse_num |= 1 << ((sizeof(fcs) * 8 - 1) - i);
-  }
-  fcs = reverse_num;
+  fcs = reverseUint16(fcs);
 
   uint16_t calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
@@ -565,3 +565,11 @@ void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
 }
 
 void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
+
+static inline uint16_t reverseUint16(uint16_t numToReverse) {
+  uint16_t reverseNum = 0;
+  for (uint8_t i = 0; i < sizeof(*calculatedFcs) * 8; i++) {
+    if ((numToReverse & (1 << i))) reverseNum |= 1 << ((sizeof(numToReverse) * 8 - 1) - i);
+  }
+  return reverseNum
+}
