@@ -25,6 +25,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/aes128/obc_gs_aes128.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/ax25/obc_gs_ax25.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec/obc_gs_fec.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/obc_gs_crc.c
 )
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
