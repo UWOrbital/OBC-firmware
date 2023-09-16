@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief generates a checksum using CRC16-CCITT algorithm
  *
@@ -11,3 +15,7 @@
  * @return calculated checksum
  */
 uint16_t calculateCrc16Ccitt(const uint8_t *data, uint16_t dataLen);
+
+#ifdef __cplusplus
+}
+#endif

@@ -20,16 +20,16 @@ jobs:
       run: |
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD
-        make -j 32
+        make
 
     - name: Build (Release-OBC Rev1)
       run: |
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1
-        make -j 32
+        make
 
     - name: Build (Release-OBC Rev2)
       run: |
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2
-        make -j 32
+        make
