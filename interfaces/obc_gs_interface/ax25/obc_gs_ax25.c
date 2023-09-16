@@ -121,14 +121,9 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
       memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION,
              telemData + (frameStart * AX25_INFO_BYTES), remainingDataBytes);
     }
-    obc_gs_error_code_t errCode;
 
     uint16_t fcs;
-    errCode =
-        fcsCalculate(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG), AX25_MINIMUM_I_FRAME_LEN, &fcs);
-    if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
-      return errCode;
-    }
+    fcsCalculate(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG), AX25_MINIMUM_I_FRAME_LEN, &fcs);
 
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION + 1] =
@@ -170,13 +165,8 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   ax25Data->data[AX25_MOD128_PID_POSITION] = AX25_PID;
   memcpy(ax25Data->data + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
 
-  obc_gs_error_code_t errCode;
-
   uint16_t fcs;
-  errCode = fcsCalculate(ax25Data->data, AX25_MINIMUM_I_FRAME_LEN, &fcs);
-  if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
-    return errCode;
-  }
+  fcsCalculate(ax25Data->data, AX25_MINIMUM_I_FRAME_LEN, &fcs);
 
   ax25Data->data[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25Data->data[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
@@ -230,10 +220,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   ax25PacketUnstuffed[AX25_MOD8_PID_POSITION] = AX25_PID;
 
   uint16_t fcs;
-  errCode = fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
-  if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
-    return errCode;
-  }
+  fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
 
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
