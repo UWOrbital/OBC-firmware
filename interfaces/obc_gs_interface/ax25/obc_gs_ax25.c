@@ -1,4 +1,5 @@
 #include "obc_gs_ax25.h"
+#include "obc_gs_crc.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -59,10 +60,8 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
  * @param data uint8_t array that holds the ax25 packet data
  * @param dataLen total length of the data array
  * @param calculatedFcs pointer to a un16_t to hold the calculated FCS
- *
- * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs);
+static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs);
 
 /**
  * @brief checks if a received fcs is correct
@@ -435,7 +434,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
   return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
 }
 
-static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
+static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
   *calculatedFcs = calculateCrcCcitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
   // reverse order so that FCS can be transmitted with most significant bit first as per AX25 standard
@@ -581,17 +580,3 @@ void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
 }
 
 void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
-
-uint16_t calculateCrcCcitt(const uint8_t *data, uint16_t dataLen) {
-  // See VN100 user guide section 3.8.3 or ISO standard for CRC16-CCITT algorithm
-  register uint16_t crc = 0;
-  for (uint16_t i = 0; i < dataLen; ++i) {
-    crc = (unsigned char)(crc >> 8) | (crc << 8);
-    crc ^= data[i];
-    crc ^= (unsigned char)(crc & 0xFF) >> 4;
-    crc ^= crc << 12;
-    crc ^= (crc & 0x00FF) << 5;
-  }
-
-  return crc;
-}
