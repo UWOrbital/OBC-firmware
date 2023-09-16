@@ -568,8 +568,8 @@ void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(
 
 static inline uint16_t reverseUint16(uint16_t numToReverse) {
   uint16_t reverseNum = 0;
-  for (uint8_t i = 0; i < sizeof(*calculatedFcs) * 8; i++) {
+  for (uint8_t i = 0; i < sizeof(numToReverse) * 8; i++) {
     if ((numToReverse & (1 << i))) reverseNum |= 1 << ((sizeof(numToReverse) * 8 - 1) - i);
   }
-  return reverseNum
+  return reverseNum;
 }
