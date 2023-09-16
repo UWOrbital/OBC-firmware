@@ -435,7 +435,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
 }
 
 static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
-  *calculatedFcs = calculateCrcCcitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
+  *calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
   // reverse order so that FCS can be transmitted with most significant bit first as per AX25 standard
   uint16_t reverse_num = 0;
@@ -444,8 +444,6 @@ static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calcul
   }
 
   *calculatedFcs = reverse_num;
-
-  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs) {
@@ -456,7 +454,7 @@ static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint1
   }
   fcs = reverse_num;
 
-  uint16_t calculatedFcs = calculateCrcCcitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
+  uint16_t calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
   if (fcs != calculatedFcs) {
     return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
