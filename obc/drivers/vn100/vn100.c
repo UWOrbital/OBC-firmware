@@ -50,11 +50,15 @@
 static obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet);
 
 void initVN100(void) {
-    /* TODO:
-       - Setup vn-100 mutex
-       - configure baudrate
-       - configure asyncronous outputs
-    */
+  initSciMutex();
+  sciSetBaudrate(UART_VN100_REG, VN100_BAUDRATE);
+  /* TODO:
+     - Setup vn-100 mutex
+     - setup the configuration register
+     - configure baudrate
+     - configure asyncronous outputs
+     - Add any offsets to gyro or acceleration or additional info about velocity compensation
+  */
 }
 
 obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
@@ -97,11 +101,9 @@ obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
       return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  /* TODO:
-    - Add something to wait for a response here from the peripheral?
-  */
-  unsigned char received[MAX_COMMAND_SIZE];
-  RETURN_IF_ERROR_CODE(sciReadBytes(received, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
+  // Short delay to allow VN-100 to respond
+  vTaskDelay(pdMS_TO_TICKS(10));
+  sciReadBytes(packet, numBytesToRead, TICK_TIMEOUT, pdMS_TO_TICKS(10));
   return errCode;
 }
 
@@ -111,7 +113,7 @@ obc_error_code_t resetModule() {
   */
   obc_error_code_t errCode;
   unsigned char req[MAX_COMMAND_SIZE] = "$VNRST*4D\r\n";
-  RETURN_IF_ERROR_CODE(sciReadBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -133,6 +135,7 @@ obc_error_code_t retrieveYPR(vn_ypr_packet_t* packet) {
   }
   obc_error_code_t errCode;
   unsigned char unparsedPacket[YPR_PACKET_SIZE];
+  unsigned char unparsedPacket[YPR_PACKET_SIZE];
   RETURN_IF_ERROR_CODE(serialRequestCMD(VN_YPR, unparsedPacket));
 
   VN100_error_t error;
@@ -145,6 +148,7 @@ obc_error_code_t retrieveMAG(vn_mag_packet_t* packet) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   obc_error_code_t errCode;
+  unsigned char unparsedPacket[MAG_PACKET_SIZE];
   unsigned char unparsedPacket[MAG_PACKET_SIZE];
   RETURN_IF_ERROR_CODE(serialRequestCMD(VN_MAG, unparsedPacket));
 
@@ -199,7 +203,6 @@ obc_error_code_t setASYNCOutputs(vn_cmd_t cmd) {
      packet type
      - See Example Case 1 in section 4.2.4 of the user manual
   */
-
   switch (cmd) {
     case VN_YPR:
       // unsigned char req [MAX_COMMAND_SIZE] = "$VNWRG,75,2,16,01,0009*XX\r\n";

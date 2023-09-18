@@ -9,6 +9,7 @@
 #define VN100_ERR_CODE_STRING "$VNERR,"
 #define VALID_RESPONSE_STRING "$VNWRG,75"
 #define SYNC_HEADER_LENGTH 1
+
 typedef struct {
   uint8_t groups;
   uint16_t groupField;
