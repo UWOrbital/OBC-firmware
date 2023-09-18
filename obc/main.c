@@ -3,6 +3,7 @@
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
+#include "vn100.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -37,6 +38,13 @@ int main(void) {
 
   // The supervisor is the only task running initially.
   initSupervisor();
-
+  initVN100();
   vTaskStartScheduler();
+
+  vn_ypr_packet_t mypacket;
+  retrieveYPR(&mypacket);
+
+  sciPrintf("Yaw: %f \r\n", mypacket.yaw);
+  sciPrintf("Pitch: %f \r\n", mypacket.pitch);
+  sciPrintf("Roll: %f \r\n", mypacket.roll);
 }
