@@ -3,10 +3,9 @@
 #include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_logging.h"
+#include "obc_persistent.h"
 #include "obc_task_config.h"
 #include "ds3232_mz.h"
-#include "obc_persistent_store.h"
-#include "obc_persistent_sections.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>

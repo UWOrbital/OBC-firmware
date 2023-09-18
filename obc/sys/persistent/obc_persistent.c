@@ -1,5 +1,4 @@
-#include "obc_persistent_store.h"
-#include "obc_persistent_sections.h"
+#include "obc_persistent.h"
 
 #include "fm25v20a.h"
 #include "obc_assert.h"
