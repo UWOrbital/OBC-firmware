@@ -13,11 +13,11 @@
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 #define MAX_PRINTF_SIZE 128U
 
-int validBaudRates[] = {9600, 19200, 38400, 57600, 115200};
+uint32_t validBaudRates[] = {9600, 19200, 38400, 57600, 115200};
 
-static obc_error_code_t isValidBaudRate(int baudRate);
+static obc_error_code_t isValidBaudRate(uint32_t baudRate);
 
-static obc_error_code_t isValidBaudRate(int baudRate) {
+static obc_error_code_t isValidBaudRate(uint32_t baudRate) {
   // Calculate the number of valid baud rates
   int numValidBaudRates = sizeof(validBaudRates) / sizeof(validBaudRates[0]);
 
@@ -63,10 +63,8 @@ obc_error_code_t sciPrintf(const char *s, ...) {
 
 obc_error_code_t sciPrintSetBaudrate(uint32_t baudRate) {
   // Check if the baudRate is a valid param
-  obc_error_code_t errCode = isValidBaudRate(baudRate);
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    return errCode;
-  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(isValidBaudRate(baudRate));
   sciSetBaudrate(UART_PRINT_REG, baudRate);
   return OBC_ERR_CODE_SUCCESS;
 }
