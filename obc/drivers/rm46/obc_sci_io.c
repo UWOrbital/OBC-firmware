@@ -119,14 +119,15 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
 
 void sciNotification(sciBASE_t *sci, uint32 flags) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  SemaphoreHandle_t transferCompleteSemaphore = NULL;
 
-  if (!(sci == scilinREG || sci == sciREG)) {
+  if (sci == sciREG) {
+    transferCompleteSemaphore = sciTransferComplete;
+  } else if (sci == scilinREG) {
+    transferCompleteSemaphore = sciLinTransferComplete;
+  } else {
     return;
   }
-
-  SemaphoreHandle_t transferCompleteSemaphore = (sci == sciREG) ? sciTransferComplete : sciLinTransferComplete;
-
-  configASSERT(transferCompleteSemaphore != NULL);
 
   switch (flags) {
     case SCI_RX_INT:
