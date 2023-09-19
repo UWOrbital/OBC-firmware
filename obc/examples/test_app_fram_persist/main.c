@@ -2,8 +2,7 @@
 #include "obc_print.h"
 #include "obc_spi_io.h"
 #include "obc_errors.h"
-#include "obc_persistent_sections.h"
-#include "obc_persistent_store.h"
+#include "obc_persistent.h"
 #include "fm25v20a.h"
 
 #include <FreeRTOS.h>
