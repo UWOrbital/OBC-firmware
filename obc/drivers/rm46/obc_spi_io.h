@@ -6,6 +6,8 @@
 
 #include <spi.h>
 #include <gio.h>
+#include <FreeRTOS.h>
+#include <os_semphr.h>
 
 #define DEASSERT_RETURN_IF_ERROR_CODE(_spiPort, _csNum, _ret)     \
   do {                                                            \
@@ -121,3 +123,20 @@ obc_error_code_t spiTransmitAndReceiveByte(spiBASE_t *spiReg, spiDAT1_t *spiData
  */
 obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDataFormat, uint8_t *outBytes,
                                             uint8_t *inBytes, size_t numBytes);
+
+/**
+ * @brief Check if the current task owns the SPI bus mutex.
+ *
+ * @param spiMutex The SPI bus mutex to check.
+ * @return true if the current task owns the SPI bus mutex; false otherwise.
+ */
+bool isSpiBusOwner(SemaphoreHandle_t spiMutex);
+
+/**
+ * @brief Get the Mutex for the specified SPI port and chip select pin.
+ *
+ * @param spi The SPI reg to use.
+ * @param mutex The mutex for the specified SPI port and chip select pin.
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, error code otherwise.
+ */
+obc_error_code_t getSpiMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex);

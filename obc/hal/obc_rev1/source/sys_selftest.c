@@ -43,6 +43,8 @@
 
 
 /* USER CODE BEGIN (0) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 /* USER CODE END */
 
 #include "sys_selftest.h"
@@ -2624,6 +2626,7 @@ void pbistFail(void)
         }/* Wait */
 
 /* USER CODE BEGIN (78) */
+#pragma GCC diagnostic pop
 /* USER CODE END */
     }
 }

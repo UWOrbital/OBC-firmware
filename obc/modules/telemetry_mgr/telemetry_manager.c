@@ -5,6 +5,7 @@
 #include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_task_config.h"
+#include "downlink_encoder.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -101,9 +102,9 @@ static void telemetryManager(void *pvParameters) {
       // TODO: Handle this error
     }
 
-    comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
+    encode_event_t encodeEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
 
-    LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+    LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeEvent));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       // TODO: Handle this error, specifically if the queue is full. Other
       // errors should be caught during testing.

@@ -10,5 +10,5 @@ else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
-set(HAL_LIB_ARCHIVE ${HAL_LIB}-archive)
+set(HAL_LIB_OPTIMIZE ${HAL_LIB}-optimize)
 set(HAL_LIB_NO_OPTIMIZE ${HAL_LIB}-no-optimize)

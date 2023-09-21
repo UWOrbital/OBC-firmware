@@ -212,6 +212,7 @@ void hetNotification(hetBASE_t *het, uint32 offset)
 
 
 /* USER CODE BEGIN (53) */
+__attribute__((weak))
 /* USER CODE END */
 
 void dmaGroupANotification(dmaInterrupt_t inttype, uint32 channel)

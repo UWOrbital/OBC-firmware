@@ -16,7 +16,7 @@ obc_error_code_t rffm6404ActivateRx(void);
  *
  * @return obc_err_code_t - whether or not the chip was successfully turned on
  */
-obc_error_code_t rff6404ActivateTx(float voltagePowerControl);
+obc_error_code_t rffm6404ActivateTx(float voltagePowerControl);
 
 /**
  * @brief from receive mode, activate bypass mode to turn of LNA
