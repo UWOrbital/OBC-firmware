@@ -1,7 +1,7 @@
 #if (DEBUG == 1)
 #include "task_stats_collector.h"
 #include "obc_task_config.h"
-#include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_privilege.h"
 #include "obc_logging.h"
 

@@ -1,4 +1,5 @@
 #include "comms_manager.h"
+#include "obc_board_config.h"
 #include "uplink_decoder.h"
 #include "downlink_encoder.h"
 #include "obc_gs_aes128.h"
@@ -369,13 +370,13 @@ static obc_error_code_t handleAwaitingConnState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -396,7 +397,7 @@ static obc_error_code_t handleSendingConnState(void) {
   }
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
-  RETURN_IF_ERROR_CODE(sciSendBytes(connCmdPkt.data, (uint32_t)connCmdPkt.length, portMAX_DELAY));
+  RETURN_IF_ERROR_CODE(sciSendBytes(connCmdPkt.data, (uint32_t)connCmdPkt.length, portMAX_DELAY, UART_PRINT_REG));
 #else
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
   RETURN_IF_ERROR_CODE(
@@ -415,7 +416,7 @@ static obc_error_code_t handleSendingDiscState(void) {
   }
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
-  RETURN_IF_ERROR_CODE(sciSendBytes(discCmdPkt.data, discCmdPkt.length, portMAX_DELAY));
+  RETURN_IF_ERROR_CODE(sciSendBytes(discCmdPkt.data, discCmdPkt.length, portMAX_DELAY, UART_PRINT_REG));
 #else
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
   RETURN_IF_ERROR_CODE(cc1120Send(discCmdPkt.data, discCmdPkt.length, CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
@@ -434,7 +435,7 @@ static obc_error_code_t handleSendingAckState(void) {
   obc_error_code_t errCode;
 
 #if COMMS_PHY == COMMS_PHY_UART
-  RETURN_IF_ERROR_CODE(sciSendBytes(ackCmdPkt.data, ackCmdPkt.length, portMAX_DELAY));
+  RETURN_IF_ERROR_CODE(sciSendBytes(ackCmdPkt.data, ackCmdPkt.length, portMAX_DELAY, UART_PRINT_REG));
 #else
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
   RETURN_IF_ERROR_CODE(cc1120Send(ackCmdPkt.data, ackCmdPkt.length, CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
@@ -452,13 +453,13 @@ static obc_error_code_t handleAwaitingAckDiscState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -479,13 +480,13 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -504,13 +505,13 @@ static obc_error_code_t handleUplinkingState(void) {
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000)));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
   for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10)));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
 
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
@@ -537,8 +538,8 @@ static obc_error_code_t handleDownlinkingState(void) {
     }
     if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
-      RETURN_IF_ERROR_CODE(
-          sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY));
+      RETURN_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
+                                        portMAX_DELAY, UART_PRINT_REG));
 #else
       RETURN_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
                                       CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));

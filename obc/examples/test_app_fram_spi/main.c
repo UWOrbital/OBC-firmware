@@ -1,7 +1,6 @@
-#include "obc_sci_io.h"
-
 #include "obc_spi_io.h"
-#include "obc_sci_io.h"
+#include "obc_print.h"
+#include "fram.h"
 #include "fm25v20a.h"
 
 #include <gio.h>
@@ -21,7 +20,7 @@ int main(void) {
   spiInit();
 
   // Initialize the SCI mutex.
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};
