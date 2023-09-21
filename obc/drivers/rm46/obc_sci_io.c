@@ -119,22 +119,21 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
 
 void sciNotification(sciBASE_t *sci, uint32 flags) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  SemaphoreHandle_t transferCompleteSemaphore = NULL;
 
   if (sci == sciREG) {
-    transferCompleteSemaphore = sciTransferComplete;
+    switch (flags) {
+      case SCI_RX_INT:
+        xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken);
+        break;
+    }
   } else if (sci == scilinREG) {
-    transferCompleteSemaphore = sciLinTransferComplete;
+    switch (flags) {
+      case SCI_RX_INT:
+        xSemaphoreGiveFromISR(sciLinTransferComplete, &xHigherPriorityTaskWoken);
+        break;
+    }
   } else {
     return;
-  }
-
-  switch (flags) {
-    case SCI_RX_INT:
-      xSemaphoreGiveFromISR(transferCompleteSemaphore, &xHigherPriorityTaskWoken);
-      break;
-    default:
-      break;
   }
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
