@@ -77,6 +77,62 @@ Install Python 3.8+ and pip if they're not already installed, then run the follo
 pip install -r requirements.txt # You may want to create a Python virtual env before this
 pre-commit install
 ```
+#### **Docker Workflow Setup**
+
+#### Installation & Configuration
+1. Install Docker Desktop App from [this link](https://www.docker.com/products/docker-desktop/)
+    - You can choose to sign-up/create an account but for the purpose of this tutorial, we will skip and continue without signing up
+    - Same thing with the "Tell-us about what you do" section
+2. Click on ```Dev Environments``` from the side-panel
+    - Click on create on ```create``` in the top-right corner.
+3. Setting up the repo
+    - Name the Environment as desired
+    - For the ```choose source``` option, select ```existing repo``` and add "```https://github.com/UWOrbital/OBC-firmware.git```"  as the link.
+    - Choose your preferred/installed IDE, we suggest ```Visual Studio Code```
+    - Once the container is created, click the ```play``` button to start the container session in Vscode
+
+#### Installing Dependcies & ToolChains
+Once you open the docker instance, open a terminal in VSCODE and run the following commands ```Ctrl + '```
+
+```
+sudo apt-get update
+sudo apt-get install python3-pip
+pip3 install -r requirements.txt
+pre-commit install
+```
+
+
+```
+sudo apt-get update
+sudo apt-get install build-essential
+sudo apt-get install cmake
+```
+#### Testing The Container Build
+
+To test whether your Dev environment has been set up correctly run the following commands from your top level directory.
+
+The dollar-sign in your terminal should be prefaced by something like this : ```root ➜ /com.docker.devenvironments.code (main ✗)```
+
+```
+# Building the firmware
+mkdir build_arm && cd build_arm
+cmake .. -DCMAKE_BUILD_TYPE=OBC
+cmake --build .
+```
+
+```
+#Testing the builds
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Test
+cmake --build .
+ctest --verbose
+```
+
+If the development environment is setup correctly, ```2 of 2 (100%)``` tests should pass.
+
+**Note**: The docker container used pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary.
+
+**Tip**: Use the ```git config --list``` command on the VsCode terminal to confirm your git info.
 
 ### Getting the Source
 
