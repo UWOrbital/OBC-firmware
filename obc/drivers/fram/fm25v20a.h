@@ -4,9 +4,14 @@
 #include <stdint.h>
 #include "obc_errors.h"
 
-// FRAM LIMITS
+// FM25V20A LIMITS
 #define FRAM_MAX_ADDRESS 0x3FFFFU
 #define FRAM_ID_LEN 9
+
+/**
+ * @brief Initializes FRAM sleep status
+ */
+void initFRAM(void);
 
 /**
  * @brief Read FRAM status register.

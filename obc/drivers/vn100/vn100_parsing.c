@@ -9,6 +9,11 @@
 #define VN100_ERR_CODE_STRING "$VNERR,"
 #define VALID_RESPONSE_STRING "$VNWRG,75"
 #define SYNC_HEADER_LENGTH 1
+#define MAX_PAYLOAD_SIZE 24U  // Max size is defined by the largest packet ouputted
+
+static const uint8_t PAYLOAD_OFFSET = sizeof(VALID_RESPONSE_STRING);
+static const char errorCodePacket[] = VN100_ERR_CODE_STRING;
+static const uint8_t errorCodeIndex = sizeof(errorCodePacket) - 1;
 
 typedef struct {
   uint8_t groups;
@@ -25,14 +30,8 @@ typedef struct {
   uint16_t crc;
 } VN100_decoded_packet_t;
 
-static const uint8_t PAYLOAD_OFFSET = sizeof(VALID_RESPONSE_STRING);
-static const uint16_t MAX_PAYLOAD_SIZE = sizeof(vn_ymr_packet_t);
-static const char errorCodePacket[] = VN100_ERR_CODE_STRING;
-static const uint8_t errorCodeIndex = sizeof(errorCodePacket) - 1;
-
 static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN100_decoded_packet_t* parsedPacket);
 static uint16_t calculateCRC(unsigned char data[], unsigned int length);
-static obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error);
 
 obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
@@ -67,6 +66,7 @@ obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPa
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
@@ -83,7 +83,7 @@ static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
   return crc;
 }
 
-static obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error) {
+obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error) {
   if (packet == NULL || error == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   const unsigned char errorCode = packet[errorCodeIndex];
