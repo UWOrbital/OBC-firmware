@@ -3,7 +3,7 @@
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
-#include "vn100.h"
+#include "obc_reset.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -16,6 +16,13 @@
 #include <spi.h>
 #include <can.h>
 #include <het.h>
+
+// This is the stack canary. It should never be overwritten.
+// Ideally, it would be a random value, but we don't have a good source of entropy
+// that we can use.
+void *__stack_chk_guard = (void *)0xDEADBEEF;
+
+void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
 int main(void) {
   // Run hardware initialization code
@@ -38,13 +45,6 @@ int main(void) {
 
   // The supervisor is the only task running initially.
   initSupervisor();
-  initVN100();
+
   vTaskStartScheduler();
-
-  vn_ypr_packet_t mypacket;
-  retrieveYPR(&mypacket);
-
-  sciPrintf("Yaw: %f \r\n", mypacket.yaw);
-  sciPrintf("Pitch: %f \r\n", mypacket.pitch);
-  sciPrintf("Roll: %f \r\n", mypacket.roll);
 }
