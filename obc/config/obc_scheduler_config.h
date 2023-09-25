@@ -14,9 +14,9 @@ typedef enum {
   OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR,
   OBC_SCHEDULER_TASK_ID_TIMEKEEPER,
   OBC_SCHEDULER_TASK_ID_SW_WATCHDOG,
-  OBC_SCHEDULER_TASK_ID_ALARM_HANDLER,
+  OBC_SCHEDULER_TASK_ID_ALARM_MGR,
   OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR,
-  OBC_SCHEDULER_TASK_ID_TASK_STATS_COLLECTOR,
+  OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR,
 
   OBC_SCHEDULER_TASK_COUNT
 } obc_scheduler_task_id_t;
@@ -33,3 +33,4 @@ typedef struct {
 
 obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID);
 void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID);
+void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args);

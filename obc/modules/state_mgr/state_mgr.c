@@ -99,7 +99,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   initAlarmHandler();
   initTelemetry();
   initCommandManager();
-  initCommsManager(&commsManagerState);
+  initCommsManager();
   initDecodeTask();
   initTelemEncodeTask();
   initEPSManager();
@@ -112,9 +112,19 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   /* Create all tasks*/
   taskENTER_CRITICAL();
-  for (uint8_t taskId = 0; taskId < OBC_SCHEDULER_TASK_COUNT; taskId++) {
-    obcSchedulerCreateTask(taskId);
-  }
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_TIMEKEEPER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_ALARM_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_COMMAND_MGR);
+  obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_TASK_ID_COMMS_MGR, &commsManagerState);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_EPS_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR);
+#if ENABLE_TASK_STATS_COLLECTOR == 1
+  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR);
+#endif
   taskEXIT_CRITICAL();
 
   // TODO: Deal with errors

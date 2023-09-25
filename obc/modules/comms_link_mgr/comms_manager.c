@@ -112,7 +112,7 @@ static const comms_state_func_t commsStateFns[] = {
     // Add more functions for other states as needed
 };
 
-void initCommsManager(comms_state_t *commsState) {
+void initCommsManager(void) {
   ASSERT((commsQueueStack != NULL) && (&commsQueue != NULL));
   if (commsQueueHandle == NULL) {
     commsQueueHandle =
