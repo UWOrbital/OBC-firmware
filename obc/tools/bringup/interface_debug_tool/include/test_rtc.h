@@ -1,3 +1,3 @@
 #pragma once
 
-voic testRTC(void);
+void testRTC(void);
