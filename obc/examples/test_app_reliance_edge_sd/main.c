@@ -1,5 +1,6 @@
 #include "obc_spi_io.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -134,7 +135,7 @@ int main(void) {
   sciInit();
   spiInit();
 
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
 
   sciPrintf("Starting Reliance Edge Demo\r\n");

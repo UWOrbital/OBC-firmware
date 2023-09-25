@@ -3,6 +3,7 @@
 #include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_logging.h"
+#include "obc_persistent.h"
 #include "obc_task_config.h"
 #include "ds3232_mz.h"
 
@@ -44,7 +45,7 @@ static void timekeeperTask(void *pvParameters) {
    */
 
   obc_error_code_t errCode;
-
+  obc_time_persist_data_t unixTime;
   uint8_t syncPeriodCounter = 0;  // Sync whenever this counter is 0
 
   while (1) {
@@ -57,7 +58,9 @@ static void timekeeperTask(void *pvParameters) {
     }
 
     LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
-
+    // Send Unix time to fram
+    unixTime.unixTime = getCurrentUnixTime();
+    LOG_IF_ERROR_CODE(setPersistentObcTime(&unixTime));
     syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
