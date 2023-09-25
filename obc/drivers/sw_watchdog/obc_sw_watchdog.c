@@ -1,7 +1,7 @@
 #include "obc_sw_watchdog.h"
 #include "obc_assert.h"
 #include "obc_privilege.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 
 #include <system.h>
 #include <reg_rti.h>
@@ -32,27 +32,16 @@
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73, "RTI frequency is not 73.333 MHz");
 STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
 
-static StackType_t watchdogStack[SW_WATCHDOG_STACK_SIZE];
-static StaticTask_t watchdogTaskBuffer;
-static TaskHandle_t watchdogTaskHandle;
-
-/**
- * @brief Software watchdog task
- */
-static void swWatcdogFeeder(void* pvParameters);
+void obcTaskFunctionSwWatchdog(void* pvParameters);
 
 /**
  * @brief Feed the software watchdog
  */
 static void feedSwWatchdog(void);
 
-void initSwWatchdog(void) {
-  ASSERT((watchdogStack != NULL) && (&watchdogTaskBuffer != NULL));
-  watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
-                                         SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
-}
+void initSwWatchdog(void) {}
 
-static void swWatcdogFeeder(void* pvParameters) {
+void obcTaskFunctionSwWatchdog(void* pvParameters) {
   // Set up the watchdog
   BaseType_t xRunningPrivileged = prvRaisePrivilege();
 

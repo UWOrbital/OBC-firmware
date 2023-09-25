@@ -1,8 +1,10 @@
-#include "supervisor.h"
+#include "state_mgr.h"
 #include "timekeeper.h"
 #include "telemetry_manager.h"
 #include "command_manager.h"
 #include "comms_manager.h"
+#include "uplink_decoder.h"
+#include "downlink_encoder.h"
 #include "eps_manager.h"
 #include "payload_manager.h"
 #include "alarm_handler.h"
@@ -13,7 +15,7 @@
 #include "obc_logging.h"
 #include "obc_state_handle.h"
 #include "obc_state_defs.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_reset.h"
 #include "obc_reliance_fs.h"
 #include "lm75bd.h"
@@ -30,52 +32,38 @@
 #include <redposix.h>
 
 /* Supervisor queue config */
-#define SUPERVISOR_QUEUE_LENGTH 10U
-#define SUPERVISOR_QUEUE_ITEM_SIZE sizeof(supervisor_event_t)
-#define SUPERVISOR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
-#define SUPERVISOR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define STATE_MGR_QUEUE_LENGTH 10U
+#define STATE_MGR_QUEUE_ITEM_SIZE sizeof(state_mgr_event_t)
+#define STATE_MGR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define STATE_MGR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
-static TaskHandle_t supervisorTaskHandle = NULL;
-static StaticTask_t supervisorTaskBuffer;
-static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
-
-static QueueHandle_t supervisorQueueHandle = NULL;
-static StaticQueue_t supervisorQueue;
-static uint8_t supervisorQueueStack[SUPERVISOR_QUEUE_LENGTH * SUPERVISOR_QUEUE_ITEM_SIZE];
+static QueueHandle_t stateMgrQueueHandle = NULL;
+static StaticQueue_t stateMgrQueue;
+static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 
-/**
- * @brief	Supervisor task.
- * @param	pvParameters	Task parameters.
- */
-static void vSupervisorTask(void *pvParameters);
+void obcTaskFunctionStateMgr(void *pvParameters);
 
 /**
- * @brief Send all startup messages from the supervisor task to other tasks.
+ * @brief Send all startup messages from the stateMgr task to other tasks.
  */
 static void sendStartupMessages(void);
 
-void initSupervisor(void) {
-  ASSERT((supervisorTaskStack != NULL) && (&supervisorTaskBuffer != NULL));
-  if (supervisorTaskHandle == NULL) {
-    supervisorTaskHandle = xTaskCreateStatic(vSupervisorTask, SUPERVISOR_NAME, SUPERVISOR_STACK_SIZE, NULL,
-                                             SUPERVISOR_PRIORITY, supervisorTaskStack, &supervisorTaskBuffer);
-  }
-
-  ASSERT((supervisorQueueStack != NULL) && (&supervisorQueue != NULL));
-  if (supervisorQueueHandle == NULL) {
-    supervisorQueueHandle =
-        xQueueCreateStatic(SUPERVISOR_QUEUE_LENGTH, SUPERVISOR_QUEUE_ITEM_SIZE, supervisorQueueStack, &supervisorQueue);
+void initStateMgr(void) {
+  ASSERT((stateMgrQueueStack != NULL) && (&stateMgrQueue != NULL));
+  if (stateMgrQueueHandle == NULL) {
+    stateMgrQueueHandle =
+        xQueueCreateStatic(STATE_MGR_QUEUE_LENGTH, STATE_MGR_QUEUE_ITEM_SIZE, stateMgrQueueStack, &stateMgrQueue);
   }
 }
 
-obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
-  ASSERT(supervisorQueueHandle != NULL);
+obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
+  ASSERT(stateMgrQueueHandle != NULL);
 
   if (event == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if (xQueueSend(supervisorQueueHandle, (void *)event, SUPERVISOR_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+  if (xQueueSend(stateMgrQueueHandle, (void *)event, STATE_MGR_QUEUE_TX_WAIT_PERIOD) == pdPASS)
     return OBC_ERR_CODE_SUCCESS;
 
   return OBC_ERR_CODE_QUEUE_FULL;
@@ -83,10 +71,10 @@ obc_error_code_t sendToSupervisorQueue(supervisor_event_t *event) {
 
 static void sendStartupMessages(void) {}
 
-static void vSupervisorTask(void *pvParameters) {
+void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
-  ASSERT(supervisorQueueHandle != NULL);
+  ASSERT(stateMgrQueueHandle != NULL);
 
   /* Initialize critical peripherals */
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
@@ -106,26 +94,28 @@ static void vSupervisorTask(void *pvParameters) {
 
   initFRAM();  // FRAM storage (OBC)
 
-  /* Initialize other tasks */
-  // Don't start running any tasks until all tasks are initialized
-  taskENTER_CRITICAL();
-
+  // Call init functions for all tasks. TODO: Combine into obc_scheduler
   initTimekeeper();
   initAlarmHandler();
-
   initTelemetry();
   initCommandManager();
   initCommsManager(&commsManagerState);
+  initDecodeTask();
+  initTelemEncodeTask();
   initEPSManager();
   initPayloadManager();
   initHealthCollector();
-#if (DEBUG == 1)
+#if ENABLE_TASK_STATS_COLLECTOR == 1
   initTaskStatsCollector();
 #endif
-
-  taskEXIT_CRITICAL();
-
   initSwWatchdog();
+
+  /* Create all tasks*/
+  taskENTER_CRITICAL();
+  for (uint8_t taskId = 0; taskId < OBC_SCHEDULER_TASK_COUNT; taskId++) {
+    obcSchedulerCreateTask(taskId);
+  }
+  taskEXIT_CRITICAL();
 
   // TODO: Deal with errors
   LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
@@ -137,12 +127,12 @@ static void vSupervisorTask(void *pvParameters) {
   LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
 
   while (1) {
-    supervisor_event_t inMsg;
+    state_mgr_event_t inMsg;
 
-    if (xQueueReceive(supervisorQueueHandle, &inMsg, SUPERVISOR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    if (xQueueReceive(stateMgrQueueHandle, &inMsg, STATE_MGR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
       vTaskDelay(pdMS_TO_TICKS(1000));
-      gioToggleBit(SUPERVISOR_DEBUG_LED_GIO_PORT, SUPERVISOR_DEBUG_LED_GIO_BIT);
+      gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 #endif
       continue;
     }

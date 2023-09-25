@@ -4,7 +4,7 @@
 #include "telemetry_manager.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -12,21 +12,12 @@
 
 #define HEALTH_COLLECTION_PERIOD_MS 60000UL
 
-static void healthCollectorTask(void* pvParameters);
+void obcTaskFunctionHealthCollector(void* pvParameters);
 static obc_error_code_t collectObcLm75bdTemp(void);
 
-TaskHandle_t healthCollectorTaskHandle;
-StaticTask_t healthCollectorTaskBuffer;
-StackType_t healthCollectorTaskStack[HEALTH_COLLECTOR_STACK_SIZE];
+void initHealthCollector(void) {}
 
-void initHealthCollector(void) {
-  ASSERT(healthCollectorTaskStack != NULL && &healthCollectorTaskBuffer != NULL);
-  healthCollectorTaskHandle =
-      xTaskCreateStatic(healthCollectorTask, "health_collector", HEALTH_COLLECTOR_STACK_SIZE, NULL,
-                        HEALTH_COLLECTOR_PRIORITY, healthCollectorTaskStack, &healthCollectorTaskBuffer);
-}
-
-static void healthCollectorTask(void* pvParameters) {
+void obcTaskFunctionHealthCollector(void* pvParameters) {
   obc_error_code_t errCode;
 
   while (1) {
