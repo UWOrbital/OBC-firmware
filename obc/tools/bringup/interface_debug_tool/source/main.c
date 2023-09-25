@@ -13,6 +13,7 @@
 #include "test_can.h"
 #include "test_adc.h"
 #include "test_gio.h"
+#include "test_rtc.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -36,6 +37,7 @@ typedef void (*testFunc_t)(void);
 static const testFunc_t testFuncs[NUM_COMMANDS_MAX] = {
     [OP_CODE_SPI_TEST] = testSPI, [OP_CODE_SCI_TEST] = testSCI, [OP_CODE_I2C_TEST] = testI2C,
     [OP_CODE_CAN_TEST] = testCAN, [OP_CODE_ADC_TEST] = testADC, [OP_CODE_GIO_TEST] = testGIO,
+    [OP_CODE_RTC_TEST] = testRTC,
 };
 
 void utilityCLI(void *pvParameters) {
