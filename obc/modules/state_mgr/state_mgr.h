@@ -6,17 +6,17 @@
 
 /**
  * @enum	state_mgr_event_id_t
- * @brief	Supervisor event ID enum.
+ * @brief	State Manager event ID enum.
  *
  * Enum containing all possible event IDs passed to the state_mgr event queue.
  */
 typedef enum {
-  SUPERVISOR_NULL_EVENT_ID,
+  STATE_MGR_NULL_EVENT_ID,
 } state_mgr_event_id_t;
 
 /**
  * @union	state_mgr_event_data_t
- * @brief	Supervisor event data union
+ * @brief	State Manager event data union
  */
 typedef union {
   int i;
@@ -25,7 +25,7 @@ typedef union {
 
 /**
  * @struct	state_mgr_event_t
- * @brief	Supervisor event struct
+ * @brief	State Manager event struct
  *
  * Holds the message data for each event sent/received by the state_mgr manager queue.
  */

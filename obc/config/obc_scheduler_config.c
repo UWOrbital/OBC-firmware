@@ -263,6 +263,8 @@ void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID) {
   ASSERT(taskID > 0 && taskID < OBC_SCHEDULER_TASK_COUNT);
   obc_scheduler_config_t *taskConfig = obcSchedulerGetConfig(taskID);
 
+  ASSERT(taskConfig != NULL);
+
   ASSERT(taskConfig->taskStack != NULL);
   ASSERT(taskConfig->taskBuffer != NULL);
 
