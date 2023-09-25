@@ -9,3 +9,4 @@
 
 #define OP_CODE_ADC_TEST (uint8_t)'4'
 #define OP_CODE_GIO_TEST (uint8_t)'5'
+#define OP_CODE_TEMP_TEST (uint8_t)'6'

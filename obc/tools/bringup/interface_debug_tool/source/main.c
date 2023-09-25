@@ -11,7 +11,7 @@
 #include "test_can.h"
 #include "test_adc.h"
 #include "test_gio.h"
-
+#include "test_temp.h"
 #include <FreeRTOS.h>
 #include <os_task.h>
 
@@ -32,8 +32,9 @@ typedef void (*testFunc_t)(void);
 #define NUM_COMMANDS_MAX 255  // Each command initiated by a single character
 
 static const testFunc_t testFuncs[NUM_COMMANDS_MAX] = {
-    [OP_CODE_SPI_TEST] = testSPI, [OP_CODE_SCI_TEST] = testSCI, [OP_CODE_I2C_TEST] = testI2C,
-    [OP_CODE_CAN_TEST] = testCAN, [OP_CODE_ADC_TEST] = testADC, [OP_CODE_GIO_TEST] = testGIO,
+    [OP_CODE_SPI_TEST] = testSPI,   [OP_CODE_SCI_TEST] = testSCI, [OP_CODE_I2C_TEST] = testI2C,
+    [OP_CODE_CAN_TEST] = testCAN,   [OP_CODE_ADC_TEST] = testADC, [OP_CODE_GIO_TEST] = testGIO,
+    [OP_CODE_TEMP_TEST] = testTemp,
 };
 
 void utilityCLI(void *pvParameters) {
