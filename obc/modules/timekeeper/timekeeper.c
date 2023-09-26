@@ -57,7 +57,6 @@ static void timekeeperTask(void *pvParameters) {
       incrementCurrentUnixTime();
     }
 
-    LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
     // Send Unix time to fram
     unixTime.unixTime = getCurrentUnixTime();
     LOG_IF_ERROR_CODE(setPersistentObcTime(&unixTime));

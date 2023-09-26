@@ -89,8 +89,6 @@ static void commandManagerTask(void *pvParameters) {
   while (1) {
     cmd_msg_t cmd;
     if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
-      LOG_DEBUG("Received command %u", cmd.id);
-
       // Check if the ID is a valid index
       if (cmd.id >= CMDS_CONFIG_SIZE) {
         LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_CMD);
@@ -116,7 +114,7 @@ static void commandManagerTask(void *pvParameters) {
         // TODO: Make this persistent across resets
         if (!cmdProgressTracker[cmd.id]) {
           // Begin the two-step process of executing a safety-critical command
-          LOG_DEBUG("Process started to execute safety-critical command %u", cmd.id);
+          LOG_DEBUG("Process started to execute safety-critical command");
           cmdProgressTracker[cmd.id] = true;
           continue;
         }

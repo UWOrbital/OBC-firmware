@@ -2,6 +2,7 @@
 #include "obc_sci_io.h"
 #include "obc_logging.h"
 #include "ds3232_mz.h"
+#include "obc_print.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -30,13 +31,13 @@ void vTask1(void *pvParameters) {
   // Get the temperature
   float temperature;
   LOG_IF_ERROR_CODE(getTemperatureRTC(&temperature));
-  LOG_INFO("RTC Temperature: %f", temperature);
+  sciPrintf("RTC Temperature: %f", temperature);
 
   // Enable interrupt on alarm 1
   rtc_control_t control;
   LOG_IF_ERROR_CODE(getControlRTC(&control));
-  LOG_INFO("RTC Control: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u", control.EOSC, control.BBSQW, control.CONV,
-           control.A1IE, control.A2IE, control.INTCN);
+  sciPrintf("RTC Control: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u", control.EOSC, control.BBSQW, control.CONV,
+            control.A1IE, control.A2IE, control.INTCN);
 
   control.A1IE = 1;
   control.INTCN = 1;
@@ -59,8 +60,8 @@ void vTask1(void *pvParameters) {
   while (1) {
     rtc_date_time_t newDateTime;
     LOG_IF_ERROR_CODE(getCurrentDateTimeRTC(&newDateTime));
-    LOG_INFO("RTC Date: %u/%u/%u", newDateTime.date.month, newDateTime.date.date, newDateTime.date.year);
-    LOG_INFO("RTC Time: %u:%u:%u", newDateTime.time.hours, newDateTime.time.minutes, newDateTime.time.seconds);
+    sciPrintf("RTC Date: %u/%u/%u", newDateTime.date.month, newDateTime.date.date, newDateTime.date.year);
+    sciPrintf("RTC Time: %u:%u:%u", newDateTime.time.hours, newDateTime.time.minutes, newDateTime.time.seconds);
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }

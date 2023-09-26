@@ -36,8 +36,6 @@
 #define SUPERVISOR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define SUPERVISOR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
-static uint8_t currentNumLogFiles;
-
 static TaskHandle_t supervisorTaskHandle = NULL;
 static StaticTask_t supervisorTaskBuffer;
 static StackType_t supervisorTaskStack[SUPERVISOR_STACK_SIZE];
@@ -116,7 +114,8 @@ static void vSupervisorTask(void *pvParameters) {
   initTimekeeper();
   initAlarmHandler();
 
-  initLogger(&currentNumLogFiles);
+  initLogger();
+  initLoggerTask();
 
   initTelemetry();
   initCommandManager();

@@ -48,7 +48,7 @@ obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
   }
 
   // TODO: Implement handling for this command. Check if the log level is valid
-  LOG_DEBUG("Executing log downlink command - log level %u", cmd->downlinkLogsNextPass.logLevel);
+  LOG_DEBUG("Executing log downlink command");
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -59,7 +59,7 @@ obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
 
   int32_t ret = red_format("");
   if (ret != 0) {
-    LOG_DEBUG("Executing microSD format error code %u", OBC_ERR_CODE_FS_FORMAT_FAILED);
+    LOG_ERROR(OBC_ERR_CODE_FS_FORMAT_FAILED);
     return OBC_ERR_CODE_FS_FORMAT_FAILED;
   }
 

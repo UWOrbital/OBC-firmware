@@ -154,7 +154,7 @@ static void vDecodeTask(void *pvParameters) {
         } else {
           if (!startFlagReceived) {
             if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS)) != pdPASS) {
-              LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_FULL);
+              LOG_ERROR(OBC_ERR_CODE_QUEUE_FULL);
             }
           }
           startFlagReceived = true;

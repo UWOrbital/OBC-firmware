@@ -2,6 +2,7 @@
 #include "obc_task_config.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
+#include "obc_print.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -10,8 +11,10 @@
 #include <redposix.h>
 
 #include <string.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdio.h>
 
-static uint8_t currentLogFileNum = 0;
 #define LOG_FILE_NAME "log_file0.log"
 
 #define MAX_MSG_SIZE 128U
@@ -34,7 +37,7 @@ static log_output_location_t outputLocation;
 
 static TaskHandle_t loggerTaskHandle = NULL;
 static StaticTask_t loggerTaskBuffer;
-static StackType_t loggerTaskStack[LOGGER_STACK_SIZE];
+static StackType_t loggerTaskStack[LOGGER_TASK_STACK_SIZE];
 
 static QueueHandle_t loggerQueueHandle = NULL;
 static StaticQueue_t loggerQueue;
@@ -47,14 +50,6 @@ static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
 static void vLoggerTask(void *pvParameters);
 
 /**
- * @brief logs a received message to log
- *
- * @param logMsg string that needs to be logged
- * @param fname name of the file to write to
- */
-static obc_error_code_t logMsg(const char *logMsg, const char *fname);
-
-/**
  * @brief formats
  */
 
@@ -63,22 +58,22 @@ static obc_error_code_t logMsg(const char *logMsg, const char *fname);
  *
  * @param currentNumLogFiles pointer to current number of existing log files
  */
-void initLoggerTask(uint8_t *currentNumLogFiles) {
+void initLoggerTask(void) {
   ASSERT((loggerTaskStack != NULL) && (&loggerTaskBuffer != NULL));
   if (loggerTaskHandle == NULL) {
-    loggerTaskHandle =
-        xTaskCreateStatic(vLoggerTask, LOGGER_TASK_NAME, LOGGER_TASK_STACK_SIZE, (void *)currentNumLogFiles,
-                          LOGGER_TASK_PRIORITY, loggerTaskStack, &loggerTaskBuffer);
+    loggerTaskHandle = xTaskCreateStatic(vLoggerTask, LOGGER_TASK_NAME, LOGGER_TASK_STACK_SIZE, NULL,
+                                         LOGGER_TASK_PRIORITY, loggerTaskStack, &loggerTaskBuffer);
   }
 
   ASSERT((loggerQueueStack != NULL) && (&loggerQueue != NULL));
   if (loggerQueueHandle == NULL) {
     loggerQueueHandle = xQueueCreateStatic(LOGGER_QUEUE_LENGTH, LOGGER_QUEUE_ITEM_SIZE, loggerQueueStack, &loggerQueue);
   }
+
+  outputLocation = LOG_DEFAULT_OUTPUT_LOCATION;
 }
 
 static void vLoggerTask(void *pvParameters) {
-  uint8_t currentNumLogFiles = *((uint8_t *)pvParameters);
   char *fname = LOG_FILE_NAME;
   while (1) {
     logger_event_t queueMsg;
@@ -96,23 +91,24 @@ static void vLoggerTask(void *pvParameters) {
 
     char buf[MAX_LOG_SIZE] = {0};
     int bufLen = 0;
+    // File & line number
+    char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
+    int ret = 0;
     switch (queueMsg.logType) {
       case LOG_ERROR:
-        // File & line number
-        char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
-        int ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType],
-                           queueMsg.file, queueMsg.line);
+        ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType],
+                       queueMsg.file, queueMsg.line);
         if (ret < 0) {
           LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
         if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE) {
           LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
-          continuel
+          continue;
         }
 
         // Prepare entire output
-        bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %u\r\n", infobuf, queueMsg.errCode);
+        bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, queueMsg.errCode);
         if (bufLen < 0) {
           LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           continue;
@@ -127,17 +123,15 @@ static void vLoggerTask(void *pvParameters) {
           LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
-        // File & line number
-        char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
-        int ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType],
-                           queueMsg.file, queueMsg.line);
+        ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType],
+                       queueMsg.file, queueMsg.line);
         if (ret < 0) {
           LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
         if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE) {
           LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
-          continuel
+          continue;
         }
 
         // Prepare entire output
@@ -166,6 +160,7 @@ static void vLoggerTask(void *pvParameters) {
         continue;
       }
     } else {
+      sciPrintText((unsigned char *)buf, bufLen, UART_MUTEX_BLOCK_TIME);
     }
   }
 }
@@ -206,7 +201,7 @@ obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
   }
   BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
 
-  xQueueSendFromISR(loggerQueueHandle, (void *)event, xHigherPriorityTaskAwoken);
+  xQueueSendFromISR(loggerQueueHandle, (void *)event, &xHigherPriorityTaskAwoken);
 
   portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 

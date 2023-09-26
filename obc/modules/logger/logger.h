@@ -17,10 +17,8 @@ typedef struct {
 
 /**
  * @brief Initialize the logger task for logging to the sd card
- *
- * @param currentNumLogFiles pointer to current number of existing log files
  */
-void initLoggerTask(uint8_t *currentNumLogFiles);
+void initLoggerTask(void);
 
 /**
  * @brief Sends an event to the logger queue
