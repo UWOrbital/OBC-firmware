@@ -1,4 +1,5 @@
 #include "obc_gs_ax25.h"
+#include "obc_gs_crc.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -10,7 +11,7 @@
 #define POLL_FINAL_BIT_OFFSET 4
 #define POLL_FINAL_BIT_MASK (0x01 << POLL_FINAL_BIT_OFFSET)
 
-#define SRC_CALLSIGN "\0\0\0\0\0\0\0"
+#define SRC_CALLSIGN "\0\0\0\0\0\0"
 
 #define AX25_ADDRESS_SPACE_BYTE 0x40
 #define AX25_ADDRESS_RESERVE_BIT_MASK 0b01100000
@@ -22,6 +23,17 @@ static uint8_t pktReceiveNum = 0;
 /* Note these will need to be adjusted according to chapter 3.12 of the AX.25 Standard */
 ax25_addr_t cubesatCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};        // mock cubesat address
 ax25_addr_t groundStationCallsign = {.data = {0}, .length = AX25_DEST_ADDR_BYTES};  // Mock Ground station address
+
+static ax25_addr_t currentLinkDestAddr;
+
+/**
+ * @brief reverses the given number and returns the reversed number
+ *
+ * @param numToReverse: the number that should be reversed
+ *
+ * @return uint16_t - the reversed number
+ */
+static inline uint16_t reverseUint16(uint16_t numToReverse);
 
 /**
  * @brief checks for a valid s frame and performs the necessary command responses
@@ -45,10 +57,11 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
  * @brief recieves a U frame and performs the necessary next action
  *
  * @param unstuffedPacket unstuffed ax.25 packet
+ * @param uFrameCmd buffer to store the received command if the frame was a U frame
  *
  * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket);
+static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command);
 
 /**
  * @brief calculates the FCS for an ax.25 packet
@@ -56,10 +69,8 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
  * @param data uint8_t array that holds the ax25 packet data
  * @param dataLen total length of the data array
  * @param calculatedFcs pointer to a un16_t to hold the calculated FCS
- *
- * @return obc_gs_error_code_t OBC_GS_ERR_CODE_SUCCESS if it was successful and error code if not
  */
-static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs);
+static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs);
 
 /**
  * @brief checks if a received fcs is correct
@@ -72,8 +83,8 @@ static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, u
  */
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs);
 
-obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data,
-                                   const ax25_addr_t *destAddress) {
+obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t telemDataLen, uint8_t *ax25Data,
+                                                  uint32_t ax25DataLen, const ax25_addr_t *destAddress) {
   if (telemData == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -85,7 +96,67 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   if (destAddress == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
+
   if (destAddress->length < AX25_DEST_ADDR_BYTES) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  uint8_t numOfFrames = (telemDataLen + AX25_INFO_BYTES - 1) / AX25_INFO_BYTES;  // Number of frames and rounding up
+  if (ax25DataLen < ((uint32_t)(numOfFrames * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + 1)) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  memset(ax25Data, 0, ax25DataLen);
+
+  uint8_t remainingDataBytes = telemDataLen;
+  uint8_t frameStart = 0;
+
+  for (frameStart = 0; frameStart < numOfFrames; ++frameStart) {
+    ax25Data[frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG] = AX25_FLAG;
+
+    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_DEST_ADDR_POSITION, destAddress->data,
+           AX25_DEST_ADDR_BYTES);
+    uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
+    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_SRC_ADDR_POSITION, srcAddress,
+           AX25_SRC_ADDR_BYTES);
+
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION + 1] = (pktSentNum << 1);
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_MOD128_PID_POSITION] = AX25_PID;
+    if (remainingDataBytes >= AX25_INFO_BYTES) {
+      memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION,
+             telemData + (frameStart * AX25_INFO_BYTES), AX25_INFO_BYTES);
+    } else {
+      memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_INFO_FIELD_POSITION,
+             telemData + (frameStart * AX25_INFO_BYTES), remainingDataBytes);
+    }
+
+    uint16_t fcs;
+    fcsCalculate(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG), AX25_MINIMUM_I_FRAME_LEN, &fcs);
+
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
+    ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_I_FRAME_FCS_POSITION + 1] =
+        (uint8_t)(fcs & 0xFF);
+    pktSentNum++;
+    remainingDataBytes -= AX25_INFO_BYTES;
+  }
+  ax25Data[frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG] = AX25_FLAG;
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
+
+obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, unstuffed_ax25_i_frame_t *ax25Data) {
+  if (telemData == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (ax25Data == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+  if (currentLinkDestAddr.length < AX25_DEST_ADDR_BYTES) {
     /* TODO: technically not an error, should be filled with spaces */
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -95,7 +166,7 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
 
   ax25Data->data[0] = AX25_FLAG;
   // ax25Data->data[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
-  memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
+  memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
   uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   memcpy(ax25Data->data + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
   ax25Data->data[AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
@@ -103,13 +174,8 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   ax25Data->data[AX25_MOD128_PID_POSITION] = AX25_PID;
   memcpy(ax25Data->data + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
 
-  obc_gs_error_code_t errCode;
-
   uint16_t fcs;
-  errCode = fcsCalculate(ax25Data->data, AX25_MINIMUM_I_FRAME_LEN, &fcs);
-  if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
-    return errCode;
-  }
+  fcsCalculate(ax25Data->data, AX25_MINIMUM_I_FRAME_LEN, &fcs);
 
   ax25Data->data[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25Data->data[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
@@ -120,8 +186,7 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit,
-                                   const ax25_addr_t *destAddress) {
+obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd, uint8_t pollFinalBit) {
   if (cmd > MAX_U_FRAME_CMD_VALUE) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -130,7 +195,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (destAddress == NULL) {
+  if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
@@ -146,7 +211,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
 
   ax25PacketUnstuffed[0] = AX25_FLAG;
 
-  memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, destAddress->data, AX25_DEST_ADDR_BYTES);
+  memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
 
   uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   memcpy(ax25PacketUnstuffed + AX25_SRC_ADDR_POSITION, srcAddress, AX25_SRC_ADDR_BYTES);
@@ -164,10 +229,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   ax25PacketUnstuffed[AX25_MOD8_PID_POSITION] = AX25_PID;
 
   uint16_t fcs;
-  errCode = fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
-  if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
-    return errCode;
-  }
+  fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
 
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
@@ -184,10 +246,11 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command) {
   if (unstuffedPacket == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
+
   if (unstuffedPacket->length > AX25_MINIMUM_I_FRAME_LEN || unstuffedPacket->length < AX25_MINIMUM_U_FRAME_CMD_LENGTH) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
@@ -212,7 +275,7 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
     errCode = iFrameRecv(unstuffedPacket);
   } else if (unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
     // If the LSB was 1, check if the next bit is a 1 to see if it is a U Frame
-    errCode = uFrameRecv(unstuffedPacket);
+    errCode = uFrameRecv(unstuffedPacket, command);
   } else {
     // Must be an S Frame if we reach this point
     errCode = sFrameRecv(unstuffedPacket);
@@ -268,6 +331,9 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
 }
 
 static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+    return OBC_GS_ERR_CODE_INVALID_TNC;
+  }
   if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
@@ -293,6 +359,9 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
   // first control byte will be the the after the flag and the address bytes
   // next control byte will be immediately after the previous one
   // See AX.25 standard
+  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+    return OBC_GS_ERR_CODE_INVALID_TNC;
+  }
   if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
@@ -316,97 +385,64 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command) {
   if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
 
   uint8_t controlByte = unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION];
-  uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK;
+  // uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK; TODO: figure out how to handle poll/control bits
 
   // clear the poll/final bit from controlByte
   controlByte &= ~POLL_FINAL_BIT_MASK;
 
-  ax25_addr_t destAddress = {0};
+  ax25_addr_t destAddress = {.length = AX25_DEST_ADDR_BYTES};
 
   // the destination address for the packet we send will be the src address of the packet we just received
   memcpy(destAddress.data, unstuffedPacket->data + AX25_SRC_ADDR_POSITION, AX25_DEST_ADDR_BYTES);
-  if (controlByte == U_FRAME_CMD_CONN) {
-    // Send an unnumbered acknowledgement
-    packed_ax25_u_frame_t ax25Data = {0};
+  if (controlByte == AX25_U_FRAME_SABME_CMD_CONTROL) {
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;
-    ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
-    // Future PR will handle sending this to the proper queue
-  } else if (controlByte == U_FRAME_CMD_DISC) {
-    // Send an unnumbered acknowledgement
-    packed_ax25_u_frame_t ax25Data = {0};
-    ax25SendUFrame(&ax25Data, U_FRAME_CMD_ACK, pollFinalBit, &destAddress);
-    // Future PR will handle sending this to the proper queue
-  } else if (controlByte == U_FRAME_CMD_ACK) {
+    if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
+      setCurrentLinkDestAddress(&destAddress);
+    }
+    *command = U_FRAME_CMD_CONN;
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (controlByte == AX25_U_FRAME_DISC_CMD_CONTROL) {
+    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+      return OBC_GS_ERR_CODE_INVALID_TNC;
+    }
+    *command = U_FRAME_CMD_DISC;
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (controlByte == AX25_U_FRAME_ACK_CMD_CONTROL) {
+    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+      return OBC_GS_ERR_CODE_INVALID_TNC;
+    }
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;
-    // acknowledgeFlag == true
-    // Future PR will handle what to do here most likely some kind of state variable change
+    *command = U_FRAME_CMD_ACK;
+    return OBC_GS_ERR_CODE_SUCCESS;
   }
 
   // Add more command actions as our architecture changes to need different commands
-  return OBC_GS_ERR_CODE_SUCCESS;
+  return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
 }
 
-static obc_gs_error_code_t fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
-  /* TODO: look into this more and make sure this is the right implementation */
-  *calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
-
-  for (uint16_t i = 0; i < (dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
-    *calculatedFcs ^= (uint16_t)data[i] << 8;
-
-    for (uint8_t j = 0; j < 8; ++j) {
-      if (*calculatedFcs & 0x8000) {
-        *calculatedFcs = (*calculatedFcs << 1) ^ 0x8408;  // Polynomial X^16 + X^12 + X^5 + 1
-      } else {
-        *calculatedFcs <<= 1;
-      }
-    }
-  }
-
-  *calculatedFcs ^= 0xFFFF;
+static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
+  *calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
   // reverse order so that FCS can be transmitted with most significant bit first as per AX25 standard
-  uint16_t reverse_num = 0;
-  for (uint8_t i = 0; i < sizeof(*calculatedFcs) * 8; i++) {
-    if ((*calculatedFcs & (1 << i))) reverse_num |= 1 << ((sizeof(*calculatedFcs) * 8 - 1) - i);
-  }
-
-  *calculatedFcs = reverse_num;
-
-  return OBC_GS_ERR_CODE_SUCCESS;
+  *calculatedFcs = reverseUint16(*calculatedFcs);
 }
 
 static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint16_t fcs) {
   // reverse bit order of fcs to account for the fact that it was transmitted in the reverse order as the other bytes
-  uint16_t reverse_num = 0;
-  for (uint8_t i = 0; i < sizeof(fcs) * 8; i++) {
-    if ((fcs & (1 << i))) reverse_num |= 1 << ((sizeof(fcs) * 8 - 1) - i);
-  }
-  fcs = reverse_num;
-  uint16_t calculatedFcs = 0xFFFF;  // Initial calculatedFcs value
+  fcs = reverseUint16(fcs);
 
-  for (uint16_t i = 0; i < (dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES); ++i) {
-    calculatedFcs ^= (uint16_t)data[i] << 8;
+  uint16_t calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
 
-    for (uint8_t j = 0; j < 8; ++j) {
-      if (calculatedFcs & 0x8000) {
-        calculatedFcs = (calculatedFcs << 1) ^ 0x8408;  // Polynomial X^16 + X^12 + X^5 + 1
-      } else {
-        calculatedFcs <<= 1;
-      }
-    }
-  }
-
-  calculatedFcs ^= 0xFFFF;  // XOR with 0xFFFF at the end
   if (fcs != calculatedFcs) {
     return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
   }
@@ -522,4 +558,18 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
   address->data[address->length - 1] = ssid | controlBit | AX25_ADDRESS_END_FLAG;
 
   return OBC_GS_ERR_CODE_SUCCESS;
+}
+
+void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
+  memcpy(&currentLinkDestAddr, destAddress, sizeof(ax25_addr_t));
+}
+
+void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
+
+static inline uint16_t reverseUint16(uint16_t numToReverse) {
+  uint16_t reverseNum = 0;
+  for (uint8_t i = 0; i < sizeof(numToReverse) * 8; i++) {
+    if ((numToReverse & (1 << i))) reverseNum |= 1 << ((sizeof(numToReverse) * 8 - 1) - i);
+  }
+  return reverseNum;
 }

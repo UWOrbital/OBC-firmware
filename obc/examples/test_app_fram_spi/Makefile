@@ -57,7 +57,6 @@ LIBS :=
 
 SRC_DIRS :=
 SRC_DIRS += hal/source
-
 SRC_DIRS += examples/spi_fram_demo
 # Drivers
 SRC_DIRS += drivers/common/source
