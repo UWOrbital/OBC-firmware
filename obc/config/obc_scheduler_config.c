@@ -52,24 +52,24 @@
 
 /* TYPEDEFS */
 typedef enum {
-  OBC_TASK_PRIORITY_IDLE = 0U,
+  TASK_IDLE_PRIORITY = 0U,
 
-  OBC_TASK_PRIORITY_COMMAND_MGR = 1U,
-  OBC_TASK_PRIORITY_TELEMETRY_MGR = 1U,
-  OBC_TASK_PRIORITY_HEALTH_COLLECTOR = 1U,
-  OBC_TASK_PRIORITY_PAYLOAD_MGR = 1U,
-  OBC_TASK_PRIORITY_COMMS = 2U,
-  OBC_TASK_PRIORITY_COMMS_MGR = OBC_TASK_PRIORITY_COMMS,
-  OBC_TASK_PRIORITY_COMMS_UPLINK_DECODE = OBC_TASK_PRIORITY_COMMS,
-  OBC_TASK_PRIORITY_COMMS_DOWNLINK_ENCODE = OBC_TASK_PRIORITY_COMMS,
-  OBC_TASK_PRIORITY_EPS_MGR = 3U,
-  OBC_TASK_PRIORITY_STATS_COLLECTOR = 4U,
-  OBC_TASK_PRIORITY_ALARM_MGR = 4U,
-  OBC_TASK_PRIORITY_STATE_MGR = 5U,
-  OBC_TASK_PRIORITY_TIMEKEEPER = 6U,
-  OBC_TASK_PRIORITY_SW_WATCHDOG = OBC_SCHEDULER_MAX_PRIORITY,
+  TASK_COMMAND_MGR_PRIORITY = 1U,
+  TASK_TELEMETRY_MGR_PRIORITY = 1U,
+  TASK_HEALTH_COLLECTOR_PRIORITY = 1U,
+  TASK_PAYLOAD_MGR_PRIORITY = 1U,
+  TASK_COMMS_PRIORITY = 2U,
+  TASK_COMMS_MGR_PRIORITY = TASK_COMMS_PRIORITY,
+  TASK_COMMS_UPLINK_DECODE_PRIORITY = TASK_COMMS_PRIORITY,
+  TASK_COMMS_DOWNLINK_ENCODE_PRIORITY = TASK_COMMS_PRIORITY,
+  TASK_EPS_MGR_PRIORITY = 3U,
+  TASK_STATS_COLLECTOR_PRIORITY = 4U,
+  TASK_ALARM_MGR_PRIORITY = 4U,
+  TASK_STATE_MGR_PRIORITY = 5U,
+  TASK_TIMEKEEPER_PRIORITY = 6U,
+  TASK_SW_WATCHDOG_PRIORITY = OBC_SCHEDULER_MAX_PRIORITY,
 
-  OBC_TASK_PRIORITY_MAX = OBC_SCHEDULER_MAX_PRIORITY,
+  TASK_MAX_PRIORITY = OBC_SCHEDULER_MAX_PRIORITY,
 } obc_scheduler_task_priority_t;
 
 /* TASK FUNCTION PROTOTYPES */
@@ -136,7 +136,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackStateMgr,
             .taskBuffer = &obcTaskBufferStateMgr,
             .stackSize = TASK_STATE_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_STATE_MGR,
+            .priority = TASK_STATE_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionStateMgr,
         },
     [OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR] =
@@ -145,7 +145,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackTelemetryMgr,
             .taskBuffer = &obcTaskBufferTelemetryMgr,
             .stackSize = TASK_TELEMETRY_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_TELEMETRY_MGR,
+            .priority = TASK_TELEMETRY_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionTelemetryMgr,
         },
     [OBC_SCHEDULER_TASK_ID_COMMAND_MGR] =
@@ -154,7 +154,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackCommandMgr,
             .taskBuffer = &obcTaskBufferCommandMgr,
             .stackSize = TASK_COMMAND_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_COMMAND_MGR,
+            .priority = TASK_COMMAND_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionCommandMgr,
         },
     [OBC_SCHEDULER_TASK_ID_COMMS_MGR] =
@@ -163,7 +163,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackCommsMgr,
             .taskBuffer = &obcTaskBufferCommsMgr,
             .stackSize = TASK_COMMS_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_COMMS_MGR,
+            .priority = TASK_COMMS_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionCommsMgr,
         },
     [OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER] =
@@ -172,7 +172,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackCommsDownlinkEncoder,
             .taskBuffer = &obcTaskBufferCommsDownlinkEncoder,
             .stackSize = TASK_COMMS_DOWNLINK_ENCODER_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_COMMS_DOWNLINK_ENCODE,
+            .priority = TASK_COMMS_DOWNLINK_ENCODE_PRIORITY,
             .taskFunc = obcTaskFunctionCommsDownlinkEncoder,
         },
     [OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER] =
@@ -181,7 +181,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackCommsUplinkDecoder,
             .taskBuffer = &obcTaskBufferCommsUplinkDecoder,
             .stackSize = TASK_COMMS_UPLINK_DECODER_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_COMMS_UPLINK_DECODE,
+            .priority = TASK_COMMS_UPLINK_DECODE_PRIORITY,
             .taskFunc = obcTaskFunctionCommsUplinkDecoder,
         },
     [OBC_SCHEDULER_TASK_ID_EPS_MGR] =
@@ -190,7 +190,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackEpsMgr,
             .taskBuffer = &obcTaskBufferEpsMgr,
             .stackSize = TASK_EPS_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_EPS_MGR,
+            .priority = TASK_EPS_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionEpsMgr,
         },
     [OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR] =
@@ -199,7 +199,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackPayloadMgr,
             .taskBuffer = &obcTaskBufferPayloadMgr,
             .stackSize = TASK_PAYLOAD_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_PAYLOAD_MGR,
+            .priority = TASK_PAYLOAD_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionPayloadMgr,
         },
     [OBC_SCHEDULER_TASK_ID_TIMEKEEPER] =
@@ -208,7 +208,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackTimekeeper,
             .taskBuffer = &obcTaskBufferTimekeeper,
             .stackSize = TASK_TIMEKEEPER_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_TIMEKEEPER,
+            .priority = TASK_TIMEKEEPER_PRIORITY,
             .taskFunc = obcTaskFunctionTimekeeper,
         },
     [OBC_SCHEDULER_TASK_ID_SW_WATCHDOG] =
@@ -217,7 +217,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackSwWatchdog,
             .taskBuffer = &obcTaskBufferSwWatchdog,
             .stackSize = TASK_SW_WATCHDOG_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_SW_WATCHDOG,
+            .priority = TASK_SW_WATCHDOG_PRIORITY,
             .taskFunc = obcTaskFunctionSwWatchdog,
         },
     [OBC_SCHEDULER_TASK_ID_ALARM_MGR] =
@@ -226,7 +226,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackAlarmMgr,
             .taskBuffer = &obcTaskBufferAlarmMgr,
             .stackSize = TASK_ALARM_MGR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_ALARM_MGR,
+            .priority = TASK_ALARM_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionAlarmMgr,
         },
     [OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR] =
@@ -235,7 +235,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackHealthCollector,
             .taskBuffer = &obcTaskBufferHealthCollector,
             .stackSize = TASK_HEALTH_COLLECTOR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_HEALTH_COLLECTOR,
+            .priority = TASK_HEALTH_COLLECTOR_PRIORITY,
             .taskFunc = obcTaskFunctionHealthCollector,
         },
 
@@ -246,7 +246,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskStack = obcTaskStackTaskStatsCollector,
             .taskBuffer = &obcTaskBufferTaskStatsCollector,
             .stackSize = TASK_STATS_COLLECTOR_STACK_SIZE,
-            .priority = OBC_TASK_PRIORITY_STATS_COLLECTOR,
+            .priority = TASK_STATS_COLLECTOR_PRIORITY,
             .taskFunc = obcTaskFunctionStatsCollector,
         },
 #endif
