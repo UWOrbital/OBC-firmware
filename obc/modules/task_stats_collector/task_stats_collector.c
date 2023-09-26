@@ -14,7 +14,7 @@ static char taskTableHeaderStr[] =
     "***********************************************\r\nTask           State   Prio    Stack    "
     "Num\r\n***********************************************\r\n";
 
-void initTaskStatsCollector(void) {}
+void obcTaskInitStatsCollector(void) {}
 
 void obcTaskFunctionStatsCollector(void *pvParameters) {
   obc_error_code_t errCode;

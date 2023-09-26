@@ -39,11 +39,6 @@ typedef struct {
 #define EPS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
- * @brief	Initialize the EPS Manager task and associated FreeRTOS constructs (queues, timers, etc.)
- */
-void initEPSManager(void);
-
-/**
  * @brief	Send an event to the EPS Manager queue.
  * @param	event	Event to send.
  * @return The error code

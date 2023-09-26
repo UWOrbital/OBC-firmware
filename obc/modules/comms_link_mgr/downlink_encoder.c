@@ -75,11 +75,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket);
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset);
 
-/**
- * @brief Initializes the telemetry encoding task and queue
- *
- */
-void initTelemEncodeTask(void) {
+void obcTaskInitCommsDownlinkEncoder(void) {
   if (telemEncodeQueueHandle == NULL) {
     telemEncodeQueueHandle = xQueueCreateStatic(COMMS_TELEM_ENCODE_QUEUE_LENGTH, COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE,
                                                 telemEncodeQueueStack, &telemEncodeQueue);

@@ -29,8 +29,10 @@ typedef struct {
   uint32_t priority;
   const char *taskName;
   void (*taskFunc)(void *);
+  void (*taskInit)(void);  // Optional
 } obc_scheduler_config_t;
 
 obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID);
 void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID);
 void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args);
+void obcSchedulerInitTask(obc_scheduler_task_id_t taskID);

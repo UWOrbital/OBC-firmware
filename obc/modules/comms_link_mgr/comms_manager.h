@@ -65,11 +65,6 @@ typedef enum {
 } comms_state_t;
 
 /**
- * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)
- */
-void initCommsManager(void);
-
-/**
  * @brief	Send an event to the Comms Manager queue.
  * @param	event	Event to send.
  * @return The error code

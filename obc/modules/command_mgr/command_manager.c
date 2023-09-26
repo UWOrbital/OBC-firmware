@@ -1,3 +1,4 @@
+#include "command_manager.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 #include "command_callbacks.h"
@@ -40,7 +41,7 @@ static const cmd_info_t cmdsConfig[] = {
 
 STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
-void initCommandManager(void) {
+void obcTaskInitCommandMgr(void) {
   ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
   if (commandQueueHandle == NULL) {
     commandQueueHandle =

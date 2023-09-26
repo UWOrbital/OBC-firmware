@@ -32,7 +32,7 @@ static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
 
-void initAlarmHandler(void) {
+void obcTaskInitAlarmMgr(void) {
   ASSERT((alarmHandlerQueueStack != NULL) && (&alarmHandlerQueue != NULL));
   alarmHandlerQueueHandle = xQueueCreateStatic(ALARM_HANDLER_QUEUE_LENGTH, ALARM_HANDLER_QUEUE_ITEM_SIZE,
                                                alarmHandlerQueueStack, &alarmHandlerQueue);

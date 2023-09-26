@@ -37,7 +37,7 @@ STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, 
  */
 static void feedSwWatchdog(void);
 
-void initSwWatchdog(void) {}
+void obcTaskInitSwWatchdog(void) {}
 
 void obcTaskFunctionSwWatchdog(void* pvParameters) {
   // Set up the watchdog

@@ -81,12 +81,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
  */
 static void flagTimeoutCallback() { isStartFlagReceived = false; }
 
-/**
- * @brief initializes the decode data pipeline task
- *
- * @return void
- */
-void initDecodeTask(void) {
+void obcTaskInitCommsUplinkDecoder(void) {
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
     decodeDataQueueHandle = xQueueCreateStatic(DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,

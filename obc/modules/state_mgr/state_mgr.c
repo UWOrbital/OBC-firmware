@@ -48,7 +48,7 @@ static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
  */
 static void sendStartupMessages(void);
 
-void initStateMgr(void) {
+void obcTaskInitStateMgr(void) {
   ASSERT((stateMgrQueueStack != NULL) && (&stateMgrQueue != NULL));
   if (stateMgrQueueHandle == NULL) {
     stateMgrQueueHandle =
@@ -92,23 +92,23 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   initFRAM();  // FRAM storage (OBC)
 
-  // Call init functions for all tasks. TODO: Combine into obc_scheduler
-  initTimekeeper();
-  initAlarmHandler();
-  initTelemetry();
-  initCommandManager();
-  initCommsManager();
-  initDecodeTask();
-  initTelemEncodeTask();
-  initEPSManager();
-  initPayloadManager();
-  initHealthCollector();
+  // Initialize the state of each module. This will not start any tasks.
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_TIMEKEEPER);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_ALARM_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMAND_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_EPS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-  initTaskStatsCollector();
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR);
 #endif
-  initSwWatchdog();
+  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_SW_WATCHDOG);
 
-  /* Create all tasks*/
+  // Create each task
   taskENTER_CRITICAL();
   obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_TIMEKEEPER);
   obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_ALARM_MGR);
