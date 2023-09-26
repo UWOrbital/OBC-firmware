@@ -53,7 +53,6 @@ typedef struct {
   obc_time_persist_data_t data;
 } obc_time_persist_t;
 
-
 // alarm_mgr module
 typedef struct {
   uint32_t unixTime;
@@ -70,7 +69,6 @@ typedef struct {
   alarm_mgr_persist_data_t data;
 
 } alarm_mgr_persist_t;
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -93,7 +91,5 @@ typedef struct {
 obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *buffer);
 obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data);
 
-
 obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *buffer);
 obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data);
-
