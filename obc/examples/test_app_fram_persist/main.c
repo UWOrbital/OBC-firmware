@@ -1,4 +1,5 @@
 #include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_spi_io.h"
 #include "obc_errors.h"
 #include "obc_persistent.h"
@@ -102,7 +103,7 @@ int main(void) {
   sciInit();
   spiInit();
 
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
 
   xTaskCreateStatic(vTask1, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);

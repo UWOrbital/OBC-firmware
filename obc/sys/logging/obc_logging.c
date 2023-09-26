@@ -1,6 +1,6 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
-#include "obc_sci_io.h"
+#include "obc_print.h"
 
 #include <stdarg.h>
 #include <stdint.h>

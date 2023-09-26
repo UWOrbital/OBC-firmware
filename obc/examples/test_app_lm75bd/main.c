@@ -1,6 +1,7 @@
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
+#include "obc_print.h"
 #include "lm75bd.h"
 
 #include <FreeRTOS.h>
@@ -50,7 +51,7 @@ int main(void) {
   sciInit();
   i2cInit();
 
-  initSciMutex();
+  initSciPrint();
   initI2CMutex();
 
   xTaskCreateStatic(vTask1, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);

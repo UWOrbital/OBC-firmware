@@ -91,6 +91,7 @@ obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+
 obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
   obc_error_code_t errCode;
 
@@ -116,6 +117,7 @@ obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
 
   return OBC_ERR_CODE_SUCCESS;
 }
+
 
 /*---------------------------------------------------------------------*/
 /*------------------------- Private functions -------------------------*/
