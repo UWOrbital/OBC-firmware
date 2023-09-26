@@ -89,6 +89,9 @@ static void vSupervisorTask(void *pvParameters) {
 
   ASSERT(supervisorQueueHandle != NULL);
 
+  initLogger();
+  initLoggerTask();
+
   /* Initialize critical peripherals */
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
   LOG_IF_ERROR_CODE(initTime());         // RTC
@@ -113,9 +116,6 @@ static void vSupervisorTask(void *pvParameters) {
 
   initTimekeeper();
   initAlarmHandler();
-
-  initLogger();
-  initLoggerTask();
 
   initTelemetry();
   initCommandManager();
