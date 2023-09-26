@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "obc_errors.h"
-
+#include "alarm_handler.h"
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
  * 1. Add a struct for the data to be stored in the section
@@ -52,6 +52,23 @@ typedef struct {
   obc_time_persist_data_t data;
 } obc_time_persist_t;
 
+// alarm_mgr module
+typedef struct {
+  uint32_t unixTime;
+  alarm_type_t type;
+  alarm_handler_callback_def_t callbackDef;
+  union {
+    cmd_msg_t cmdMsg;
+  };
+
+} alarm_mgr_persist_data_t;
+
+typedef struct {
+  obc_persist_section_header_t header;
+  alarm_mgr_persist_data_t data;
+
+} alarm_mgr_persist_t;
+
 /*---------------------------------------------------------------------------*/
 
 /**
@@ -59,6 +76,7 @@ typedef struct {
  */
 typedef struct {
   obc_time_persist_t obcTime;
+  alarm_mgr_persist_t alarmMgr;
 } obc_persist_t;
 
 #define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))
@@ -69,3 +87,6 @@ typedef struct {
 
 obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *buffer);
 obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data);
+
+obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *buffer);
+obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data);

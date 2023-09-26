@@ -91,6 +91,32 @@ obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
+  obc_error_code_t errCode;
+
+  uint8_t sectionBuffer[sizeof(alarm_mgr_persist_t)] = {0};
+  RETURN_IF_ERROR_CODE(
+      getPersistentSection(OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+
+  RETURN_IF_ERROR_CODE(
+      extractDataFromSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
+  obc_error_code_t errCode;
+
+  uint8_t sectionBuffer[sizeof(alarm_mgr_persist_data_t)] = {0};
+
+  RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+
+  RETURN_IF_ERROR_CODE(
+      setPersistentSection(OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 /*---------------------------------------------------------------------*/
 /*------------------------- Private functions -------------------------*/
 /*---------------------------------------------------------------------*/
