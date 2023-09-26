@@ -31,11 +31,6 @@ static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH * COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
 
 /**
- * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
- */
-void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters);
-
-/**
  * @brief Sends data from a telemetry buffer to the CC1120 transmit queue
  *
  * @param telemetryDataBuffer - Pointer to the telemetry_data_t buffer

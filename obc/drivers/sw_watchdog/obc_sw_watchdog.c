@@ -32,8 +32,6 @@
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73, "RTI frequency is not 73.333 MHz");
 STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
 
-void obcTaskFunctionSwWatchdog(void* pvParameters);
-
 /**
  * @brief Feed the software watchdog
  */

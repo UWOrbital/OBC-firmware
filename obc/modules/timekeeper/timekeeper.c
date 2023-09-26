@@ -14,8 +14,6 @@
 
 #define LOCAL_TIME_SYNC_PERIOD_S 60UL
 
-void obcTaskFunctionTimekeeper(void *pvParameters);
-
 void initTimekeeper(void) {}
 
 void obcTaskFunctionTimekeeper(void *pvParameters) {

@@ -28,8 +28,6 @@
 
 #define STARTING_TELEMETRY_BATCH_ID 0UL
 
-void obcTaskFunctionTelemetryMgr(void *pvParameters);
-
 /**
  * @brief Check if it's time to downlink telemetry.
  * @return bool True if it's time to downlink telemetry, false otherwise

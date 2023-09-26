@@ -40,8 +40,6 @@ static const cmd_info_t cmdsConfig[] = {
 
 STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
-void obcTaskFunctionCommandMgr(void *pvParameters);
-
 void initCommandManager(void) {
   ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
   if (commandQueueHandle == NULL) {

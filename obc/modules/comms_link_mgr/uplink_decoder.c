@@ -43,8 +43,6 @@ static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
-void obcTaskFunctionCommsUplinkDecoder(void *pvParameters);
-
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**

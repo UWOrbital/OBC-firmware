@@ -12,7 +12,6 @@
 
 #define HEALTH_COLLECTION_PERIOD_MS 60000UL
 
-void obcTaskFunctionHealthCollector(void* pvParameters);
 static obc_error_code_t collectObcLm75bdTemp(void);
 
 void initHealthCollector(void) {}

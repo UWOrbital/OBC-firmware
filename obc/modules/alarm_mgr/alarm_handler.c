@@ -24,8 +24,6 @@ static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
 
-void obcTaskFunctionAlarmMgr(void *pvParameters);
-
 static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm, size_t *insertedAlarmIndex);
 
 static obc_error_code_t dequeueAlarm(alarm_handler_alarm_info_t *alarm);

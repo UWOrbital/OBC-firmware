@@ -43,8 +43,6 @@ static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 
-void obcTaskFunctionStateMgr(void *pvParameters);
-
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
  */
