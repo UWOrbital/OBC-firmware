@@ -29,20 +29,20 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
 #define LOG_DEFAULT_LEVEL LOG_TRACE
 #endif
 
-#define LOG_TRACE(...) logLog(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_DEBUG(...) logLog(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_INFO(...) logLog(LOG_INFO, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_WARN(...) logLog(LOG_WARN, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_ERROR(...) logLog(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_FATAL(...) logLog(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_TRACE(errCode) logLog(LOG_TRACE, __FILE__, __LINE__, errCode)
+#define LOG_DEBUG(msg) logLog(LOG_DEBUG, __FILE__, __LINE__, errCode)
+#define LOG_INFO(errCode) logLog(LOG_INFO, __FILE__, __LINE__, errCode)
+#define LOG_WARN(errCode) logLog(LOG_WARN, __FILE__, __LINE__, errCode)
+#define LOG_ERROR(errCode) logLog(LOG_ERROR, __FILE__, __LINE__, errCode)
+#define LOG_FATAL(errCode) logLog(LOG_FATAL, __FILE__, __LINE__, errCode)
 
-#define LOG_ERROR_CODE(errCode) LOG_ERROR("Error code: %lu", (uint32_t)errCode)
+#define LOG_ERROR(errCode) LOG_ERROR((uint32_t)errCode)
 
 #define RETURN_IF_ERROR_CODE(_ret)         \
   do {                                     \
     errCode = _ret;                        \
     if (errCode != OBC_ERR_CODE_SUCCESS) { \
-      LOG_ERROR_CODE(errCode);             \
+      LOG_ERROR(errCode);                  \
       return errCode;                      \
     }                                      \
   } while (0)
@@ -51,7 +51,7 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
   do {                                     \
     errCode = _ret;                        \
     if (errCode != OBC_ERR_CODE_SUCCESS) { \
-      LOG_ERROR_CODE(errCode);             \
+      LOG_ERROR(errCode);                  \
     }                                      \
   } while (0)
 
@@ -68,20 +68,12 @@ void initLogger(void);
 void logSetLevel(log_level_t newLogLevel);
 
 /**
- * @brief Set the output location
- *
- * @param newOutputLocation The new output location
- */
-void logSetOutputLocation(log_output_location_t newOutputLocation);
-
-/**
- * @brief Log a message
+ * @brief Log an error code
  *
  * @param msgLevel				Level of the message
  * @param file					File of message
  * @param line					Line of message
- * @param s						Message to log
- * @param ...					Additional arguments for the message
+ * @param errCode       the error code that needs to be logged
  * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
  * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
  * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
@@ -89,4 +81,20 @@ void logSetOutputLocation(log_output_location_t newOutputLocation);
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  *
  */
-obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, const char *s, ...);
+obc_error_code_t logError(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
+
+/**
+ * @brief Log a message
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param msg           the message that should be logged (MUST BE STATIC)
+ * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
+ * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
+ * 								OBC_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
+obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg);

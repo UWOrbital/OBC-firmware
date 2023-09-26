@@ -7,7 +7,12 @@
 
 typedef struct {
   log_level_t logType;
-  unsigned char msg[];
+  const char *file;
+  uint32_t line;
+  union {
+    uint32_t errCode;
+    const char *msg;
+  };
 } logger_event_t;
 
 /**
@@ -32,3 +37,10 @@ obc_error_code_t sendToLoggerQueue(logger_event_t *event);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
 obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event);
+
+/**
+ * @brief Set the output location
+ *
+ * @param newOutputLocation The new output location
+ */
+void logSetOutputLocation(log_output_location_t newOutputLocation);

@@ -151,7 +151,7 @@ static void vSupervisorTask(void *pvParameters) {
 
     switch (inMsg.eventID) {
       default:
-        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+        LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
     }
   }
 }

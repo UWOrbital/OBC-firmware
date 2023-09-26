@@ -7,19 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define MAX_MSG_SIZE 5U
-#define MAX_FNAME_LINENUM_SIZE 128U
-#define SD_CARD_LOG_MAX_FILE_MSG 20U
-// Extra 10 for the small extra pieces in "%s - %s\r\n"
-#define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
-#define MAX_SD_CARD_LOG_SIZE (MAX_MSG_SIZE + SD_CARD_LOG_MAX_FILE_MSG + 3U)
-
-#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
-
-static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
-
 static log_level_t logLevel;
-static log_output_location_t outputLocation;
 
 void initLogger(void) {
   logLevel = LOG_DEFAULT_LEVEL;
@@ -28,9 +16,50 @@ void initLogger(void) {
 
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
-void logSetOutputLocation(log_output_location_t newOutputLocation) { outputLocation = newOutputLocation; }
+/**
+ * @brief Log an error code
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param errCode       the error code that needs to be logged
+ * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
+ * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
+ * 								OBC_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
+obc_error_code_t logError(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+  if (msgLevel < logLevel) {
+    return OBC_ERR_CODE_LOG_MSG_SILENCED;
+  }
 
-obc_error_code_t logLog(log_level_t msgLevel, const char *file, uint32_t line, const char *s, ...) {
+  if (file == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  logger_event_t logEvent = {.logType = msgLevel, .file = file, .line = line, .errCode = errCode};
+
+  // send the event to the logger queue and don't try to log any error that occurs
+  return sendToLoggerQueue(&logEvent);
+}
+
+/**
+ * @brief Log a message
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param msg           the message that should be logged (MUST BE STATIC)
+ * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
+ * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
+ * 								OBC_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
+obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
   if (msgLevel < logLevel) return OBC_ERR_CODE_LOG_MSG_SILENCED;
 
   if (file == NULL || s == NULL) return OBC_ERR_CODE_INVALID_ARG;

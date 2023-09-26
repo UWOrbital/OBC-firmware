@@ -14,7 +14,7 @@
     errCode = _ret;                                               \
     if (errCode != OBC_ERR_CODE_SUCCESS) {                        \
       RETURN_IF_ERROR_CODE(deassertChipSelect(_spiPort, _csNum)); \
-      LOG_ERROR_CODE(errCode);                                    \
+      LOG_ERROR(errCode);                                         \
       return errCode;                                             \
     }                                                             \
   } while (0)

@@ -22,4 +22,9 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
         break;
     }
   }
-}
+
+  if (sci == sciREG) {
+    switch (flag) {}
+  } else if (sci == scilinREG) {
+    transferCompleteSemaphore = sciLinTransferComplete;
+  }

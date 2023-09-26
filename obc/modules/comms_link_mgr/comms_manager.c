@@ -138,7 +138,7 @@ static void vCommsManagerTask(void *pvParameters) {
           // poll the transmit queue
           if (xQueueReceive(cc1120TransmitQueueHandle, &transmitEvent, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) !=
               pdPASS) {
-            LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_EMPTY);
+            LOG_ERROR(OBC_ERR_CODE_QUEUE_EMPTY);
           }
           if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
@@ -151,7 +151,7 @@ static void vCommsManagerTask(void *pvParameters) {
           } else if (transmitEvent.eventID == END_DOWNLINK) {
             break;
           } else {
-            LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+            LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           }
         }
         break;
@@ -188,7 +188,7 @@ static void vCommsManagerTask(void *pvParameters) {
 #endif
         break;
       default:
-        LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+        LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
     }
   }
 }

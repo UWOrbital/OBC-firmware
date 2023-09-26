@@ -11,7 +11,21 @@
 
 #include <string.h>
 
-#define ERROR_LOG_FILE_NAME "error_file"
+static uint8_t currentLogFileNum = 0;
+#define LOG_FILE_NAME "log_file0.log"
+
+#define MAX_MSG_SIZE 128U
+#define MAX_FNAME_LINENUM_SIZE 128U
+#define SD_CARD_LOG_MAX_FILE_MSG 20U
+// Extra 10 for the small extra pieces in "%s - %s\r\n"
+#define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
+#define MAX_SD_CARD_LOG_SIZE (MAX_MSG_SIZE + SD_CARD_LOG_MAX_FILE_MSG + 3U)
+
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
+static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+
+static log_output_location_t outputLocation;
 
 #define LOGGER_QUEUE_LENGTH 10U
 #define LOGGER_QUEUE_ITEM_SIZE sizeof(logger_event_t)
@@ -41,6 +55,10 @@ static void vLoggerTask(void *pvParameters);
 static obc_error_code_t logMsg(const char *logMsg, const char *fname);
 
 /**
+ * @brief formats
+ */
+
+/**
  * @brief Initialize the logger task for logging to the sd card
  *
  * @param currentNumLogFiles pointer to current number of existing log files
@@ -61,36 +79,93 @@ void initLoggerTask(uint8_t *currentNumLogFiles) {
 
 static void vLoggerTask(void *pvParameters) {
   uint8_t currentNumLogFiles = *((uint8_t *)pvParameters);
-  const char *fname = ERROR_LOG_FILE_NAME;
+  char *fname = LOG_FILE_NAME;
   while (1) {
     logger_event_t queueMsg;
     if (xQueueReceive(loggerQueueHandle, &queueMsg, LOGGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
+    if (queueMsg.logType > LOG_FATAL) {
+      LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+      continue;
+    }
+    if (queueMsg.file == NULL) {
+      LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+      continue;
+    }
+
+    char buf[MAX_LOG_SIZE] = {0};
+    int bufLen = 0;
     switch (queueMsg.logType) {
       case LOG_ERROR:
-        int32_t fdescriptor = red_open(fname, RED_O_WRONLY | RED_O_APPEND | RED_O_CREAT);
-        if (fdescriptor == -1) {
-          // TODO: figure out best way to deal with this
-          // If we tried logging the error code we coule just end up in an infinite loop where we keep failing and
-          // trying to log the previous fail
+        // File & line number
+        char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
+        int ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType],
+                           queueMsg.file, queueMsg.line);
+        if (ret < 0) {
+          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
-        if (red_write(fdescriptor, queueMsg.msg, strlen((char *)queueMsg.msg)) == -1) {
-          // TODO: figure out best way to deal with this
-          // If we tried logging the error code we coule just end up in an infinite loop where we keep failing and
-          // trying to log the previous fail
+        if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE) {
+          LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
+          continuel
+        }
+
+        // Prepare entire output
+        bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %u\r\n", infobuf, queueMsg.errCode);
+        if (bufLen < 0) {
+          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
-        if (red_close(fdescriptor) == -1) {
-          // TODO: figure out best way to deal with this
-          // If we tried logging the error code we coule just end up in an infinite loop where we keep failing and
-          // trying to log the previous fail
+        if ((uint32_t)bufLen >= MAX_LOG_SIZE) {
+          LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
+          continue;
+        }
+        break;
+      case LOG_DEBUG:
+        if (queueMsg.msg == NULL) {
+          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+          continue;
+        }
+        // File & line number
+        char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
+        int ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType],
+                           queueMsg.file, queueMsg.line);
+        if (ret < 0) {
+          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+          continue;
+        }
+        if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE) {
+          LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
+          continuel
+        }
+
+        // Prepare entire output
+        bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %s\r\n", infobuf, queueMsg.msg);
+        if (bufLen < 0) {
+          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+          continue;
+        }
+        if ((uint32_t)bufLen >= MAX_LOG_SIZE) {
+          LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
           continue;
         }
         break;
       default:
-        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+        LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+    }
+    if (outputLocation == LOG_TO_SDCARD) {
+      int32_t fdescriptor = red_open(fname, RED_O_WRONLY | RED_O_APPEND | RED_O_CREAT);
+      if (fdescriptor == -1) {
+        continue;
+      }
+      if (red_write(fdescriptor, buf, bufLen) == -1) {
+        continue;
+      }
+      if (red_close(fdescriptor) == -1) {
+        continue;
+      }
+    } else {
     }
   }
 }
@@ -137,3 +212,5 @@ obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
 
   return OBC_ERR_CODE_QUEUE_FULL;
 }
+
+void logSetOutputLocation(log_output_location_t newOutputLocation) { outputLocation = newOutputLocation; }

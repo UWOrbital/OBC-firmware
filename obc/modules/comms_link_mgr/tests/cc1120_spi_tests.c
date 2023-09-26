@@ -66,7 +66,7 @@ obc_error_code_t cc1120TestSpiRead(void) {
 
     if (data != 0x41U) {
       errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
-      LOG_ERROR_CODE(errCode);
+      LOG_ERROR(errCode);
       LOG_ERROR("MARCSTATE read 0x%02X, expected 0x%02X\n", data, 0x41U);
       return errCode;
     }
@@ -79,13 +79,13 @@ obc_error_code_t cc1120TestSpiRead(void) {
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
-      LOG_ERROR_CODE(errCode);
+      LOG_ERROR(errCode);
       return errCode;
     }
 
     if (memcmp(extBurstData, expected, 3)) {
       errCode = OBC_ERR_CODE_CC1120_TEST_FAILURE;
-      LOG_ERROR_CODE(errCode);
+      LOG_ERROR(errCode);
       return errCode;
     }
   }

@@ -112,7 +112,7 @@ static void vDecodeTask(void *pvParameters) {
   while (1) {
     if (xQueueReceive(decodeDataQueueHandle, &byte, DECODE_DATA_QUEUE_RX_WAIT_PERIOD) == pdPASS) {
       if (axDataIndex >= sizeof(axData.data)) {
-        LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_OVERFLOW);
+        LOG_ERROR(OBC_ERR_CODE_BUFF_OVERFLOW);
 
         // Restart the decoding process
         memset(&axData, 0, sizeof(axData));

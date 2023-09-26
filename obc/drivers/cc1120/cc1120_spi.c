@@ -73,7 +73,7 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len)
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &recvData));
   if (recvData != 0x00) {  // When sending the extended address, SO will return all zeros. See section 3.2.
     errCode = OBC_ERR_CODE_CC1120_READ_EXT_ADDR_SPI_FAILED;
-    LOG_ERROR_CODE(errCode);
+    LOG_ERROR(errCode);
     return errCode;
   }
 
@@ -147,7 +147,7 @@ obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &recvData));
   if (recvData != 0x00) {  // When sending the extended address, SO will return all zeros. See section 3.2.
     errCode = OBC_ERR_CODE_CC1120_WRITE_EXT_ADDR_SPI_FAILED;
-    LOG_ERROR_CODE(errCode);
+    LOG_ERROR(errCode);
     return errCode;
   }
 
