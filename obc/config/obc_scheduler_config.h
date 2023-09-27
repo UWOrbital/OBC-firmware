@@ -1,8 +1,5 @@
 #pragma once
 
-#include <FreeRTOS.h>
-#include <os_task.h>
-
 typedef enum {
   OBC_SCHEDULER_TASK_ID_STATE_MGR = 0,
   OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR,
@@ -16,21 +13,22 @@ typedef enum {
   OBC_SCHEDULER_TASK_ID_SW_WATCHDOG,
   OBC_SCHEDULER_TASK_ID_ALARM_MGR,
   OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR,
+
+#if ENABLE_TASK_STATS_COLLECTOR == 1
   OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR,
+#endif
 
   OBC_SCHEDULER_TASK_COUNT
 } obc_scheduler_task_id_t;
 
-typedef struct {
-  TaskHandle_t *taskHandle;
-  StaticTask_t *taskBuffer;
-  StackType_t *taskStack;
-  uint32_t stackSize;
-  uint32_t priority;
-  const char *taskName;
-  void (*taskFunc)(void *);
-} obc_scheduler_config_t;
-
-obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID);
+/**
+ * @brief Create a task with the given ID. The task function will be called with
+ * no arguments.
+ */
 void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID);
+
+/**
+ * @brief Create a task with the given ID. The task function will be called with
+ * the given arguments.
+ */
 void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args);
