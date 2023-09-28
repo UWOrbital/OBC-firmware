@@ -46,7 +46,7 @@ int main(void) {
 
   // The state_mgr is the only task running initially.
   initStateMgr();
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_STATE_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
 
   vTaskStartScheduler();
 }

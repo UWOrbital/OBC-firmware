@@ -131,7 +131,7 @@ static StaticTask_t obcTaskBufferTaskStatsCollector;
 #endif
 
 static obc_scheduler_config_t obcSchedulerConfig[] = {
-    [OBC_SCHEDULER_TASK_ID_STATE_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
         {
             .taskName = TASK_STATE_MGR_NAME,
             .taskStack = obcTaskStackStateMgr,
@@ -140,7 +140,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_STATE_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionStateMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR] =
         {
             .taskName = TASK_TELEMETRY_MGR_NAME,
             .taskStack = obcTaskStackTelemetryMgr,
@@ -149,7 +149,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_TELEMETRY_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionTelemetryMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMAND_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR] =
         {
             .taskName = TASK_COMMAND_MGR_NAME,
             .taskStack = obcTaskStackCommandMgr,
@@ -158,7 +158,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_COMMAND_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionCommandMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMS_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_MGR] =
         {
             .taskName = TASK_COMMS_MGR_NAME,
             .taskStack = obcTaskStackCommsMgr,
@@ -167,7 +167,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_COMMS_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionCommsMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER] =
         {
             .taskName = TASK_COMMS_DOWNLINK_ENCODER_NAME,
             .taskStack = obcTaskStackCommsDownlinkEncoder,
@@ -176,7 +176,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_COMMS_DOWNLINK_ENCODE_PRIORITY,
             .taskFunc = obcTaskFunctionCommsDownlinkEncoder,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER] =
         {
             .taskName = TASK_COMMS_UPLINK_DECODER_NAME,
             .taskStack = obcTaskStackCommsUplinkDecoder,
@@ -185,7 +185,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_COMMS_UPLINK_DECODE_PRIORITY,
             .taskFunc = obcTaskFunctionCommsUplinkDecoder,
         },
-    [OBC_SCHEDULER_TASK_ID_EPS_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_EPS_MGR] =
         {
             .taskName = TASK_EPS_MGR_NAME,
             .taskStack = obcTaskStackEpsMgr,
@@ -194,7 +194,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_EPS_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionEpsMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR] =
         {
             .taskName = TASK_PAYLOAD_MGR_NAME,
             .taskStack = obcTaskStackPayloadMgr,
@@ -203,7 +203,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_PAYLOAD_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionPayloadMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_TIMEKEEPER] =
+    [OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER] =
         {
             .taskName = TASK_TIMEKEEPER_NAME,
             .taskStack = obcTaskStackTimekeeper,
@@ -212,7 +212,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_TIMEKEEPER_PRIORITY,
             .taskFunc = obcTaskFunctionTimekeeper,
         },
-    [OBC_SCHEDULER_TASK_ID_SW_WATCHDOG] =
+    [OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG] =
         {
             .taskName = TASK_SW_WATCHDOG_NAME,
             .taskStack = obcTaskStackSwWatchdog,
@@ -221,7 +221,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_SW_WATCHDOG_PRIORITY,
             .taskFunc = obcTaskFunctionSwWatchdog,
         },
-    [OBC_SCHEDULER_TASK_ID_ALARM_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
         {
             .taskName = TASK_ALARM_MGR_NAME,
             .taskStack = obcTaskStackAlarmMgr,
@@ -230,7 +230,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_ALARM_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionAlarmMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR] =
+    [OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR] =
         {
             .taskName = TASK_HEALTH_COLLECTOR_NAME,
             .taskStack = obcTaskStackHealthCollector,
@@ -241,7 +241,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-    [OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR] =
+    [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
         {
             .taskName = TASK_STATS_COLLECTOR_NAME,
             .taskStack = obcTaskStackTaskStatsCollector,
