@@ -88,6 +88,7 @@ typedef enum {
   OBC_ERR_CODE_RTC_ALARM_EARLY = 801,
 
   /* Reliance edge errors */
+  // Values are mapped as (ORIGINAL_RED_ERRCODE + RELIANCE_EDGE_ERROR_CODES_OFFSET)
   /** Operation not permitted. */
   OBC_ERR_CODE_RED_EPERM = 1001,
   OBC_ERR_CODE_RED_ENOENT = 1002,
