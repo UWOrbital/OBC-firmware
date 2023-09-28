@@ -81,7 +81,7 @@ STATIC_ASSERT_EQ(COMMS_MANAGER_PRIORITY, COMMS_DOWNLINK_ENCODE_PRIORITY);
 /* Logging task config */
 #define LOGGER_TASK_STACK_SIZE 1024U
 #define LOGGER_TASK_NAME "logger"
-#define LOGGER_TASK_PRIORITY tskIDLE_PRIORITY + 50U
+#define LOGGER_TASK_PRIORITY tskIDLE_PRIORITY + 4U
 
 /* Task debug stats collector task config */
 #if (DEBUG == 1)
