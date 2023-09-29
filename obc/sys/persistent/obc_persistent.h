@@ -75,10 +75,11 @@ typedef struct {
 /**
  * @brief Layout of the persistent storage
  */
+
 typedef struct {
   obc_time_persist_t obcTime;
 
-  alarm_mgr_persist_t alarmMgr;
+  alarm_mgr_persist_t alarmMgr[ALARM_QUEUE_SIZE];
 
 } obc_persist_t;
 

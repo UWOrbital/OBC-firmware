@@ -24,7 +24,6 @@ static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
 static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER_QUEUE_ITEM_SIZE];
 
-#define ALARM_QUEUE_SIZE 24U
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
 
