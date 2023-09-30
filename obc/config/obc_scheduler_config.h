@@ -19,16 +19,16 @@ typedef enum {
 #endif
 
   OBC_SCHEDULER_TASK_COUNT
-} obc_scheduler_task_id_t;
+} obc_scheduler_config_id_t;
 
 /**
  * @brief Create a task with the given ID. The task function will be called with
  * no arguments.
  */
-void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID);
+void obcSchedulerCreateTask(obc_scheduler_config_id_t taskID);
 
 /**
  * @brief Create a task with the given ID. The task function will be called with
  * the given arguments.
  */
-void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args);
+void obcSchedulerCreateTaskWithArgs(obc_scheduler_config_id_t taskID, void *args);
