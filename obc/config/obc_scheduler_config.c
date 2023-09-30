@@ -86,7 +86,7 @@ extern void obcTaskFunctionHealthCollector(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
 
 /* PRIVATE FUNCTION PROTOTYPES */
-obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID);
+static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID);
 
 /* PRIVATE DATA */
 static StackType_t obcTaskStackStateMgr[TASK_STATE_MGR_STACK_SIZE];
@@ -257,11 +257,6 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
 STATIC_ASSERT_EQ(sizeof(obcSchedulerConfig) / sizeof(obc_scheduler_config_t), OBC_SCHEDULER_TASK_COUNT);
 
 /* PUBLIC FUNCTION DEFINITIONS */
-obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID) {
-  if (taskID >= OBC_SCHEDULER_TASK_COUNT) return NULL;
-  return &obcSchedulerConfig[taskID];
-}
-
 void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID) { obcSchedulerCreateTaskWithArgs(taskID, NULL); }
 
 void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args) {
@@ -275,4 +270,10 @@ void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args) 
     taskConfig->taskHandle = xTaskCreateStatic(taskConfig->taskFunc, taskConfig->taskName, taskConfig->stackSize, args,
                                                taskConfig->priority, taskConfig->taskStack, taskConfig->taskBuffer);
   }
+}
+
+/* PRIVATE FUNCTION DEFINITIONS */
+static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID) {
+  if (taskID >= OBC_SCHEDULER_TASK_COUNT) return NULL;
+  return &obcSchedulerConfig[taskID];
 }
