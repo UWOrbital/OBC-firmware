@@ -75,10 +75,8 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   ASSERT(stateMgrQueueHandle != NULL);
 
   /* Initialize critical peripherals */
-
-  // Assign to errCode for debugging purposes; we don't want to
-  // log until the logger and file system are initialized
-  errCode = initTime();  // This initializes the RTC as well
+  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
+  LOG_IF_ERROR_CODE(initTime());         // RTC
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
@@ -90,11 +88,9 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
       .hysteresisThresholdCelsius = 75.0f,
   };
 
-  // Assign to errCode for debugging purposes; we don't want to
-  // log until the logger and file system are initialized
-  errCode = lm75bdInit(&config);
+  LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
-  initFRAM();
+  initFRAM();  // FRAM storage (OBC)
 
   // Call init functions for all tasks. TODO: Combine into obc_scheduler
   initTimekeeper();
@@ -111,12 +107,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   initTaskStatsCollector();
 #endif
   initSwWatchdog();
-
-  // TODO: Create logger task before setupFileSystem so we don't fill up the logger queue
-
-  // Assign to errCode for debugging purposes; we don't want to
-  // log until the logger and file system are initialized
-  errCode = setupFileSystem();
 
   /* Create all tasks*/
   taskENTER_CRITICAL();
