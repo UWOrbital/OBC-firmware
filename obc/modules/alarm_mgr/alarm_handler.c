@@ -5,6 +5,7 @@
 #include "obc_logging.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
+#include "obc_persistent.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -24,6 +25,7 @@ static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
 static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER_QUEUE_ITEM_SIZE];
 
+#define ALARM_QUEUE_SIZE 24U
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
 
@@ -36,6 +38,8 @@ static obc_error_code_t dequeueAlarm(alarm_handler_alarm_info_t *alarm);
 static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
+
+STATIC_ASSERT(ALARM_QUEUE_SIZE <= OBC_PERSISTENT_MAX_ALARM_COUNT);
 
 void initAlarmHandler(void) {
   ASSERT((alarmHandlerTaskStack != NULL) && (&alarmHandlerTaskBuffer != NULL));

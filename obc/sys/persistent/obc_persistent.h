@@ -5,7 +5,8 @@
 #include <stdbool.h>
 
 #include "obc_errors.h"
-#include "alarm_handler.h"
+
+#define OBC_PERSISTENT_MAX_ALARM_COUNT 24U
 
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
@@ -79,7 +80,7 @@ typedef struct {
 typedef struct {
   obc_time_persist_t obcTime;
 
-  alarm_mgr_persist_t alarmMgr[ALARM_QUEUE_SIZE];
+  alarm_mgr_persist_t alarmMgr[OBC_PERSISTENT_MAX_ALARM_COUNT];
 
 } obc_persist_t;
 

@@ -6,8 +6,6 @@
 #include "command_callbacks.h"
 #include "obc_time.h"
 
-#define ALARM_QUEUE_SIZE 24U
-
 // Alarm handler event IDs
 typedef enum {
   ALARM_HANDLER_NEW_ALARM,        // New alarm to be added to the queue
