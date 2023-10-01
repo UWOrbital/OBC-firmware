@@ -1,35 +1,27 @@
 #include "state_mgr.h"
-#include "timekeeper.h"
-#include "telemetry_manager.h"
-#include "command_manager.h"
-#include "comms_manager.h"
-#include "uplink_decoder.h"
-#include "downlink_encoder.h"
-#include "eps_manager.h"
-#include "payload_manager.h"
-#include "alarm_handler.h"
-#include "health_collector.h"
-#include "task_stats_collector.h"
-#include "obc_sw_watchdog.h"
+#include "comms_manager.h"  // for comms_state_t
+
+#include "obc_board_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_reliance_fs.h"
+#include "obc_scheduler_config.h"
 #include "obc_state_handle.h"
 #include "obc_state_defs.h"
-#include "obc_scheduler_config.h"
-#include "obc_reset.h"
-#include "obc_reliance_fs.h"
-#include "lm75bd.h"
-#include "obc_board_config.h"
+#include "obc_time.h"
+
 #include "fm25v20a.h"
+#include "lm75bd.h"  // TODO: Handle within thermal manager
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
-
 #include <sys_common.h>
+
+#if defined(DEBUG) && !defined(OBC_REVISION_2)
 #include <gio.h>
-#include <redposix.h>
+#endif
 
 /* Supervisor queue config */
 #define STATE_MGR_QUEUE_LENGTH 10U
@@ -93,36 +85,37 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   initFRAM();  // FRAM storage (OBC)
 
   // Initialize the state of each module. This will not start any tasks.
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_TIMEKEEPER);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_ALARM_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMAND_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMS_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_EPS_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
-  obcSchedulerInitTask(OBC_SCHEDULER_TASK_ID_SW_WATCHDOG);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG);
 
-  // Create each task
+  /* Create all tasks*/
   taskENTER_CRITICAL();
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_TIMEKEEPER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_ALARM_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_COMMAND_MGR);
-  obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_TASK_ID_COMMS_MGR, &commsManagerState);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_EPS_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
+  obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-  obcSchedulerCreateTask(OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG);
   taskEXIT_CRITICAL();
 
   // TODO: Deal with errors

@@ -3,7 +3,9 @@
 #include "obc_errors.h"
 #include "obc_assert.h"
 
+#include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
+#include <os_task.h>
 #include <sys_common.h>
 
 #include <stdint.h>
@@ -38,9 +40,9 @@
 #define TASK_ALARM_MGR_STACK_SIZE 512U
 #define TASK_HEALTH_COLLECTOR_STACK_SIZE 256U
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
-#define OBC_SCHEDULER_MAX_PRIORITY configMAX_PRIORITIES - 1U
 
 // All task priorities must be in [0, OBC_SCHEDULER_MAX_PRIORITY]
+#define OBC_SCHEDULER_MAX_PRIORITY configMAX_PRIORITIES - 1U
 #define TASK_IDLE_PRIORITY 0U
 #define TASK_COMMAND_MGR_PRIORITY 1U
 #define TASK_TELEMETRY_MGR_PRIORITY 1U
@@ -56,6 +58,18 @@
 #define TASK_STATE_MGR_PRIORITY 5U
 #define TASK_TIMEKEEPER_PRIORITY 6U
 #define TASK_SW_WATCHDOG_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
+
+/* TYPEDEFS */
+typedef struct {
+  TaskHandle_t *taskHandle;
+  StaticTask_t *taskBuffer;
+  StackType_t *taskStack;
+  uint32_t stackSize;
+  uint32_t priority;
+  const char *taskName;
+  void (*taskFunc)(void *);
+  void (*taskInit)(void);  // Optional
+} obc_scheduler_config_t;
 
 /* TASK INIT PROTOTYPES - These run before their respective tasks are created */
 extern void obcTaskInitStateMgr(void);
@@ -86,6 +100,9 @@ extern void obcTaskFunctionSwWatchdog(void *params);
 extern void obcTaskFunctionAlarmMgr(void *params);
 extern void obcTaskFunctionHealthCollector(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
+
+/* PRIVATE FUNCTION PROTOTYPES */
+static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID);
 
 /* PRIVATE DATA */
 static StackType_t obcTaskStackStateMgr[TASK_STATE_MGR_STACK_SIZE];
@@ -130,7 +147,7 @@ static StaticTask_t obcTaskBufferTaskStatsCollector;
 #endif
 
 static obc_scheduler_config_t obcSchedulerConfig[] = {
-    [OBC_SCHEDULER_TASK_ID_STATE_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
         {
             .taskName = TASK_STATE_MGR_NAME,
             .taskStack = obcTaskStackStateMgr,
@@ -140,7 +157,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionStateMgr,
             .taskInit = obcTaskInitStateMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_TELEMETRY_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR] =
         {
             .taskName = TASK_TELEMETRY_MGR_NAME,
             .taskStack = obcTaskStackTelemetryMgr,
@@ -150,7 +167,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionTelemetryMgr,
             .taskInit = obcTaskInitTelemetryMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMAND_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR] =
         {
             .taskName = TASK_COMMAND_MGR_NAME,
             .taskStack = obcTaskStackCommandMgr,
@@ -160,7 +177,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionCommandMgr,
             .taskInit = obcTaskInitCommandMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMS_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_MGR] =
         {
             .taskName = TASK_COMMS_MGR_NAME,
             .taskStack = obcTaskStackCommsMgr,
@@ -170,7 +187,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionCommsMgr,
             .taskInit = obcTaskInitCommsMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMS_DOWNLINK_ENCODER] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER] =
         {
             .taskName = TASK_COMMS_DOWNLINK_ENCODER_NAME,
             .taskStack = obcTaskStackCommsDownlinkEncoder,
@@ -180,7 +197,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionCommsDownlinkEncoder,
             .taskInit = obcTaskInitCommsDownlinkEncoder,
         },
-    [OBC_SCHEDULER_TASK_ID_COMMS_UPLINK_DECODER] =
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER] =
         {
             .taskName = TASK_COMMS_UPLINK_DECODER_NAME,
             .taskStack = obcTaskStackCommsUplinkDecoder,
@@ -190,7 +207,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionCommsUplinkDecoder,
             .taskInit = obcTaskInitCommsUplinkDecoder,
         },
-    [OBC_SCHEDULER_TASK_ID_EPS_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_EPS_MGR] =
         {
             .taskName = TASK_EPS_MGR_NAME,
             .taskStack = obcTaskStackEpsMgr,
@@ -200,7 +217,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionEpsMgr,
             .taskInit = obcTaskInitEpsMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_PAYLOAD_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR] =
         {
             .taskName = TASK_PAYLOAD_MGR_NAME,
             .taskStack = obcTaskStackPayloadMgr,
@@ -210,7 +227,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionPayloadMgr,
             .taskInit = obcTaskInitPayloadMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_TIMEKEEPER] =
+    [OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER] =
         {
             .taskName = TASK_TIMEKEEPER_NAME,
             .taskStack = obcTaskStackTimekeeper,
@@ -220,7 +237,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionTimekeeper,
             .taskInit = obcTaskInitTimekeeper,
         },
-    [OBC_SCHEDULER_TASK_ID_SW_WATCHDOG] =
+    [OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG] =
         {
             .taskName = TASK_SW_WATCHDOG_NAME,
             .taskStack = obcTaskStackSwWatchdog,
@@ -230,7 +247,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionSwWatchdog,
             .taskInit = obcTaskInitSwWatchdog,
         },
-    [OBC_SCHEDULER_TASK_ID_ALARM_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
         {
             .taskName = TASK_ALARM_MGR_NAME,
             .taskStack = obcTaskStackAlarmMgr,
@@ -240,7 +257,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionAlarmMgr,
             .taskInit = obcTaskInitAlarmMgr,
         },
-    [OBC_SCHEDULER_TASK_ID_HEALTH_COLLECTOR] =
+    [OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR] =
         {
             .taskName = TASK_HEALTH_COLLECTOR_NAME,
             .taskStack = obcTaskStackHealthCollector,
@@ -252,7 +269,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-    [OBC_SCHEDULER_TASK_ID_STATS_COLLECTOR] =
+    [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
         {
             .taskName = TASK_STATS_COLLECTOR_NAME,
             .taskStack = obcTaskStackTaskStatsCollector,
@@ -266,28 +283,25 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
 
 };
 
+STATIC_ASSERT_EQ(sizeof(obcSchedulerConfig) / sizeof(obc_scheduler_config_t), OBC_SCHEDULER_TASK_COUNT);
+
 /* PUBLIC FUNCTION DEFINITIONS */
-obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_task_id_t taskID) {
-  if (taskID >= OBC_SCHEDULER_TASK_COUNT) return NULL;
-  return &obcSchedulerConfig[taskID];
-}
+void obcSchedulerCreateTask(obc_scheduler_config_id_t taskID) { obcSchedulerCreateTaskWithArgs(taskID, NULL); }
 
-void obcSchedulerCreateTask(obc_scheduler_task_id_t taskID) { obcSchedulerCreateTaskWithArgs(taskID, NULL); }
-
-void obcSchedulerCreateTaskWithArgs(obc_scheduler_task_id_t taskID, void *args) {
+void obcSchedulerCreateTaskWithArgs(obc_scheduler_config_id_t taskID, void *args) {
   obc_scheduler_config_t *taskConfig = obcSchedulerGetConfig(taskID);
-
   ASSERT(taskConfig != NULL);
 
-  ASSERT(taskConfig->taskStack != NULL);
-  ASSERT(taskConfig->taskBuffer != NULL);
-  ASSERT(taskConfig->taskFunc != NULL);
+  const bool taskConfigExists =
+      (taskConfig->taskFunc != NULL) && (taskConfig->taskStack != NULL) && (taskConfig->taskBuffer != NULL);
 
-  taskConfig->taskHandle = xTaskCreateStatic(taskConfig->taskFunc, taskConfig->taskName, taskConfig->stackSize, args,
-                                             taskConfig->priority, taskConfig->taskStack, taskConfig->taskBuffer);
+  if (taskConfigExists) {
+    taskConfig->taskHandle = xTaskCreateStatic(taskConfig->taskFunc, taskConfig->taskName, taskConfig->stackSize, args,
+                                               taskConfig->priority, taskConfig->taskStack, taskConfig->taskBuffer);
+  }
 }
 
-void obcSchedulerInitTask(obc_scheduler_task_id_t taskID) {
+void obcSchedulerInitTask(obc_scheduler_config_id_t taskID) {
   obc_scheduler_config_t *taskConfig = obcSchedulerGetConfig(taskID);
 
   ASSERT(taskConfig != NULL);
@@ -295,4 +309,10 @@ void obcSchedulerInitTask(obc_scheduler_task_id_t taskID) {
   if (taskConfig->taskInit != NULL) {
     taskConfig->taskInit();
   }
+}
+
+/* PRIVATE FUNCTION DEFINITIONS */
+static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID) {
+  if (taskID >= OBC_SCHEDULER_TASK_COUNT) return NULL;
+  return &obcSchedulerConfig[taskID];
 }
