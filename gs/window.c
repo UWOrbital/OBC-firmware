@@ -4,12 +4,17 @@
 
 #include "obc_gs_errors.h"
 #include "gs_errors.h"
+#include "gs_os_config.h"
 
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
 #include "obc_gs_aes128.h"
 
+#if WINDOWS
 #include "win_uart.h"
+#elif LINUX
+#include "wsl_uart.h"
+#endif
 
 #include <aes.h>
 
@@ -65,6 +70,13 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+#if LINUX
+  if (openSerialPort(&hSerial, comPortName) != 0) {
+    printf("Failed to open serial port!");
+    exit(1);
+  }
+#endif
+
   DCB dcbSerialParams = {0};
   dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
   if (getDeviceState(hSerial, &dcbSerialParams) != 0) {
@@ -72,6 +84,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  /* Begin setting serial parameters */
   dcbSerialParams.BaudRate = CBR_9600;
   dcbSerialParams.ByteSize = 8;
   dcbSerialParams.StopBits = TWOSTOPBITS;
@@ -81,6 +94,21 @@ int main(int argc, char *argv[]) {
     printf("Failed to set serial parameters!");
     exit(1);
   }
+
+#if LINUX
+  struct termios serialSettings;
+  memset(&serialSettings, 0, sizeof(serialSettings));
+  serialSettings.c_cflag = B9600;    // Baud rate: 9600
+  serialSettings.c_cflag |= CS8;     // 8 data bits
+  serialSettings.c_cflag |= CREAD;   // Enable receiver
+  serialSettings.c_cflag |= CSTOPB;  // Set 2 stop bits
+  serialSettings.c_iflag = IGNPAR;   // Ignore parity errors
+
+  if (setDeviceParameters(hSerial, &serialSettings) != 0) {
+    printf("Failed to set serial parameters!");
+    exit(1);
+  }
+#endif
 
   COMMTIMEOUTS timeouts = {0};
 
