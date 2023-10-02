@@ -281,13 +281,32 @@ obc_error_code_t retrieveYMR(vn_ymr_packet_t* packet) {
 
 obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate) {
   obc_error_code_t errCode;
+  unsigned char asyncCommand [MAX_COMMAND_SIZE];
   switch (cmd) {
-    case VN_YPR:
-      unsigned char asyncCommand[] = ASYNC_YPR;
+    case VN_YPR: {
+      memcpy(asyncCommand, ASYNC_YPR, sizeof(ASYNC_YPR))
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      break;
+    }
+    case VN_MAG: {
+      memcpy(asyncCommand, ASYNC_MAG, sizeof(ASYNC_MAG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      break;
+    }
+    case VN_ACC:
+      memcpy(asyncCommand, ASYNC_ACCEL, sizeof(ASYNC_ACCEL));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      break;
+    case VN_GYR:
+      memcpy(asyncCommand, ASYNC_GYRO, sizeof(ASYNC_GYRO));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      break;
+    case VN_YMR:
+      memcpy(asyncCommand, ASYNC_YMR, sizeof(ASYNC_YMR));
       RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
       break;
     default:
-      break;
+      return OBC_ERR_CODE_INVALID_ARG;
   }
   RETURN_IF_ERROR_CODE(VN100SetOutputRate(outputRate));
   return OBC_ERR_CODE_SUCCESS;
