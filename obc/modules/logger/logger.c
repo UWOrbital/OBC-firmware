@@ -154,7 +154,7 @@ static void vLoggerTask(void *pvParameters) {
  * @param event Pointer to the event to send
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
-obc_error_code_t sendToLoggerQueue(logger_event_t *event, BaseType_t blockTimeTicks) {
+obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks) {
   ASSERT(loggerQueueHandle != NULL);
 
   if (event == NULL) {
