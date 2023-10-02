@@ -278,10 +278,10 @@ obc_error_code_t retrieveYMR(vn_ymr_packet_t* packet) {
 
 obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate) {
   obc_error_code_t errCode;
-  unsigned char asyncCommand [MAX_COMMAND_SIZE];
+  unsigned char asyncCommand[MAX_COMMAND_SIZE];
   switch (cmd) {
     case VN_YPR: {
-      memcpy(asyncCommand, ASYNC_YPR, sizeof(ASYNC_YPR))
+      memcpy(asyncCommand, ASYNC_YPR, sizeof(ASYNC_YPR));
       RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
