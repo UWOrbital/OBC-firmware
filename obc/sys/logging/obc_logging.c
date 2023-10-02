@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define LOGGER_QUEUE_TX_WAIT_PERIOD 0
+
 static log_level_t logLevel;
 
 void initLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
@@ -25,7 +27,7 @@ void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  *
  */
-obc_error_code_t logError(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
   if (msgLevel < logLevel) {
     return OBC_ERR_CODE_LOG_MSG_SILENCED;
   }
@@ -34,10 +36,11 @@ obc_error_code_t logError(log_level_t msgLevel, const char *file, uint32_t line,
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  logger_event_t logEvent = {.logType = msgLevel, .file = file, .line = line, .errCode = errCode};
+  logger_event_t logEvent = {
+      .logEntry = {.logType = ERROR_CODE, .logLevel = msgLevel}, .file = file, .line = line, .errCode = errCode};
 
   // send the event to the logger queue and don't try to log any error that occurs
-  return sendToLoggerQueue(&logEvent);
+  return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
 
 /**
@@ -67,9 +70,10 @@ obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, c
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  logger_event_t logEvent = {.logType = msgLevel, .file = file, .line = line, .msg = msg};
+  logger_event_t logEvent = {
+      .logEntry = {.logType = MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
-  return sendToLoggerQueue(&logEvent);
+  return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
 
 /**
@@ -86,7 +90,7 @@ obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, c
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  *
  */
-obc_error_code_t logErrorFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+obc_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
   if (msgLevel < logLevel) {
     return OBC_ERR_CODE_LOG_MSG_SILENCED;
   }
@@ -95,7 +99,8 @@ obc_error_code_t logErrorFromISR(log_level_t msgLevel, const char *file, uint32_
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  logger_event_t logEvent = {.logType = msgLevel, .file = file, .line = line, .errCode = errCode};
+  logger_event_t logEvent = {
+      .logEntry = {.logType = ERROR_CODE, .logLevel = msgLevel}, .file = file, .line = line, .errCode = errCode};
 
   // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueueFromISR(&logEvent);
@@ -128,7 +133,8 @@ obc_error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t 
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  logger_event_t logEvent = {.logType = msgLevel, .file = file, .line = line, .msg = msg};
+  logger_event_t logEvent = {
+      .logEntry = {.logType = MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
   return sendToLoggerQueueFromISR(&logEvent);
 }

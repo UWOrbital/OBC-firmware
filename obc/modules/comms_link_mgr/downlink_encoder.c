@@ -153,7 +153,7 @@ static void vTelemEncodeTask(void *pvParameters) {
         LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       default:
-        LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+        LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
         break;
     }
   }
@@ -219,7 +219,7 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
   while ((errCode = readNextTelemetryFromFile(fd, &singleTelem)) == OBC_ERR_CODE_SUCCESS) {
     errCode = sendOrPackNextTelemetry(&singleTelem, &telemPacket, &telemPacketOffset);
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-      LOG_ERROR(errCode);
+      LOG_ERROR_CODE(errCode);
       RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
       return errCode;
     }
@@ -229,7 +229,7 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
     LOG_DEBUG("Reached end of telemetry file");
     errCode = OBC_ERR_CODE_SUCCESS;
   } else {
-    LOG_ERROR(errCode);  // If the error wasn't an EOF error, return
+    LOG_ERROR_CODE(errCode);  // If the error wasn't an EOF error, return
     RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
     return errCode;
   }
@@ -239,7 +239,7 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
 
   errCode = sendTelemetryPacket(&telemPacket);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR(errCode);
+    LOG_ERROR_CODE(errCode);
     RETURN_IF_ERROR_CODE(closeTelemetryFile(fd));
     return errCode;
   }
@@ -271,7 +271,7 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
   size_t fileSize;
   errCode = getFileSize(*fd, &fileSize);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR(errCode);
+    LOG_ERROR_CODE(errCode);
     closeTelemetryFile(*fd);
     return errCode;
   }
@@ -281,7 +281,7 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
   char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
   errCode = constructTelemetryFilePath(telemetryBatchId, fileName, TELEMETRY_FILE_PATH_MAX_LENGTH);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR(errCode);
+    LOG_ERROR_CODE(errCode);
     closeTelemetryFile(*fd);
     return errCode;
   }

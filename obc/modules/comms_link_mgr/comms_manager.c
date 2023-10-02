@@ -311,13 +311,13 @@ static void vCommsManagerTask(void *pvParameters) {
     }
 
     if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
-      LOG_ERROR(OBC_ERR_CODE_INVALID_STATE);
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
       commsState = COMMS_STATE_DISCONNECTED;
       continue;
     }
 
     if (commsStateFns[commsState] == NULL) {
-      LOG_ERROR(OBC_ERR_CODE_INVALID_STATE);
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
       commsState = COMMS_STATE_DISCONNECTED;
       continue;
     }
@@ -530,7 +530,7 @@ static obc_error_code_t handleDownlinkingState(void) {
     transmit_event_t transmitEvent;
     // poll the transmit queue
     if (xQueueReceive(cc1120TransmitQueueHandle, &transmitEvent, CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-      LOG_ERROR(OBC_ERR_CODE_QUEUE_EMPTY);
+      LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_EMPTY);
     }
     if (transmitEvent.eventID == DOWNLINK_PACKET) {
 #if COMMS_PHY == COMMS_PHY_UART
@@ -543,7 +543,7 @@ static obc_error_code_t handleDownlinkingState(void) {
     } else if (transmitEvent.eventID == END_DOWNLINK) {
       break;
     } else {
-      LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+      LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
     }
   }
   comms_event_t finishedDownlinkEvent = {.eventID = COMMS_EVENT_DOWNLINK_FINISHED};

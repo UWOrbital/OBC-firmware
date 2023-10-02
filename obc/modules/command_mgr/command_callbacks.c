@@ -59,7 +59,7 @@ obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
 
   int32_t ret = red_format("");
   if (ret != 0) {
-    LOG_ERROR(OBC_ERR_CODE_FS_FORMAT_FAILED);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FS_FORMAT_FAILED);
     return OBC_ERR_CODE_FS_FORMAT_FAILED;
   }
 

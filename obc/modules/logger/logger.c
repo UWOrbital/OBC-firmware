@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define LOG_FILE_NAME "log_file0.log"
+#define LOG_FILE_NAME "log.log"
 
 #define MAX_MSG_SIZE 128U
 #define MAX_FNAME_LINENUM_SIZE 128U
@@ -31,7 +31,6 @@ static log_output_location_t outputLocation;
 #define LOGGER_QUEUE_LENGTH 10U
 #define LOGGER_QUEUE_ITEM_SIZE sizeof(logger_event_t)
 #define LOGGER_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
-#define LOGGER_QUEUE_TX_WAIT_PERIOD 0
 
 static TaskHandle_t loggerTaskHandle = NULL;
 static StaticTask_t loggerTaskBuffer;
@@ -78,12 +77,12 @@ static void vLoggerTask(void *pvParameters) {
     if (xQueueReceive(loggerQueueHandle, &queueMsg, LOGGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
-    if (queueMsg.logType > LOG_FATAL) {
-      LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+    if (queueMsg.logEntry.logLevel > LOG_FATAL) {
+      LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
       continue;
     }
     if (queueMsg.file == NULL) {
-      LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+      LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
       continue;
     }
 
@@ -92,42 +91,45 @@ static void vLoggerTask(void *pvParameters) {
     // File & line number
     char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
     int ret = 0;
-    ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logType], queueMsg.file,
-                   queueMsg.line);
+    ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logEntry.logLevel],
+                   queueMsg.file, queueMsg.line);
     if (ret < 0) {
-      LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
       continue;
     }
     if ((uint32_t)ret >= MAX_FNAME_LINENUM_SIZE) {
-      LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
+      LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_TOO_SMALL);
       continue;
     }
-    switch (queueMsg.logType) {
-      case LOG_ERROR:
+    switch (queueMsg.logEntry.logType) {
+      case ERROR_CODE:
         // Prepare entire output
         bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, queueMsg.errCode);
         if (bufLen < 0) {
-          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+          LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
         if ((uint32_t)bufLen >= MAX_LOG_SIZE) {
-          LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
+          LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_TOO_SMALL);
           continue;
         }
         break;
-      default:
+      case MSG:
         // if it isnt an error log, it has a string to be logged
         // Prepare entire output
         bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %s\r\n", infobuf, queueMsg.msg);
         if (bufLen < 0) {
-          LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+          LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
         if ((uint32_t)bufLen >= MAX_LOG_SIZE) {
-          LOG_ERROR(OBC_ERR_CODE_BUFF_TOO_SMALL);
+          LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_TOO_SMALL);
           continue;
         }
         break;
+      default:
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+        continue;
     }
     if (outputLocation == LOG_TO_SDCARD) {
       int32_t fdescriptor = red_open(fname, RED_O_WRONLY | RED_O_APPEND | RED_O_CREAT);
@@ -152,14 +154,14 @@ static void vLoggerTask(void *pvParameters) {
  * @param event Pointer to the event to send
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
-obc_error_code_t sendToLoggerQueue(logger_event_t *event) {
+obc_error_code_t sendToLoggerQueue(logger_event_t *event, BaseType_t blockTimeTicks) {
   ASSERT(loggerQueueHandle != NULL);
 
   if (event == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(loggerQueueHandle, (void *)event, LOGGER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
+  if (xQueueSend(loggerQueueHandle, (void *)event, blockTimeTicks) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 

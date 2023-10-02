@@ -35,7 +35,7 @@ obc_error_code_t mkDir(const char *dirPath) {
       return OBC_ERR_CODE_SUCCESS;
     }
 
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_MKDIR_FAILED;
   }
 
@@ -70,7 +70,7 @@ obc_error_code_t closeFile(int32_t fileId) {
 
   int32_t ret = red_close(fileId);
   if (ret != 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_CLOSE;
   }
 
@@ -80,7 +80,7 @@ obc_error_code_t closeFile(int32_t fileId) {
 obc_error_code_t deleteFile(const char *filePath) {
   int32_t ret = red_unlink(filePath);
   if (ret != 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_DELETE;
   }
 
@@ -99,12 +99,12 @@ obc_error_code_t writeFile(int32_t fileId, const void *data, size_t dataLength) 
   }
 
   if (ret < 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_WRITE;
   }
 
   if ((size_t)ret != dataLength) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_WRITE;
   }
 
@@ -122,7 +122,7 @@ obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize, size_
 
   int32_t ret = red_read(fileId, buffer, bufferSize);
   if (ret < 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_READ;
   }
 
@@ -135,14 +135,14 @@ obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize) {
   int32_t curr_pos = red_lseek(fileId, 0, RED_SEEK_CUR);
 
   if (curr_pos < 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_SEEK;
   }
 
   int32_t file_end = red_lseek(fileId, 0, RED_SEEK_END);
 
   if (file_end < 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_SEEK;
   }
 
@@ -152,7 +152,7 @@ obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize) {
   int32_t ret = red_lseek(fileId, curr_pos, RED_SEEK_SET);
 
   if (ret < 0) {
-    LOG_ERROR(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_SEEK;
   }
 

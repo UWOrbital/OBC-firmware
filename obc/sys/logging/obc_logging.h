@@ -25,6 +25,15 @@ typedef enum { LOG_TO_SDCARD, LOG_TO_UART } log_output_location_t;
  */
 typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, LOG_OFF } log_level_t;
 
+// Define a bit field structure for the log type, log level, and isMsg
+typedef struct {
+  unsigned int logType : 1;   // 1 bit for log type (0 for ERROR_CODE, 1 for MSG)
+  unsigned int logLevel : 3;  // 3 bits for log level
+} log_entry_t;
+
+// Define the log enum based on the bit field structure
+typedef enum { ERROR_CODE = 0, MSG = 1 } log_type_t;
+
 #ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL LOG_TRACE
 #endif
@@ -33,21 +42,24 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
 #define LOG_DEBUG(msg) logMsg(LOG_DEBUG, __FILE__, __LINE__, msg)
 #define LOG_INFO(msg) logMsg(LOG_INFO, __FILE__, __LINE__, msg)
 #define LOG_WARN(msg) logMsg(LOG_WARN, __FILE__, __LINE__, msg)
-#define LOG_ERROR(errCode) logError(LOG_ERROR, __FILE__, __LINE__, errCode)
+#define LOG_ERROR(msg) logMsg(LOG_ERROR, __FILE__, __LINE__, msg)
 #define LOG_FATAL(msg) logMsg(LOG_FATAL, __FILE__, __LINE__, msg)
 
 #define LOG_TRACE_FROM_ISR(msg) logMsgFromISR(LOG_TRACE, __FILE__, __LINE__, msg)
 #define LOG_DEBUG_FROM_ISR(msg) logMsgFromISR(LOG_DEBUG, __FILE__, __LINE__, msg)
 #define LOG_INFO_FROM_ISR(msg) logMsgFromISR(LOG_INFO, __FILE__, __LINE__, msg)
 #define LOG_WARN_FROM_ISR(msg) logMsgFromISR(LOG_WARN, __FILE__, __LINE__, msg)
-#define LOG_ERROR_FROM_ISR(errCode) logErrorFromISR(LOG_ERROR, __FILE__, __LINE__, errCode)
+#define LOG_ERROR_FROM_ISR(msg) logMsgFromISR(LOG_ERROR, __FILE__, __LINE__, msg)
 #define LOG_FATAL_FROM_ISR(msg) logMsgFromISR(LOG_FATAL, __FILE__, __LINE__, msg)
+
+#define LOG_ERROR_CODE(errCode) logErrorCode(LOG_ERROR, __FILE__, __LINE__, errCode)
+#define LOG_ERROR_CODE_FROM_ISR(errCode) logErrorCodeFromISR(LOG_ERROR, __FILE__, __LINE__, errCode)
 
 #define RETURN_IF_ERROR_CODE(_ret)         \
   do {                                     \
     errCode = _ret;                        \
     if (errCode != OBC_ERR_CODE_SUCCESS) { \
-      LOG_ERROR(errCode);                  \
+      LOG_ERROR_CODE(errCode);             \
       return errCode;                      \
     }                                      \
   } while (0)
@@ -56,7 +68,7 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
   do {                                     \
     errCode = _ret;                        \
     if (errCode != OBC_ERR_CODE_SUCCESS) { \
-      LOG_ERROR(errCode);                  \
+      LOG_ERROR_CODE(errCode);             \
     }                                      \
   } while (0)
 
@@ -86,7 +98,7 @@ void logSetLevel(log_level_t newLogLevel);
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  *
  */
-obc_error_code_t logError(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
+obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
 
 /**
  * @brief Log a message
@@ -118,7 +130,7 @@ obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, c
  * 								OBC_ERR_CODE_UNKNOWN 			otherwise
  *
  */
-obc_error_code_t logErrorFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
+obc_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
 
 /**
  * @brief Log a message from ISR

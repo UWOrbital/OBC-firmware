@@ -392,7 +392,7 @@ DSTATUS disk_initialize(uint8_t drv) {
         vTaskDelay(SDC_DELAY_1MS);
       }
     } else {
-      LOG_ERROR(OBC_ERR_CODE_SD_CARD_INVALID_VOLTAGE);
+      LOG_ERROR_CODE(OBC_ERR_CODE_SD_CARD_INVALID_VOLTAGE);
     }
   } else {
     // Card is SDC Ver1 or MMC
@@ -413,7 +413,7 @@ DSTATUS disk_initialize(uint8_t drv) {
     }
 
     if (!initSuccess) {
-      LOG_ERROR(OBC_ERR_CODE_SD_CARD_INIT_FAILED);
+      LOG_ERROR_CODE(OBC_ERR_CODE_SD_CARD_INIT_FAILED);
       ty = 0;
     }
 

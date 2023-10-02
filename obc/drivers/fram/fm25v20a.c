@@ -78,7 +78,7 @@ static obc_error_code_t framTransmitOpCode(cmd_t cmd) {
       LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, OP_SLEEP));
       break;
     default:
-      LOG_ERROR(OBC_ERR_CODE_INVALID_ARG);
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
       errCode = OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -111,7 +111,7 @@ obc_error_code_t framReadStatusReg(uint8_t *status) {
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
 
   if (isAsleep) {
-    LOG_ERROR(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
     errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
@@ -139,7 +139,7 @@ obc_error_code_t framWriteStatusReg(uint8_t status) {
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
 
   if (isAsleep) {
-    LOG_ERROR(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
     errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
@@ -181,7 +181,7 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
 
   if (isAsleep) {
-    LOG_ERROR(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
     errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
@@ -227,7 +227,7 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
 
   if (isAsleep) {
-    LOG_ERROR(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
     errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
@@ -268,7 +268,7 @@ obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
 
   if (isAsleep) {
-    LOG_ERROR(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
     errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
 
@@ -355,7 +355,7 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
   }
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
   if (isAsleep) {
-    LOG_ERROR(OBC_ERR_CODE_FRAM_IS_ASLEEP);
+    LOG_ERROR_CODE(OBC_ERR_CODE_FRAM_IS_ASLEEP);
     errCode = OBC_ERR_CODE_FRAM_IS_ASLEEP;
   }
   if (errCode == OBC_ERR_CODE_SUCCESS) {

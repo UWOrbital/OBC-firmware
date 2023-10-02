@@ -91,7 +91,7 @@ static void commandManagerTask(void *pvParameters) {
     if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
       // Check if the ID is a valid index
       if (cmd.id >= CMDS_CONFIG_SIZE) {
-        LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_CMD);
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
         continue;
       }
 
@@ -99,13 +99,13 @@ static void commandManagerTask(void *pvParameters) {
 
       // Check if the ID has a callback
       if (currCmdInfo.callback == NULL) {
-        LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_CMD);
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
         continue;
       }
 
       // Check if the command is allowed to be executed
       if (!(currCmdInfo.policy & OBC_ACTIVE_POLICY)) {
-        LOG_ERROR(OBC_ERR_CODE_CMD_NOT_ALLOWED);
+        LOG_ERROR_CODE(OBC_ERR_CODE_CMD_NOT_ALLOWED);
         continue;
       }
 

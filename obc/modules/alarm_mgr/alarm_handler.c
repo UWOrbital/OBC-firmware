@@ -102,7 +102,7 @@ static void alarmHandler(void *pvParameters) {
         static const uint32_t tol = 2;  // tolerance of 2 seconds
         uint32_t currTime = getCurrentUnixTime();
         if (currTime + tol < alarm.unixTime) {
-          LOG_ERROR(OBC_ERR_CODE_RTC_ALARM_EARLY);
+          LOG_ERROR_CODE(OBC_ERR_CODE_RTC_ALARM_EARLY);
           break;
         }
 
@@ -134,7 +134,7 @@ static void alarmHandler(void *pvParameters) {
               LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg));
               break;
             default:
-              LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);
+              LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);
               break;
           }
         }
@@ -142,7 +142,7 @@ static void alarmHandler(void *pvParameters) {
       }
 
       default: {
-        LOG_ERROR(OBC_ERR_CODE_UNSUPPORTED_EVENT);
+        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         continue;
       }
     }

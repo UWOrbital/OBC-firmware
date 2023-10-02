@@ -198,7 +198,7 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len, TickType_t txFifoEmptyT
 
   // wait on the semaphore to make sure tx fifo is empty
   if (xSemaphoreTake(txFifoEmptySemaphore, txFifoEmptyTimeoutTicks) != pdPASS) {
-    LOG_ERROR(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
+    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
 
@@ -310,12 +310,12 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len) 
 static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len) {
   obc_error_code_t errCode;
   if (xSemaphoreTake(txSemaphore, TX_SEMAPHORE_TIMEOUT) != pdPASS) {
-    LOG_ERROR(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
+    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
   errCode = cc1120WriteFifo(data, len);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR(errCode);
+    LOG_ERROR_CODE(errCode);
     xSemaphoreGive(txSemaphore);
     return errCode;
   }
@@ -374,7 +374,7 @@ obc_error_code_t cc1120Receive(TickType_t syncWordTimeoutTicks) {
 
   // wait to receive sync word before continuing
   if (xSemaphoreTake(syncReceivedSemaphore, syncWordTimeoutTicks) != pdPASS) {
-    LOG_ERROR(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
+    LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
   // See chapters 8.1, 8.4, 8.5
