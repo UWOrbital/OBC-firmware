@@ -7,7 +7,7 @@
 
 int openSerialPort(int serialFD, char *portName) {
     // Open the serial port (replace "/dev/ttyS0" with your device)
-    serialFD = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
+    serialFD = open("/dev/USBS0", O_RDWR | O_NOCTTY);
     if (serialFD == -1) {
         perror("Error opening serial port");
         return -1;
