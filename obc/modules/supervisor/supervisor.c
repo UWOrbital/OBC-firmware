@@ -89,7 +89,6 @@ static void vSupervisorTask(void *pvParameters) {
 
   ASSERT(supervisorQueueHandle != NULL);
 
-  initLogger();
   initLoggerTask();
 
   /* Initialize critical peripherals */

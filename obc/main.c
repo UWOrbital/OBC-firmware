@@ -35,9 +35,6 @@ int main(void) {
 
   _enable_interrupt_();
 
-  // Initialize logger
-  initLogger();
-
   // Initialize bus mutexes
   initSciMutex();
   initI2CMutex();

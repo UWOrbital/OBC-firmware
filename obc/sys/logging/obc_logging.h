@@ -73,11 +73,6 @@ typedef enum { ERROR_CODE = 0, MSG = 1 } log_type_t;
   } while (0)
 
 /**
- * @brief Initialize the logger
- */
-void initLogger(void);
-
-/**
  * @brief Set the logging level
  *
  * @param newLogLevel The new logging level
