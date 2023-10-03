@@ -86,16 +86,10 @@ static obc_error_code_t isValidOutputRate(uint32_t outputRate) {
 void initVN100(void) {
   initSciMutex();
   sciSetBaudrate(UART_VN100_REG, VN100_BAUDRATE);
+
   /* Configure the asnyc output to output Yaw Pitch Roll, Accelerometer, Angular Rates and Magnetometer readings
      at a fixed output rate of 10Hz */
   setASYNCOutputs(VN_YMR, DEFAULT_OUTPUT_RATE);
-  /* TODO:
-     - Setup vn-100 mutex
-     - setup the configuration register
-     - configure baudrate
-     - configure asyncronous outputs
-     - Add any offsets to gyro or acceleration or additional info about velocity compensation
-  */
 }
 
 obc_error_code_t serialRequestCMD(vn_cmd_t cmd, unsigned char* packet) {
@@ -290,21 +284,67 @@ obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate) {
       RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
-    case VN_ACC:
+    case VN_ACC: {
       memcpy(asyncCommand, ASYNC_ACCEL, sizeof(ASYNC_ACCEL));
       RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
       break;
-    case VN_GYR:
+    }
+    case VN_GYR: {
       memcpy(asyncCommand, ASYNC_GYRO, sizeof(ASYNC_GYRO));
       RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
       break;
-    case VN_YMR:
+    }
+    case VN_YMR: {
       memcpy(asyncCommand, ASYNC_YMR, sizeof(ASYNC_YMR));
       RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
       break;
+    }
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
   RETURN_IF_ERROR_CODE(VN100SetOutputRate(outputRate));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t readVN100(vn_cmd_t cmd, void* packet) {
+  unsigned char buf[MAX_COMMAND_SIZE];
+  uint32_t len;
+  uint8_t packetType;
+
+  switch (cmd) {
+    case VN_YPR: {
+      len = sizeof(YPR_PACKET_SIZE);
+      packetType = VN_YPR;
+      break;
+    }
+    case VN_MAG: {
+      len = sizeof(MAG_PACKET_SIZE);
+      packetType = VN_MAG;
+      break;
+    }
+    case VN_ACC: {
+      len = sizeof(ACCEL_PACKET_SIZE);
+      packetType = VN_ACC;
+      break;
+    }
+    case VN_GYR: {
+      len = sizeof(GYRO_PACKET_SIZE);
+      packetType = VN_GYR;
+      break;
+    }
+    case VN_YMR: {
+      len = sizeof(YMR_PACKET_SIZE);
+      packetType = VN_YMR;
+      break;
+    }
+    default:
+      return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(sciReadBytes(buf, len, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
+
+  VN100_error_t error;
+  RETURN_IF_ERROR_CODE(parsePacket(packetType, buf, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }

@@ -121,3 +121,12 @@ obc_error_code_t retrieveYMR(vn_ymr_packet_t *packet);
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate);
+
+/**
+ * @brief Wrapper to read from the VN100 UART register
+ *
+ * @param cmd Specify which packet type you expect to receive
+ * @param packet Pointer to packet to store parsed data
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t readVN100(vn_cmd_t cmd, void *packet);
