@@ -76,6 +76,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   ASSERT(stateMgrQueueHandle != NULL);
 
   initLoggerTask();
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
   /* Initialize critical peripherals */
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card

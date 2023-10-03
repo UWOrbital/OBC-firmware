@@ -1,5 +1,4 @@
 #include "logger.h"
-#include "obc_task_config.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_print.h"
@@ -34,19 +33,9 @@ static log_output_location_t outputLocation;
 #define LOGGER_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define LOGGER_QUEUE_TX_WAIT_PERIOD 0
 
-static TaskHandle_t loggerTaskHandle = NULL;
-static StaticTask_t loggerTaskBuffer;
-static StackType_t loggerTaskStack[LOGGER_TASK_STACK_SIZE];
-
 static QueueHandle_t loggerQueueHandle = NULL;
 static StaticQueue_t loggerQueue;
 static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
-
-/**
- * @brief	Logger task
- * @param	pvParameters Task parameters.
- */
-static void vLoggerTask(void *pvParameters);
 
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
@@ -56,12 +45,6 @@ void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
  * @param currentNumLogFiles pointer to current number of existing log files
  */
 void initLoggerTask(void) {
-  ASSERT((loggerTaskStack != NULL) && (&loggerTaskBuffer != NULL));
-  if (loggerTaskHandle == NULL) {
-    loggerTaskHandle = xTaskCreateStatic(vLoggerTask, LOGGER_TASK_NAME, LOGGER_TASK_STACK_SIZE, NULL,
-                                         LOGGER_TASK_PRIORITY, loggerTaskStack, &loggerTaskBuffer);
-  }
-
   ASSERT((loggerQueueStack != NULL) && (&loggerQueue != NULL));
   if (loggerQueueHandle == NULL) {
     loggerQueueHandle = xQueueCreateStatic(LOGGER_QUEUE_LENGTH, LOGGER_QUEUE_ITEM_SIZE, loggerQueueStack, &loggerQueue);
@@ -71,7 +54,7 @@ void initLoggerTask(void) {
   logLevel = LOG_DEFAULT_LEVEL;
 }
 
-static void vLoggerTask(void *pvParameters) {
+void obcTaskFunctionLogger(void *pvParameters) {
   char *fname = LOG_FILE_NAME;
   while (1) {
     logger_event_t queueMsg;
