@@ -123,7 +123,7 @@ obc_error_code_t retrieveYMR(vn_ymr_packet_t *packet);
 obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate);
 
 /**
- * @brief Wrapper to read from the VN100 UART register
+ * @brief Wrapper to read from the VN100 UART register, used to read the currently configured ASYNC ouputs.
  *
  * @param cmd Specify which packet type you expect to receive
  * @param packet Pointer to packet to store parsed data
