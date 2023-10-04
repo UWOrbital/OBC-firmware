@@ -25,14 +25,14 @@ typedef enum { LOG_TO_SDCARD, LOG_TO_UART } log_output_location_t;
  */
 typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, LOG_OFF } log_level_t;
 
-// Define a bit field structure for the log type, log level, and isMsg
+// Define a bit field structure for the log type and log level
 typedef struct {
-  unsigned int logType : 1;   // 1 bit for log type (0 for ERROR_CODE, 1 for MSG)
+  unsigned int logType : 1;   // 1 bit for log type (0 for LOG_TYPE_ERROR_CODE, 1 for LOG_TYPE_MSG)
   unsigned int logLevel : 3;  // 3 bits for log level
 } log_entry_t;
 
 // Define the log enum based on the bit field structure
-typedef enum { ERROR_CODE = 0, MSG = 1 } log_type_t;
+typedef enum { LOG_TYPE_ERROR_CODE = 0, LOG_TYPE_MSG = 1 } log_type_t;
 
 #ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL LOG_TRACE

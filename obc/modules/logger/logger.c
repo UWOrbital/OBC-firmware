@@ -37,6 +37,22 @@ static QueueHandle_t loggerQueueHandle = NULL;
 static StaticQueue_t loggerQueue;
 static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
 
+/**
+ * @brief Sends an event to the logger queue
+ *
+ * @param event Pointer to the event to send
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
+ */
+static obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks);
+
+/**
+ * @brief Sends an event to the logger queue from an ISR
+ *
+ * @param event Pointer to the event to send
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
+ */
+static obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event);
+
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
 /**
@@ -70,8 +86,6 @@ void obcTaskFunctionLogger(void *pvParameters) {
       continue;
     }
 
-    char buf[MAX_LOG_SIZE] = {0};
-    int bufLen = 0;
     // File & line number
     char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
     int ret = 0;
@@ -85,28 +99,30 @@ void obcTaskFunctionLogger(void *pvParameters) {
       LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_TOO_SMALL);
       continue;
     }
+    char logBuf[MAX_LOG_SIZE] = {0};
+    int logBufLen = 0;
     switch (queueMsg.logEntry.logType) {
-      case ERROR_CODE:
+      case LOG_TYPE_ERROR_CODE:
         // Prepare entire output
-        bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, queueMsg.errCode);
-        if (bufLen < 0) {
+        logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, queueMsg.errCode);
+        if (logBufLen < 0) {
           LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
-        if ((uint32_t)bufLen >= MAX_LOG_SIZE) {
+        if ((uint32_t)logBufLen >= MAX_LOG_SIZE) {
           LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_TOO_SMALL);
           continue;
         }
         break;
-      case MSG:
+      case LOG_TYPE_MSG:
         // if it isnt an error log, it has a string to be logged
         // Prepare entire output
-        bufLen = snprintf(buf, MAX_LOG_SIZE, "%s - %s\r\n", infobuf, queueMsg.msg);
-        if (bufLen < 0) {
+        logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%s - %s\r\n", infobuf, queueMsg.msg);
+        if (logBufLen < 0) {
           LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
           continue;
         }
-        if ((uint32_t)bufLen >= MAX_LOG_SIZE) {
+        if ((uint32_t)logBufLen >= MAX_LOG_SIZE) {
           LOG_ERROR_CODE(OBC_ERR_CODE_BUFF_TOO_SMALL);
           continue;
         }
@@ -120,26 +136,22 @@ void obcTaskFunctionLogger(void *pvParameters) {
       if (fdescriptor == -1) {
         continue;
       }
-      if (red_write(fdescriptor, buf, bufLen) == -1) {
+      if (red_write(fdescriptor, logBuf, logBufLen) == -1) {
         continue;
       }
       if (red_close(fdescriptor) == -1) {
         continue;
       }
     } else {
-      sciPrintText((unsigned char *)buf, bufLen, UART_MUTEX_BLOCK_TIME);
+      sciPrintText((unsigned char *)logBuf, logBufLen, UART_MUTEX_BLOCK_TIME);
     }
   }
 }
 
-/**
- * @brief Sends an event to the logger queue
- *
- * @param event Pointer to the event to send
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
- */
-obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks) {
-  ASSERT(loggerQueueHandle != NULL);
+static obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks) {
+  if (loggerQueueHandle == NULL) {
+    return OBC_ERR_CODE_INVALID_STATE;
+  }
 
   if (event == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -152,13 +164,7 @@ obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks)
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-/**
- * @brief Sends an event to the logger queue from an ISR
- *
- * @param event Pointer to the event to send
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
- */
-obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
+static obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
   if (loggerQueueHandle == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
@@ -177,20 +183,6 @@ obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
 
 void logSetOutputLocation(log_output_location_t newOutputLocation) { outputLocation = newOutputLocation; }
 
-/**
- * @brief Log an error code
- *
- * @param msgLevel				Level of the message
- * @param file					File of message
- * @param line					Line of message
- * @param errCode       the error code that needs to be logged
- * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
- * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
- * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
- * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
- * 								OBC_ERR_CODE_UNKNOWN 			otherwise
- *
- */
 obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
   if (msgLevel < logLevel) {
     return OBC_ERR_CODE_LOG_MSG_SILENCED;
@@ -200,27 +192,15 @@ obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t l
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  logger_event_t logEvent = {
-      .logEntry = {.logType = ERROR_CODE, .logLevel = msgLevel}, .file = file, .line = line, .errCode = errCode};
+  logger_event_t logEvent = {.logEntry = {.logType = LOG_TYPE_ERROR_CODE, .logLevel = msgLevel},
+                             .file = file,
+                             .line = line,
+                             .errCode = errCode};
 
   // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
 
-/**
- * @brief Log a message
- *
- * @param msgLevel				Level of the message
- * @param file					File of message
- * @param line					Line of message
- * @param msg           the message that should be logged (MUST BE STATIC)
- * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
- * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
- * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
- * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
- * 								OBC_ERR_CODE_UNKNOWN 			otherwise
- *
- */
 obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
   if (msgLevel < logLevel) {
     return OBC_ERR_CODE_LOG_MSG_SILENCED;
@@ -235,25 +215,11 @@ obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, c
   }
 
   logger_event_t logEvent = {
-      .logEntry = {.logType = MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
+      .logEntry = {.logType = LOG_TYPE_MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
   return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
 
-/**
- * @brief Log an error code from ISR
- *
- * @param msgLevel				Level of the message
- * @param file					File of message
- * @param line					Line of message
- * @param errCode       the error code that needs to be logged
- * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
- * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
- * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
- * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
- * 								OBC_ERR_CODE_UNKNOWN 			otherwise
- *
- */
 obc_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
   if (msgLevel < logLevel) {
     return OBC_ERR_CODE_LOG_MSG_SILENCED;
@@ -263,27 +229,15 @@ obc_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uin
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  logger_event_t logEvent = {
-      .logEntry = {.logType = ERROR_CODE, .logLevel = msgLevel}, .file = file, .line = line, .errCode = errCode};
+  logger_event_t logEvent = {.logEntry = {.logType = LOG_TYPE_ERROR_CODE, .logLevel = msgLevel},
+                             .file = file,
+                             .line = line,
+                             .errCode = errCode};
 
   // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueueFromISR(&logEvent);
 }
 
-/**
- * @brief Log a message from ISR
- *
- * @param msgLevel				Level of the message
- * @param file					File of message
- * @param line					Line of message
- * @param msg           the message that should be logged (MUST BE STATIC)
- * @return obc_error_code_t		OBC_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
- * 								OBC_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
- * 								OBC_ERR_CODE_INVALID_ARG		if file or s are null or if there is an encoding error
- * 								OBC_ERR_CODE_SUCCESS			if message is successfully logged
- * 								OBC_ERR_CODE_UNKNOWN 			otherwise
- *
- */
 obc_error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
   if (msgLevel < logLevel) {
     return OBC_ERR_CODE_LOG_MSG_SILENCED;
@@ -298,7 +252,7 @@ obc_error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t 
   }
 
   logger_event_t logEvent = {
-      .logEntry = {.logType = MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
+      .logEntry = {.logType = LOG_TYPE_MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
   return sendToLoggerQueueFromISR(&logEvent);
 }
