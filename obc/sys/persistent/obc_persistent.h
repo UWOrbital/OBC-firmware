@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "obc_errors.h"
+#include "alarm_handler.h"
 
 #define OBC_PERSISTENT_MAX_ALARM_COUNT 24U
 
@@ -93,5 +94,5 @@ typedef struct {
 obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *buffer);
 obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data);
 
-obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *buffer);
-obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data);
+obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *buffer, size_t index);
+obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data, size_t index);

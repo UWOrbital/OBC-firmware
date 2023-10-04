@@ -6,8 +6,10 @@
 #include "obc_logging.h"
 #include "obc_crc.h"
 #include "obc_assert.h"
+#include "alarm_handler.h"
 
 #include <string.h>
+#include <stddef.h>
 
 STATIC_ASSERT(sizeof(obc_persist_t) <= FRAM_MAX_ADDRESS, "obc_persist_t exceeds available FRAM space");
 
@@ -91,12 +93,16 @@ obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
+obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *data, size_t index) {
   obc_error_code_t errCode;
 
-  uint8_t sectionBuffer[sizeof(alarm_mgr_persist_t)] = {0};
-  RETURN_IF_ERROR_CODE(
-      getPersistentSection(OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+  if (index >= OBC_PERSISTENT_MAX_ALARM_COUNT) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  uint8_t sectionBuffer[sizeof(alarm_mgr_persist_t) * OBC_PERSISTENT_MAX_ALARM_COUNT] = {0};
+  RETURN_IF_ERROR_CODE(getPersistentSection(OBC_PERSIST_ADDR_OF(alarmMgr[index]), sizeof(sectionBuffer), sectionBuffer,
+                                            sizeof(sectionBuffer)));
 
   RETURN_IF_ERROR_CODE(
       extractDataFromSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
@@ -104,15 +110,19 @@ obc_error_code_t getPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data) {
+obc_error_code_t setPersistentAlarmMgr(alarm_mgr_persist_data_t *data, size_t index) {
   obc_error_code_t errCode;
 
-  uint8_t sectionBuffer[sizeof(alarm_mgr_persist_data_t)] = {0};
+  if (index >= OBC_PERSISTENT_MAX_ALARM_COUNT) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  uint8_t sectionBuffer[sizeof(alarm_mgr_persist_data_t) * OBC_PERSISTENT_MAX_ALARM_COUNT] = {0};
 
   RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
 
-  RETURN_IF_ERROR_CODE(
-      setPersistentSection(OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(sectionBuffer), sectionBuffer, sizeof(sectionBuffer)));
+  RETURN_IF_ERROR_CODE(setPersistentSection(OBC_PERSIST_ADDR_OF(alarmMgr[index]), sizeof(sectionBuffer), sectionBuffer,
+                                            sizeof(sectionBuffer)));
 
   return OBC_ERR_CODE_SUCCESS;
 }
