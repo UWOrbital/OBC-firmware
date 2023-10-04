@@ -6,7 +6,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/cmake/board_lib_defs.cmake)
 
-set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/obc/bl/bl_hal/bl_link.ld")
+set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/obc/bl/bl_link.ld")
 
 set(BL_SOURCES
     ${CMAKE_SOURCE_DIR}/obc/bl/bl_main.c
@@ -45,7 +45,7 @@ target_link_libraries(f021_api_archive INTERFACE "-Wl,--whole-archive" f021_api 
 add_subdirectory(bl_hal)
 
 target_link_libraries(${BL_BIN} PRIVATE
-    ${BL_HAL_LIB_ARCHIVE}
-    $<TARGET_OBJECTS:${BL_HAL_LIB_NO_OPTIMIZE}>
+    ${HAL_LIB_OPTIMIZE}
+    $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
     f021_api_archive
 )

@@ -5,15 +5,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(hal/cmake/board_lib_defs.cmake)
 
-if(${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
-    set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/launchpad/source/sys_link.ld")
-elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
-    set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev1/source/sys_link.ld")
-elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
-    set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/obc_rev2/source/sys_link.ld")
-else()
-    message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
-endif()
+set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/hal/common/sys_link.ld")
 
 add_executable(OBC-firmware.out main.c)
 
