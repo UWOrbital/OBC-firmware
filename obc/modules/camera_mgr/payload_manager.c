@@ -26,7 +26,7 @@ static QueueHandle_t secondaryPayloadQueueHandle = NULL;
 static StaticQueue_t secondaryPayloadQueue;
 static uint8_t secondaryPayloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH * PAYLOAD_MANAGER_QUEUE_ITEM_SIZE];
 
-static SemaphoreHandle_t xPayloadMutex;
+static xPayloadMutex;
 
 /**
  * @brief	Payload Manager task.
@@ -95,11 +95,11 @@ static void secondaryPayloadManagerTask(void *pvParameters) {
   ASSERT(secondaryPayloadQueueHandle != NULL);
 
   while (1) {
-    if (xSemaphoreHandle(xPayloadMutex, portMAX_DELAY) == pdTRUE) {
+    if (SemaphoreHandle_t(xPayloadMutex, portMAX_DELAY) == pdTRUE) {
       // ADD SECONDARY PAYLOAD COMMAND HANDLER
 
       // releases Payload mutex when secondary payload functionality has been executed
-      xSemaphoreHandle(xPayloadMutex);
+      SemaphoreHandle_t(xPayloadMutex);
     }
 
     vTaskDelay(pdMS_TO_TICKS(1000));
