@@ -12,6 +12,7 @@
 #include <os_queue.h>
 #include <sys_common.h>
 
+#define ALARM_QUEUE_SIZE 24U
 #define ALARM_HANDLER_QUEUE_LENGTH 64U
 #define ALARM_HANDLER_QUEUE_ITEM_SIZE sizeof(alarm_handler_event_t)
 #define ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
@@ -25,7 +26,6 @@ static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
 static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER_QUEUE_ITEM_SIZE];
 
-#define ALARM_QUEUE_SIZE 24U
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
 
@@ -40,7 +40,7 @@ static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
 
 STATIC_ASSERT(ALARM_QUEUE_SIZE <= OBC_PERSISTENT_MAX_ALARM_COUNT,
-              "alarm queue size must not exceed max number of alarms that can be stored in persistent memory");
+              "alarm queue size exceeds max alarms that can be stored in persistent memory");
 
 void initAlarmHandler(void) {
   ASSERT((alarmHandlerTaskStack != NULL) && (&alarmHandlerTaskBuffer != NULL));
