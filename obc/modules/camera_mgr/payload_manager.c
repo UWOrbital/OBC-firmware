@@ -26,15 +26,15 @@ static QueueHandle_t secondaryPayloadQueueHandle = NULL;
 static StaticQueue_t secondaryPayloadQueue;
 static uint8_t secondaryPayloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH * PAYLOAD_MANAGER_QUEUE_ITEM_SIZE];
 
-static SemaphoreHandle_t xPayloadMutex; 
-
-
+static SemaphoreHandle_t xPayloadMutex;
 
 /**
  * @brief	Payload Manager task.
  * @param	pvParameters	Task parameters.
  */
 static void vPayloadManagerTask(void *pvParameters);
+
+static void secondaryPayloadManagerTask(void *pvParameters);
 
 void initPayloadManager(void) {
   ASSERT((payloadTaskStack != NULL) && (&payloadTaskBuffer != NULL));
@@ -49,20 +49,20 @@ void initPayloadManager(void) {
                                             payloadQueueStack, &payloadQueue);
   }
 
-  //Created a separate queue for the secondary payload
+  // Created a separate queue for the secondary payload
   ASSERT((secondaryPayloadTaskStack != NULL) && (&secondaryPayloadTaskBuffer != NULL));
   xPayloadMutex = xSemaphoreCreateMutex();
-  if (xPayloadMutex != NULL) {
-    secondaryPayloadTaskHandle = xTaskCreateStatic(secondaryPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL,
-                                          PAYLOAD_MANAGER_PRIORITY, secondaryPayloadTaskStack, &secondaryPayloadTaskBuffer);
+  if (xPayloadMutex != NULL_PTR) {
+    secondaryPayloadTaskHandle =
+        xTaskCreateStatic(secondaryPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL,
+                          PAYLOAD_MANAGER_PRIORITY, secondaryPayloadTaskStack, &secondaryPayloadTaskBuffer);
   }
 
   ASSERT((secondaryPayloadQueueStack != NULL) && (&secondaryPayloadQueue != NULL));
   if (secondaryPayloadQueueHandle == NULL) {
     secondaryPayloadQueueHandle = xQueueCreateStatic(PAYLOAD_MANAGER_QUEUE_LENGTH, PAYLOAD_MANAGER_QUEUE_ITEM_SIZE,
-                                            secondaryPayloadQueueStack, &secondaryPayloadQueue);
+                                                     secondaryPayloadQueueStack, &secondaryPayloadQueue);
   }
-  
 }
 
 obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
@@ -91,17 +91,17 @@ static void vPayloadManagerTask(void *pvParameters) {
   }
 }
 
-static void secondaryPayloadManagerTask(void *pvParameters){
+static void secondaryPayloadManagerTask(void *pvParameters) {
   ASSERT(secondaryPayloadQueueHandle != NULL);
-  
-  while(1){
-    if (xSemaphoreTake(xPayloadMutex, portMAX_DELAY) == pdTRUE){
+
+  while (1) {
+    if (xSemaphoreHandle(xPayloadMutex, portMAX_DELAY) == pdTRUE) {
       // ADD SECONDARY PAYLOAD COMMAND HANDLER
 
-      //releases Payload mutex when secondary payload functionality has been executed
-      xSemaphoreGive(xPayloadMutex);
+      // releases Payload mutex when secondary payload functionality has been executed
+      xSemaphoreHandle(xPayloadMutex);
     }
-    
+
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
