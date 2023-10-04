@@ -1,9 +1,10 @@
 #include "obc_logging.h"
-#include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
 #include "obc_reset.h"
+#include "obc_scheduler_config.h"
+#include "state_mgr.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -28,6 +29,10 @@ int main(void) {
   // Run hardware initialization code
   gioInit();
   sciInit();
+  // i2cInit();
+  // spiInit();
+  // canInit();
+  // hetInit();
 
   char str[] = "Hello, OBC\r\n";
   sciSend(scilinREG, sizeof(str), (uint8 *)str);
@@ -39,13 +44,15 @@ int main(void) {
     }
   }
 
-  // sciInit();
-  // i2cInit();
-  // spiInit();
-  // canInit();
-  // hetInit();
-
   // _enable_interrupt_();
+  // Initialize bus mutexes
+  // initSciMutex();
+  // initI2CMutex();
+  // initSpiMutex();
+
+  // The state_mgr is the only task running initially.
+  // initStateMgr();
+  // obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
 
   // // Initialize logger
   // initLogger();

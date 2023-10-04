@@ -38,13 +38,14 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     COMMS_PHY=${COMMS_PHY}
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
+    ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/config
 )
 
+add_subdirectory(config)
 add_subdirectory(hal)
 add_subdirectory(drivers)
 add_subdirectory(sys)
