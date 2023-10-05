@@ -80,6 +80,5 @@ int readSerialPort(int serialFD, uint8_t *buff, size_t len) {
     buff[bytes_read] = '\0';
     return 0;
   }
-  printf("Error reading from serial port\r\n");
   return -1;
 }
