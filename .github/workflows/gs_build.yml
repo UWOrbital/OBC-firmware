@@ -7,6 +7,10 @@ jobs:
       runs-on: ubuntu-latest
     elif [ "$RUNNER_OS" == "Windows" ]; then
       runs-on: windows-latest
+    else 
+      echo "$RUNNER_OS not supported"
+      exit 1
+    fi
     defaults:
       run:
         shell: bash
