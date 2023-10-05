@@ -1,5 +1,6 @@
 #include "fec.h"
 #include "obc_logging.h"
+#include "obc_print.h"
 
 void testRs(void) {
   initRs();
@@ -11,18 +12,18 @@ void testRs(void) {
     telemData.data[i] = (uint8_t)testData[i];
   }
 
-  LOG_DEBUG("Original data: %s\r\n", telemData.data);
+  sciPrintf("Original data: %s\r\n", telemData.data);
 
   packed_rs_packet_t rsData = {.data = {0}};
 
   rsEncode(&telemData, &rsData);
-  LOG_DEBUG("Encoded data: %s\r\n", rsData.data);
+  sciPrintf("Encoded data: %s\r\n", rsData.data);
   rsData.data[0] = 'a';  // Simulate a bit flip
-  LOG_DEBUG("Corrupted data: %s\r\n", rsData.data);
+  sciPrintf("Corrupted data: %s\r\n", rsData.data);
 
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
   rsDecode(&rsData, decodedData, (uint8_t)RS_ENCODED_SIZE);
-  LOG_DEBUG("Decoded data: %s\r\n", decodedData);
+  sciPrintf("Decoded data: %s\r\n", decodedData);
 
   destroyRs();
 }

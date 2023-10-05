@@ -1,9 +1,10 @@
 #include "obc_logging.h"
-#include "supervisor.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
 #include "obc_reset.h"
+#include "obc_scheduler_config.h"
+#include "state_mgr.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -35,16 +36,14 @@ int main(void) {
 
   _enable_interrupt_();
 
-  // Initialize logger
-  initLogger();
-
   // Initialize bus mutexes
   initSciMutex();
   initI2CMutex();
   initSpiMutex();
 
-  // The supervisor is the only task running initially.
-  initSupervisor();
+  // The state_mgr is the only task running initially.
+  initStateMgr();
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
 
   vTaskStartScheduler();
 }
