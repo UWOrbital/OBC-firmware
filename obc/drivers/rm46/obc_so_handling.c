@@ -5,5 +5,5 @@
 #include <FreeRTOS.h>
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-  LOG_ERROR("Stack overflow detected: reseting RM46.");
+  LOG_FATAL_FROM_ISR("***********************STACK OVERFLOW DETECTED!!!!!!***********************");
 }
