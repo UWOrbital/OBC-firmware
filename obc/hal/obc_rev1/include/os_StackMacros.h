@@ -80,11 +80,9 @@
  * the stack limit.  Setting configCHECK_FOR_STACK_OVERFLOW to greater than 1
  * will also cause the last few stack bytes to be checked to ensure the value
  * to which the bytes were set when the task was created have not been
- * overwritten.  Note this second test does not guarantee that an overflowed
+ * overwritten.  Note this second test does not guarantee that an overflowed    
  * stack will always be recognised.
  */
-
-/*-----------------------------------------------------------*/
 
 #if( ( configCHECK_FOR_STACK_OVERFLOW == 1 ) && ( portSTACK_GROWTH < 0 ) )
 

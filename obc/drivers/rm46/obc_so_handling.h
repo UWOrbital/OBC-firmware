@@ -1,5 +1,6 @@
 #pragma once
 
+#include <FreeRTOS.h>
 #include "os_task.h"
 #include "obc_reset.h"
 
@@ -10,4 +11,4 @@
  *
  */
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName) {}
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName);
