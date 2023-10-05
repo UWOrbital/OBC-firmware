@@ -11,6 +11,7 @@ jobs:
         with:
           token: ${{ secrets.ADD_A_PERSONAL_ACCESS_TOKEN }}
           chats: true
+          period: 1000
           disable-links: false
           sort-by: 'REVIEWS'
           organization: 'UWOrbital'
