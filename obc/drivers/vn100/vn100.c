@@ -351,3 +351,17 @@ obc_error_code_t readVN100(vn_cmd_t cmd, void* packet) {
   RETURN_IF_ERROR_CODE(parsePacket(packetType, buf, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t pauseASYNC() {
+  obc_error_code_t errCode;
+  unsigned char command[] = "$VNASY,0*XX";
+  RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), TICK_TIMEOUT, UART_VN100_REG));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t resumeASYNC() {
+  obc_error_code_t errCode;
+  unsigned char command[] = "$VNASY,1*XX";
+  RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), TICK_TIMEOUT, UART_VN100_REG));
+  return OBC_ERR_CODE_SUCCESS;
+}
