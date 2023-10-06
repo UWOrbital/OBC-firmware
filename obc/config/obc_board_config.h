@@ -29,9 +29,9 @@
 #define CAM_CS_1 2UL
 #define CAM_CS_2 3UL
 
-// Supervisor DEBUG LED
-#define SUPERVISOR_DEBUG_LED_GIO_PORT gioPORTB
-#define SUPERVISOR_DEBUG_LED_GIO_BIT 1
+// State Manager DEBUG LED
+#define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTB
+#define STATE_MGR_DEBUG_LED_GIO_BIT 1
 
 // Comms pin numbers for ISR
 #define CC1120_RX_THR_PKT_gioPORTB_PIN 3U      // cc1120 GIO0
@@ -77,9 +77,9 @@
 #define CAM_CS_1 1UL
 #define CAM_CS_2 2UL
 
-// Supervisor DEBUG LED
-#define SUPERVISOR_DEBUG_LED_GIO_PORT gioPORTA
-#define SUPERVISOR_DEBUG_LED_GIO_BIT 5
+// State Manager DEBUG LED
+#define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTA
+#define STATE_MGR_DEBUG_LED_GIO_BIT 5
 
 #define DS3232_INT_PORT gioPORTA
 #define DS3232_INT_PIN 0U

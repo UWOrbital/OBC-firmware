@@ -8,7 +8,7 @@
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"
 #include "command_manager.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "comms_manager.h"
 
@@ -40,14 +40,12 @@
 static TaskHandle_t decodeTaskHandle = NULL;
 static StaticTask_t decodeTaskBuffer;
 static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
-static bool isStartFlagReceived;
 
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
-static void vDecodeTask(void *pvParameters);
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
@@ -92,11 +90,6 @@ static void flagTimeoutCallback() { isStartFlagReceived = false; }
  * @return void
  */
 void initDecodeTask(void) {
-  ASSERT((decodeTaskStack != NULL) && (&decodeTaskBuffer != NULL));
-  if (decodeTaskHandle == NULL) {
-    decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_UPLINK_DECODE_NAME, COMMS_UPLINK_DECODE_STACK_SIZE, NULL,
-                                         COMMS_UPLINK_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
-  }
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
     decodeDataQueueHandle = xQueueCreateStatic(DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,
@@ -112,9 +105,6 @@ void initDecodeTask(void) {
  * @return void
  */
 static void vDecodeTask(void *pvParameters) {
-  StaticTimer_t timerBuffer = {0};
-  TimerHandle_t flagTimeoutTimer = xTimerCreateStatic(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdFALSE,
-                                                      (void *)0, flagTimeoutCallback, &timerBuffer);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 

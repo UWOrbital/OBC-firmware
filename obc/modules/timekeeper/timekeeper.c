@@ -4,7 +4,7 @@
 #include "obc_assert.h"
 #include "obc_logging.h"
 #include "obc_persistent.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "ds3232_mz.h"
 
 #include <FreeRTOS.h>
@@ -14,25 +14,9 @@
 
 #define LOCAL_TIME_SYNC_PERIOD_S 60UL
 
-/**
- * @brief Timekeeper task.
- */
-static void timekeeperTask(void *pvParameters);
+void initTimekeeper(void) {}
 
-static TaskHandle_t timekeeperTaskHandle;
-static StaticTask_t timekeeperTaskBuffer;
-static StackType_t timekeeperTaskStack[TIMEKEEPER_STACK_SIZE];
-
-void initTimekeeper(void) {
-  memset(&timekeeperTaskBuffer, 0, sizeof(timekeeperTaskBuffer));
-  memset(&timekeeperTaskStack, 0, sizeof(timekeeperTaskStack));
-
-  ASSERT(timekeeperTaskStack != NULL && &timekeeperTaskBuffer != NULL);
-  timekeeperTaskHandle = xTaskCreateStatic(timekeeperTask, TIMEKEEPER_NAME, TIMEKEEPER_STACK_SIZE, NULL,
-                                           TIMEKEEPER_PRIORITY, timekeeperTaskStack, &timekeeperTaskBuffer);
-}
-
-static void timekeeperTask(void *pvParameters) {
+void obcTaskFunctionTimekeeper(void *pvParameters) {
   /*
    * The timekeeper is a task instead of a FreeRTOS timer because we have more control
    * over its priority relative to other tasks (inc. the time service daemon). The sync period is
@@ -57,7 +41,6 @@ static void timekeeperTask(void *pvParameters) {
       incrementCurrentUnixTime();
     }
 
-    LOG_DEBUG("Current time: %lu", getCurrentUnixTime());
     // Send Unix time to fram
     unixTime.unixTime = getCurrentUnixTime();
     LOG_IF_ERROR_CODE(setPersistentObcTime(&unixTime));
