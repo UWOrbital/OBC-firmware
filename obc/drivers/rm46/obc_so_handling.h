@@ -1,12 +1,11 @@
 #pragma once
 
+#include "os_task.h"
+
 #include <FreeRTOS.h>
 
-#include "os_task.h"
-#include "obc_reset.h"
-
 /**
- * @brief Stack overflow hook.
+ * @brief Hook that logs stack overflow occurrences.
  * @param xTask Task reference handle.
  * @param pcTaskName Task name.
  */
