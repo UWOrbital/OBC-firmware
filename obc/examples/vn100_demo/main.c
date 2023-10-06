@@ -14,13 +14,25 @@ static StackType_t taskStack[1024];
 
 void vTask1(void *pvParameter) {
   while (1) {
-    vn_ypr_packet_t myPacket;
-    retrieveYPR(&myPacket);
+    vn_ymr_packet_t myPacket;
+    readVN100(VN_YMR, &myPacket);
 
     sciPrintf("Yaw: %f \r\n", myPacket.yaw);
     sciPrintf("Pitch: %f \r\n", myPacket.pitch);
     sciPrintf("Roll: %f \r\n", myPacket.roll);
 
+    sciPrintf("MagX: %f \r\n", myPacket.magX);
+    sciPrintf("MagY: %f \r\n", myPacket.magY);
+    sciPrintf("MagZ: %f \r\n", myPacket.magZ);
+
+    sciPrintf("AccelX: %f \r\n", myPacket.accelX);
+    sciPrintf("AccelY: %f \r\n", myPacket.accelY);
+    sciPrintf("AccelZ: %f \r\n", myPacket.accelZ);
+
+    sciPrintf("GyroX: %f \r\n", myPacket.gyroX);
+    sciPrintf("GyorY: %f \r\n", myPacket.gyroY);
+    sciPrintf("GyroZ: %f \r\n", myPacket.gyroZ);
+    
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }

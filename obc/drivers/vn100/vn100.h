@@ -20,24 +20,36 @@ typedef struct {
 } vn_ypr_packet_t;
 
 typedef struct {
-  float magnet;
+  float magX;
+  float magY;
+  float magZ;
 } vn_mag_packet_t;
 
 typedef struct {
-  float accel;
+  float accelX;
+  float accelY;
+  float accelZ;
 } vn_accel_packet_t;
 
 typedef struct {
-  float gyro;
+  float gyroX;
+  float gyroY;
+  float gyroZ;
 } vn_gyro_packet_t;
 
 typedef struct {
   float yaw;
   float pitch;
   float roll;
-  float magnet;
-  float accel;
-  float gyro;
+  float magX;
+  float magY;
+  float magZ;
+  float accelX;
+  float accelY;
+  float accelZ;
+  float gyroX;
+  float gyroY;
+  float gyroZ;
 } vn_ymr_packet_t;
 
 /**
