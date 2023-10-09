@@ -39,10 +39,10 @@ __attribute__((weak)) uint32_t rtiResetCounter(uint32_t counter) {
   RTICPUC1 = 0x00000000;
 
   // Clear current Counter 1 overflow interrupts
-  RTI_INTFLAG_REG = (0x00000001 << 18);
+  RTI_INTFLAG_REG = (1UL << 18);
 
   // Disable future Counter 1 overflow interrupts
-  RTI_CLEARINTENA_REG = (0x00000001 << 18);
+  RTI_CLEARINTENA_REG = (1UL << 18);
   return 0;
 }
 
