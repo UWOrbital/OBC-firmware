@@ -6,6 +6,7 @@ set(OBC_REV2_HAL_LIB obc-rev2-hal)
 
 set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/dabort.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/errata_SSWF021_45.c
@@ -36,7 +37,6 @@ set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_pmu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_vim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/system.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/rti_weak.c
 )
 
 set(RM46_LAUNCHPAD_NO_OPTIMIZE_SOURCES
@@ -47,6 +47,7 @@ set(RM46_LAUNCHPAD_NO_OPTIMIZE_SOURCES
 
 set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/dabort.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/errata_SSWF021_45.c
@@ -77,7 +78,6 @@ set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_pmu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_vim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/system.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/rti_weak.c
 )
 
 set(OBC_REV1_NO_OPTIMIZE_SOURCES
@@ -88,6 +88,7 @@ set(OBC_REV1_NO_OPTIMIZE_SOURCES
 
 set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/dabort.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/errata_SSWF021_45.c
@@ -118,7 +119,6 @@ set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_pmu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_vim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/system.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/rti_weak.c
 )
 
 set(OBC_REV2_NO_OPTIMIZE_SOURCES
