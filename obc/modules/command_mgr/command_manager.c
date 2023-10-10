@@ -34,7 +34,8 @@ static const cmd_info_t cmdsConfig[] = {
                                      CMD_TYPE_CRITICAL},
     [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
+    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_FRAM_DUMP] = {framDumpCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
 
 #define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))
 
