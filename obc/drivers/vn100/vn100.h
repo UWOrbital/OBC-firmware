@@ -145,14 +145,14 @@ obc_error_code_t readVN100(vn_cmd_t cmd, void *packet);
 
 /**
  * @brief pause asyncronous outputs from the VN-100
- * 
+ *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 obc_error_code_t pauseASYNC();
 
 /**
  * @brief resume asyncronous outputs from the VN-100
- * 
+ *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 obc_error_code_t resumeASYNC();
