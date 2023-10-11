@@ -25,9 +25,15 @@
  *      - You can declare a buffer of identical sections in this struct.
  *        This is useful for storing arrays that need to be individually
  *        accessible.
- * 4. Create getter/setter for the section
- *     - The getter/setter should be named getPersistent<Module> and
- *       setPersistent<Module> respectively
+ * 4. Add to the obcPersistConfig[]
+ *     - First create an ID in the obc_persist_section_id_t enum,
+ *       it should be OBC_PERSIST_SECTION_ID<MODULE_NAME>
+ *     - Then add a config struct to the obcPersistConfig[] array
+ *     - The sectionStartAddr should be the address of the section in FRAM, use the OBC_PERSIST_ADDR_OF macro
+ *       with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
+ *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro with the section name
+ *      (e.g. sizeof(obc_time_persist_t))
+ *     - The sectionCount should be 1 unless you are storing an array of identical sections
  *---------------------------------------------------------------------------*/
 
 /**
@@ -54,6 +60,17 @@ typedef struct {
 } obc_time_persist_t;
 
 /*---------------------------------------------------------------------------*/
+
+/**
+ * @brief Layout of the persistent storage
+ */
+typedef struct {
+  obc_time_persist_t obcTime;
+} obc_persist_t;
+
+#define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))
+
+/*---------------------------------------------------------------------------*/
 /* CONFIG */
 
 typedef enum {
@@ -67,7 +84,7 @@ typedef enum {
 typedef struct {
   uint32_t sectionStartAddr;  // Includes the header
   size_t sectionSize;         // Includes the header
-  size_t sectionCount;        // Put as 1 if only 1 section of this type is needed
+  size_t sectionCount;
 } obc_persist_config_t;
 
 /* Config */
@@ -77,19 +94,6 @@ const obc_persist_config_t obcPersistConfig[] = {
 };
 
 /*---------------------------------------------------------------------------*/
-
-/**
- * @brief Layout of the persistent storage
- */
-typedef struct {
-  obc_time_persist_t obcTime;
-} obc_persist_t;
-
-#define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))
-
-/*---------------------------------------------------------------------------*/
-
-/* GETTERS AND SETTERS */
 
 /**
  * @brief Get a persistent section from FRAM by the sectionId and verify its header data
@@ -140,6 +144,3 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
  */
 obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex,
                                                 const uint8_t *buff, size_t buffLen);
-
-// obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *buffer);
-// obc_error_code_t setPersistentObcTime(obc_time_persist_data_t *data);
