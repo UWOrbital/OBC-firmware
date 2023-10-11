@@ -5,4 +5,5 @@ typedef enum {
   GS_ERR_CODE_CORRUPTED_MSG,
   GS_ERR_CODE_AX25_DECODE_FAILURE,
 
+  GS_ERR_CODE_INVALID_STATE,
 } gs_error_code_t;

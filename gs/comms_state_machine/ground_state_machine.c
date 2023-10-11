@@ -19,9 +19,13 @@ static ground_state_handler* state_handlers[] = {
     [GS_STATE_AWAIT_CONN_ACK] = GSStateAwaitConnAckHandler, [GS_STATE_UPLINK_COMMANDS] = GSStateUplinkCommands,
     [GS_STATE_DOWNLINK_TELEMTRY] = GSStateDowlinkTelemtry,  [GS_STATE_SEND_DISC_ACK] = GSStateSendDiscAck};
 
-gs_error_code_t updateGroundStationState(ground_station_event_t* state, ground_station_event_t event) {
+gs_error_code_t updateGroundStationState(ground_station_state_t* state, ground_station_event_t event) {
+  ground_station_state_t nextState = GS_STATE_DISCONNECTED;
+
   switch (*state) {
     default:
-      return GS_INVALID_STATE;
+      return GS_ERR_CODE_INVALID_STATE;
   }
+
+  *state = nextState;
 }
