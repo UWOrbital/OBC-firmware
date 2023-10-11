@@ -11,6 +11,7 @@
 #include "health_collector.h"
 #include "task_stats_collector.h"
 #include "obc_sw_watchdog.h"
+#include "logger.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_state_handle.h"
@@ -73,6 +74,9 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   ASSERT(stateMgrQueueHandle != NULL);
+
+  initLoggerTask();
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
   /* Initialize critical peripherals */
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
