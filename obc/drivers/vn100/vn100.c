@@ -18,17 +18,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#define VN100_BAUDRATE 1152000U
+#define VN100_BAUDRATE 115200U
 #define MAX_COMMAND_SIZE 256U
 #define TICK_TIMEOUT portMAX_DELAY
 #define DEFAULT_OUTPUT_RATE 20U
 
-/* ---------------------------- Command Byte Sizes ----------------------------------- */
-#define YPR_PACKET_SIZE 12U
-#define MAG_PACKET_SIZE 12U
-#define ACCEL_PACKET_SIZE 12U
-#define GYRO_PACKET_SIZE 12U
-#define YMR_PACKET_SIZE 48U
+/* ---------------------------- Packet Byte Sizes ----------------------------------- */
+#define YPR_PACKET_SIZE 36U
+#define MAG_PACKET_SIZE 36U
+#define ACCEL_PACKET_SIZE 36U
+#define GYRO_PACKET_SIZE 36U
+#define YMR_PACKET_SIZE 120U
 
 /* ---------------------------- Request Commands ------------------------------------- */
 #define YPR_REQUEST_CMD "$VNRRG,8*XX\r\n"
@@ -90,8 +90,8 @@ void initVN100(void) {
   initSciMutex();
   sciSetBaudrate(UART_VN100_REG, VN100_BAUDRATE);
 
-  /* Configure the asnyc output to output Yaw Pitch Roll, Accelerometer, Angular Rates and Magnetometer readings
-     at a fixed output rate of 10Hz */
+  // /* Configure the asnyc output to output Yaw Pitch Roll, Accelerometer, Angular Rates and Magnetometer readings
+  //    at a fixed output rate of 10Hz */
   setASYNCOutputs(VN_YMR, DEFAULT_OUTPUT_RATE);
 }
 
@@ -310,34 +310,28 @@ obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate) {
 }
 
 obc_error_code_t readVN100(vn_cmd_t cmd, void* packet) {
-  unsigned char buf[MAX_COMMAND_SIZE];
-  uint32_t len;
-  uint8_t packetType;
+  unsigned char buf[MAX_COMMAND_SIZE] = {'\0'};
+  uint32_t len = 0;
 
   switch (cmd) {
     case VN_YPR: {
-      len = sizeof(YPR_PACKET_SIZE);
-      packetType = VN_YPR;
+      len = YPR_PACKET_SIZE;
       break;
     }
     case VN_MAG: {
-      len = sizeof(MAG_PACKET_SIZE);
-      packetType = VN_MAG;
+      len = MAG_PACKET_SIZE;
       break;
     }
     case VN_ACC: {
-      len = sizeof(ACCEL_PACKET_SIZE);
-      packetType = VN_ACC;
+      len = ACCEL_PACKET_SIZE;
       break;
     }
     case VN_GYR: {
-      len = sizeof(GYRO_PACKET_SIZE);
-      packetType = VN_GYR;
+      len = GYRO_PACKET_SIZE;
       break;
     }
     case VN_YMR: {
-      len = sizeof(YMR_PACKET_SIZE);
-      packetType = VN_YMR;
+      len = YMR_PACKET_SIZE;
       break;
     }
     default:
@@ -348,20 +342,20 @@ obc_error_code_t readVN100(vn_cmd_t cmd, void* packet) {
   RETURN_IF_ERROR_CODE(sciReadBytes(buf, len, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
 
   VN100_error_t error;
-  RETURN_IF_ERROR_CODE(parsePacket(packetType, buf, packet, &error));
+  RETURN_IF_ERROR_CODE(parsePacket(cmd, buf, packet, &error));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t pauseASYNC() {
   obc_error_code_t errCode;
-  unsigned char command[] = "$VNASY,0*XX";
+  unsigned char command[] = "$VNASY,0*XX\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), TICK_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t resumeASYNC() {
   obc_error_code_t errCode;
-  unsigned char command[] = "$VNASY,1*XX";
+  unsigned char command[] = "$VNASY,1*XX\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), TICK_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
