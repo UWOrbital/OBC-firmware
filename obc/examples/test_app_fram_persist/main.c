@@ -22,13 +22,13 @@ void vTask1(void *pvParameters) {
   obc_time_persist_data_t timeData = {0};
   timeData.unixTime = 0x12345678;
 
-  errCode = setPersistentObcTime(&timeData);
+  errCode = setPersistent(OBC_PERSIST_SECTION_ID_OBC_TIME, (uint8_t *)&timeData, sizeof(obc_time_persist_data_t));
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Error setting time data: %d\r\n", errCode);
   }
 
   obc_time_persist_data_t readTimeData = {0};
-  errCode = getPersistentObcTime(&readTimeData);
+  errCode = getPersistent(OBC_PERSIST_SECTION_ID_OBC_TIME, (uint8_t *)&readTimeData, sizeof(obc_time_persist_data_t));
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Error getting time data: %d\r\n", errCode);
   } else {
@@ -42,7 +42,7 @@ void vTask1(void *pvParameters) {
   uint32_t unixTimeAddr = OBC_PERSIST_ADDR_OF(obcTime.data);
   framWrite(unixTimeAddr, &corrupt, 1);
 
-  errCode = getPersistentObcTime(&readTimeData);
+  errCode = getPersistent(OBC_PERSIST_SECTION_ID_OBC_TIME, (uint8_t *)&readTimeData, sizeof(obc_time_persist_data_t));
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     if (errCode == OBC_ERR_CODE_PERSISTENT_CORRUPTED) {
       sciPrintf("FRAM is corrupt\r\n");
