@@ -6,7 +6,6 @@
 
 #include "obc_errors.h"
 
-// TODO: Change instructions
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
  * 1. Add a struct for the data to be stored in the section
@@ -27,13 +26,13 @@
  *        accessible.
  * 4. Add to the obcPersistConfig[]
  *     - First create an ID in the obc_persist_section_id_t enum,
- *       it should be OBC_PERSIST_SECTION_ID<MODULE_NAME>
+ *       it should be OBC_PERSIST_SECTION_ID_<MODULE_NAME>
  *     - Then add a config struct to the obcPersistConfig[] array
  *     - The sectionStartAddr should be the address of the section in FRAM, use the OBC_PERSIST_ADDR_OF macro
  *       with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
- *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro with the section name
- *      (e.g. sizeof(obc_time_persist_t))
- *     - The sectionCount should be 1 unless you are storing an array of identical sections
+ *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro with the section struct
+ *       name (e.g. sizeof(obc_time_persist_t))
+ *     - The sectionCount should be 1 unless, the section is storing an array of identical sections
  *---------------------------------------------------------------------------*/
 
 /**
@@ -115,7 +114,7 @@ obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, const uint8_t *buff, size_t buffLen);
+obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen);
 
 /**
  * @brief Get a persistent section from FRAM by the sectionId and subIndex and verify its header data. This function is
@@ -142,5 +141,5 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex,
-                                                const uint8_t *buff, size_t buffLen);
+obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
+                                                size_t buffLen);
