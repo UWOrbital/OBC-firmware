@@ -91,9 +91,3 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
 
   return OBC_ERR_CODE_SUCCESS;
 }
-
-// TODO: Implement this command
-obc_error_code_t framDumpCmdCallback(cmd_msg_t *cmd) {
-  obc_error_code_t errCode;
-  return OBC_ERR_CODE_SUCCESS;
-}

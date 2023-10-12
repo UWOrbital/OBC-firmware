@@ -24,6 +24,3 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd);
 
 // CMD_DOWNLINK_TELEM
 obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd);
-
-// CMD_FRAM_DUMP
-obc_error_code_t framDumpCmdCallback(cmd_msg_t *cmd);
