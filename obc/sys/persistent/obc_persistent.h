@@ -24,7 +24,7 @@
  *      - You can declare a buffer of identical sections in this struct.
  *        This is useful for storing arrays that need to be individually
  *        accessible.
- * 4. Add to the obcPersistConfig[]
+ * 4. Add to the obcPersistConfig[] in the obc_persistent.c file
  *     - First create an ID in the obc_persist_section_id_t enum,
  *       it should be OBC_PERSIST_SECTION_ID_<MODULE_NAME>
  *     - Then add a config struct to the obcPersistConfig[] array
@@ -85,12 +85,6 @@ typedef struct {
   size_t sectionSize;         // Includes the header
   size_t sectionCount;
 } obc_persist_config_t;
-
-/* Config */
-const obc_persist_config_t obcPersistConfig[] = {
-    [OBC_PERSIST_SECTION_ID_OBC_TIME] = {OBC_PERSIST_ADDR_OF(obcTime), sizeof(obc_time_persist_t), 1},
-    //  [OBC_PERSIST_SECTION_ID_ALARM_MGR] = {OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(obc_alarm_mgr_persist_t), 1}
-};
 
 /*---------------------------------------------------------------------------*/
 
