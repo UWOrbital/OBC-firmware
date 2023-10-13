@@ -30,10 +30,10 @@ typedef struct {
   uint16_t crc;
 } VN100_decoded_packet_t;
 
-static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN100_decoded_packet_t* parsedPacket);
+static obc_error_code_t __decodePacket(unsigned char* packet, VN100_decoded_packet_t* parsedPacket);
 static uint16_t calculateCRC(unsigned char data[], unsigned int length);
 
-obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
+obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   /* Parsing for error */
@@ -45,27 +45,9 @@ obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPa
 
   VN100_decoded_packet_t decodedPacket = {0};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(__decodePacket(cmd, packet, &decodedPacket));
+  RETURN_IF_ERROR_CODE(__decodePacket(packet, &decodedPacket));
 
-  switch (cmd) {
-    case VN_YPR:
-      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_ypr_packet_t));
-      break;
-    case VN_MAG:
-      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_mag_packet_t));
-      break;
-    case VN_ACC:
-      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_accel_packet_t));
-      break;
-    case VN_GYR:
-      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_gyro_packet_t));
-      break;
-    case VN_YMR:
-      memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_ymr_packet_t));
-      break;
-    default:
-      return OBC_ERR_CODE_INVALID_ARG;
-  }
+  memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_binary_packet_t));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -94,7 +76,7 @@ obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN100_decoded_packet_t* parsedPacket) {
+static obc_error_code_t __decodePacket(unsigned char* packet, VN100_decoded_packet_t* parsedPacket) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   unsigned char* payload = &packet[PAYLOAD_OFFSET];  // The main payload
@@ -103,26 +85,10 @@ static obc_error_code_t __decodePacket(vn_cmd_t cmd, unsigned char* packet, VN10
   memcpy(&decodedPacket.header, payload, sizeof(decodedPacket.header));
 
   unsigned char* data = &payload[sizeof(decodedPacket.header)];
+
   uint16_t packetSize = 0;
-  switch (cmd) {
-    case VN_YPR:
-      packetSize = sizeof(vn_ypr_packet_t);
-      break;
-    case VN_MAG:
-      packetSize = sizeof(vn_mag_packet_t);
-      break;
-    case VN_ACC:
-      packetSize = sizeof(vn_accel_packet_t);
-      break;
-    case VN_GYR:
-      packetSize = sizeof(vn_gyro_packet_t);
-      break;
-    case VN_YMR:
-      packetSize = sizeof(vn_ymr_packet_t);
-      break;
-    default:
-      return OBC_ERR_CODE_INVALID_ARG;
-  }
+  packetSize = sizeof(vn_binary_packet_t);
+  return OBC_ERR_CODE_INVALID_ARG;
 
   memcpy(&decodedPacket.data, data, packetSize);
   uint16_t checksum = calculateCRC(&data[SYNC_HEADER_LENGTH], packetSize);

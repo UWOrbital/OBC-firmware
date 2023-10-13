@@ -1,7 +1,7 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "vn100.h"
+#include "vn100_binary.h"
 
 typedef enum {
   HARD_FAULT = 1,
@@ -28,7 +28,7 @@ typedef enum {
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t parsePacket(vn_cmd_t cmd, unsigned char* packet, void* parsedPacket, VN100_error_t* error);
+obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_error_t* error);
 
 /**
  * @brief If there is an error thrown by the VN-100, parse the error message and return the corresponding error
