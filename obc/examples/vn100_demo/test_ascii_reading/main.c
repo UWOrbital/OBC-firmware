@@ -11,25 +11,22 @@
 #include <gio.h>
 #include <sci.h>
 
-#define NUM_CHARS_TO_READ 120U
-#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+#define DEFUALT_OUPUT_RATE 10
 
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
 void vTaskCode(void* pvParameters) {
-  initVN100();
+  /* Disable binary outputs */
+  stopBinaryOutputs();
+  startASCIIOutputs(VN_YMR);
+  setASCIIOutputRate(DEFUALT_OUPUT_RATE);
+
   while (1) {
-    unsigned char buffer[NUM_CHARS_TO_READ] = {'\0'};
-    obc_error_code_t error =
-        sciReadBytes(buffer, NUM_CHARS_TO_READ, UART_MUTEX_BLOCK_TIME, pdMS_TO_TICKS(1000), UART_VN100_REG);
-    if (error != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error reading from SCI! - %d\r\n", (int)error);
-      continue;
-    } else {
-      sciPrintText(buffer, NUM_CHARS_TO_READ, UART_MUTEX_BLOCK_TIME);
-      sciPrintf("\r\n");
-      continue;
+    obc_error_code_t errCode = printSerialASCII(VN_YMR);
+    
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      sciPrintf("Error Code - %d\r\n", errCode);
     }
 
     // Toggle the LED.

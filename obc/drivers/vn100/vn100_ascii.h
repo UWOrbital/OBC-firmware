@@ -15,10 +15,9 @@ typedef enum {
  * @brief Wrapper to read from the VN100 UART register, used to read the currently configured ASYNC ouputs.
  *
  * @param cmd Specify which packet type you expect to receive
- * @param buf Pointer to packet to store parsed data
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t readSerialASCII(vn_ascii_types_t cmd, unsigned char *buf);
+obc_error_code_t printSerialASCII(vn_ascii_types_t cmd);
 
 /**
  * @brief Configure which packet type will be asyncronously outputted, note that this will also change the packet header
