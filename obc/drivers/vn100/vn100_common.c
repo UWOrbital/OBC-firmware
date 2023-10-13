@@ -34,8 +34,8 @@ void initVN100(void) {
 
 obc_error_code_t VN100resetModule() {
   obc_error_code_t errCode;
-  unsigned char req[MAX_COMMAND_SIZE] = "$VNRST*4D\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(req, MAX_COMMAND_SIZE, TICK_TIMEOUT, UART_VN100_REG));
+  unsigned char buf[] = "$VNRST*4D\r\n";
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), TICK_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -57,7 +57,7 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
   // Set to XX for now, means to ignore the checksum
   const char checksum[] = "*XX\r\n";
   const char base[] = "$VNWRG,05,";
-  unsigned char req[MAX_COMMAND_SIZE];
+  unsigned char buf[MAX_COMMAND_SIZE];
   snprintf(baud, sizeof(baud), "%ld", baudrate);
 
   size_t len1 = strlen(base);
@@ -65,14 +65,14 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
   size_t len3 = strlen(checksum);
 
   // Begin appending the command
-  memcpy(req, base, len1);
-  memcpy(req + len1, baud, len2);
-  memcpy(req + len1 + len2, checksum, len3);
+  memcpy(buf, base, len1);
+  memcpy(buf + len1, baud, len2);
+  memcpy(buf + len1 + len2, checksum, len3);
 
-  size_t numBytes = sizeof(req);
-
+  size_t numBytes = len1 + len2 + len3;
+  
   // Send the message via UART
-  sciSendBytes(req, numBytes, TICK_TIMEOUT, UART_VN100_REG);
+  sciSendBytes(buf, numBytes, TICK_TIMEOUT, UART_VN100_REG);
   sciSetBaudrate(UART_VN100_REG, baudrate);
   return OBC_ERR_CODE_SUCCESS;
 }
