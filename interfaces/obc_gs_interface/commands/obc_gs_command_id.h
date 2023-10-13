@@ -37,4 +37,3 @@ typedef enum {
 #define CMD_MICRO_SD_FORMAT (uint8_t)4
 #define CMD_PING (uint8_t)5
 #define CMD_DOWNLINK_TELEM (uint8_t)6
-#define CMD_FRAM_DUMP (uint8_t)7

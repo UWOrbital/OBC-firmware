@@ -1,11 +1,10 @@
 #include "obc_persistent.h"
 
-#include "fm25v20a.h"
-#include "obc_assert.h"
-#include "obc_errors.h"
-#include "obc_logging.h"
-#include "obc_crc.h"
-#include "obc_assert.h"
+#include "fm25v20a.h"     // obc/drivers/fram
+#include "obc_assert.h"   // obc/sys/utils
+#include "obc_errors.h"   // obc/sys
+#include "obc_logging.h"  // obc/sys/logging
+#include "obc_crc.h"      // obc/sys/utils
 
 #include <string.h>
 

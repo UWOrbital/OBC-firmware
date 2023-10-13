@@ -27,13 +27,21 @@
  * 4. Add to the obcPersistConfig[] in the obc_persistent.c file
  *     - First create an ID in the obc_persist_section_id_t enum,
  *       it should be OBC_PERSIST_SECTION_ID_<MODULE_NAME>
+ *     - If the sub index is greater than 1, create a maximum sub index macro for the
+ *       section in the config section in the obc_persistent.h file
  *     - Then add a config struct to the obcPersistConfig[] array
- *     - The sectionStartAddr should be the address of the section in FRAM, use the OBC_PERSIST_ADDR_OF macro
- *       with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
- *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro with the section struct
- *       name (e.g. sizeof(obc_time_persist_t))
- *     - The sectionCount should be 1 unless, the section is storing an array of identical sections
+ *     - The sectionStartAddr should be the address of the section in FRAM, use the
+ *       OBC_PERSIST_ADDR_OF macro with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
+ *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro
+ *       with the section struct name (e.g. sizeof(obc_time_persist_t))
+ *     - The sectionCount should be 1 unless, the section is storing an array of
+ *       identical sections. In this case, use the macro that was defined in the
+ *       obc_persistent.h file
  *---------------------------------------------------------------------------*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief Header struct to be placed at the start of each persistent section
@@ -74,7 +82,7 @@ typedef struct {
 
 typedef enum {
   OBC_PERSIST_SECTION_ID_OBC_TIME = 0,
-  OBC_PERSIST_SECTION_ID_ALARM_MGR,
+  // OBC_PERSIST_SECTION_ID_ALARM_MGR,
 
   OBC_PERSIST_SECTION_ID_COUNT  // Must always be last
 } obc_persist_section_id_t;
@@ -85,6 +93,8 @@ typedef struct {
   size_t sectionSize;         // Includes the header
   size_t sectionCount;
 } obc_persist_config_t;
+
+// Maximum sub index for each section
 
 /*---------------------------------------------------------------------------*/
 
@@ -137,3 +147,7 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
  */
 obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
                                                 size_t buffLen);
+
+#ifdef __cplusplus
+}
+#endif
