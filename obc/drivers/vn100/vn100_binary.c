@@ -19,14 +19,14 @@ obc_error_code_t startBinaryOutputs(void) {
   /* Outputs: Yaw Pitch Roll, Angular rates, Accelerometer data, Magnetometer, Temp and Pressure. */
   unsigned char buf[] = "$VNWRG,75,2,80,01,0528*XX\r\n";
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), portMAX_DELAY, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf) + 1, portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t stopBinaryOutputs(void) {
   unsigned char buf[] = "$VNWRG,75,0,80,01,0528*XX\r\n";
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), portMAX_DELAY, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf) + 1, portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 

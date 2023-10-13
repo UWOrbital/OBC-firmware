@@ -27,9 +27,14 @@ static obc_error_code_t isValidBaudRate(uint32_t baudRate);
 
 void initVN100(void) {
   initSciMutex();
+
   sciSetBaudrate(UART_VN100_REG, VN100_BAUDRATE);
-  /* Configure the asnyc output to output Yaw Pitch Roll, Accelerometer, Angular Rates and Magnetometer readings
-      at a fixed output rate of 10Hz */
+
+  stopASCIIOuputs();
+
+  startBinaryOutputs();
+
+  resumeASYNC();
 }
 
 obc_error_code_t VN100resetModule() {
@@ -53,11 +58,11 @@ static obc_error_code_t isValidBaudRate(uint32_t baudRate) {
 obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
   isValidBaudRate(baudrate);
 
-  char baud[7];
+  char baud[7] = {'\0'};
   // Set to XX for now, means to ignore the checksum
   const char checksum[] = "*XX\r\n";
   const char base[] = "$VNWRG,05,";
-  unsigned char buf[MAX_COMMAND_SIZE];
+  unsigned char buf[MAX_COMMAND_SIZE] = {'\0'};
   snprintf(baud, sizeof(baud), "%ld", baudrate);
 
   size_t len1 = strlen(base);
@@ -70,9 +75,9 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
   memcpy(buf + len1 + len2, checksum, len3);
 
   size_t numBytes = len1 + len2 + len3;
-  
-  // Send the message via UART
-  sciSendBytes(buf, numBytes, TICK_TIMEOUT, UART_VN100_REG);
+
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, TICK_TIMEOUT, UART_VN100_REG));
   sciSetBaudrate(UART_VN100_REG, baudrate);
   return OBC_ERR_CODE_SUCCESS;
 }

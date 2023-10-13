@@ -6,6 +6,7 @@
 #include "obc_board_config.h"
 #include "obc_logging.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 
 #include "stdint.h"
 #include "stdio.h"
@@ -33,7 +34,7 @@
 #define ASYNC_YMR "$VNWRG,06,14*XX\r\n"
 
 #define TICK_TIMEOUT portMAX_DELAY
-#define MAX_COMMAND_SIZE 120U
+#define MAX_COMMAND_SIZE 256U
 #define DEFAULT_OUTPUT_RATE 10U
 
 static obc_error_code_t isValidOutputRate(uint32_t outputRate);
@@ -49,38 +50,35 @@ static obc_error_code_t isValidOutputRate(uint32_t outputRate) {
   return OBC_ERR_CODE_INVALID_ARG;
 }
 
-obc_error_code_t readSerialASCII(vn_ascii_types_t cmd, unsigned char* buf) {
-  uint32_t len = 0;
-
+obc_error_code_t printSerialASCII(vn_ascii_types_t cmd) {
+  size_t len = 0;
   switch (cmd) {
-    case VN_YPR: {
+    case VN_YPR:
       len = YPR_PACKET_SIZE;
       break;
-    }
-    case VN_MAG: {
+    case VN_MAG:
       len = MAG_PACKET_SIZE;
       break;
-    }
-    case VN_ACC: {
+    case VN_ACC:
       len = ACCEL_PACKET_SIZE;
       break;
-    }
-    case VN_GYR: {
+    case VN_GYR:
       len = GYRO_PACKET_SIZE;
       break;
-    }
-    case VN_YMR: {
+    case VN_YMR:
       len = YMR_PACKET_SIZE;
       break;
-    }
     default:
       return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciReadBytes(buf, len, TICK_TIMEOUT, pdMS_TO_TICKS(10), UART_VN100_REG));
-
-  return OBC_ERR_CODE_SUCCESS;
+  unsigned char buf[MAX_COMMAND_SIZE] = {'\0'};
+  obc_error_code_t errCode = sciReadBytes(buf, len, TICK_TIMEOUT, pdMS_TO_TICKS(1000), UART_VN100_REG);
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    sciPrintText(buf, len, portMAX_DELAY);
+    sciPrintf("\r\n");
+  }
+  return errCode;
 }
 
 obc_error_code_t setASCIIOutputRate(uint32_t outputRate) {
@@ -103,7 +101,7 @@ obc_error_code_t setASCIIOutputRate(uint32_t outputRate) {
   memcpy(req + len1, freq, len2);
   memcpy(req + len1 + len2, checksum, len3);
 
-  size_t numBytes = sizeof(req);
+  size_t numBytes = len1 + len2 + len3 + 1;
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciSendBytes(req, numBytes, TICK_TIMEOUT, UART_VN100_REG));
@@ -116,27 +114,27 @@ obc_error_code_t startASCIIOutputs(vn_ascii_types_t cmd) {
   switch (cmd) {
     case VN_YPR: {
       memcpy(asyncCommand, ASYNC_YPR, sizeof(ASYNC_YPR));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_MAG: {
       memcpy(asyncCommand, ASYNC_MAG, sizeof(ASYNC_MAG));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_ACC: {
       memcpy(asyncCommand, ASYNC_ACCEL, sizeof(ASYNC_ACCEL));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_GYR: {
       memcpy(asyncCommand, ASYNC_GYRO, sizeof(ASYNC_GYRO));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_YMR: {
       memcpy(asyncCommand, ASYNC_YMR, sizeof(ASYNC_YMR));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
       break;
     }
     default:
@@ -148,6 +146,6 @@ obc_error_code_t startASCIIOutputs(vn_ascii_types_t cmd) {
 obc_error_code_t stopASCIIOuputs(void) {
   unsigned char buf[] = "$VNWRG,06,0*XX\r\n";
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), portMAX_DELAY, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf) + 1, portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
