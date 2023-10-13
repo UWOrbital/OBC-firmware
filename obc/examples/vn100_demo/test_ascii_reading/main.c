@@ -1,6 +1,7 @@
 #include "obc_print.h"
 #include "obc_sci_io.h"
 #include "obc_board_config.h"
+#include "vn100_common.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -17,6 +18,7 @@ static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
 void vTaskCode(void* pvParameters) {
+  initVN100();
   while (1) {
     unsigned char buffer[NUM_CHARS_TO_READ] = {'\0'};
     obc_error_code_t error =
@@ -47,7 +49,6 @@ int main(void) {
 
   // Initialize bus mutexes
   initSciPrint();
-  sciSetBaudrate(UART_VN100_REG, 115200);
   // Assume all tasks are created correctly
   xTaskCreateStatic(vTaskCode, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);
 
