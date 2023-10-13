@@ -1,16 +1,17 @@
 #include "obc_persistent.h"
 
-#include "fm25v20a.h"     // obc/drivers/fram
-#include "obc_assert.h"   // obc/sys/utils
-#include "obc_errors.h"   // obc/sys
-#include "obc_logging.h"  // obc/sys/logging
-#include "obc_crc.h"      // obc/sys/utils
+#include "fm25v20a.h"
+#include "obc_assert.h"
+#include "obc_errors.h"
+#include "obc_logging.h"
+#include "obc_crc.h"
 
 #include <string.h>
 
 /* Config */
 static const obc_persist_config_t obcPersistConfig[] = {
-    [OBC_PERSIST_SECTION_ID_OBC_TIME] = {OBC_PERSIST_ADDR_OF(obcTime), sizeof(obc_time_persist_t), 1},
+    [OBC_PERSIST_SECTION_ID_OBC_TIME] = {OBC_PERSIST_ADDR_OF(obcTime), sizeof(obc_time_persist_t),
+                                         sizeof(obc_time_persist_data_t), 1},
     //  [OBC_PERSIST_SECTION_ID_ALARM_MGR] = {OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(obc_alarm_mgr_persist_t), 1}
 };
 
@@ -51,7 +52,7 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
   }
 
   // Buffer will only hold the data not the header
-  if (buffLen < config->sectionSize - sizeof(obc_persist_section_header_t)) {
+  if (buffLen < config->dataSize) {
     return OBC_ERR_CODE_BUFF_TOO_SMALL;
   }
   uint32_t sectionStartAddrBySubIndex = config->sectionStartAddr + subIndex * config->sectionSize;
@@ -64,13 +65,14 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
     return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
   }
 
+  RETURN_IF_ERROR_CODE(framRead(sectionStartAddrBySubIndex + sizeof(obc_persist_section_header_t), buff, buffLen));
+
   // Compute CRC32 of data and check it
   uint32_t crc32 = computeCrc32(0, buff, buffLen);
   if (header.crc32 != crc32) {
     return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
   }
 
-  RETURN_IF_ERROR_CODE(framRead(sectionStartAddrBySubIndex + sizeof(obc_persist_section_header_t), buff, buffLen));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -92,7 +94,7 @@ obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t section
   }
 
   // Buffer will only hold the data not the header
-  if (buffLen < config->sectionSize - sizeof(obc_persist_section_header_t)) {
+  if (buffLen < config->dataSize) {
     return OBC_ERR_CODE_BUFF_TOO_SMALL;
   }
 
@@ -109,9 +111,7 @@ obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t section
   return OBC_ERR_CODE_SUCCESS;
 }
 
-/*---------------------------------------------------------------------*/
-/*------------------------- Private functions -------------------------*/
-/*---------------------------------------------------------------------*/
+/* Private functions */
 
 static const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t sectionId) {
   if (sectionId >= OBC_PERSIST_SECTION_ID_COUNT) return NULL;

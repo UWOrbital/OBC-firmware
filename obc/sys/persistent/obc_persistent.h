@@ -34,6 +34,8 @@
  *       OBC_PERSIST_ADDR_OF macro with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
  *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro
  *       with the section struct name (e.g. sizeof(obc_time_persist_t))
+ *     - The dataSize should be the size of the data in the section, use the sizeof() macro
+ *       with the data struct name (e.g. sizeof(obc_time_persist_data_t))
  *     - The sectionCount should be 1 unless, the section is storing an array of
  *       identical sections. In this case, use the macro that was defined in the
  *       obc_persistent.h file
@@ -91,6 +93,7 @@ typedef enum {
 typedef struct {
   uint32_t sectionStartAddr;  // Includes the header
   size_t sectionSize;         // Includes the header
+  size_t dataSize;            // Size of the data in the section (Does not include the header)
   size_t sectionCount;
 } obc_persist_config_t;
 
