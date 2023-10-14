@@ -13,7 +13,7 @@
 #include "obc_reliance_fs.h"
 #include "telemetry_manager.h"
 #include "cc1120_txrx.h"
-#include "cc1120_spi.h"
+#include "cc1120.h"
 #include "rffm6404.h"
 #include "obc_privilege.h"
 
