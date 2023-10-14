@@ -27,6 +27,7 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/comms_manager.c
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/downlink_encoder.c
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/uplink_decoder.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/cc1120_txrx.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/eps_mgr/eps_manager.c
 

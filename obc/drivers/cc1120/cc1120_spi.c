@@ -2,6 +2,7 @@
 #include "cc1120_defs.h"
 #include "cc1120_mcu.h"
 #include "obc_logging.h"
+#include "obc_board_config.h"
 
 #define READ_BIT 1 << 7
 #define BURST_BIT 1 << 6
@@ -9,6 +10,56 @@
 #define CHIP_READY_MASK 1 << 7
 #define CHIP_READY 0
 #define CHIP_STATE 0b1110000
+
+static register_setting_t cc1120SettingsStd[] = {
+    // Set GPIO 0 to RXFIFO_THR_PKT
+    {CC1120_REGS_IOCFG0, 0x01U},
+    // Set GPIO 1 to HighZ
+    {CC1120_REGS_IOCFG1, 0x30U},
+    // Set GPIO 2 to PKT_SYNC_RXTX
+    {CC1120_REGS_IOCFG2, 0x06U},
+    // Set GPIO 3 to TXFIFO_THR_PKT
+    {CC1120_REGS_IOCFG3, 0x03U},
+    // Set the sync word as 16 bits and allow for < 2 bit error on sync word
+    {CC1120_REGS_SYNC_CFG0, 0x09U},
+    // Set sync word qualifier value threshold similar to the one talked about for preamble in section 6.8
+    {CC1120_REGS_SYNC_CFG1, 0x08U},
+    // Set first 8 bits of the sync word to 0x55U (arbitrary value)
+    {CC1120_REGS_SYNC0, 0x55U},
+    // Set next 8 bits of the sync word to 0x57U (arbitrary value)
+    {CC1120_REGS_SYNC1, 0x57U},
+    // Set cc1120 to switch to FSTXON state after a packet is received
+    {CC1120_REGS_RFEND_CFG1, 0x1F},
+    {CC1120_REGS_DEVIATION_M, 0x3AU},
+    {CC1120_REGS_MODCFG_DEV_E, 0x0AU},
+    {CC1120_REGS_DCFILT_CFG, 0x1CU},
+    // Set the preamble as 4 bytes of 10101010
+    {CC1120_REGS_PREAMBLE_CFG1, 0x18U},
+    // enable preamble and set the error threshold
+    {CC1120_REGS_PREAMBLE_CFG0, 0x2AU},
+    {CC1120_REGS_IQIC, 0xC6U},
+    {CC1120_REGS_CHAN_BW, 0x08U},
+    {CC1120_REGS_MDMCFG0, 0x05U},
+    {CC1120_REGS_SYMBOL_RATE2, 0x73U},
+    {CC1120_REGS_AGC_REF, 0x20U},
+    {CC1120_REGS_AGC_CS_THR, 0x19U},
+    {CC1120_REGS_AGC_CFG2, 0x20U},
+    {CC1120_REGS_AGC_CFG1, 0xA9U},
+    {CC1120_REGS_AGC_CFG0, 0xCFU},
+    {CC1120_REGS_FIFO_CFG, TXRX_INTERRUPT_THRESHOLD},
+    {CC1120_REGS_FS_CFG, 0x14U},
+    {CC1120_REGS_PKT_CFG0, 0x00U},
+    {CC1120_REGS_PA_CFG0, 0x7DU},
+    {CC1120_REGS_PKT_LEN, 0x0CU}};
+
+static register_setting_t cc1120SettingsExt[] = {
+    {CC1120_REGS_EXT_IF_MIX_CFG, 0x00U}, {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U}, {CC1120_REGS_EXT_FREQ2, 0x6CU},
+    {CC1120_REGS_EXT_FREQ1, 0x7AU},      {CC1120_REGS_EXT_FREQ0, 0xE1U},       {CC1120_REGS_EXT_FS_DIG1, 0x00U},
+    {CC1120_REGS_EXT_FS_DIG0, 0x5FU},    {CC1120_REGS_EXT_FS_CAL1, 0x40U},     {CC1120_REGS_EXT_FS_CAL0, 0x0EU},
+    {CC1120_REGS_EXT_FS_DIVTWO, 0x03U},  {CC1120_REGS_EXT_FS_DSM0, 0x33U},     {CC1120_REGS_EXT_FS_DVC0, 0x17U},
+    {CC1120_REGS_EXT_FS_PFD, 0x50U},     {CC1120_REGS_EXT_FS_PRE, 0x6EU},      {CC1120_REGS_EXT_FS_REG_DIV_CML, 0x14U},
+    {CC1120_REGS_EXT_FS_SPARE, 0xACU},   {CC1120_REGS_EXT_FS_VCO0, 0xB4U},     {CC1120_REGS_EXT_XOSC5, 0x0EU},
+    {CC1120_REGS_EXT_XOSC1, 0x03U},      {CC1120_REGS_EXT_TOC_CFG, 0x89U}};
 
 /**
  * @brief - Reads from consecutive registers from the CC1120.
@@ -313,4 +364,82 @@ obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
   }
 
   return OBC_ERR_CODE_CC1120_INVALID_STATUS_BYTE;
+}
+
+/**
+ * @brief Gets the number of bytes queued in the TX FIFO
+ *
+ * @param numBytes - A pointer to an 8-bit integer to store the number of bytes in
+ * @return obc_error_code_t - Whether or not the registe read was successful
+ */
+obc_error_code_t cc1120GetBytesInTxFifo(uint8_t *numBytes) {
+  if (numBytes == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_TXBYTES, numBytes, 1));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Gets the state of the CC1120 from the MARCSTATE register
+ *
+ * @param stateNum - A pointer to an 8-bit integer to store the state in
+ * @return obc_error_code_t - Whether or not the register read was successful
+ */
+obc_error_code_t cc1120GetState(cc1120_state_t *stateNum) {
+  if (stateNum == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_MARCSTATE, stateNum, 1));
+  *stateNum &= 0b11111;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Resets CC1120 & initializes transmit mode
+ *
+ * @return obc_error_code_t - Whether or not the setup was a success
+ */
+obc_error_code_t cc1120Init(void) {
+  obc_error_code_t errCode;
+
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRES));
+
+  // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
+  // see chapter 3.4 in the datasheet for more info
+  gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
+  gioDisableNotification(gioPORTB, CC1120_TX_THR_PKT_hetPORT1_PIN);
+  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
+
+  for (uint8_t i = 0; i < sizeof(cc1120SettingsStd) / sizeof(register_setting_t); i++) {
+    RETURN_IF_ERROR_CODE(cc1120WriteSpi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1));
+  }
+
+  // enable interrupts again now that the gpio signals are set
+  gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
+  gioEnableNotification(gioPORTB, CC1120_TX_THR_PKT_hetPORT1_PIN);
+  gioEnableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
+  for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++) {
+    RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
+  }
+
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Gets the number of bytes queued in the RX FIFO
+ *
+ * @param numBytes - A pointer to an 8-bit integer to store the number of bytes in
+ * @return obc_error_code_t - Whether or not the register read was successful
+ */
+obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
+  if (numBytes == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1));
+  return OBC_ERR_CODE_SUCCESS;
 }

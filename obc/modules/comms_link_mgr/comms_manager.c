@@ -13,6 +13,7 @@
 #include "obc_reliance_fs.h"
 #include "telemetry_manager.h"
 #include "cc1120_txrx.h"
+#include "cc1120_spi.h"
 #include "rffm6404.h"
 #include "obc_privilege.h"
 
@@ -278,6 +279,9 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
+  initAllCc1120TxRxSemaphores();
+  LOG_IF_ERROR_CODE(cc1120Init());
+
   while (1) {
     comms_event_t queueMsg;
 
@@ -359,7 +363,7 @@ static obc_error_code_t handleAwaitingConnState(void) {
 #else
   // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
   RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
-  LOG_IF_ERROR_CODE(cc1120Receive());
+  LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
   return OBC_ERR_CODE_SUCCESS;
@@ -442,7 +446,7 @@ static obc_error_code_t handleAwaitingAckDiscState(void) {
 #else
   // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
   RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
-  LOG_IF_ERROR_CODE(cc1120Receive());
+  LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
   return OBC_ERR_CODE_SUCCESS;
@@ -469,7 +473,7 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
 #else
   // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
   RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
-  LOG_IF_ERROR_CODE(cc1120Receive());
+  LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
   return OBC_ERR_CODE_SUCCESS;
@@ -493,7 +497,7 @@ static obc_error_code_t handleUplinkingState(void) {
   }
 #else
   // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
-  LOG_IF_ERROR_CODE(cc1120Receive());
+  LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
   comms_event_t uplinkFinishedEvent = {.eventID = COMMS_EVENT_UPLINK_FINISHED};
