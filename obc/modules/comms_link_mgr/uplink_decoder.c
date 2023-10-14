@@ -4,7 +4,7 @@
 #include "obc_gs_fec.h"
 #include "cc1120_txrx.h"
 #include "cc1120_defs.h"
-#include "cc1120_spi.h"
+#include "cc1120.h"
 #include "obc_gs_command_unpack.h"
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"

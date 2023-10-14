@@ -1,7 +1,7 @@
 #include "cc1120_txrx.h"
 #include "obc_logging.h"
 #include "cc1120_mcu.h"
-#include "cc1120_spi.h"
+#include "cc1120.h"
 #include "cc1120_defs.h"
 #include "obc_math.h"
 #include "obc_board_config.h"

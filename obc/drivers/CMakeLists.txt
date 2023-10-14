@@ -33,7 +33,7 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_reg.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_mcu.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_spi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/ds3232/ds3232_mz.c
 
