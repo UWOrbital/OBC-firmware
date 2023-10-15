@@ -33,6 +33,8 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/drivers/ds3232
     ${CMAKE_SOURCE_DIR}/obc/drivers/arducam
     ${CMAKE_SOURCE_DIR}/obc/drivers/fram
+    ${CMAKE_SOURCE_DIR}/obc/reliance_edge/projects/freertos_rm46/host/ # redconf.h
+    ${CMAKE_SOURCE_DIR}/obc/reliance_edge/include # redconf.h
 )
 
 target_link_libraries(${TEST_BINARY}

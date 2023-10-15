@@ -50,7 +50,7 @@ extern "C" {
  *
  */
 typedef struct {
-  size_t len;
+  uint32_t len;
   uint32_t crc32;
 } obc_persist_section_header_t;
 
@@ -92,9 +92,9 @@ typedef enum {
 //? Might want to change the config related to include/excluding headers in the section size/addr
 typedef struct {
   uint32_t sectionStartAddr;  // Includes the header
-  size_t sectionSize;         // Includes the header
-  size_t dataSize;            // Size of the data in the section (Does not include the header)
-  size_t sectionCount;
+  uint32_t sectionSize;       // Includes the header
+  uint32_t dataSize;          // Size of the data in the section (Does not include the header)
+  uint32_t sectionCount;
 } obc_persist_config_t;
 
 // Maximum sub index for each section
@@ -110,7 +110,7 @@ typedef struct {
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen);
+obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, uint32_t buffLen);
 
 /**
  * @brief Set a persistent section in FRAM by the sectionId and write its header data
@@ -121,7 +121,7 @@ obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen);
+obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, uint32_t buffLen);
 
 /**
  * @brief Get a persistent section from FRAM by the sectionId and subIndex and verify its header data. This function is
@@ -134,8 +134,8 @@ obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, uint8_
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
-                                                size_t buffLen);
+obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, uint32_t subIndex, uint8_t *buff,
+                                                uint32_t buffLen);
 
 /**
  * @brief Set a persistent section in FRAM by the sectionId and subIndex and write its header data. This function is
@@ -148,8 +148,8 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
-                                                size_t buffLen);
+obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, uint32_t subIndex, uint8_t *buff,
+                                                uint32_t buffLen);
 
 #ifdef __cplusplus
 }

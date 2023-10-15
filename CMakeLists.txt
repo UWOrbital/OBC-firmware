@@ -12,6 +12,7 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES GS)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Test)
     include(${CMAKE_SOURCE_DIR}/cmake/fetch_googletest.cmake)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_linux_gcc.cmake)
+    # add_compile_options(-m32)  # Force 32 bit compilation
 else()
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
 endif()

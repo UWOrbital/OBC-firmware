@@ -10,9 +10,10 @@
 
 /* Config */
 static const obc_persist_config_t obcPersistConfig[] = {
-    [OBC_PERSIST_SECTION_ID_OBC_TIME] = {OBC_PERSIST_ADDR_OF(obcTime), sizeof(obc_time_persist_t),
-                                         sizeof(obc_time_persist_data_t), 1},
-    //  [OBC_PERSIST_SECTION_ID_ALARM_MGR] = {OBC_PERSIST_ADDR_OF(alarmMgr), sizeof(obc_alarm_mgr_persist_t), 1}
+    [OBC_PERSIST_SECTION_ID_OBC_TIME] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(obcTime),
+                                         .sectionSize = sizeof(obc_time_persist_t),
+                                         .dataSize = sizeof(obc_time_persist_data_t),
+                                         .sectionCount = 1},
 };
 
 STATIC_ASSERT(sizeof(obc_persist_t) <= FRAM_MAX_ADDRESS, "obc_persist_t exceeds available FRAM space");
@@ -27,16 +28,16 @@ static const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t 
 
 /* Public function definitions */
 
-obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen) {
+obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, uint32_t buffLen) {
   return getPersistentSectionBySubIndex(sectionId, 0, buff, buffLen);
 }
 
-obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen) {
+obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, uint32_t buffLen) {
   return setPersistentSectionBySubIndex(sectionId, 0, buff, buffLen);
 }
 
-obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
-                                                size_t buffLen) {
+obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, uint32_t subIndex, uint8_t *buff,
+                                                uint32_t buffLen) {
   obc_error_code_t errCode;
   if (buff == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -76,8 +77,8 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
-                                                size_t buffLen) {
+obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, uint32_t subIndex, uint8_t *buff,
+                                                uint32_t buffLen) {
   obc_error_code_t errCode;
 
   if (buff == NULL) {
