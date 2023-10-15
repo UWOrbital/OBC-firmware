@@ -4,16 +4,7 @@
 #include "obc_logging.h"
 #include "obc_sci_io.h"
 #include "vn100_common.h"
-#include "vn100_ascii.h"
-#include "vn100_binary.h"
 
-#include <FreeRTOS.h>
-#include <FreeRTOSConfig.h>
-#include <os_portmacro.h>
-#include <os_semphr.h>
-#include <os_task.h>
-
-#include <sci.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,6 +21,8 @@ void initVN100(void) {
 
   sciSetBaudrate(UART_VN100_REG, VN100_BAUDRATE);
 
+  VN100SetBaudrate(VN100_BAUDRATE);
+
   stopASCIIOuputs();
 
   startBinaryOutputs();
@@ -40,7 +33,7 @@ void initVN100(void) {
 obc_error_code_t VN100resetModule() {
   obc_error_code_t errCode;
   unsigned char buf[] = "$VNRST*4D\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), TICK_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf) + 1, TICK_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -92,6 +85,6 @@ obc_error_code_t pauseASYNC() {
 obc_error_code_t resumeASYNC() {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,1*XX\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), TICK_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command) + 1, TICK_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }

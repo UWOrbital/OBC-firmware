@@ -33,7 +33,7 @@ obc_error_code_t stopBinaryOutputs(void) {
 obc_error_code_t readBinaryOutputs(void* parsedPacket) {
   unsigned char buf[MAX_PACKET_SIZE] = {'\0'};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciReadBytes(buf, BINARY_PACKET_SIZE, portMAX_DELAY, pdMS_TO_TICKS(10), UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciReadBytes(buf, BINARY_PACKET_SIZE, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_VN100_REG));
 
   VN100_error_t vnError;
   RETURN_IF_ERROR_CODE(parsePacket(buf, parsedPacket, &vnError));

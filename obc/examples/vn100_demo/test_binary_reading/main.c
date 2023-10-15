@@ -15,7 +15,6 @@ static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
 void vTaskCode(void* pvParameters) {
-  // Move this back to main after bug with sciReadBytes & dabort_ is fixed
   initVN100();
 
   obc_error_code_t errCode;
@@ -24,7 +23,7 @@ void vTaskCode(void* pvParameters) {
   sciPrintf("Beginning demo \r\n");
 
   while (1) {
-    errCode = readVN100(VN_YMR, &packet);
+    errCode = readBinaryOutputs(&packet);
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       sciPrintf("Error reading from VN100 - %d\r\n", errCode);
