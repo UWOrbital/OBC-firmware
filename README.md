@@ -1,6 +1,6 @@
 # OBC-firmware
 
-This repository holds all the code written by UW Orbital's firmware team.
+This repository holds all the code written by UW Orbital's firmware team. This includes: OBC firmware/embedded software, ground station software, and all testing infrastructure.
 
 ## Table of Contents
 
@@ -15,25 +15,75 @@ This repository holds all the code written by UW Orbital's firmware team.
 
 This section will explain how to set up the repo, and how to build, flash, and debug the code.
 
+### Getting the Source
+
+1. Check if you have Git installed on your system by running `git --version` in a terminal. If it returns some version number, then it's installed. If not, follow the installation steps listed [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). If you're on Windows, it's highly recommended that you also install Git Bash and use that instead of the command prompt or Powershell.
+2. To clone this project, run the following command in whatever directory you want to store the repository in:
+```
+git clone git@github.com:UWOrbital/OBC-firmware.git
+```
+
 ### Dependencies
 
+#### HALCoGen
+
+Download HALCoGen here: https://www.ti.com/tool/HALCOGEN#downloads. This will be used for configuring the HAL. Unfortunately, the tool is only available on Windows. If you're on a non-Windows system, you may be able to set HALCoGen up in a Windows VM or someone else on the team can make HAL changes for you. We don't have to modify the HAL very often anyways.
+
+#### Code Composer Studio (CCS)
+
+Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO. This will be used for debugging.
+
+#### Uniflash
+
+Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be used for flashing the RM46.
+
+#### Docker Development Environment
+
+It's highly recommended that you set up your development environment using Docker and VSCode, especially if you're new to software development. If you follow the instructions in this section, you can skip the **Windows/MacOS/Linux** sections. If you know what you're doing, feel free to set up your dev environment however you like using the instructions in the **Windows/MacOS/Linux** sections for reference. However, there may be a lack of support from other leads/members who don't use the same setup.
+
+##### Docker Desktop Installation & Configuration
+1. Install Docker Desktop App from [this link](https://www.docker.com/products/docker-desktop/)
+    - You can choose to sign-up/create an account but it's not required. You can also skip the "Tell-us about what you do" section.
+2. Open Docker Desktop and click on ```Dev Environments``` from the side-panel
+    - Click on create on ```Create +``` in the top-right corner.
+3. Setting up the repo
+    - Name the Environment as desired
+    - For the ```Choose source``` option, select ```Local directory``` and then select the `OBC-firmware` repository folder that you cloned earlier.
+    - Click ```Continue```
+    - Once the container is created, you should be able to open the container in VSCode. If you have VSCode, you can press ```Open in VSCode```. If you don't have VSCode, you can get it here: https://code.visualstudio.com/download
+
+##### Installing Dependencies
+Once you open the docker instance, open a terminal in VSCode and run the following commands. The dollar sign in your terminal should be prefaced by something like this: ```root ➜ /com.docker.devenvironments.code (main ✗)```.
+
+This command opens a terminal in VSCode: ```Ctrl + Shift + ` ```
+
+Enter these commands in your terminal:
+```
+sudo apt-get update
+sudo apt-get install -y python3-pip build-essential cmake
+pip3 install -r requirements.txt
+pre-commit install
+```
+
+##### Testing The Container Build
+
+To test whether your Dev environment has been set up correctly run the commands in the **Building** section. The OBC firmware and test builds should pass. All tests should succeed.
+
+**Note**: The docker container uses pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary.
+
+**Tip**: Use the ```git config --list``` command on the VsCode terminal to confirm your git info.
+
 #### **Windows**
-1. Download HALCoGen: https://www.ti.com/tool/HALCOGEN#downloads
-    - This will be used for configuring the HAL. Unfortunately, the tool is only available on Windows.
-2. Download UniFlash: https://www.ti.com/tool/UNIFLASH#downloads
-    - This will be used for flashing the RM46.
+Skip this section if you set up a Docker development environment.
 
-3. Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO
-    - This will be used for debugging.
+1. Download WSL2: https://learn.microsoft.com/en-us/windows/wsl/install
 
-4. Download WSL2: https://learn.microsoft.com/en-us/windows/wsl/install
-
-5. In WSL2, run the following:
+2. In WSL2, run the following:
     ```sh
     sudo apt-get update
     sudo apt-get install build-essential
     ```
-6. Choose the environment where you'll be running `git commit` (either WSL2 or the host). In that environment, install Python 3.8+ and pip if they're not already installed. Then, run the following in the OBC-firmware directory:
+3. Choose the environment where you'll be running `git commit` (either WSL2 or the host). In that environment, install Python 3.8+ and pip if they're not already installed. Then, run the following in the OBC-firmware directory:
     ```sh
     pip install -r requirements.txt # You may want to create a Python virtual env before this
     pre-commit install
@@ -46,6 +96,8 @@ This section will explain how to set up the repo, and how to build, flash, and d
 You'll be using WSL2 primarily for building the firmware and running tests.
 
 #### **MacOS**
+Skip this section if you set up a Docker development environment.
+
 Install required build tools (CMake, Make, gcc)
 ```sh
 brew install cmake
@@ -59,86 +111,19 @@ pip install -r requirements.txt # You may want to create a Python virtual env be
 pre-commit install
 ```
 
-Download UniFlash: https://www.ti.com/tool/UNIFLASH#downloads
-
-Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO
 #### **Linux**
+Skip this section if you set up a Docker development environment.
+
 Install required build tools (CMake, Make, gcc)
 ```sh
 sudo apt-get update
 sudo apt-get install build-essential
 ```
-Download UniFlash: https://www.ti.com/tool/UNIFLASH#downloads
-
-Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO
 
 Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
 ```sh
 pip install -r requirements.txt # You may want to create a Python virtual env before this
 pre-commit install
-```
-#### **Docker Workflow Setup**
-
-#### Installation & Configuration
-1. Install Docker Desktop App from [this link](https://www.docker.com/products/docker-desktop/)
-    - You can choose to sign-up/create an account but for the purpose of this tutorial, we will skip and continue without signing up
-    - Same thing with the "Tell-us about what you do" section
-2. Click on ```Dev Environments``` from the side-panel
-    - Click on create on ```create``` in the top-right corner.
-3. Setting up the repo
-    - Name the Environment as desired
-    - For the ```choose source``` option, select ```existing repo``` and add "```https://github.com/UWOrbital/OBC-firmware.git```"  as the link.
-    - Choose your preferred/installed IDE, we suggest ```Visual Studio Code```
-    - Once the container is created, click the ```play``` button to start the container session in Vscode
-
-#### Installing Dependcies & ToolChains
-Once you open the docker instance, open a terminal in VSCODE and run the following commands ```Ctrl + '```
-
-```
-sudo apt-get update
-sudo apt-get install python3-pip
-pip3 install -r requirements.txt
-pre-commit install
-```
-
-
-```
-sudo apt-get update
-sudo apt-get install build-essential
-sudo apt-get install cmake
-```
-#### Testing The Container Build
-
-To test whether your Dev environment has been set up correctly run the following commands from your top level directory.
-
-The dollar-sign in your terminal should be prefaced by something like this : ```root ➜ /com.docker.devenvironments.code (main ✗)```
-
-```
-# Building the firmware
-mkdir build_arm && cd build_arm
-cmake .. -DCMAKE_BUILD_TYPE=OBC
-cmake --build .
-```
-
-```
-#Testing the builds
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Test
-cmake --build .
-ctest --verbose
-```
-
-If the development environment is setup correctly, ```2 of 2 (100%)``` tests should pass.
-
-**Note**: The docker container used pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary.
-
-**Tip**: Use the ```git config --list``` command on the VsCode terminal to confirm your git info.
-
-### Getting the Source
-
-To clone this project and pull all required submodules, run the following:
-```
-git clone git@github.com:UWOrbital/OBC-firmware.git
 ```
 
 ### Building
@@ -153,7 +138,7 @@ cmake --build .
 Take a look at `cmake/fw_build_options.cmake` to see the available build options.
 
 #### **Ground Station**
-From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows.
+From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows, so
 ```
 mkdir build_gs && cd build_gs
 cmake .. -DCMAKE_BUILD_TYPE=GS
@@ -236,8 +221,8 @@ We use `#pragma once` instead of include guards.
     -   Ex:
         ```c
         typedef struct {
-          int a;
-          int b;
+          uint32_t a;
+          uint32_t b;
         } struct_name_t
         ```
 -   Import statements should be grouped in the following order:
@@ -262,6 +247,6 @@ Some of these rules don't apply in certain cases. Use your better judgement. To 
 **[Back to top](#table-of-contents)**
 
 ## Authors
-This repository was developed by the members of UW Orbital, the University of Waterloo's CubeSat design team.
+This codebase was developed by the members of UW Orbital, the University of Waterloo's CubeSat design team.
 
 **[Back to top](#table-of-contents)**
