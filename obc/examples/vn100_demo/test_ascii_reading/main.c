@@ -24,7 +24,7 @@ void vTaskCode(void* pvParameters) {
 
   while (1) {
     obc_error_code_t errCode = printSerialASCII(VN_YMR);
-    
+
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       sciPrintf("Error Code - %d\r\n", errCode);
     }
