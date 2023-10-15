@@ -10,15 +10,28 @@
 
 #define MAX_DOWNLINK_TELEM_BUFFER_SIZE 1U
 
-#define CC1120_MUTEX_TIMEOUT pdMS_TO_TICKS(300000)
-
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.
  *
  * Enum containing all possible event IDs passed to the comms event queue.
  */
-typedef enum { BEGIN_UPLINK, BEGIN_DOWNLINK } comms_event_id_t;
+typedef enum {
+  COMMS_EVENT_BEGIN_UPLINK,
+  COMMS_EVENT_CONN_RECEIVED,
+  COMMS_EVENT_ACK_SENT,
+  COMMS_EVENT_UPLINK_FINISHED,
+  COMMS_EVENT_DOWNLINK_FINISHED,
+  COMMS_EVENT_DISC_SENT,
+  COMMS_EVENT_DISC_RECEIVED,
+  COMMS_EVENT_CONTINUE_UPLINK,
+  COMMS_EVENT_ACK_RECEIVED,
+  COMMS_EVENT_ENTER_EMERG,
+  COMMS_EVENT_EMERG_INITIALIZED,
+  COMMS_EVENT_CONN_SENT,
+  COMMS_EVENT_NO_ACK,
+  COMMS_EVENT_ERROR
+} comms_event_id_t;
 
 /**
  * @struct	comms_event_t
@@ -36,6 +49,20 @@ typedef struct {
   transmit_event_id_t eventID;
   packed_ax25_i_frame_t ax25Pkt;
 } transmit_event_t;
+
+typedef enum {
+  COMMS_STATE_DISCONNECTED = 0,
+  COMMS_STATE_AWAITING_CONN,
+  COMMS_STATE_SENDING_CONN,
+  COMMS_STATE_SENDING_DISC,
+  COMMS_STATE_SENDING_ACK,
+  COMMS_STATE_AWAITING_ACK_DISC,
+  COMMS_STATE_AWAITING_ACK_CONN,
+  COMMS_STATE_UPLINKING,
+  COMMS_STATE_DOWNLINKING,
+  COMMS_STATE_ENTERING_EMERGENCY,
+  COMMS_STATE_EMERGENCY_UPLINK,
+} comms_state_t;
 
 /**
  * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)

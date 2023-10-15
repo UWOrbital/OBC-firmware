@@ -14,7 +14,7 @@ obc_error_code_t changeStateOBC(uint8_t newState) {
 
   currStateOBC = newState;
   telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
-
   RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
+
   return OBC_ERR_CODE_SUCCESS;
 }
