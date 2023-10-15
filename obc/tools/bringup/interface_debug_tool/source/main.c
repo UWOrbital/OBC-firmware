@@ -1,5 +1,6 @@
 #include "obc_spi_io.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_i2c_io.h"
 #include "obc_logging.h"
 
@@ -63,7 +64,7 @@ int main(void) {
   i2cInit();
   gioInit();
 
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
   initI2CMutex();
 

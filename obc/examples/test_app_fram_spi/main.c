@@ -1,7 +1,6 @@
-#include "obc_sci_io.h"
-
 #include "obc_spi_io.h"
-#include "obc_sci_io.h"
+#include "obc_print.h"
+#include "fram.h"
 #include "fm25v20a.h"
 
 #include <gio.h>
@@ -16,7 +15,9 @@
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
+
 void vTask1(void *pvParameters) {
+
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};
 
@@ -103,7 +104,7 @@ int main(void) {
   spiInit();
 
   // Initialize the SCI mutex.
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
 
   sciPrintf("Starting FRAM Demo\r\n");
