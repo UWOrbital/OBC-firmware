@@ -25,7 +25,7 @@
 #define TASK_ALARM_MGR_NAME "alarm_handler"
 #define TASK_HEALTH_COLLECTOR_NAME "health_collector"
 #define TASK_STATS_COLLECTOR_NAME "stats_collector"
-
+#define TASK_LOGGER_NAME "logger"
 // Task stack sizes in words
 #define TASK_STATE_MGR_STACK_SIZE 1024U
 #define TASK_TELEMETRY_MGR_STACK_SIZE 1024U
@@ -40,6 +40,7 @@
 #define TASK_ALARM_MGR_STACK_SIZE 512U
 #define TASK_HEALTH_COLLECTOR_STACK_SIZE 256U
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
+#define TASK_LOGGER_STACK_SIZE 512U
 
 // All task priorities must be in [0, OBC_SCHEDULER_MAX_PRIORITY]
 #define OBC_SCHEDULER_MAX_PRIORITY configMAX_PRIORITIES - 1U
@@ -58,6 +59,7 @@
 #define TASK_STATE_MGR_PRIORITY 5U
 #define TASK_TIMEKEEPER_PRIORITY 6U
 #define TASK_SW_WATCHDOG_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
+#define TASK_LOGGER_PRIORITY 5U
 
 /* TYPEDEFS */
 typedef struct {
@@ -84,6 +86,7 @@ extern void obcTaskFunctionSwWatchdog(void *params);
 extern void obcTaskFunctionAlarmMgr(void *params);
 extern void obcTaskFunctionHealthCollector(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
+extern void obcTaskFunctionLogger(void *params);
 
 /* PRIVATE FUNCTION PROTOTYPES */
 static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID);
@@ -124,6 +127,9 @@ static StaticTask_t obcTaskBufferAlarmMgr;
 
 static StackType_t obcTaskStackHealthCollector[TASK_HEALTH_COLLECTOR_STACK_SIZE];
 static StaticTask_t obcTaskBufferHealthCollector;
+
+static StackType_t obcTaskStackLogger[TASK_LOGGER_STACK_SIZE];
+static StaticTask_t obcTaskBufferLogger;
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
 static StackType_t obcTaskStackTaskStatsCollector[TASK_STATS_COLLECTOR_STACK_SIZE];
@@ -238,6 +244,15 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .stackSize = TASK_HEALTH_COLLECTOR_STACK_SIZE,
             .priority = TASK_HEALTH_COLLECTOR_PRIORITY,
             .taskFunc = obcTaskFunctionHealthCollector,
+        },
+    [OBC_SCHEDULER_CONFIG_ID_LOGGER] =
+        {
+            .taskName = TASK_LOGGER_NAME,
+            .taskStack = obcTaskStackLogger,
+            .taskBuffer = &obcTaskBufferLogger,
+            .stackSize = TASK_LOGGER_STACK_SIZE,
+            .priority = TASK_LOGGER_PRIORITY,
+            .taskFunc = obcTaskFunctionLogger,
         },
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
