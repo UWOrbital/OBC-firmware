@@ -138,7 +138,7 @@ cmake --build .
 Take a look at `cmake/fw_build_options.cmake` to see the available build options.
 
 #### **Ground Station**
-From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows, so
+From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows.
 ```
 mkdir build_gs && cd build_gs
 cmake .. -DCMAKE_BUILD_TYPE=GS
