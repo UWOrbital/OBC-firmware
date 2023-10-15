@@ -18,6 +18,8 @@
 #define COMMS_MAX_UPLINK_BYTES \
   1000U  // Maximum amount of bytes we will currently be uplinking at a time (should be updated in the future)
 
+#define TIME_FOR_SINGLE_CHUNK_MS \
+  (((TXRX_INTERRUPT_THRESHOLD - 1) * 8) / 9600)  // number of bits divided by cc1120 baudrate
 #define TX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
 #define RX_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(100)
 #define TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(5000)
@@ -333,14 +335,20 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
   // If we do not stop receiving data, continue looping until COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple
   // of TXRX_INTERRUPT_THRESHOLD bytes are received
   uint8_t rxFifoReadCycles;  // number of times we receive TXRX_INTERRUPT_THRESHOLD bytes and read them out
-  for (rxFifoReadCycles = 0; rxFifoReadCycles < (recvBufLen + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD;
-       ++rxFifoReadCycles) {
+  for (rxFifoReadCycles = 0; rxFifoReadCycles < recvBufLen / TXRX_INTERRUPT_THRESHOLD; ++rxFifoReadCycles) {
     // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than rxTimeout
     // before exiting this loop since that means we are no longer transmitting
     if (xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS) {
       break;
     }
-    RETURN_IF_ERROR_CODE(cc1120ReadFifo(recvBuf, TXRX_INTERRUPT_THRESHOLD));
+    RETURN_IF_ERROR_CODE(
+        cc1120ReadFifo(recvBuf + rxFifoReadCycles * TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
+  }
+
+  if (rxFifoReadCycles == 0) {
+    // if we never entered the for loop due to recvLen < TXRX_INTERRUPT_THRESHOLD, then block to allow cc1120 to receive
+    // up to 99 bytes before we check the number of bytes
+    vTaskDelay(pdMS_TO_TICKS(TIME_FOR_SINGLE_CHUNK_MS));
   }
 
   uint8_t numBytesInRxFifo = 0;
@@ -354,7 +362,7 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
 
   if (numBytesInRxFifo != 0) {
     // if there are still bytes in the RX FIFO, read them out
-    RETURN_IF_ERROR_CODE(cc1120ReadFifo(recvBuf, numBytesInRxFifo));
+    RETURN_IF_ERROR_CODE(cc1120ReadFifo(recvBuf + rxFifoReadCycles * TXRX_INTERRUPT_THRESHOLD, numBytesInRxFifo));
   }
 
   return OBC_ERR_CODE_SUCCESS;

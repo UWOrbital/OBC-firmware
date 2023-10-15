@@ -11,7 +11,7 @@
 #define CHIP_READY 0
 #define CHIP_STATE 0b1110000
 
-static register_setting_t cc1120SettingsStd[] = {
+static const register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 0 to RXFIFO_THR_PKT
     {CC1120_REGS_IOCFG0, 0x01U},
     // Set GPIO 1 to HighZ
@@ -52,7 +52,7 @@ static register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_PA_CFG0, 0x7DU},
     {CC1120_REGS_PKT_LEN, 0x0CU}};
 
-static register_setting_t cc1120SettingsExt[] = {
+static const register_setting_t cc1120SettingsExt[] = {
     {CC1120_REGS_EXT_IF_MIX_CFG, 0x00U}, {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U}, {CC1120_REGS_EXT_FREQ2, 0x6CU},
     {CC1120_REGS_EXT_FREQ1, 0x7AU},      {CC1120_REGS_EXT_FREQ0, 0xE1U},       {CC1120_REGS_EXT_FS_DIG1, 0x00U},
     {CC1120_REGS_EXT_FS_DIG0, 0x5FU},    {CC1120_REGS_EXT_FS_CAL1, 0x40U},     {CC1120_REGS_EXT_FS_CAL0, 0x0EU},
@@ -144,7 +144,7 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len)
  * @return OBC_ERR_CODE_SUCCESS - If the write was successful.
  * @return An error code - If the register is not valid, or the errCode byte is invalid.
  */
-obc_error_code_t cc1120WriteSpi(uint8_t addr, uint8_t data[], uint8_t len) {
+obc_error_code_t cc1120WriteSpi(uint8_t addr, const uint8_t data[], uint8_t len) {
   obc_error_code_t errCode;
 
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
@@ -174,7 +174,7 @@ obc_error_code_t cc1120WriteSpi(uint8_t addr, uint8_t data[], uint8_t len) {
  * @return OBC_ERR_CODE_SUCCESS - If the write was successful.
  * @return An error code - If the register is not valid, or the errCode byte is invalid.
  */
-obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len) {
+obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, const uint8_t data[], uint8_t len) {
   obc_error_code_t errCode;
 
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;

@@ -68,7 +68,7 @@ obc_error_code_t cc1120ReadExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len)
  * @return OBC_ERR_CODE_SUCCESS - If the write was successful.
  * @return An error code - If the register is not valid, or the status byte is invalid.
  */
-obc_error_code_t cc1120WriteSpi(uint8_t addr, uint8_t data[], uint8_t len);
+obc_error_code_t cc1120WriteSpi(uint8_t addr, const uint8_t data[], uint8_t len);
 
 /**
  * @brief - Writes to consecutive extended address space registers on the CC1120.
@@ -79,7 +79,7 @@ obc_error_code_t cc1120WriteSpi(uint8_t addr, uint8_t data[], uint8_t len);
  * @return OBC_ERR_CODE_SUCCESS - If the write was successful.
  * @return An error code - If the register is not valid, or the status byte is invalid.
  */
-obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, uint8_t data[], uint8_t len);
+obc_error_code_t cc1120WriteExtAddrSpi(uint8_t addr, const uint8_t data[], uint8_t len);
 
 /**
  * @brief Calls a strobe command on the CC1120.
