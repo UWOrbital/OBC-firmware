@@ -39,7 +39,7 @@ Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be
 
 #### Docker Development Environment
 
-It's highly recommended that you set up your development environment using Docker and VSCode, especially if you're new to software development. If you follow the instructions in this section, you can skip the **Windows/MacOS/Linux** sections. If you know what you're doing, feel free to set up your dev environment however you like using the instructions in the **Windows/MacOS/Linux** sections for reference. However, there may be a lack of support from other leads/members who don't use the same setup.
+It's **highly recommended** that you set up your development environment using Docker and VSCode, especially if you're new to software development. If you follow the instructions in this section, you can skip the **Windows/MacOS/Linux** sections. If you know what you're doing, feel free to set up your dev environment however you like using the instructions in the **Windows/MacOS/Linux** sections for reference. However, there may be a lack of support from other leads/members who don't use the same setup.
 
 ##### Docker Desktop Installation & Configuration
 1. Install Docker Desktop App from [this link](https://www.docker.com/products/docker-desktop/)
