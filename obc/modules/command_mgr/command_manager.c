@@ -1,7 +1,7 @@
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 #include "command_callbacks.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_errors.h"
 #include "obc_time.h"
 #include "obc_logging.h"
@@ -15,10 +15,6 @@
 
 #define COMMAND_QUEUE_LENGTH 25UL
 #define COMMAND_QUEUE_ITEM_SIZE sizeof(cmd_msg_t)
-
-static TaskHandle_t cmdManagerTaskHandle;
-static StaticTask_t cmdManagerTaskBuffer;
-static StackType_t cmdManagerTaskStack[CMD_MANAGER_STACK_SIZE];
 
 static QueueHandle_t commandQueueHandle;
 static StaticQueue_t commandQueue;
@@ -44,18 +40,7 @@ static const cmd_info_t cmdsConfig[] = {
 
 STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
-/**
- * @brief Task that manages the command queue and executes commands
- */
-static void commandManagerTask(void *pvParameters);
-
 void initCommandManager(void) {
-  ASSERT((cmdManagerTaskStack != NULL) && (&cmdManagerTaskBuffer != NULL));
-  if (cmdManagerTaskHandle == NULL) {
-    cmdManagerTaskHandle = xTaskCreateStatic(commandManagerTask, CMD_MANAGER_NAME, CMD_MANAGER_STACK_SIZE, NULL,
-                                             CMD_MANAGER_PRIORITY, cmdManagerTaskStack, &cmdManagerTaskBuffer);
-  }
-
   ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
   if (commandQueueHandle == NULL) {
     commandQueueHandle =
@@ -79,7 +64,7 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-static void commandManagerTask(void *pvParameters) {
+void obcTaskFunctionCommandMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   // Used to track whether a safety-critical command is currently being executed
@@ -89,8 +74,6 @@ static void commandManagerTask(void *pvParameters) {
   while (1) {
     cmd_msg_t cmd;
     if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
-      LOG_DEBUG("Received command %u", cmd.id);
-
       // Check if the ID is a valid index
       if (cmd.id >= CMDS_CONFIG_SIZE) {
         LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
@@ -116,7 +99,7 @@ static void commandManagerTask(void *pvParameters) {
         // TODO: Make this persistent across resets
         if (!cmdProgressTracker[cmd.id]) {
           // Begin the two-step process of executing a safety-critical command
-          LOG_DEBUG("Process started to execute safety-critical command %u", cmd.id);
+          LOG_DEBUG("Process started to execute safety-critical command");
           cmdProgressTracker[cmd.id] = true;
           continue;
         }
