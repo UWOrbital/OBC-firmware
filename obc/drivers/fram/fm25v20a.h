@@ -49,7 +49,7 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
 /**
  * @brief Write nBytes starting from given address.
  * @param addr Starting address of write.
- * @param buffer Buffer of data to write.
+ * @param data Buffer of data to write.
  * @param nBytes Size of buffer.
  * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
  */

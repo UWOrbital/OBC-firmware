@@ -16,15 +16,30 @@ obc_error_code_t testFRAM_ID(void){
 
     obc_error_code_t errCode;
     uint8_t id[9] = {0};
-    
+
     errCode = framReadID(&id, sizeof(uint8_t) * 9);
 
     if (errCode != OBC_ERR_CODE_SUCCESS){
         return errCode;
-    }
+    }    
     else if (id[0] != 0x7F || id[1] != 0x7F || id[2] != 0x7F || id[3] != 0x7F || id[4] != 0x7F || id[5] != 0x7F || id[6] != 0xC2 || id[7] != 0x25 || id[8] != 0x08){
         return OBC_ERR_CODE_INVALID_STATE;  // Check ID
     }
-
+    
     return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t testFRAM_statusReg(void){
+
+    initFRAM(); // DO I EVEN NEED THSI LOL
+
+    uint8_t status;
+    obc_error_code_t errCode;
+    
+    errCode = framReadStatusReg(&status);
+
+    if (errCode != OBC_ERR_CODE_SUCCESS){
+        return errCode;
+    }
+
 }
