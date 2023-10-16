@@ -66,6 +66,9 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   ASSERT(stateMgrQueueHandle != NULL);
 
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+
   /* Initialize critical peripherals */
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
   LOG_IF_ERROR_CODE(initTime());         // RTC

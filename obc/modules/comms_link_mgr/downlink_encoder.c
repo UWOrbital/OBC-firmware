@@ -247,7 +247,7 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
     closeTelemetryFile(*fd);
     return errCode;
   }
-  LOG_DEBUG("Sending telemetry file with size: %lu", fileSize);
+  LOG_DEBUG("Sending telemetry file");
 
   // Print telemetry file name
   char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
@@ -257,8 +257,6 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
     closeTelemetryFile(*fd);
     return errCode;
   }
-
-  LOG_DEBUG("Sending telemetry file with name: %s", fileName);
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -274,8 +272,6 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset) {
   obc_error_code_t errCode;
-
-  LOG_DEBUG("Sending telemetry: %u", singleTelem->id);
 
   uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized version of the current piece of telemetry
   uint32_t packedSingleTelemSize = 0;                  // Size of the packed single telemetry
