@@ -57,7 +57,7 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
  * @param nBytes Size of buffer.
  * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
  */
-obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes);
+obc_error_code_t framWrite(uint32_t addr, const uint8_t *data, size_t nBytes);
 
 /**
  * @brief Send sleep command to FRAM

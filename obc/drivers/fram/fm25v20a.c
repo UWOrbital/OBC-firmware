@@ -258,7 +258,7 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
   return errCode;
 }
 
-obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes) {
+obc_error_code_t framWrite(uint32_t addr, const uint8_t *data, size_t nBytes) {
   obc_error_code_t errCode;
   if (data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
