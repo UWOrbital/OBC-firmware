@@ -1,5 +1,6 @@
 #pragma once
 
-obc_error_code_t testFRAM_ID(void);
-
-obc_error_code_t testFRAM_statusReg(void);
+/**
+ * @brief Tests FRAM read/write functionality and verifies ID
+ */
+void testFRAM(void);
