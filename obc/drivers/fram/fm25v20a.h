@@ -33,7 +33,7 @@ obc_error_code_t framWriteStatusReg(uint8_t status);
  * @param addr Starting address of read.
  * @param buffer Buffer to hold read data.
  * @param nBytes Size of buffer.
- * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
 
@@ -42,7 +42,7 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
  * @param addr Starting address of read.
  * @param buffer Buffer to hold read data.
  * @param nBytes Size of buffer.
- * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
 
@@ -51,19 +51,19 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
  * @param addr Starting address of write.
  * @param data Buffer of data to write.
  * @param nBytes Size of buffer.
- * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes);
 
 /**
  * @brief Send sleep command to FRAM
- * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framSleep(void);
 
 /**
  * @brief Wake FRAM from sleep
- * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framWakeUp(void);
 
@@ -71,6 +71,6 @@ obc_error_code_t framWakeUp(void);
  * @brief Read FRAM manufacture ID.
  * @param id Buffer to hold read ID.
  * @param nBytes Size of Buffer. ID is max 9 bytes long
- * @return Error code. OBC_ERR_CODE_SUCCESS of successful.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framReadID(uint8_t *id, size_t nBytes);
