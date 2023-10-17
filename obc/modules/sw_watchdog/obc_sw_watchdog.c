@@ -4,7 +4,6 @@
 #include "obc_scheduler_config.h"
 #include "obc_logging.h"
 
-#include <os_event_groups.h>
 #include <system.h>
 #include <reg_rti.h>
 #include <rti.h>
@@ -34,35 +33,16 @@
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73, "RTI frequency is not 73.333 MHz");
 STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
 
-static StackType_t watchdogStack[SW_WATCHDOG_STACK_SIZE];
-static StaticTask_t watchdogTaskBuffer;
-static TaskHandle_t watchdogTaskHandle;
-
-// Enable event flag and checks each crital task's status
-static EventGroupHandle_t watchdogEventHandle;
-static StaticEventGroup_t watchdogEventGroup;
-
-static watchdog_task_t taskArray[4];
-
-/**
- * @brief Software watchdog task
- */
-static void swWatcdogFeeder(void* pvParameters);
+extern task_watchdog_config_t watchdogTaskConfigArray[];
 
 /**
  * @brief Feed the software watchdog
  */
 static void feedSwWatchdog(void);
 
-void initSwWatchdog(void) {
-  ASSERT((watchdogStack != NULL) && (&watchdogTaskBuffer != NULL));
-  ASSERT(&watchdogEventGroup != NULL);
-  watchdogEventHandle = xEventGroupCreateStatic(&watchdogEventGroup);
-  watchdogTaskHandle = xTaskCreateStatic(swWatcdogFeeder, SW_WATCHDOG_NAME, SW_WATCHDOG_STACK_SIZE, NULL,
-                                         SW_WATCHDOG_PRIORITY, watchdogStack, &watchdogTaskBuffer);
-}
+void initSwWatchdog(void) {}
 
-static void swWatcdogFeeder(void* pvParameters) {
+void obcTaskFunctionSwWatchdog(void *params) {
   // Set up the watchdog
   BaseType_t xRunningPrivileged = prvRaisePrivilege();
 
@@ -75,27 +55,22 @@ static void swWatcdogFeeder(void* pvParameters) {
 
   while (1) {
     bool allTasksCheckedIn = true;
-    for (uint8_t i = 0; i < (sizeof(taskArray) / sizeof(taskArray[0])); i++) {
-      TickType_t currentTick = xTaskGetTickCount();
+    TickType_t currentTick = xTaskGetTickCount();
+    for (uint8_t i = 0; i < OBC_SCHEDULER_TASK_COUNT - 1; i++) {
       TickType_t tickDiff =
-          currentTick - taskArray[i].taskLastCheckIn;  // Calculate the tick between last checkin and current tick
-      bool checkInStat = result & (1 << taskArray[i].taskNum);  // check if the task has checked in
+          currentTick -
+          watchdogTaskConfigArray[i].taskLastCheckIn;  // Calculate the tick between last checkin and current tick
 
       // The task does not respond after timeout period
-      if (tickDiff >= taskArray[i].taskTimeOut) {
+      if (tickDiff >= watchdogTaskConfigArray[i].taskTimeout) {
         allTasksCheckedIn = false;
         break;
-      }
-
-      // The task has checked in
-      if (checkInStat) {
-        taskArray[i].taskLastCheckIn = currentTick;
       }
     }
     if (allTasksCheckedIn) {
       feedSwWatchdog();
     } else {
-      LOG_ERROR(OBC_ERR_CODE_TASK_NOT_CHECKED_IN);
+      LOG_ERROR_CODE(OBC_ERR_CODE_TASK_NOT_CHECKED_IN);
     }
     vTaskDelay(FEEDING_PERIOD);
   }
@@ -108,12 +83,6 @@ static void feedSwWatchdog(void) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 }
 
-void taskRegister(uint32_t taskNum, TickType_t taskTimeOut) {
-  watchdog_task_t task;
-  task.taskNum = taskNum;
-  task.taskLastCheckIn = 0;
-  task.taskTimeOut = taskTimeOut;
-  taskArray[taskNum] = task;
+void taskCheckIn(obc_scheduler_config_id_t taskNum) {
+  watchdogTaskConfigArray[taskNum].taskLastCheckIn = xTaskGetTickCount();
 }
-
-void taskCheckIn(uint32_t taskNum) { xEventGroupSetBits(watchdogTaskHandle, (1 << taskNum)); }

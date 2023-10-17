@@ -269,6 +269,64 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
 
 };
 
+task_watchdog_config_t watchdogTaskConfigArray[] = {
+    [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
+        {
+            .taskTimeout = portMAX_DELAY,
+        },
+    [OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(36000000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(36000000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_MGR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(36000000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(36000000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(36000000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_EPS_MGR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(5000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(86000000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(3000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(86000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(86000),
+        },
+    [OBC_SCHEDULER_CONFIG_ID_LOGGER] =
+        {
+            .taskTimeout = portMAX_DELAY,
+        },
+
+#if ENABLE_TASK_STATS_COLLECTOR == 1
+    [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
+        {
+            .taskTimeout = pdMS_TO_TICKS(25000),
+        },
+#endif
+};
+
 STATIC_ASSERT_EQ(sizeof(obcSchedulerConfig) / sizeof(obc_scheduler_config_t), OBC_SCHEDULER_TASK_COUNT);
 
 /* PUBLIC FUNCTION DEFINITIONS */
