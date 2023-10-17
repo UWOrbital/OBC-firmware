@@ -69,7 +69,7 @@ uint32_t Fapi_BlockProgram(uint32_t flashAddress, uint32_t dataAddress, uint32_t
   register uint32_t src = dataAddress;
   register uint32_t dst = flashAddress;
 
-  uint32_t bytes = numBytes ? numBytes < 16 : 16;
+  uint32_t bytes = numBytes < 16 ? numBytes : 16;
 
   if (!bankInitialized) {
     return 1;
