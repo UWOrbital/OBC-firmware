@@ -11,10 +11,12 @@
 #include <sys_common.h>
 #include <sci.h>
 #include <spi.h>
-#include <system_error>
 
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
+
+static StaticTask_t taskBuffer2;
+static StackType_t taskStack2[1024];
 
 void vTask1(void *pvParameters) {
   obc_error_code_t errCode;
@@ -108,7 +110,7 @@ int main(void) {
 
   xTaskCreateStatic(vTask1, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);
 
-  xTaskCreateStatic(vTask2, "AlarmPersistTest", 1024, NULL, 1, taskStack, &taskBuffer);
+  xTaskCreateStatic(vTask2, "AlarmPersist", 1024, NULL, 1, taskStack2, &taskBuffer2);
 
   vTaskStartScheduler();
 
