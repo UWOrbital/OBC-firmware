@@ -2,6 +2,7 @@
 #include "obc_assert.h"
 #include "obc_privilege.h"
 #include "obc_task_config.h"
+#include "obc_logging.h"
 
 #include <os_event_groups.h>
 #include <system.h>
@@ -73,10 +74,7 @@ static void swWatcdogFeeder(void* pvParameters) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 
   while (1) {
-    // Check if all tasks has checked in
-    uint32_t taskCheckinTrue = 0x1111;
-    uint32_t result = xEventGroupWaitBits(watchdogEventHandle, taskCheckinTrue, pdTRUE, pdTRUE, FEEDING_PERIOD);
-
+    bool allTasksCheckedIn = true;
     for (uint8_t i = 0; i < (sizeof(taskArray) / sizeof(taskArray[0])); i++) {
       TickType_t currentTick = xTaskGetTickCount();
       TickType_t tickDiff =
@@ -84,7 +82,8 @@ static void swWatcdogFeeder(void* pvParameters) {
       bool checkInStat = result & (1 << taskArray[i].taskNum);  // check if the task has checked in
 
       // The task does not respond after timeout period
-      if (!(taskArray[i].taskTimeOut < tickDiff)) {
+      if (tickDiff >= taskArray[i].taskTimeOut) {
+        allTasksCheckedIn = false;
         break;
       }
 
@@ -92,8 +91,13 @@ static void swWatcdogFeeder(void* pvParameters) {
       if (checkInStat) {
         taskArray[i].taskLastCheckIn = currentTick;
       }
-      feedSwWatchdog();
     }
+    if (allTasksCheckedIn) {
+      feedSwWatchdog();
+    } else {
+      LOG_ERROR(OBC_ERR_CODE_TASK_NOT_CHECKED_IN);
+    }
+    vTaskDelay(FEEDING_PERIOD);
   }
 }
 
