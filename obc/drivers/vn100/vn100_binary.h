@@ -7,15 +7,15 @@ typedef struct {
   float yaw;
   float pitch;
   float roll;
-  float magX;
-  float magY;
-  float magZ;
+  float gyroX;
+  float gyroY;
+  float gyroZ; 
   float accelX;
   float accelY;
   float accelZ;
-  float gyroX;
-  float gyroY;
-  float gyroZ;
+  float magX;
+  float magY;
+  float magZ;
   float temp;
   float pres;
 } vn_binary_packet_t;
@@ -27,6 +27,8 @@ typedef struct {
  *  Angular Rates
  *  Acceleration
  *  Magnetometer
+ *  Temperature
+ *  Pressure
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
