@@ -1,6 +1,7 @@
 #include "obc_logging.h"
 #include "supervisor.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
 #include "sys_dma.h"
@@ -55,7 +56,7 @@ int main(void) {
   dmaEnable();
   initDmaSpiSemaphores();
 
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
 
   _enable_interrupt_();
@@ -80,9 +81,9 @@ void task(void *pvParameters) {
   deassertChipSelect(spiPORT1, 0);
 
   char str[10] = {'\0'};
-  char spaceStr[] = "            "
+  char spaceStr[] = "            ";
 
-      for (uint8_t i = 0; i < D_SIZE; ++i) {
+  for (uint8_t i = 0; i < D_SIZE; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
     sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }

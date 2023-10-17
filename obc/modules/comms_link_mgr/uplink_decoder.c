@@ -8,7 +8,7 @@
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"
 #include "command_manager.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "comms_manager.h"
 
@@ -19,6 +19,7 @@
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
+#include <os_timer.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -31,18 +32,17 @@
 #define DECODE_DATA_QUEUE_ITEM_SIZE sizeof(uint8_t)
 #define DECODE_DATA_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define DECODE_DATA_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#define AX25_TIMEOUT_MILLISECONDS 330000
+#define TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS 500
+#define TIMER_NAME "flag_timeout"
 
-// Decode Data task
-static TaskHandle_t decodeTaskHandle = NULL;
-static StaticTask_t decodeTaskBuffer;
-static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
+static bool isStartFlagReceived;
 
 // Decode Data Queue
 static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
-static void vDecodeTask(void *pvParameters);
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
@@ -77,16 +77,16 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
 }
 
 /**
+ * @brief flag timeout callback that sets isFlagReceived to false due to a timeout
+ */
+static void flagTimeoutCallback() { isStartFlagReceived = false; }
+
+/**
  * @brief initializes the decode data pipeline task
  *
  * @return void
  */
 void initDecodeTask(void) {
-  ASSERT((decodeTaskStack != NULL) && (&decodeTaskBuffer != NULL));
-  if (decodeTaskHandle == NULL) {
-    decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_UPLINK_DECODE_NAME, COMMS_UPLINK_DECODE_STACK_SIZE, NULL,
-                                         COMMS_UPLINK_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
-  }
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
     decodeDataQueueHandle = xQueueCreateStatic(DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,
@@ -94,14 +94,10 @@ void initDecodeTask(void) {
   }
 }
 
-/**
- * @brief takes a received packet from a vRecvTask and completely decodes it and sends the commands to command manager
- *
- * @param pvParamaters NULL
- *
- * @return void
- */
-static void vDecodeTask(void *pvParameters) {
+void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
+  StaticTimer_t timerBuffer = {0};
+  TimerHandle_t flagTimeoutTimer = xTimerCreateStatic(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdFALSE,
+                                                      (void *)0, flagTimeoutCallback, &timerBuffer);
   obc_error_code_t errCode;
   uint8_t byte = 0;
 
@@ -137,15 +133,18 @@ static void vDecodeTask(void *pvParameters) {
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
           axDataIndex = 0;
-          startFlagReceived = false;
+          axData.data[axDataIndex++] = AX25_FLAG;
         } else {
+          if (!startFlagReceived) {
+            if (xTimerStart(flagTimeoutTimer, pdMS_TO_TICKS(TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS)) != pdPASS) {
+              LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_FULL);
+            }
+          }
           startFlagReceived = true;
           axDataIndex = 1;
         }
-
         continue;
       }
-
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
       }

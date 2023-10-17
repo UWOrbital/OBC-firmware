@@ -1,7 +1,7 @@
 #include "obc_sw_watchdog.h"
 #include "obc_assert.h"
 #include "obc_privilege.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_logging.h"
 
 #include <os_event_groups.h>
