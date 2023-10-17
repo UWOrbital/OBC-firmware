@@ -1,4 +1,4 @@
-name: OBC Build
+name: OBC Build Release
 on: [push, pull_request]
 
 jobs:
