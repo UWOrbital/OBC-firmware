@@ -27,7 +27,8 @@ static spiDAT1_t framSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = F
 
 #define FRAM_WAKE_BUSY_WAIT \
   99000U  // Assume RM46 clk is 220 MHz, value for wait loop should give ~450us delay (datasheet pg.15)
-#define FRAM_WAKE_TIME_MS 1U  // Not woken up often, so ok to use minimum task delay of 1 ms
+#define FRAM_WAKE_TIME_MS \
+  2U  // Not woken up often, so ok to use minimum task delay of 2 ms, value expirementally determined to be 2 ¯\_(ツ)_/¯
 static bool isAsleep = false;
 
 typedef enum cmd {
@@ -126,10 +127,16 @@ obc_error_code_t framReadStatusReg(uint8_t *status) {
   if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(spiReceiveByte(FRAM_spiREG, &framSPIDataFmt, status));
   }
-
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  obc_error_code_t prev_errCode = errCode;
+  if (errCode != OBC_ERR_CODE_FRAM_IS_ASLEEP) {
+    // Do not deassert since never asserted in the first place
+    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  // Reset overwritten error code
+  errCode = prev_errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
-
+  // Reset overwritten error code
+  errCode = prev_errCode;
   return errCode;
 }
 
@@ -166,8 +173,16 @@ obc_error_code_t framWriteStatusReg(uint8_t status) {
     LOG_IF_ERROR_CODE(spiTransmitByte(FRAM_spiREG, &framSPIDataFmt, status));
   }
 
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  obc_error_code_t prev_errCode = errCode;
+  if (errCode != OBC_ERR_CODE_FRAM_IS_ASLEEP) {
+    // Do not deassert since never asserted in the first place
+    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  // Reset overwritten error code
+  errCode = prev_errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
+  // Reset overwritten error code
+  errCode = prev_errCode;
   return errCode;
 }
 
@@ -212,8 +227,16 @@ obc_error_code_t framFastRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
     }
   }
 
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  obc_error_code_t prev_errCode = errCode;
+  if (errCode != OBC_ERR_CODE_FRAM_IS_ASLEEP) {
+    // Do not deassert since never asserted in the first place
+    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  // Reset overwritten error code
+  errCode = prev_errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
+  // Reset overwritten error code
+  errCode = prev_errCode;
   return errCode;
 }
 
@@ -253,8 +276,16 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes) {
     }
   }
 
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  obc_error_code_t prev_errCode = errCode;
+  if (errCode != OBC_ERR_CODE_FRAM_IS_ASLEEP) {
+    // Do not deassert since never asserted in the first place
+    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  // Reset overwritten error code
+  errCode = prev_errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
+  // Reset overwritten error code
+  errCode = prev_errCode;
   return errCode;
 }
 
@@ -304,8 +335,16 @@ obc_error_code_t framWrite(uint32_t addr, const uint8_t *data, size_t nBytes) {
     }
   }
 
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  obc_error_code_t prev_errCode = errCode;
+  if (errCode != OBC_ERR_CODE_FRAM_IS_ASLEEP) {
+    // Do not deassert since never asserted in the first place
+    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  // Reset overwritten error code
+  errCode = prev_errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
+  // Reset overwritten error code
+  errCode = prev_errCode;
   return errCode;
 }
 
@@ -314,6 +353,7 @@ obc_error_code_t framSleep(void) {
   // Recursive take mutex
   RETURN_IF_ERROR_CODE(spiTakeBusMutex(FRAM_spiREG));
   if (isAsleep) {
+    RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
     return OBC_ERR_CODE_SUCCESS;
   }
   if (errCode == OBC_ERR_CODE_SUCCESS) {
@@ -375,7 +415,15 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
     }
   }
 
-  RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  obc_error_code_t prev_errCode = errCode;
+  if (errCode != OBC_ERR_CODE_FRAM_IS_ASLEEP) {
+    // Do not deassert since never asserted in the first place
+    RETURN_IF_ERROR_CODE(deassertChipSelect(FRAM_spiPORT, FRAM_CS));
+  }
+  // Reset overwritten error code
+  errCode = prev_errCode;
   RETURN_IF_ERROR_CODE(spiReleaseBusMutex(FRAM_spiREG));
+  // Reset overwritten error code
+  errCode = prev_errCode;
   return errCode;
 }

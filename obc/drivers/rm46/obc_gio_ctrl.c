@@ -4,6 +4,7 @@
 #include "cc1120_txrx.h"
 #include "alarm_handler.h"
 #include "obc_board_config.h"
+#include "tpl5010.h"
 
 void gioNotification(gioPORT_t *port, uint32 bit) {
   if (port == gioPORTA) {
@@ -20,6 +21,12 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
       case CC1120_RX_THR_PKT_gioPORTB_PIN:
         rxFifoReadyCallback();
         break;
+
+#ifdef OBC_REVISION_2
+      case TPL5010_WAKE_PIN:
+        feedHardwareWatchdog();
+        break;
+#endif
     }
   }
 }
