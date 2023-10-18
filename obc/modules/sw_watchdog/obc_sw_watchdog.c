@@ -83,6 +83,6 @@ static void feedSwWatchdog(void) {
   portRESET_PRIVILEGE(xRunningPrivileged);
 }
 
-void taskCheckIn(obc_scheduler_config_id_t taskNum) {
+void taskCheckInToWatchdog(obc_scheduler_config_id_t taskNum) {
   watchdogTaskConfigArray[taskNum].taskLastCheckIn = xTaskGetTickCount();
 }

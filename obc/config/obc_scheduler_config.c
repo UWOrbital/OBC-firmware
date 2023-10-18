@@ -61,6 +61,21 @@
 #define TASK_SW_WATCHDOG_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
 #define TASK_LOGGER_PRIORITY 5U
 
+/* Task timeouts for watchdog */
+#define TASK_STATE_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_TELEMETRY_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_COMMAND_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_COMMS_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_COMMS_DOWNLINK_ENCODER_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_COMMS_UPLINK_DECODER_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_EPS_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_PAYLOAD_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_TIMEKEEPER_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_ALARM_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_HEALTH_COLLECTOR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_STATS_COLLECTOR_WATCHDOG_TIMEOUT portMAX_DELAY
+#define TASK_LOGGER_WATCHDOG_TIMEOUT portMAX_DELAY
+
 /* TYPEDEFS */
 typedef struct {
   TaskHandle_t *taskHandle;
@@ -272,57 +287,57 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
 task_watchdog_config_t watchdogTaskConfigArray[] = {
     [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
         {
-            .taskTimeout = portMAX_DELAY,
+            .taskTimeout = TASK_STATE_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(36000000),
+            .taskTimeout = TASK_TELEMETRY_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(36000000),
+            .taskTimeout = TASK_COMMAND_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_COMMS_MGR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(36000000),
+            .taskTimeout = TASK_COMMS_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER] =
         {
-            .taskTimeout = pdMS_TO_TICKS(36000000),
+            .taskTimeout = TASK_COMMS_DOWNLINK_ENCODER_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER] =
         {
-            .taskTimeout = pdMS_TO_TICKS(36000000),
+            .taskTimeout = TASK_COMMS_UPLINK_DECODER_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_EPS_MGR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(5000),
+            .taskTimeout = TASK_EPS_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(86000000),
+            .taskTimeout = TASK_PAYLOAD_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER] =
         {
-            .taskTimeout = pdMS_TO_TICKS(3000),
+            .taskTimeout = TASK_TIMEKEEPER_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(86000),
+            .taskTimeout = TASK_ALARM_MGR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(86000),
+            .taskTimeout = TASK_HEALTH_COLLECTOR_WATCHDOG_TIMEOUT,
         },
     [OBC_SCHEDULER_CONFIG_ID_LOGGER] =
         {
-            .taskTimeout = portMAX_DELAY,
+            .taskTimeout = TASK_LOGGER_WATCHDOG_TIMEOUT,
         },
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
     [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
         {
-            .taskTimeout = pdMS_TO_TICKS(25000),
+            .taskTimeout = TASK_STATS_COLLECTOR_WATCHDOG_TIMEOUT,
         },
 #endif
 };

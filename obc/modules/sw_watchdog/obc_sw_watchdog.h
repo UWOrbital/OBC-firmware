@@ -14,4 +14,4 @@ void initSwWatchdog(void);
  * @brief Check in to ensure the watchdog knows the task has not timed out
  * @param taskNum number to be registered
  */
-void taskCheckIn(obc_scheduler_config_id_t taskNum);
+void taskCheckInToWatchdog(obc_scheduler_config_id_t taskNum);
