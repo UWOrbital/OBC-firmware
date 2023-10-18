@@ -13,7 +13,11 @@ static const obc_persist_config_t obcPersistConfig[] = {
     [OBC_PERSIST_SECTION_ID_OBC_TIME] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(obcTime),
                                          .sectionSize = sizeof(obc_time_persist_t),
                                          .dataSize = sizeof(obc_time_persist_data_t),
-                                         .sectionCount = 1},
+                                         .sectionCount = OBC_PERSISTENT_DEFAULT_COUNT},
+    [OBC_PERSIST_SECTION_ID_ALARM_MGR] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(alarmMgr),
+                                          .sectionSize = sizeof(alarm_mgr_persist_t),
+                                          .dataSize = sizeof(alarm_mgr_persist_data_t),
+                                          .sectionCount = OBC_PERSISTENT_MAX_ALARM_COUNT},
 };
 
 STATIC_ASSERT(sizeof(obc_persist_t) <= FRAM_MAX_ADDRESS, "obc_persist_t exceeds available FRAM space");

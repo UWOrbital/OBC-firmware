@@ -1,8 +1,10 @@
 #include "obc_persistent.h"
 
 #include "obc_errors.h"
-#include "obc_time_utils.h"  // Use as test subject
 #include "fm25v20a.h"
+
+// Test subjects
+#include "obc_time_utils.h"
 
 #include <gtest/gtest.h>
 

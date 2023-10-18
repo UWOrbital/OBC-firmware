@@ -7,47 +7,53 @@
 #include "obc_errors.h"
 #include "alarm_handler.h"
 
-#define OBC_PERSISTENT_MAX_ALARM_COUNT 24U
-
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
- * 1. Add a struct for the data to be stored in the section
+ * 1. Add required configs
+ *     - Create an ID in the obc_persist_section_id_t enum,
+ *       it should be OBC_PERSIST_SECTION_ID_<MODULE_NAME>
+ *     - If the number of sections is greater than 1, create a count macro for the
+ *       section in the config section of the obc_persistent.h file. It should be
+ *       OBC_PERSISTENT_MAX_<MODULE_NAME>_COUNT
+ * 2. Add a struct for the data to be stored in the section
  *      - This struct should contain all the data that needs to be stored
  *      - The entire section is protected with a single CRC so the entire
  *        section must be read/written even if you only care about 1 field.
  *        Ex: If you store an array in the section, you must read/write the
  *        entire array even if you only want to change 1 element.
  *      - The struct name should be <module>_persist_data_t
- * 2. Add a struct for the section itself (header + data)
+ * 3. Add a struct for the section itself (header + data)
  *      - The struct name should be <module>_persist_t
  *      - This is the layout of the section in persistent storage
- * 3. Add the section struct (header + data) to the obc_persist_t struct
+ * 4. Add the section struct (header + data) to the obc_persist_t struct
  *      - The struct element name should be <module> (e.g. obcTime)
  *      - obc_persist_t is the layout of the entire persistent storage
  *      - You can declare a buffer of identical sections in this struct.
  *        This is useful for storing arrays that need to be individually
- *        accessible.
- * 4. Add to the obcPersistConfig[] in the obc_persistent.c file
- *     - First create an ID in the obc_persist_section_id_t enum,
- *       it should be OBC_PERSIST_SECTION_ID_<MODULE_NAME>
- *     - If the sub index is greater than 1, create a maximum sub index macro for the
- *       section in the config section in the obc_persistent.h file
- *     - Then add a config struct to the obcPersistConfig[] array
+ *        accessible. If you are doing so, use the count macro created in step 1.
+ * 5. Add a config struct to the obcPersistConfig[] in the obc_persistent.c file
  *     - The sectionStartAddr should be the address of the section in FRAM, use the
  *       OBC_PERSIST_ADDR_OF macro with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
  *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro
  *       with the section struct name (e.g. sizeof(obc_time_persist_t))
  *     - The dataSize should be the size of the data in the section, use the sizeof() macro
- *       with the data struct name (e.g. sizeof(obc_time_persist_data_t))
- *     - The sectionCount should be 1 unless, the section is storing an array of
- *       identical sections. In this case, use the macro that was defined in the
- *       obc_persistent.h file
+ *       with the data struct name (e.g. sizeof(obc_time_persist_data_t)). This is used to
+ *       verify that the buffer passed to the get/set functions is large enough.
+ *     - The sectionCount should be OBC_PERSISTENT_DEFAULT_COUNT (equivalent to 1) unless,
+ *       the section is storing an array of identical sections. In this case,
+ *       use the macro that was defined in the obc_persistent.h file under step 1.
  *---------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*---------------------------------------------------------------------------*/
+/* Maximum sub index for each section */
+#define OBC_PERSISTENT_DEFAULT_COUNT 1U
+#define OBC_PERSISTENT_MAX_ALARM_COUNT 24U
+
+/*---------------------------------------------------------------------------*/
 /**
  * @brief Header struct to be placed at the start of each persistent section
  *
@@ -79,7 +85,6 @@ typedef struct {
   union {
     cmd_msg_t cmdMsg;
   };
-
 } alarm_mgr_persist_data_t;
 
 typedef struct {
@@ -96,9 +101,7 @@ typedef struct {
 
 typedef struct {
   obc_time_persist_t obcTime;
-
   alarm_mgr_persist_t alarmMgr[OBC_PERSISTENT_MAX_ALARM_COUNT];
-
 } obc_persist_t;
 
 #define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))
@@ -108,7 +111,7 @@ typedef struct {
 
 typedef enum {
   OBC_PERSIST_SECTION_ID_OBC_TIME = 0,
-  // OBC_PERSIST_SECTION_ID_ALARM_MGR,
+  OBC_PERSIST_SECTION_ID_ALARM_MGR,
 
   OBC_PERSIST_SECTION_ID_COUNT  // Must always be last
 } obc_persist_section_id_t;
@@ -120,8 +123,6 @@ typedef struct {
   size_t dataSize;          // Size of the data in the section (Does not include the header)
   size_t sectionCount;
 } obc_persist_config_t;
-
-// Maximum sub index for each section
 
 /*---------------------------------------------------------------------------*/
 
