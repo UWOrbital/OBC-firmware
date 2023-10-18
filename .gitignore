@@ -1,6 +1,4 @@
 # TODO: REVERT THIS
-# Supposed to ignore the changes made in the download toolchain file but doesn't work
-cmake/download_arm_toolchain.cmake
 yarik*
 
 # Prerequisites

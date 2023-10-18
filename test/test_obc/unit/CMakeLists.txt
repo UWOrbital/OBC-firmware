@@ -35,6 +35,9 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/drivers/fram
     ${CMAKE_SOURCE_DIR}/obc/reliance_edge/projects/freertos_rm46/host/ # redconf.h
     ${CMAKE_SOURCE_DIR}/obc/reliance_edge/include # redconf.h
+    ${CMAKE_SOURCE_DIR}/obc/modules/alarm_mgr
+    ${CMAKE_SOURCE_DIR}/obc/modules/command_mgr
+    ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
 )
 
 target_link_libraries(${TEST_BINARY}

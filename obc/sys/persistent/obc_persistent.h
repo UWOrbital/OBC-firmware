@@ -131,7 +131,7 @@ typedef struct {
  *
  * @param sectionId The sectionId of the section to get
  * @param buff Buffer to store the section (header not included)
- * @param buffLen Length of the buffer (Must be at least dataSize bytes long)
+ * @param buffLen Length of the buffer (Must be at least sectionId's dataSize bytes long)
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
@@ -142,7 +142,7 @@ obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_
  *
  * @param sectionId The sectionId of the section to set
  * @param buff Buffer containing the section data (header not included)
- * @param buffLen Length of the buffer (Must be at least dataSize bytes long)
+ * @param buffLen Length of the buffer (Must be at least sectionId's dataSize bytes long)
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
@@ -155,7 +155,7 @@ obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, const 
  * @param sectionId The sectionId of the section to get
  * @param subIndex The subIndex of the section to get
  * @param buff Buffer to store the section data (header not included)
- * @param buffLen Length of the buffer (Must be at least dataSize bytes long)
+ * @param buffLen Length of the buffer (Must be at least sectionId's dataSize bytes long)
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
@@ -169,7 +169,7 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
  * @param sectionId The sectionId of the section to set
  * @param subIndex The subIndex of the section to get
  * @param buff Buffer containing the section data (header not included)
- * @param buffLen Length of the buffer (Must be at least dataSize bytes long)
+ * @param buffLen Length of the buffer (Must be at least sectionId's dataSize bytes long)
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */

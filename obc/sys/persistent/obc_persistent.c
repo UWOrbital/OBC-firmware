@@ -32,6 +32,8 @@ static const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t 
 
 /* Public function definitions */
 
+//? Perhaps the buffLen is redundant since the config holds the dataSize, maybe change buff to a void* instead?
+
 obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen) {
   return getPersistentSectionBySubIndex(sectionId, 0, buff, buffLen);
 }
@@ -62,7 +64,7 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
   }
   uint32_t sectionStartAddrBySubIndex = config->sectionStartAddr + subIndex * config->sectionSize;
 
-  // Reads header, assumes sectionSize holds the header as well
+  // Reads header, sectionSize holds the header as well
   obc_persist_section_header_t header = {0};
   RETURN_IF_ERROR_CODE(framRead(sectionStartAddrBySubIndex, (uint8_t *)&header, sizeof(obc_persist_section_header_t)));
 
@@ -108,7 +110,7 @@ obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t section
   // Create header
   obc_persist_section_header_t header = {0};
   header.len = config->sectionSize;
-  // Use the dataSize, so that prevent accidentally overriding data past the section
+  // Use the dataSize as that's what we're writing
   header.crc32 = computeCrc32(0, buff, config->dataSize);
 
   // Write header and data
