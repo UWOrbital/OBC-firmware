@@ -30,10 +30,11 @@ void vTaskCode(void* pvParameters) {
     } else {
       sciPrintf("Yaw:   %f | MagX: %f | AccelX: %f | GyroX: %f \r\n", packet.yaw, packet.magX, packet.accelX,
                 packet.gyroX);
-      sciPrintf("Pitch: %f | MagY: %f | AccelY: %f | GyroY: %f \r\n", packet.yaw, packet.magX, packet.accelX,
-                packet.gyroX);
-      sciPrintf("Roll:  %f | MagZ: %f | AccelZ: %f | GyroZ: %f \r\n", packet.yaw, packet.magX, packet.accelX,
-                packet.gyroX);
+      sciPrintf("Pitch: %f | MagY: %f | AccelY: %f | GyroY: %f \r\n", packet.pitch, packet.magY, packet.accelY,
+                packet.gyroY);
+      sciPrintf("Roll:  %f | MagZ: %f | AccelZ: %f | GyroZ: %f \r\n", packet.roll, packet.magZ, packet.accelZ,
+                packet.gyroZ);
+      sciPrintf("Temperature:  %f | Pressure: %f \r\n", packet.temp, packet.pres);
     }
     // Toggle the LED.
     gioToggleBit(gioPORTB, 1);

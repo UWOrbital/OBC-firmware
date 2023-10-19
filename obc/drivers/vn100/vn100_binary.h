@@ -3,6 +3,8 @@
 #include "obc_errors.h"
 #include <stdint.h>
 
+#define BINARY_PACKET_SIZE 62U  // Size including header and CRC
+
 typedef struct __attribute__((__packed__)) {
   float yaw;
   float pitch;
@@ -49,4 +51,4 @@ obc_error_code_t stopBinaryOutputs(void);
  * @param parsedPacket Pointer to the packet to store data in.
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t readBinaryOutputs(void* parsedPacket);
+obc_error_code_t readBinaryOutputs(vn_binary_packet_t* parsedPacket);

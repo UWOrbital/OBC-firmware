@@ -6,18 +6,59 @@
 #include "vn100_binary.h"
 #include "obc_logging.h"
 
-/*
+#define BINARY_PACKET_SIZE 62U  // Size including header and CRC
 #define DEAFULT_SYNC 0xFA
 #define SYNC_HEADER_LENGTH 1
-#define MAX_PAYLOAD_SIZE 10U  // Max size is defined by the largest packet ouputted
-#define MAX_GROUP_FIELDS 10u
-*/
+#define PAYLOAD_OFFSET 4U
 
-#define PAYLOAD_OFFSET 14u
+// Checksum
+union {
+  unsigned short s;
+  char b[2];
+} checksum;
+
+static int check_sync_byte(unsigned char* packet);
+// static uint16_t calculateCRC(unsigned char data[], unsigned int length);
+
+// static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
+//   unsigned int i;
+//   uint16_t crc = 0;
+
+//   for (i = 0; i < length; i++) {
+//     crc = (unsigned char)(crc >> 8) | (crc << 8);
+//     crc ^= data[i];
+//     crc ^= (unsigned char)(crc & 0xff) >> 4;
+//     crc ^= crc << 12;
+//     crc ^= (crc & 0x00ff) << 5;
+//   }
+//   return crc;
+// }
+
+static int check_sync_byte(unsigned char* packet) {
+  if (packet[0] == DEAFULT_SYNC) {
+    return 1;
+  }
+  return 0;
+}
 
 obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPacket, VN100_error_t* error) {
+  if (error == NULL || packet == NULL || parsedPacket == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  if (!check_sync_byte(packet)) {
+    return OBC_ERR_CODE_VN100_PARSE_ERROR;
+  }
+
+  checksum.b[0] = packet[BINARY_PACKET_SIZE - 1];
+  checksum.b[1] = packet[BINARY_PACKET_SIZE - 2];
+
+  // if(calculateCRC(packet, BINARY_PACKET_SIZE - 2) == checksum.s) {
   memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn_binary_packet_t));
   return OBC_ERR_CODE_SUCCESS;
+  // }
+
+  // return OBC_ERR_CODE_VN100_PARSE_ERROR;
 }
 
 /*
@@ -55,20 +96,6 @@ obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_er
 
   memcpy(parsedPacket, &decodedPacket.data, sizeof(vn_binary_packet_t));
   return OBC_ERR_CODE_SUCCESS;
-}
-
-static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
-  unsigned int i;
-  uint16_t crc = 0;
-
-  for (i = 0; i < length; i++) {
-    crc = (unsigned char)(crc >> 8) | (crc << 8);
-    crc ^= data[i];
-    crc ^= (unsigned char)(crc & 0xff) >> 4;
-    crc ^= crc << 12;
-    crc ^= (crc & 0x00ff) << 5;
-  }
-  return crc;
 }
 
 obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error) {
