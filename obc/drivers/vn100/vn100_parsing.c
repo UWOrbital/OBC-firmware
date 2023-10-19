@@ -13,7 +13,7 @@
 #define MAX_GROUP_FIELDS 10u
 */
 
-#define PAYLOAD_OFFSET 100u
+#define PAYLOAD_OFFSET 14u
 
 obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPacket, VN100_error_t* error) {
   memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn_binary_packet_t));
