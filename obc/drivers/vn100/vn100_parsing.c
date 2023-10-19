@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "vn100_parsing.h"
 #include "vn100_common.h"
 #include "vn100_binary.h"
