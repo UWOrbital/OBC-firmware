@@ -26,13 +26,64 @@ gs_error_code_t updateGroundStationState(ground_station_state_t* state, ground_s
     case GS_STATE_DISCONNECTED:
       switch (event) {
         case GS_EVENT_UPLINK_BEGIN:
-          UPDATE_STATE(state, GS_STATE_SEND_CONN)
+          UPDATE_STATE(nextState, GS_STATE_SEND_CONN);
+        default:
+          return GS_ERR_CODE_UNRECOGNIZED_TRANSITION;
       };
     case GS_STATE_SEND_CONN:
-      switch (event) {}
+      switch (event) {
+        case GS_EVENT_ERROR_RESET:
+          UPDATE_STATE(nextState, GS_STATE_ERROR_CLEANUP);
+        case GS_EVENT_CONTINUE:
+          UPDATE_STATE(nextState, GS_STATE_AWAIT_CONN_ACK);
+        default:
+          return GS_ERR_CODE_UNRECOGNIZED_TRANSITION;
+      };
+    case GS_STATE_AWAIT_CONN_ACK:
+      switch (event) {
+        case GS_EVENT_NO_ACK:
+          UPDATE_STATE(nextState, GS_STATE_AWAIT_CONN_ACK);
+        case GS_EVENT_ERROR_RESET:
+          UPDATE_STATE(nextState, GS_STATE_ERROR_CLEANUP);
+        default:
+          return GS_ERR_CODE_UNRECOGNIZED_TRANSITION;
+      };
+    case GS_STATE_UPLINK_COMMANDS:
+      switch (event) {
+        case GS_EVENT_UPLINK_CONTINUE:
+          UPDATE_STATE(nextState, GS_STATE_UPLINK_COMMANDS);
+        case GS_EVENT_UPLINK_FINISHED:
+          UPDATE_STATE(nextState, GS_STATE_DOWNLINK_TELEMTRY);
+        case GS_EVENT_ERROR_RESET:
+          UPDATE_STATE(nextState, GS_STATE_ERROR_CLEANUP);
+        default:
+          return GS_ERR_CODE_UNRECOGNIZED_TRANSITION;
+      };
+    case GS_STATE_DOWNLINK_TELEMTRY:
+      switch (event) {
+        case GS_EVENT_DOWNLINK_CONTINUE:
+          UPDATE_STATE(nextState, GS_STATE_DOWNLINK_TELEMTRY);
+        case GS_EVENT_DOWNLINK_FINISHED:
+          UPDATE_STATE(nextState, GS_STATE_SEND_DISC_ACK);
+        case GS_EVENT_ERROR_RESET:
+          UPDATE_STATE(nextState, GS_STATE_ERROR_CLEANUP);
+        default:
+          return GS_ERR_CODE_UNRECOGNIZED_TRANSITION;
+      };
+    case GS_STATE_SEND_DISC_ACK:
+      switch (event) {
+        case GS_EVENT_CONTINUE:
+          UPDATE_STATE(nextState, GS_STATE_DISCONNECTED);
+        case GS_EVENT_ERROR_RESET:
+          UPDATE_STATE(nextState, GS_STATE_ERROR_CLEANUP);
+        default:
+          return GS_ERR_CODE_UNRECOGNIZED_TRANSITION;
+      };
+    case GS_STATE_ERROR_CLEANUP:
+      UPDATE_STATE(nextState, GS_STATE_DISCONNECTED);
     default:
       return GS_ERR_CODE_INVALID_STATE;
-  }
+  };
 
   *state = nextState;
 }
