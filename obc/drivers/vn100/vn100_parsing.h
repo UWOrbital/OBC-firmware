@@ -28,7 +28,7 @@ typedef enum {
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_error_t* error);
+obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPacket, VN100_error_t* error);
 
 /**
  * @brief If there is an error thrown by the VN-100, parse the error message and return the corresponding error

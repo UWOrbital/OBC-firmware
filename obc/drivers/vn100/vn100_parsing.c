@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "vn100_parsing.h"
 #include "vn100_common.h"
@@ -14,8 +15,7 @@
 
 #define PAYLOAD_OFFSET 100u
 
-obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
-  vn_binary_packet_t packet = {};
+obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPacket, VN100_error_t* error) {
   memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(packet));
   return OBC_ERR_CODE_SUCCESS;
 }
