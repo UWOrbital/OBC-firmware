@@ -56,21 +56,22 @@
     ***************************************************************************
 
 
-    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
+    http://www.FreeRTOS.org - Documentation, books, training, latest versions, 
     license and Real Time Engineers Ltd. contact details.
 
     http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
     including FreeRTOS+Trace - an indispensable productivity tool, and our new
     fully thread aware and reentrant UDP/IP stack.
 
-    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
-    Integrity Systems, who sell the code with commercial support,
+    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High 
+    Integrity Systems, who sell the code with commercial support, 
     indemnification and middleware, under the OpenRTOS brand.
-
-    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
-    engineered and independently SIL3 certified version for use in safety and
+    
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety 
+    engineered and independently SIL3 certified version for use in safety and 
     mission critical applications that require provable dependability.
 */
+
 
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
@@ -82,7 +83,7 @@
  * application requirements.
  *
  * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
- * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+ * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE. 
  *
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
@@ -90,81 +91,78 @@
 /* USER CODE BEGIN (0) */
 #define configUSE_STATS_FORMATTING_FUNCTIONS 1
 /* USER CODE END */
-#define configUSE_PREEMPTION 1
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
-#define configUSE_FPU 1
-#define configUSE_IDLE_HOOK 0
-#define configUSE_TICK_HOOK 0
-#define configUSE_TRACE_FACILITY 1
-#define configUSE_16_BIT_TICKS 0
-#define configCPU_CLOCK_HZ ((unsigned portLONG)73333000) /* Timer clock. */
-#define configTICK_RATE_HZ ((TickType_t)1000)
-#define configMAX_PRIORITIES (12)
-#define configMINIMAL_STACK_SIZE ((unsigned portSHORT)128)
-#define configTOTAL_HEAP_SIZE ((size_t)24576)
-#define configMAX_TASK_NAME_LEN (16)
-#define configIDLE_SHOULD_YIELD 1
+#define configUSE_PREEMPTION		  1
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION	1
+#define configUSE_FPU							1
+#define configUSE_IDLE_HOOK			  0
+#define configUSE_TICK_HOOK			  0
+#define configUSE_TRACE_FACILITY	  1
+#define configUSE_16_BIT_TICKS		  0
+#define configCPU_CLOCK_HZ			  ( ( unsigned portLONG ) 73333000 ) /* Timer clock. */
+#define configTICK_RATE_HZ			  ( ( TickType_t ) 1000 )
+#define configMAX_PRIORITIES		  ( 12 )
+#define configMINIMAL_STACK_SIZE	  ( ( unsigned portSHORT ) 128 )
+#define configTOTAL_HEAP_SIZE		  ( ( size_t ) 24576 )
+#define configMAX_TASK_NAME_LEN		  ( 16 )
+#define configIDLE_SHOULD_YIELD		  1
 #define configGENERATE_RUN_TIME_STATS 0
-#define configUSE_MALLOC_FAILED_HOOK 0
+#define configUSE_MALLOC_FAILED_HOOK  0
 
 /* USER CODE BEGIN (1) */
 /* USER CODE END */
 
-#define configSUPPORT_STATIC_ALLOCATION 0
-#define configSUPPORT_DYNAMIC_ALLOCATION 1
+#define configSUPPORT_STATIC_ALLOCATION			0
+#define configSUPPORT_DYNAMIC_ALLOCATION		1
 
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 1
-#define configUSE_TICKLESS_IDLE 1
+#define configUSE_TICKLESS_IDLE					1
 
 /* USER CODE BEGIN (2) */
 /* USER CODE END */
+#define configCHECK_FOR_STACK_OVERFLOW 2
 
 /* Co-routine definitions. */
-#define configUSE_CO_ROUTINES 0
-#define configMAX_CO_ROUTINE_PRIORITIES (2)
+#define configUSE_CO_ROUTINES 		    0
+#define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
 
 /* Mutexes */
-#define configUSE_MUTEXES 1
-#define configUSE_RECURSIVE_MUTEXES 1
+#define configUSE_MUTEXES               1
+#define configUSE_RECURSIVE_MUTEXES     1
 
 /* Semaphores */
-#define configUSE_COUNTING_SEMAPHORES 0
+#define configUSE_COUNTING_SEMAPHORES   0
 
 /* Timers */
-#define configUSE_TIMERS 1
-#define configTIMER_TASK_PRIORITY (3)
-#define configTIMER_QUEUE_LENGTH 10
-#define configTIMER_TASK_STACK_DEPTH (128)
+#define configUSE_TIMERS                1
+#define configTIMER_TASK_PRIORITY		( 3 )
+#define configTIMER_QUEUE_LENGTH		10
+#define configTIMER_TASK_STACK_DEPTH	( 128 )
 
 /* USER CODE BEGIN (3) */
 /* USER CODE END */
 
 /* Set the following definitions to 1 to include the API function, or zero to exclude the API function. */
-#define INCLUDE_vTaskPrioritySet 1
-#define INCLUDE_uxTaskPriorityGet 1
-#define INCLUDE_vTaskDelete 1
-#define INCLUDE_vTaskCleanUpResources 0
-#define INCLUDE_vTaskSuspend 1
-#define INCLUDE_xTaskResumeFromISR 1
-#define INCLUDE_vTaskDelayUntil 1
-#define INCLUDE_vTaskDelay 1
-#define INCLUDE_xTaskGetSchedulerState 1
+#define INCLUDE_vTaskPrioritySet		    1
+#define INCLUDE_uxTaskPriorityGet		    1
+#define INCLUDE_vTaskDelete					1
+#define INCLUDE_vTaskCleanUpResources	    0
+#define INCLUDE_vTaskSuspend		     	1
+#define INCLUDE_xTaskResumeFromISR			1
+#define INCLUDE_vTaskDelayUntil			    1
+#define INCLUDE_vTaskDelay				    1
+#define INCLUDE_xTaskGetSchedulerState      1
 #define INCLUDE_uxTaskGetStackHighWaterMark 1
-#define INCLUDE_xTaskAbortDelay 1
-#define INCLUDE_eTaskGetState 1
-#define INCLUDE_xTaskGetHandle 1
-#define INCLUDE_xTaskGetIdleTaskHandle 1
+#define INCLUDE_xTaskAbortDelay             1
+#define INCLUDE_eTaskGetState               1
+#define INCLUDE_xTaskGetHandle              1
+#define INCLUDE_xTaskGetIdleTaskHandle      1
 
 /* USER CODE BEGIN (4) */
 /* USER CODE END */
 
+
 /* debug ASSERT */
-#define configASSERT(x)       \
-  if ((x) == pdFALSE) {       \
-    taskDISABLE_INTERRUPTS(); \
-    for (;;)                  \
-      ;                       \
-  }
+#define configASSERT( x ) if( ( x ) == pdFALSE ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
 
 /* USER CODE BEGIN (5) */
 #undef configSUPPORT_STATIC_ALLOCATION

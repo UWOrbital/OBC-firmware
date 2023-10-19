@@ -1,8 +1,8 @@
 #pragma once
 
-#include "os_task.h"
-
 #include <FreeRTOS.h>
+
+#include "os_task.h"
 
 /**
  * @brief Hook that logs stack overflow occurrences.
