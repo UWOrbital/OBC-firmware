@@ -12,7 +12,6 @@
 #include <string.h>
 
 /* ---------------------------- Incoming Binary Packet Byte Sizes ----------------------------------- */
-#define BINARY_PACKET_SIZE 48U
 #define MAX_PACKET_SIZE 256U
 
 obc_error_code_t startBinaryOutputs(void) {
@@ -30,7 +29,7 @@ obc_error_code_t stopBinaryOutputs(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t readBinaryOutputs(void* parsedPacket) {
+obc_error_code_t readBinaryOutputs(vn_binary_packet_t* parsedPacket) {
   unsigned char buf[MAX_PACKET_SIZE] = {'\0'};
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciReadBytes(buf, BINARY_PACKET_SIZE, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_VN100_REG));
