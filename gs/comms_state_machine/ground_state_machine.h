@@ -2,6 +2,8 @@
 
 #include "gs_errors.h"
 
+#define UPDATE_STATE(state, transitionState) *state = transitionState;
+
 typedef enum {
   GS_STATE_DISCONNECTED,       // GS is Idle and not doing anything
   GS_STATE_SEND_CONN,          // GS is uplinking
@@ -13,7 +15,7 @@ typedef enum {
 } ground_station_state_t;
 
 typedef enum {
-  GS_EVENT_BEGIN_UPLINK,
+  GS_EVENT_UPLINK_BEGIN,
   GS_EVENT_SEND_CONN,
   GS_EVENT_ACK_RECIEVED,
   GS_EVENT_UPLINK_FINISHED,
@@ -25,6 +27,6 @@ typedef enum {
   GS_EVENT_CONN_RECIEVED,
   GS_EVENT_NO_ACK,
   GS_EVENT_ERROR
-} ground_station_event_id_t;
+} ground_station_event_t;
 
-gs_error_code_t updateGroundStationState(ground_station_event_t* state, ground_station_event_t event);
+gs_error_code_t updateGroundStationState(round_station_state_t* state, ground_station_event_t event);

@@ -23,6 +23,13 @@ gs_error_code_t updateGroundStationState(ground_station_state_t* state, ground_s
   ground_station_state_t nextState = GS_STATE_DISCONNECTED;
 
   switch (*state) {
+    case GS_STATE_DISCONNECTED:
+      switch (event) {
+        case GS_EVENT_UPLINK_BEGIN:
+          UPDATE_STATE(state, GS_STATE_SEND_CONN)
+      };
+    case GS_STATE_SEND_CONN:
+      switch (event) {}
     default:
       return GS_ERR_CODE_INVALID_STATE;
   }
