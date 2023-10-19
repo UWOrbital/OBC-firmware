@@ -13,7 +13,18 @@ typedef enum {
 } ground_station_state_t;
 
 typedef enum {
-
-} ground_station_event_t;
+  GS_EVENT_BEGIN_UPLINK,
+  GS_EVENT_SEND_CONN,
+  GS_EVENT_ACK_RECIEVED,
+  GS_EVENT_UPLINK_FINISHED,
+  GS_EVENT_DOWNLINK_FINISHED,
+  GS_EVENT_DISC_SENT,
+  GS_EVENT_DISC_RECEIVED,
+  GS_EVENT_CONTINUE_UPLINK,
+  GS_EVENT_ACK_SEND,
+  GS_EVENT_CONN_RECIEVED,
+  GS_EVENT_NO_ACK,
+  GS_EVENT_ERROR
+} ground_station_event_id_t;
 
 gs_error_code_t updateGroundStationState(ground_station_event_t* state, ground_station_event_t event);
