@@ -99,7 +99,10 @@ TEST(TestOBCPersistent, CorruptOBCTime) {
 TEST(TestOBCPersistent, ValidAllAlarms) {
   // Write data for to all alarms
   for (uint32_t i = 0; i < OBC_PERSISTENT_MAX_ALARM_COUNT; ++i) {
-    alarm_mgr_persist_data_t alarmIn = {.unixTime = i};
+    alarm_mgr_persist_data_t alarmIn = {
+        .unixTime = i,
+        .type = ALARM_TYPE_TIME_TAGGED_CMD,
+    };
     ASSERT_EQ(setPersistentSectionBySubIndex(OBC_PERSIST_SECTION_ID_ALARM_MGR, i, (uint8_t *)&alarmIn,
                                              sizeof(alarm_mgr_persist_data_t)),
               OBC_ERR_CODE_SUCCESS);
@@ -107,18 +110,26 @@ TEST(TestOBCPersistent, ValidAllAlarms) {
 
   // Read out all the data for the alarms
   for (int i = 0; i < OBC_PERSISTENT_MAX_ALARM_COUNT; ++i) {
+    // i-th alarm will have unixTime = i
     alarm_mgr_persist_data_t alarmOut = {0};
     ASSERT_EQ(getPersistentSectionBySubIndex(OBC_PERSIST_SECTION_ID_ALARM_MGR, i, (uint8_t *)&alarmOut,
                                              sizeof(alarm_mgr_persist_data_t)),
               OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(alarmOut.unixTime, i);
+    ASSERT_EQ(alarmOut.type, ALARM_TYPE_TIME_TAGGED_CMD);
   }
 
   // Read out all the alarm data backwards to double check it
-  for (int i = OBC_PERSISTENT_MAX_ALARM_COUNT - 1; i >= 0; --i) {
+  for (uint32_t i = OBC_PERSISTENT_MAX_ALARM_COUNT - 1; i >= 0; --i) {
     alarm_mgr_persist_data_t alarmOut = {0};
     ASSERT_EQ(getPersistentSectionBySubIndex(OBC_PERSIST_SECTION_ID_ALARM_MGR, i, (uint8_t *)&alarmOut,
                                              sizeof(alarm_mgr_persist_data_t)),
               OBC_ERR_CODE_SUCCESS);
+    // i-th alarm will have unixTime = i
+    ASSERT_EQ(alarmOut.unixTime, i);
+    ASSERT_EQ(alarmOut.type, ALARM_TYPE_TIME_TAGGED_CMD);
+
+    if (0 == i) break;  // Otherwise it will loop around to max of uint32
   }
 }
 
@@ -134,7 +145,8 @@ TEST(TestOBCPersistent, CorruptAllAlarms) {
   // Corrupt all of the alarm's unixTimes
   for (int i = 0; i < OBC_PERSISTENT_MAX_ALARM_COUNT; ++i) {
     uint32_t corrupt = 0xFFFF;
-    // unixTimeAddr is equivalent to what is done in the set/get
+    // unixTimeAddr is calculated the same way as in the set/get persistent by sub index
+    //  but outside of testing SHOULD NOT BE USED, use the provided functions
     uint32_t unixTimeAddr = OBC_PERSIST_ADDR_OF(alarmMgr[0].data) + sizeof(alarm_mgr_persist_t) * i;
     framWrite(unixTimeAddr, (uint8_t *)&corrupt, sizeof(uint32_t));
   }

@@ -1,3 +1,4 @@
+// Copied from obc/reliance_edge/util/crc.c with RED function calls removed
 #include "obc_crc.h"
 
 #include "obc_errors.h"

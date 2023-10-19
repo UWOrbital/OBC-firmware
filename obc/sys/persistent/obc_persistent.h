@@ -116,7 +116,6 @@ typedef enum {
   OBC_PERSIST_SECTION_ID_COUNT  // Must always be last
 } obc_persist_section_id_t;
 
-//? Might want to change the config related to include/excluding headers in the section size/addr
 typedef struct {
   size_t sectionStartAddr;  // Includes the header
   size_t sectionSize;       // Includes the header
