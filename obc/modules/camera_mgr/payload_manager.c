@@ -18,16 +18,6 @@ static QueueHandle_t payloadQueueHandle = NULL;
 static StaticQueue_t payloadQueue;
 static uint8_t payloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH * PAYLOAD_MANAGER_QUEUE_ITEM_SIZE];
 
-static TaskHandle_t secondaryPayloadTaskHandle = NULL;
-static StaticTask_t secondaryPayloadTaskBuffer;
-static StackType_t secondaryPayloadTaskStack[PAYLOAD_MANAGER_STACK_SIZE];
-
-static QueueHandle_t secondaryPayloadQueueHandle = NULL;
-static StaticQueue_t secondaryPayloadQueue;
-static uint8_t secondaryPayloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH * PAYLOAD_MANAGER_QUEUE_ITEM_SIZE];
-
-static xPayloadMutex;
-
 /**
  * @brief	Payload Manager task.
  * @param	pvParameters	Task parameters.
@@ -45,21 +35,6 @@ void initPayloadManager(void) {
   if (payloadQueueHandle == NULL) {
     payloadQueueHandle = xQueueCreateStatic(PAYLOAD_MANAGER_QUEUE_LENGTH, PAYLOAD_MANAGER_QUEUE_ITEM_SIZE,
                                             payloadQueueStack, &payloadQueue);
-  }
-
-  // Created a separate queue for the secondary payload
-  ASSERT((secondaryPayloadTaskStack != NULL) && (&secondaryPayloadTaskBuffer != NULL));
-  xPayloadMutex = xSemaphoreCreateMutex();
-  if (xPayloadMutex != NULL) {
-    secondaryPayloadTaskHandle =
-        xTaskCreateStatic(vPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL,
-                          PAYLOAD_MANAGER_PRIORITY, secondaryPayloadTaskStack, &secondaryPayloadTaskBuffer);
-  }
-
-  ASSERT((secondaryPayloadQueueStack != NULL) && (&secondaryPayloadQueue != NULL));
-  if (secondaryPayloadQueueHandle == NULL) {
-    secondaryPayloadQueueHandle = xQueueCreateStatic(PAYLOAD_MANAGER_QUEUE_LENGTH, PAYLOAD_MANAGER_QUEUE_ITEM_SIZE,
-                                                     secondaryPayloadQueueStack, &secondaryPayloadQueue);
   }
 }
 
@@ -80,23 +55,17 @@ static void vPayloadManagerTask(void *pvParameters) {
   while (1) {
     payload_event_t queueMsg;
     if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
-      queueMsg.eventID = PAYLOAD_MANAGER_NULL_EVENT_ID;
 
-    if (xQueueReceive(secondaryPayloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
-      queueMsg.eventID = SECONDARY_PAYLOAD_MANAGER_EVENT_ID;
+      switch (queueMsg.eventID) {
+        case PAYLOAD_MANAGER_NULL_EVENT_ID:
+          break;
 
-    switch (queueMsg.eventID) {
-      case PAYLOAD_MANAGER_NULL_EVENT_ID:
-        break;
+        case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
 
-      case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
-        if (xSemaphoreHandle(xPayloadMutex, portMAX_DELAY) == pdTRUE) {
           // ADD SECONDARY PAYLOAD COMMAND HANDLER
 
           // releases Payload mutex when secondary payload functionality has been executed
-          SemaphoreHandle_t(xPayloadMutex);
-        }
-        break;
-    }
+          break;
+      }
   }
 }
