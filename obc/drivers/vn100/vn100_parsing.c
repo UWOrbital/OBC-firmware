@@ -16,7 +16,7 @@
 #define PAYLOAD_OFFSET 100u
 
 obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPacket, VN100_error_t* error) {
-  memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(packet));
+  memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn_binary_packet_t));
   return OBC_ERR_CODE_SUCCESS;
 }
 

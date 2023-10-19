@@ -3,13 +3,13 @@
 #include "obc_errors.h"
 #include <stdint.h>
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
   float yaw;
   float pitch;
   float roll;
   float gyroX;
   float gyroY;
-  float gyroZ; 
+  float gyroZ;
   float accelX;
   float accelY;
   float accelZ;
