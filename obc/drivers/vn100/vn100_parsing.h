@@ -36,5 +36,6 @@ obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_er
  * @param error Error code in case an error occurs
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
+
 obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t* error);
+*/

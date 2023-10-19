@@ -1,28 +1,32 @@
 #include "vn100_parsing.h"
+#include "vn100_common.h"
+#include "vn100_binary.h"
 #include "obc_logging.h"
 
-#include <stdint.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-
-#define VN100_ERR_CODE_STRING "$VNERR,"
-#define VALID_RESPONSE_STRING "$VNWRG,75"
+/*
+#define DEAFULT_SYNC 0xFA
 #define SYNC_HEADER_LENGTH 1
-#define MAX_PAYLOAD_SIZE 24U  // Max size is defined by the largest packet ouputted
+#define MAX_PAYLOAD_SIZE 10U  // Max size is defined by the largest packet ouputted
+#define MAX_GROUP_FIELDS 10u
+*/
 
-static const uint8_t PAYLOAD_OFFSET = sizeof(VALID_RESPONSE_STRING);
-static const char errorCodePacket[] = VN100_ERR_CODE_STRING;
-static const uint8_t errorCodeIndex = sizeof(errorCodePacket) - 1;
+#define PAYLOAD_OFFSET 100u
 
+obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
+  vn_binary_packet_t packet = {};
+  memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(packet));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/*
 typedef struct {
   uint8_t groups;
-  uint16_t groupField;
-} VN100_header_t;
+  uint16_t groupField[MAX_PAYLOAD_SIZE]; // Could change in the future to include more groups
+} VN100_decoded_header_t;
 
 typedef struct {
   float payload[MAX_PAYLOAD_SIZE];
-} VN100_payload_t;
+} VN100_decoded_payload_t;
 
 typedef struct {
   VN100_header_t header;
@@ -30,13 +34,13 @@ typedef struct {
   uint16_t crc;
 } VN100_decoded_packet_t;
 
+static uint8_t calculateSetBytes(uint8_t value);
 static obc_error_code_t __decodePacket(unsigned char* packet, VN100_decoded_packet_t* parsedPacket);
 static uint16_t calculateCRC(unsigned char data[], unsigned int length);
 
 obc_error_code_t parsePacket(unsigned char* packet, void* parsedPacket, VN100_error_t* error) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  /* Parsing for error */
   if (!memcmp(packet, errorCodePacket, errorCodeIndex)) {
     obc_error_code_t errCode = 0;
     RETURN_IF_ERROR_CODE(recoverErrorCodeFromPacket(packet, error));
@@ -79,8 +83,14 @@ obc_error_code_t recoverErrorCodeFromPacket(unsigned char* packet, VN100_error_t
 static obc_error_code_t __decodePacket(unsigned char* packet, VN100_decoded_packet_t* parsedPacket) {
   if (packet == NULL || parsedPacket == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  unsigned char* payload = &packet[PAYLOAD_OFFSET];  // The main payload
+  VN100_header_t header = {};
+  memcpy(&header.groups, packet, sizeof(header.groups));
+  if (header.groups.sync != DEAFULT_SYNC) return OBC_ERR_CODE_VN100_PARSE_ERROR;
 
+  header.groupCount = calculateSetBytes(header.groups.groups);
+  memcpy(&header.groupField, packet + sizeof(header.groups) + header.groupCount, 2*header.groupCount);
+
+  unsigned char* payload = packet + sizeof(header.groups) + header.groupCount;
   VN100_decoded_packet_t decodedPacket = {0};
   memcpy(&decodedPacket.header, payload, sizeof(decodedPacket.header));
 
@@ -101,3 +111,13 @@ static obc_error_code_t __decodePacket(unsigned char* packet, VN100_decoded_pack
   *parsedPacket = decodedPacket;
   return OBC_ERR_CODE_SUCCESS;
 }
+
+static uint8_t calculateSetBytes(uint8_t value) {
+  uint8_t count = 0;
+  while (value != 0) {
+    if (value & (0x01 << 7)) count++;
+    value <<= 1;
+  }
+  return count;
+}
+*/
