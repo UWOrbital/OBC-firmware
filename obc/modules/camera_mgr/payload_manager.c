@@ -34,8 +34,6 @@ static xPayloadMutex;
  */
 static void vPayloadManagerTask(void *pvParameters);
 
-static void secondaryPayloadManagerTask(void *pvParameters);
-
 void initPayloadManager(void) {
   ASSERT((payloadTaskStack != NULL) && (&payloadTaskBuffer != NULL));
   if (payloadTaskHandle == NULL) {
@@ -52,9 +50,9 @@ void initPayloadManager(void) {
   // Created a separate queue for the secondary payload
   ASSERT((secondaryPayloadTaskStack != NULL) && (&secondaryPayloadTaskBuffer != NULL));
   xPayloadMutex = xSemaphoreCreateMutex();
-  if (xPayloadMutex != NULL_PTR) {
+  if (xPayloadMutex != NULL) {
     secondaryPayloadTaskHandle =
-        xTaskCreateStatic(secondaryPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL,
+        xTaskCreateStatic(vPayloadManagerTask, PAYLOAD_MANAGER_NAME, PAYLOAD_MANAGER_STACK_SIZE, NULL,
                           PAYLOAD_MANAGER_PRIORITY, secondaryPayloadTaskStack, &secondaryPayloadTaskBuffer);
   }
 
@@ -84,24 +82,21 @@ static void vPayloadManagerTask(void *pvParameters) {
     if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
       queueMsg.eventID = PAYLOAD_MANAGER_NULL_EVENT_ID;
 
+    if (xQueueReceive(secondaryPayloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
+      queueMsg.eventID = SECONDARY_PAYLOAD_MANAGER_EVENT_ID;
+
     switch (queueMsg.eventID) {
       case PAYLOAD_MANAGER_NULL_EVENT_ID:
         break;
+
+      case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
+        if (xSemaphoreHandle(xPayloadMutex, portMAX_DELAY) == pdTRUE) {
+          // ADD SECONDARY PAYLOAD COMMAND HANDLER
+
+          // releases Payload mutex when secondary payload functionality has been executed
+          SemaphoreHandle_t(xPayloadMutex);
+        }
+        break;
     }
-  }
-}
-
-static void secondaryPayloadManagerTask(void *pvParameters) {
-  ASSERT(secondaryPayloadQueueHandle != NULL);
-
-  while (1) {
-    if (SemaphoreHandle_t(xPayloadMutex, portMAX_DELAY) == pdTRUE) {
-      // ADD SECONDARY PAYLOAD COMMAND HANDLER
-
-      // releases Payload mutex when secondary payload functionality has been executed
-      SemaphoreHandle_t(xPayloadMutex);
-    }
-
-    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
