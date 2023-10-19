@@ -114,6 +114,7 @@ static obc_error_code_t __decodePacket(unsigned char* packet, VN100_decoded_pack
   return OBC_ERR_CODE_SUCCESS;
 }
 
+
 static uint8_t calculateSetBytes(uint8_t value) {
   uint8_t count = 0;
   while (value != 0) {
