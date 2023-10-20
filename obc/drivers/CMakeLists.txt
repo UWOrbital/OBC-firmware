@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(INCLUDES 
+set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam
@@ -18,7 +18,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
 
-set(SOURCES 
+set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_het_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c

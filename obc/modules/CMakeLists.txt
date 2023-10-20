@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(INCLUDES 
+set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/alarm_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/altitude_ctrl_mgr
@@ -16,7 +16,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/logger
 )
 
-set(SOURCES 
+set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/alarm_mgr/alarm_handler.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/camera_mgr/payload_manager.c

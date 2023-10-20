@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(DEBUG_SOURCES 
+set(DEBUG_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/source/test_adc.c
   ${CMAKE_CURRENT_SOURCE_DIR}/source/test_can.c
   ${CMAKE_CURRENT_SOURCE_DIR}/source/test_gio.c
@@ -31,7 +31,7 @@ target_sources(debug-tool.out PUBLIC
   ${DEBUG_SOURCES}
 )
 
-target_include_directories(debug-tool.out PUBLIC 
+target_include_directories(debug-tool.out PUBLIC
   ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

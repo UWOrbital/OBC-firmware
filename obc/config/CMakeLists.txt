@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(INCLUDES 
+set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set(SOURCES 
+set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_scheduler_config.c
 )
 
