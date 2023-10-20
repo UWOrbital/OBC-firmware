@@ -1,5 +1,5 @@
 #include "test_rtc.h"
-#include "obc_sci_io.h"
+#include "obc_print.h"
 #include "ds3232_mz.h"
 
 void testRTC(void) {
