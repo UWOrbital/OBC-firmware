@@ -1,3 +1,4 @@
+#include "obc_board_config.h"
 #include "obc_spi_io.h"
 #include "obc_sci_io.h"
 #include "obc_print.h"
@@ -41,7 +42,7 @@ void utilityCLI(void *pvParameters) {
   while (1) {
     unsigned char cmdChar;
     sciPrintf("Enter a command: ");
-    sciRead(&cmdChar, 1);
+    sciReadBytes(&cmdChar, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG);
     sciPrintf("\r\n");
 
     if (cmdChar >= NUM_COMMANDS_MAX) {
