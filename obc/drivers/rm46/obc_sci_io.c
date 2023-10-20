@@ -136,10 +136,5 @@ void sciNotification(sciBASE_t *sci, uint32 flags) {
     return;
   }
 
-  if (flags == SCI_RX_INT) {
-    sciReceive(UART_READ_REG, sciRxBuffLen, sciRxBuff);
-    xSemaphoreGiveFromISR(sciTransferComplete, &xHigherPriorityTaskWoken);
-  }
-
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }

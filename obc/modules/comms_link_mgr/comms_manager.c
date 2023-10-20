@@ -118,10 +118,10 @@ void initCommsManager(void) {
     cc1120TransmitQueueHandle = xQueueCreateStatic(CC1120_TRANSMIT_QUEUE_LENGTH, CC1120_TRANSMIT_QUEUE_ITEM_SIZE,
                                                    cc1120TransmitQueueStack, &cc1120TransmitQueue);
   }
-
   // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
   initializeAesCtx(TEMP_STATIC_KEY);
   initRs();
+}
 
 static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t *state) {
   if (state == NULL) {
@@ -248,129 +248,6 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
       switch (event) {
         case COMMS_EVENT_UPLINK_FINISHED:
           *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    default:
-      return OBC_ERR_CODE_INVALID_STATE;
-  }
-}
-
-static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t *state) {
-  if (state == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-  switch (*state) {
-    case COMMS_STATE_DISCONNECTED:
-      switch (event) {
-        case COMMS_EVENT_BEGIN_UPLINK:
-          *state = COMMS_STATE_AWAITING_CONN;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ENTER_EMERG:
-          *state = COMMS_STATE_ENTERING_EMERGENCY;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_AWAITING_CONN:
-      switch (event) {
-        case COMMS_EVENT_CONN_RECEIVED:
-          *state = COMMS_STATE_SENDING_ACK;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_SENDING_CONN:
-      switch (event) {
-        case COMMS_EVENT_CONN_SENT:
-          *state = COMMS_STATE_AWAITING_ACK_CONN;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_SENDING_DISC:
-      switch (event) {
-        case COMMS_EVENT_DISC_SENT:
-          *state = COMMS_STATE_AWAITING_ACK_DISC;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_SENDING_ACK:
-      switch (event) {
-        case COMMS_EVENT_ACK_SENT:
-          *state = COMMS_STATE_UPLINKING;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_AWAITING_ACK_DISC:
-      switch (event) {
-        case COMMS_EVENT_ACK_RECEIVED:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_AWAITING_ACK_CONN:
-      switch (event) {
-        case COMMS_EVENT_ACK_RECEIVED:
-          *state = COMMS_STATE_EMERGENCY_UPLINK;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_NO_ACK:
-          *state = COMMS_STATE_SENDING_CONN;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_UPLINKING:
-      switch (event) {
-        case COMMS_EVENT_UPLINK_FINISHED:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_DOWNLINKING:
-      switch (event) {
-        case COMMS_EVENT_DOWNLINK_FINISHED:
-          *state = COMMS_STATE_SENDING_DISC;
-          return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_ERROR:
-          *state = COMMS_STATE_DISCONNECTED;
-          return OBC_ERR_CODE_SUCCESS;
-        default:
-          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-      }
-    case COMMS_STATE_ENTERING_EMERGENCY:
-      switch (event) {
-        case COMMS_EVENT_EMERG_INITIALIZED:
-          *state = COMMS_STATE_SENDING_CONN;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_ERROR:
           *state = COMMS_STATE_DISCONNECTED;
