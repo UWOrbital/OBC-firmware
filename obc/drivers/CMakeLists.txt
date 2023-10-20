@@ -20,7 +20,6 @@ target_include_directories(OBC-firmware.out PUBLIC
 )
 
 target_sources(OBC-firmware.out PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_dma.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_het_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c

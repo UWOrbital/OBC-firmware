@@ -60,6 +60,47 @@ void vTask1(void *pvParameters) {
     ;
 }
 
+void vTask2(void *pvParameters) {
+  obc_error_code_t errCode;
+  sciPrintf("Alarm Persist Test\r\n");
+
+  alarm_mgr_persist_data_t alarmData = {0};
+  alarmData.unixTime = 0x12345678;
+
+  errCode = setPersistentAlarmMgr(&alarmData);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    sciPrintf("Error setting alarm data: %d\r\n", errCode);
+  }
+
+  alarm_mgr_persist_data_t readAlarmData = {0};
+  errCode = getPersistentAlarmMgr(&readAlarmData);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    sciPrintf("Error getting alarm data: %d\r\n", errCode);
+  } else {
+    sciPrintf("Alarm data: %x\r\n", readAlarmData.unixTime);
+  }
+
+  sciPrintf("Corrupting FRAM\r\n");
+
+  uint8_t corrupt = 0xFF;
+  uint32_t unixTimeAddr = OBC_PERSIST_ADDR_OF(alarmMgr.data);
+  framWrite(unixTimeAddr, &corrupt, 1);
+
+  errCode = getPersistentAlarmMgr(&readAlarmData);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    if (errCode == OBC_ERR_CODE_PERSISTENT_CORRUPTED) {
+      sciPrintf("FRAM is corrupt\r\n");
+    } else {
+      sciPrintf("Error getting alarm data: %d\r\n", errCode);
+    }
+  } else {
+    sciPrintf("Alarm data: %x\r\n", readAlarmData.unixTime);
+  }
+
+  while (1)
+    ;
+}
+
 int main(void) {
   sciInit();
   spiInit();

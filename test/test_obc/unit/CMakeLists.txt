@@ -3,10 +3,6 @@ set(TEST_BINARY obc-firmware-tests)
 set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/sys/time/obc_time_utils.c
     ${CMAKE_SOURCE_DIR}/obc/drivers/arducam/image_processing.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100/vn100.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100/vn100_parsing.c
-    ${CMAKE_SOURCE_DIR}/obc/sys/logging/obc_logging.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/arducam/image_processing.c
 )
 
 set(TEST_MOCKS
