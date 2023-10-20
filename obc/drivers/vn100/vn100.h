@@ -3,6 +3,8 @@
 #include "obc_errors.h"
 #include <stdint.h>
 
+/* To access the user manual for VN-100 click here --> https://geo-matching.com/media/migrationpiwnum.pdf */
+
 typedef enum {
   VN_YPR,  // Get yaw, pitch and roll measurements
   VN_MAG,  // Get magnetic measurements
@@ -62,6 +64,16 @@ obc_error_code_t resetModule();
 obc_error_code_t VN100SetBaudrate(uint32_t baudrate);
 
 /**
+ * @brief Set the output rate for the ASYNC outputs
+ * @param outputRate The desired baudrate to be set
+ * @note The default output rate is 40Hz.
+ *        Acceptable Output rates: 1Hz, 2Hz, 4Hz, 5Hz, 10Hz, 20Hz, 25Hz, 40Hz, 50Hz, 100Hz, 200Hz
+ *
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t VN100SetOutputRate(uint32_t outputRate);
+
+/**
  * @brief Retrieve the Yaw, Pitch and Roll from the VN-100
  *
  * @param packet Packet to store the returned information in
@@ -108,4 +120,4 @@ obc_error_code_t retrieveYMR(vn_ymr_packet_t *packet);
  * @param cmd Command to denote which packet type to use
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t setASYNCOutputs(vn_cmd_t cmd);
+obc_error_code_t setASYNCOutputs(vn_cmd_t cmd, uint32_t outputRate);

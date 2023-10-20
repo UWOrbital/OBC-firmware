@@ -119,6 +119,7 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
 
 void sciNotification(sciBASE_t *sci, uint32 flags) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  SemaphoreHandle_t transferCompleteSemaphore = NULL;
 
   if (sci == sciREG) {
     switch (flags) {
