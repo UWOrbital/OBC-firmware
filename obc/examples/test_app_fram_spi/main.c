@@ -1,6 +1,5 @@
 #include "obc_spi_io.h"
 #include "obc_print.h"
-#include "fram.h"
 #include "fm25v20a.h"
 
 #include <gio.h>
@@ -15,13 +14,7 @@
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
-  gioInit();
-  sciInit();
-  spiInit();
-
-  // Initialize the SCI mutex.
-  initSciPrint();
-  initSpiMutex();
+void vTask1(void *pvParameters) {
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};
 
