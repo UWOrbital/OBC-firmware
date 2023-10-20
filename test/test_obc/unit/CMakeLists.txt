@@ -2,7 +2,6 @@ set(TEST_BINARY obc-firmware-tests)
 
 set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/sys/time/obc_time_utils.c
-    ${CMAKE_SOURCE_DIR}/obc/sys/logging/obc_logging.c
     ${CMAKE_SOURCE_DIR}/obc/drivers/arducam/image_processing.c
 )
 

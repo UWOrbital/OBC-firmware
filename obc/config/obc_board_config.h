@@ -29,9 +29,9 @@
 #define CAM_CS_1 2UL
 #define CAM_CS_2 3UL
 
-// Supervisor DEBUG LED
-#define SUPERVISOR_DEBUG_LED_GIO_PORT gioPORTB
-#define SUPERVISOR_DEBUG_LED_GIO_BIT 1
+// State Manager DEBUG LED
+#define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTB
+#define STATE_MGR_DEBUG_LED_GIO_BIT 1
 
 // Comms pin numbers for ISR
 #define CC1120_RX_THR_PKT_gioPORTB_PIN 3U      // cc1120 GIO0
@@ -77,9 +77,9 @@
 #define CAM_CS_1 1UL
 #define CAM_CS_2 2UL
 
-// Supervisor DEBUG LED
-#define SUPERVISOR_DEBUG_LED_GIO_PORT gioPORTA
-#define SUPERVISOR_DEBUG_LED_GIO_BIT 5
+// State Manager DEBUG LED
+#define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTA
+#define STATE_MGR_DEBUG_LED_GIO_BIT 5
 
 #define DS3232_INT_PORT gioPORTA
 #define DS3232_INT_PIN 0U
@@ -145,6 +145,10 @@
 #define RFFM6404_EN_PIN_PORT gioPORTA
 #define RFFM6404_BYP_PIN_PORT gioPORTB
 
+// TPL5010 pin numbers
+#define TPL5010_WAKE_PIN 0
+#define TPL5010_DONE_PIN 1
+#define TPL5010_GIO_PORT gioPORTB
 #else
 #error Board configuration not defined
 #endif
