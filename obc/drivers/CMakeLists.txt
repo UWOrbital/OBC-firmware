@@ -27,6 +27,7 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_sci_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_dma.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_dma.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam.c
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/camera_reg.c

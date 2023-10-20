@@ -170,4 +170,5 @@ typedef enum {
 
   /** Operation is not supported. */
   OBC_ERR_CODE_RED_ENOTSUPP = 1524,
+
 } obc_error_code_t;
