@@ -9,7 +9,10 @@
 // TODO: Save the reason to persistent storage
 
 void resetSystem(obc_reset_reason_t reason) {
-  setPersistentResetReason(reason);
+  obc_reset_reason_persist_data_t resetReason;
+  resetReason.reason = reason;
+
+  setPersistentResetReason(&resetReason);
 
   BaseType_t xRunningPrivileged = prvRaisePrivilege();
 

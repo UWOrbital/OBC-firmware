@@ -100,7 +100,9 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   initFRAM();  // FRAM storage (OBC)
 
   if (!resetReasonFlag) {
-    getPersistentResetReason(resetReason);
+    obc_reset_reason_persist_data_t obcResetReasonPersist;
+    getPersistentResetReason(&obcResetReasonPersist);
+    resetReason = obcResetReasonPersist.reason;
   } else {
     resetReason = obc_reset_reason_t(resetReasonFlag);
   }
