@@ -23,7 +23,7 @@
 #include "obc_board_config.h"
 #include "fm25v20a.h"
 #include "obc_reset.h"
-#include "obc_persist.h"
+#include "obc_persistent.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -85,7 +85,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
   LOG_IF_ERROR_CODE(initTime());         // RTC
 
-  +lm75bd_config_t config = {
+  lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
       .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
       .osFaultQueueSize = 2,
@@ -100,43 +100,49 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   initFRAM();  // FRAM storage (OBC)
 
   if (!resetReasonFlag) {
-    obc_reset_reason_persist_data_t obcResetReasonPersist;
+    obc_reset_reason_persist_t obcResetReasonPersist;
     getPersistentResetReason(&obcResetReasonPersist);
-    resetReason = obcResetReasonPersist.reason;
+    resetReason = obcResetReasonPersist.data.reason;
   } else {
-    resetReason = obc_reset_reason_t(resetReasonFlag);
+    resetReason = resetReasonFlag;
   }
 
   switch (resetReason) {
     case RESET_REASON_STACK_CHECK_FAIL:
-      LOG_ERROR_CODE(OBC_ERR_CODE_STACK_CHECK_FAIL);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_STACK_CHECK_FAIL);
 
     case RESET_REASON_FS_FAILURE:
-      LOG_ERROR_CODE(OBC_ERR_CODE_FS_FAILURE);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_FS_FAILURE);
 
     case RESET_REASON_CMD_EXEC_OBC_RESET:
-      LOG_ERROR_CODE(OBC_ERR_CODE_CMD_EXEC_OBC_RESET);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_CMD_EXEC_OBC_RESET);
 
     case RESET_REASON_UNKNOWN:
-      LOG_ERROR_CODE(OBC_ERR_CODE_UNKNOWN);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_UNKNOWN);
 
     case RESET_REASON_ICEPICK_RESET:
-      LOG_ERROR_CODE(OBC_ERR_CODE_ICEPICK_RESET);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_ICEPICK_RESET);
 
     case RESET_REASON_WATCHDOG_RESET:
-      LOG_ERROR_CODE(OBC_ERR_CODE_WATCHDOG_RESET);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_WATCHDOG_RESET);
 
     case RESET_REASON_CPU_RESET:
-      LOG_ERROR_CODE(OBC_ERR_CODE_CPU_RESET);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_CPU_RESET);
 
     case RESET_REASON_SW_RESET:
-      LOG_ERROR_CODE(OBC_ERR_CODE_SW_RESET);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_SW_RESET);
 
     case RESET_REASON_OSC_FAILURE_RESET:
-      LOG_ERROR_CODE(OBC_ERR_CODE_OSC_FAILURE_RESET);
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_OSC_FAILURE_RESET);
+
+    case RESET_REASON_TESTING:
+      LOG_IF_ERROR_CODE(OBC_ERR_CODE_SUCCESS);
   }
 
-  setPersistentResetReason(RESET_REASON_UNKNOWN);
+  obc_reset_reason_persist_t defaultResetReason;
+  (defaultResetReason.data).reason = RESET_REASON_UNKNOWN;
+
+  setPersistentResetReason(&defaultResetReason);
 
   // Call init functions for all tasks. TODO: Combine into obc_scheduler
   initTimekeeper();

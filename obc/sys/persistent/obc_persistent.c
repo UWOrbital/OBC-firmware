@@ -76,10 +76,10 @@ obc_error_code_t getPersistentResetReason(obc_reset_reason_persist_t *data) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentResetReason(reset_reason_persist_t *data) {
+obc_error_code_t setPersistentResetReason(obc_reset_reason_persist_t *data) {
   obc_error_code_t errCode;
 
-  uint8_t sectionBuffer[sizeof(reset_reason_persist_t)] = {0};
+  uint8_t sectionBuffer[sizeof(obc_reset_reason_persist_t)] = {0};
 
   RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
   RETURN_IF_ERROR_CODE(setPersistentSection(OBC_PERSIST_ADDR_OF(resetReason), sizeof(sectionBuffer), sectionBuffer,
