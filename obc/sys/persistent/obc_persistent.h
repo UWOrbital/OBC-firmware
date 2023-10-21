@@ -126,7 +126,9 @@ typedef struct {
 /*---------------------------------------------------------------------------*/
 
 /**
- * @brief Get a persistent section from FRAM by the sectionId and verify its header data
+ * @brief Get a persistent section from FRAM by the sectionId and verify its header data.
+ * This function is used when the section is not an array of identical sections and is equivalent
+ * to calling getPersistentDataByIndex with index = 0.
  *
  * @param sectionId The sectionId of the section to get
  * @param buff Buffer to store the section (header not included)
@@ -134,10 +136,12 @@ typedef struct {
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen);
+obc_error_code_t getPersistentData(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen);
 
 /**
  * @brief Set a persistent section in FRAM by the sectionId and write its header data
+ * This function is used when the section is not an array of identical sections and is equivalent
+ * to calling setPersistentDataByIndex with index = 0.
  *
  * @param sectionId The sectionId of the section to set
  * @param buff Buffer containing the section data (header not included)
@@ -145,35 +149,35 @@ obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, const uint8_t *buff, size_t buffLen);
+obc_error_code_t setPersistentData(obc_persist_section_id_t sectionId, const uint8_t *buff, size_t buffLen);
 
 /**
- * @brief Get a persistent section from FRAM by the sectionId and subIndex and verify its header data. This function is
+ * @brief Get a persistent section from FRAM by the sectionId and index and verify its header data. This function is
  * used when the section is an array of identical sections.
  *
  * @param sectionId The sectionId of the section to get
- * @param subIndex The subIndex of the section to get
+ * @param index The index of the section to get
  * @param buff Buffer to store the section data (header not included)
  * @param buffLen Length of the buffer (Must be at least sectionId's dataSize bytes long)
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
-                                                size_t buffLen);
+obc_error_code_t getPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, uint8_t *buff,
+                                          size_t buffLen);
 
 /**
- * @brief Set a persistent section in FRAM by the sectionId and subIndex and write its header data. This function is
+ * @brief Set a persistent section in FRAM by the sectionId and index and write its header data. This function is
  * used when the section is an array of identical sections.
  *
  * @param sectionId The sectionId of the section to set
- * @param subIndex The subIndex of the section to get
+ * @param index The index of the section to get
  * @param buff Buffer containing the section data (header not included)
  * @param buffLen Length of the buffer (Must be at least sectionId's dataSize bytes long)
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex,
-                                                const uint8_t *buff, size_t buffLen);
+obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, const uint8_t *buff,
+                                          size_t buffLen);
 
 #ifdef __cplusplus
 }

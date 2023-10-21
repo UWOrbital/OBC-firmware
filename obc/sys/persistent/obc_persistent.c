@@ -34,16 +34,16 @@ static const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t 
 
 //? Perhaps the buffLen is redundant since the config holds the dataSize, maybe change buff to a void* instead?
 
-obc_error_code_t getPersistentSection(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen) {
-  return getPersistentSectionBySubIndex(sectionId, 0, buff, buffLen);
+obc_error_code_t getPersistentData(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen) {
+  return getPersistentDataByIndex(sectionId, 0, buff, buffLen);
 }
 
-obc_error_code_t setPersistentSection(obc_persist_section_id_t sectionId, const uint8_t *buff, size_t buffLen) {
-  return setPersistentSectionBySubIndex(sectionId, 0, buff, buffLen);
+obc_error_code_t setPersistentData(obc_persist_section_id_t sectionId, const uint8_t *buff, size_t buffLen) {
+  return setPersistentDataByIndex(sectionId, 0, buff, buffLen);
 }
 
-obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex, uint8_t *buff,
-                                                size_t buffLen) {
+obc_error_code_t getPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, uint8_t *buff,
+                                          size_t buffLen) {
   obc_error_code_t errCode;
   if (buff == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -54,7 +54,7 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
   if (config == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  if (subIndex >= config->sectionCount) {
+  if (index >= config->sectionCount) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -62,11 +62,11 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
   if (buffLen < config->dataSize) {
     return OBC_ERR_CODE_BUFF_TOO_SMALL;
   }
-  uint32_t sectionStartAddrBySubIndex = config->sectionStartAddr + subIndex * config->sectionSize;
+  uint32_t sectionStartAddrByIndex = config->sectionStartAddr + index * config->sectionSize;
 
   // Reads header, sectionSize holds the header as well
   obc_persist_section_header_t header = {0};
-  RETURN_IF_ERROR_CODE(framRead(sectionStartAddrBySubIndex, (uint8_t *)&header, sizeof(obc_persist_section_header_t)));
+  RETURN_IF_ERROR_CODE(framRead(sectionStartAddrByIndex, (uint8_t *)&header, sizeof(obc_persist_section_header_t)));
 
   if (header.len != config->sectionSize) {
     return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
@@ -74,7 +74,7 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
 
   // Use the dataSize to prevent accidentally reading data past the section
   RETURN_IF_ERROR_CODE(
-      framRead(sectionStartAddrBySubIndex + sizeof(obc_persist_section_header_t), buff, config->dataSize));
+      framRead(sectionStartAddrByIndex + sizeof(obc_persist_section_header_t), buff, config->dataSize));
 
   // Compute CRC32 of data and check it
   uint32_t crc32 = computeCrc32(0, buff, config->dataSize);
@@ -85,8 +85,8 @@ obc_error_code_t getPersistentSectionBySubIndex(obc_persist_section_id_t section
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t sectionId, size_t subIndex,
-                                                const uint8_t *buff, size_t buffLen) {
+obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, const uint8_t *buff,
+                                          size_t buffLen) {
   obc_error_code_t errCode;
 
   if (buff == NULL) {
@@ -98,7 +98,7 @@ obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t section
   if (config == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  if (subIndex >= config->sectionCount) {
+  if (index >= config->sectionCount) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -114,12 +114,12 @@ obc_error_code_t setPersistentSectionBySubIndex(obc_persist_section_id_t section
   header.crc32 = computeCrc32(0, buff, config->dataSize);
 
   // Write header and data
-  uint32_t sectionStartAddrBySubIndex = config->sectionStartAddr + subIndex * config->sectionSize;
-  RETURN_IF_ERROR_CODE(framWrite(sectionStartAddrBySubIndex, (uint8_t *)&header, sizeof(obc_persist_section_header_t)));
+  uint32_t sectionStartAddrByIndex = config->sectionStartAddr + index * config->sectionSize;
+  RETURN_IF_ERROR_CODE(framWrite(sectionStartAddrByIndex, (uint8_t *)&header, sizeof(obc_persist_section_header_t)));
 
   // Use the dataSize to prevent accidentally overriding data past the section
   RETURN_IF_ERROR_CODE(
-      framWrite(sectionStartAddrBySubIndex + sizeof(obc_persist_section_header_t), buff, config->dataSize));
+      framWrite(sectionStartAddrByIndex + sizeof(obc_persist_section_header_t), buff, config->dataSize));
 
   return OBC_ERR_CODE_SUCCESS;
 }
