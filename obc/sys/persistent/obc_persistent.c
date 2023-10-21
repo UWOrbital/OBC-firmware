@@ -62,6 +62,32 @@ static obc_error_code_t overlayDataInSectionBuff(uint8_t *data, size_t dataLen, 
 static obc_error_code_t extractDataFromSectionBuff(uint8_t *data, size_t dataLen, uint8_t *sectionBuff,
                                                    size_t sectionLen);
 
+obc_error_code_t getPersistentResetReason(reset_reason_persist_t *data) {
+  obc_error_code_t errCode;
+
+  uint8_t sectionBuffer[sizeof(reset_reason_persist_t)] = {0};
+
+  RETURN_IF_ERROR_CODE(getPersistentSection(OBC_PERSIST_ADDR_OF(resetReason), sizeof(sectionBuffer), sectionBuffer,
+                                            sizeof(sectionBuffer)));
+
+  RETURN_IF_ERROR_CODE(
+      extractDataFromSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t setPersistentResetReason(reset_reason_persist_t *data) {
+  obc_error_code_t errCode;
+
+  uint8_t sectionBuffer[sizeof(reset_reason_persist_t)] = {0};
+
+  RETURN_IF_ERROR_CODE(overlayDataInSectionBuff((uint8_t *)data, sizeof(*data), sectionBuffer, sizeof(sectionBuffer)));
+  RETURN_IF_ERROR_CODE(setPersistentSection(OBC_PERSIST_ADDR_OF(resetReason), sizeof(sectionBuffer), sectionBuffer,
+                                            sizeof(sectionBuffer)));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t getPersistentObcTime(obc_time_persist_data_t *data) {
   obc_error_code_t errCode;
 
