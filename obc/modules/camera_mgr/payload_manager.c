@@ -54,7 +54,7 @@ static void vPayloadManagerTask(void *pvParameters) {
 
   while (1) {
     payload_event_t queueMsg;
-    if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS)
+    if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) == pdTRUE)
 
       switch (queueMsg.eventID) {
         case PAYLOAD_MANAGER_NULL_EVENT_ID:
