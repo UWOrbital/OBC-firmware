@@ -104,6 +104,8 @@ typedef enum config_value_type
 #endif
 
 /* USER CODE BEGIN (1) */
+extern uint8_t resetReasonFlag;
+
 /* USER CODE END */
 
 /********************************************************************************/

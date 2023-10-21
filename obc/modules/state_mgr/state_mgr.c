@@ -22,6 +22,8 @@
 #include "lm75bd.h"
 #include "obc_board_config.h"
 #include "fm25v20a.h"
+#include "obc_reset.h"
+#include "obc_persist.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -72,6 +74,7 @@ static void sendStartupMessages(void) {}
 
 void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
+  obc_reset_reason_t resetReason;
 
   ASSERT(stateMgrQueueHandle != NULL);
 
@@ -82,7 +85,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
   LOG_IF_ERROR_CODE(initTime());         // RTC
 
-  lm75bd_config_t config = {
+  +lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
       .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
       .osFaultQueueSize = 2,
@@ -95,6 +98,43 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
   initFRAM();  // FRAM storage (OBC)
+
+  if (!resetReasonFlag) {
+    getPersistentResetReason(resetReason);
+  } else {
+    resetReason = obc_reset_reason_t(resetReasonFlag);
+  }
+
+  switch (resetReason) {
+    case RESET_REASON_STACK_CHECK_FAIL:
+      LOG_ERROR_CODE(OBC_ERR_CODE_STACK_CHECK_FAIL);
+
+    case RESET_REASON_FS_FAILURE:
+      LOG_ERROR_CODE(OBC_ERR_CODE_FS_FAILURE);
+
+    case RESET_REASON_CMD_EXEC_OBC_RESET:
+      LOG_ERROR_CODE(OBC_ERR_CODE_CMD_EXEC_OBC_RESET);
+
+    case RESET_REASON_UNKNOWN:
+      LOG_ERROR_CODE(OBC_ERR_CODE_UNKNOWN);
+
+    case RESET_REASON_ICEPICK_RESET:
+      LOG_ERROR_CODE(OBC_ERR_CODE_ICEPICK_RESET);
+
+    case RESET_REASON_WATCHDOG_RESET:
+      LOG_ERROR_CODE(OBC_ERR_CODE_WATCHDOG_RESET);
+
+    case RESET_REASON_CPU_RESET:
+      LOG_ERROR_CODE(OBC_ERR_CODE_CPU_RESET);
+
+    case RESET_REASON_SW_RESET:
+      LOG_ERROR_CODE(OBC_ERR_CODE_SW_RESET);
+
+    case RESET_REASON_OSC_FAILURE_RESET:
+      LOG_ERROR_CODE(OBC_ERR_CODE_OSC_FAILURE_RESET);
+  }
+
+  setPersistentResetReason(RESET_REASON_UNKNOWN);
 
   // Call init functions for all tasks. TODO: Combine into obc_scheduler
   initTimekeeper();

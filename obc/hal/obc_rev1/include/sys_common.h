@@ -104,7 +104,10 @@ typedef enum config_value_type
 #endif
 
 /* USER CODE BEGIN (1) */
+extern uint8_t resetReasonFlag;
+
 /* USER CODE END */
+
 
 /********************************************************************************/
 /* The ASSERT macro, which does the actual assertion checking.  Typically, this */

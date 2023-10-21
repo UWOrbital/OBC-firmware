@@ -78,7 +78,6 @@ extern void main(void);
 /*SAFETYMCUSW 354 S MR:NA <APPROVED> " Startup code(Extern declaration present in the library)" */
 extern void exit(int _status);
 
-
 /* USER CODE BEGIN (3) */
 /* USER CODE END */
 void handlePLLLockFail(void);
@@ -143,7 +142,7 @@ void _c_int00(void)
         }
         /* clear all reset status flags */
         SYS_EXCEPTION = 0xFFFFU;
-
+        resetReasonFlag =0;
 /* USER CODE BEGIN (13) */
 /* USER CODE END */
 /* USER CODE BEGIN (14) */
@@ -155,6 +154,7 @@ void _c_int00(void)
     /*SAFETYMCUSW 139 S MR:13.7 <APPROVED> "Hardware status bit read check" */
     else if ((SYS_EXCEPTION & OSC_FAILURE_RESET) != 0U)
     {
+        resetReasonFlag = 9;
         /* Reset caused due to oscillator failure.
         Add user code here to handle oscillator failure */
 
@@ -174,7 +174,7 @@ void _c_int00(void)
             /* Add user code here to handle watchdog violation. */ 
 /* USER CODE BEGIN (17) */
 /* USER CODE END */
-
+      resetReasonFlag = 6;
             /* Clear the Watchdog reset flag in Exception Status register */ 
             SYS_EXCEPTION = WATCHDOG_RESET;
         
@@ -183,7 +183,8 @@ void _c_int00(void)
         }
         else
         {
-            /* Clear the ICEPICK reset flag in Exception Status register */ 
+            resetReasonFlag = 5;
+            /* Clear the ICEPICK reset flag in Exception Status register */
             SYS_EXCEPTION = ICEPICK_RESET;
 /* USER CODE BEGIN (19) */
 /* USER CODE END */
@@ -192,7 +193,8 @@ void _c_int00(void)
     /*SAFETYMCUSW 139 S MR:13.7 <APPROVED> "Hardware status bit read check" */
     else if ((SYS_EXCEPTION & CPU_RESET) !=0U)
     {
-        /* Reset caused due to CPU reset.
+    resetReasonFlag = 7;
+    /* Reset caused due to CPU reset.
         CPU reset can be caused by CPU self-test completion, or
         by toggling the "CPU RESET" bit of the CPU Reset Control Register. */
 
@@ -209,6 +211,7 @@ void _c_int00(void)
     /*SAFETYMCUSW 139 S MR:13.7 <APPROVED> "Hardware status bit read check" */
     else if ((SYS_EXCEPTION & SW_RESET) != 0U)
     {
+        resetReasonFlag = 8;
         /* Reset caused due to software reset.
         Add user code to handle software reset. */
 		
