@@ -6,6 +6,7 @@
 
 #include "obc_errors.h"
 #include "alarm_handler.h"
+#include "obc_reset.h"
 
 #define OBC_PERSISTENT_MAX_ALARM_COUNT 24U
 
