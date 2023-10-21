@@ -9,8 +9,8 @@
 // TODO: Save the reason to persistent storage
 
 void resetSystem(obc_reset_reason_t reason) {
-  obc_reset_reason_persist_data_t resetReason;
-  resetReason.reason = reason;
+  obc_reset_reason_persist_t resetReason;
+  (resetReason.data).reason = reason;
 
   setPersistentResetReason(&resetReason);
 
