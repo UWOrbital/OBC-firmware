@@ -45,6 +45,7 @@
 /* USER CODE BEGIN (0) */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow="
+#pragma GCC diagnostic ignored "-Warray-bounds"
 /* USER CODE END */
 
 /*----------------------------------------------------------------------------*/
