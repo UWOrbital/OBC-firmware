@@ -138,6 +138,9 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
         case COMMS_EVENT_ENTER_EMERG:
           *state = COMMS_STATE_ENTERING_EMERGENCY;
           return OBC_ERR_CODE_SUCCESS;
+        case COMMS_EVENT_BEGIN_DOWNLINK:
+          *state = COMMS_STATE_DOWNLINKING;
+          return OBC_ERR_CODE_SUCCESS;
         default:
           return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
       }
@@ -236,6 +239,17 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
       switch (event) {
         case COMMS_EVENT_EMERG_INITIALIZED:
           *state = COMMS_STATE_SENDING_CONN;
+          return OBC_ERR_CODE_SUCCESS;
+        case COMMS_EVENT_ERROR:
+          *state = COMMS_STATE_DISCONNECTED;
+          return OBC_ERR_CODE_SUCCESS;
+        default:
+          return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
+      }
+    case COMMS_STATE_EMERGENCY_UPLINK:
+      switch (event) {
+        case COMMS_EVENT_UPLINK_FINISHED:
+          *state = COMMS_STATE_DISCONNECTED;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_ERROR:
           *state = COMMS_STATE_DISCONNECTED;
