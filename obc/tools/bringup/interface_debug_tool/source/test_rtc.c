@@ -19,7 +19,7 @@ void testRTC(void) {
   float temperature;
 
   // Initialize RTC
-  if (rctInit(&rtcDateTime) != OBC_ERR_CODE_SUCCESS) {
+  if (rtcInit(&rtcDateTime) != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Failed to initialize RTC\r\n");
     return;
   }
