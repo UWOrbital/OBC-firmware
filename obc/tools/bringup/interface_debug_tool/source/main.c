@@ -33,9 +33,9 @@ typedef void (*testFunc_t)(void);
 #define NUM_COMMANDS_MAX 255  // Each command initiated by a single character
 
 static const testFunc_t testFuncs[NUM_COMMANDS_MAX] = {
-    [OP_CODE_SPI_TEST] = testSPI,   [OP_CODE_SCI_TEST] = testSCI, [OP_CODE_I2C_TEST] = testI2C,
-    [OP_CODE_CAN_TEST] = testCAN,   [OP_CODE_ADC_TEST] = testADC, [OP_CODE_GIO_TEST] = testGIO,
-    [OP_CODE_TEMP_TEST] = testTemp,
+    [OP_CODE_SPI_TEST] = testSPI,       [OP_CODE_SCI_TEST] = testSCI, [OP_CODE_I2C_TEST] = testI2C,
+    [OP_CODE_CAN_TEST] = testCAN,       [OP_CODE_ADC_TEST] = testADC, [OP_CODE_GIO_TEST] = testGIO,
+    [OP_CODE_LM75BD_TEST] = testLm75bd,
 };
 
 void utilityCLI(void *pvParameters) {

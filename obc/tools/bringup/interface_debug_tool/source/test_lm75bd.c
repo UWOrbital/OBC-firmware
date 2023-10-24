@@ -10,7 +10,7 @@
 
 #define LM75BD_CONF_BUFF_SIZE 1U
 
-void testTemp(void) {
+void testLm75bd(void) {
   sciPrintf("Testing temp sensor...\r\n");
 
   obc_error_code_t errCode;
