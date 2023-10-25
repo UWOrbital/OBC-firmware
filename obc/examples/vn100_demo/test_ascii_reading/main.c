@@ -33,7 +33,7 @@ void vTaskCode(void* pvParameters) {
     gioToggleBit(gioPORTB, 1);
 
     // Simple delay.
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
 

@@ -82,7 +82,8 @@ obc_error_code_t printSerialASCII(vn_ascii_types_t cmd) {
 }
 
 obc_error_code_t setASCIIOutputRate(uint32_t outputRate) {
-  isValidOutputRate(outputRate);
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(isValidOutputRate(outputRate));
   // Make the size of the string representation sufficiently large, use memcpy to append string onto req
   char freq[3];
 
@@ -103,7 +104,6 @@ obc_error_code_t setASCIIOutputRate(uint32_t outputRate) {
 
   size_t numBytes = len1 + len2 + len3 + 1;
 
-  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciSendBytes(req, numBytes, TICK_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }

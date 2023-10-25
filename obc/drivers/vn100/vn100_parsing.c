@@ -6,33 +6,27 @@
 #include "vn100_binary.h"
 #include "obc_logging.h"
 
-#define BINARY_PACKET_SIZE 62U  // Size including header and CRC
 #define DEAFULT_SYNC 0xFA
 #define SYNC_HEADER_LENGTH 1
 #define PAYLOAD_OFFSET 4U
-
-// Checksum
-union {
-  unsigned short s;
-  char b[2];
-} checksum;
+#define VALID_CHECKSUM_RETURN 0
 
 static int check_sync_byte(unsigned char* packet);
-// static uint16_t calculateCRC(unsigned char data[], unsigned int length);
+static uint16_t calculateCRC(unsigned char data[], unsigned int length);
 
-// static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
-//   unsigned int i;
-//   uint16_t crc = 0;
+static uint16_t calculateCRC(unsigned char data[], unsigned int length) {
+  unsigned int i;
+  uint16_t crc = 0;
 
-//   for (i = 0; i < length; i++) {
-//     crc = (unsigned char)(crc >> 8) | (crc << 8);
-//     crc ^= data[i];
-//     crc ^= (unsigned char)(crc & 0xff) >> 4;
-//     crc ^= crc << 12;
-//     crc ^= (crc & 0x00ff) << 5;
-//   }
-//   return crc;
-// }
+  for (i = 0; i < length; i++) {
+    crc = (unsigned char)(crc >> 8) | (crc << 8);
+    crc ^= data[i];
+    crc ^= (unsigned char)(crc & 0xff) >> 4;
+    crc ^= crc << 12;
+    crc ^= (crc & 0x00ff) << 5;
+  }
+  return crc;
+}
 
 static int check_sync_byte(unsigned char* packet) {
   if (packet[0] == DEAFULT_SYNC) {
@@ -50,15 +44,18 @@ obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPa
     return OBC_ERR_CODE_VN100_PARSE_ERROR;
   }
 
-  checksum.b[0] = packet[BINARY_PACKET_SIZE - 1];
-  checksum.b[1] = packet[BINARY_PACKET_SIZE - 2];
+  /* The CRC is selected such that if you compute the 16-bit CRC starting with the group byte 
+  and include the CRC itself, a valid packet will result in 0x0000 computed 
+  by the running CRC calculation over the entire packet. */ 
+  
+  uint16_t vn100_crc = calculateCRC(&packet[1], BINARY_PACKET_SIZE - 1U);
 
-  // if(calculateCRC(packet, BINARY_PACKET_SIZE - 2) == checksum.s) {
-  memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn_binary_packet_t));
-  return OBC_ERR_CODE_SUCCESS;
-  // }
+  if(vn100_crc == VALID_CHECKSUM_RETURN) {
+    memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn_binary_packet_t));
+    return OBC_ERR_CODE_SUCCESS;
+  }
 
-  // return OBC_ERR_CODE_VN100_PARSE_ERROR;
+  return OBC_ERR_CODE_VN100_CHECKSUM_ERROR;
 }
 
 /*
