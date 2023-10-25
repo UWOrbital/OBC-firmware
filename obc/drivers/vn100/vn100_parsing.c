@@ -44,13 +44,13 @@ obc_error_code_t parsePacket(unsigned char* packet, vn_binary_packet_t* parsedPa
     return OBC_ERR_CODE_VN100_PARSE_ERROR;
   }
 
-  /* The CRC is selected such that if you compute the 16-bit CRC starting with the group byte 
-  and include the CRC itself, a valid packet will result in 0x0000 computed 
-  by the running CRC calculation over the entire packet. */ 
-  
+  /* The CRC is selected such that if you compute the 16-bit CRC starting with the group byte
+  and include the CRC itself, a valid packet will result in 0x0000 computed
+  by the running CRC calculation over the entire packet. */
+
   uint16_t vn100_crc = calculateCRC(&packet[1], BINARY_PACKET_SIZE - 1U);
 
-  if(vn100_crc == VALID_CHECKSUM_RETURN) {
+  if (vn100_crc == VALID_CHECKSUM_RETURN) {
     memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn_binary_packet_t));
     return OBC_ERR_CODE_SUCCESS;
   }
