@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-target_include_directories(OBC-firmware.out PUBLIC
+set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam
@@ -19,7 +19,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
 
-target_sources(OBC-firmware.out PUBLIC
+set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_het_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c
@@ -60,3 +60,10 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_common.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_parsing.c
 )
+
+
+target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
+target_sources(OBC-firmware.out PUBLIC ${SOURCES})
+
+target_include_directories(debug-tool.out PUBLIC ${INCLUDES})
+target_sources(debug-tool.out PUBLIC ${SOURCES})
