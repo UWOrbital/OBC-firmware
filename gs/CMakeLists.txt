@@ -5,7 +5,6 @@ set(CSerialPortRootPath "/home/joel/CSerialPort/bin/install")
 set(SOURCES
 main.c
 common/gs_heap.c
-serial_utils/win_uart.c
 )
 
 add_executable(gs.out ${SOURCES})
@@ -30,3 +29,5 @@ elseif(UNIX)
     cserialport
 endif()
 )
+
+

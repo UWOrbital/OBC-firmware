@@ -1,4 +1,9 @@
-set(CMAKE_SYSTEM_NAME Windows)
+if (WIN32)
+    set(CMAKE_SYSTEM_NAME Windows)
+endif()
+
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
