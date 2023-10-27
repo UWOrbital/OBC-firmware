@@ -106,8 +106,12 @@ target_compile_definitions(debug-tool.out PRIVATE
 add_subdirectory(tools/bringup/interface_debug_tool)
 
 target_link_libraries(debug-tool.out PRIVATE
+    tiny-aes
+    lib-correct
+    obc-gs-interface
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
+
 )
 
 # Shared

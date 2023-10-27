@@ -14,8 +14,6 @@ SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
-    # TODO: Update cc1120 driver so that it doesn't need to include this
-    ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
 
 SET(SOURCES
@@ -31,8 +29,7 @@ SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_reg.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_mcu.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_spi.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_txrx.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/ds3232/ds3232_mz.c
 
@@ -58,3 +55,6 @@ target_sources(OBC-firmware.out PUBLIC ${SOURCES})
 
 target_include_directories(OBC-bl.out PUBLIC ${INCLUDES})
 target_sources(OBC-bl.out PUBLIC ${SOURCES})
+
+target_include_directories(debug-tool.out PUBLIC ${INCLUDES})
+target_sources(debug-tool.out PUBLIC ${SOURCES})
