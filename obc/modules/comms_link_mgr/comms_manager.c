@@ -107,7 +107,7 @@ static const comms_state_func_t commsStateFns[] = {
     // Add more functions for other states as needed
 };
 
-void initCommsManager(void) {
+void obcTaskInitCommsMgr(void) {
   ASSERT((commsQueueStack != NULL) && (&commsQueue != NULL));
   if (commsQueueHandle == NULL) {
     commsQueueHandle =

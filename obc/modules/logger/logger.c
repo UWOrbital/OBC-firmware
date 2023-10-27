@@ -55,12 +55,7 @@ static obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event);
 
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
-/**
- * @brief Initialize the logger task for logging to the sd card
- *
- * @param currentNumLogFiles pointer to current number of existing log files
- */
-void initLoggerTask(void) {
+void obcTaskInitLogger(void) {
   ASSERT((loggerQueueStack != NULL) && (&loggerQueue != NULL));
   if (loggerQueueHandle == NULL) {
     loggerQueueHandle = xQueueCreateStatic(LOGGER_QUEUE_LENGTH, LOGGER_QUEUE_ITEM_SIZE, loggerQueueStack, &loggerQueue);

@@ -16,11 +16,6 @@ typedef struct {
 } logger_event_t;
 
 /**
- * @brief Initialize the logger task for logging to the sd card
- */
-void initLoggerTask(void);
-
-/**
  * @brief Set the output location
  *
  * @param newOutputLocation The new output location
