@@ -29,5 +29,3 @@ elseif(UNIX)
     cserialport
 endif()
 )
-
-
