@@ -30,7 +30,7 @@ void feedDigitalWatchdog(void) {
   rtiREG1->WDKEY = RESET_DWD_CMD2;
 }
 
-void initDigitalWatchdog() {
+void initDigitalWatchdog(void) {
   rtiREG1->DWDPRLD = PRELOAD_VAL;
   rtiREG1->WWDSIZECTRL = Size_100_Percent;
   rtiREG1->WWDRXNCTRL = Generate_Reset;

@@ -17,7 +17,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
 
-target_sources(OBC-firmware.out PUBLIC
+set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_digital_watchdog.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_het_ctrl.c

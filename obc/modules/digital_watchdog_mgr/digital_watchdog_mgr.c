@@ -120,6 +120,7 @@ void obcTaskFunctionSwWatchdog(void *params) {
       feedDigitalWatchdog();
     } else {
       LOG_ERROR_CODE(DIGITAL_WATCHDOG_ERROR_CODE_OFFSET + i);
+      vTaskSuspend(NULL);  // suspend this task and wait for reset
     }
     vTaskDelay(FEEDING_PERIOD);
   }

@@ -21,7 +21,7 @@
 #define TASK_EPS_MGR_NAME "eps_mgr"
 #define TASK_PAYLOAD_MGR_NAME "payload_mgr"
 #define TASK_TIMEKEEPER_NAME "timekeeper"
-#define TASK_DIGITAL_WATCHDOG_MGR_NAME "digital_watchdog_mgr"
+#define TASK_DIGITAL_WATCHDOG_MGR_NAME "digital_wdg_mgr"
 #define TASK_ALARM_MGR_NAME "alarm_handler"
 #define TASK_HEALTH_COLLECTOR_NAME "health_collector"
 #define TASK_STATS_COLLECTOR_NAME "stats_collector"
