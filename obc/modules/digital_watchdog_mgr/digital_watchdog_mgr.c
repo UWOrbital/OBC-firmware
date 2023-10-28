@@ -107,7 +107,7 @@ void obcTaskFunctionSwWatchdog(void *params) {
     uint8_t i;
     for (i = 0; i < OBC_SCHEDULER_TASK_COUNT; i++) {
       TickType_t ticksSinceLastCheckin = (currentTick - watchdogTaskArray[i].taskLastCheckInTick) %
-                                         0xFFFF;  // Calculate the tick between last checkin and current tick
+                                         UINT32_MAX;  // Calculate the tick between last checkin and current tick
       // Mod by UINT32_MAX in case timer has overflowed so currentTick < taskLastCheckInTick
 
       // The task does not respond after timeout period
