@@ -14,7 +14,7 @@
 
 static obc_error_code_t collectObcLm75bdTemp(void);
 
-void initHealthCollector(void) {}
+void obcTaskInitHealthCollector(void) {}
 
 void obcTaskFunctionHealthCollector(void* pvParameters) {
   obc_error_code_t errCode;
