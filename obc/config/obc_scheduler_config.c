@@ -84,7 +84,6 @@ extern void obcTaskInitCommsUplinkDecoder(void);
 extern void obcTaskInitEpsMgr(void);
 extern void obcTaskInitPayloadMgr(void);
 extern void obcTaskInitTimekeeper(void);
-extern void obcTaskInitSwWatchdog(void);
 extern void obcTaskInitAlarmMgr(void);
 extern void obcTaskInitHealthCollector(void);
 extern void obcTaskInitStatsCollector(void);
@@ -253,7 +252,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .stackSize = TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE,
             .priority = TASK_DIGITAL_WATCHDOG_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionSwWatchdog,
-            .taskInit = obcTaskInitSwWatchdog,
+            .taskInit = NULL,
         },
     [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
         {
