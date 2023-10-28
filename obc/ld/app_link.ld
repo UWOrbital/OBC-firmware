@@ -23,7 +23,7 @@ SECTIONS
     KEEP(*(.kernelTEXT))
     . = ALIGN(4);
   } >APP_KERNEL
-  
+
   /* The program code and other data goes into RAM */
   .text :
   {
@@ -80,7 +80,7 @@ SECTIONS
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
-  
+
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data :
   {
@@ -107,7 +107,7 @@ SECTIONS
   /* FreeRTOS Kernel data in protected region of RAM */
   /* used by the startup to initialize data */
   _ksidata = LOADADDR(.kernelBSS);
- 
+
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .data :
   {
@@ -119,9 +119,9 @@ SECTIONS
     . = ALIGN(4);
     _kedata = .;        /* define a global symbol at data end */
   } >RAM AT> APP_FLASH
-  
+
   .kernelHEAP : {} >RAM
-  
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -158,6 +158,6 @@ SECTIONS
     libm.a ( * )
     libgcc.a ( * )
   }
-  
+
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
