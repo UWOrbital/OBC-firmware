@@ -21,7 +21,7 @@
 #define TASK_EPS_MGR_NAME "eps_mgr"
 #define TASK_PAYLOAD_MGR_NAME "payload_mgr"
 #define TASK_TIMEKEEPER_NAME "timekeeper"
-#define TASK_SW_WATCHDOG_NAME "sw_watchdog"
+#define TASK_DIGITAL_WATCHDOG_MGR_NAME "digital_watchdog_mgr"
 #define TASK_ALARM_MGR_NAME "alarm_handler"
 #define TASK_HEALTH_COLLECTOR_NAME "health_collector"
 #define TASK_STATS_COLLECTOR_NAME "stats_collector"
@@ -36,7 +36,7 @@
 #define TASK_EPS_MGR_STACK_SIZE 1024U
 #define TASK_PAYLOAD_MGR_STACK_SIZE 1024U
 #define TASK_TIMEKEEPER_STACK_SIZE 1024U
-#define TASK_SW_WATCHDOG_STACK_SIZE 128U
+#define TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE 128U
 #define TASK_ALARM_MGR_STACK_SIZE 512U
 #define TASK_HEALTH_COLLECTOR_STACK_SIZE 256U
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
@@ -58,23 +58,8 @@
 #define TASK_ALARM_MGR_PRIORITY 4U
 #define TASK_STATE_MGR_PRIORITY 5U
 #define TASK_TIMEKEEPER_PRIORITY 6U
-#define TASK_SW_WATCHDOG_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
+#define TASK_DIGITAL_WATCHDOG_MGR_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
 #define TASK_LOGGER_PRIORITY 5U
-
-/* Task timeouts for watchdog */
-#define TASK_STATE_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_TELEMETRY_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_COMMAND_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_COMMS_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_COMMS_DOWNLINK_ENCODER_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_COMMS_UPLINK_DECODER_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_EPS_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_PAYLOAD_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_TIMEKEEPER_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_ALARM_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_HEALTH_COLLECTOR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_STATS_COLLECTOR_WATCHDOG_TIMEOUT portMAX_DELAY
-#define TASK_LOGGER_WATCHDOG_TIMEOUT portMAX_DELAY
 
 /* TYPEDEFS */
 typedef struct {
@@ -134,7 +119,7 @@ static StaticTask_t obcTaskBufferPayloadMgr;
 static StackType_t obcTaskStackTimekeeper[TASK_TIMEKEEPER_STACK_SIZE];
 static StaticTask_t obcTaskBufferTimekeeper;
 
-static StackType_t obcTaskStackSwWatchdog[TASK_SW_WATCHDOG_STACK_SIZE];
+static StackType_t obcTaskStackSwWatchdog[TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE];
 static StaticTask_t obcTaskBufferSwWatchdog;
 
 static StackType_t obcTaskStackAlarmMgr[TASK_ALARM_MGR_STACK_SIZE];
@@ -233,13 +218,13 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_TIMEKEEPER_PRIORITY,
             .taskFunc = obcTaskFunctionTimekeeper,
         },
-    [OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG] =
+    [OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR] =
         {
-            .taskName = TASK_SW_WATCHDOG_NAME,
+            .taskName = TASK_DIGITAL_WATCHDOG_MGR_NAME,
             .taskStack = obcTaskStackSwWatchdog,
             .taskBuffer = &obcTaskBufferSwWatchdog,
-            .stackSize = TASK_SW_WATCHDOG_STACK_SIZE,
-            .priority = TASK_SW_WATCHDOG_PRIORITY,
+            .stackSize = TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE,
+            .priority = TASK_DIGITAL_WATCHDOG_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionSwWatchdog,
         },
     [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
@@ -282,64 +267,6 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
 #endif
 
-};
-
-task_watchdog_config_t watchdogTaskConfigArray[] = {
-    [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
-        {
-            .taskTimeout = TASK_STATE_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR] =
-        {
-            .taskTimeout = TASK_TELEMETRY_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR] =
-        {
-            .taskTimeout = TASK_COMMAND_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_COMMS_MGR] =
-        {
-            .taskTimeout = TASK_COMMS_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER] =
-        {
-            .taskTimeout = TASK_COMMS_DOWNLINK_ENCODER_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER] =
-        {
-            .taskTimeout = TASK_COMMS_UPLINK_DECODER_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_EPS_MGR] =
-        {
-            .taskTimeout = TASK_EPS_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR] =
-        {
-            .taskTimeout = TASK_PAYLOAD_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER] =
-        {
-            .taskTimeout = TASK_TIMEKEEPER_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
-        {
-            .taskTimeout = TASK_ALARM_MGR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR] =
-        {
-            .taskTimeout = TASK_HEALTH_COLLECTOR_WATCHDOG_TIMEOUT,
-        },
-    [OBC_SCHEDULER_CONFIG_ID_LOGGER] =
-        {
-            .taskTimeout = TASK_LOGGER_WATCHDOG_TIMEOUT,
-        },
-
-#if ENABLE_TASK_STATS_COLLECTOR == 1
-    [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
-        {
-            .taskTimeout = TASK_STATS_COLLECTOR_WATCHDOG_TIMEOUT,
-        },
-#endif
 };
 
 STATIC_ASSERT_EQ(sizeof(obcSchedulerConfig) / sizeof(obc_scheduler_config_t), OBC_SCHEDULER_TASK_COUNT);

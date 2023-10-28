@@ -19,14 +19,9 @@ typedef enum {
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR,
 #endif
-  OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG,
+  OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR,
   OBC_SCHEDULER_TASK_COUNT
 } obc_scheduler_config_id_t;
-
-typedef struct {
-  uint32_t taskTimeout;
-  uint32_t taskLastCheckIn;
-} task_watchdog_config_t;
 
 /**
  * @brief Create a task with the given ID. The task function will be called with

@@ -10,7 +10,7 @@
 #include "alarm_handler.h"
 #include "health_collector.h"
 #include "task_stats_collector.h"
-#include "obc_sw_watchdog.h"
+#include "digital_watchdog_mgr.h"
 #include "logger.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -110,7 +110,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   initTaskStatsCollector();
 #endif
-  initSwWatchdog();
 
   /* Create all tasks*/
   taskENTER_CRITICAL();
@@ -127,7 +126,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR);
   taskEXIT_CRITICAL();
 
   // TODO: Deal with errors
