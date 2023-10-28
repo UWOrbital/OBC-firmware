@@ -11,12 +11,12 @@ SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/max5360
     ${CMAKE_CURRENT_SOURCE_DIR}/rffm6404
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard
-    ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
 )
 
 SET(SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_digital_watchdog.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_reset.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_sci_io.c
@@ -44,8 +44,6 @@ SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdc_bdev.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x/bd621x.c
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010/tpl5010.c
 )

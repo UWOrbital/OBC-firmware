@@ -1,6 +1,7 @@
 #pragma once
 
 #define RELIANCE_EDGE_ERROR_CODES_OFFSET 1000U
+#define DIGITAL_WATCHDOG_ERROR_CODE_OFFSET 900U
 
 typedef enum {
   /* Common Errors 0 - 99 */
@@ -86,6 +87,10 @@ typedef enum {
   /* Time errors 800 - 899 */
   OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE = 800,
   OBC_ERR_CODE_RTC_ALARM_EARLY = 801,
+
+  /* watchdog errors 900-925 */
+  /* values are mapped as (DIGITAL_WATCHDOG_ERROR_CODE_OFFSET + enum value of task in obc_scheduler_config_id_t)*/
+  OBC_ERR_CODE_STATE_MGR_NOT_CHECKED_IN = 900,
 
   /* Reliance edge errors */
   // Values are mapped as (ORIGINAL_RED_ERRCODE + RELIANCE_EDGE_ERROR_CODES_OFFSET)

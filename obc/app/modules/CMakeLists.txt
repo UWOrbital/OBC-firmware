@@ -7,6 +7,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/camera_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/command_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr
+    ${CMAKE_CURRENT_SOURCE_DIR}/digital_watchdog_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/eps_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/health_collector
     ${CMAKE_CURRENT_SOURCE_DIR}/state_mgr
@@ -34,6 +35,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/health_collector/health_collector.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/state_mgr/state_mgr.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/digital_watchdog_mgr/digital_watchdog_mgr.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_mgr/telemetry_manager.c
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_mgr/telemetry_fs_utils.c
