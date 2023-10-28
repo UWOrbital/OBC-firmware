@@ -21,7 +21,7 @@
 #define TASK_EPS_MGR_NAME "eps_mgr"
 #define TASK_PAYLOAD_MGR_NAME "payload_mgr"
 #define TASK_TIMEKEEPER_NAME "timekeeper"
-#define TASK_SW_WATCHDOG_NAME "sw_watchdog"
+#define TASK_DIGITAL_WATCHDOG_MGR_NAME "digital_wdg_mgr"
 #define TASK_ALARM_MGR_NAME "alarm_handler"
 #define TASK_HEALTH_COLLECTOR_NAME "health_collector"
 #define TASK_STATS_COLLECTOR_NAME "stats_collector"
@@ -37,7 +37,7 @@
 #define TASK_EPS_MGR_STACK_SIZE 1024U
 #define TASK_PAYLOAD_MGR_STACK_SIZE 1024U
 #define TASK_TIMEKEEPER_STACK_SIZE 1024U
-#define TASK_SW_WATCHDOG_STACK_SIZE 128U
+#define TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE 128U
 #define TASK_ALARM_MGR_STACK_SIZE 512U
 #define TASK_HEALTH_COLLECTOR_STACK_SIZE 256U
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
@@ -59,7 +59,7 @@
 #define TASK_ALARM_MGR_PRIORITY 4U
 #define TASK_STATE_MGR_PRIORITY 5U
 #define TASK_TIMEKEEPER_PRIORITY 6U
-#define TASK_SW_WATCHDOG_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
+#define TASK_DIGITAL_WATCHDOG_MGR_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
 #define TASK_LOGGER_PRIORITY 5U
 
 /* TYPEDEFS */
@@ -84,7 +84,6 @@ extern void obcTaskInitCommsUplinkDecoder(void);
 extern void obcTaskInitEpsMgr(void);
 extern void obcTaskInitPayloadMgr(void);
 extern void obcTaskInitTimekeeper(void);
-extern void obcTaskInitSwWatchdog(void);
 extern void obcTaskInitAlarmMgr(void);
 extern void obcTaskInitHealthCollector(void);
 extern void obcTaskInitStatsCollector(void);
@@ -137,7 +136,7 @@ static StaticTask_t obcTaskBufferPayloadMgr;
 static StackType_t obcTaskStackTimekeeper[TASK_TIMEKEEPER_STACK_SIZE];
 static StaticTask_t obcTaskBufferTimekeeper;
 
-static StackType_t obcTaskStackSwWatchdog[TASK_SW_WATCHDOG_STACK_SIZE];
+static StackType_t obcTaskStackSwWatchdog[TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE];
 static StaticTask_t obcTaskBufferSwWatchdog;
 
 static StackType_t obcTaskStackAlarmMgr[TASK_ALARM_MGR_STACK_SIZE];
@@ -245,15 +244,15 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionTimekeeper,
             .taskInit = obcTaskInitTimekeeper,
         },
-    [OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG] =
+    [OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR] =
         {
-            .taskName = TASK_SW_WATCHDOG_NAME,
+            .taskName = TASK_DIGITAL_WATCHDOG_MGR_NAME,
             .taskStack = obcTaskStackSwWatchdog,
             .taskBuffer = &obcTaskBufferSwWatchdog,
-            .stackSize = TASK_SW_WATCHDOG_STACK_SIZE,
-            .priority = TASK_SW_WATCHDOG_PRIORITY,
+            .stackSize = TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE,
+            .priority = TASK_DIGITAL_WATCHDOG_MGR_PRIORITY,
             .taskFunc = obcTaskFunctionSwWatchdog,
-            .taskInit = obcTaskInitSwWatchdog,
+            .taskInit = NULL,
         },
     [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
         {

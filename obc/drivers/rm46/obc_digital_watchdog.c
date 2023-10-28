@@ -1,12 +1,9 @@
-#include "obc_sw_watchdog.h"
+#include "obc_digital_watchdog.h"
 #include "obc_assert.h"
-#include "obc_privilege.h"
-#include "obc_scheduler_config.h"
 
 #include <system.h>
 #include <reg_rti.h>
 #include <rti.h>
-
 #include <stdint.h>
 
 // Watchdog is fed by writing these two values to the WDKEY register
@@ -24,41 +21,18 @@
 // based on the formula: timeout = (PRELOAD_VAL + 1) * 2^13 / RTI_FREQ
 #define PRELOAD_VAL 0xFBB
 
-// Must feed the watchdog before the timeout period expires
-// This value should provide some margin
-#define FEEDING_PERIOD pdMS_TO_TICKS(300)
-
 // This check does not explicitly check for 73.333 MHz, but it will fail if the RTI frequency changed too much
 STATIC_ASSERT((uint32_t)RTI_FREQ == 73, "RTI frequency is not 73.333 MHz");
 STATIC_ASSERT(PRELOAD_VAL >= MIN_PRELOAD_VAL && PRELOAD_VAL <= MAX_PRELOAD_VAL, "Preload value is out of range");
 
-/**
- * @brief Feed the software watchdog
- */
-static void feedSwWatchdog(void);
+void feedDigitalWatchdog(void) {
+  rtiREG1->WDKEY = RESET_DWD_CMD1;
+  rtiREG1->WDKEY = RESET_DWD_CMD2;
+}
 
-void obcTaskInitSwWatchdog(void) {}
-
-void obcTaskFunctionSwWatchdog(void* pvParameters) {
-  // Set up the watchdog
-  BaseType_t xRunningPrivileged = prvRaisePrivilege();
-
+void initDigitalWatchdog(void) {
   rtiREG1->DWDPRLD = PRELOAD_VAL;
   rtiREG1->WWDSIZECTRL = Size_100_Percent;
   rtiREG1->WWDRXNCTRL = Generate_Reset;
   rtiREG1->DWDCTRL = DWD_CTRL_ENABLE;
-
-  portRESET_PRIVILEGE(xRunningPrivileged);
-
-  while (1) {
-    feedSwWatchdog();
-    vTaskDelay(FEEDING_PERIOD);
-  }
-}
-
-static void feedSwWatchdog(void) {
-  BaseType_t xRunningPrivileged = prvRaisePrivilege();
-  rtiREG1->WDKEY = RESET_DWD_CMD1;
-  rtiREG1->WDKEY = RESET_DWD_CMD2;
-  portRESET_PRIVILEGE(xRunningPrivileged);
 }

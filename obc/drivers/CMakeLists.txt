@@ -11,7 +11,6 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/max5360
     ${CMAKE_CURRENT_SOURCE_DIR}/rffm6404
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard
-    ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
     # TODO: Update cc1120 driver so that it doesn't need to include this
@@ -19,6 +18,7 @@ set(INCLUDES
 )
 
 set(SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_digital_watchdog.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_het_ctrl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c
@@ -48,8 +48,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdc_bdev.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x/bd621x.c
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010/tpl5010.c
 )

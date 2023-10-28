@@ -101,7 +101,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG);
 
   /* Create all tasks*/
   taskENTER_CRITICAL();
@@ -118,7 +117,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR);
   taskEXIT_CRITICAL();
 
   // TODO: Deal with errors
