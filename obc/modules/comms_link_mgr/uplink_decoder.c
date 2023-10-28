@@ -4,6 +4,7 @@
 #include "obc_gs_fec.h"
 #include "cc1120_txrx.h"
 #include "cc1120_defs.h"
+#include "cc1120.h"
 #include "obc_gs_command_unpack.h"
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"
@@ -81,12 +82,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
  */
 static void flagTimeoutCallback() { isStartFlagReceived = false; }
 
-/**
- * @brief initializes the decode data pipeline task
- *
- * @return void
- */
-void initDecodeTask(void) {
+void obcTaskInitCommsUplinkDecoder(void) {
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
     decodeDataQueueHandle = xQueueCreateStatic(DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,

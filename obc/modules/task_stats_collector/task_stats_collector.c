@@ -1,3 +1,4 @@
+#if ENABLE_TASK_STATS_COLLECTOR == 1
 #include "task_stats_collector.h"
 #include "obc_scheduler_config.h"
 #include "obc_print.h"
@@ -14,7 +15,7 @@ static char taskTableHeaderStr[] =
     "***********************************************\r\nTask           State   Prio    Stack    "
     "Num\r\n***********************************************\r\n";
 
-void initTaskStatsCollector(void) {}
+void obcTaskInitStatsCollector(void) {}
 
 void obcTaskFunctionStatsCollector(void *pvParameters) {
   obc_error_code_t errCode;
@@ -28,3 +29,4 @@ void obcTaskFunctionStatsCollector(void *pvParameters) {
     LOG_IF_ERROR_CODE(sciPrintText((unsigned char *)taskStatsString, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME));
   }
 }
+#endif

@@ -1,36 +1,27 @@
 #include "state_mgr.h"
-#include "timekeeper.h"
-#include "telemetry_manager.h"
-#include "command_manager.h"
-#include "comms_manager.h"
-#include "uplink_decoder.h"
-#include "downlink_encoder.h"
-#include "eps_manager.h"
-#include "payload_manager.h"
-#include "alarm_handler.h"
-#include "health_collector.h"
-#include "task_stats_collector.h"
-#include "digital_watchdog_mgr.h"
-#include "logger.h"
+#include "comms_manager.h"  // for comms_state_t
+
+#include "obc_board_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_reliance_fs.h"
+#include "obc_scheduler_config.h"
 #include "obc_state_handle.h"
 #include "obc_state_defs.h"
-#include "obc_scheduler_config.h"
-#include "obc_reset.h"
-#include "obc_reliance_fs.h"
-#include "lm75bd.h"
-#include "obc_board_config.h"
+#include "obc_time.h"
+
 #include "fm25v20a.h"
+#include "lm75bd.h"  // TODO: Handle within thermal manager
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
-
 #include <sys_common.h>
+
+#if defined(DEBUG) && !defined(OBC_REVISION_2)
 #include <gio.h>
-#include <redposix.h>
+#endif
 
 /* Supervisor queue config */
 #define STATE_MGR_QUEUE_LENGTH 10U
@@ -49,7 +40,7 @@ static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
  */
 static void sendStartupMessages(void);
 
-void initStateMgr(void) {
+void obcTaskInitStateMgr(void) {
   ASSERT((stateMgrQueueStack != NULL) && (&stateMgrQueue != NULL));
   if (stateMgrQueueHandle == NULL) {
     stateMgrQueueHandle =
@@ -75,7 +66,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   ASSERT(stateMgrQueueHandle != NULL);
 
-  initLoggerTask();
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
   /* Initialize critical peripherals */
@@ -96,19 +87,19 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   initFRAM();  // FRAM storage (OBC)
 
-  // Call init functions for all tasks. TODO: Combine into obc_scheduler
-  initTimekeeper();
-  initAlarmHandler();
-  initTelemetry();
-  initCommandManager();
-  initCommsManager();
-  initDecodeTask();
-  initTelemEncodeTask();
-  initEPSManager();
-  initPayloadManager();
-  initHealthCollector();
+  // Initialize the state of each module. This will not start any tasks.
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-  initTaskStatsCollector();
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
 
   /* Create all tasks*/

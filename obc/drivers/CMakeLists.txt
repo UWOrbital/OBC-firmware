@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-target_include_directories(OBC-firmware.out PUBLIC
+set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam
@@ -33,8 +33,7 @@ target_sources(OBC-firmware.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_reg.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_mcu.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_spi.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_txrx.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/ds3232/ds3232_mz.c
 
@@ -52,3 +51,10 @@ target_sources(OBC-firmware.out PUBLIC
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010/tpl5010.c
 )
+
+
+target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
+target_sources(OBC-firmware.out PUBLIC ${SOURCES})
+
+target_include_directories(debug-tool.out PUBLIC ${INCLUDES})
+target_sources(debug-tool.out PUBLIC ${SOURCES})

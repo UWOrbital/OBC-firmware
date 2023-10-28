@@ -39,11 +39,6 @@ typedef struct {
 #define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
- * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs (queues, timers, etc.)
- */
-void initPayloadManager(void);
-
-/**
  * @brief	Send an event to the Payload Manager queue.
  * @param	event	Event to send.
  * @return The error code

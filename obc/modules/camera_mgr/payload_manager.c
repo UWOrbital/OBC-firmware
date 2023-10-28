@@ -14,7 +14,7 @@ static QueueHandle_t payloadQueueHandle = NULL;
 static StaticQueue_t payloadQueue;
 static uint8_t payloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH * PAYLOAD_MANAGER_QUEUE_ITEM_SIZE];
 
-void initPayloadManager(void) {
+void obcTaskInitPayloadMgr(void) {
   ASSERT((payloadQueueStack != NULL) && (&payloadQueue != NULL));
   if (payloadQueueHandle == NULL) {
     payloadQueueHandle = xQueueCreateStatic(PAYLOAD_MANAGER_QUEUE_LENGTH, PAYLOAD_MANAGER_QUEUE_ITEM_SIZE,

@@ -35,11 +35,6 @@ typedef struct {
 } state_mgr_event_t;
 
 /**
- * @brief	Initialize the state_mgr task and associated FreeRTOS constructs (queues, timers, etc.)
- */
-void initStateMgr(void);
-
-/**
  * @brief	Send an event to the state_mgr queue.
  * @param	event	Event to send.
  * @return The error code

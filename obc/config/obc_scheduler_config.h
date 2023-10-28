@@ -34,3 +34,9 @@ void obcSchedulerCreateTask(obc_scheduler_config_id_t taskID);
  * the given arguments.
  */
 void obcSchedulerCreateTaskWithArgs(obc_scheduler_config_id_t taskID, void *args);
+
+/**
+ * @brief Initialize the task with the given ID. This should be called
+ * before the task is created.
+ */
+void obcSchedulerInitTask(obc_scheduler_config_id_t taskID);
