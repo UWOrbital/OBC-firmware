@@ -22,9 +22,6 @@ add_executable(debug-tool.out)
 # Shared
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
-add_subdirectory(shared/drivers)
-add_subdirectory(shared/sys)
-add_subdirectory(shared/reliance_edge)
 
 # Application
 target_link_options(OBC-firmware.out PRIVATE
@@ -55,6 +52,8 @@ target_include_directories(OBC-firmware.out PUBLIC
 add_subdirectory(app/modules)
 add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
+add_subdirectory(app/drivers)
+add_subdirectory(app/reliance_edge)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
@@ -96,8 +95,7 @@ target_link_libraries(OBC-bl.out PRIVATE
 # Tools
 target_link_options(debug-tool.out PRIVATE
     -specs=nosys.specs
-    -Wl,-Map=OBC-bl.map -T${APP_LINKER_SCRIPT}
-    -Wl,--print-memory-usage
+    -Wl,-Map=debug-tool.map -T${APP_LINKER_SCRIPT}
     -Wl,-L${LD_DIR_PATH}
 )
 
@@ -115,7 +113,7 @@ target_compile_definitions(debug-tool.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
-add_subdirectory(tools/bringup/interface_debug_tool)
+add_subdirectory(app/tools/interface_debug_tool)
 
 target_link_libraries(debug-tool.out PRIVATE
     tiny-aes
@@ -123,5 +121,4 @@ target_link_libraries(debug-tool.out PRIVATE
     obc-gs-interface
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
-
 )

@@ -3,14 +3,14 @@
  *  -------------------------------------------------------------------------------------------------------------------
  *  \verbatim
  *
- *                 © Copyright 2009-2012 Texas Instruments Incorporated.  All rights reserved.
+ *                 ï¿½ Copyright 2009-2012 Texas Instruments Incorporated.  All rights reserved.
  *
  *  \endverbatim
  *  -------------------------------------------------------------------------------------------------------------------
  *  FILE DESCRIPTION
  *  -------------------------------------------------------------------------------------------------------------------
  *
- *      Project:  Hercules™ ARM® Safety MCUs - F021 Flash API
+ *      Project:  Herculesï¿½ ARMï¿½ Safety MCUs - F021 Flash API
  *      Version:  v2.01.01 Build(000830)
  *   Build Date:  2014-10-21
  *
@@ -37,12 +37,17 @@
 /**********************************************************************************************************************
  * INCLUDES
  *********************************************************************************************************************/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wno-wchar-size-warning"
+
 #include "Types.h"
 #include "Helpers.h"
 #include "Constants.h"
 #include "Registers.h"
 #include "FapiFunctions.h"
 #include "Compatibility.h"
+
+#pragma GCC diagnostic pop
 
 #endif /*F021_H_*/
 

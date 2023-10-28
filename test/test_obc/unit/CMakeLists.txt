@@ -1,8 +1,8 @@
 set(TEST_BINARY obc-firmware-tests)
 
 set(TEST_DEPENDENCIES
-    ${CMAKE_SOURCE_DIR}/obc/sys/time/obc_time_utils.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/arducam/image_processing.c
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/time/obc_time_utils.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/arducam/image_processing.c
 )
 
 set(TEST_MOCKS
@@ -21,10 +21,10 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
-    ${CMAKE_SOURCE_DIR}/obc/sys
-    ${CMAKE_SOURCE_DIR}/obc/sys/time
-    ${CMAKE_SOURCE_DIR}/obc/drivers/ds3232
-    ${CMAKE_SOURCE_DIR}/obc/drivers/arducam
+    ${CMAKE_SOURCE_DIR}/obc/app/sys
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/time
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/ds3232
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/arducam
 )
 
 target_link_libraries(${TEST_BINARY}
