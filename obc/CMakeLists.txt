@@ -5,6 +5,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/cmake/board_lib_defs.cmake)
 
+set(LD_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ld")
 set(APP_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ld/app_link.ld")
 set(BL_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ld/bl_link.ld")
 
@@ -30,6 +31,7 @@ target_link_options(OBC-firmware.out PRIVATE
     -specs=nosys.specs
     -Wl,-Map=OBC-firmware.map -T${APP_LINKER_SCRIPT}
     -Wl,--print-memory-usage
+    -Wl,-L${LD_DIR_PATH}
 )
 
 target_compile_options(OBC-firmware.out PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
@@ -67,6 +69,7 @@ target_link_options(OBC-bl.out PRIVATE
     -specs=nosys.specs
     -Wl,-Map=OBC-bl.map -T${BL_LINKER_SCRIPT}
     -Wl,--print-memory-usage
+    -Wl,-L${LD_DIR_PATH}
 )
 
 target_compile_options(OBC-bl.out PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
@@ -95,6 +98,7 @@ target_link_options(debug-tool.out PRIVATE
     -specs=nosys.specs
     -Wl,-Map=OBC-bl.map -T${APP_LINKER_SCRIPT}
     -Wl,--print-memory-usage
+    -Wl,-L${LD_DIR_PATH}
 )
 
 target_compile_options(debug-tool.out PRIVATE ${TARGET_OPTIMIZATION_FLAGS})

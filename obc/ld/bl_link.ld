@@ -1,31 +1,11 @@
-/*----------------------------------------------------------------------------*/
-/* sys_link.ld                                                              */
-/*                                                                            */
-/* (c) Texas Instruments 2009-2014, All rights reserved.                      */
-/*                                                                            */
-/*----------------------------------------------------------------------------*/
-/* Entry Point */
+INCLUDE memory.ld
+
 ENTRY(_c_int00)
 
-/* Highest address of the stack */
 _estack = 0x8040000;    /* end of 256K RAM */
 
-/* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x400;      /* required amount of heap  */
 
-/* Specify the memory areas */
-MEMORY
-{
-  VECTORS(rx)     : ORIGIN = 0x00000000, LENGTH = 0x00000020
-  KERNEL (rx)     : ORIGIN = 0x00000020, LENGTH = 0x00008000
-  FLASH  (rx)     : ORIGIN = 0x00008020, LENGTH = (0x00028000 - 0x00008020)
-  CPU_STACK (rw)  : ORIGIN = 0x08000000, LENGTH = 0x00000800 /* Stack is configured in sys_core.asm */
-  KRAM (xrw)      : ORIGIN = 0x08000800, LENGTH = 0x00000800
-  RAM (xrw)       : ORIGIN = (0x08000800 + 0x00000800), LENGTH = (0x0002f800 - 0x00000800)
-  MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
-}
-
-/* Define output sections */
 SECTIONS
 {
   /* The ISR vector goes first into RAM */
@@ -34,7 +14,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.intvecs)) /* ISR vector */
     . = ALIGN(4);
-  } >VECTORS
+  } >BL_VECTORS
 
   /* Flash API */
   .flashApi : ALIGN(8)
@@ -44,7 +24,7 @@ SECTIONS
     *(.flashApi*)
     *F021_API_CortexR4_LE.lib:*(.text .text*)
     __flashApiRunEnd__ = .;
-  } >RAM AT> FLASH
+  } >RAM AT> BL_FLASH
 
     /* used by bootloader to copy F021 API to RAM */
   __flashApiLoadStart__ = LOADADDR(.flashApi);
@@ -56,7 +36,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.kernelTEXT))
     . = ALIGN(4);
-  } >KERNEL
+  } >BL_KERNEL
 
   /* The program code and other data goes into RAM */
   .text :
@@ -73,7 +53,7 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
+  } >BL_FLASH
 
   /* Constant data goes into RAM */
   .rodata :
@@ -82,35 +62,35 @@ SECTIONS
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
-  } >FLASH
+  } >BL_FLASH
 
    .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >RAM
     .ARM : {
     __exidx_start = .;
       *(.ARM.exidx*)
       __exidx_end = .;
-    } >FLASH
+    } >BL_FLASH
 
   .preinit_array     :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >FLASH
+  } >BL_FLASH
   .init_array :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT(.init_array.*)))
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
-  } >FLASH
+  } >BL_FLASH
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(SORT(.fini_array.*)))
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
-  } >FLASH
+  } >BL_FLASH
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
@@ -125,7 +105,7 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM AT> FLASH
+  } >RAM AT> BL_FLASH
 
   .kernelBSS :
   {
@@ -152,7 +132,7 @@ SECTIONS
 
     . = ALIGN(4);
     _kedata = .;        /* define a global symbol at data end */
-  } >RAM AT> FLASH
+  } >RAM AT> BL_FLASH
 
   .kernelHEAP : {} >RAM
 
