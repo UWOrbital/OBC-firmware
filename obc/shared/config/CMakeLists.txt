@@ -6,3 +6,4 @@ SET(INCLUDES
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
 target_include_directories(OBC-bl.out PUBLIC ${INCLUDES})
+target_include_directories(debug-tool.out PUBLIC ${INCLUDES})

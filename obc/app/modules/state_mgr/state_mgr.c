@@ -6,8 +6,6 @@
 #include "obc_logging.h"
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
-#include "obc_state_handle.h"
-#include "obc_state_defs.h"
 #include "obc_time.h"
 
 #include "fm25v20a.h"
@@ -121,14 +119,8 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG);
   taskEXIT_CRITICAL();
 
-  // TODO: Deal with errors
-  LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_INITIALIZING));
-
   /* Send initial messages to system queues */
   sendStartupMessages();
-
-  // TODO: Deal with errors
-  LOG_IF_ERROR_CODE(changeStateOBC(OBC_STATE_NORMAL));
 
   while (1) {
     state_mgr_event_t inMsg;

@@ -18,6 +18,13 @@ add_executable(OBC-firmware.out app/app_main.c)
 add_executable(OBC-bl.out)
 add_executable(debug-tool.out)
 
+# Shared
+add_subdirectory(shared/config)
+add_subdirectory(shared/hal)
+add_subdirectory(shared/drivers)
+add_subdirectory(shared/sys)
+add_subdirectory(shared/reliance_edge)
+
 # Application
 target_link_options(OBC-firmware.out PRIVATE
     -specs=nosys.specs
@@ -45,6 +52,7 @@ target_include_directories(OBC-firmware.out PUBLIC
 
 add_subdirectory(app/modules)
 add_subdirectory(app/rtos)
+add_subdirectory(app/sys)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
@@ -113,10 +121,3 @@ target_link_libraries(debug-tool.out PRIVATE
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 
 )
-
-# Shared
-add_subdirectory(shared/config)
-add_subdirectory(shared/hal)
-add_subdirectory(shared/drivers)
-add_subdirectory(shared/sys)
-add_subdirectory(shared/reliance_edge)
