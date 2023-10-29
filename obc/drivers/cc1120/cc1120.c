@@ -443,3 +443,6 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
   RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1));
   return OBC_ERR_CODE_SUCCESS;
 }
+
+// Write CC1120 temperature sensor driver
+// Add enable and disable function for temp sensor
