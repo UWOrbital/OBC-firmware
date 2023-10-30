@@ -33,25 +33,27 @@
 #define ASYNC_GYRO "$VNWRG,06,12*XX\r\n"
 #define ASYNC_YMR "$VNWRG,06,14*XX\r\n"
 
-#define TICK_TIMEOUT portMAX_DELAY
-#define MAX_COMMAND_SIZE 256U
-#define DEFAULT_OUTPUT_RATE 10U
+#define MUTEX_TIMEOUT portMAX_DELAY
+#define MAX_SEND_SIZE 128U
+#define MAX_RECEIVE_SIZE 120U
+#define DEFAULT_OUTPUT_RATE_HZ 10U
+#define MAX_OUTPUT_RATE_LENGTH 3U
 
-static obc_error_code_t isValidOutputRate(uint32_t outputRate);
+static obc_error_code_t isValidOutputRate(uint32_t outputRateHz);
 
-static obc_error_code_t isValidOutputRate(uint32_t outputRate) {
+static obc_error_code_t isValidOutputRate(uint32_t outputRateHz) {
   uint32_t validOutputRate[] = {1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200};
   uint32_t length = sizeof(validOutputRate) / sizeof(uint32_t);
   for (uint32_t i = 0; i < length; i++) {
-    if (outputRate == validOutputRate[i]) {
+    if (outputRateHz == validOutputRate[i]) {
       return OBC_ERR_CODE_SUCCESS;
     }
   }
   return OBC_ERR_CODE_INVALID_ARG;
 }
 
-obc_error_code_t printSerialASCII(vn_ascii_types_t cmd) {
-  size_t len = 0;
+obc_error_code_t printSerialASCII(vn100_ascii_types_t cmd) {
+  uint8_t len = 0;
   switch (cmd) {
     case VN_YPR:
       len = YPR_PACKET_SIZE;
@@ -72,8 +74,8 @@ obc_error_code_t printSerialASCII(vn_ascii_types_t cmd) {
       return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  unsigned char buf[MAX_COMMAND_SIZE] = {'\0'};
-  obc_error_code_t errCode = sciReadBytes(buf, len, TICK_TIMEOUT, pdMS_TO_TICKS(1000), UART_VN100_REG);
+  unsigned char buf[MAX_RECEIVE_SIZE] = {'\0'};
+  obc_error_code_t errCode = sciReadBytes(buf, len, MUTEX_TIMEOUT, pdMS_TO_TICKS(1000), UART_VN100_REG);
   if (errCode == OBC_ERR_CODE_SUCCESS) {
     sciPrintText(buf, len, portMAX_DELAY);
     sciPrintf("\r\n");
@@ -81,60 +83,60 @@ obc_error_code_t printSerialASCII(vn_ascii_types_t cmd) {
   return errCode;
 }
 
-obc_error_code_t setASCIIOutputRate(uint32_t outputRate) {
+obc_error_code_t setASCIIOutputRate(uint32_t outputRateHz) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(isValidOutputRate(outputRate));
+  RETURN_IF_ERROR_CODE(isValidOutputRate(outputRateHz));
   // Make the size of the string representation sufficiently large, use memcpy to append string onto req
-  char freq[3];
+  char freq[MAX_OUTPUT_RATE_LENGTH];
 
   // Set to XX for now, means to ignore the checksum
   const char checksum[] = "*XX\r\n";
-  const char base[] = "$VNWRG,07,";
-  unsigned char req[MAX_COMMAND_SIZE];
-  snprintf(freq, sizeof(freq), "%ld", outputRate);
+  const char header[] = "$VNWRG,07,";
+  unsigned char req[MAX_SEND_SIZE];
+  snprintf(freq, sizeof(freq), "%ld", outputRateHz);
 
-  size_t len1 = strlen(base);
-  size_t len2 = strlen(freq);
-  size_t len3 = strlen(checksum);
+  size_t headerLength = strlen(header);
+  size_t freqLength = strlen(freq);
+  size_t checksumLength = strlen(checksum);
 
   // Begin appending the command
-  memcpy(req, base, len1);
-  memcpy(req + len1, freq, len2);
-  memcpy(req + len1 + len2, checksum, len3);
+  memcpy(req, header, headerLength);
+  memcpy(req + headerLength, freq, freqLength);
+  memcpy(req + headerLength + freqLength, checksum, checksumLength);
 
-  size_t numBytes = len1 + len2 + len3 + 1;
+  size_t numBytes = headerLength + freqLength + checksumLength;
 
-  RETURN_IF_ERROR_CODE(sciSendBytes(req, numBytes, TICK_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(req, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t startASCIIOutputs(vn_ascii_types_t cmd) {
+obc_error_code_t startASCIIOutputs(vn100_ascii_types_t cmd) {
   obc_error_code_t errCode;
-  unsigned char asyncCommand[MAX_COMMAND_SIZE];
+  unsigned char asyncCommand[MAX_SEND_SIZE];
   switch (cmd) {
     case VN_YPR: {
       memcpy(asyncCommand, ASYNC_YPR, sizeof(ASYNC_YPR));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR), MUTEX_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_MAG: {
       memcpy(asyncCommand, ASYNC_MAG, sizeof(ASYNC_MAG));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_MAG), MUTEX_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_ACC: {
       memcpy(asyncCommand, ASYNC_ACCEL, sizeof(ASYNC_ACCEL));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_ACCEL), MUTEX_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_GYR: {
       memcpy(asyncCommand, ASYNC_GYRO, sizeof(ASYNC_GYRO));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_GYRO), MUTEX_TIMEOUT, UART_VN100_REG));
       break;
     }
     case VN_YMR: {
       memcpy(asyncCommand, ASYNC_YMR, sizeof(ASYNC_YMR));
-      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YPR) + 1, TICK_TIMEOUT, UART_VN100_REG));
+      RETURN_IF_ERROR_CODE(sciSendBytes(asyncCommand, sizeof(ASYNC_YMR), MUTEX_TIMEOUT, UART_VN100_REG));
       break;
     }
     default:
@@ -146,6 +148,6 @@ obc_error_code_t startASCIIOutputs(vn_ascii_types_t cmd) {
 obc_error_code_t stopASCIIOuputs(void) {
   unsigned char buf[] = "$VNWRG,06,0*XX\r\n";
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf) + 1, portMAX_DELAY, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }

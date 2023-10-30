@@ -9,7 +9,7 @@ typedef enum {
   VN_ACC,  // Get acceleration measurements
   VN_GYR,  // Get angular rate measurements
   VN_YMR   // Get all of the above
-} vn_ascii_types_t;
+} vn100_ascii_types_t;
 
 /**
  * @brief Wrapper to read from the VN100 UART register, used to read the currently configured ASYNC ouputs.
@@ -17,7 +17,7 @@ typedef enum {
  * @param cmd Specify which packet type you expect to receive
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t printSerialASCII(vn_ascii_types_t cmd);
+obc_error_code_t printSerialASCII(vn100_ascii_types_t cmd);
 
 /**
  * @brief Configure which packet type will be asyncronously outputted, note that this will also change the packet header
@@ -26,7 +26,7 @@ obc_error_code_t printSerialASCII(vn_ascii_types_t cmd);
  * @param cmd Specify which type of information you want to be outputted
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t startASCIIOutputs(vn_ascii_types_t cmd);
+obc_error_code_t startASCIIOutputs(vn100_ascii_types_t cmd);
 
 /**
  * @brief Set the output rate for the ASYNC outputs

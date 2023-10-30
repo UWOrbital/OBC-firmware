@@ -58,7 +58,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_ascii.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_common.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_parsing.c
 )
 
 

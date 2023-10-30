@@ -18,7 +18,7 @@ void vTaskCode(void* pvParameters) {
   initVN100();
 
   obc_error_code_t errCode;
-  vn_binary_packet_t packet;
+  vn100_binary_packet_t packet;
 
   sciPrintf("Beginning demo \r\n");
 
