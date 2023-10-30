@@ -1,8 +1,11 @@
 #pragma once
 
 #include "gs_errors.h"
+#include "obc_gs_ax25.h"
 
 #define UPDATE_STATE(state, transitionState) state = transitionState
+#define MAX_COMMAND_BUFFER_SIZE 10u
+#define MAX_CONNECTION_ACK_ATTEMPTS 10u
 
 typedef enum {
   GS_STATE_DISCONNECTED,       // GS is Idle and not doing anything
@@ -32,4 +35,11 @@ typedef enum {
   GS_EVENT_CONTINUE  // Transition to next state if no event needed
 } ground_station_event_t;
 
-gs_error_code_t updateGroundStationState(round_station_state_t* state, ground_station_event_t event);
+typedef struct {
+  enum { TERMINATE, COMMAND } operation;
+  u_frame_cmd_t command;
+} gs_command_t;
+
+gs_error_code_t updateGroundStationState(ground_station_state_t* state, ground_station_event_t event);
+gs_error_code_t initializeGroundStation(gs_command_t* commandBuffer);
+gs_error_code_t setCommandBuffer(gs_command_t* buffer, uint8_t size);
