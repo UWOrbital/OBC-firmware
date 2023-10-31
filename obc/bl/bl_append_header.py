@@ -16,7 +16,7 @@ def send_bin(input_file, input_version, header_data, com_port):
             bin_data = f.read()
             
         bin_len = len(bin_data)
-        header = header_struct(version=input_version, bin_size=bin_len, data=header_data)
+        header = header_struct(version=input_version, bin_size=bin_len, data=header_data) # Create header struct with data
         
         header_bytes = struct.pack('III', header.version, header.bin_size, header.data)
         
@@ -29,7 +29,7 @@ def send_bin(input_file, input_version, header_data, com_port):
         
         OBC_UART_BAUD_RATE = 115200
         
-        with serial.Serial(com_port, OBC_UART_BAUD_RATE, timeout=1) as ser:
+        with serial.Serial(com_port, OBC_UART_BAUD_RATE, timeout=1) as ser: # Open serial port
             with open(input_file, 'rb') as f:
                 data = f.read()
                 ser.write(data) # Write binary to device via UART
