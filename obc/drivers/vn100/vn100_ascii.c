@@ -89,9 +89,9 @@ obc_error_code_t setAsciiOutputRate(uint32_t outputRateHz) {
   // Make the size of the string representation sufficiently large, use memcpy to append string onto req
   char freq[MAX_OUTPUT_RATE_LENGTH];
 
-  // Set to XX for now, means to ignore the checksum
-  const char checksum[] = "*XX\r\n";
-  const char header[] = "$VNWRG,07,";
+  /* For documentation on how these commands are formed, refer to section 5.2.8 of the user manual */
+  const char checksum[] = "*XX\r\n";   // Checksum set to "XX", which means to ignore the checksum
+  const char header[] = "$VNWRG,07,";  // Header set to write a command to register 7
   unsigned char req[MAX_SEND_SIZE];
   snprintf(freq, sizeof(freq), "%ld", outputRateHz);
 

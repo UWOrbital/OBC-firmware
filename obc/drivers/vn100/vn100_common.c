@@ -52,9 +52,10 @@ obc_error_code_t vn100SetBaudrate(uint32_t baudrate) {
   RETURN_IF_ERROR_CODE(isValidBaudRate(baudrate));
 
   char baud[MAX_BAUDRATE_LENGTH] = {'\0'};
-  // Set to XX for now, means to ignore the checksum
-  const char checksum[] = "*XX\r\n";
-  const char header[] = "$VNWRG,05,";
+
+  /* For documentation on how these commands are formed, refer to section 5.2.6 of the user manual */
+  const char checksum[] = "*XX\r\n";   // Checksum set to "XX", which means to ignore the checksum
+  const char header[] = "$VNWRG,05,";  // Header set to write a command to register 7
   unsigned char buf[MAX_SEND_SIZE] = {'\0'};
   snprintf(baud, sizeof(baud), "%ld", baudrate);
 
