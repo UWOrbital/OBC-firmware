@@ -17,7 +17,7 @@ typedef enum {
  * @param cmd Specify which packet type you expect to receive
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t printSerialASCII(vn100_ascii_types_t cmd);
+obc_error_code_t printSerialAscii(vn100_ascii_types_t cmd);
 
 /**
  * @brief Configure which packet type will be asyncronously outputted, note that this will also change the packet header
@@ -26,7 +26,7 @@ obc_error_code_t printSerialASCII(vn100_ascii_types_t cmd);
  * @param cmd Specify which type of information you want to be outputted
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t startASCIIOutputs(vn100_ascii_types_t cmd);
+obc_error_code_t startAsciiOutputs(vn100_ascii_types_t cmd);
 
 /**
  * @brief Set the output rate for the ASYNC outputs
@@ -36,11 +36,11 @@ obc_error_code_t startASCIIOutputs(vn100_ascii_types_t cmd);
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t setASCIIOutputRate(uint32_t outputRate);
+obc_error_code_t setAsciiOutputRate(uint32_t outputRate);
 
 /**
  * @brief Stops ASCII Outputs on the current active serial port. Should be used if switching modes.
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t stopASCIIOuputs(void);
+obc_error_code_t stopAsciiOuputs(void);

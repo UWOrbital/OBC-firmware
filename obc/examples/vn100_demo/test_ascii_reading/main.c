@@ -11,7 +11,7 @@
 #include <gio.h>
 #include <sci.h>
 
-#define DEFUALT_OUPUT_RATE 10
+#define DEFUALT_OUPUT_RATE_HZ 10
 
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
@@ -19,11 +19,11 @@ static StackType_t taskStack[1024];
 void vTaskCode(void* pvParameters) {
   /* Disable binary outputs */
   stopBinaryOutputs();
-  startASCIIOutputs(VN_YMR);
-  setASCIIOutputRate(DEFUALT_OUPUT_RATE);
+  startAsciiOutputs(VN_YMR);
+  setAsciiOutputRate(DEFUALT_OUPUT_RATE_HZ);
 
   while (1) {
-    obc_error_code_t errCode = printSerialASCII(VN_YMR);
+    obc_error_code_t errCode = printSerialAscii(VN_YMR);
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       sciPrintf("Error Code - %d\r\n", errCode);

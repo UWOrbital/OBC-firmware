@@ -15,12 +15,10 @@ static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
 void vTaskCode(void* pvParameters) {
-  initVN100();
+  initVn100();
 
   obc_error_code_t errCode;
   vn100_binary_packet_t packet;
-
-  sciPrintf("Beginning demo \r\n");
 
   while (1) {
     errCode = readBinaryOutputs(&packet);

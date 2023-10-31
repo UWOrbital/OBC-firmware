@@ -24,7 +24,7 @@
 #define PAYLOAD_OFFSET BINARY_HEADER_SIZE
 #define VALID_CHECKSUM_RETURN 0
 
-static uint8_t check_sync_byte(unsigned char* packet);
+static uint8_t checkSyncByte(unsigned char* packet);
 
 /**
  * @brief Parse the packets into their respective packet types
@@ -37,7 +37,7 @@ static uint8_t check_sync_byte(unsigned char* packet);
  */
 static obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket, vn100_error_t* error);
 
-static uint8_t check_sync_byte(unsigned char* packet) {
+static uint8_t checkSyncByte(unsigned char* packet) {
   if (packet[0] == DEAFULT_SYNC) {
     return 1;
   }
@@ -49,7 +49,7 @@ static obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (!check_sync_byte(packet)) {
+  if (!checkSyncByte(packet)) {
     return OBC_ERR_CODE_VN100_PARSE_ERROR;
   }
 

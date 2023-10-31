@@ -18,7 +18,7 @@
  * Syncronization control: 3,0,0,0,6,1,0,100000000,0
  *
  */
-void initVN100(void);
+void initVn100(void);
 
 obc_error_code_t resetModule();
 
@@ -29,18 +29,18 @@ obc_error_code_t resetModule();
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t VN100SetBaudrate(uint32_t baudrate);
+obc_error_code_t vn100SetBaudrate(uint32_t baudrate);
 
 /**
  * @brief pause asyncronous outputs from the VN-100
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t pauseASYNC();
+obc_error_code_t pauseAsync();
 
 /**
  * @brief resume asyncronous outputs from the VN-100
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t resumeASYNC();
+obc_error_code_t resumeAsync();

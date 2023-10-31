@@ -52,7 +52,7 @@ static obc_error_code_t isValidOutputRate(uint32_t outputRateHz) {
   return OBC_ERR_CODE_INVALID_ARG;
 }
 
-obc_error_code_t printSerialASCII(vn100_ascii_types_t cmd) {
+obc_error_code_t printSerialAscii(vn100_ascii_types_t cmd) {
   uint8_t len = 0;
   switch (cmd) {
     case VN_YPR:
@@ -83,7 +83,7 @@ obc_error_code_t printSerialASCII(vn100_ascii_types_t cmd) {
   return errCode;
 }
 
-obc_error_code_t setASCIIOutputRate(uint32_t outputRateHz) {
+obc_error_code_t setAsciiOutputRate(uint32_t outputRateHz) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidOutputRate(outputRateHz));
   // Make the size of the string representation sufficiently large, use memcpy to append string onto req
@@ -110,7 +110,7 @@ obc_error_code_t setASCIIOutputRate(uint32_t outputRateHz) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t startASCIIOutputs(vn100_ascii_types_t cmd) {
+obc_error_code_t startAsciiOutputs(vn100_ascii_types_t cmd) {
   obc_error_code_t errCode;
   unsigned char asyncCommand[MAX_SEND_SIZE];
   switch (cmd) {
@@ -145,7 +145,7 @@ obc_error_code_t startASCIIOutputs(vn100_ascii_types_t cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t stopASCIIOuputs(void) {
+obc_error_code_t stopAsciiOuputs(void) {
   unsigned char buf[] = "$VNWRG,06,0*XX\r\n";
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), portMAX_DELAY, UART_VN100_REG));

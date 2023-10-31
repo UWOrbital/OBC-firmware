@@ -17,19 +17,19 @@
 
 static obc_error_code_t isValidBaudRate(uint32_t baudRate);
 
-void initVN100(void) {
+void initVn100(void) {
   sciSetBaudrate(UART_VN100_REG, VN100_DEFAULT_BAUDRATE);
 
-  VN100SetBaudrate(VN100_DEFAULT_BAUDRATE);
+  vn100SetBaudrate(VN100_DEFAULT_BAUDRATE);
 
-  stopASCIIOuputs();
+  stopAsciiOuputs();
 
   startBinaryOutputs();
 
-  resumeASYNC();
+  resumeAsync();
 }
 
-obc_error_code_t VN100resetModule() {
+obc_error_code_t vn100resetModule() {
   obc_error_code_t errCode;
   unsigned char buf[] = "$VNRST*4D\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), MUTEX_TIMEOUT, UART_VN100_REG));
@@ -47,7 +47,7 @@ static obc_error_code_t isValidBaudRate(uint32_t baudRate) {
   return OBC_ERR_CODE_INVALID_ARG;
 }
 
-obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
+obc_error_code_t vn100SetBaudrate(uint32_t baudrate) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidBaudRate(baudrate));
 
@@ -74,14 +74,14 @@ obc_error_code_t VN100SetBaudrate(uint32_t baudrate) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t pauseASYNC() {
+obc_error_code_t pauseAsync() {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,0*XX\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t resumeASYNC() {
+obc_error_code_t resumeAsync() {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,1*XX\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), MUTEX_TIMEOUT, UART_VN100_REG));
