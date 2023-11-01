@@ -1,6 +1,5 @@
 #include "obc_spi_io.h"
 #include "obc_print.h"
-#include "fram.h"
 #include "fm25v20a.h"
 
 #include <gio.h>
@@ -12,16 +11,10 @@
 
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
-int main(void) {
-  // Initialize hardware.
+static StaticTask_t taskBuffer;
+static StackType_t taskStack[1024];
 
-  gioInit();
-  sciInit();
-  spiInit();
-
-  // Initialize the SCI mutex.
-  initSciPrint();
-  initSpiMutex();
+void vTask1(void *pvParameters) {
   uint8_t chipID[FRAM_ID_LEN];
   char msg[50] = {0};
 
@@ -33,9 +26,6 @@ int main(void) {
            chipID[5], chipID[6], chipID[7], chipID[8]);
   // Note: This will send through the USB port on the LaunchPad
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
-
-  // Toggle the LED.
-  gioToggleBit(gioPORTB, 1);
 
   // Write 1 byte to 0x31415
 
@@ -53,11 +43,11 @@ int main(void) {
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
 
   // Multipe Bytes
+  addr = 0x12345;
   unsigned char hello_world[12] = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'};
   snprintf(msg, 50, "Writting %s to %lX\r\n", hello_world, addr);
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
   // Write Hello World to 0x12345
-  addr = 0x12345;
   framWrite(addr, hello_world, sizeof(hello_world));
 
   // Read Hello World from 0x12345
@@ -99,6 +89,28 @@ int main(void) {
   framRead(addr, hello_world, sizeof(hello_world));
   snprintf(msg, 50, "Read %s from %lX after wakeup\r\n", hello_world, addr);
   sciPrintText((unsigned char *)msg, strlen(msg), UART_MUTEX_BLOCK_TIME);
+
+  while (1)
+    ;
+}
+int main(void) {
+  // Initialize hardware.
+  gioInit();
+  sciInit();
+  spiInit();
+
+  // Initialize the SCI mutex.
+  initSciPrint();
+  initSpiMutex();
+
+  sciPrintf("Starting FRAM Demo\r\n");
+
+  xTaskCreateStatic(vTask1, "FRAMDemo", 1024, NULL, 1, taskStack, &taskBuffer);
+
+  vTaskStartScheduler();
+
+  while (1)
+    ;
 
   return 0;
 }
