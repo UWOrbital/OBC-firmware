@@ -43,9 +43,9 @@ obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
 
   if (event == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  if (xQueueSend(payloadQueueHandle, (void *)event, PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS)
+  if (xQueueSend(payloadQueueHandle, (void *)event, PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
-
+  }
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
@@ -54,8 +54,7 @@ static void vPayloadManagerTask(void *pvParameters) {
 
   while (1) {
     payload_event_t queueMsg;
-    if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) == pdTRUE)
-
+    if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) == pdTRUE) {
       switch (queueMsg.eventID) {
         case PAYLOAD_MANAGER_NULL_EVENT_ID:
           break;
@@ -67,5 +66,6 @@ static void vPayloadManagerTask(void *pvParameters) {
           // releases Payload mutex when secondary payload functionality has been executed
           break;
       }
+    }
   }
 }
