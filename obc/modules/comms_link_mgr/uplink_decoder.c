@@ -4,11 +4,12 @@
 #include "obc_gs_fec.h"
 #include "cc1120_txrx.h"
 #include "cc1120_defs.h"
+#include "cc1120.h"
 #include "obc_gs_command_unpack.h"
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"
 #include "command_manager.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "comms_manager.h"
 
@@ -36,10 +37,6 @@
 #define TIMER_QUEUE_TX_TIMEOUT_MILLISECONDS 500
 #define TIMER_NAME "flag_timeout"
 
-// Decode Data task
-static TaskHandle_t decodeTaskHandle = NULL;
-static StaticTask_t decodeTaskBuffer;
-static StackType_t decodeTaskStack[COMMS_UPLINK_DECODE_STACK_SIZE];
 static bool isStartFlagReceived;
 
 // Decode Data Queue
@@ -47,7 +44,6 @@ static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
-static void vDecodeTask(void *pvParameters);
 static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData);
 
 /**
@@ -86,17 +82,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
  */
 static void flagTimeoutCallback() { isStartFlagReceived = false; }
 
-/**
- * @brief initializes the decode data pipeline task
- *
- * @return void
- */
-void initDecodeTask(void) {
-  ASSERT((decodeTaskStack != NULL) && (&decodeTaskBuffer != NULL));
-  if (decodeTaskHandle == NULL) {
-    decodeTaskHandle = xTaskCreateStatic(vDecodeTask, COMMS_UPLINK_DECODE_NAME, COMMS_UPLINK_DECODE_STACK_SIZE, NULL,
-                                         COMMS_UPLINK_DECODE_PRIORITY, decodeTaskStack, &decodeTaskBuffer);
-  }
+void obcTaskInitCommsUplinkDecoder(void) {
   ASSERT((decodeDataQueueStack != NULL) && (&decodeDataQueue != NULL));
   if (decodeDataQueueHandle == NULL) {
     decodeDataQueueHandle = xQueueCreateStatic(DECODE_DATA_QUEUE_LENGTH, DECODE_DATA_QUEUE_ITEM_SIZE,
@@ -104,14 +90,7 @@ void initDecodeTask(void) {
   }
 }
 
-/**
- * @brief takes a received packet from a vRecvTask and completely decodes it and sends the commands to command manager
- *
- * @param pvParamaters NULL
- *
- * @return void
- */
-static void vDecodeTask(void *pvParameters) {
+void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
   StaticTimer_t timerBuffer = {0};
   TimerHandle_t flagTimeoutTimer = xTimerCreateStatic(TIMER_NAME, pdMS_TO_TICKS(AX25_TIMEOUT_MILLISECONDS), pdFALSE,
                                                       (void *)0, flagTimeoutCallback, &timerBuffer);
