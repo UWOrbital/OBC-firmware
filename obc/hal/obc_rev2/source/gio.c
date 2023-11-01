@@ -186,7 +186,7 @@ void gioInit(void)
                 | (uint32)((uint32)0U << 5U)   /* Bit 5 */
                 | (uint32)((uint32)0U << 6U)   /* Bit 6 */
                 | (uint32)((uint32)0U << 7U)   /* Bit 7 */
-                | (uint32)((uint32)0U << 8U)   /* Bit 8  */
+                | (uint32)((uint32)1U << 8U)   /* Bit 8  */
                 | (uint32)((uint32)0U << 9U)   /* Bit 9  */
                 | (uint32)((uint32)1U << 10U)  /* Bit 10 */
                 | (uint32)((uint32)0U << 11U)  /* Bit 11 */
@@ -229,7 +229,7 @@ void gioInit(void)
                    | (uint32)((uint32)0U << 5U)   /* Bit 5 */
                    | (uint32)((uint32)0U << 6U)   /* Bit 6 */
                    | (uint32)((uint32)0U << 7U)   /* Bit 7 */
-                   | (uint32)((uint32)0U << 8U)   /* Bit 8  */
+                   | (uint32)((uint32)1U << 8U)   /* Bit 8  */
                    | (uint32)((uint32)0U << 9U)   /* Bit 9  */
                    | (uint32)((uint32)0U << 10U)  /* Bit 10 */
                    | (uint32)((uint32)1U << 11U)  /* Bit 11 */

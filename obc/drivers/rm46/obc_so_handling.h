@@ -5,7 +5,7 @@
 #include "os_task.h"
 
 /**
- * @brief Hook that logs stack overflow occurrences.
+ * @brief Hook to log instances of stack overflow.
  * @param xTask Task reference handle.
  * @param pcTaskName Task name.
  */
