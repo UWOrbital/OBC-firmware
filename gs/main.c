@@ -17,7 +17,6 @@
 #include <stdint.h>
 #include <time.h>
 
-int main() {
 #define COM_PORT_NAME_PREFIX "\\\\.\\COM"
 
 /* THIS GROUND STATION IS FOR DEMO PURPOSES */
@@ -308,5 +307,4 @@ static uint32_t getCurrentTime(void) {
     exit(1);
   }
   return (uint32_t)ts;
-}
 }
