@@ -3,14 +3,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    if [ "$RUNNER_OS" == "Linux" ]; then
-      runs-on: ubuntu-latest
-    elif [ "$RUNNER_OS" == "Windows" ]; then
-      runs-on: windows-latest
-    else
-      echo "$RUNNER_OS not supported"
-      exit 1
-    fi
+    runs-on: windows-latest
     defaults:
       run:
         shell: bash
