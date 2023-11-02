@@ -2,6 +2,7 @@
 
 1. Clone the repository (outside of OBC-firmware):
 ```
+cd ~
 git clone https://github.com/itas109/CSerialPort.git
 ```
 
