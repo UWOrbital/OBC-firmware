@@ -44,10 +44,8 @@ void obcTaskFunctionPayloadMgr(void *pvParameters) {
           break;
 
         case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
-
           // ADD SECONDARY PAYLOAD COMMAND HANDLER
-
-          // releases Payload mutex when secondary payload functionality has been executed
+          
           break;
       }
     }
