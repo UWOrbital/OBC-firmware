@@ -4,10 +4,16 @@
 #include "obc_gs_ax25.h"
 #include <string.h>
 
+#include "posix_freertos/include/FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+
 #define MAX_AX25_BUFFER_SIZE 200
 
 static gs_command_t* commandBuffer = {0};
 static const gs_command_t DEFAULT_COMMAND = {.command = U_FRAME_CMD_ACK, .operation = TERMINATE};
+static ground_station_state_t groundStationState = {0};
+
+static xQueueHandle gsEventQueue = NULL;
 
 typedef gs_error_code_t* ground_state_handler(void);
 
@@ -24,6 +30,12 @@ static ground_state_handler* state_handlers[] = {[GS_STATE_SEND_CONN] = GSStateS
                                                  [GS_STATE_UPLINK_COMMANDS] = GSStateUplinkCommands,
                                                  [GS_STATE_DOWNLINK_TELEMTRY] = GSStateDowlinkTelemtry,
                                                  [GS_STATE_SEND_DISC_ACK] = GSStateSendDiscAck};
+
+void vGroundStationTask(void* gsEventParameter) {
+  while (1) {
+    if (updateGroundStationState(&groundStationState, *event) != OBC_GS_ERR_CODE_SUCCESS) };
+  vTaskDelete(NULL);
+}
 
 gs_error_code_t setCommandBuffer(gs_command_t* buffer, uint8_t size) {
   memcpy(commandBuffer, buffer, size * sizeof(gs_command_t));
