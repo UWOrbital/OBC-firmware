@@ -45,7 +45,6 @@ void obcTaskFunctionPayloadMgr(void *pvParameters) {
 
         case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
           // ADD SECONDARY PAYLOAD COMMAND HANDLER
-          
           break;
       }
     }
