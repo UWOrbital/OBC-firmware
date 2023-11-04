@@ -39,10 +39,11 @@ void initTestTask(void) {
 }
 
 static void vTestTask(void * pvParameters) {
-    // Run the E2E SPI read test
+    //Run the E2E SPI read test
     // cc1120TestSpiRead();
     // testRs();
     cc1120Init();
+    LOG_ERROR_CODE(5);
     uint8_t data = 0x4F;
     cc1120WriteSpi(CC1120_REGS_PA_CFG2, &data, 1);
     cc1120StrobeSpi(CC1120_STROBE_STX);
