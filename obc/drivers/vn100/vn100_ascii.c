@@ -19,13 +19,6 @@
 #define GYRO_PACKET_SIZE 36U
 #define YMR_PACKET_SIZE 120U
 
-/* ---------------------------- Read Register Commands ------------------------------------- */
-#define YPR_REQUEST_CMD "$VNRRG,8*XX\r\n"
-#define MAG_REQUEST_CMD "$VNRRG,17*XX\r\n"
-#define ACCEL_REQUEST_CMD "$VNRRG,18*XX\r\n"
-#define GYRO_REQUEST_CMD "$VNRRG,19*XX\r\n"
-#define YMR_REQUEST_CMD "$VNRRG,27*XX\r\n"
-
 /* ---------------------------- ASYNC Configuration Commands -------------------------- */
 #define ASYNC_YPR "$VNWRG,06,1*XX\r\n"
 #define ASYNC_MAG "$VNWRG,06,10*XX\r\n"
