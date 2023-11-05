@@ -36,21 +36,6 @@
 #define MUTEX_TIMEOUT portMAX_DELAY
 #define MAX_SEND_SIZE 128U
 #define MAX_RECEIVE_SIZE 120U
-#define DEFAULT_OUTPUT_RATE_HZ 10U
-#define MAX_OUTPUT_RATE_LENGTH 3U
-
-static obc_error_code_t isValidOutputRate(uint32_t outputRateHz);
-
-static obc_error_code_t isValidOutputRate(uint32_t outputRateHz) {
-  uint32_t validOutputRate[] = {1, 2, 4, 5, 10, 20, 25, 40, 50, 100, 200};
-  uint32_t length = sizeof(validOutputRate) / sizeof(uint32_t);
-  for (uint32_t i = 0; i < length; i++) {
-    if (outputRateHz == validOutputRate[i]) {
-      return OBC_ERR_CODE_SUCCESS;
-    }
-  }
-  return OBC_ERR_CODE_INVALID_ARG;
-}
 
 obc_error_code_t printSerialAscii(vn100_ascii_types_t cmd) {
   uint8_t len = 0;
@@ -81,33 +66,6 @@ obc_error_code_t printSerialAscii(vn100_ascii_types_t cmd) {
     sciPrintf("\r\n");
   }
   return errCode;
-}
-
-obc_error_code_t setAsciiOutputRate(uint32_t outputRateHz) {
-  obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(isValidOutputRate(outputRateHz));
-  // Make the size of the string representation sufficiently large, use memcpy to append string onto req
-  char freq[MAX_OUTPUT_RATE_LENGTH];
-
-  /* For documentation on how these commands are formed, refer to section 5.2.8 of the user manual */
-  const char checksum[] = "*XX\r\n";   // Checksum set to "XX", which means to ignore the checksum
-  const char header[] = "$VNWRG,07,";  // Header set to write a command to register 7
-  unsigned char req[MAX_SEND_SIZE];
-  snprintf(freq, sizeof(freq), "%ld", outputRateHz);
-
-  size_t headerLength = strlen(header);
-  size_t freqLength = strlen(freq);
-  size_t checksumLength = strlen(checksum);
-
-  // Begin appending the command
-  memcpy(req, header, headerLength);
-  memcpy(req + headerLength, freq, freqLength);
-  memcpy(req + headerLength + freqLength, checksum, checksumLength);
-
-  size_t numBytes = headerLength + freqLength + checksumLength;
-
-  RETURN_IF_ERROR_CODE(sciSendBytes(req, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
-  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t startAsciiOutputs(vn100_ascii_types_t cmd) {

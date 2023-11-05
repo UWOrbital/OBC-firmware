@@ -4,6 +4,8 @@
 #include "obc_logging.h"
 #include "obc_gs_crc.h"
 #include "obc_sci_io.h"
+#include "data_pack_utils.h"
+#include "data_unpack_utils.h"
 
 #include "vn100_binary.h"
 
@@ -15,16 +17,37 @@
 /* -------------------------------------- Packet structure sizes -------------------------- */
 #define BINARY_HEADER_SIZE 4U
 #define BINARY_CRC_SIZE 2U
-#define BINARY_PAYLOAD_SIZE 56U  // Size including header and CRC
+#define BINARY_PAYLOAD_SIZE 56U  // Size excluding header and CRC
 #define BINARY_PACKET_SIZE BINARY_CRC_SIZE + BINARY_PAYLOAD_SIZE + BINARY_HEADER_SIZE
 
 /* -------------------------------------- Other relevant packet info -------------------------- */
-#define DEAFULT_SYNC 0xFA
+#define DEFAULT_SYNC_BYTE 0xFA
 #define SYNC_HEADER_LENGTH 1
 #define PAYLOAD_OFFSET BINARY_HEADER_SIZE
 #define VALID_CHECKSUM_RETURN 0
+#define DEFAULT_BINARY_OUTPUT_RATE_HZ 10U
 
-static uint8_t checkSyncByte(unsigned char* packet);
+// static void concatenateStrings(const char* str1, const char* str2, char* result, size_t resultSize);
+
+// // Function to concatenate two strings without using malloc
+// static void concatenateStrings(const char* str1, const char* str2, char* result, size_t resultSize) {
+//     // Check if the result buffer is large enough
+//     if (resultSize <= (strlen(str1) + strlen(str2)) + 1) {
+//         return;
+//     }
+
+//     // Copy the first string into the result
+//     strcpy(result, str1);
+
+//     // Concatenate the second string to the end of the result
+//     strcat(result, str2);
+// }
+
+/**
+ * @brief Check the first pyte of the packet. If it is not 0xFA, return an error code.
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+static uint8_t isSyncByteValid(unsigned char* packet);
 
 /**
  * @brief Parse the packets into their respective packet types
@@ -37,8 +60,8 @@ static uint8_t checkSyncByte(unsigned char* packet);
  */
 static obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket, vn100_error_t* error);
 
-static uint8_t checkSyncByte(unsigned char* packet) {
-  if (packet[0] == DEAFULT_SYNC) {
+static uint8_t isSyncByteValid(unsigned char* packet) {
+  if (packet[0] == DEFAULT_SYNC_BYTE) {
     return 1;
   }
   return 0;
@@ -49,7 +72,7 @@ static obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (!checkSyncByte(packet)) {
+  if (!isSyncByteValid(packet)) {
     return OBC_ERR_CODE_VN100_PARSE_ERROR;
   }
 
@@ -59,9 +82,32 @@ static obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t
 
   uint16_t vn100Crc = calculateCrc16Ccitt(&packet[1], BINARY_PACKET_SIZE - 1U);
 
+  uint32_t offset = PAYLOAD_OFFSET;
+
   if (vn100Crc == VALID_CHECKSUM_RETURN) {
-    memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn100_binary_packet_t));
+    parsedPacket->yaw = unpackFloat(packet, &offset);
+    parsedPacket->pitch = unpackFloat(packet, &offset);
+    parsedPacket->roll = unpackFloat(packet, &offset);
+
+    parsedPacket->gyroX = unpackFloat(packet, &offset);
+    parsedPacket->gyroY = unpackFloat(packet, &offset);
+    parsedPacket->gyroZ = unpackFloat(packet, &offset);
+
+    parsedPacket->accelX = unpackFloat(packet, &offset);
+    parsedPacket->accelY = unpackFloat(packet, &offset);
+    parsedPacket->accelZ = unpackFloat(packet, &offset);
+
+    parsedPacket->magX = unpackFloat(packet, &offset);
+    parsedPacket->magY = unpackFloat(packet, &offset);
+    parsedPacket->magZ = unpackFloat(packet, &offset);
+
+    parsedPacket->temp = unpackFloat(packet, &offset);
+    parsedPacket->pres = unpackFloat(packet, &offset);
+
     return OBC_ERR_CODE_SUCCESS;
+
+    // memcpy(parsedPacket, &packet[PAYLOAD_OFFSET], sizeof(vn100_binary_packet_t));
+    // return OBC_ERR_CODE_SUCCESS;
   }
 
   return OBC_ERR_CODE_VN100_CHECKSUM_ERROR;

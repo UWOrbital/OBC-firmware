@@ -29,16 +29,6 @@ obc_error_code_t printSerialAscii(vn100_ascii_types_t cmd);
 obc_error_code_t startAsciiOutputs(vn100_ascii_types_t cmd);
 
 /**
- * @brief Set the output rate for the ASYNC outputs
- * @param outputRate The desired baudrate to be set
- * @note The factory output rate is 40Hz.
- *        Acceptable Output rates: 1Hz, 2Hz, 4Hz, 5Hz, 10Hz, 20Hz, 25Hz, 40Hz, 50Hz, 100Hz, 200Hz
- *
- * @return OBC_ERR_CODE_SUCCESS on success, else an error code
- */
-obc_error_code_t setAsciiOutputRate(uint32_t outputRate);
-
-/**
  * @brief Stops ASCII Outputs on the current active serial port. Should be used if switching modes.
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
