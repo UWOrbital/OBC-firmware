@@ -57,9 +57,9 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_ascii.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary_parsing.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_common.c
 )
-
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
 target_sources(OBC-firmware.out PUBLIC ${SOURCES})

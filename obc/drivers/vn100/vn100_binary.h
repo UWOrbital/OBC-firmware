@@ -1,40 +1,8 @@
 #pragma once
 
 #include "obc_errors.h"
+#include "vn100_binary_parsing.h"
 #include <stdint.h>
-
-typedef struct __attribute__((__packed__)) {
-  float yaw;
-  float pitch;
-  float roll;
-  float gyroX;
-  float gyroY;
-  float gyroZ;
-  float accelX;
-  float accelY;
-  float accelZ;
-  float magX;
-  float magY;
-  float magZ;
-  float temp;
-  float pres;
-} vn100_binary_packet_t;
-
-typedef enum {
-  HARD_FAULT = 1,
-  SERIAL_BUFFER_OVERFLOW = 2,
-  INVALID_CHECKSUM = 3,
-  INVALID_COMMAND = 4,
-  NOT_ENOUGH_PARAMETERS = 5,
-  TOO_MANY_PARAMETERS = 6,
-  INVALID_PARAMETER = 7,
-  INVALID_REGISTER = 8,
-  UNATHORIZED_ACCESS = 9,
-  WATCHDOG_RESET = 10,
-  OUTPUT_BUFFER_OVERFLOW = 11,
-  INSUFFICIENT_BAUD_RATE = 12,
-  ERROR_BUFFER_OVERFLOW = 255
-} vn100_error_t;
 
 /**
  * @brief Function begins asynchronous binary outputs on VN_100 Serial port 2 (TTL)
