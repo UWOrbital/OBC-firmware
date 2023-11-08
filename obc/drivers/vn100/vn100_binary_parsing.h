@@ -34,10 +34,8 @@ extern "C" {
 
 /**
  * @brief Parse the packets into their respective packet types
- * @param cmd Command that denotes which packet type it is
  * @param packet Unparsed packet in the form of a string
  * @param parsedPacket Buffer with the correct packet type
- * @param error Error code in case an error occurs
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */

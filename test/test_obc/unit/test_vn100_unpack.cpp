@@ -50,4 +50,7 @@ TEST(TestVn100PackUnpack, ValidVn100PackUnpack) {
 
   EXPECT_EQ(receivedPacket.temp, payloadFloat[12]);
   EXPECT_EQ(receivedPacket.pres, payloadFloat[13]);
+
+  unsigned char mockErrorPacket[] = "$VNERR,1";
+  ASSERT_EQ(parsePacket(mockErrorPacket, &receivedPacket), OBC_ERR_CODE_VN100_HARDFAULT);
 }

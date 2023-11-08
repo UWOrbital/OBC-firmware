@@ -9,13 +9,15 @@
 #include <string.h>
 #include <stdio.h>
 
+/* ------------------------------------------- Packet Error Checking ------------------------------------*/
 #define DEFAULT_SYNC_BYTE 0xFA
 #define SYNC_HEADER_LENGTH 1
 #define PAYLOAD_OFFSET BINARY_HEADER_SIZE
 #define VALID_CHECKSUM_RETURN 0
-#define VN100_ERROR_HEADER "$VNERR"
-#define VN100_ERROR_TO_OBC_ERROR(err) err + 300 /* VN100 error codes have been mapped to be*/
+#define VN100_ERROR_HEADER "$VNERR,"
 #define ERROR_BUFFER_OVERFLOW 255
+#define VN100_ERROR_TO_OBC_ERROR(err) err + 300 /* VN100 error codes have been mapped to be*/
+#define ASCII_TO_INT(x) (x - '0')
 
 /**
  * @brief Check the first pyte of the packet.
@@ -65,11 +67,11 @@ static float unpackFloatLittleEndian(const uint8_t* buffer, uint32_t* offset) {
 }
 
 obc_error_code_t extractErrorCode(unsigned char* buffer) {
-  uint8_t vn100Error = buffer[sizeof(VN100_ERROR_HEADER)];
+  uint8_t vn100Error = buffer[strlen(VN100_ERROR_HEADER)];
   if (vn100Error == ERROR_BUFFER_OVERFLOW) {
     return OBC_ERR_CODE_VN100_ERROR_BUFFER_OVERFLOW;
   }
-  obc_error_code_t errorCode = VN100_ERROR_TO_OBC_ERROR(vn100Error);
+  obc_error_code_t errorCode = VN100_ERROR_TO_OBC_ERROR(ASCII_TO_INT(vn100Error));
   return errorCode;
 }
 
@@ -78,12 +80,12 @@ obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parse
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (!isSyncByteValid(packet)) {
-    return OBC_ERR_CODE_VN100_INVALID_SYNC_BYTE;
+  if (strncmp((const char*)packet, VN100_ERROR_HEADER, strlen(VN100_ERROR_HEADER)) == 0) {
+    return extractErrorCode(packet);
   }
 
-  if (strncmp((char*)packet, VN100_ERROR_HEADER, sizeof(VN100_ERROR_HEADER))) {
-    return extractErrorCode(packet);
+  if (!isSyncByteValid(packet)) {
+    return OBC_ERR_CODE_VN100_INVALID_SYNC_BYTE;
   }
 
   /* The CRC is selected such that if you compute the 16-bit CRC starting with the group byte
