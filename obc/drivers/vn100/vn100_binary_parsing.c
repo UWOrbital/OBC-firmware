@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include <stdbool.h>
 
 /* ------------------------------------------- Packet Error Checking ------------------------------------*/
 #define DEFAULT_SYNC_BYTE 0xFA
@@ -21,33 +21,39 @@
 
 /**
  * @brief Check the first pyte of the packet.
+ * @param buffer pointer to the packet
  * @return If it is not 0xFA, return false (0) otherwise true (1).
  */
-static uint8_t isSyncByteValid(unsigned char* packet);
+static bool isSyncByteValid(unsigned char* buffer);
 
 /**
  * @brief Unpack buffer into a uin32_t value
+ * @param buffer pointer to the packet
+ * @param offset Initial offset in the buffer, will increment by 4 bytes afterwards
  * @return The corresponding uint32_t value
  */
 static uint32_t unpackInt32LittleEndian(const uint8_t* buffer, uint32_t* offset);
 
 /**
  * @brief Unpack buffer into a float value
+ * @param buffer pointer to the packet
+ * @param offset Initial offset in the buffer, will increment by 4 bytes afterwards
  * @return The corresponding float value
  */
 static float unpackFloatLittleEndian(const uint8_t* buffer, uint32_t* offset);
 
 /**
  * @brief Extracts the corresponding error code
+ * @param buffer pointer to the packet
  * @return A VN_100 error code
  */
 static obc_error_code_t extractErrorCode(unsigned char* buffer);
 
-static uint8_t isSyncByteValid(unsigned char* packet) {
-  if (packet[0] == DEFAULT_SYNC_BYTE) {
-    return 1;
+static bool isSyncByteValid(unsigned char* buffer) {
+  if (buffer[0] == DEFAULT_SYNC_BYTE) {
+    return true;
   }
-  return 0;
+  return false;
 }
 
 static uint32_t unpackInt32LittleEndian(const uint8_t* buffer, uint32_t* offset) {

@@ -25,8 +25,6 @@ void initVn100(void) {
 
   vn100SetBaudrate(VN100_DEFAULT_BAUDRATE);
 
-  stopAsciiOuputs();
-
   startBinaryOutputs();
 
   resumeAsync();

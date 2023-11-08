@@ -1,7 +1,6 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "vn100_ascii.h"
 #include "vn100_binary.h"
 
 #include <stdint.h>
