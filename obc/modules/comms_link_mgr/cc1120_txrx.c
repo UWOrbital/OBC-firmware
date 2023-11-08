@@ -224,7 +224,7 @@ obc_error_code_t cc1120ReceiveToDecodeTask(TickType_t syncWordTimeoutTicks) {
 
   // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
   // see chapter 3.4 in the datasheet for more info
-  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
+  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
 
   // switch gpio 2 to be a SYNC_EVENT signal instead of CC1120_PKT_SYNC_RXTX_PIN
   uint8_t spiTransferData = SYNC_EVENT_SIGNAL_NUM;
@@ -310,7 +310,7 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
 
   // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
   // see chapter 3.4 in the datasheet for more info
-  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
+  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
 
   // switch gpio 2 to be a SYNC_EVENT signal instead of CC1120_PKT_SYNC_RXTX_PIN
   uint8_t spiTransferData = SYNC_EVENT_SIGNAL_NUM;

@@ -18,8 +18,8 @@ static const register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_IOCFG1, 0x30U},
     // Set GPIO 2 to PKT_SYNC_RXTX
     {CC1120_REGS_IOCFG2, 0x06U},
-    // Set GPIO 3 to TXFIFO_THR_PKT
-    {CC1120_REGS_IOCFG3, 0x03U},
+    // Set GPIO 3 to TXFIFO_THR
+    {CC1120_REGS_IOCFG3, 0x02U},
     // Set the sync word as 16 bits and allow for < 2 bit error on sync word
     {CC1120_REGS_SYNC_CFG0, 0x09U},
     // Set sync word qualifier value threshold similar to the one talked about for preamble in section 6.8
@@ -410,22 +410,23 @@ obc_error_code_t cc1120Init(void) {
   // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
   // see chapter 3.4 in the datasheet for more info
   gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
-  gioDisableNotification(gioPORTB, CC1120_TX_THR_PKT_hetPORT1_PIN);
-  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
+  gioDisableNotification(gioPORTA, CC1120_TX_THR_PKT_gioPORTA_PIN);
+  gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
 
   for (uint8_t i = 0; i < sizeof(cc1120SettingsStd) / sizeof(register_setting_t); i++) {
     RETURN_IF_ERROR_CODE(cc1120WriteSpi(cc1120SettingsStd[i].addr, &cc1120SettingsStd[i].val, 1));
   }
 
-  // enable interrupts again now that the gpio signals are set
-  gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
-  gioEnableNotification(gioPORTB, CC1120_TX_THR_PKT_hetPORT1_PIN);
-  gioEnableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_hetPORT1_PIN);
   for (uint8_t i = 0; i < sizeof(cc1120SettingsExt) / sizeof(register_setting_t); i++) {
     RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(cc1120SettingsExt[i].addr, &cc1120SettingsExt[i].val, 1));
   }
 
+  // enable interrupts again now that the gpio signals are set
+  gioEnableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
+  gioEnableNotification(gioPORTA, CC1120_TX_THR_PKT_gioPORTA_PIN);
+  gioEnableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
