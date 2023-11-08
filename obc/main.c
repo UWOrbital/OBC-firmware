@@ -35,10 +35,10 @@ int main(void) {
   hetInit();
   gioSetBit(gioPORTA, 1, 1);
   gioSetBit(gioPORTA, 0, 1);
-  _enable_interrupt_();
   gioDisableNotification(gioPORTB, CC1120_RX_THR_PKT_gioPORTB_PIN);
   gioDisableNotification(gioPORTA, CC1120_TX_THR_PKT_gioPORTA_PIN);
   gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
+  _enable_interrupt_();
 
   // Initialize logger
   initLogger();

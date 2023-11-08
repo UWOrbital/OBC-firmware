@@ -404,10 +404,13 @@ static void vCommsManagerTask(void *pvParameters) {
 
   // LOG_IF_ERROR_CODE(cc1120TestSpiRead());
   // LOG_IF_ERROR_CODE(cc1120TestSpiRead());
-
+  // uint8_t data = 0x4F;
+  // LOG_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PA_CFG2, &data, 1));
+  // LOG_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
   while (1) {
     errCode = cc1120Send(buf, sizeof(buf), pdMS_TO_TICKS(1000));
     LOG_INFO("errCode %d", errCode);
+    // vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 
