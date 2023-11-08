@@ -13,6 +13,9 @@
 #define SYNC_HEADER_LENGTH 1
 #define PAYLOAD_OFFSET BINARY_HEADER_SIZE
 #define VALID_CHECKSUM_RETURN 0
+#define VN100_ERROR_HEADER "$VNERR"
+#define VN100_ERROR_TO_OBC_ERROR(err) err + 300 /* VN100 error codes have been mapped to be*/
+#define ERROR_BUFFER_OVERFLOW 255
 
 /**
  * @brief Check the first pyte of the packet.
@@ -31,6 +34,12 @@ static uint32_t unpackInt32LittleEndian(const uint8_t* buffer, uint32_t* offset)
  * @return The corresponding float value
  */
 static float unpackFloatLittleEndian(const uint8_t* buffer, uint32_t* offset);
+
+/**
+ * @brief Extracts the corresponding error code
+ * @return A VN_100 error code
+ */
+static obc_error_code_t extractErrorCode(unsigned char* buffer);
 
 static uint8_t isSyncByteValid(unsigned char* packet) {
   if (packet[0] == DEFAULT_SYNC_BYTE) {
@@ -55,13 +64,26 @@ static float unpackFloatLittleEndian(const uint8_t* buffer, uint32_t* offset) {
   return val;
 }
 
-obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket, vn100_error_t* error) {
-  if (error == NULL || packet == NULL || parsedPacket == NULL) {
+obc_error_code_t extractErrorCode(unsigned char* buffer) {
+  uint8_t vn100Error = buffer[sizeof(VN100_ERROR_HEADER)];
+  if (vn100Error == ERROR_BUFFER_OVERFLOW) {
+    return OBC_ERR_CODE_VN100_ERROR_BUFFER_OVERFLOW;
+  }
+  obc_error_code_t errorCode = VN100_ERROR_TO_OBC_ERROR(vn100Error);
+  return errorCode;
+}
+
+obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket) {
+  if (packet == NULL || parsedPacket == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   if (!isSyncByteValid(packet)) {
-    return OBC_ERR_CODE_VN100_PARSE_ERROR;
+    return OBC_ERR_CODE_VN100_INVALID_SYNC_BYTE;
+  }
+
+  if (strncmp((char*)packet, VN100_ERROR_HEADER, sizeof(VN100_ERROR_HEADER))) {
+    return extractErrorCode(packet);
   }
 
   /* The CRC is selected such that if you compute the 16-bit CRC starting with the group byte
@@ -95,5 +117,5 @@ obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parse
     return OBC_ERR_CODE_SUCCESS;
   }
 
-  return OBC_ERR_CODE_VN100_CHECKSUM_ERROR;
+  return OBC_ERR_CODE_VN100_INVALID_CHECKSUM;
 }

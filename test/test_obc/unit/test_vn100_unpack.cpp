@@ -29,9 +29,8 @@ TEST(TestVn100PackUnpack, ValidVn100PackUnpack) {
   memcpy(mockVn100Packet + sizeof(header) + sizeof(payload), &crc, sizeof(crc));
 
   vn100_binary_packet_t receivedPacket;
-  vn100_error_t vnError;
 
-  ASSERT_EQ(parsePacket(mockVn100Packet, &receivedPacket, &vnError), OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(parsePacket(mockVn100Packet, &receivedPacket), OBC_ERR_CODE_SUCCESS);
 
   EXPECT_EQ(receivedPacket.yaw, payloadFloat[0]);
   EXPECT_EQ(receivedPacket.pitch, payloadFloat[1]);

@@ -28,22 +28,6 @@ typedef struct __attribute__((__packed__)) {
   float pres;
 } vn100_binary_packet_t;
 
-typedef enum {
-  HARD_FAULT = 1,
-  SERIAL_BUFFER_OVERFLOW = 2,
-  INVALID_CHECKSUM = 3,
-  INVALID_COMMAND = 4,
-  NOT_ENOUGH_PARAMETERS = 5,
-  TOO_MANY_PARAMETERS = 6,
-  INVALID_PARAMETER = 7,
-  INVALID_REGISTER = 8,
-  UNATHORIZED_ACCESS = 9,
-  WATCHDOG_RESET = 10,
-  OUTPUT_BUFFER_OVERFLOW = 11,
-  INSUFFICIENT_BAUD_RATE = 12,
-  ERROR_BUFFER_OVERFLOW = 255
-} vn100_error_t;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,7 +41,7 @@ extern "C" {
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket, vn100_error_t* error);
+obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket);
 
 #ifdef __cplusplus
 }

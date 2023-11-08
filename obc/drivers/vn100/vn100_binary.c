@@ -75,7 +75,6 @@ obc_error_code_t readBinaryOutputs(vn100_binary_packet_t* parsedPacket) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciReadBytes(buf, BINARY_PACKET_SIZE, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_VN100_REG));
 
-  vn100_error_t vnError;
-  RETURN_IF_ERROR_CODE(parsePacket(buf, parsedPacket, &vnError));
+  RETURN_IF_ERROR_CODE(parsePacket(buf, parsedPacket));
   return OBC_ERR_CODE_SUCCESS;
 }
