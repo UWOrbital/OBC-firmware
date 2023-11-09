@@ -4,12 +4,6 @@
 #include "obc_gs_command_data.h"
 
 /**
- * @brief Initializes the command manager task
- *
- */
-void initCommandManager(void);
-
-/**
  * @brief Sends a command to the command queue
  *
  * @param cmd Pointer to the command message

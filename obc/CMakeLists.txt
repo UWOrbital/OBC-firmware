@@ -45,6 +45,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
 )
 
+add_subdirectory(tools/bringup/interface_debug_tool)
 add_subdirectory(config)
 add_subdirectory(hal)
 add_subdirectory(drivers)
