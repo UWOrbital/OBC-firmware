@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 import struct
 import serial
-import argparse
+from argparse import ArgumentParser
 from pathlib import Path
+from typing import Final
 
+OBC_UART_BAUD_RATE: Final = 115200
 
 # Define header class. Example dummy data
 @dataclass
@@ -13,8 +15,8 @@ class BootloaderHeader:
 
     def serialize(self) -> bytes:
         """ Returns the serialized version of the object """
-
         return struct.pack('<II', self.version, self.bin_size)
+
 
 
 def create_bin(input_path: str, input_version: int) -> str:
@@ -23,6 +25,7 @@ def create_bin(input_path: str, input_version: int) -> str:
 
     :param input_path: Path to .bin file to be modified and sent
     :param input_version: Header version
+    :return: The output file path as a string
     """
 
     input_obj = Path(input_path)
@@ -46,7 +49,7 @@ def send_bin(file_path: str, com_port: str) -> None:
     :param file_path: Path to .bin file to be sent
     :param com_port: Com port for UART communication
     """
-    OBC_UART_BAUD_RATE = 115200
+
     file_obj = Path(file_path)
 
     with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO, timeout=1) as ser: # Open serial port
@@ -54,19 +57,20 @@ def send_bin(file_path: str, com_port: str) -> None:
        ser.write(data) # Write binary to device via UART
 
 
-def arg_parse() -> object:
-    parser = argparse.ArgumentParser(description='Append custom data to .bin and send')
+def arg_parse() -> ArgumentParser:
+    parser = ArgumentParser(description='Append custom data to .bin and send')
 
     # Add arguments
     parser.add_argument('-i', required=True, dest='input_path', type=str, help='Path to the input .bin file.')
     parser.add_argument('-p', required=True, dest='port', type=str, help='Serial port number')
     parser.add_argument('-v', dest='version', type=int, default=0, help='Version of the application. Default is 0')
 
-    return parser.parse_args()
+    return parser
 
 
 def main():
-    args = arg_parse() # Parse args
+    ArgParser = arg_parse()
+    args = ArgParser.parse_args()
 
     output_file = create_bin(args.input_path, args.version)
     send_bin(output_file, args.port)
