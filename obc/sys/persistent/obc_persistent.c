@@ -13,11 +13,11 @@ static const obc_persist_config_t obcPersistConfig[] = {
     [OBC_PERSIST_SECTION_ID_OBC_TIME] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(obcTime),
                                          .sectionSize = sizeof(obc_time_persist_t),
                                          .dataSize = sizeof(obc_time_persist_data_t),
-                                         .sectionCount = OBC_PERSISTENT_DEFAULT_COUNT},
+                                         .sectionCount = OBC_PERSISTENT_MIN_SUBINDEX},
     [OBC_PERSIST_SECTION_ID_ALARM_MGR] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(alarmMgr),
                                           .sectionSize = sizeof(alarm_mgr_persist_t),
                                           .dataSize = sizeof(alarm_mgr_persist_data_t),
-                                          .sectionCount = OBC_PERSISTENT_MAX_ALARM_COUNT},
+                                          .sectionCount = OBC_PERSISTENT_MAX_SUBINDEX_ALARM},
 };
 
 STATIC_ASSERT(sizeof(obc_persist_t) <= FRAM_MAX_ADDRESS, "obc_persist_t exceeds available FRAM space");
@@ -32,20 +32,19 @@ static const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t 
 
 /* Public function definitions */
 
-//? Perhaps the buffLen is redundant since the config holds the dataSize, maybe change buff to a void* instead?
-
-obc_error_code_t getPersistentData(obc_persist_section_id_t sectionId, uint8_t *buff, size_t buffLen) {
+obc_error_code_t getPersistentData(obc_persist_section_id_t sectionId, void *buff, size_t buffLen) {
   return getPersistentDataByIndex(sectionId, 0, buff, buffLen);
 }
 
-obc_error_code_t setPersistentData(obc_persist_section_id_t sectionId, const uint8_t *buff, size_t buffLen) {
+obc_error_code_t setPersistentData(obc_persist_section_id_t sectionId, const void *buff, size_t buffLen) {
   return setPersistentDataByIndex(sectionId, 0, buff, buffLen);
 }
 
-obc_error_code_t getPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, uint8_t *buff,
+obc_error_code_t getPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, void *buff,
                                           size_t buffLen) {
   obc_error_code_t errCode;
-  if (buff == NULL) {
+  uint8_t *buffPtr = (uint8_t *)buff;
+  if (buffPtr == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -68,16 +67,16 @@ obc_error_code_t getPersistentDataByIndex(obc_persist_section_id_t sectionId, si
   obc_persist_section_header_t header = {0};
   RETURN_IF_ERROR_CODE(framRead(sectionStartAddrByIndex, (uint8_t *)&header, sizeof(obc_persist_section_header_t)));
 
-  if (header.len != config->sectionSize) {
+  if (header.sectionSize != config->sectionSize) {
     return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
   }
 
   // Use the dataSize to prevent accidentally reading data past the section
   RETURN_IF_ERROR_CODE(
-      framRead(sectionStartAddrByIndex + sizeof(obc_persist_section_header_t), buff, config->dataSize));
+      framRead(sectionStartAddrByIndex + sizeof(obc_persist_section_header_t), buffPtr, config->dataSize));
 
   // Compute CRC32 of data and check it
-  uint32_t crc32 = computeCrc32(0, buff, config->dataSize);
+  uint32_t crc32 = computeCrc32(0, buffPtr, config->dataSize);
   if (header.crc32 != crc32) {
     return OBC_ERR_CODE_PERSISTENT_CORRUPTED;
   }
@@ -85,11 +84,12 @@ obc_error_code_t getPersistentDataByIndex(obc_persist_section_id_t sectionId, si
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, const uint8_t *buff,
+obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, size_t index, const void *buff,
                                           size_t buffLen) {
   obc_error_code_t errCode;
+  const uint8_t *buffPtr = (const uint8_t *)buff;
 
-  if (buff == NULL) {
+  if (buffPtr == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -109,9 +109,9 @@ obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, si
 
   // Create header
   obc_persist_section_header_t header = {0};
-  header.len = config->sectionSize;
+  header.sectionSize = config->sectionSize;
   // Use the dataSize as that's what we're writing
-  header.crc32 = computeCrc32(0, buff, config->dataSize);
+  header.crc32 = computeCrc32(0, buffPtr, config->dataSize);
 
   // Write header and data
   uint32_t sectionStartAddrByIndex = config->sectionStartAddr + index * config->sectionSize;
@@ -119,7 +119,7 @@ obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, si
 
   // Use the dataSize to prevent accidentally overriding data past the section
   RETURN_IF_ERROR_CODE(
-      framWrite(sectionStartAddrByIndex + sizeof(obc_persist_section_header_t), buff, config->dataSize));
+      framWrite(sectionStartAddrByIndex + sizeof(obc_persist_section_header_t), buffPtr, config->dataSize));
 
   return OBC_ERR_CODE_SUCCESS;
 }
