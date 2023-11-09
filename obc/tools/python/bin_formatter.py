@@ -7,7 +7,7 @@ from typing import Final
 
 OBC_UART_BAUD_RATE: Final = 115200
 
-# Define header class. Example dummy data
+# Define header class. This is the header that will be appended to the .bin file
 @dataclass
 class BootloaderHeader:
     version: int
@@ -16,7 +16,6 @@ class BootloaderHeader:
     def serialize(self) -> bytes:
         """ Returns the serialized version of the object """
         return struct.pack('<II', self.version, self.bin_size)
-
 
 
 def create_bin(input_path: str, input_version: int) -> str:
@@ -52,9 +51,10 @@ def send_bin(file_path: str, com_port: str) -> None:
 
     file_obj = Path(file_path)
 
-    with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO, timeout=1) as ser: # Open serial port
+    # Open serial port and write binary to device via UART
+    with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO, timeout=1) as ser:
        data = file_obj.read_bytes()
-       ser.write(data) # Write binary to device via UART
+       ser.write(data)
 
 
 def arg_parse() -> ArgumentParser:
@@ -69,8 +69,8 @@ def arg_parse() -> ArgumentParser:
 
 
 def main():
-    ArgParser = arg_parse()
-    args = ArgParser.parse_args()
+    arg_parser = arg_parse()
+    args = arg_parser.parse_args()
 
     output_file = create_bin(args.input_path, args.version)
     send_bin(output_file, args.port)
