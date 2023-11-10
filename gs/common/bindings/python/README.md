@@ -11,7 +11,7 @@ python: 3.6.8
 ```
 mkdir bin
 cd bin
-cmake .. 
+cmake ..
 cmake --build . --config Release
 ```
 
@@ -22,4 +22,3 @@ cmake -E copy generate/cserialport.py example
 cmake -E copy bin/bin/Release/_cserialport.pyd example
 python example/main.py
 ```
-

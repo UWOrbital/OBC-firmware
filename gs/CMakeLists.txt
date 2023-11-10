@@ -20,5 +20,5 @@ target_link_libraries(gs.out PUBLIC
 tiny-aes
 lib-correct
 obc-gs-interface
-cserialport
+CSerialPort
 )

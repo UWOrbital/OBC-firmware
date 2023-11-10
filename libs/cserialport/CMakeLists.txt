@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(CSERIALPORT_LIB cserialport)
+set(CSERIALPORT_LIB CSerialPort)
 
 if(UNIX)
 add_library(${CSERIALPORT_LIB} STATIC
