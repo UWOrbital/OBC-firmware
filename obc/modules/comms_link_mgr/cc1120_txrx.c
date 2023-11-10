@@ -85,10 +85,6 @@ obc_error_code_t cc1120Send(uint8_t *data, uint32_t len, TickType_t txFifoEmptyT
   // wait on the semaphore to make sure tx fifo is empty
   if (xSemaphoreTake(txFifoEmptySemaphore, txFifoEmptyTimeoutTicks) != pdPASS) {
     LOG_ERROR_CODE(OBC_ERR_CODE_SEMAPHORE_TIMEOUT);
-
-    // TODO: the cc1120 eventually reaches this error after transmitting for 20 seconds, we should figure out why this
-    // is happening and figure out a proper fix for it. Might be another ISR taking too longer and causing us to miss
-    // this one
     cc1120StrobeSpi(CC1120_STROBE_SFTX);
     xSemaphoreGive(txFifoEmptySemaphore);
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
