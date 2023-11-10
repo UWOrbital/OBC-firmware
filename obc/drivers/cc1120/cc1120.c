@@ -277,7 +277,8 @@ obc_error_code_t cc1120WriteFifo(uint8_t data[], uint8_t len) {
   RETURN_IF_ERROR_CODE(mcuCC1120CSAssert());
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(cc1120SendByteReceiveStatus(header));
 
-  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  uint8_t ignore;
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data[i], &ignore));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
 
@@ -338,7 +339,7 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
 
   uint8_t ignore;
   CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(addr, &ignore));
-  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(0x00, &data[i]));
+  for (uint8_t i = 0; i < len; i++) CC1120_DEASSERT_RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data[i], &ignore));
 
   RETURN_IF_ERROR_CODE(mcuCC1120CSDeassert());
   return OBC_ERR_CODE_SUCCESS;
@@ -360,6 +361,8 @@ obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
     if ((ccStatus & CHIP_READY_MASK) == CHIP_READY) {
       return OBC_ERR_CODE_SUCCESS;
+    } else if (ccStatus == 249) {
+      cc1120StrobeSpi(CC1120_STROBE_SFTX);
     }
   }
 
