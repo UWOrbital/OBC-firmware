@@ -361,8 +361,6 @@ obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
     if ((ccStatus & CHIP_READY_MASK) == CHIP_READY) {
       return OBC_ERR_CODE_SUCCESS;
-    } else if (ccStatus == 249) {
-      cc1120StrobeSpi(CC1120_STROBE_SFTX);
     }
   }
 
