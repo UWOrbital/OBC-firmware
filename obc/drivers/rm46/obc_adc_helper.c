@@ -13,15 +13,12 @@ static StaticSemaphore_t adcConversionMutexBuffer;
 static SemaphoreHandle_t adcConversionComplete = NULL;
 static StaticSemaphore_t adcConversionCompleteBuffer;
 
-void initADCMutex(void)
-{
-  if (adcConversionMutex == NULL)
-  {
+void initADCMutex(void) {
+  if (adcConversionMutex == NULL) {
     adcConversionMutex = xSemaphoreCreateMutexStatic(&adcConversionMutexBuffer);
   }
   ASSERT(adcConversionMutex != NULL);
-  if (adcConversionComplete == NULL)
-  {
+  if (adcConversionComplete == NULL) {
     adcConversionComplete = xSemaphoreCreateBinaryStatic(&adcConversionCompleteBuffer);
   }
   ASSERT(adcConversionComplete != NULL);
@@ -42,7 +39,8 @@ static obc_error_code_t adcGetSingleChData(adcBASE_t *adc, uint8_t channel, uint
     statusReg = &(adc->G2SR);
   }
   // While loop runs until end flag is set to 1
-  while (!(*statusReg & 0x1));
+  while (!(*statusReg & 0x1))
+    ;
 
   adcStopConversion(adc, group);
   adcReadSingleData(adc, group, *data);
@@ -71,7 +69,8 @@ static obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t channel, uint8_t
   }
   adcStartConversion(adc, group);
 
-  while (!adcIsConversionComplete(adc, group));
+  while (!adcIsConversionComplete(adc, group))
+    ;
   adcStopConversion(adc, group);
 
   adcGetData(adc, group, data);
