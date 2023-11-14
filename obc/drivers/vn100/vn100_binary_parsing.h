@@ -11,7 +11,7 @@
 #define BINARY_PAYLOAD_SIZE 56U                                                        // Size excluding header and CRC
 #define BINARY_PACKET_SIZE BINARY_CRC_SIZE + BINARY_PAYLOAD_SIZE + BINARY_HEADER_SIZE  // Total Size
 
-typedef struct __attribute__((__packed__)) {
+typedef struct {
   float yaw;
   float pitch;
   float roll;
@@ -39,7 +39,7 @@ extern "C" {
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket);
+obc_error_code_t parsePacket(const unsigned char* packet, vn100_binary_packet_t* parsedPacket);
 
 #ifdef __cplusplus
 }

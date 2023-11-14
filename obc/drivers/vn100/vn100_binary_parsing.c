@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /* ------------------------------------------- Packet Error Checking ------------------------------------*/
 #define DEFAULT_SYNC_BYTE 0xFA
@@ -24,7 +25,7 @@
  * @param buffer pointer to the packet
  * @return If it is not 0xFA, return false (0) otherwise true (1).
  */
-static bool isSyncByteValid(unsigned char* buffer);
+static bool isSyncByteValid(const unsigned char* buffer);
 
 /**
  * @brief Unpack buffer into a uin32_t value
@@ -47,9 +48,9 @@ static float unpackFloatLittleEndian(const uint8_t* buffer, uint32_t* offset);
  * @param buffer pointer to the packet
  * @return A VN_100 error code
  */
-static obc_error_code_t extractErrorCode(unsigned char* buffer);
+static obc_error_code_t extractErrorCode(const unsigned char* buffer);
 
-static bool isSyncByteValid(unsigned char* buffer) {
+static bool isSyncByteValid(const unsigned char* buffer) {
   if (buffer[0] == DEFAULT_SYNC_BYTE) {
     return true;
   }
@@ -72,7 +73,7 @@ static float unpackFloatLittleEndian(const uint8_t* buffer, uint32_t* offset) {
   return val;
 }
 
-obc_error_code_t extractErrorCode(unsigned char* buffer) {
+obc_error_code_t extractErrorCode(const unsigned char* buffer) {
   uint8_t vn100Error = buffer[strlen(VN100_ERROR_HEADER)];
   if (vn100Error == ERROR_BUFFER_OVERFLOW) {
     return OBC_ERR_CODE_VN100_ERROR_BUFFER_OVERFLOW;
@@ -81,7 +82,7 @@ obc_error_code_t extractErrorCode(unsigned char* buffer) {
   return errorCode;
 }
 
-obc_error_code_t parsePacket(unsigned char* packet, vn100_binary_packet_t* parsedPacket) {
+obc_error_code_t parsePacket(const unsigned char* packet, vn100_binary_packet_t* parsedPacket) {
   if (packet == NULL || parsedPacket == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
