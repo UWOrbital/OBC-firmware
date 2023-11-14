@@ -42,7 +42,7 @@ int main(void) {
   initSpiMutex();
 
   // The state_mgr is the only task running initially.
-  initStateMgr();
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
 
   vTaskStartScheduler();

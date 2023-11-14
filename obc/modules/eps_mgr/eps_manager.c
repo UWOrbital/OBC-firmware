@@ -13,7 +13,7 @@ static QueueHandle_t epsQueueHandle = NULL;
 static StaticQueue_t epsQueue;
 static uint8_t epsQueueStack[EPS_MANAGER_QUEUE_LENGTH * EPS_MANAGER_QUEUE_ITEM_SIZE];
 
-void initEPSManager(void) {
+void obcTaskInitEpsMgr(void) {
   ASSERT((epsQueueStack != NULL) && (&epsQueue != NULL));
   if (epsQueueHandle == NULL) {
     epsQueueHandle =
