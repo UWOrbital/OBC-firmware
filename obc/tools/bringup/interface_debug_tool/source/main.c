@@ -13,7 +13,7 @@
 #include "test_can.h"
 #include "test_adc.h"
 #include "test_gio.h"
-#include "test_temp.h"
+#include "test_lm75bd.h"
 #include <FreeRTOS.h>
 #include <os_task.h>
 
@@ -43,7 +43,7 @@ void utilityCLI(void *pvParameters) {
   while (1) {
     unsigned char cmdChar;
     sciPrintf("Enter a command: ");
-    sciReadBytes(&cmdChar, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG);
+    sciReadBytes(&cmdChar, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG);
     sciPrintf("\r\n");
 
     if (cmdChar >= NUM_COMMANDS_MAX) {
@@ -70,7 +70,7 @@ int main(void) {
   initSpiMutex();
   initI2CMutex();
 
-  sciPrintf("Starting Bringup Utility...\r\n");
+  // sciPrintf("Starting Bringup Utility...\r\n");
 
   xTaskCreateStatic(utilityCLI, "Bringup Utility", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
