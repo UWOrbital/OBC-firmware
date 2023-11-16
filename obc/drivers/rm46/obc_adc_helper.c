@@ -1,36 +1,39 @@
 #include "obc_logging.h"
 #include "stdint.h"
-#include "adc.h"
+#include "obc_adc_helper.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_semphr.h>
 #include <os_task.h>
 
+#include <adc.h>
+
 static SemaphoreHandle_t adcConversionMutex = NULL;
 static StaticSemaphore_t adcConversionMutexBuffer;
-
-static SemaphoreHandle_t adcConversionComplete = NULL;
-static StaticSemaphore_t adcConversionCompleteBuffer;
 
 void initADCMutex(void) {
   if (adcConversionMutex == NULL) {
     adcConversionMutex = xSemaphoreCreateMutexStatic(&adcConversionMutexBuffer);
   }
   ASSERT(adcConversionMutex != NULL);
-  if (adcConversionComplete == NULL) {
-    adcConversionComplete = xSemaphoreCreateBinaryStatic(&adcConversionCompleteBuffer);
-  }
-  ASSERT(adcConversionComplete != NULL);
 }
 
 static obc_error_code_t adcGetSingleChData(adcBASE_t *adc, uint8_t channel, uint8_t group, adcData_t *data) {
   if (adc == NULL || data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  ASSERT(adcConversionMutex != NULL);
+
+  if (xStaticSemaphoreTake(adcConversionMutexBuffer, portMAX_DELAY) != pdTRUE) {
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+  }
+
   adc->GxSEL[group] = 1 << channel;
   // GxSR sets bit 0 to 1 when group conversions are done: recommended for single conversion mode
   volatile uint32_t *statusReg;
+
   if (group == 0) {
     statusReg = &(adc->EVSR);
   } else if (group == 1) {
@@ -38,18 +41,21 @@ static obc_error_code_t adcGetSingleChData(adcBASE_t *adc, uint8_t channel, uint
   } else {
     statusReg = &(adc->G2SR);
   }
+
   // While loop runs until end flag is set to 1
   while (!(*statusReg & 0x1))
     ;
 
   adcStopConversion(adc, group);
+
+  // Reading from memory resets the statusReg to 0
   adcReadSingleData(adc, group, *data);
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
 // Helper function for adcGetSingleChData
-static obc_error_code_t adcReadSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data) {
+static obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data) {
   unsigned buf;
   adcData_t *ptr = data;
 
@@ -67,10 +73,16 @@ static obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t channel, uint8_t
   if (adc == NULL || data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  if (xStaticSemaphoreTake(adcConversionMutexBuffer, portMAX_DELAY) != pdTRUE) {
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+  }
+
   adcStartConversion(adc, group);
 
   while (!adcIsConversionComplete(adc, group))
     ;
+
   adcStopConversion(adc, group);
 
   adcGetData(adc, group, data);
