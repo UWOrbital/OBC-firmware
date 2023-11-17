@@ -1,6 +1,7 @@
 #include "test_rtc.h"
 #include "obc_print.h"
 #include "ds3232_mz.h"
+#include "gio.h"
 
 #define TEMP_LOWER_BOUND 0.0f
 #define TEMP_UPPER_BOUND 40.0f
@@ -89,9 +90,10 @@ void testRTC(void) {
     }
   }
 
+  /*---------ALARM TESTS---------*/
+
   // Alarm & interrupt register sets
   control.A1IE = 1;
-  control.A2IE = 1;
   control.INTCN = 1;
   if (setControlRTC(&control) != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Failed to set RTC control\r\n");
@@ -99,7 +101,7 @@ void testRTC(void) {
 
   rtc_alarm_time_t alarm = {0};
 
-  // Alarm1 set to pulse whenever seconds == 30
+  // Alarm1 set to trigger whenever seconds == 30
   rtc_alarm1_mode_t alarm1Mode = RTC_ALARM1_MATCH_SECONDS;
   alarm.time.seconds = 30;
   alarm.time.minutes = 0;
@@ -108,18 +110,41 @@ void testRTC(void) {
   if (setAlarm1RTC(alarm1Mode, alarm) != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Failed to set RTC alarm 1\r\n");
   } else {
-    sciPrintf("Successfully set RTC alarm 1\r\n");
+    sciPrintf("Successfully set RTC alarm 1\r\nWaiting for alarm interrupt...\r\n");
   }
 
-  // Alarm2 set to pulse whenever minutes == 15
-  rtc_alarm2_mode_t alarm2Mode = RTC_ALARM2_MATCH_MINUTES;
-  alarm.time.seconds = 0;
-  alarm.time.minutes = 15;
-  alarm.time.hours = 0;
-  alarm.date = 1;
-  if (setAlarm2RTC(alarm2Mode, alarm) != OBC_ERR_CODE_SUCCESS) {
-    sciPrintf("Failed to set RTC alarm 2\r\n");
+  // Poll for alarm interrupt which should set GIOA_0 HIGH
+  uint32_t elapsed = 0;
+  bool failed = false;
+  while (gioGetBit(gioPORTA, 0) == 0) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    elapsed++;
+
+    // Since seconds will match 30 once a minute, let this poll for max 1 minute before assuming failure
+    if (elapsed > 60) {
+      failed = true;
+      sciPrintf("Alarm Interrupt Failed: Alarm was not triggered within a minute");
+      break;
+    }
+  }
+
+  if (!failed) {
+    // Verify the alarm flag was set at the right time (matching 30 seconds, with some error)
+    if (getCurrentTimeRTC(&currentDateTime.time) != OBC_ERR_CODE_SUCCESS) {
+      if (0 <= (currentDateTime.time.seconds - 30) && (currentDateTime.time.seconds - 30) <= 2) {
+        sciPrintf("Alarm 1 interrupt triggered succesfully\r\n");
+      } else {
+        sciPrintf("Alarm 1 flag interrupt triggered at wrong time: %d seconds\r\n\tExpected: 30 seconds",
+                  currentDateTime.time.seconds);
+      }
+    } else {
+      sciPrintf("Failed to get RTC DateTime\r\n");
+    }
+  }
+
+  if (clearAlarm1RTC() != OBC_ERR_CODE_SUCCESS) {
+    sciPrintf("Failed to clear RTC alarm 1 flag\r\n");
   } else {
-    sciPrintf("Successfully set RTC alarm 2\r\n");
+    sciPrintf("RTC alarm 1 flag cleared succesfully\r\n");
   }
 }
