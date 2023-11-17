@@ -2,6 +2,9 @@
 #include "obc_print.h"
 #include "ds3232_mz.h"
 
+#define TEMP_LOWER_BOUND 0.0f
+#define TEMP_UPPER_BOUND 40.0f
+
 void testRTC(void) {
   sciPrintf("Testing RTC...\r\n");
 
@@ -34,16 +37,26 @@ void testRTC(void) {
   // Temperature read
   if (getTemperatureRTC(&temperature) != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Failed to get RTC temperature\r\n");
+  } else if (temperature < TEMP_LOWER_BOUND || TEMP_UPPER_BOUND < temperature) {
+    sciPrintf("RTC Temperature Test Failed: %f°C\r\n\tExpected: [%f°C, %f°C]\r\n", temperature, TEMP_LOWER_BOUND,
+              TEMP_UPPER_BOUND);
+
   } else {
-    sciPrintf("RTC Temperature: %f\r\n", temperature);
+    sciPrintf("RTC Temperature Test Passed: %f\r\n", temperature);
   }
 
   // Control register configuration read
   if (getControlRTC(&control) != OBC_ERR_CODE_SUCCESS) {
     sciPrintf("Failed to get RTC control\r\n");
+  } else if (control.EOSC == 0 && control.BBSQW == 0 && control.CONV == 0 && control.A1IE == 0 && control.A2IE == 0 &&
+             control.INTCN == 1) {
+    sciPrintf("Initial RTC Control Test Passed: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u\r\n", control.EOSC,
+              control.BBSQW, control.CONV, control.A1IE, control.A2IE, control.INTCN);
   } else {
-    sciPrintf("Initial RTC Control: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u\r\n", control.EOSC, control.BBSQW,
-              control.CONV, control.A1IE, control.A2IE, control.INTCN);
+    sciPrintf(
+        "Initial RTC Control Test Failed: EOSC-%u BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u\r\n\tExpected: EOSC-%u "
+        "BBSQW-%u CONV-%u A1IE-%u A2IE-%u INTCN-%u",
+        control.EOSC, control.BBSQW, control.CONV, control.A1IE, control.A2IE, control.INTCN, 0, 0, 0, 0, 0, 1);
   }
 
   /*---------SET TESTS---------*/
@@ -67,7 +80,9 @@ void testRTC(void) {
                updatedDateTime.date.date == currentDateTime.date.date &&
                updatedDateTime.time.hours == currentDateTime.time.hours &&
                updatedDateTime.time.minutes == currentDateTime.time.minutes &&
-               updatedDateTime.time.seconds == currentDateTime.time.seconds) {
+               // Two second tolerance to account for delay between writing and reading
+               0 <= updatedDateTime.time.seconds - currentDateTime.time.seconds &&
+               updatedDateTime.time.seconds - currentDateTime.time.seconds <= 2) {
       sciPrintf("Successfully set RTC DateTime\r\n");
     } else {
       sciPrintf("RTC DateTime does not match expected\r\n");
