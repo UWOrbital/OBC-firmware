@@ -52,9 +52,8 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010/tpl5010.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary_parsing.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_common.c
 )
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})

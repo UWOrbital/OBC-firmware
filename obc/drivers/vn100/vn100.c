@@ -2,7 +2,7 @@
 #include "obc_board_config.h"
 #include "obc_logging.h"
 #include "obc_sci_io.h"
-#include "vn100_common.h"
+#include "vn100.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -15,6 +15,20 @@
 #define MAX_BAUDRATE_LENGTH 7U
 #define MAX_OUTPUT_RATE_LENGTH 3U
 #define DEFAULT_OUTPUT_RATE_HZ 10U
+#define SCI_SEMAPHORE_TIMEOUT_MS 10U
+
+/* Building start and stop binary output comands */
+#define BINARY_OUTPUT_START_PREFIX "$VNWRG,75,2,"  // Configure write command to output on register 75 and serial port 2
+#define BINARY_OUTPUT_STOP_PREFIX "$VNWRG,75,0,"   // Configure write command to stop outputs on register 75
+#define BINARY_OUTPUT_RATE_DIVISOR \
+  "80"  // Calculated by taking the IMU rate = 800Hz and dividing by the desired Output rate = 10Hz (800/10 = 80)
+#define BINARY_OUTPUT_POSTFIX \
+  ",01,0528*XX\r\n"  // Configure to use output group 1 and enable the aforemore mentioned outputs, see section 4.2.4
+                     // for more details.
+#define START_BINARY_OUTPUTS \
+  BINARY_OUTPUT_START_PREFIX BINARY_OUTPUT_RATE_DIVISOR BINARY_OUTPUT_POSTFIX /* $VNWRG,75,2,80,01,0528*XX\r\n */
+#define STOP_BINARY_OUTPUTS \
+  BINARY_OUTPUT_STOP_PREFIX BINARY_OUTPUT_RATE_DIVISOR BINARY_OUTPUT_POSTFIX /* $VNWRG,75,0,80,01,0528*XX\r\n */
 
 static obc_error_code_t isValidBaudRate(uint32_t baudRate);
 
@@ -25,12 +39,14 @@ void initVn100(void) {
 
   vn100SetBaudrate(VN100_DEFAULT_BAUDRATE);
 
-  startBinaryOutputs();
+  vn100StartBinaryOutputs();
 
-  resumeAsync();
+  vn100SetOutputRate(DEFAULT_OUTPUT_RATE_HZ);
+
+  vn100ResumeAsync();
 }
 
-obc_error_code_t vn100resetModule(void) {
+obc_error_code_t vn100ResetModule(void) {
   obc_error_code_t errCode;
   unsigned char buf[] = "$VNRST*4D\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), MUTEX_TIMEOUT, UART_VN100_REG));
@@ -114,14 +130,44 @@ obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t pauseAsync(void) {
+obc_error_code_t startBinaryOutputs(void) {
+  /* Outputs: Yaw Pitch Roll, Angular rates, Accelerometer data, Magnetometer, Temp and Pressure.
+     Initialized to start with an output rate of 10Hz */
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), sizeof(START_BINARY_OUTPUTS), portMAX_DELAY,
+                                    UART_VN100_REG));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t vn100StopBinaryOutputs(void) {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(
+      sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), sizeof(STOP_BINARY_OUTPUTS), portMAX_DELAY, UART_VN100_REG));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t* parsedPacket) {
+  if (parsedPacket == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  unsigned char buf[VN100_BINARY_PACKET_SIZE] = {'\0'};
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(sciReadBytes(buf, VN100_BINARY_PACKET_SIZE, portMAX_DELAY,
+                                    pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS), UART_VN100_REG));
+
+  RETURN_IF_ERROR_CODE(vn100ParsePacket(buf, VN100_BINARY_PACKET_SIZE, parsedPacket));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t vn100PauseAsync(void) {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,0*XX\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t resumeAsync(void) {
+obc_error_code_t vn100ResumeAsync(void) {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,1*XX\r\n";
   RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), MUTEX_TIMEOUT, UART_VN100_REG));

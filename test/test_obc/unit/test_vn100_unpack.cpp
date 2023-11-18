@@ -30,7 +30,7 @@ TEST(TestVn100PackUnpack, ValidVn100PackUnpack) {
 
   vn100_binary_packet_t receivedPacket;
 
-  ASSERT_EQ(parsePacket(mockVn100Packet, &receivedPacket), OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(vn100ParsePacket(mockVn100Packet, totalSize, &receivedPacket), OBC_ERR_CODE_SUCCESS);
 
   EXPECT_EQ(receivedPacket.yaw, payloadFloat[0]);
   EXPECT_EQ(receivedPacket.pitch, payloadFloat[1]);
@@ -52,5 +52,5 @@ TEST(TestVn100PackUnpack, ValidVn100PackUnpack) {
   EXPECT_EQ(receivedPacket.pres, payloadFloat[13]);
 
   unsigned char mockErrorPacket[] = "$VNERR,1";
-  ASSERT_EQ(parsePacket(mockErrorPacket, &receivedPacket), OBC_ERR_CODE_VN100_HARDFAULT);
+  ASSERT_EQ(vn100ParsePacket(mockErrorPacket, totalSize, &receivedPacket), OBC_ERR_CODE_VN100_HARDFAULT);
 }

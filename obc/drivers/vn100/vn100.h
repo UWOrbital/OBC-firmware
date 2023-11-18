@@ -1,7 +1,7 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "vn100_binary.h"
+#include "vn100_binary_parsing.h"
 
 #include <stdint.h>
 
@@ -26,7 +26,7 @@ void initVn100(void);
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
 
-obc_error_code_t vn100resetModule(void);
+obc_error_code_t vn100ResetModule(void);
 
 /**
  * @brief Set the baudrate for the VN-100 peripheral
@@ -52,11 +52,42 @@ obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz);
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t pauseAsync(void);
+obc_error_code_t vn100PauseAsync(void);
 
 /**
  * @brief resume asyncronous outputs from the VN-100
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t resumeAsync(void);
+obc_error_code_t vn100ResumeAsync(void);
+
+/**
+ * @brief Function begins asynchronous binary outputs on VN_100 Serial port 2 (TTL)
+ *  Outputs:
+ *  Yaw, Pitch, Roll
+ *  Angular Rates
+ *  Acceleration
+ *  Magnetometer
+ *  Temperature
+ *  Pressure
+ *
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t vn100StartBinaryOutputs(void);
+
+/**
+ * @brief Stops asyncronous binary ouputs from serial port 2, this should be used in the event of changing the
+ *        configuration of serial port 2 to output serial ASCII. Simply call startBinaryOutputs() to
+ *        reconfigure the serial port to output binary packets.
+ *
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t vn100StopBinaryOutputs(void);
+
+/**
+ * @brief Reads all incoming asyncronous binary output data.
+ *
+ * @param parsedPacket Pointer to the packet to store data in.
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t* parsedPacket);

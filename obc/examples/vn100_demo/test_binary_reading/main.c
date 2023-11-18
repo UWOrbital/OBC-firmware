@@ -1,7 +1,7 @@
 #include "obc_print.h"
 #include "obc_sci_io.h"
 #include "obc_board_config.h"
-#include "vn100_common.h"
+#include "vn100.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -21,7 +21,7 @@ void vTaskCode(void* pvParameters) {
   vn100_binary_packet_t packet;
 
   while (1) {
-    errCode = readBinaryOutputs(&packet);
+    errCode = vn100ReadBinaryOutputs(&packet);
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       sciPrintf("Error reading from VN100 - %d\r\n", errCode);
