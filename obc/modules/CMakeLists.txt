@@ -15,6 +15,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector
     ${CMAKE_CURRENT_SOURCE_DIR}/logger
+    ${CMAKE_CURRENT_SOURCE_DIR}/power_mgr
 )
 
 set(SOURCES
@@ -45,6 +46,8 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/task_stats_collector.c
     ${CMAKE_CURRENT_SOURCE_DIR}/logger/logger.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/power_mgr/power_mgr.c
 )
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
