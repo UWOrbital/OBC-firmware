@@ -1,5 +1,5 @@
 #include "obc_logging.h"
-#include "stdint.h"
+#include "obc_errors.h"
 #include "obc_adc_helper.h"
 
 #include <FreeRTOS.h>
@@ -19,21 +19,20 @@ void initADCMutex(void) {
   ASSERT(adcConversionMutex != NULL);
 }
 
-static obc_error_code_t adcGetSingleChData(adcBASE_t *adc, uint8_t channel, uint8_t group, adcData_t *data) {
+static obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group, adcData_t *data) {
   if (adc == NULL || data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   ASSERT(adcConversionMutex != NULL);
 
-  if (xStaticSemaphoreTake(adcConversionMutexBuffer, portMAX_DELAY) != pdTRUE) {
+  if (xSemaphoreTake(adcConversionMutex, portMAX_DELAY) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
   adc->GxSEL[group] = 1 << channel;
-  // GxSR sets bit 0 to 1 when group conversions are done: recommended for single conversion mode
-  volatile uint32_t *statusReg;
 
+  volatile uint32_t *statusReg;
   if (group == 0) {
     statusReg = &(adc->EVSR);
   } else if (group == 1) {
@@ -42,20 +41,18 @@ static obc_error_code_t adcGetSingleChData(adcBASE_t *adc, uint8_t channel, uint
     statusReg = &(adc->G2SR);
   }
 
-  // While loop runs until end flag is set to 1
   while (!(*statusReg & 0x1))
     ;
 
   adcStopConversion(adc, group);
-
-  // Reading from memory resets the statusReg to 0
   adcReadSingleData(adc, group, *data);
+
+  xSemaphoreGive(adcConversionMutex);
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// Helper function for adcGetSingleChData
-static obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data) {
+static obc_error_code_t adcReadSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data) {
   unsigned buf;
   adcData_t *ptr = data;
 
@@ -66,9 +63,6 @@ static obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t group, adcData_
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// A helper function: calls functions from adc.c to get group values. Note that *data should have adjacent buffers to
-// hold all the data being requested. The group table and FIFO size should be hardcoded based on used adc channels per
-// group in adc.c for this to work properly.
 static obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t channel, uint8_t group, adcData_t *data) {
   if (adc == NULL || data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -87,6 +81,8 @@ static obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t channel, uint8_t
 
   adcGetData(adc, group, data);
   adcResetFiFo(*adc, group);
+
+  xSemaphoreGive(adcConversionMutex);
 
   return OBC_ERR_CODE_SUCCESS;
 }
