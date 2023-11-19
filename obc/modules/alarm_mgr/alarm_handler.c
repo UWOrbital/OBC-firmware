@@ -34,7 +34,7 @@ static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
 
-STATIC_ASSERT((ALARM_QUEUE_SIZE <= OBC_PERSISTENT_MAX_ALARM_COUNT),
+STATIC_ASSERT((ALARM_QUEUE_SIZE <= OBC_PERSISTENT_MAX_SUBINDEX_ALARM),
               "queue size exceeds max number of alarms that can be stored in FRAM");
 
 void obcTaskInitAlarmMgr(void) {
