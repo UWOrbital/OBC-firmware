@@ -14,7 +14,7 @@
 
 #define LOCAL_TIME_SYNC_PERIOD_S 60UL
 
-void initTimekeeper(void) {}
+void obcTaskInitTimekeeper(void) {}
 
 void obcTaskFunctionTimekeeper(void *pvParameters) {
   /*
@@ -43,7 +43,8 @@ void obcTaskFunctionTimekeeper(void *pvParameters) {
 
     // Send Unix time to fram
     unixTime.unixTime = getCurrentUnixTime();
-    LOG_IF_ERROR_CODE(setPersistentObcTime(&unixTime));
+    LOG_IF_ERROR_CODE(
+        setPersistentData(OBC_PERSIST_SECTION_ID_OBC_TIME, (uint8_t *)&unixTime, sizeof(obc_time_persist_data_t)));
     syncPeriodCounter = (syncPeriodCounter + 1) % LOCAL_TIME_SYNC_PERIOD_S;
     vTaskDelay(pdMS_TO_TICKS(1000));
   }

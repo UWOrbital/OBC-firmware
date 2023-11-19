@@ -42,7 +42,7 @@ static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH * TELEMETRY_D
 static SemaphoreHandle_t downlinkReady = NULL;
 static StaticSemaphore_t downlinkReadyBuffer;
 
-void initTelemetry(void) {
+void obcTaskInitTelemetryMgr(void) {
   memset(&telemetryDataQueue, 0, sizeof(telemetryDataQueue));
   memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
 
