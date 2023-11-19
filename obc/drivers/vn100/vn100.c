@@ -130,7 +130,7 @@ obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t startBinaryOutputs(void) {
+obc_error_code_t vn100StartBinaryOutputs(void) {
   /* Outputs: Yaw Pitch Roll, Angular rates, Accelerometer data, Magnetometer, Temp and Pressure.
      Initialized to start with an output rate of 10Hz */
   obc_error_code_t errCode;
