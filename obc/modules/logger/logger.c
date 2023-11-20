@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
+// test commit
 
 #define LOG_FILE_NAME "log.log"
 
