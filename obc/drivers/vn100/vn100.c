@@ -15,7 +15,8 @@
 #define MAX_BAUDRATE_LENGTH 7U
 #define MAX_OUTPUT_RATE_LENGTH 3U
 #define DEFAULT_OUTPUT_RATE_HZ 10U
-#define SCI_SEMAPHORE_TIMEOUT_MS 10U
+#define SCI_SEMAPHORE_TIMEOUT_MS \
+  100U /* Time between successive sensor outputs (period): 1/output rate = 1/10Hz = 0.1s = 100ms */
 
 /* Building start and stop binary output comands */
 #define BINARY_OUTPUT_START_PREFIX "$VNWRG,75,2,"  // Configure write command to output on register 75 and serial port 2
@@ -112,7 +113,7 @@ obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz) {
   /* For documentation on how these commands are formed, refer to section 5.2.8 of the user manual */
   const char checksum[] = "*XX\r\n";   // Checksum set to "XX", which means to ignore the checksum
   const char header[] = "$VNWRG,07,";  // Header set to write a command to register 7
-  unsigned char req[MAX_SEND_SIZE];
+  unsigned char buf[MAX_SEND_SIZE];
   snprintf(freq, sizeof(freq), "%ld", outputRateHz);
 
   size_t headerLength = strlen(header);
@@ -120,13 +121,13 @@ obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz) {
   size_t checksumLength = strlen(checksum);
 
   // Begin appending the command
-  memcpy(req, header, headerLength);
-  memcpy(req + headerLength, freq, freqLength);
-  memcpy(req + headerLength + freqLength, checksum, checksumLength);
+  memcpy(buf, header, headerLength);
+  memcpy(buf + headerLength, freq, freqLength);
+  memcpy(buf + headerLength + freqLength, checksum, checksumLength);
 
   size_t numBytes = headerLength + freqLength + checksumLength;
 
-  RETURN_IF_ERROR_CODE(sciSendBytes(req, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
