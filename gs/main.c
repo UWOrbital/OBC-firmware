@@ -88,7 +88,7 @@ int main(void) {
 
     CSerialPortInit(pSerialPort,
                     portName,    // windows:COM1 Linux:/dev/ttyS0
-                    9600,        // baudrate
+                    115200,      // baudrate
                     ParityNone,  // parity
                     DataBits8,   // data bit
                     StopTwo,     // stop bit
@@ -216,9 +216,12 @@ int main(void) {
   uint16_t axDataIndex = 0;
   packed_ax25_i_frame_t axData = {0};
   bool startFlagReceived = false;
+  
   while (1) {
+    
     uint8_t byte = '\0';
-    if (CSerialPortReadData(pSerialPort, &byte, 1) == -1) {
+    if (CSerialPortReadData(pSerialPort, &byte, 1) < 0) {
+      printf("Error Reading! \r\n");
       break;
     }
 
@@ -315,4 +318,3 @@ static uint32_t getCurrentTime(void) {
   }
   return (uint32_t)ts;
 }
-
