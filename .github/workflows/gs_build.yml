@@ -28,6 +28,10 @@ jobs:
     - name: Create binary directory
       run: |
         mkdir build
+    - name: Set up MSVC
+      uses: mloskot/setup-msvc@v2
+      with:
+        msvc-version: 2019
     - name: Build
       run: |
         cd build
