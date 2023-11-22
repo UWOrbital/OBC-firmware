@@ -34,5 +34,5 @@ jobs:
     - name: Build
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Visual Studio 16 2019"
-        msbuild YourProject.sln /p:Configuration=Release
+        cmake .. -DCMAKE_BUILD_TYPE=GS -G"NMake Makefiles"
+        nmake
