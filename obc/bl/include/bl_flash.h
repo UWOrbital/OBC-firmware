@@ -1,7 +1,11 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
-uint32_t Fapi_Init(uint32_t startBank, uint32_t endBank);
-uint32_t Fapi_BlockErase(uint32_t startAddr, uint32_t size);
-uint32_t Fapi_BlockProgram(uint32_t flashAddress, uint32_t dataAddress, uint32_t numBytes);
+#include "bl_errors.h"
+
+bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum);
+bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size);
+bl_error_code_t bl_flash_FapiBlockWrite(uint32_t flashAddress, uint32_t dataAddress, uint32_t numBytes);
+bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize);

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 set(BL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_flash.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_uart.c
     ${CMAKE_CURRENT_SOURCE_DIR}/F021_Flash_API/source/Fapi_UserDefinedFunctions.c
 )
 
@@ -23,6 +24,8 @@ target_link_libraries(f021_api_archive INTERFACE "-Wl,--whole-archive" f021_api 
 
 # Lib doesn't use wchar so warning can be ignored
 target_link_options(f021_api_archive INTERFACE "-Wl,--no-wchar-size-warning")
+
+target_compile_options(f021_api_archive INTERFACE -O0)
 
 target_link_libraries(OBC-bl.out PRIVATE
     f021_api_archive

@@ -2,95 +2,143 @@
 #include "flash_config.h"
 #include "bl_config.h"
 #include "bl_flash.h"
-
+#include "bl_errors.h"
+#include "sci.h"
 #include <stdint.h>
-#include <stdbool.h>
 
-static bool bankInitialized = false;
+/* PRIVATE FUNCTION DECLARATIONS */
+static void bl_flash_waitFsmReady(void);
+static void bl_flash_waitFsmStatusSuccess(void);
 
-uint32_t Fapi_Init(uint32_t startBank, uint32_t endBank) {
-  if ((Fapi_initializeFlashBanks(SYS_CLK_FREQ)) == Fapi_Status_Success) {
-    for (uint32_t i = startBank; i < endBank + 1; i++) {
-      (void)Fapi_setActiveFlashBank((Fapi_FlashBankType)i);
-      (void)Fapi_enableMainBankSectors(0xFFFF);
-      while (FAPI_CHECK_FSM_READY_BUSY != Fapi_Status_FsmReady)
-        ;
-      while (FAPI_GET_FSM_STATUS != Fapi_Status_Success)
-        ;
-    }
-
-    bankInitialized = true;
-    return 0;
+/* PUBLIC FUNCTION DEFINITIONS */
+bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum) {
+  if ((Fapi_initializeFlashBanks(SYS_CLK_FREQ)) != Fapi_Status_Success) {
+    return BL_ERR_CODE_UNKNOWN;
   }
 
-  return 1;
+  if (Fapi_setActiveFlashBank((Fapi_FlashBankType)bankNum) != Fapi_Status_Success) {
+    return BL_ERR_CODE_INVALID_ARG;
+  }
+
+  if (Fapi_enableMainBankSectors(0xFF00U) != Fapi_Status_Success) {
+    return BL_ERR_CODE_UNKNOWN;
+  }
+
+  // Possible infinite loop, but watchdog should reset the device if it gets stuck
+  bl_flash_waitFsmReady();
+  bl_flash_waitFsmStatusSuccess();
+
+  return BL_ERR_CODE_SUCCESS;
 }
 
-uint32_t Fapi_BlockErase(uint32_t startAddr, uint32_t size) {
-  uint8_t startSector = 0;
-  uint8_t endSector = 0;
+bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size) {
+  bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
-  uint32_t endAddr = startAddr + size;
+  const uint32_t endAddr = startAddr + size;
 
-  uint8_t startBankNum = 0;
-  for (int i = 0; i < NUM_FLASH_SECTORS; i++) {
-    if (startAddr < (uint32_t)(flashSectors[i].start)) {
-      startBankNum = flashSectors[i - 1].bankNumber;
-      startSector = i - 1;
+  // Find the start and end of the sectors to erase. Assume flashSectors is sorted
+  // by start address, and that the first sector starts at address 0
+
+  uint8_t startSector = 0U;
+  for (uint8_t i = 0U; i < NUM_FLASH_SECTORS; i++) {
+    const uint32_t sectorStartAddr = (uint32_t)(flashSectors[i].start);
+    if (sectorStartAddr > startAddr) {
+      startSector = i - 1U;  // The previous sector contains the start address
       break;
     }
   }
 
-  uint8_t endBankNum = 0;
-  for (int i = startSector; i < NUM_FLASH_SECTORS; i++) {
-    if (endAddr <= (((uint32_t)flashSectors[i].start) + flashSectors[i].length)) {
-      endBankNum = flashSectors[i].bankNumber;
+  uint8_t endSector = 0U;
+  for (uint8_t i = 0U; i < NUM_FLASH_SECTORS; i++) {
+    const uint32_t sectorEndAddr = (uint32_t)(flashSectors[i].start) + flashSectors[i].length;
+    if (sectorEndAddr >= endAddr) {
       endSector = i;
       break;
     }
   }
 
-  uint32_t status;  // TODO: Add error codes
+  for (uint8_t i = startSector; i < endSector + 1U; i++) {
+    if (Fapi_issueAsyncCommandWithAddress(Fapi_EraseSector, flashSectors[i].start) != Fapi_Status_Success) {
+      errCode = BL_ERR_CODE_UNKNOWN;
+      break;
+    }
 
-  status = Fapi_Init(startBankNum, endBankNum);
-
-  for (int i = startSector; i < endSector + 1; i++) {
-    Fapi_issueAsyncCommandWithAddress(Fapi_EraseSector, flashSectors[i].start);
-    while (FAPI_CHECK_FSM_READY_BUSY == Fapi_Status_FsmBusy)
-      ;
-    while (FAPI_GET_FSM_STATUS != Fapi_Status_Success)
-      ;
+    bl_flash_waitFsmReady();
+    bl_flash_waitFsmStatusSuccess();
   }
 
-  return status;
+  return errCode;
 }
 
-uint32_t Fapi_BlockProgram(uint32_t flashAddress, uint32_t dataAddress, uint32_t numBytes) {
-  register uint32_t src = dataAddress;
-  register uint32_t dst = flashAddress;
+bl_error_code_t bl_flash_FapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32_t numBytes) {
+  bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
-  uint32_t bytes = numBytes < 16 ? numBytes : 16;
+  register uint32_t src = srcAddr;
+  register uint32_t dst = dstAddr;
 
-  if (!bankInitialized) {
-    return 1;
-  }
+  // Programming at an address is limited to the bank width number of bytes
+  uint32_t bytesToFlashNext = numBytes < 16 ? numBytes : 16;
 
   while (numBytes > 0) {
-    Fapi_issueProgrammingCommand((uint32_t *)dst, (uint8_t *)src, (uint32_t)bytes, 0, 0, Fapi_AutoEccGeneration);
+    if (Fapi_issueProgrammingCommand((uint32_t *)dst, (uint8_t *)src, (uint32_t)bytesToFlashNext, NULL, 0,
+                                     Fapi_DataOnly) != Fapi_Status_Success) {
+      errCode = BL_ERR_CODE_UNKNOWN;
+      break;
+    }
 
-    while (FAPI_CHECK_FSM_READY_BUSY == Fapi_Status_FsmBusy)
-      ;
-    while (FAPI_GET_FSM_STATUS != Fapi_Status_Success)
-      ;
+    bl_flash_waitFsmReady();
+    bl_flash_waitFsmStatusSuccess();
 
-    src += bytes;
-    dst += bytes;
-    numBytes -= bytes;
+    src += bytesToFlashNext;
+    dst += bytesToFlashNext;
 
-    if (numBytes < 32) {
-      bytes = numBytes;
+    numBytes -= bytesToFlashNext;
+
+    if (numBytes < 16) {
+      bytesToFlashNext = numBytes;
     }
   }
 
-  return 0;
+  return errCode;
+}
+
+bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize) {
+  const uint32_t lastFlashAddr =
+      (uint32_t)flashSectors[NUM_FLASH_SECTORS - 1].start + flashSectors[NUM_FLASH_SECTORS - 1].length;
+
+  if (addr + binSize > lastFlashAddr) {
+    return false;
+  }
+
+  /* The start address must be at the beginning of the sector */
+  bool isSectionStart = false;
+  for (uint8_t i = 0; i < NUM_FLASH_SECTORS; i++) {
+    if (addr == (uint32_t)(flashSectors[i].start)) {
+      isSectionStart = true;
+      break;
+    }
+  }
+
+  if (!isSectionStart) {
+    return false;
+  }
+
+  return true;
+}
+
+/* PRIVATE FUNCTION DEFINITIONS */
+static void bl_flash_waitFsmReady(void) {
+  while (FAPI_CHECK_FSM_READY_BUSY != Fapi_Status_FsmReady) {
+    asm(" NOP");
+  }
+}
+
+static void bl_flash_waitFsmStatusSuccess(void) {
+  while (FAPI_GET_FSM_STATUS != Fapi_Status_Success) {
+    asm(" NOP");
+  }
+
+  for (volatile uint32_t i = 0U; i < 100000UL; i++) {
+    asm(" NOP");
+  }
 }

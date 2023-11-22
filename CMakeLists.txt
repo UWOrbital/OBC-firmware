@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Set the toolchain file before the project is declared
-if(${CMAKE_BUILD_TYPE} MATCHES OBC OR ${CMAKE_BUILD_TYPE} MATCHES BL)
+if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     # Download the toolchain if it doesn't exist
     if(NOT EXISTS ${CMAKE_BINARY_DIR}/toolchain)
         include(${CMAKE_SOURCE_DIR}/cmake/download_arm_toolchain.cmake)
