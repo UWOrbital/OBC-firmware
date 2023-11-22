@@ -29,11 +29,9 @@ jobs:
       run: |
         mkdir build
     - name: Set up MSVC
-      uses: mloskot/setup-msvc@v2
-      with:
-        msvc-version: 2019
+      uses: mloskot/setup-msvc@v1
     - name: Build
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
-        make
+        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Visual Studio 16 2019"
+        msbuild YourProject.sln /p:Configuration=Release
