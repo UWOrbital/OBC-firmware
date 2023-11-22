@@ -15,6 +15,19 @@ else()
     set(TARGET_OPTIMIZATION_FLAGS "-O2")
 endif()
 
+# Define the bootloader bypass option
+option(ENABLE_BL_BYPASS "Write directly to 0x0 and overwrite the bootloader" ON)
+
+# Set the custom address based on the option
+if(ENABLE_BL_BYPASS)
+    set(CUSTOM_START_ADDRESS 0)
+else()
+    set(CUSTOM_START_ADDRESS 0x00040000)
+endif()
+
+# Pass the address to the linker
+add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
+
 add_executable(OBC-firmware.out app/app_main.c)
 add_executable(OBC-bl.out)
 add_executable(debug-tool.out)
