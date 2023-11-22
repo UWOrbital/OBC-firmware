@@ -25,11 +25,12 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
+    - uses: TheMrMilchmann/setup-msvc-dev@v3
+      with:
+        arch: x86
     - name: Create binary directory
       run: |
         mkdir build
-    - name: Set up MSVC
-      uses: TheMrMilchmann/setup-msvc-dev@v3
     - name: Build
       run: |
         cd build
