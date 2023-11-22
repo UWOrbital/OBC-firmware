@@ -32,7 +32,7 @@ int main(void) {
   gs_error_code_t gsErrCode;
   obc_gs_error_code_t obcGsErrCode;
 
-  uint8_t demoNum = 0;
+  signed char demoNum = 0;
 
   printf(
       "\n0: Immediate RTC Sync"
