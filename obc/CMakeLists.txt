@@ -60,7 +60,7 @@ target_link_libraries(OBC-firmware.out PRIVATE
     lib-correct
     obc-gs-interface
     ${HAL_LIB_OPTIMIZE}
-    ${HAL_LIB_NO_OPTIMIZE}
+    $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
 
 # Bootloader
@@ -89,7 +89,7 @@ add_subdirectory(bl)
 
 target_link_libraries(OBC-bl.out PRIVATE
     ${HAL_LIB_OPTIMIZE}
-    ${HAL_LIB_NO_OPTIMIZE}
+    $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
 
 # Tools
@@ -120,5 +120,5 @@ target_link_libraries(debug-tool.out PRIVATE
     lib-correct
     obc-gs-interface
     ${HAL_LIB_OPTIMIZE}
-    ${HAL_LIB_NO_OPTIMIZE}
+    $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
