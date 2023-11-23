@@ -8,6 +8,7 @@
 #include "downlink_encoder.h"
 #include "comms_manager.h"
 #include "telemetry_manager.h"
+#include "payload_manager.h"
 
 #include <redposix.h>
 #include <stddef.h>
@@ -88,6 +89,21 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(setTelemetryManagerDownlinkReady());
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t cameraCaptureCmdCallback(cmd_msg_t *cmd) {
+  obc_error_code_t errCode;
+
+  if (cmd == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  payload_event_t payloadEvent;
+  payloadEvent.eventID = PAYLOAD_MANAGER_CAM_CAPTURE_EVENT_ID;
+
+  RETURN_IF_ERROR_CODE(sendToPayloadQueue(&payloadEvent));
 
   return OBC_ERR_CODE_SUCCESS;
 }

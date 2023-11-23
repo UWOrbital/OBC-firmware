@@ -43,6 +43,10 @@ void obcTaskFunctionPayloadMgr(void *pvParameters) {
         case PAYLOAD_MANAGER_NULL_EVENT_ID:
           break;
 
+        case PAYLOAD_MANAGER_CAM_CAPTURE_EVENT_ID:
+          // ADD CAMERA CAPTURE COMMAND HANDLER
+          break;
+
         case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
           // ADD SECONDARY PAYLOAD COMMAND HANDLER
           break;
