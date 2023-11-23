@@ -29,7 +29,7 @@ static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t
 static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_BEGIN_DOWNLINK
-static void unpackBeginDownlinkCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+static void unpackBeginDownlinkCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 typedef void (*unpack_func_t)(const uint8_t*, uint32_t*, cmd_msg_t*);
 
@@ -110,6 +110,6 @@ static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, 
 }
 
 // CMD_BEGIN_DOWNLINK
-static void unpackBeginDownlinkCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+static void unpackBeginDownlinkCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
   // No data to unpack
 }
