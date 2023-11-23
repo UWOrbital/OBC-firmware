@@ -24,3 +24,6 @@ obc_error_code_t pingCmdCallback(cmd_msg_t *cmd);
 
 // CMD_DOWNLINK_TELEM
 obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd);
+
+// CMD_CAMERA_CAPTURE
+obc_error_code_t cameraCaptureCmdCallback(cmd_msg_t *cmd);
