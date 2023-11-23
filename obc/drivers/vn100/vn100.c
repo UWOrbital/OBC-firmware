@@ -135,15 +135,15 @@ obc_error_code_t vn100StartBinaryOutputs(void) {
   /* Outputs: Yaw Pitch Roll, Angular rates, Accelerometer data, Magnetometer, Temp and Pressure.
      Initialized to start with an output rate of 10Hz */
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), strlen((const char*)START_BINARY_OUTPUTS), portMAX_DELAY,
-                                    UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), strlen((const char*)START_BINARY_OUTPUTS),
+                                    portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t vn100StopBinaryOutputs(void) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(
-      sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), strlen((const char*)STOP_BINARY_OUTPUTS), portMAX_DELAY, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), strlen((const char*)STOP_BINARY_OUTPUTS),
+                                    portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
