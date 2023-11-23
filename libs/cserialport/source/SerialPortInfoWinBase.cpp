@@ -11,9 +11,7 @@
 #undef PHYSICAL_ADDRESS
 #define PHYSICAL_ADDRESS LARGE_INTEGER
 
-#if defined(_MSC_VER)
 #pragma comment(lib, "setupapi.lib")
-#endif
 
 //#include <ntddser.h>  //GUID_DEVINTERFACE_COMPORT
 #ifndef GUID_DEVINTERFACE_COMPORT
