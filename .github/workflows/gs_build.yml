@@ -25,14 +25,11 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
-    - uses: TheMrMilchmann/setup-msvc-dev@v3
-      with:
-        arch: x86
     - name: Create binary directory
       run: |
         mkdir build
     - name: Build
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=GS -G"NMake Makefiles"
-        nmake
+        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
+        make
