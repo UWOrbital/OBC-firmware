@@ -16,9 +16,21 @@ ${CMAKE_CURRENT_SOURCE_DIR}/serial_utils
 
 target_compile_options(gs.out PUBLIC -Wall -g)
 
+if(UNIX)
 target_link_libraries(gs.out PUBLIC
 tiny-aes
 lib-correct
 obc-gs-interface
 CSerialPort
 )
+
+elseif(WIN32)
+target_link_libraries(gs.out PUBLIC
+tiny-aes
+lib-correct
+obc-gs-interface
+CSerialPort
+setupapi
+)
+
+endif()

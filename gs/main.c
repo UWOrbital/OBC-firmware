@@ -107,10 +107,10 @@ int main(void) {
     printf("Open %s %s\n", portName, 1 == CSerialPortIsOpen(pSerialPort) ? "Success" : "Failed");
     printf("Code: %d, Message: %s\n", CSerialPortGetLastError(pSerialPort), CSerialPortGetLastErrorMsg(pSerialPort));
   }
-  
+
   printf("Serial port configured!\n");
 
-  /* ------------------------------------------------------ Demo Code ------------------------------------------------------------ */
+  /* ------------------------------------------- Demo Code ----------------------------------------------------- */
 
   /* Construct packet */
 
@@ -216,9 +216,8 @@ int main(void) {
   uint16_t axDataIndex = 0;
   packed_ax25_i_frame_t axData = {0};
   bool startFlagReceived = false;
-  
+
   while (1) {
-    
     uint8_t byte = '\0';
     if (CSerialPortReadData(pSerialPort, &byte, 1) < 0) {
       printf("Error Reading! \r\n");
