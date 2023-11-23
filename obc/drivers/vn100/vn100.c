@@ -50,7 +50,7 @@ void initVn100(void) {
 obc_error_code_t vn100ResetModule(void) {
   obc_error_code_t errCode;
   unsigned char buf[] = "$VNRST*4D\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, sizeof(buf), MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, strlen((const char*)buf), MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -135,7 +135,7 @@ obc_error_code_t vn100StartBinaryOutputs(void) {
   /* Outputs: Yaw Pitch Roll, Angular rates, Accelerometer data, Magnetometer, Temp and Pressure.
      Initialized to start with an output rate of 10Hz */
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), sizeof(START_BINARY_OUTPUTS), portMAX_DELAY,
+  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), strlen((const char*)START_BINARY_OUTPUTS), portMAX_DELAY,
                                     UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -143,7 +143,7 @@ obc_error_code_t vn100StartBinaryOutputs(void) {
 obc_error_code_t vn100StopBinaryOutputs(void) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(
-      sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), sizeof(STOP_BINARY_OUTPUTS), portMAX_DELAY, UART_VN100_REG));
+      sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), strlen((const char*)STOP_BINARY_OUTPUTS), portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -164,13 +164,13 @@ obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t* parsedPacket) {
 obc_error_code_t vn100PauseAsync(void) {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,0*XX\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(command, strlen((const char*)command), MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t vn100ResumeAsync(void) {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,1*XX\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(command, sizeof(command), MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(command, strlen((const char*)command), MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
