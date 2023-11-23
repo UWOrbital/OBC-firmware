@@ -95,7 +95,8 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
 obc_error_code_t beginDownlinkCmdCallback(cmd_msg_t *cmd) {
   obc_error_code_t errCode;
 
-  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(COMMS_EVENT_BEGIN_DOWNLINK));
+  comms_event_t beginDownlinkEvent = {.eventID = COMMS_EVENT_BEGIN_DOWNLINK};
+  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&beginDownlinkEvent));
 
   return OBC_ERR_CODE_SUCCESS;
 }
