@@ -135,3 +135,24 @@ TEST(TestCommandPackUnpack, ValidCmdDownlinkTelemPackUnpack) {
   EXPECT_EQ(packOffset, unpackOffset);
   EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
 }
+
+// CMD_BEGIN_DOWNLINK
+TEST(TestCommandPackUnpack, ValidCmdBeginDownlinkPackUnpack) {
+  obc_gs_error_code_t errCode;
+  cmd_msg_t cmdMsg = {0};
+  cmdMsg.id = CMD_BEGIN_DOWNLINK;
+
+  uint8_t buff[MAX_CMD_MSG_SIZE] = {0};
+  uint32_t packOffset = 0;
+  uint8_t numPacked = 0;
+  errCode = packCmdMsg(buff, &packOffset, &cmdMsg, &numPacked);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  cmd_msg_t unpackedCmdMsg = {0};
+  uint32_t unpackOffset = 0;
+  errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+}
