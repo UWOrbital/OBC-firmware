@@ -34,6 +34,13 @@ static log_output_location_t outputLocation;
 #define LOGGER_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define LOGGER_QUEUE_TX_WAIT_PERIOD 0
 
+/* Uncomment to anable blocking logs */
+// #define LOGGER_BOCKING_MODE 1
+#ifdef LOGGER_BLOCKING_MODE
+#undef LOGGER_QUEUE_TX_WAIT_PERIOD
+#define LOGGER_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#endif
+
 static QueueHandle_t loggerQueueHandle = NULL;
 static StaticQueue_t loggerQueue;
 static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
