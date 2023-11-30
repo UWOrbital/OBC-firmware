@@ -38,4 +38,7 @@ typedef enum {
 
   TELEM_NUM_CSP_PACKETS_RCVD,
   TELEM_PONG,
+
+  TELEM_FRAM_DUMP,
+
 } telemetry_data_id_t;

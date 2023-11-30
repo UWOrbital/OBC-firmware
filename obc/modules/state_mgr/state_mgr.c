@@ -9,6 +9,7 @@
 #include "obc_state_handle.h"
 #include "obc_state_defs.h"
 #include "obc_time.h"
+#include "obc_persistent.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -86,6 +87,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
   initFRAM();  // FRAM storage (OBC)
+  initPersistent();
 
   // Initialize the state of each module. This will not start any tasks.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);

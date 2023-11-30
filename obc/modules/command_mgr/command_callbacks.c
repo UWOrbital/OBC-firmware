@@ -5,6 +5,7 @@
 #include "obc_logging.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
+#include "obc_persistent.h"
 #include "downlink_encoder.h"
 #include "comms_manager.h"
 #include "telemetry_manager.h"
@@ -94,6 +95,34 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
 
 obc_error_code_t framDumpCmdCallback(cmd_msg_t *cmd) {
   obc_error_code_t errCode;
+  
+  for(size_t i=0; i < OBC_PERSIST_SECTION_ID_COUNT; ++i) {
+    const obc_persist_config_t *config = getOBCPersistConfig(i);
+    if(config == NULL) {
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+      continue;
+    }
+
+    for(size_t j=0; j<config[i].sectionCount; ++j) {
+      uint8_t buff[OBC_PERSISTENT_MAX_SUBINDEX_SIZE] = {0};
+      errCode = getPersistentDataByIndex(i, j, buff, sizeof(buff));
+      if(errCode != OBC_ERR_CODE_SUCCESS) {
+        LOG_ERROR_CODE(errCode);
+        continue;
+      }
+
+      // TODO: Finish this
+      telemetry_data_t data = {0};
+      data.id = TELEM_FRAM_DUMP;
+      data.timestamp = getCurrentUnixTime();
+      
+      errCode = addTelemetryData(&data);
+      if(errCode != OBC_ERR_CODE_SUCCESS) {
+        LOG_ERROR_CODE(errCode);
+        continue;
+      }
+    }
+  }
 
   return OBC_ERR_CODE_SUCCESS;
 }

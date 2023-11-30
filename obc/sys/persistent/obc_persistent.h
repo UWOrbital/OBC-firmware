@@ -52,6 +52,7 @@ extern "C" {
 /* Maximum sub index for each section */
 #define OBC_PERSISTENT_MIN_SUBINDEX 1U
 #define OBC_PERSISTENT_MAX_SUBINDEX_ALARM 24U
+#define OBC_PERSISTENT_MAX_SUBINDEX_SIZE 24U  // Must be the largest of all the max sub indexes
 
 /*---------------------------------------------------------------------------*/
 /**
@@ -123,6 +124,18 @@ typedef struct {
 } obc_persist_config_t;
 
 /*---------------------------------------------------------------------------*/
+
+/**
+ * @brief Initialize the persistent storage. This checks to make sure the 
+ * OBC_PERSISTENT_MAX_SUBINDEX_SIZE is large enough to store a sub-section in its entirety.
+ */
+void initPersistent(void);
+
+/**
+ * @brief Gets the config based on the section id
+ * @return obc_persist_config_t* Pointer to the config or NULL if sectionId is invalid
+ */
+const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t sectionId);
 
 /**
  * @brief Get a persistent section from FRAM by the sectionId and verify its header data.
