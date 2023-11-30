@@ -9,14 +9,14 @@
 #include <FreeRTOS.h>
 #include <os_semphr.h>
 
-#define DEASSERT_RETURN_IF_ERROR_CODE(_spiPort, _csNum, _ret)     \
-  do {                                                            \
-    errCode = _ret;                                               \
-    if (errCode != OBC_ERR_CODE_SUCCESS) {                        \
-      RETURN_IF_ERROR_CODE(deassertChipSelect(_spiPort, _csNum)); \
-      LOG_ERROR_CODE(errCode);                                    \
-      return errCode;                                             \
-    }                                                             \
+#define DEASSERT_RETURN_IF_ERROR_CODE(_spiPort, _csNum, _ret) \
+  do {                                                        \
+    errCode = _ret;                                           \
+    if (errCode != OBC_ERR_CODE_SUCCESS) {                    \
+      LOG_ERROR_CODE(errCode);                                \
+      deassertChipSelect(_spiPort, _csNum);                   \
+      return errCode;                                         \
+    }                                                         \
   } while (0)
 
 /**
