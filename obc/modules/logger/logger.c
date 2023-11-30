@@ -13,7 +13,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-// test commit
 
 #define LOG_FILE_NAME "log.log"
 
@@ -32,13 +31,11 @@ static log_output_location_t outputLocation;
 #define LOGGER_QUEUE_LENGTH 10U
 #define LOGGER_QUEUE_ITEM_SIZE sizeof(logger_event_t)
 #define LOGGER_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
-#define LOGGER_QUEUE_TX_WAIT_PERIOD 0
 
-/* Uncomment to anable blocking logs */
-// #define LOGGER_BOCKING_MODE 1
-#ifdef LOGGER_BLOCKING_MODE
-#undef LOGGER_QUEUE_TX_WAIT_PERIOD
+#ifdef ENABLE_BLOCKING_LOGS
 #define LOGGER_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#else
+#define LOGGER_QUEUE_TX_WAIT_PERIOD 0
 #endif
 
 static QueueHandle_t loggerQueueHandle = NULL;
