@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 typedef enum {
   OBC_SCHEDULER_CONFIG_ID_STATE_MGR = 0,
   OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR,
@@ -10,7 +12,6 @@ typedef enum {
   OBC_SCHEDULER_CONFIG_ID_EPS_MGR,
   OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR,
   OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER,
-  OBC_SCHEDULER_CONFIG_ID_SW_WATCHDOG,
   OBC_SCHEDULER_CONFIG_ID_ALARM_MGR,
   OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR,
   OBC_SCHEDULER_CONFIG_ID_LOGGER,
@@ -18,7 +19,7 @@ typedef enum {
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR,
 #endif
-
+  OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR,
   OBC_SCHEDULER_TASK_COUNT
 } obc_scheduler_config_id_t;
 
@@ -33,3 +34,9 @@ void obcSchedulerCreateTask(obc_scheduler_config_id_t taskID);
  * the given arguments.
  */
 void obcSchedulerCreateTaskWithArgs(obc_scheduler_config_id_t taskID, void *args);
+
+/**
+ * @brief Initialize the task with the given ID. This should be called
+ * before the task is created.
+ */
+void obcSchedulerInitTask(obc_scheduler_config_id_t taskID);
