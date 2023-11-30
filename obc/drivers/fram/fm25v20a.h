@@ -8,6 +8,10 @@
 #define FRAM_MAX_ADDRESS 0x3FFFFU
 #define FRAM_ID_LEN 9
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Initializes FRAM sleep status
  */
@@ -53,7 +57,7 @@ obc_error_code_t framRead(uint32_t addr, uint8_t *buffer, size_t nBytes);
  * @param nBytes Size of buffer.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t framWrite(uint32_t addr, uint8_t *data, size_t nBytes);
+obc_error_code_t framWrite(uint32_t addr, const uint8_t *data, size_t nBytes);
 
 /**
  * @brief Send sleep command to FRAM
@@ -74,3 +78,7 @@ obc_error_code_t framWakeUp(void);
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t framReadID(uint8_t *id, size_t nBytes);
+
+#ifdef __cplusplus
+}
+#endif
