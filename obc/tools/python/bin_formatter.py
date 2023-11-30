@@ -53,7 +53,7 @@ def send_bin(file_path: str, com_port: str) -> None:
     file_obj = Path(file_path)
 
     # Open serial port and write binary to device via UART
-    with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO, timeout=2, write_timeout=3) as ser:
+    with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO, timeout=2) as ser:
         data = file_obj.read_bytes()
         ser.write('d'.encode('ascii'))
         time.sleep(0.1)
@@ -79,13 +79,26 @@ def send_bin(file_path: str, com_port: str) -> None:
                 break
 
         ser.write('D'.encode('ascii'))
+        ser.write(data[8:])
 
-        print(ser.readlines())
+        # print(ser.readlines())
 
-        # send rest of data in 100 byte chunks
-        for i in range(8, len(data), 100):
-            ser.write(data[i:i+100])
-            print(f"{i}/{len(data) - 8} bytes sent")
+        # # send rest of data
+        # for i in range(8, len(data)):
+        #     while True:
+        #         ser.write(data[i])
+        #         if ser.read() == data[i]:
+        #             ser.write('A'.encode('ascii'))
+        #             break
+
+        #         time.sleep(0.01)
+        #     print(f"{i}/{len(data) - 8} bytes sent")
+
+        #     time.sleep(0.01)
+
+        # for i in range(8, len(data), 100):
+        #     ser.write(data[i:i+100])
+        #     print(f"{i}/{len(data) - 8} bytes sent")
 
         print(ser.readlines())
 
@@ -101,7 +114,9 @@ def send_bin(file_path: str, com_port: str) -> None:
         time.sleep(1)
         ser.write('r'.encode('ascii'))
         time.sleep(0.1)
-        print(ser.readlines())
+        while True:
+            print(ser.read())
+        # print(ser.readlines())
 
 
 def arg_parse() -> ArgumentParser:

@@ -3,12 +3,7 @@
 #include "bl_config.h"
 #include "bl_flash.h"
 #include "bl_errors.h"
-#include "sci.h"
 #include <stdint.h>
-
-/* PRIVATE FUNCTION DECLARATIONS */
-static void bl_flash_waitFsmReady(void);
-static void bl_flash_waitFsmStatusSuccess(void);
 
 /* PUBLIC FUNCTION DEFINITIONS */
 bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum) {
@@ -106,6 +101,11 @@ bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize) {
   const uint32_t lastFlashAddr =
       (uint32_t)flashSectors[NUM_FLASH_SECTORS - 1].start + flashSectors[NUM_FLASH_SECTORS - 1].length;
 
+  // Cannot write to the first sector (contains bootloader)
+  if (addr <= (uint32_t)flashSectors[0].start) {
+    return false;
+  }
+
   if (addr + binSize > lastFlashAddr) {
     return false;
   }
@@ -126,14 +126,13 @@ bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize) {
   return true;
 }
 
-/* PRIVATE FUNCTION DEFINITIONS */
-static void bl_flash_waitFsmReady(void) {
+void bl_flash_waitFsmReady(void) {
   while (FAPI_CHECK_FSM_READY_BUSY != Fapi_Status_FsmReady) {
     asm(" NOP");
   }
 }
 
-static void bl_flash_waitFsmStatusSuccess(void) {
+void bl_flash_waitFsmStatusSuccess(void) {
   while (FAPI_GET_FSM_STATUS != Fapi_Status_Success) {
     asm(" NOP");
   }

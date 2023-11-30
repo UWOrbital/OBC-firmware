@@ -4,6 +4,7 @@
 
 #include "sys_core.h"
 #include "sci.h"
+#include "gio.h"
 
 #include "F021.h"
 
@@ -63,14 +64,14 @@ void bootloader(void) {
   (void)errCode;
   // TODO: Remove later
   char str[] = "Hello from BL\r\n";
-  sciSend(scilinREG, sizeof(str), (uint8_t *)str);
+  sciSend(sciREG, sizeof(str), (uint8_t *)str);
 
   bl_state_t state = BL_STATE_IDLE;
 
   while (1) {
     switch (state) {
       case BL_STATE_IDLE: {
-        sciSend(scilinREG, 18U, (uint8_t *)"Waiting for input\r\n");
+        sciSend(sciREG, 18U, (uint8_t *)"Waiting for input\r\n");
 
         char c = '0';
         bl_uart_readBytes(scilinREG, (uint8_t *)&c, 1U);
@@ -86,24 +87,28 @@ void bootloader(void) {
         break;
       }
       case BL_STATE_DOWNLOAD_IMAGE: {
-        sciSend(scilinREG, 26U, (uint8_t *)"Downloading application\r\n");
+        sciSend(sciREG, 26U, (uint8_t *)"Downloading application\r\n");
 
         uint8_t recvBuffer[sizeof(app_header_t)] = {0U};
 
-        bl_uart_readBytes(scilinREG, recvBuffer, sizeof(app_header_t));
+        if (bl_uart_readBytes(scilinREG, recvBuffer, sizeof(app_header_t)) != BL_ERR_CODE_SUCCESS) {
+          sciSend(sciREG, 22U, (uint8_t *)"Failed to read header\r\n");
+          state = BL_STATE_IDLE;
+          break;
+        }
 
         app_header_t appHeader = {0};
         memcpy((void *)&appHeader, (void *)recvBuffer, sizeof(app_header_t));
 
         if (!bl_flash_isStartAddrValid(APP_START_ADDRESS, appHeader.size)) {
-          sciSend(scilinREG, 22U, (uint8_t *)"Invalid start address\r\n");
+          sciSend(sciREG, 22U, (uint8_t *)"Invalid start address\r\n");
           state = BL_STATE_IDLE;
           break;
         }
 
         // char headerOutStr[100] = {'0'};
         // sprintf(headerOutStr, "Version: %lu\r\nSize: %lu\r\n", appHeader.version, appHeader.size);
-        // sciSend(scilinREG, strlen(headerOutStr), (uint8_t *)headerOutStr);
+        // sciSend(sciREG, strlen(headerOutStr), (uint8_t *)headerOutStr);
 
         // Check that the application image is not too large
         // if (appHeader.size > MAX_APP_SIZE_BYTES) {
@@ -112,49 +117,63 @@ void bootloader(void) {
         // }
 
         const char *ackStr = "ACK\r\n";
-        sciSend(scilinREG, strlen(ackStr), (uint8_t *)ackStr);
+        sciSend(sciREG, strlen(ackStr), (uint8_t *)ackStr);
 
         errCode = bl_flash_FapiInitBank(0U);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          sciSend(scilinREG, 22U, (uint8_t *)"Failed to init flash\r\n");
+          sciSend(sciREG, 22U, (uint8_t *)"Failed to init flash\r\n");
           state = BL_STATE_IDLE;
           break;
         }
 
         errCode = bl_flash_FapiBlockErase(APP_START_ADDRESS, appHeader.size);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          sciSend(scilinREG, 22U, (uint8_t *)"Failed to erase flash\r\n");
+          sciSend(sciREG, 22U, (uint8_t *)"Failed to erase flash\r\n");
           state = BL_STATE_IDLE;
           break;
         }
 
         char waitChar = '0';
         while (1) {
-          bl_uart_readBytes(scilinREG, (uint8_t *)&waitChar, 1U);
+          if (bl_uart_readBytes(scilinREG, (uint8_t *)&waitChar, 1U) != BL_ERR_CODE_SUCCESS) {
+            continue;
+          }
+
           if (waitChar == 'D') {
             break;
           }
         }
 
-        sciSend(scilinREG, 22U, (uint8_t *)"Writing application\r\n");
-
         bl_flash_FapiInitBank(0U);
 
-        for (uint32_t i = 0; i < appHeader.size; i++) {
-          uint8_t rxChar = 0U;
-          bl_uart_readBytes(scilinREG, &rxChar, 1U);
+        // for (uint32_t i = 0; i < appHeader.size; i++) {
+        for (uint32_t i = 0; i < 12; i++) {
+          uint8_t rxChar;
+          if (bl_uart_readBytes(scilinREG, &rxChar, 1U) != BL_ERR_CODE_SUCCESS) {
+            state = BL_STATE_IDLE;
+            break;
+          }
+
+          // print rxchar in hex
+          char hexStr[5] = {'0'};
+          sprintf(hexStr, "%02X\r\n", rxChar);
+          sciSend(sciREG, 5U, (uint8_t *)hexStr);
 
           // TODO: Maybe flash in larger chunks
           bl_flash_FapiBlockWrite(APP_START_ADDRESS + i, (uint32_t)&rxChar, 1);
+
+          if (i % 1000 == 0) {
+            gioToggleBit(gioPORTB, 1);
+          }
         }
 
-        sciSend(scilinREG, 22U, (uint8_t *)"Verifying application\r\n");
+        sciSend(sciREG, 22U, (uint8_t *)"Verifying application\r\n");
 
         state = BL_STATE_IDLE;
         break;
       }
       case BL_STATE_ERASE_IMAGE: {
-        sciSend(scilinREG, 22U, (uint8_t *)"Erasing application\r\n");
+        sciSend(sciREG, 22U, (uint8_t *)"Erasing application\r\n");
 
         // TODO: Get the header from flash and erase the image
         // Fapi_BlockErase(APP_START_ADDRESS, MAX_APP_SIZE_BYTES);
@@ -162,7 +181,7 @@ void bootloader(void) {
         break;
       }
       case BL_STATE_RUN_APP: {
-        sciSend(scilinREG, 18U, (uint8_t *)"Running application\r\n");
+        sciSend(sciREG, 18U, (uint8_t *)"Running application\r\n");
 
         // Go to the application's entry point
         uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
@@ -180,11 +199,16 @@ void bootloader(void) {
   }
 }
 
+extern BaseType_t prvRaisePrivilege(void);
+
 int main(void) {
   // _coreDisableFlashEcc_();  // TODO: Remove if unnecessary
   // _coreDisableRamEcc_(); // TODO: Remove if unnecessary
 
   bl_uart_init();
+  gioInit();
+
+  prvRaisePrivilege();
 
   // Flash API cannot be executed from the same flash bank it is modifying. So
   // copy it to RAM and execute it from there.
