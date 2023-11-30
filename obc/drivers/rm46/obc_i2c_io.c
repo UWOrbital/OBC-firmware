@@ -155,9 +155,9 @@ void i2cNotification(i2cBASE_t *i2c, uint32 flags) {
     xSemaphoreGiveFromISR(i2cTransferComplete, &xHigherPriorityTaskWoken);
 
     if (xSemaphoreGiveFromISR(i2cTransferComplete, &xHigherPriorityTaskWoken) == pdTRUE) {
-      LOG_DEBUG_FROM_ISR("Semaphore successfully given.");
+      LOG_ERROR_FROM_ISR("Semaphore successfully given.");
     } else {
-      LOG_DEBUG_FROM_ISR("Semaphore cannot be given or was already given.");
+      LOG_ERROR_FROM_ISR("Semaphore cannot be given or was already given.");
     }
   }
 

@@ -12,7 +12,6 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
     switch (bit) {
       case DS3232_INT_PIN:
         alarmInterruptCallback();
-        LOG_DEBUG_FROM_ISR("Alarm handler called.");
         break;
       // See section 3.4.1.1
       // Triggered on falling edge so TX FIFO can be written to once the signal that RTX FIFO is above
@@ -33,7 +32,6 @@ void gioNotification(gioPORT_t *port, uint32 bit) {
       // is asserted to avoid a FIFO overflow
       case CC1120_RX_THR_PKT_gioPORTB_PIN:
         rxFifoReadyCallback();
-        LOG_DEBUG_FROM_ISR("RX FIFO above threshold.");
         break;
 
 #ifdef OBC_REVISION_2
