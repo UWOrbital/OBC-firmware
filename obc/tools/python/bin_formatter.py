@@ -53,70 +53,38 @@ def send_bin(file_path: str, com_port: str) -> None:
     file_obj = Path(file_path)
 
     # Open serial port and write binary to device via UART
-    with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO, timeout=2) as ser:
+    with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO) as ser:
         data = file_obj.read_bytes()
         ser.write('d'.encode('ascii'))
         time.sleep(0.1)
-        print(ser.readlines())
 
         ser.write(data[0:8])
         for i in range(0, 8):
             ser.write(data[i])
-
-        time.sleep(1)
-        print(ser.readlines())
-
-        time.sleep(1)
-        print(ser.readlines())
-
-        # for i in range(1000):
-            # time.sleep(0.01)
-            # print(ser.readline())
-        # print(ser.readlines())
 
         while True:
             if (input("Enter 1 to send binary: ") == "1"):
                 break
 
         ser.write('D'.encode('ascii'))
-        ser.write(data[8:])
 
-        # print(ser.readlines())
+        time.sleep(0.1)
 
-        # # send rest of data
-        # for i in range(8, len(data)):
-        #     while True:
-        #         ser.write(data[i])
-        #         if ser.read() == data[i]:
-        #             ser.write('A'.encode('ascii'))
-        #             break
+        bytesToWrite = len(data) - 8
+        bytesWritten = 0
+        # Write in chunks of 32 bytes and then write remaining bytes
+        while bytesWritten < bytesToWrite:
+            if bytesToWrite - bytesWritten >= 128:
+                ser.write(data[8 + bytesWritten : 8 + bytesWritten + 128])
+                bytesWritten += 128
+                time.sleep(0.1)
+            else:
+                ser.write(data[bytesWritten + 8:])
+                bytesWritten += bytesToWrite - bytesWritten
 
-        #         time.sleep(0.01)
-        #     print(f"{i}/{len(data) - 8} bytes sent")
-
-        #     time.sleep(0.01)
-
-        # for i in range(8, len(data), 100):
-        #     ser.write(data[i:i+100])
-        #     print(f"{i}/{len(data) - 8} bytes sent")
-
-        print(ser.readlines())
-
-        # for i in range(9, len(data)):
-        #     # give progress update
-        #     if i % 1000 == 0:
-        #         print(f'{i}/{len(data)} bytes sent')
-
-        #     ser.write(data[i])
-        #     # print(ser.readlines())
+            print(f"{bytesWritten}/{bytesToWrite} bytes sent")
 
         print("Done writing app")
-        time.sleep(1)
-        ser.write('r'.encode('ascii'))
-        time.sleep(0.1)
-        while True:
-            print(ser.read())
-        # print(ser.readlines())
 
 
 def arg_parse() -> ArgumentParser:
