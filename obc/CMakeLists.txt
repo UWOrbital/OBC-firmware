@@ -60,3 +60,19 @@ target_link_libraries(OBC-firmware.out PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
+
+# Add OBC-firmware.bin generation to build process
+add_custom_command(
+    TARGET OBC-firmware.out
+    POST_BUILD
+    COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.intvecs
+                                                                     --only-section=.kernelTEXT
+                                                                     --only-section=.text
+                                                                     --only-section=.ARM
+                                                                     --only-section=.preinit_array
+                                                                     --only-section=.init_array
+                                                                     --only-section=.fini_array
+                                                                     --only-section=.data
+                                                                        OBC-firmware.out OBC-firmware.bin
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Generating OBC-firmware.bin")
