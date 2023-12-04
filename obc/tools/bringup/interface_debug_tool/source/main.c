@@ -40,6 +40,8 @@ static const testFunc_t testFuncs[NUM_COMMANDS_MAX] = {
 };
 
 void utilityCLI(void *pvParameters) {
+  sciPrintf("Starting Bringup Utility...\r\n");
+
   while (1) {
     unsigned char cmdChar;
     sciPrintf("Enter a command: ");
@@ -69,8 +71,6 @@ int main(void) {
   initSciPrint();
   initSpiMutex();
   initI2CMutex();
-
-  // sciPrintf("Starting Bringup Utility...\r\n");
 
   xTaskCreateStatic(utilityCLI, "Bringup Utility", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
