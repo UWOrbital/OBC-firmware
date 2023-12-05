@@ -4,8 +4,9 @@ import serial
 import time
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Final
 
-OBC_UART_BAUD_RATE = 115200
+OBC_UART_BAUD_RATE: Final = 115200
 
 # Define header class. This is the header that will be appended to the .bin file
 @dataclass
