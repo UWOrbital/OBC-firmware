@@ -68,3 +68,6 @@ venv/
 # Python
 __pycache__/
 .pytest_cache/
+
+#matlab
+/matlab
