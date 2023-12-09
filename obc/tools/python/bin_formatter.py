@@ -11,12 +11,23 @@ OBC_UART_BAUD_RATE: Final = 115200
 # Define header class. This is the header that will be appended to the .bin file
 @dataclass
 class BootloaderHeader:
+    """ Header for the application binary """
     version: int
     bin_size: int
 
+    HEADER_FMT: Final = '<II'
+
     def serialize(self) -> bytes:
         """ Returns the serialized version of the object """
-        return struct.pack('<II', self.version, self.bin_size)
+        return struct.pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size)
+
+    @staticmethod
+    def get_header_size() -> int:
+        """ Returns the size of the header in bytes """
+        return struct.calcsize(BootloaderHeader.HEADER_FMT)
+
+    def __str__(self) -> str:
+        return f'Header Size: {BootloaderHeader.get_header_size()}, Version: {self.version}, Bin Size: {self.bin_size}'
 
 
 def create_bin(input_path: str, input_version: int) -> str:
@@ -28,17 +39,17 @@ def create_bin(input_path: str, input_version: int) -> str:
     :return: The output file path as a string
     """
 
-    input_obj = Path(input_path)
+    program_bin = Path(input_path).read_bytes()
+    program_size_bytes = len(program_bin)
 
-    input_bin_data = input_obj.read_bytes()
-    bin_len = len(input_bin_data)
-    header = BootloaderHeader(version=input_version, bin_size=bin_len) # Create header struct
-    print(f'Version: {header.version}, Bin Size: {header.bin_size}')
+    header = BootloaderHeader(version=input_version, bin_size=program_size_bytes)
     header_bytes = header.serialize()
+
+    print(header)
 
     output_path = input_path.replace('.bin', '_formatted.bin')
     output_obj = Path(output_path)
-    output_obj.write_bytes(header_bytes + input_bin_data)
+    output_obj.write_bytes(header_bytes + program_bin)
 
     return output_path
 
@@ -53,37 +64,42 @@ def send_bin(file_path: str, com_port: str) -> None:
 
     file_obj = Path(file_path)
 
-    # Open serial port and write binary to device via UART
     with serial.Serial(com_port, baudrate=OBC_UART_BAUD_RATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_TWO) as ser:
         data = file_obj.read_bytes()
+
+        # TODO: Improve transfer protocol
+
+        # Start program download
         ser.write('d'.encode('ascii'))
         time.sleep(0.1)
 
-        ser.write(data[0:8])
-        for i in range(0, 8):
-            ser.write(data[i])
-
-        while True:
-            if (input("Enter 1 to send binary: ") == "1"):
-                break
-
-        ser.write('D'.encode('ascii'))
-
+        # Send header
+        ser.write(data[0:BootloaderHeader.get_header_size()])
         time.sleep(0.1)
 
-        bytesToWrite = len(data) - 8
-        bytesWritten = 0
-        # Write in chunks of 32 bytes and then write remaining bytes
-        while bytesWritten < bytesToWrite:
-            if bytesToWrite - bytesWritten >= 128:
-                ser.write(data[8 + bytesWritten : 8 + bytesWritten + 128])
-                bytesWritten += 128
+        # Wait for user to initiate transfer
+        while input("Enter 1 to start program transfer: ") != "1":
+            pass
+
+        # Bootloader expects a 'D' to be sent before the app
+        ser.write('D'.encode('ascii'))
+        time.sleep(0.1)
+
+        # Send app in chunks of 128 bytes
+        total_bytes_to_write = len(data) - BootloaderHeader.get_header_size()
+        num_bytes_written = 0
+        while num_bytes_written < total_bytes_to_write:
+            chunk_size = 128
+
+            if total_bytes_to_write - num_bytes_written >= chunk_size:
+                ser.write(data[8 + num_bytes_written : 8 + num_bytes_written + chunk_size])
+                num_bytes_written += chunk_size
                 time.sleep(0.1)
             else:
-                ser.write(data[bytesWritten + 8:])
-                bytesWritten += bytesToWrite - bytesWritten
+                ser.write(data[num_bytes_written + 8:])
+                num_bytes_written += total_bytes_to_write - num_bytes_written
 
-            print(f"{bytesWritten}/{bytesToWrite} bytes sent")
+            print(f"{num_bytes_written}/{total_bytes_to_write} bytes sent")
 
         print("Done writing app")
 

@@ -26,35 +26,24 @@ void *__stack_chk_guard = (void *)0xDEADBEEF;
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
 int main(void) {
-  // sciInit();
-  // i2cInit();
-  // spiInit();
-  // canInit();
-  // hetInit();
-
-  // _enable_interrupt_();
-
-  // // Initialize bus mutexes
-  // initSciMutex();
-  // initI2CMutex();
-  // initSpiMutex();
-
-  // // The state_mgr is the only task running initially.
-  // obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
-  // obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
-
-  // vTaskStartScheduler();
-
+  // Run hardware initialization code
   gioInit();
   sciInit();
+  i2cInit();
+  spiInit();
+  canInit();
+  hetInit();
 
-  char str[] = "Hello, OBC\r\n";
-  sciSend(scilinREG, sizeof(str), (uint8 *)str);
+  _enable_interrupt_();
 
-  while (1) {
-    gioToggleBit(gioPORTB, 1);
-    for (volatile int i = 0; i < 10000000; i++) {
-      asm(" NOP");
-    }
-  }
+  // Initialize bus mutexes
+  initSciMutex();
+  initI2CMutex();
+  initSpiMutex();
+
+  // The state_mgr is the only task running initially.
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
+
+  vTaskStartScheduler();
 }
