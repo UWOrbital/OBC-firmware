@@ -1,7 +1,6 @@
 #pragma once
 
 #include "obc_gs_errors.h"
-#include "correct.h"
 
 #include <stdint.h>
 
@@ -37,16 +36,6 @@ obc_gs_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData);
  * @param decodedDataLen length of the decodedData array
  */
 obc_gs_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData, uint8_t decodedDataLen);
-
-/**
- * @brief initializes the rs variable to be used for rs encryption and decryption
- */
-void initRs(void);
-
-/**
- * @brief cleans up the memory allocated for the rs variable
- */
-void destroyRs(void);
 
 #ifdef __cplusplus
 }

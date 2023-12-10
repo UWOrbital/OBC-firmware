@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 
 set(SOURCES
     main.c
-    common/gs_heap.c
     serial_utils/win_uart.c
 )
 
@@ -17,6 +16,6 @@ target_compile_options(gs PUBLIC -Wall -g)
 
 target_link_libraries(gs PUBLIC
     tiny-aes
-    lib-correct
+    rs-lib
     obc-gs-interface
 )
