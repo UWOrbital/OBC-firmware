@@ -24,12 +24,11 @@ STATIC_ASSERT(sizeof(obc_persist_t) <= FRAM_MAX_ADDRESS, "obc_persist_t exceeds 
 
 /* Private function declarations */
 
-
 /* Public function definitions */
 
 void initPersistent(void) {
   uint32_t maxValue = 0;
-  for(int i=0; i<OBC_PERSIST_SECTION_ID_COUNT; ++i) {
+  for (int i = 0; i < OBC_PERSIST_SECTION_ID_COUNT; ++i) {
     maxValue = MAX(maxValue, obcPersistConfig[i].sectionSize);
   }
   ASSERT(maxValue <= OBC_PERSISTENT_MAX_SUBINDEX_SIZE);
@@ -127,7 +126,7 @@ obc_error_code_t setPersistentDataByIndex(obc_persist_section_id_t sectionId, si
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t sectionId) {
+const obc_persist_config_t *getOBCPersistConfig(obc_persist_section_id_t sectionId) {
   if (sectionId >= OBC_PERSIST_SECTION_ID_COUNT) return NULL;
 
   return &obcPersistConfig[sectionId];
