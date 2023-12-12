@@ -44,8 +44,8 @@ void obcTaskFunctionPayloadMgr(void *pvParameters) {
           // ADD CAMERA CAPTURE COMMAND HANDLER
           break;
 
-        case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
-          // ADD SECONDARY PAYLOAD COMMAND HANDLER
+        case PAYLOAD_MANAGER_INITIATE_QEYNET_ROUTINE_EVENT_ID:
+          // ADD QEYNET ROUTINE COMMAND HANDLER
           break;
       }
     }
