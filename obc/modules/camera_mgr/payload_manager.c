@@ -40,14 +40,11 @@ void obcTaskFunctionPayloadMgr(void *pvParameters) {
     payload_event_t queueMsg;
     if (xQueueReceive(payloadQueueHandle, &queueMsg, PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD) == pdTRUE) {
       switch (queueMsg.eventID) {
-        case PAYLOAD_MANAGER_NULL_EVENT_ID:
-          break;
-
-        case PAYLOAD_MANAGER_CAM_CAPTURE_EVENT_ID:
+        case PAYLOAD_MANAGER_CAMERA_CAPTURE_EVENT_ID:
           // ADD CAMERA CAPTURE COMMAND HANDLER
           break;
 
-        case SECONDARY_PAYLOAD_MANAGER_EVENT_ID:
+        case PAYLOAD_MANAGER_INIATE_QEYNET_ROUTINE_EVENT_ID:
           // ADD SECONDARY PAYLOAD COMMAND HANDLER
           break;
       }

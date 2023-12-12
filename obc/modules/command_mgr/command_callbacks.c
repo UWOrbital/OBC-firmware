@@ -100,8 +100,8 @@ obc_error_code_t cameraCaptureCmdCallback(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  payload_event_t payloadEvent;
-  payloadEvent.eventID = PAYLOAD_MANAGER_CAM_CAPTURE_EVENT_ID;
+  payload_event_t payloadEvent = {0};
+  payloadEvent.eventID = PAYLOAD_MANAGER_CAMERA_CAPTURE_EVENT_ID;
 
   RETURN_IF_ERROR_CODE(sendToPayloadQueue(&payloadEvent));
 

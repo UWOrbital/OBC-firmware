@@ -11,9 +11,8 @@
  * Enum containing all possible event IDs passed to the payload event queue.
  */
 typedef enum {
-  PAYLOAD_MANAGER_NULL_EVENT_ID,
-  PAYLOAD_MANAGER_CAM_CAPTURE_EVENT_ID,
-  SECONDARY_PAYLOAD_MANAGER_EVENT_ID
+  PAYLOAD_MANAGER_CAMERA_CAPTURE_EVENT_ID,
+  PAYLOAD_MANAGER_INIATE_QEYNET_ROUTINE_EVENT_ID
 } payload_event_id_t;
 
 /**
