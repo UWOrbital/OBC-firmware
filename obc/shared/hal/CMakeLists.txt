@@ -26,7 +26,6 @@ set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/spi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_core.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_dma.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_intvecs.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_mpu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_pcr.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/sys_phantom.c
@@ -66,7 +65,6 @@ set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/spi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_core.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_dma.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_intvecs.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_mpu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_pcr.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/sys_phantom.c
@@ -106,7 +104,6 @@ set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/spi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_core.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_dma.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_intvecs.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_mpu.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_pcr.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_phantom.c

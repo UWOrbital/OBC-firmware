@@ -62,6 +62,7 @@ target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
 )
 
+add_subdirectory(app/hal)
 add_subdirectory(app/modules)
 add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
@@ -82,6 +83,7 @@ add_custom_command(
     COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.intvecs
                                                                      --only-section=.kernelTEXT
                                                                      --only-section=.text
+                                                                     --only-section=.rodata
                                                                      --only-section=.ARM
                                                                      --only-section=.preinit_array
                                                                      --only-section=.init_array

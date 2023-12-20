@@ -15,6 +15,8 @@ set(BL_INCLUDES
 target_include_directories(OBC-bl.out PUBLIC ${BL_INCLUDES})
 target_sources(OBC-bl.out PUBLIC ${BL_SOURCES})
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/hal)
+
 add_library(f021_api STATIC IMPORTED)
 set_property(TARGET f021_api PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/F021_Flash_API/F021_API_CortexR4_LE.lib)
 target_include_directories(f021_api INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/F021_Flash_API/include)

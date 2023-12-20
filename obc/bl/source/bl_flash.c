@@ -26,6 +26,29 @@ bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum) {
   return BL_ERR_CODE_SUCCESS;
 }
 
+uint8_t bl_flash_sectorOfAddr(uint32_t addr) {
+  uint8_t sector = 0U;
+  for (uint8_t i = 0U; i < NUM_FLASH_SECTORS; i++) {
+    const uint32_t sectorStartAddr = (uint32_t)(flashSectors[i].start);
+    const uint32_t sectorEndAddr = sectorStartAddr + flashSectors[i].length;
+
+    if (addr >= sectorStartAddr && addr < sectorEndAddr) {
+      sector = i;
+      break;
+    }
+  }
+
+  return sector;
+}
+
+uint32_t bl_flash_sectorStartAddr(uint8_t sector) { return (uint32_t)(flashSectors[sector].start); }
+
+uint32_t bl_flash_sectorEndAddr(uint8_t sector) {
+  return (uint32_t)(flashSectors[sector].start) + flashSectors[sector].length;
+}
+
+uint8_t bl_flash_getNumSectors(void) { return NUM_FLASH_SECTORS; }
+
 bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
@@ -34,23 +57,8 @@ bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size) {
   // Find the start and end of the sectors to erase. Assume flashSectors is sorted
   // by start address, and that the first sector starts at address 0
 
-  uint8_t startSector = 0U;
-  for (uint8_t i = 0U; i < NUM_FLASH_SECTORS; i++) {
-    const uint32_t sectorStartAddr = (uint32_t)(flashSectors[i].start);
-    if (sectorStartAddr > startAddr) {
-      startSector = i - 1U;  // The previous sector contains the start address
-      break;
-    }
-  }
-
-  uint8_t endSector = 0U;
-  for (uint8_t i = 0U; i < NUM_FLASH_SECTORS; i++) {
-    const uint32_t sectorEndAddr = (uint32_t)(flashSectors[i].start) + flashSectors[i].length;
-    if (sectorEndAddr >= endAddr) {
-      endSector = i;
-      break;
-    }
-  }
+  const uint8_t startSector = bl_flash_sectorOfAddr(startAddr);
+  const uint8_t endSector = bl_flash_sectorOfAddr(endAddr);
 
   for (uint8_t i = startSector; i < endSector + 1U; i++) {
     if (Fapi_issueAsyncCommandWithAddress(Fapi_EraseSector, flashSectors[i].start) != Fapi_Status_Success) {
@@ -76,7 +84,7 @@ bl_error_code_t bl_flash_FapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint
 
   while (numBytes > 0) {
     if (Fapi_issueProgrammingCommand((uint32_t *)dst, (uint8_t *)src, (uint32_t)bytesToFlashNext, NULL, 0,
-                                     Fapi_DataOnly) != Fapi_Status_Success) {
+                                     Fapi_AutoEccGeneration) != Fapi_Status_Success) {
       errCode = BL_ERR_CODE_UNKNOWN;
       break;
     }

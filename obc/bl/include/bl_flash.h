@@ -14,3 +14,7 @@ bl_error_code_t bl_flash_FapiBlockWrite(uint32_t flashAddress, uint32_t dataAddr
 bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize) BL_FLASH_API_SECTION;
 void bl_flash_waitFsmReady(void) BL_FLASH_API_SECTION;
 void bl_flash_waitFsmStatusSuccess(void) BL_FLASH_API_SECTION;
+uint8_t bl_flash_sectorOfAddr(uint32_t addr) BL_FLASH_API_SECTION;
+uint32_t bl_flash_sectorStartAddr(uint8_t sector) BL_FLASH_API_SECTION;
+uint32_t bl_flash_sectorEndAddr(uint8_t sector) BL_FLASH_API_SECTION;
+uint8_t bl_flash_getNumSectors(void) BL_FLASH_API_SECTION;
