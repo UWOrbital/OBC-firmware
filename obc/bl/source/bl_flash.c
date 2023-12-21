@@ -144,8 +144,4 @@ void bl_flash_waitFsmStatusSuccess(void) {
   while (FAPI_GET_FSM_STATUS != Fapi_Status_Success) {
     asm(" NOP");
   }
-
-  for (volatile uint32_t i = 0U; i < 100000UL; i++) {
-    asm(" NOP");
-  }
 }

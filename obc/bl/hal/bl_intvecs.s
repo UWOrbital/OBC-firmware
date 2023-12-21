@@ -50,7 +50,9 @@
 
 /*-------------------------------------------------------------------------------*/
 @ interrupt vectors
-@ TODO: Jump to handler that we can modify at runtime
+
+@ TODO: Jump to routine which decides the handler to call
+
 resetEntry:
         b   _c_int00    @ Reset
 undefEntry:
@@ -58,7 +60,7 @@ undefEntry:
         b   #0x40008     @ Software interrupt (SWI / SVC)
 prefetchEntry:
         b   #0x4000c     @ Abort (prefetch)
-        b   #0x40010     @ Abort (data)
+        b   _dabort      @ Abort (data)
         b   #0x40014     @ phantomInterrupt
         ldr pc,[pc,#-0x1b0]     @ IRQ
         ldr pc,[pc,#-0x1b0]     @ FIQ
