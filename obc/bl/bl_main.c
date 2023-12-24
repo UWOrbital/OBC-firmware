@@ -140,21 +140,34 @@ void bootloader(void) {
 
         sciSend(sciREG, strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
 
-        // sciSend(sciREG, strlen("Writing 0xFF to remaining flash\r\n"), (uint8_t *)"Writing 0xFF to remaining
-        // flash\r\n");
+        // Write msg that we're fixing incorrect ECC due to erase
+        sciSend(sciREG, strlen("Fixing ECC\r\n"), (uint8_t *)"Fixing ECC\r\n");
 
-        // // Go through rest of flash in erased sections and write 0xFF with ECC auto-calculation
-        // numBytesToFlash = bl_flash_sectorEndAddr(bl_flash_sectorOfAddr(APP_START_ADDRESS + appHeader.size + 1U)) -
-        // (APP_START_ADDRESS + appHeader.size + 1U); for (uint32_t i = 0U; i < numBytesToFlash; i++) {
-        //   uint8_t byte = 0xFFU;
-        //   bl_flash_FapiBlockWrite(APP_START_ADDRESS + appHeader.size + i + 1U, (uint32_t)&byte, 1U);
-        // }
+        // Go through the rest of the final flash section we erased and write 0xFF in blocks of 128 with ECC
+        // auto-calculation
+        uint8_t eccFixBuf[128] = {0U};
+        memset(eccFixBuf, 0xFFU, sizeof(eccFixBuf));
+
+        const uint32_t numBytesToFix =
+            bl_flash_sectorEndAddr(bl_flash_sectorOfAddr(APP_START_ADDRESS + appHeader.size)) -
+            (APP_START_ADDRESS + appHeader.size);
+        numBytesToFlash = numBytesToFix;
+        while (numBytesToFlash > 0) {
+          uint32_t numBytesToWrite = (numBytesToFlash > 128U) ? 128U : numBytesToFlash;
+
+          const uint32_t baseAddr = APP_START_ADDRESS + appHeader.size + 1U;
+          const uint32_t addr = baseAddr + (numBytesToFix - numBytesToFlash);
+
+          bl_flash_FapiBlockWrite(addr, (uint32_t)eccFixBuf, numBytesToWrite);
+
+          numBytesToFlash -= numBytesToWrite;
+        }
 
         if (state == BL_STATE_IDLE) {
           break;
         }
 
-        // sciSend(sciREG, strlen("Finished writing to flash\r\n"), (uint8_t *)"Finished writing to flash\r\n");
+        sciSend(sciREG, strlen("Finished writing to flash\r\n"), (uint8_t *)"Finished writing to flash\r\n");
 
         state = BL_STATE_IDLE;
         break;

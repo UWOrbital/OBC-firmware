@@ -26,8 +26,6 @@ void *__stack_chk_guard = (void *)0xDEADBEEF;
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
 int main(void) {
-  _coreDisableFlashEcc_();
-
   // Run hardware initialization code
   gioInit();
   sciInit();
