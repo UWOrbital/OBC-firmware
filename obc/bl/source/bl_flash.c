@@ -9,7 +9,7 @@
 #include <stdbool.h>
 
 /* PUBLIC FUNCTION DEFINITIONS */
-bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum) {
+bl_error_code_t bl_flash_fapiInitBank(uint32_t bankNum) {
   if ((Fapi_initializeFlashBanks(SYS_CLK_FREQ)) != Fapi_Status_Success) {
     return BL_ERR_CODE_UNKNOWN;
   }
@@ -52,7 +52,7 @@ uint32_t bl_flash_sectorEndAddr(uint8_t sector) {
 
 uint8_t bl_flash_getNumSectors(void) { return NUM_FLASH_SECTORS; }
 
-bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size) {
+bl_error_code_t bl_flash_fapiBlockErase(uint32_t startAddr, uint32_t size) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
   const uint32_t endAddr = startAddr + size;
@@ -76,7 +76,7 @@ bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size) {
   return errCode;
 }
 
-bl_error_code_t bl_flash_FapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32_t numBytes) {
+bl_error_code_t bl_flash_fapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32_t numBytes) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
   register uint32_t src = srcAddr;

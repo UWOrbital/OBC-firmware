@@ -85,7 +85,7 @@ int main(void) {
 
         bl_uart_writeBytes(BL_UART_SCIREG_1, strlen("Received header\r\n"), (uint8_t *)"Received header\r\n");
 
-        errCode = bl_flash_FapiInitBank(0U);
+        errCode = bl_flash_fapiInitBank(0U);
         if (errCode != BL_ERR_CODE_SUCCESS) {
           bl_uart_writeBytes(BL_UART_SCIREG_1, strlen("Failed to init flash\r\n"),
                              (uint8_t *)"Failed to init flash\r\n");
@@ -93,7 +93,7 @@ int main(void) {
           break;
         }
 
-        errCode = bl_flash_FapiBlockErase(APP_START_ADDRESS, appHeader.size);
+        errCode = bl_flash_fapiBlockErase(APP_START_ADDRESS, appHeader.size);
         if (errCode != BL_ERR_CODE_SUCCESS) {
           bl_uart_writeBytes(BL_UART_SCIREG_1, strlen("Failed to erase flash\r\n"),
                              (uint8_t *)"Failed to erase flash\r\n");
@@ -114,7 +114,7 @@ int main(void) {
           }
         }
 
-        bl_flash_FapiInitBank(0U);
+        bl_flash_fapiInitBank(0U);
 
         // Receive image in chunks of 128 bytes and write to flash
         uint32_t numAppBytesToFlash = appHeader.size;
@@ -125,7 +125,7 @@ int main(void) {
 
           bl_uart_readBytes(BL_UART_SCIREG_2, recvBuffer, numBytesToRead);
 
-          bl_flash_FapiBlockWrite(APP_START_ADDRESS + (appHeader.size - numAppBytesToFlash), (uint32_t)recvBuffer,
+          bl_flash_fapiBlockWrite(APP_START_ADDRESS + (appHeader.size - numAppBytesToFlash), (uint32_t)recvBuffer,
                                   numBytesToRead);
 
           numAppBytesToFlash -= numBytesToRead;
@@ -150,7 +150,7 @@ int main(void) {
           const uint32_t baseAddr = APP_START_ADDRESS + appHeader.size + 1U;
           const uint32_t addr = baseAddr + (eccFixTotalBytes - eccFixBytesLeft);
 
-          bl_flash_FapiBlockWrite(addr, (uint32_t)eccFixWriteBuf, numBytesToWrite);
+          bl_flash_fapiBlockWrite(addr, (uint32_t)eccFixWriteBuf, numBytesToWrite);
 
           eccFixBytesLeft -= numBytesToWrite;
         }

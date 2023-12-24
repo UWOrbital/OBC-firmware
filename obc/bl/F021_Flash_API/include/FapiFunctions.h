@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#define ATTR_FLASH_API_SECTION __attribute__((section(".ramFuncs")))
+#define FAPI_ATTR_RAMFUNC_SECTION __attribute__((section(".ramFuncs")))
 
 /* Flash C API functions*/
 
@@ -122,7 +122,7 @@ extern uint32_t Fapi_calculateFletcherChecksum(uint32_t u32Address, uint32_t u32
 extern uint8_t Fapi_calculateEcc(uint32_t u32Address, uint64_t u64Data);
 
 /* User Defined Functions */
-extern Fapi_StatusType Fapi_serviceWatchdogTimer(void) ATTR_FLASH_API_SECTION;
+extern Fapi_StatusType Fapi_serviceWatchdogTimer(void) FAPI_ATTR_RAMFUNC_SECTION;
 
 #ifdef __cplusplus
 }
