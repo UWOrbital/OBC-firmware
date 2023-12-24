@@ -17,18 +17,18 @@ SECTIONS
   } >BL_VECTORS
 
   /* Flash API */
-  .flashApi : ALIGN(8)
+  .ramFuncs : ALIGN(8)
   {
-    __flashApiRunStart__ = .;
-    *(.flashApi)
-    *(.flashApi*)
+    __ramFuncsRunStart__ = .;
+    *(.ramFuncs)
+    *(.ramFuncs*)
     *F021_API_CortexR4_LE.lib:*(.text .text*)
-    __flashApiRunEnd__ = .;
+    __ramFuncsRunEnd__ = .;
   } >RAM AT> BL_FLASH
 
     /* used by bootloader to copy F021 API to RAM */
-  __flashApiLoadStart__ = LOADADDR(.flashApi);
-  __flashApiSize__ = SIZEOF(.flashApi);
+  __ramFuncsLoadStart__ = LOADADDR(.ramFuncs);
+  __ramFuncsSize__ = SIZEOF(.ramFuncs);
 
  /* FreeRTOS Kernel in protected region of Flash */
   .kernelTEXT :

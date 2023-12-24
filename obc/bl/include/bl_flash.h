@@ -5,7 +5,7 @@
 
 #include "bl_errors.h"
 
-#define BL_FLASH_API_SECTION __attribute__((section(".flashApi")))
+#define BL_FLASH_API_SECTION __attribute__((section(".ramFuncs")))
 
 bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum) BL_FLASH_API_SECTION;
 bl_error_code_t bl_flash_FapiBlockErase(uint32_t startAddr, uint32_t size) BL_FLASH_API_SECTION;

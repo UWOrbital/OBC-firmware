@@ -1,9 +1,12 @@
-#include "F021.h"
-#include "flash_config.h"
-#include "bl_config.h"
 #include "bl_flash.h"
+#include "bl_config.h"
 #include "bl_errors.h"
+#include "flash_config.h"
+
+#include "F021.h"
+
 #include <stdint.h>
+#include <stdbool.h>
 
 /* PUBLIC FUNCTION DEFINITIONS */
 bl_error_code_t bl_flash_FapiInitBank(uint32_t bankNum) {

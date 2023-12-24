@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#define ATTR_FLASH_API_SECTION __attribute__((section(".flashApi")))
+#define ATTR_FLASH_API_SECTION __attribute__((section(".ramFuncs")))
 
 /* Flash C API functions*/
 
