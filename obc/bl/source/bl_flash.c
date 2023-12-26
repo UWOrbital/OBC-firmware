@@ -1,7 +1,7 @@
 #include "bl_flash.h"
+#include "bl_flash_config.h"
 #include "bl_config.h"
 #include "bl_errors.h"
-#include "flash_config.h"
 
 #include "F021.h"
 
