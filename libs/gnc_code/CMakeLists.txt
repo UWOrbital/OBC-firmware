@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/attitude_control_grt_rtw)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/attitude_determination_and_vehi_grt_rtw)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/onboard_env_modelling_grt_rtw)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/attitude_control_ert_rtw)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/attitude_determination_and_vehi_ert_rtw)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/onboard_env_modelling_ert_rtw)
