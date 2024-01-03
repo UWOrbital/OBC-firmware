@@ -144,70 +144,7 @@ Output entry point of generated code
 Timing
 </td>
 <td width="75%" align="left" valign="top">
-Must be called periodically, every 0.01 seconds
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Arguments
-</td>
-<td width="75%" align="left" valign="top">
-None
-</td>
-
-</tr>
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Return value
-</td>
-<td width="75%" align="left" valign="top">
-None
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Header file
-</td>
-<td width="75%" align="left" valign="top">
-<a href="javascript: void(0)" onclick="postParentWindowMessage({message:'jumpToCode',location:'attitude_control.h'})">attitude_control.h</a>
-</td>
-
-</tr>
-
-</table>
-<p>
-Function: <a href="javascript: void(0)" onclick="postParentWindowMessage({message:'jumpToCode',location:'attitude_control_terminate'})">attitude_control_terminate</a>
-</p>
-<table width="100%" class="AltRow" cellspacing="0">
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Prototype
-</td>
-<td width="75%" align="left" valign="top">
-<b>
-void attitude_control_terminate(void)
-</b>
-
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Description
-</td>
-<td width="75%" align="left" valign="top">
-Termination entry point of generated code
-</td>
-
-</tr>
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Timing
-</td>
-<td width="75%" align="left" valign="top">
-Must be called exactly once
+Must be called periodically, every 0.05 seconds
 </td>
 
 </tr>
@@ -276,10 +213,10 @@ Dimension
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S4&gt;/ang_vel_body
+&lt;S5&gt;/ang_vel_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_control_U.est_curr_ang_vel_body
+rtU.est_curr_ang_vel_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -291,10 +228,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S4&gt;/curr_quat_body
+&lt;S5&gt;/curr_quat_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_control_U.est_curr_quat_body
+rtU.est_curr_quat_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -306,10 +243,10 @@ real_T
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S4&gt;/com_quat_body
+&lt;S5&gt;/com_quat_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_control_U.com_quat_body
+rtU.com_quat_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -321,10 +258,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S4&gt;/mag_field_body
+&lt;S5&gt;/mag_field_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_control_U.mag_field_body
+rtU.mag_field_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -372,10 +309,10 @@ Dimension
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S4&gt;/comm_wheel_torque_body
+&lt;S5&gt;/comm_wheel_torque_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_control_Y.comm_wheel_torque_body
+rtY.comm_wheel_torque_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -387,10 +324,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S4&gt;/comm_mag_dipole_body
+&lt;S5&gt;/comm_mag_dipole_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_control_Y.comm_mag_dipole_body
+rtY.comm_mag_dipole_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -408,66 +345,9 @@ Interface Parameters
 </a>
 
 </h3>
-<table width="100%" class="AltRow FirstColumn" cellspacing="0">
-<tr class="heading">
-<th width="42%" align="left" valign="top">
-<b>
-Parameter Source
-</b>
-
-</th>
-<th width="26%" align="left" valign="top">
-<b>
-Code Identifier
-</b>
-
-</th>
-<th width="21%" align="left" valign="top">
-<b>
-Data Type
-</b>
-
-</th>
-<th width="10%" align="right" valign="top">
-<b>
-Dimension
-</b>
-
-</th>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S4&gt;/k_p
-</td>
-<td width="26%" align="left" valign="top">
-attitude_control_P.k_p_Gain
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S4&gt;/k_d
-</td>
-<td width="26%" align="left" valign="top">
-attitude_control_P.k_d_Gain
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-
-</table>
+<p>
+No interface/tunable parameters in model.
+</p>
 <h3>
 <a name="sec_Data_Stores">
 Data Stores

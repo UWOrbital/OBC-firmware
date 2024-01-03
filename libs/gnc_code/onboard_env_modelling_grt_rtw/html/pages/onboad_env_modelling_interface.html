@@ -144,70 +144,7 @@ Output entry point of generated code
 Timing
 </td>
 <td width="75%" align="left" valign="top">
-Must be called periodically, every 0.01 seconds
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Arguments
-</td>
-<td width="75%" align="left" valign="top">
-None
-</td>
-
-</tr>
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Return value
-</td>
-<td width="75%" align="left" valign="top">
-None
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Header file
-</td>
-<td width="75%" align="left" valign="top">
-<a href="javascript: void(0)" onclick="postParentWindowMessage({message:'jumpToCode',location:'onboad_env_modelling.h'})">onboad_env_modelling.h</a>
-</td>
-
-</tr>
-
-</table>
-<p>
-Function: <a href="javascript: void(0)" onclick="postParentWindowMessage({message:'jumpToCode',location:'onboad_env_modelling_terminate'})">onboad_env_modelling_terminate</a>
-</p>
-<table width="100%" class="AltRow" cellspacing="0">
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Prototype
-</td>
-<td width="75%" align="left" valign="top">
-<b>
-void onboad_env_modelling_terminate(void)
-</b>
-
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Description
-</td>
-<td width="75%" align="left" valign="top">
-Termination entry point of generated code
-</td>
-
-</tr>
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Timing
-</td>
-<td width="75%" align="left" valign="top">
-Must be called exactly once
+Must be called periodically, every 0.05 seconds
 </td>
 
 </tr>
@@ -276,10 +213,10 @@ Dimension
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S9&gt;/magnetorquer comm
+&lt;S10&gt;/magnetorquer comm
 </td>
 <td width="26%" align="left" valign="top">
-onboad_env_modelling_U.commanded_mag_dipole_body
+rtU.commanded_mag_dipole_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -291,10 +228,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S9&gt;/r_sat_com
+&lt;S10&gt;/r_sat_com
 </td>
 <td width="26%" align="left" valign="top">
-onboad_env_modelling_U.r_sat_com_ax1
+rtU.r_sat_com_ax1
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -306,10 +243,10 @@ real_T
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S9&gt;/r_sat_com_ax1
+&lt;S10&gt;/r_sat_com_ax1
 </td>
 <td width="26%" align="left" valign="top">
-onboad_env_modelling_U.r_sat_com
+rtU.r_sat_com
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -321,10 +258,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S9&gt;/steve_values
+&lt;S10&gt;/steve_values
 </td>
 <td width="26%" align="left" valign="top">
-onboad_env_modelling_U.steve_values
+rtU.steve_values
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -372,10 +309,10 @@ Dimension
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S9&gt;/estimated_expect_ang_acc_body
+&lt;S10&gt;/estimated_expect_ang_acc_body
 </td>
 <td width="26%" align="left" valign="top">
-onboad_env_modelling_Y.estimated_expect_ang_acc_body
+rtY.estimated_expect_ang_acc_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -387,10 +324,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S9&gt;/r_ref_com_est
+&lt;S10&gt;/r_ref_com_est
 </td>
 <td width="26%" align="left" valign="top">
-onboad_env_modelling_Y.r_ref_com_est
+rtY.r_ref_com_est
 </td>
 <td width="21%" align="left" valign="top">
 real_T

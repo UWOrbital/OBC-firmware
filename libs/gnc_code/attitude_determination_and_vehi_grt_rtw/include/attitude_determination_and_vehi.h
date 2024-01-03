@@ -1,20 +1,21 @@
 /*
- * attitude_determination_and_vehi.h
- *
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * Code generation for model "attitude_determination_and_vehi".
+ * File: attitude_determination_and_vehi.h
  *
- * Model version              : 3.77
- * Simulink Coder version : 9.9 (R2023a) 19-Nov-2022
- * C source code generated on : Mon Dec  4 21:30:29 2023
+ * Code generated for Simulink model 'attitude_determination_and_vehi'.
  *
- * Target selection: grt.tlc
- * Note: GRT includes extra infrastructure and instrumentation for prototyping
+ * Model version                  : 3.78
+ * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
+ * C/C++ source code generated on : Mon Jan  1 12:50:14 2024
+ *
+ * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-R
- * Code generation objective: Debugging
+ * Code generation objectives:
+ *    1. Execution efficiency
+ *    2. RAM efficiency
  * Validation result: Not run
  */
 
@@ -25,24 +26,9 @@
 #include "rtwtypes.h"
 #include "rtw_continuous.h"
 #include "rtw_solver.h"
-#include "rt_logging.h"
 #endif                    /* attitude_determination_and_vehi_COMMON_INCLUDES_ */
 
-#include "attitude_determination_and_vehi_types.h"
-#include <float.h>
-#include <string.h>
-#include <stddef.h>
-#include "rt_nonfinite.h"
-
 /* Macros for accessing real-time model data structure */
-#ifndef rtmGetFinalTime
-#define rtmGetFinalTime(rtm)           ((rtm)->Timing.tFinal)
-#endif
-
-#ifndef rtmGetRTWLogInfo
-#define rtmGetRTWLogInfo(rtm)          ((rtm)->rtwLogInfo)
-#endif
-
 #ifndef rtmGetErrorStatus
 #define rtmGetErrorStatus(rtm)         ((rtm)->errorStatus)
 #endif
@@ -51,49 +37,15 @@
 #define rtmSetErrorStatus(rtm, val)    ((rtm)->errorStatus = (val))
 #endif
 
-#ifndef rtmGetStopRequested
-#define rtmGetStopRequested(rtm)       ((rtm)->Timing.stopRequestedFlag)
-#endif
+/* Forward declaration for rtModel */
+typedef struct tag_RTM RT_MODEL;
 
-#ifndef rtmSetStopRequested
-#define rtmSetStopRequested(rtm, val)  ((rtm)->Timing.stopRequestedFlag = (val))
-#endif
-
-#ifndef rtmGetStopRequestedPtr
-#define rtmGetStopRequestedPtr(rtm)    (&((rtm)->Timing.stopRequestedFlag))
-#endif
-
-#ifndef rtmGetT
-#define rtmGetT(rtm)                   ((rtm)->Timing.taskTime0)
-#endif
-
-#ifndef rtmGetTFinal
-#define rtmGetTFinal(rtm)              ((rtm)->Timing.tFinal)
-#endif
-
-#ifndef rtmGetTPtr
-#define rtmGetTPtr(rtm)                (&(rtm)->Timing.taskTime0)
-#endif
-
-#define attitude_determination_and_vehi_M (attitude_determination_and_v_M)
-
-/* Block signals (default storage) */
+/* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  real_T DataStoreRead1[4];            /* '<S1>/Data Store Read1' */
-  real_T DataStoreRead2[3];            /* '<S1>/Data Store Read2' */
-  real_T Transpose1[3];                /* '<S1>/Transpose1' */
-  real_T Reshape1[3];                  /* '<S1>/Reshape1' */
-  real_T P[36];                        /* '<S1>/MEKF' */
-  real_T beta[3];                      /* '<S1>/MEKF' */
-  real_T hat_omega[3];                 /* '<S1>/MEKF' */
-} B_attitude_determination_and__T;
-
-/* Block states (default storage) for system '<Root>' */
-typedef struct {
-  real_T P[36];                        /* '<S1>/Data Store Memory' */
+  real_T P_o[36];                      /* '<S1>/Data Store Memory' */
   real_T q_n2m[4];                     /* '<S1>/Data Store Memory1' */
   real_T beta[3];                      /* '<S1>/Data Store Memory2' */
-} DW_attitude_determination_and_T;
+} DW;
 
 /* Constant parameters (default storage) */
 typedef struct {
@@ -101,7 +53,7 @@ typedef struct {
    * Referenced by: '<S1>/Data Store Memory'
    */
   real_T DataStoreMemory_InitialValue[36];
-} ConstP_attitude_determination_T;
+} ConstP;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
@@ -114,56 +66,48 @@ typedef struct {
   real_T ref_aam[3];                   /* '<Root>/ref_aam' */
   real_T mes_aam[3];                   /* '<Root>/mes_aam' */
   real_T steve_mes[3];                 /* '<Root>/steve_mes' */
-} ExtU_attitude_determination_a_T;
+} ExtU;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
   real_T meas_ang_vel_body[3];         /* '<Root>/meas_ang_vel_body' */
   real_T meas_quat_body[4];            /* '<Root>/meas_quat_body' */
-} ExtY_attitude_determination_a_T;
+} ExtY;
 
 /* Real-time Model Data Structure */
-struct tag_RTM_attitude_determinatio_T {
-  const char_T *errorStatus;
-  RTWLogInfo *rtwLogInfo;
-
-  /*
-   * Timing:
-   * The following substructure contains information regarding
-   * the timing information for the model.
-   */
-  struct {
-    time_T taskTime0;
-    uint32_T clockTick0;
-    uint32_T clockTickH0;
-    time_T stepSize0;
-    time_T tFinal;
-    boolean_T stopRequestedFlag;
-  } Timing;
+struct tag_RTM {
+  const char_T * volatile errorStatus;
 };
 
-/* Block signals (default storage) */
-extern B_attitude_determination_and__T attitude_determination_and_ve_B;
-
-/* Block states (default storage) */
-extern DW_attitude_determination_and_T attitude_determination_and_v_DW;
+/* Block signals and states (default storage) */
+extern DW rtDW;
 
 /* External inputs (root inport signals with default storage) */
-extern ExtU_attitude_determination_a_T attitude_determination_and_ve_U;
+extern ExtU rtU;
 
 /* External outputs (root outports fed by signals with default storage) */
-extern ExtY_attitude_determination_a_T attitude_determination_and_ve_Y;
+extern ExtY rtY;
 
 /* Constant parameters (default storage) */
-extern const ConstP_attitude_determination_T attitude_determination_a_ConstP;
+extern const ConstP rtConstP;
 
 /* Model entry point functions */
 extern void attitude_determination_and_vehi_initialize(void);
 extern void attitude_determination_and_vehi_step(void);
-extern void attitude_determination_and_vehi_terminate(void);
 
 /* Real-time Model object */
-extern RT_MODEL_attitude_determinati_T *const attitude_determination_and_v_M;
+extern RT_MODEL *const rtM;
+
+/*-
+ * These blocks were eliminated from the model due to optimizations:
+ *
+ * Block '<S1>/Estimated Angular Velocity' : Unused code path elimination
+ * Block '<S1>/Estimated Attitude' : Unused code path elimination
+ * Block '<S1>/MEKF Covariance Matrix' : Unused code path elimination
+ * Block '<S1>/Reshape' : Reshape block reduction
+ * Block '<S1>/Reshape1' : Reshape block reduction
+ * Block '<S1>/Reshape2' : Reshape block reduction
+ */
 
 /*-
  * The generated code includes comments that allow you to trace directly
@@ -187,3 +131,9 @@ extern RT_MODEL_attitude_determinati_T *const attitude_determination_and_v_M;
  * '<S2>'   : 'cubesat_alg_dev_env_v2_main/attitude_determination_and_vehicle_est/MEKF'
  */
 #endif                       /* RTW_HEADER_attitude_determination_and_vehi_h_ */
+
+/*
+ * File trailer for generated code.
+ *
+ * [EOF]
+ */

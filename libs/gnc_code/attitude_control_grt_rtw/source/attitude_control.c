@@ -1,324 +1,352 @@
 /*
- * attitude_control.c
- *
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * Code generation for model "attitude_control".
+ * File: attitude_control.c
  *
- * Model version              : 3.77
- * Simulink Coder version : 9.9 (R2023a) 19-Nov-2022
- * C source code generated on : Mon Dec  4 21:31:21 2023
+ * Code generated for Simulink model 'attitude_control'.
  *
- * Target selection: grt.tlc
- * Note: GRT includes extra infrastructure and instrumentation for prototyping
+ * Model version                  : 3.78
+ * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
+ * C/C++ source code generated on : Mon Jan  1 12:47:01 2024
+ *
+ * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-R
- * Code generation objective: Debugging
+ * Code generation objectives:
+ *    1. Execution efficiency
+ *    2. RAM efficiency
  * Validation result: Not run
  */
 
 #include "attitude_control.h"
-#include "rt_nonfinite.h"
 #include "rtwtypes.h"
-#include <string.h>
-#include "attitude_control_private.h"
-
-/* Block signals (default storage) */
-B_attitude_control_T attitude_control_B;
+#include <stddef.h>
+#define NumBitsPerChar                 8U
 
 /* External inputs (root inport signals with default storage) */
-ExtU_attitude_control_T attitude_control_U;
+ExtU rtU;
 
 /* External outputs (root outports fed by signals with default storage) */
-ExtY_attitude_control_T attitude_control_Y;
+ExtY rtY;
 
 /* Real-time model */
-static RT_MODEL_attitude_control_T attitude_control_M_;
-RT_MODEL_attitude_control_T *const attitude_control_M = &attitude_control_M_;
+static RT_MODEL rtM_;
+RT_MODEL *const rtM = &rtM_;
+static real_T rtGetNaN(void);
+static real32_T rtGetNaNF(void);
+
+#define NOT_USING_NONFINITE_LITERALS   1
+
+extern real_T rtInf;
+extern real_T rtMinusInf;
+extern real_T rtNaN;
+extern real32_T rtInfF;
+extern real32_T rtMinusInfF;
+extern real32_T rtNaNF;
+static void rt_InitInfAndNaN(size_t realSize);
+static boolean_T rtIsInf(real_T value);
+static boolean_T rtIsInfF(real32_T value);
+static boolean_T rtIsNaN(real_T value);
+static boolean_T rtIsNaNF(real32_T value);
+typedef struct {
+  struct {
+    uint32_T wordH;
+    uint32_T wordL;
+  } words;
+} BigEndianIEEEDouble;
+
+typedef struct {
+  struct {
+    uint32_T wordL;
+    uint32_T wordH;
+  } words;
+} LittleEndianIEEEDouble;
+
+typedef struct {
+  union {
+    real32_T wordLreal;
+    uint32_T wordLuint;
+  } wordL;
+} IEEESingle;
+
+real_T rtInf;
+real_T rtMinusInf;
+real_T rtNaN;
+real32_T rtInfF;
+real32_T rtMinusInfF;
+real32_T rtNaNF;
+static real_T rtGetInf(void);
+static real32_T rtGetInfF(void);
+static real_T rtGetMinusInf(void);
+static real32_T rtGetMinusInfF(void);
+
+/*
+ * Initialize rtNaN needed by the generated code.
+ * NaN is initialized as non-signaling. Assumes IEEE.
+ */
+static real_T rtGetNaN(void)
+{
+  size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
+  real_T nan = 0.0;
+  if (bitsPerReal == 32U) {
+    nan = rtGetNaNF();
+  } else {
+    union {
+      LittleEndianIEEEDouble bitVal;
+      real_T fltVal;
+    } tmpVal;
+
+    tmpVal.bitVal.words.wordH = 0xFFF80000U;
+    tmpVal.bitVal.words.wordL = 0x00000000U;
+    nan = tmpVal.fltVal;
+  }
+
+  return nan;
+}
+
+/*
+ * Initialize rtNaNF needed by the generated code.
+ * NaN is initialized as non-signaling. Assumes IEEE.
+ */
+static real32_T rtGetNaNF(void)
+{
+  IEEESingle nanF = { { 0.0F } };
+
+  nanF.wordL.wordLuint = 0xFFC00000U;
+  return nanF.wordL.wordLreal;
+}
+
+/*
+ * Initialize the rtInf, rtMinusInf, and rtNaN needed by the
+ * generated code. NaN is initialized as non-signaling. Assumes IEEE.
+ */
+static void rt_InitInfAndNaN(size_t realSize)
+{
+  (void) (realSize);
+  rtNaN = rtGetNaN();
+  rtNaNF = rtGetNaNF();
+  rtInf = rtGetInf();
+  rtInfF = rtGetInfF();
+  rtMinusInf = rtGetMinusInf();
+  rtMinusInfF = rtGetMinusInfF();
+}
+
+/* Test if value is infinite */
+static boolean_T rtIsInf(real_T value)
+{
+  return (boolean_T)((value==rtInf || value==rtMinusInf) ? 1U : 0U);
+}
+
+/* Test if single-precision value is infinite */
+static boolean_T rtIsInfF(real32_T value)
+{
+  return (boolean_T)(((value)==rtInfF || (value)==rtMinusInfF) ? 1U : 0U);
+}
+
+/* Test if value is not a number */
+static boolean_T rtIsNaN(real_T value)
+{
+  boolean_T result = (boolean_T) 0;
+  size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
+  if (bitsPerReal == 32U) {
+    result = rtIsNaNF((real32_T)value);
+  } else {
+    union {
+      LittleEndianIEEEDouble bitVal;
+      real_T fltVal;
+    } tmpVal;
+
+    tmpVal.fltVal = value;
+    result = (boolean_T)((tmpVal.bitVal.words.wordH & 0x7FF00000) == 0x7FF00000 &&
+                         ( (tmpVal.bitVal.words.wordH & 0x000FFFFF) != 0 ||
+                          (tmpVal.bitVal.words.wordL != 0) ));
+  }
+
+  return result;
+}
+
+/* Test if single-precision value is not a number */
+static boolean_T rtIsNaNF(real32_T value)
+{
+  IEEESingle tmp;
+  tmp.wordL.wordLreal = value;
+  return (boolean_T)( (tmp.wordL.wordLuint & 0x7F800000) == 0x7F800000 &&
+                     (tmp.wordL.wordLuint & 0x007FFFFF) != 0 );
+}
+
+/*
+ * Initialize rtInf needed by the generated code.
+ * Inf is initialized as non-signaling. Assumes IEEE.
+ */
+static real_T rtGetInf(void)
+{
+  size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
+  real_T inf = 0.0;
+  if (bitsPerReal == 32U) {
+    inf = rtGetInfF();
+  } else {
+    union {
+      LittleEndianIEEEDouble bitVal;
+      real_T fltVal;
+    } tmpVal;
+
+    tmpVal.bitVal.words.wordH = 0x7FF00000U;
+    tmpVal.bitVal.words.wordL = 0x00000000U;
+    inf = tmpVal.fltVal;
+  }
+
+  return inf;
+}
+
+/*
+ * Initialize rtInfF needed by the generated code.
+ * Inf is initialized as non-signaling. Assumes IEEE.
+ */
+static real32_T rtGetInfF(void)
+{
+  IEEESingle infF;
+  infF.wordL.wordLuint = 0x7F800000U;
+  return infF.wordL.wordLreal;
+}
+
+/*
+ * Initialize rtMinusInf needed by the generated code.
+ * Inf is initialized as non-signaling. Assumes IEEE.
+ */
+static real_T rtGetMinusInf(void)
+{
+  size_t bitsPerReal = sizeof(real_T) * (NumBitsPerChar);
+  real_T minf = 0.0;
+  if (bitsPerReal == 32U) {
+    minf = rtGetMinusInfF();
+  } else {
+    union {
+      LittleEndianIEEEDouble bitVal;
+      real_T fltVal;
+    } tmpVal;
+
+    tmpVal.bitVal.words.wordH = 0xFFF00000U;
+    tmpVal.bitVal.words.wordL = 0x00000000U;
+    minf = tmpVal.fltVal;
+  }
+
+  return minf;
+}
+
+/*
+ * Initialize rtMinusInfF needed by the generated code.
+ * Inf is initialized as non-signaling. Assumes IEEE.
+ */
+static real32_T rtGetMinusInfF(void)
+{
+  IEEESingle minfF;
+  minfF.wordL.wordLuint = 0xFF800000U;
+  return minfF.wordL.wordLreal;
+}
 
 /* Model step function */
 void attitude_control_step(void)
 {
-  real_T k_d;
-  real_T u;
+  real_T rtb_Product1;
+  real_T rtb_Product2;
+  real_T rtb_Product2_l;
+  real_T rtb_Sign;
+  real_T rtb_Sum_b;
 
-  /* Product: '<S5>/Product' incorporates:
+  /* Sum: '<S5>/Sum' incorporates:
    *  Inport: '<Root>/com_quat_body'
+   *  Product: '<S5>/Product'
+   *  Product: '<S5>/Product1'
+   *  Product: '<S5>/Product2'
+   *  Product: '<S5>/Product3'
    */
-  attitude_control_B.Product = attitude_control_U.com_quat_body[0] *
-    attitude_control_U.com_quat_body[0];
-
-  /* Product: '<S5>/Product1' incorporates:
-   *  Inport: '<Root>/com_quat_body'
-   */
-  attitude_control_B.Product1 = attitude_control_U.com_quat_body[1] *
-    attitude_control_U.com_quat_body[1];
-
-  /* Product: '<S5>/Product2' incorporates:
-   *  Inport: '<Root>/com_quat_body'
-   */
-  attitude_control_B.Product2 = attitude_control_U.com_quat_body[2] *
-    attitude_control_U.com_quat_body[2];
-
-  /* Product: '<S5>/Product3' incorporates:
-   *  Inport: '<Root>/com_quat_body'
-   */
-  attitude_control_B.Product3 = attitude_control_U.com_quat_body[3] *
-    attitude_control_U.com_quat_body[3];
-
-  /* Sum: '<S5>/Sum' */
-  attitude_control_B.Sum = ((attitude_control_B.Product +
-    attitude_control_B.Product1) + attitude_control_B.Product2) +
-    attitude_control_B.Product3;
+  rtb_Product2_l = ((rtU.com_quat_body[0] * rtU.com_quat_body[0] +
+                     rtU.com_quat_body[1] * rtU.com_quat_body[1]) +
+                    rtU.com_quat_body[2] * rtU.com_quat_body[2]) +
+    rtU.com_quat_body[3] * rtU.com_quat_body[3];
 
   /* Product: '<S2>/Divide' incorporates:
    *  Inport: '<Root>/com_quat_body'
    */
-  attitude_control_B.Divide = attitude_control_U.com_quat_body[0] /
-    attitude_control_B.Sum;
+  rtb_Sum_b = rtU.com_quat_body[0] / rtb_Product2_l;
 
-  /* Product: '<S6>/Product' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product_d = attitude_control_B.Divide *
-    attitude_control_U.est_curr_quat_body[0];
-
-  /* UnaryMinus: '<S4>/Unary Minus' incorporates:
+  /* Product: '<S2>/Divide1' incorporates:
    *  Inport: '<Root>/com_quat_body'
+   *  UnaryMinus: '<S4>/Unary Minus'
    */
-  attitude_control_B.UnaryMinus = -attitude_control_U.com_quat_body[1];
+  rtb_Product1 = -rtU.com_quat_body[1] / rtb_Product2_l;
 
-  /* Product: '<S2>/Divide1' */
-  attitude_control_B.Divide1 = attitude_control_B.UnaryMinus /
-    attitude_control_B.Sum;
-
-  /* Product: '<S6>/Product1' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product1_o = attitude_control_B.Divide1 *
-    attitude_control_U.est_curr_quat_body[1];
-
-  /* UnaryMinus: '<S4>/Unary Minus1' incorporates:
+  /* Product: '<S2>/Divide2' incorporates:
    *  Inport: '<Root>/com_quat_body'
+   *  UnaryMinus: '<S4>/Unary Minus1'
    */
-  attitude_control_B.UnaryMinus1 = -attitude_control_U.com_quat_body[2];
+  rtb_Product2 = -rtU.com_quat_body[2] / rtb_Product2_l;
 
-  /* Product: '<S2>/Divide2' */
-  attitude_control_B.Divide2 = attitude_control_B.UnaryMinus1 /
-    attitude_control_B.Sum;
-
-  /* Product: '<S6>/Product2' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product2_i = attitude_control_B.Divide2 *
-    attitude_control_U.est_curr_quat_body[2];
-
-  /* UnaryMinus: '<S4>/Unary Minus2' incorporates:
+  /* Product: '<S2>/Divide3' incorporates:
    *  Inport: '<Root>/com_quat_body'
+   *  UnaryMinus: '<S4>/Unary Minus2'
    */
-  attitude_control_B.UnaryMinus2 = -attitude_control_U.com_quat_body[3];
+  rtb_Product2_l = -rtU.com_quat_body[3] / rtb_Product2_l;
 
-  /* Product: '<S2>/Divide3' */
-  attitude_control_B.Divide3 = attitude_control_B.UnaryMinus2 /
-    attitude_control_B.Sum;
-
-  /* Product: '<S6>/Product3' incorporates:
+  /* Sum: '<S6>/Sum' incorporates:
    *  Inport: '<Root>/curr_quat_body'
+   *  Product: '<S6>/Product'
+   *  Product: '<S6>/Product1'
+   *  Product: '<S6>/Product2'
+   *  Product: '<S6>/Product3'
    */
-  attitude_control_B.Product3_p = attitude_control_B.Divide3 *
-    attitude_control_U.est_curr_quat_body[3];
-
-  /* Sum: '<S6>/Sum' */
-  attitude_control_B.Sum_d = ((attitude_control_B.Product_d -
-    attitude_control_B.Product1_o) - attitude_control_B.Product2_i) -
-    attitude_control_B.Product3_p;
+  rtb_Sign = ((rtb_Sum_b * rtU.est_curr_quat_body[0] - rtb_Product1 *
+               rtU.est_curr_quat_body[1]) - rtb_Product2 *
+              rtU.est_curr_quat_body[2]) - rtb_Product2_l *
+    rtU.est_curr_quat_body[3];
 
   /* Signum: '<S1>/Sign' */
-  u = attitude_control_B.Sum_d;
-  if (rtIsNaN(u)) {
-    /* Signum: '<S1>/Sign' */
-    attitude_control_B.Sign = (rtNaN);
-  } else if (u < 0.0) {
-    /* Signum: '<S1>/Sign' */
-    attitude_control_B.Sign = -1.0;
+  if (rtIsNaN(rtb_Sign)) {
+    rtb_Sign = (rtNaN);
+  } else if (rtb_Sign < 0.0) {
+    rtb_Sign = -1.0;
   } else {
-    /* Signum: '<S1>/Sign' */
-    attitude_control_B.Sign = (u > 0.0);
+    rtb_Sign = (rtb_Sign > 0.0);
   }
 
   /* End of Signum: '<S1>/Sign' */
 
-  /* Product: '<S7>/Product' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product_p = attitude_control_B.Divide *
-    attitude_control_U.est_curr_quat_body[1];
-
-  /* Product: '<S7>/Product1' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product1_f = attitude_control_B.Divide1 *
-    attitude_control_U.est_curr_quat_body[0];
-
-  /* Product: '<S7>/Product2' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product2_m = attitude_control_B.Divide2 *
-    attitude_control_U.est_curr_quat_body[3];
-
-  /* Product: '<S7>/Product3' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product3_o = attitude_control_B.Divide3 *
-    attitude_control_U.est_curr_quat_body[2];
-
-  /* Sum: '<S7>/Sum' */
-  attitude_control_B.Sum_m = ((attitude_control_B.Product_p +
-    attitude_control_B.Product1_f) + attitude_control_B.Product2_m) -
-    attitude_control_B.Product3_o;
-
-  /* Product: '<S8>/Product' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product_pw = attitude_control_B.Divide *
-    attitude_control_U.est_curr_quat_body[2];
-
-  /* Product: '<S8>/Product1' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product1_n = attitude_control_B.Divide1 *
-    attitude_control_U.est_curr_quat_body[3];
-
-  /* Product: '<S8>/Product2' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product2_iw = attitude_control_B.Divide2 *
-    attitude_control_U.est_curr_quat_body[0];
-
-  /* Product: '<S8>/Product3' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product3_e = attitude_control_B.Divide3 *
-    attitude_control_U.est_curr_quat_body[1];
-
-  /* Sum: '<S8>/Sum' */
-  attitude_control_B.Sum_l = ((attitude_control_B.Product_pw -
-    attitude_control_B.Product1_n) + attitude_control_B.Product2_iw) +
-    attitude_control_B.Product3_e;
-
-  /* Product: '<S9>/Product' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product_i = attitude_control_B.Divide *
-    attitude_control_U.est_curr_quat_body[3];
-
-  /* Product: '<S9>/Product1' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product1_h = attitude_control_B.Divide1 *
-    attitude_control_U.est_curr_quat_body[2];
-
-  /* Product: '<S9>/Product2' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product2_ig = attitude_control_B.Divide2 *
-    attitude_control_U.est_curr_quat_body[1];
-
-  /* Product: '<S9>/Product3' incorporates:
-   *  Inport: '<Root>/curr_quat_body'
-   */
-  attitude_control_B.Product3_d = attitude_control_B.Divide3 *
-    attitude_control_U.est_curr_quat_body[0];
-
-  /* Sum: '<S9>/Sum' */
-  attitude_control_B.Sum_o = ((attitude_control_B.Product_i +
-    attitude_control_B.Product1_h) - attitude_control_B.Product2_ig) +
-    attitude_control_B.Product3_d;
-
-  /* Gain: '<S1>/k_p' */
-  attitude_control_B.k_p[0] = 0.2 * attitude_control_B.Sum_m;
-  attitude_control_B.k_p[1] = 0.2 * attitude_control_B.Sum_l;
-  attitude_control_B.k_p[2] = 0.2 * attitude_control_B.Sum_o;
-
-  /* Product: '<S1>/Product' */
-  u = attitude_control_B.Sign * attitude_control_B.k_p[0];
-  attitude_control_B.Product_k[0] = u;
-
-  /* Gain: '<S1>/k_d' incorporates:
-   *  Inport: '<Root>/ang_vel_body'
-   */
-  k_d = 0.1 * attitude_control_U.est_curr_ang_vel_body[0];
-  attitude_control_B.k_d[0] = k_d;
-
   /* Outport: '<Root>/comm_wheel_torque_body' incorporates:
    *  Gain: '<S1>/k_d'
-   *  Sum: '<S1>/Sum6'
-   */
-  attitude_control_Y.comm_wheel_torque_body[0] = u + k_d;
-
-  /* Product: '<S1>/Product' */
-  u = attitude_control_B.Sign * attitude_control_B.k_p[1];
-  attitude_control_B.Product_k[1] = u;
-
-  /* Gain: '<S1>/k_d' incorporates:
+   *  Gain: '<S1>/k_p'
    *  Inport: '<Root>/ang_vel_body'
-   */
-  k_d = 0.1 * attitude_control_U.est_curr_ang_vel_body[1];
-  attitude_control_B.k_d[1] = k_d;
-
-  /* Outport: '<Root>/comm_wheel_torque_body' incorporates:
-   *  Gain: '<S1>/k_d'
+   *  Inport: '<Root>/curr_quat_body'
+   *  Product: '<S1>/Product'
+   *  Product: '<S7>/Product'
+   *  Product: '<S7>/Product1'
+   *  Product: '<S7>/Product2'
+   *  Product: '<S7>/Product3'
+   *  Product: '<S8>/Product'
+   *  Product: '<S8>/Product1'
+   *  Product: '<S8>/Product2'
+   *  Product: '<S8>/Product3'
+   *  Product: '<S9>/Product'
+   *  Product: '<S9>/Product1'
+   *  Product: '<S9>/Product2'
+   *  Product: '<S9>/Product3'
    *  Sum: '<S1>/Sum6'
+   *  Sum: '<S7>/Sum'
+   *  Sum: '<S8>/Sum'
+   *  Sum: '<S9>/Sum'
    */
-  attitude_control_Y.comm_wheel_torque_body[1] = u + k_d;
-
-  /* Product: '<S1>/Product' */
-  u = attitude_control_B.Sign * attitude_control_B.k_p[2];
-  attitude_control_B.Product_k[2] = u;
-
-  /* Gain: '<S1>/k_d' incorporates:
-   *  Inport: '<Root>/ang_vel_body'
-   */
-  k_d = 0.1 * attitude_control_U.est_curr_ang_vel_body[2];
-  attitude_control_B.k_d[2] = k_d;
-
-  /* Outport: '<Root>/comm_wheel_torque_body' incorporates:
-   *  Gain: '<S1>/k_d'
-   *  Sum: '<S1>/Sum6'
-   */
-  attitude_control_Y.comm_wheel_torque_body[2] = u + k_d;
-
-  /* Matfile logging */
-  rt_UpdateTXYLogVars(attitude_control_M->rtwLogInfo,
-                      (&attitude_control_M->Timing.taskTime0));
-
-  /* signal main to stop simulation */
-  {                                    /* Sample time: [0.05s, 0.0s] */
-    if ((rtmGetTFinal(attitude_control_M)!=-1) &&
-        !((rtmGetTFinal(attitude_control_M)-attitude_control_M->Timing.taskTime0)
-          > attitude_control_M->Timing.taskTime0 * (DBL_EPSILON))) {
-      rtmSetErrorStatus(attitude_control_M, "Simulation finished");
-    }
-  }
-
-  /* Update absolute time for base rate */
-  /* The "clockTick0" counts the number of times the code of this task has
-   * been executed. The absolute time is the multiplication of "clockTick0"
-   * and "Timing.stepSize0". Size of "clockTick0" ensures timer will not
-   * overflow during the application lifespan selected.
-   * Timer of this task consists of two 32 bit unsigned integers.
-   * The two integers represent the low bits Timing.clockTick0 and the high bits
-   * Timing.clockTickH0. When the low bit overflows to 0, the high bits increment.
-   */
-  if (!(++attitude_control_M->Timing.clockTick0)) {
-    ++attitude_control_M->Timing.clockTickH0;
-  }
-
-  attitude_control_M->Timing.taskTime0 = attitude_control_M->Timing.clockTick0 *
-    attitude_control_M->Timing.stepSize0 +
-    attitude_control_M->Timing.clockTickH0 *
-    attitude_control_M->Timing.stepSize0 * 4294967296.0;
+  rtY.comm_wheel_torque_body[0] = (((rtb_Sum_b * rtU.est_curr_quat_body[1] +
+    rtb_Product1 * rtU.est_curr_quat_body[0]) + rtb_Product2 *
+    rtU.est_curr_quat_body[3]) - rtb_Product2_l * rtU.est_curr_quat_body[2]) *
+    0.2 * rtb_Sign + 0.1 * rtU.est_curr_ang_vel_body[0];
+  rtY.comm_wheel_torque_body[1] = (((rtb_Sum_b * rtU.est_curr_quat_body[2] -
+    rtb_Product1 * rtU.est_curr_quat_body[3]) + rtb_Product2 *
+    rtU.est_curr_quat_body[0]) + rtb_Product2_l * rtU.est_curr_quat_body[1]) *
+    0.2 * rtb_Sign + 0.1 * rtU.est_curr_ang_vel_body[1];
+  rtY.comm_wheel_torque_body[2] = (((rtb_Sum_b * rtU.est_curr_quat_body[3] +
+    rtb_Product1 * rtU.est_curr_quat_body[2]) - rtb_Product2 *
+    rtU.est_curr_quat_body[1]) + rtb_Product2_l * rtU.est_curr_quat_body[0]) *
+    0.2 * rtb_Sign + 0.1 * rtU.est_curr_ang_vel_body[2];
 }
 
 /* Model initialize function */
@@ -328,59 +356,10 @@ void attitude_control_initialize(void)
 
   /* initialize non-finites */
   rt_InitInfAndNaN(sizeof(real_T));
-
-  /* initialize real-time model */
-  (void) memset((void *)attitude_control_M, 0,
-                sizeof(RT_MODEL_attitude_control_T));
-  rtmSetTFinal(attitude_control_M, 7200.0);
-  attitude_control_M->Timing.stepSize0 = 0.05;
-
-  /* Setup for data logging */
-  {
-    static RTWLogInfo rt_DataLoggingInfo;
-    rt_DataLoggingInfo.loggingInterval = (NULL);
-    attitude_control_M->rtwLogInfo = &rt_DataLoggingInfo;
-  }
-
-  /* Setup for data logging */
-  {
-    rtliSetLogXSignalInfo(attitude_control_M->rtwLogInfo, (NULL));
-    rtliSetLogXSignalPtrs(attitude_control_M->rtwLogInfo, (NULL));
-    rtliSetLogT(attitude_control_M->rtwLogInfo, "");
-    rtliSetLogX(attitude_control_M->rtwLogInfo, "");
-    rtliSetLogXFinal(attitude_control_M->rtwLogInfo, "");
-    rtliSetLogVarNameModifier(attitude_control_M->rtwLogInfo, "rt_");
-    rtliSetLogFormat(attitude_control_M->rtwLogInfo, 4);
-    rtliSetLogMaxRows(attitude_control_M->rtwLogInfo, 0);
-    rtliSetLogDecimation(attitude_control_M->rtwLogInfo, 1);
-    rtliSetLogY(attitude_control_M->rtwLogInfo, "");
-    rtliSetLogYSignalInfo(attitude_control_M->rtwLogInfo, (NULL));
-    rtliSetLogYSignalPtrs(attitude_control_M->rtwLogInfo, (NULL));
-  }
-
-  /* block I/O */
-  (void) memset(((void *) &attitude_control_B), 0,
-                sizeof(B_attitude_control_T));
-
-  /* external inputs */
-  (void)memset(&attitude_control_U, 0, sizeof(ExtU_attitude_control_T));
-
-  /* external outputs */
-  (void)memset(&attitude_control_Y, 0, sizeof(ExtY_attitude_control_T));
-
-  /* Matfile logging */
-  rt_StartDataLoggingWithStartTime(attitude_control_M->rtwLogInfo, 0.0,
-    rtmGetTFinal(attitude_control_M), attitude_control_M->Timing.stepSize0,
-    (&rtmGetErrorStatus(attitude_control_M)));
-
-  /* ConstCode for Outport: '<Root>/comm_mag_dipole_body' */
-  attitude_control_Y.comm_mag_dipole_body[0] = 0.0;
-  attitude_control_Y.comm_mag_dipole_body[1] = 0.0;
-  attitude_control_Y.comm_mag_dipole_body[2] = 0.0;
 }
 
-/* Model terminate function */
-void attitude_control_terminate(void)
-{
-  /* (no terminate code required) */
-}
+/*
+ * File trailer for generated code.
+ *
+ * [EOF]
+ */

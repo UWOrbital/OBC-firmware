@@ -144,70 +144,7 @@ Output entry point of generated code
 Timing
 </td>
 <td width="75%" align="left" valign="top">
-Must be called periodically, every 0.01 seconds
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Arguments
-</td>
-<td width="75%" align="left" valign="top">
-None
-</td>
-
-</tr>
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Return value
-</td>
-<td width="75%" align="left" valign="top">
-None
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Header file
-</td>
-<td width="75%" align="left" valign="top">
-<a href="javascript: void(0)" onclick="postParentWindowMessage({message:'jumpToCode',location:'attitude_determination_and_vehi.h'})">attitude_determination_and_vehi.h</a>
-</td>
-
-</tr>
-
-</table>
-<p>
-Function: <a href="javascript: void(0)" onclick="postParentWindowMessage({message:'jumpToCode',location:'attitude_determination_and_vehi_terminate'})">attitude_determination_and_vehi_terminate</a>
-</p>
-<table width="100%" class="AltRow" cellspacing="0">
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Prototype
-</td>
-<td width="75%" align="left" valign="top">
-<b>
-void attitude_determination_and_vehi_terminate(void)
-</b>
-
-</td>
-
-</tr>
-<tr class="odd">
-<td width="25%" align="left" valign="top">
-Description
-</td>
-<td width="75%" align="left" valign="top">
-Termination entry point of generated code
-</td>
-
-</tr>
-<tr class="even">
-<td width="25%" align="left" valign="top">
-Timing
-</td>
-<td width="75%" align="left" valign="top">
-Must be called exactly once
+Must be called periodically, every 0.05 seconds
 </td>
 
 </tr>
@@ -276,10 +213,10 @@ Dimension
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/earth_mag_field_ref
+&lt;S6&gt;/earth_mag_field_ref
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.earth_mag_field_ref
+rtU.earth_mag_field_ref
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -291,10 +228,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/sat_to_sun_unit_ref
+&lt;S6&gt;/sat_to_sun_unit_ref
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.sat_to_sun_unit_ref
+rtU.sat_to_sun_unit_ref
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -306,10 +243,10 @@ real_T
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/omega
+&lt;S6&gt;/omega
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.omega
+rtU.omega
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -321,10 +258,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/mes_ss
+&lt;S6&gt;/mes_ss
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.mes_ss
+rtU.mes_ss
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -336,10 +273,10 @@ real_T
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/r_sat_com
+&lt;S6&gt;/r_sat_com
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.r_sat_com_ax1
+rtU.r_sat_com_ax1
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -351,10 +288,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/mes_mag
+&lt;S6&gt;/mes_mag
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.mes_mag
+rtU.mes_mag
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -366,10 +303,10 @@ real_T
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/ref_aam
+&lt;S6&gt;/ref_aam
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.ref_aam
+rtU.ref_aam
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -381,10 +318,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/mes_aam
+&lt;S6&gt;/mes_aam
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.mes_aam
+rtU.mes_aam
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -396,10 +333,10 @@ real_T
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/steve_mes
+&lt;S6&gt;/steve_mes
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_U.steve_mes
+rtU.steve_mes
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -447,10 +384,10 @@ Dimension
 </tr>
 <tr class="even">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/meas_ang_vel_body
+&lt;S6&gt;/meas_ang_vel_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_Y.meas_ang_vel_body
+rtY.meas_ang_vel_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -462,10 +399,10 @@ real_T
 </tr>
 <tr class="odd">
 <td width="42%" align="left" valign="top">
-&lt;S5&gt;/meas_quat_body
+&lt;S6&gt;/meas_quat_body
 </td>
 <td width="26%" align="left" valign="top">
-attitude_determination_and_ve_Y.meas_quat_body
+rtY.meas_quat_body
 </td>
 <td width="21%" align="left" valign="top">
 real_T
@@ -483,216 +420,9 @@ Interface Parameters
 </a>
 
 </h3>
-<span title="Click to shrink or expand table" onclick="rtwTableShrink(this)">[-]</span><table width="100%" class="AltRow FirstColumn" cellspacing="0">
-<tr class="heading">
-<th width="42%" align="left" valign="top">
-<b>
-Parameter Source
-</b>
-
-</th>
-<th width="26%" align="left" valign="top">
-<b>
-Code Identifier
-</b>
-
-</th>
-<th width="21%" align="left" valign="top">
-<b>
-Data Type
-</b>
-
-</th>
-<th width="10%" align="right" valign="top">
-<b>
-Dimension
-</b>
-
-</th>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Sun Sensor Mode Selection
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.SunSensorModeSelection_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Magnetometer Mode Selection
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.MagnetometerModeSelection_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Magnetorquer Mode Selection
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.MagnetorquerModeSelection_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Angular Velocity Mode Selection
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.AngularVelocityModeSelection_Va
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/mes_var_ss
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.mes_var_ss_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/mes_var_mg
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.mes_var_mg_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/mes_var_aam
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.mes_var_aam_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Kalman Filter Timestep
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.KalmanFilterTimestep_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/STEVE Mode Selection
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.STEVEModeSelection_Value
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-1
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Data Store Memory
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.DataStoreMemory_InitialValue
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-[6  6]
-</td>
-
-</tr>
-<tr class="even">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Data Store Memory1
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.DataStoreMemory1_InitialValue
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-[1  4]
-</td>
-
-</tr>
-<tr class="odd">
-<td width="42%" align="left" valign="top">
-&lt;S5&gt;/Data Store Memory2
-</td>
-<td width="26%" align="left" valign="top">
-attitude_determination_and_ve_P.DataStoreMemory2_InitialValue
-</td>
-<td width="21%" align="left" valign="top">
-real_T
-</td>
-<td width="10%" align="right" valign="top">
-[3  1]
-</td>
-
-</tr>
-
-</table>
+<p>
+No interface/tunable parameters in model.
+</p>
 <h3>
 <a name="sec_Data_Stores">
 Data Stores

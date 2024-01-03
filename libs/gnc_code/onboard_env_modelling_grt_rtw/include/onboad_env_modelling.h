@@ -3,13 +3,13 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * File: attitude_control.h
+ * File: onboad_env_modelling.h
  *
- * Code generated for Simulink model 'attitude_control'.
+ * Code generated for Simulink model 'onboad_env_modelling'.
  *
  * Model version                  : 3.78
  * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
- * C/C++ source code generated on : Mon Jan  1 12:47:01 2024
+ * C/C++ source code generated on : Mon Jan  1 12:51:32 2024
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-R
@@ -19,14 +19,14 @@
  * Validation result: Not run
  */
 
-#ifndef RTW_HEADER_attitude_control_h_
-#define RTW_HEADER_attitude_control_h_
-#ifndef attitude_control_COMMON_INCLUDES_
-#define attitude_control_COMMON_INCLUDES_
+#ifndef RTW_HEADER_onboad_env_modelling_h_
+#define RTW_HEADER_onboad_env_modelling_h_
+#ifndef onboad_env_modelling_COMMON_INCLUDES_
+#define onboad_env_modelling_COMMON_INCLUDES_
 #include "rtwtypes.h"
 #include "rtw_continuous.h"
 #include "rtw_solver.h"
-#endif                                 /* attitude_control_COMMON_INCLUDES_ */
+#endif                               /* onboad_env_modelling_COMMON_INCLUDES_ */
 
 /* Macros for accessing real-time model data structure */
 #ifndef rtmGetErrorStatus
@@ -42,16 +42,17 @@ typedef struct tag_RTM RT_MODEL;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
-  real_T est_curr_ang_vel_body[3];     /* '<Root>/ang_vel_body' */
-  real_T est_curr_quat_body[4];        /* '<Root>/curr_quat_body' */
-  real_T com_quat_body[4];             /* '<Root>/com_quat_body' */
-  real_T mag_field_body[3];            /* '<Root>/mag_field_body' */
+  real_T commanded_mag_dipole_body[3]; /* '<Root>/magnetorquer comm' */
+  real_T r_sat_com_ax1[3];             /* '<Root>/r_sat_com' */
+  real_T r_sat_com[3];                 /* '<Root>/r_sat_com_ax1' */
+  real_T steve_values[2];              /* '<Root>/steve_values' */
 } ExtU;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
-  real_T comm_wheel_torque_body[3];    /* '<Root>/comm_wheel_torque_body' */
-  real_T comm_mag_dipole_body[3];      /* '<Root>/comm_mag_dipole_body' */
+  real_T estimated_expect_ang_acc_body[3];
+                                    /* '<Root>/estimated_expect_ang_acc_body' */
+  real_T r_ref_com_est[3];             /* '<Root>/r_ref_com_est' */
 } ExtY;
 
 /* Real-time Model Data Structure */
@@ -66,17 +67,11 @@ extern ExtU rtU;
 extern ExtY rtY;
 
 /* Model entry point functions */
-extern void attitude_control_initialize(void);
-extern void attitude_control_step(void);
+extern void onboad_env_modelling_initialize(void);
+extern void onboad_env_modelling_step(void);
 
 /* Real-time Model object */
 extern RT_MODEL *const rtM;
-
-/*-
- * These blocks were eliminated from the model due to optimizations:
- *
- * Block '<S1>/reaction_wheel_torque' : Unused code path elimination
- */
 
 /*-
  * The generated code includes comments that allow you to trace directly
@@ -90,23 +85,18 @@ extern RT_MODEL *const rtM;
  * MATLAB hilite_system command to trace the generated code back
  * to the parent model.  For example,
  *
- * hilite_system('cubesat_alg_dev_env_v2_main/attitude_control')    - opens subsystem cubesat_alg_dev_env_v2_main/attitude_control
- * hilite_system('cubesat_alg_dev_env_v2_main/attitude_control/Kp') - opens and selects block Kp
+ * hilite_system('cubesat_alg_dev_env_v2_main/onboad_env_modelling')    - opens subsystem cubesat_alg_dev_env_v2_main/onboad_env_modelling
+ * hilite_system('cubesat_alg_dev_env_v2_main/onboad_env_modelling/Kp') - opens and selects block Kp
  *
  * Here is the system hierarchy for this model
  *
  * '<Root>' : 'cubesat_alg_dev_env_v2_main'
- * '<S1>'   : 'cubesat_alg_dev_env_v2_main/attitude_control'
- * '<S2>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Inverse1'
- * '<S3>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Multiplication'
- * '<S4>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Inverse1/Quaternion Conjugate'
- * '<S5>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Inverse1/Quaternion Norm'
- * '<S6>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Multiplication/q0'
- * '<S7>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Multiplication/q1'
- * '<S8>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Multiplication/q2'
- * '<S9>'   : 'cubesat_alg_dev_env_v2_main/attitude_control/Quaternion Multiplication/q3'
+ * '<S1>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling'
+ * '<S2>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling/Cross Product'
+ * '<S3>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling/MATLAB Function6'
+ * '<S4>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling/Regenerates from UV Values'
  */
-#endif                                 /* RTW_HEADER_attitude_control_h_ */
+#endif                                 /* RTW_HEADER_onboad_env_modelling_h_ */
 
 /*
  * File trailer for generated code.
