@@ -36,32 +36,44 @@ ${parentPath}/hal/launchpad/include/FreeRTOS.h
 ${parentPath}/hal/launchpad/include/os_task.h
 ${parentPath}/hal/launchpad/include/sys_common.h
 ${parentPath}/hal/launchpad/include/sys_core.h
+${parentPath}/hal/launchpad/include/sys_dma.h
 ${parentPath}/hal/launchpad/include/gio.h
 ${parentPath}/hal/launchpad/include/sci.h
 ${parentPath}/hal/launchpad/include/i2c.h
 ${parentPath}/hal/launchpad/include/spi.h
 ${parentPath}/hal/launchpad/include/can.h
 ${parentPath}/hal/launchpad/include/het.h
+${parentPath}/hal/launchpad/include/spi.h
 ${parentPath}/hal/launchpad/include/system.h
+
+${parentPath}/hal/launchpad/source/spi.c
+${parentPath}/hal/launchpad/source/sci.c
+${parentPath}/hal/launchpad/source/sys_dma.c
+#${parentPath}/drivers/rm46/obc_spi_dma.c
+${parentPath}/drivers/rm46/obc_spi_io.c
+${parentPath}/sys/print/obc_print.c
 )
 
 set (INCLUDE_DIRS
 ${parentPath}/sys/print
 ${parentPath}/sys/logging
+${parentPath}/sys/utils
 ${parentPath}/sys
 ${parentPath}/drivers/rm46
 ${parentPath}/hal/launchpad
 ${parentPath}/hal/launchpad/include
+${parentPath}/hal/launchpad/source
+${parentPath}/config
 )
 endif()
 
 
 
-message ("Current source dir is \"${CMAKE_CURRENT_SOURCE_DIR}\"")
+#message ("Current source dir is \"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 get_filename_component(INCLUDE_DIRS_ABS "${INCLUDE_DIRS}" ABSOLUTE)
-
-message ("Absolute path is \"${INCLUDE_DIRS_ABS}\"")
+get_filename_component(HEADERS_ABS "${HEADERS}" ABSOLUTE)
+#message ("Absolute path is \"${INCLUDE_DIRS_ABS}\"")
 
 
 #message("Current HEADERS are \"${HEADERS}\"")
@@ -70,13 +82,17 @@ message ("Absolute path is \"${INCLUDE_DIRS_ABS}\"")
 set (EXAMPLE_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/main.c)
 
 
-add_executable (OBC-example.out ${EXAMPLE_SOURCE} ${HEADERS})
+add_executable (OBC-example.out ${EXAMPLE_SOURCE} ${HEADERS_ABS})
 
+add_library(example-lib STATIC ${HEADERS_ABS})
 
-target_link_libraries(OBC-example.out ${HEADERS})
-target_include_directories(OBC-example.out PRIVATE ${INCLUDE_DIRS_ABS})
+target_include_directories(example-lib PUBLIC ${INCLUDE_DIRS_ABS})
+set_target_properties (example-lib PROPERTIES LINKER_LANGUAGE C)
+
+target_include_directories(OBC-example.out PUBLIC ${INCLUDE_DIRS_ABS})
+target_link_libraries(OBC-example.out example-lib)
 #target_include_directories (OBC-example.out PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 
-#target_compile_options(OBC-example.out PUBLIC -c -mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16 ${BOARD_TYPE} -O0 -g -gdwarf-3 -gstrict-dwarf)
+target_compile_options(OBC-example.out PUBLIC -c -mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16 ${BOARD_TYPE} -O0 -g -gdwarf-3 -gstrict-dwarf)
