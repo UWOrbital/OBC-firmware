@@ -351,6 +351,7 @@ class ErrorCode(enum.Enum):
 ### Naming Conventions
 
 - `variable_names`, `field_names` and `function_constants` in snake_case
+- `_private_field_names`, and `_private_method_names()` in \_snake_case
 - `function_names()` and `method_names()` in snake_case
 - `CONSTANT_NAMES: Final` and `ENUM_OPTIONS` in CAPITAL_SNAKE_CASE for module and class constants (not for local constant)
 - `file_names` in snake_case
