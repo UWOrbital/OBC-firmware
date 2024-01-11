@@ -156,6 +156,42 @@ cmake --build .
 ctest --verbose
 ```
 
+#### **Example files**
+From the top-level directory, run the following to build the example source file.
+```
+mkdir build_examples && cd build_examples
+cmake .. _DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=[EXAMPLE_TO_BE_COMPILED]
+cmake --build .
+```
+Options for `EXAMPLE_TYPE` include:
+
+`DMA_SPI` - for `dma_spi_demo`
+
+`FRAM_PERSIST` - for `test_app_fram_persist`
+
+`FRAM_SPI` - for `test_app_fram_spi`
+
+`FREERTOS_POSIX` - for `test_app_freertos_posix`
+
+`LM75BD` - for `test_app_lm75bd`
+
+`MPU6050` - for `test_app_mpu6050`
+
+`RE_SD` - for `test_app_reliance_sd`
+
+`RTC`- for `test_app_rtc`
+
+`UART_RX` - for `test_app_uart_rx`
+
+`UART_TX` - for `test_app_uart_tx`
+
+`VN100` - for `vn100_demo`
+
+
+
+
+
+
 ### Flashing
 To flash the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.
 #### **RM46 Launchpad:**
