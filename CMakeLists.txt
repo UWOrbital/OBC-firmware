@@ -12,6 +12,13 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES GS)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Test)
     include(${CMAKE_SOURCE_DIR}/cmake/fetch_googletest.cmake)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_linux_gcc.cmake)
+elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
+
+    if(NOT EXISTS ${CMAKE_BINARY_DIR}/toolchain)
+        include(${CMAKE_SOURCE_DIR}/cmake/download_arm_toolchain.cmake)
+    endif()
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_arm_none_eabi.cmake)
+
 else()
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
 endif()
@@ -34,6 +41,12 @@ if(${CMAKE_BUILD_TYPE} MATCHES Test)
     enable_language(C CXX)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if (${CMAKE_BUILD_TYPE} MATCHES Examples)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    enable_language (C ASM)
+    add_subdirectory (obc)
 endif()
 
 # Build tiny-aes and lib-correct libs
