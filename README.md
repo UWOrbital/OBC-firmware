@@ -165,27 +165,27 @@ cmake --build .
 ```
 Options for `EXAMPLE_TYPE` include:
 
-`DMA_SPI` - for `dma_spi_demo`
+- `DMA_SPI` - for `dma_spi_demo`
 
-`FRAM_PERSIST` - for `test_app_fram_persist`
+- `FRAM_PERSIST` - for `test_app_fram_persist`
 
-`FRAM_SPI` - for `test_app_fram_spi`
+- `FRAM_SPI` - for `test_app_fram_spi`
 
-`FREERTOS_POSIX` - for `test_app_freertos_posix`
+- `FREERTOS_POSIX` - for `test_app_freertos_posix`
 
-`LM75BD` - for `test_app_lm75bd`
+- `LM75BD` - for `test_app_lm75bd`
 
-`MPU6050` - for `test_app_mpu6050`
+- `MPU6050` - for `test_app_mpu6050`
 
-`RE_SD` - for `test_app_reliance_sd`
+- `RE_SD` - for `test_app_reliance_sd`
 
-`RTC`- for `test_app_rtc`
+- `RTC`- for `test_app_rtc`
 
-`UART_RX` - for `test_app_uart_rx`
+- `UART_RX` - for `test_app_uart_rx`
 
-`UART_TX` - for `test_app_uart_tx`
+- `UART_TX` - for `test_app_uart_tx`
 
-`VN100` - for `vn100_demo`
+- `VN100` - for `vn100_demo`
 
 
 
