@@ -2,7 +2,6 @@
 #include "obc_logging.h"
 
 #include <string.h>
-#include <stdio.h>
 
 // Private functions
 
@@ -110,7 +109,6 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
   RETURN_IF_ERROR_CODE(sunManagerGetMinJulianDate(manager, &lowJD));
   RETURN_IF_ERROR_CODE(sunManagerGetMaxJulianDate(manager, &highJD));
   const manager_size_t writeIndex = manager->writeIndex;
-  printf("writeIndex: %d\n", writeIndex);
 
   // Handle edge cases
   if (julianDate >= highJD) {
@@ -128,10 +126,6 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
   while (low < high) {
     manager_size_t mid = low + (high - low) / 2;
     manager_size_t index = (writeIndex + mid) % ADCS_POSITION_DATA_MANAGER_SIZE;
-    printf("low: %d\n", low);
-    printf("high: %d\n", high);
-    printf("mid: %d\n", mid);
-    printf("index: %d\n\n", index);
     RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, index, &currentJD));
 
     // Check if the foundJulianDate is close enough to the julianDate
@@ -146,16 +140,11 @@ static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager,
   }
 
   // low == high
-  printf("low == high:\n");
-  printf("low: %d\n", low);
-  printf("high: %d\n", high);
   RETURN_IF_ERROR_CODE(sunManagerGetJulianDateByIndex(manager, low, &currentJD));
 
   if (julianDate <= currentJD) {
-    printf("<=\n");
     *buffer = (low + writeIndex) % ADCS_POSITION_DATA_MANAGER_SIZE;
   } else {
-    printf("else\n");
     *buffer = (low + 1 + writeIndex) % ADCS_POSITION_DATA_MANAGER_SIZE;
   }
   return OBC_ERR_CODE_SUCCESS;
@@ -236,7 +225,7 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
   obc_error_code_t errCode;
 
   // Check that the julian date is within the range of the manager
-  bool isInRange;
+  bool isInRange = false;
   RETURN_IF_ERROR_CODE(sunManagerCheckJD(manager, julianDate, &isInRange));
   if (!isInRange) {
     return OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE;
@@ -245,13 +234,6 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
   // Search for the index of the closest julian date
   manager_size_t index = 0;
   RETURN_IF_ERROR_CODE(sunManagerSearch(manager, julianDate, &index));
-  printf("Index: %d\n", index);
-
-  /* // Unused
-  // If the binary search fails, search linearly
-  if (errCode == OBC_ERR_CODE_SUN_POSITION_MGR_SEARCH_TIMEOUT) {
-    RETURN_IF_ERROR_CODE(sunManagerSearchLinear(manager, julianDate, &index));
-  }*/
 
   position_data_t dataHigher;
   RETURN_IF_ERROR_CODE(sunManagerGetPositionDataByIndex(manager, index, &dataHigher));

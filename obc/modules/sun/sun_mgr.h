@@ -71,7 +71,6 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
  * @param manager The manager to which to write the data
  * @param data The data to be written to the manager
  * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
- *
  */
 obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_data_t data);
 

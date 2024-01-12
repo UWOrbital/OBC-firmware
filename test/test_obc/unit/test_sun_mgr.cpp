@@ -187,7 +187,7 @@ TEST(TestObcSunMgr, getPositionDataManagerPartial) {
 
   //   // Test data
   position_data_t data1 = {2, sunData[1][0], sunData[1][1], sunData[1][2]};
-  position_data_t data2 = {15, sunData[14][0], sunData[14][1], sunData[14][2]};
+  position_data_t data2 = {5, sunData[4][0], sunData[4][1], sunData[4][2]};
   position_data_t data3 = {6.9, 39864448.7227, -1415999740.727, 7447.80624892};
   position_data_t data4 = {13, sunData[12][0], sunData[12][1], sunData[12][2]};
 
