@@ -41,7 +41,6 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/drivers/ds3232
     ${CMAKE_SOURCE_DIR}/obc/drivers/arducam
     ${CMAKE_SOURCE_DIR}/obc/modules/sun
-    ${CMAKE_SOURCE_DIR}/obc/sys/logging
     ${CMAKE_SOURCE_DIR}/obc/drivers/vn100
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack

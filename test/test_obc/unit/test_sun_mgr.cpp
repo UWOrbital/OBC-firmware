@@ -47,12 +47,13 @@ TEST(TestObcSunMgr, writeUntilEnd) {
   uint8_t count = 0;
 
   position_data_t data = {1, 1, 1, 1};
-  ASSERT_EQ(sunManagerWriteData(nullptr, data), OBC_ERR_CODE_INVALID_ARG);
+  ASSERT_EQ(sunManagerWriteData(nullptr, &data), OBC_ERR_CODE_INVALID_ARG);
+  ASSERT_EQ(sunManagerWriteData(&manager, nullptr), OBC_ERR_CODE_INVALID_ARG);
 
   while (1) {
     position_t d = (position_t)count;
     position_data_t data1 = {(julian_date_t)(count + 1), d, d, d};
-    if (sunManagerWriteData(&manager, data1) != OBC_ERR_CODE_SUCCESS) break;
+    if (sunManagerWriteData(&manager, &data1) != OBC_ERR_CODE_SUCCESS) break;
     count++;
   }
 
@@ -60,7 +61,7 @@ TEST(TestObcSunMgr, writeUntilEnd) {
 
   // Invalid JD test
   data.julianDate = 0;
-  ASSERT_EQ(sunManagerWriteData(&manager, data), OBC_ERR_CODE_INVALID_ARG);
+  ASSERT_EQ(sunManagerWriteData(&manager, &data), OBC_ERR_CODE_INVALID_ARG);
 }
 
 TEST(TestObcSunMgr, readUntilEnd) {
@@ -73,7 +74,7 @@ TEST(TestObcSunMgr, readUntilEnd) {
   while (1) {
     position_t d = (position_t)countWrite;
     position_data_t data = {(julian_date_t)(countWrite + 1), d, d, d};
-    if (sunManagerWriteData(&manager, data) != OBC_ERR_CODE_SUCCESS) break;
+    if (sunManagerWriteData(&manager, &data) != OBC_ERR_CODE_SUCCESS) break;
     countWrite++;
   }
   ASSERT_EQ(countWrite, ADCS_POSITION_DATA_MANAGER_SIZE);
@@ -94,7 +95,8 @@ TEST(TestObcSunMgr, readUntilEnd) {
   ASSERT_EQ(countRead, ADCS_POSITION_DATA_MANAGER_SIZE);
 
   position_data_t d;
-  ASSERT_EQ(sunManagerWriteData(nullptr, d), OBC_ERR_CODE_INVALID_ARG);
+  ASSERT_EQ(sunManagerWriteData(nullptr, &d), OBC_ERR_CODE_INVALID_ARG);
+  ASSERT_EQ(sunManagerWriteData(&manager, nullptr), OBC_ERR_CODE_INVALID_ARG);
 }
 
 TEST(TestObcSunMgr, readWriteTwiceLength) {
@@ -104,7 +106,7 @@ TEST(TestObcSunMgr, readWriteTwiceLength) {
   // Write and read twice the size of the data manager
   for (int i = 1; i <= ADCS_POSITION_DATA_MANAGER_SIZE * 2; ++i) {
     position_data_t dataWrite = {(julian_date_t)i, 0, 0, 0};
-    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(sunManagerWriteData(&manager, &dataWrite), OBC_ERR_CODE_SUCCESS);
 
     position_data_t dataRead;
     ASSERT_EQ(sunManagerReadData(&manager, &dataRead), OBC_ERR_CODE_SUCCESS);
@@ -120,7 +122,7 @@ TEST(TestObcSunMgr, checkJD) {
   // Fill the manager with data
   for (int i = 1; i <= ADCS_POSITION_DATA_MANAGER_SIZE; ++i) {
     position_data_t dataWrite = {(julian_date_t)i, 0, 0, 0};
-    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(sunManagerWriteData(&manager, &dataWrite), OBC_ERR_CODE_SUCCESS);
   }
 
 #define TEST_LENGTH 8
@@ -147,7 +149,7 @@ TEST(TestObcSunMgr, getPositionDataManagerFull) {
   // Fill the manager with data
   for (int i = 1; i <= ADCS_POSITION_DATA_MANAGER_SIZE; ++i) {
     position_data_t dataWrite = {(julian_date_t)i, sunData[i - 1][0], sunData[i - 1][1], sunData[i - 1][2]};
-    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(sunManagerWriteData(&manager, &dataWrite), OBC_ERR_CODE_SUCCESS);
   }
 
   //   // Test data
@@ -183,7 +185,7 @@ TEST(TestObcSunMgr, getPositionDataManagerPartial) {
   // Fill the manager with 13 data points
   for (int i = 1; i <= 13; ++i) {
     position_data_t dataWrite = {(julian_date_t)i, sunData[i - 1][0], sunData[i - 1][1], sunData[i - 1][2]};
-    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(sunManagerWriteData(&manager, &dataWrite), OBC_ERR_CODE_SUCCESS);
   }
 
   //   // Test data
@@ -215,7 +217,7 @@ TEST(TestObcSunMgr, getPositionDataManagerOutOfRange) {
   // Fill the manager with data
   for (int i = 1; i <= ADCS_POSITION_DATA_MANAGER_SIZE; ++i) {
     position_data_t dataWrite = {(julian_date_t)i, 0, 0, 0};
-    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(sunManagerWriteData(&manager, &dataWrite), OBC_ERR_CODE_SUCCESS);
   }
 
   // Shift manager move by 2
@@ -224,7 +226,7 @@ TEST(TestObcSunMgr, getPositionDataManagerOutOfRange) {
     ASSERT_EQ(sunManagerReadData(&manager, &dataRead), OBC_ERR_CODE_SUCCESS);
 
     position_data_t dataWrite = {(julian_date_t)(i + ADCS_POSITION_DATA_MANAGER_SIZE), 0, 0, 0};
-    ASSERT_EQ(sunManagerWriteData(&manager, dataWrite), OBC_ERR_CODE_SUCCESS);
+    ASSERT_EQ(sunManagerWriteData(&manager, &dataWrite), OBC_ERR_CODE_SUCCESS);
   }
 
   position_data_t buffer;

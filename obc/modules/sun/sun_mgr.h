@@ -66,13 +66,13 @@ obc_error_code_t sunManagerGetPositionData(const position_data_manager_t *manage
 
 /**
  * @brief Writes the data to the manager at writeIndex and shifts the writeIndex over
- * @attention Manager must be a valid pointer; JD of data must be greater than the JD of the last data point in the
- * manager
+ * @attention Manager and data must be a valid pointer; JD of data must be greater than the JD of the last data point in
+ * the manager
  * @param manager The manager to which to write the data
  * @param data The data to be written to the manager
  * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
  */
-obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_data_t data);
+obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, const position_data_t *data);
 
 /**
  * @brief Reads the data from the manager into the buffer at readIndex and shifts the readIndex over

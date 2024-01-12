@@ -178,8 +178,8 @@ obc_error_code_t sunManagerReadData(position_data_manager_t *manager, position_d
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_data_t data) {
-  if (manager == NULL || data.julianDate <= ADCS_INVALID_JULIAN_DATE) {
+obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, const position_data_t *data) {
+  if (manager == NULL || data == NULL || data->julianDate <= ADCS_INVALID_JULIAN_DATE) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -193,7 +193,7 @@ obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_
   // Check if the julian date is unique, all data must be sorted by the JD in ascending order
   julian_date_t maxJulianDate;
   RETURN_IF_ERROR_CODE(sunManagerGetMaxJulianDate(manager, &maxJulianDate));
-  if (data.julianDate <= maxJulianDate) {
+  if (data->julianDate <= maxJulianDate) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -211,7 +211,7 @@ obc_error_code_t sunManagerWriteData(position_data_manager_t *manager, position_
 
   // Write the data
   manager_size_t index = manager->writeIndex;
-  manager->data[index] = data;
+  memcpy(&manager->data[index], data, sizeof(position_data_t));
   manager->writeIndex = (index + 1) % ADCS_POSITION_DATA_MANAGER_SIZE;  // Increment writeIndex
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -288,7 +288,7 @@ obc_error_code_t sunManagerCheckJD(const position_data_manager_t *manager, julia
 
   // Will never be in the manager
   if (jd <= ADCS_INVALID_JULIAN_DATE) {
-    *buffer = 0;
+    *buffer = false;
     return OBC_ERR_CODE_SUCCESS;
   }
 
