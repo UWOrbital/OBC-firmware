@@ -7,31 +7,31 @@
 TEST(TestSunUtils, equalsPositionDataTrue) {
   position_data_t data1 = {0, 1, 2, 3};
   position_data_t data2 = {0, 1, 2, 3};
-  ASSERT_TRUE(equalsPositionData(data1, data2));
+  EXPECT_TRUE(equalsPositionData(data1, data2));
 }
 
 TEST(TestSunUtils, equalsPositionDataFalseX) {
   position_data_t data1 = {0, 1, 2, 3};
   position_data_t data2 = {0, 2, 2, 3};
-  ASSERT_FALSE(equalsPositionData(data1, data2));
+  EXPECT_FALSE(equalsPositionData(data1, data2));
 }
 
 TEST(TestSunUtils, equalsPositionDataFalseY) {
   position_data_t data1 = {0, 1, 3, 3};
   position_data_t data2 = {0, 1, 2, 3};
-  ASSERT_FALSE(equalsPositionData(data1, data2));
+  EXPECT_FALSE(equalsPositionData(data1, data2));
 }
 
 TEST(TestSunUtils, equalsPositionDataFalseZ) {
   position_data_t data1 = {0, 1, 2, 4};
   position_data_t data2 = {0, 1, 2, 3};
-  ASSERT_FALSE(equalsPositionData(data1, data2));
+  EXPECT_FALSE(equalsPositionData(data1, data2));
 }
 
 TEST(TestSunUtils, equalsPositionDataFalseJD) {
   position_data_t data1 = {1, 1, 2, 3};
   position_data_t data2 = {0, 1, 2, 3};
-  ASSERT_FALSE(equalsPositionData(data1, data2));
+  EXPECT_FALSE(equalsPositionData(data1, data2));
 }
 
 TEST(TestSunUtils, linearlyInterpolateFunc) {
@@ -42,20 +42,20 @@ TEST(TestSunUtils, linearlyInterpolateFunc) {
   position_t p2 = 60;
 
   position_t buffer;
-  ASSERT_EQ(linearlyInterpolate(targetJD, p1, p2, jd1, jd2, &buffer), OBC_ERR_CODE_SUCCESS);
-  ASSERT_EQ(buffer, 50);
-  ASSERT_EQ(linearlyInterpolate(targetJD, p1, p2, jd1, jd2, nullptr), OBC_ERR_CODE_INVALID_ARG);
-  ASSERT_EQ(linearlyInterpolate(targetJD, p1, p2, jd1, jd1, &buffer), OBC_ERR_CODE_INVALID_ARG);
+  EXPECT_EQ(linearlyInterpolate(targetJD, p1, p2, jd1, jd2, &buffer), OBC_ERR_CODE_SUCCESS);
+  EXPECT_EQ(buffer, 50);
+  EXPECT_EQ(linearlyInterpolate(targetJD, p1, p2, jd1, jd2, nullptr), OBC_ERR_CODE_INVALID_ARG);
+  EXPECT_EQ(linearlyInterpolate(targetJD, p1, p2, jd1, jd1, &buffer), OBC_ERR_CODE_INVALID_ARG);  // Same JD
 }
 
 TEST(TestSunUtils, doubleCloseDefaultTolerance) {
   double d1 = 1.5;
   double d2 = 1.5 + 1e-10;
 
-  ASSERT_TRUE(doubleCloseDefault(d1, d2));
+  EXPECT_TRUE(doubleCloseDefault(d1, d2));
 
   d2 = 1.5 + 1e-8;
-  ASSERT_FALSE(doubleCloseDefault(d1, d2));
+  EXPECT_FALSE(doubleCloseDefault(d1, d2));
 }
 
 TEST(TestSunUtils, doubleCloseFunc) {
@@ -63,8 +63,8 @@ TEST(TestSunUtils, doubleCloseFunc) {
   double d2 = 1.5 + 1e-10;
   double tolerance = 1e-5;
 
-  ASSERT_TRUE(doubleClose(d1, d2, tolerance));
+  EXPECT_TRUE(doubleClose(d1, d2, tolerance));
 
   d2 = 1.5 + 1e-2;
-  ASSERT_FALSE(doubleClose(d1, d2, tolerance));
+  EXPECT_FALSE(doubleClose(d1, d2, tolerance));
 }

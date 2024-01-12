@@ -94,8 +94,7 @@ static obc_error_code_t sunManagerSearchLinear(const position_data_manager_t *ma
  * @brief Searchs for the julianDate in the manager and returns the index of the julian date in the manager that
  * is greater or equal to the julianDate
  * @attention manager must be a valid pointer and julianData is greater than 0
- * @warning This function will not work if the manager is not sorted by the julian date in ascending order; This
- * function may fail so be sure to check the return value (OBC_ERR_CODE_SUN_POSITION_MGR_SEARCH_TIMEOUT)
+ * @warning This function will not work if the manager is not sorted by the julian date in ascending order
  */
 static obc_error_code_t sunManagerSearch(const position_data_manager_t *manager, julian_date_t julianDate,
                                          manager_size_t *buffer) {

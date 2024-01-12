@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+// Sun position data taken from the ephemeris script for Jan 1, 2024-Feb 1,2024 with a step of 1 day
 static position_t sunData[][3] = {
     {2.481099325965390E+07, -1.449948612736719E+08, 8.215203670851886E+03},
     {2.738540506467866E+07, -1.445294509332678E+08, 8.105178271017969E+03},
