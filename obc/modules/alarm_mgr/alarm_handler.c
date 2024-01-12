@@ -1,34 +1,30 @@
 #include "alarm_handler.h"
 #include "ds3232_mz.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
+#include "obc_persistent.h"
+#include "obc_assert.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
 #include <os_queue.h>
 #include <sys_common.h>
 
+#define ALARM_QUEUE_SIZE 24U
 #define ALARM_HANDLER_QUEUE_LENGTH 64U
 #define ALARM_HANDLER_QUEUE_ITEM_SIZE sizeof(alarm_handler_event_t)
 #define ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define ALARM_HANDLER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
-static TaskHandle_t alarmHandlerTaskHandle;
-static StaticTask_t alarmHandlerTaskBuffer;
-static StackType_t alarmHandlerTaskStack[ALARM_HANDLER_STACK_SIZE];
-
 static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
 static uint8_t alarmHandlerQueueStack[ALARM_HANDLER_QUEUE_LENGTH * ALARM_HANDLER_QUEUE_ITEM_SIZE];
 
-#define ALARM_QUEUE_SIZE 24U
 static alarm_handler_alarm_info_t alarmQueue[ALARM_QUEUE_SIZE];
 static size_t numActiveAlarms = 0;
-
-static void alarmHandler(void *pvParameters);
 
 static obc_error_code_t enqueueAlarm(alarm_handler_alarm_info_t alarm, size_t *insertedAlarmIndex);
 
@@ -38,17 +34,16 @@ static obc_error_code_t peekEarliestAlarm(alarm_handler_alarm_info_t *alarm);
 
 static void datetimeToAlarmTime(rtc_date_time_t *datetime, rtc_alarm_time_t *alarmTime);
 
-void initAlarmHandler(void) {
-  ASSERT((alarmHandlerTaskStack != NULL) && (&alarmHandlerTaskBuffer != NULL));
-  alarmHandlerTaskHandle = xTaskCreateStatic(alarmHandler, ALARM_HANDLER_NAME, ALARM_HANDLER_STACK_SIZE, NULL,
-                                             ALARM_HANDLER_PRIORITY, alarmHandlerTaskStack, &alarmHandlerTaskBuffer);
+STATIC_ASSERT((ALARM_QUEUE_SIZE <= OBC_PERSISTENT_MAX_SUBINDEX_ALARM),
+              "queue size exceeds max number of alarms that can be stored in FRAM");
 
+void obcTaskInitAlarmMgr(void) {
   ASSERT((alarmHandlerQueueStack != NULL) && (&alarmHandlerQueue != NULL));
   alarmHandlerQueueHandle = xQueueCreateStatic(ALARM_HANDLER_QUEUE_LENGTH, ALARM_HANDLER_QUEUE_ITEM_SIZE,
                                                alarmHandlerQueueStack, &alarmHandlerQueue);
 }
 
-static void alarmHandler(void *pvParameters) {
+void obcTaskFunctionAlarmMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   while (1) {

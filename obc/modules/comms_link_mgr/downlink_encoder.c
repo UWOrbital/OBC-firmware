@@ -7,7 +7,7 @@
 #include "telemetry_manager.h"
 #include "obc_gs_telemetry_pack.h"
 
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_reliance_fs.h"
@@ -21,10 +21,6 @@
 #include <sys_common.h>
 #include <gio.h>
 
-static TaskHandle_t telemEncodeTaskHandle = NULL;
-static StaticTask_t telemEncodeTaskBuffer;
-static StackType_t telemEncodeTaskStack[COMMS_DOWNLINK_ENCODE_STACK_SIZE];
-
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
 #define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(encode_event_t)  // Size of the telemetry batch ID
 #define COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
@@ -33,13 +29,6 @@ static StackType_t telemEncodeTaskStack[COMMS_DOWNLINK_ENCODE_STACK_SIZE];
 static QueueHandle_t telemEncodeQueueHandle = NULL;
 static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH * COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
-
-/**
- * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
- *
- * @param pvParameters - NULL
- */
-static void vTelemEncodeTask(void *pvParameters);
 
 /**
  * @brief Sends data from a telemetry buffer to the CC1120 transmit queue
@@ -86,19 +75,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket);
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset);
 
-/**
- * @brief Initializes the telemetry encoding task and queue
- *
- */
-void initTelemEncodeTask(void) {
-  ASSERT((telemEncodeTaskStack != NULL) && (&telemEncodeTaskBuffer != NULL));
-
-  if (telemEncodeTaskHandle == NULL) {
-    telemEncodeTaskHandle =
-        xTaskCreateStatic(vTelemEncodeTask, COMMS_DOWNLINK_ENCODE_NAME, COMMS_DOWNLINK_ENCODE_STACK_SIZE, NULL,
-                          COMMS_DOWNLINK_ENCODE_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
-  }
-
+void obcTaskInitCommsDownlinkEncoder(void) {
   if (telemEncodeQueueHandle == NULL) {
     telemEncodeQueueHandle = xQueueCreateStatic(COMMS_TELEM_ENCODE_QUEUE_LENGTH, COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE,
                                                 telemEncodeQueueStack, &telemEncodeQueue);
@@ -121,12 +98,7 @@ obc_error_code_t sendToDownlinkEncodeQueue(encode_event_t *queueMsg) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-/**
- * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
- *
- * @param pvParameters - NULL
- */
-static void vTelemEncodeTask(void *pvParameters) {
+void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
   obc_error_code_t errCode;
 
   while (1) {
@@ -275,7 +247,7 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
     closeTelemetryFile(*fd);
     return errCode;
   }
-  LOG_DEBUG("Sending telemetry file with size: %lu", fileSize);
+  LOG_DEBUG("Sending telemetry file");
 
   // Print telemetry file name
   char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
@@ -285,8 +257,6 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
     closeTelemetryFile(*fd);
     return errCode;
   }
-
-  LOG_DEBUG("Sending telemetry file with name: %s", fileName);
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -302,8 +272,6 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset) {
   obc_error_code_t errCode;
-
-  LOG_DEBUG("Sending telemetry: %u", singleTelem->id);
 
   uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized version of the current piece of telemetry
   uint32_t packedSingleTelemSize = 0;                  // Size of the packed single telemetry

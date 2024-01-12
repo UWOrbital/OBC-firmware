@@ -18,6 +18,7 @@
  */
 typedef enum {
   COMMS_EVENT_BEGIN_UPLINK,
+  COMMS_EVENT_BEGIN_DOWNLINK,
   COMMS_EVENT_CONN_RECEIVED,
   COMMS_EVENT_ACK_SENT,
   COMMS_EVENT_UPLINK_FINISHED,
@@ -63,11 +64,6 @@ typedef enum {
   COMMS_STATE_ENTERING_EMERGENCY,
   COMMS_STATE_EMERGENCY_UPLINK,
 } comms_state_t;
-
-/**
- * @brief	Initialize the Comms Manager task and associated FreeRTOS constructs (queues, timers, etc.)
- */
-void initCommsManager(comms_state_t *commsState);
 
 /**
  * @brief	Send an event to the Comms Manager queue.
