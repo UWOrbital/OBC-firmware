@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #define ADCS_INVALID_JULIAN_DATE 0U
 #define RELATIVE_TOLERANCE 1e-9f
@@ -33,7 +34,12 @@ typedef struct position_data_t {
 /**
  * @brief Returns true if the data points 1 and 2 have the same coordinates and julian date
  */
-int equalsPositionData(const position_data_t data1, const position_data_t data2);
+bool equalsPositionData(const position_data_t data1, const position_data_t data2);
+
+/**
+ * @brief Returns true if the data points 1 and 2 have the same coordinates and julian date
+ */
+bool closePositionData(const position_data_t data1, const position_data_t data2);
 
 /**
  * @brief Calculates the value of the point based on the target JD using the point1 as the lower value in the linear
@@ -78,7 +84,7 @@ static inline double doubleAbs(double num) { return (num) < 0 ? -(num) : (num); 
  * @param b: second double number to check
  * @warning This operation is not atomic. It is the responsibility of the caller to setup the appropriate locks
  */
-uint8_t doubleCloseDefault(double a, double b);
+bool doubleCloseDefault(double a, double b);
 
 /**
  * @brief Checks whether the numbers a and b are close within the given
@@ -89,7 +95,7 @@ uint8_t doubleCloseDefault(double a, double b);
  * @param relativeTolerance: Relative tolerance decimal
  * @warning This operation is not atomic. It is the responsibility of the caller to setup the appropriate locks
  */
-uint8_t doubleClose(double a, double b, double relativeTolerance);
+bool doubleClose(double a, double b, double relativeTolerance);
 
 #ifdef __cplusplus
 }

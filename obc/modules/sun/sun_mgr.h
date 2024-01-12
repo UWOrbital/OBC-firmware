@@ -5,6 +5,7 @@
 #include "sun_utils.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,10 +47,10 @@ obc_error_code_t sunManagerInit(position_data_manager_t *manager);
  * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
  * @param	manager: The manager to check
  * @param	jd: The julian date to check
- * @param   buffer: Stores the boolean value of whether the JD is within the range of the manager
+ * @param buffer: Stores the boolean value of whether the JD is within the range of the manager
  * @attention Requires that the manager and buffer are not NULL
  */
-obc_error_code_t sunManagerCheckJD(const position_data_manager_t *manager, julian_date_t jd, uint8_t *buffer);
+obc_error_code_t sunManagerCheckJD(const position_data_manager_t *manager, julian_date_t jd, bool *buffer);
 
 /**
  * @brief Gets the adjusted value at the given julian date
