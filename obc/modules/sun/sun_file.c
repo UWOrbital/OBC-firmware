@@ -55,6 +55,7 @@ static obc_error_code_t sunFileSeek(int64_t location) {
  */
 static obc_error_code_t sunFileReadPosition(position_t *buff) {
   if (buff == NULL) return OBC_ERROR_CODE_INVALID_ARGUMENT;
+  obc_error_code_t errCode;
   size_t bytesRead;
   position_t tmp;
   RETURN_IF_ERROR_CODE(readFile(fileID, &tmp, sizeof(position_t), &bytesRead));
@@ -66,6 +67,7 @@ static obc_error_code_t sunFileReadPosition(position_t *buff) {
 // Public Functions
 
 obc_error_code_t sunFileInit(void) {
+  obc_error_code_t errCode;
   // Init file
 
   // Set offset to beginning
@@ -108,6 +110,7 @@ return OBC_ERROR_CODE_SUCCESS;
 }
 
 obc_error_code_t sunFileJDInRange(julian_date_t jd, bool *buff) {
+  obc_error_code_t errCode;
   if (buff == NULL) {
     return OBC_ERROR_CODE_INVALID_ARGUMENT;
   }
@@ -119,12 +122,14 @@ obc_error_code_t sunFileJDInRange(julian_date_t jd, bool *buff) {
 }
 
 obc_error_code_t sunFileReadDataPoint(uint32_t index, position_data_t *buff) {
+  obc_error_code_t errCode;
   if (buff == NULL) {
     return OBC_ERROR_CODE_INVALID_ARGUMENT;
   }
-  RETURN_IF_ERROR_CODE(sunFileSeek(SUN_FILE_HEADER_SIZE + index * SUN_FILE_DATA_POINT_SIZE));
   julian_date_t jd;
   RETURN_IF_ERROR_CODE(sunFileJDOfIndex(index, &jd));
+
+  RETURN_IF_ERROR_CODE(sunFileSeek(SUN_FILE_HEADER_SIZE + index * SUN_FILE_DATA_POINT_SIZE));
   position_t x, y, z;
   RETURN_IF_ERROR_CODE(sunFileReadPosition(&x));
   RETURN_IF_ERROR_CODE(sunFileReadPosition(&y));
