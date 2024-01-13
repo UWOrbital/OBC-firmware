@@ -11,10 +11,10 @@ extern "C" {
 #endif
 
 /**
- *@breif Initializes the sun file module, also serves as a reset if the file is modified
+ *@breif Initializes the sun file module with the fileName, also serves as a reset if the file is modified
  * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
  */
-void sunFileInit(void);
+obc_error_code_t sunFileInit(const char *fileName);
 
 /**
  * @brief Gets the min JD stored in the sun file

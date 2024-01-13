@@ -1,5 +1,4 @@
 #include "sun_mgr.h"
-#include <stdio.h>
 
 #include "obc_errors.h"
 

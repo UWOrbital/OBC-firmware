@@ -5,6 +5,7 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/drivers/arducam/image_processing.c
     ${CMAKE_SOURCE_DIR}/obc/modules/sun/sun_mgr.c
     ${CMAKE_SOURCE_DIR}/obc/modules/sun/sun_utils.c
+    ${CMAKE_SOURCE_DIR}/obc/modules/sun/sun_file.c
     ${CMAKE_SOURCE_DIR}/obc/drivers/vn100/vn100_binary_parsing.c
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common/obc_gs_crc.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
@@ -23,6 +24,7 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_image_processing.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_sun_mgr.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_sun_utils.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_sun_file.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_vn100_unpack.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_obc_persistent.cpp
 )
@@ -34,6 +36,7 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 target_include_directories(${TEST_BINARY}
     PRIVATE
     ${CMAKE_SOURCE_DIR}/obc/sys
+    ${CMAKE_SOURCE_DIR}/obc/sys/fs_wrapper
     ${CMAKE_SOURCE_DIR}/obc/sys/time
     ${CMAKE_SOURCE_DIR}/obc/sys/utils
     ${CMAKE_SOURCE_DIR}/obc/sys/logging
