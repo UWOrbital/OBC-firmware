@@ -2,6 +2,7 @@
 #include "obc_print.h"
 #include "ds3232_mz.h"
 #include "gio.h"
+#include "obc_board_config.h"
 
 #define TEMP_LOWER_BOUND 0.0f
 #define TEMP_UPPER_BOUND 40.0f
@@ -116,7 +117,7 @@ void testRTC(void) {
   // Poll for alarm interrupt which should set GIOA_0 HIGH
   uint32_t elapsed = 0;
   bool failed = false;
-  while (gioGetBit(gioPORTA, 0) == 0) {
+  while (gioGetBit(DS3232_INT_PORT, DS3232_INT_PIN) == 0) {
     vTaskDelay(pdMS_TO_TICKS(1000));
     elapsed++;
 
