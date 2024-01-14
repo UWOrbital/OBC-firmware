@@ -10,7 +10,10 @@
  *
  * Enum containing all possible event IDs passed to the gnc event queue.
  */
-typedef enum { GNC_MANAGER_NULL_EVENT_ID, SECONDARY_GNC_MANAGER_EVENT_ID } gnc_event_id_t;
+typedef enum {
+  GNC_MANAGER_NULL_EVENT_ID,
+  SECONDARY_GNC_MANAGER_EVENT_ID,
+} gnc_event_id_t;
 
 /**
  * @union	gnc_event_data_t

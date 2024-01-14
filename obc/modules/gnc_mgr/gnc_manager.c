@@ -10,6 +10,8 @@
 #include <sys_common.h>
 #include <gio.h>
 
+#define GNC_TASK_PERIOD_MS 50 /* 50ms period or 20Hz */
+
 static QueueHandle_t gncQueueHandle = NULL;
 static StaticQueue_t gncQueue;
 static uint8_t gncQueueStack[GNC_MANAGER_QUEUE_LENGTH * GNC_MANAGER_QUEUE_ITEM_SIZE];
@@ -36,6 +38,11 @@ obc_error_code_t sendToGncQueue(gnc_event_t *event) {
 void obcTaskFunctionGncMgr(void *pvParameters) {
   ASSERT(gncQueueHandle != NULL);
 
+  TickType_t xLastWakeTime;
+
+  // Initialize the last wake time to the current time
+  xLastWakeTime = xTaskGetTickCount();
+
   while (1) {
     gnc_event_t queueMsg;
     if (xQueueReceive(gncQueueHandle, &queueMsg, GNC_MANAGER_QUEUE_RX_WAIT_PERIOD) == pdTRUE) {
@@ -49,4 +56,5 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
       }
     }
   }
+  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
 }
