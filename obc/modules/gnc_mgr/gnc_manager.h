@@ -42,7 +42,7 @@ typedef struct {
 #define GNC_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 /**
- * @brief	Send an event to the Payload Manager queue.
+ * @brief	Send an event to the gnc Manager queue.
  * @param	event	Event to send.
  * @return The error code
  */
