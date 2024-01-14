@@ -5,7 +5,6 @@
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
-#include <os_queue.h>
 #include <os_task.h>
 
 #include <sys_common.h>
