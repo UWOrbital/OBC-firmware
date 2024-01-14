@@ -86,6 +86,7 @@ obc_error_code_t sunFileInit(const char *fileName) {
   // Read number of data points
   uint32_t numDataPoints;
   RETURN_IF_ERROR_CODE(readFile(fileID, &numDataPoints, sizeof(uint32_t), &length));
+  RETURN_IF_ERROR_CODE(closeFile(fileID));
   if (length != sizeof(uint32_t) || numDataPoints == 0) return OBC_ERR_CODE_INVALID_STATE;
 
   RETURN_IF_ERROR_CODE(sunFileJDOfIndex(numberOfDataPoints, &maxJD));
