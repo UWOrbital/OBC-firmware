@@ -1,4 +1,5 @@
 #include "gnc_manager.h"
+#include "obc_digital_watchdog.h"
 #include "obc_errors.h"
 #include "obc_scheduler_config.h"
 
