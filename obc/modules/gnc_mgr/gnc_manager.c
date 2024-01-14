@@ -44,17 +44,8 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   xLastWakeTime = xTaskGetTickCount();
 
   while (1) {
-    gnc_event_t queueMsg;
-    if (xQueueReceive(gncQueueHandle, &queueMsg, GNC_MANAGER_QUEUE_RX_WAIT_PERIOD) == pdTRUE) {
-      switch (queueMsg.eventID) {
-        case GNC_MANAGER_NULL_EVENT_ID:
-          break;
+    feedDigitalWatchdog();
 
-        case SECONDARY_GNC_MANAGER_EVENT_ID:
-          // ADD SECONDARY GNC COMMAND HANDLER
-          break;
-      }
-    }
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
   }
-  vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
 }
