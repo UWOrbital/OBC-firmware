@@ -23,10 +23,10 @@ static int32_t fileID = -1;
 
 /**
  * @breif Gets the jd of the index and stores it into jd
- * @attention jd must be a valid pointer
+ * @attention jd must be a valid pointer and the index is less than the numberOfDataPoints
  */
 static obc_error_code_t sunFileJDOfIndex(uint32_t index, julian_date_t *jd) {
-  if (jd == NULL) {
+  if (jd == NULL || index >= numberOfDataPoints) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   *jd = minJD + index * stepSize;
@@ -124,7 +124,7 @@ obc_error_code_t sunFileJDInRange(julian_date_t jd, bool *buff) {
 
 obc_error_code_t sunFileReadDataPoint(uint32_t index, position_data_t *buff) {
   obc_error_code_t errCode;
-  if (buff == NULL) {
+  if (buff == NULL || index >= numberOfDataPoints) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   julian_date_t jd;
