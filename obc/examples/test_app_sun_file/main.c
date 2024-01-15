@@ -1,31 +1,42 @@
 #include "sun_file.h"
 
 #include "obc_errors.h"
+#include "obc_print.h"
+#include "obc_sci_io.h"
+#include "obc_i2c_io.h"
+#include "obc_spi_io.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
 
 #include <sys_common.h>
+#include <sys_core.h>
+#include <gio.h>
 #include <sci.h>
+#include <i2c.h>
 #include <spi.h>
+#include <can.h>
+#include <het.h>
 
 #include <string.h>
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
-#define STOP_ON_ERROR(text, errCode) if (errCode != OBC_ERR_CODE_SUCCESS) {
-sciPrintf("%s returned %d\r\n", text, errCode);
-while (1)
-  ;
-}
+#define STOP_ON_ERROR(text, _ret)                   \
+  errCode = _ret;                                   \
+  if (errCode != OBC_ERR_CODE_SUCCESS) {            \
+    sciPrintf("%s returned %d\r\n", text, errCode); \
+    while (1)                                       \
+      ;                                             \
+  }
 
 void vTask1(void *pvParameters) {
   // Data from JD1 to JD99 inclusive with step of 1 JD
-  const char *fName = "/sunData.bin"
+  const char *fName = "/sunData.bin";
 
-      // Init
+  // Init
 
-      obc_error_t errCode;
+  obc_error_code_t errCode;
   STOP_ON_ERROR("sunFileInit", sunFileInit(fName));
   sciPrintf("Sun module successfully initialized");
 
@@ -85,25 +96,25 @@ void vTask1(void *pvParameters) {
 
   // Read data point
 
-  position_date_t readData;
+  position_data_t readData;
 
   // Stored at index 0:
-  position_date_t expected1 = {julianDate = 1, x = 1.384519786747137E+08, y = -5.472710939424842E+07,
-                               z = -1.276932755237378E+06};
+  position_data_t expected1 = {
+      .julianDate = 1, .x = 1.384519786747137E+08, .y = -5.472710939424842E+07, .z = -1.276932755237378E+06};
   STOP_ON_ERROR("sunFileReadDataPoint index=0", sunFileReadDataPoint(0, &readData));
   sciPrintf("Expected: ", closePositionData(expected1, readData));
 
   // Stored at index 32:
-  position_date_t expected2 = {julianDate = 33.000000000, x = 1.481637529364224E+08, y = 2.596441718873117E+07,
-                               z = -5.378180895996094E+04} STOP_ON_ERROR("sunFileReadDataPoint index=33",
-                                                                         sunFileReadDataPoint(33, &readData));
-  sciPrintf("Expected: ", closePositionData(expected1, readData));
+  position_data_t expected2 = {
+      .julianDate = 33.000000000, .x = 1.481637529364224E+08, .y = 2.596441718873117E+07, .z = -5.378180895996094E+04};
+  STOP_ON_ERROR("sunFileReadDataPoint index=33", sunFileReadDataPoint(33, &readData));
+  sciPrintf("Expected: ", closePositionData(expected2, readData));
 
   // Stored at index 98:
-  position_date_t expected3 = {julianDate = 99.000000000, x = 4.391066938786460E+07, y = 1.459188402378541E+08,
-                               z = 2.131411070142508E+06} STOP_ON_ERROR("sunFileReadDataPoint index=98",
-                                                                        sunFileReadDataPoint(98, &readData));
-  sciPrintf("Expected: ", closePositionData(expected1, readData));
+  position_data_t expected3 = {
+      .julianDate = 99.000000000, .x = 4.391066938786460E+07, .y = 1.459188402378541E+08, .z = 2.131411070142508E+06};
+  STOP_ON_ERROR("sunFileReadDataPoint index=98", sunFileReadDataPoint(98, &readData));
+  sciPrintf("Expected: ", closePositionData(expected3, readData));
 
   // Get number of data points after JD
 

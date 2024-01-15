@@ -111,13 +111,9 @@ obc_error_code_t sunFileGetMaxJD(julian_date_t *jd) {
 }
 
 obc_error_code_t sunFileJDInRange(julian_date_t jd, bool *buff) {
-  obc_error_code_t errCode;
   if (buff == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  julian_date_t minimumJD, maximumJD;
-  RETURN_IF_ERROR_CODE(sunFileGetMinJD(&minJD));
-  RETURN_IF_ERROR_CODE(sunFileGetMaxJD(&maxJD));
   *buff = (minJD <= jd) && (jd <= maxJD);
   return OBC_ERR_CODE_SUCCESS;
 }

@@ -46,6 +46,10 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/task_stats_collector.c
     ${CMAKE_CURRENT_SOURCE_DIR}/logger/logger.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_utils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_file.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_mgr.c
 )
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})

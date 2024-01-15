@@ -69,6 +69,7 @@ static obc_error_code_t sunManagerGetMaxJulianDate(const position_data_manager_t
  * that is greater or equal to the julianDate argument
  * @attention julian_data is greater than 0 and manager and buffer are valid pointers
  */
+/*
 static obc_error_code_t sunManagerSearchLinear(const position_data_manager_t *manager, julian_date_t julianDate,
                                                manager_size_t *buffer) {
   if (julianDate <= ADCS_INVALID_JULIAN_DATE || manager == NULL || buffer == NULL) {
@@ -89,7 +90,7 @@ static obc_error_code_t sunManagerSearchLinear(const position_data_manager_t *ma
   }
   return OBC_ERR_CODE_UNKNOWN;
 }
-
+*/
 /**
  * @brief Searchs for the julianDate in the manager and returns the index of the julian date in the manager that
  * is greater or equal to the julianDate
