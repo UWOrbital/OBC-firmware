@@ -72,6 +72,7 @@ obc_error_code_t sunFileInit(const char *fileName) {
 
   // Set offset to beginning
   size_t length;
+  RETURN_IF_ERROR_CODE(sunFileSeek(0));
 
   // Read minimum jd
   julian_date_t minimumJD;
@@ -89,7 +90,7 @@ obc_error_code_t sunFileInit(const char *fileName) {
   RETURN_IF_ERROR_CODE(closeFile(fileID));
   if (length != sizeof(uint32_t) || numDataPoints == 0) return OBC_ERR_CODE_INVALID_STATE;
 
-  RETURN_IF_ERROR_CODE(sunFileJDOfIndex(numberOfDataPoints, &maxJD));
+  RETURN_IF_ERROR_CODE(sunFileJDOfIndex(numDataPoints, &maxJD));
   numberOfDataPoints = numDataPoints;
   return OBC_ERR_CODE_SUCCESS;
 }
