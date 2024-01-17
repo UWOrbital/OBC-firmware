@@ -445,6 +445,20 @@ def test_main(argsv, data_points_expected):
     assert data_points_actual == data_points_returned
     assert data_points_actual == data_points_expected
 
+
+def test_100k_request():
+    filename = "test_100k_request.bin"
+    length = 110_000
+    data_points_returned = ephemeris.main(f"JD1 JD110000 -s {length} -o {filename}")
+
+    data_points_actual = ep.parse_file()
+    file_size = os.path.getsize(filename)
+    os.remove(filename)
+
+    assert file_size == length * (3 * ephemeris.SIZE_OF_FLOAT) + SIZE_OF_HEADER
+    assert data_points_returned == data_points_actual
+
+
 # Main thing is to test the logic behind the function, assume math.isclose works
 @pytest.mark.parametrize("data_point, tolerance", [
     (DataPoint(0, 0, 0, 0), 0),
