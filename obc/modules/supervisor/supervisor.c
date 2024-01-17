@@ -119,7 +119,7 @@ static void vSupervisorTask(void *pvParameters) {
   initEPSManager();
   initPayloadManager();
   initHealthCollector();
-#if (DEBUG == 1)
+#if (configGENERATE_RUN_TIME_STATS == 1)
   initTaskStatsCollector();
 #endif
 

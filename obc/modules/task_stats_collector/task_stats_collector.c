@@ -1,4 +1,4 @@
-#if (DEBUG == 1)
+#if (configGENERATE_RUN_TIME_STATS == 1)
 #include "task_stats_collector.h"
 #include "obc_task_config.h"
 #include "obc_sci_io.h"

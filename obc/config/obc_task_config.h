@@ -70,7 +70,7 @@
 #define HEALTH_COLLECTOR_PRIORITY tskIDLE_PRIORITY + 1U
 
 /* Task debug stats collector task config */
-#if (DEBUG == 1)
+#if (configGENERATE_RUN_TIME_STATS == 1)
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
 #define TASK_STATS_COLLECTOR_NAME "task_stats_collector"
 #define TASK_STATS_COLLECTOR_PRIORITY tskIDLE_PRIORITY + 50U
