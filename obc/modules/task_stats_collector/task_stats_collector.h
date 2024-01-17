@@ -1,4 +1,5 @@
 #pragma once
+#include <FreeRTOSConfig.h>
 
 #if (configGENERATE_RUN_TIME_STATS == 1)
 /**

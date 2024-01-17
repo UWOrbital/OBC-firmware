@@ -1,3 +1,6 @@
+#include <FreeRTOSConfig.h>
+#include <FreeRTOS.h>
+
 #if (configGENERATE_RUN_TIME_STATS == 1)
 #include "task_stats_collector.h"
 #include "obc_task_config.h"
@@ -6,8 +9,6 @@
 #include "obc_logging.h"
 
 #include <runtime_stats.h>
-#include <FreeRTOSConfig.h>
-#include <FreeRTOS.h>
 
 #define TASK_STATS_BUFFER_SIZE 1000U
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
