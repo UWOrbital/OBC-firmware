@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from math import isclose
 from enum import Enum
 import os
+import datetime
 
 # Script constants
 SUPPORTED_VERSION: Final[str] = '1.2'
@@ -48,13 +49,12 @@ SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF
 # Error codes enumerator
 class ErrorCode(Enum):
     SUCCESS = 0
-    INVALID_START_TIME = 1
-    INVALID_STOP_TIME = 2
-    INVALID_STEP_SIZE = 3
-    INVALID_OUTPUT_FILE = 4
-    NO_SIGNATURE_FOUND = 5
-    INVALID_REQUEST400 = 6
-    INVALID_REQUEST = 7
+    INVALID_DATE_TIME = 1
+    INVALID_STEP_SIZE = 2
+    INVALID_OUTPUT_FILE = 3
+    NO_SIGNATURE_FOUND = 4
+    INVALID_REQUEST400 = 5
+    INVALID_REQUEST = 6
 
 
 @dataclass
@@ -85,10 +85,10 @@ def define_parser() -> argparse.ArgumentParser:
     :return: The parser
     """
     parser = argparse.ArgumentParser(description='Position Ephemeris Retriever')
-    parser.add_argument('start_time', type=str, help='Start time in the format YYYY-MM-DD or JD#')
-    parser.add_argument('stop_time', type=str, help='Stop time in the format YYYY-MM-DD or JD#')
+    parser.add_argument('start_time', type=str, help='Start time in the format YYYY-MM-DD or JD#. Must be of the same format as stop time')
+    parser.add_argument('stop_time', type=str, help='Stop time in the format YYYY-MM-DD or JD#. Must be of the same format as start time')
     parser.add_argument('-s', '--step-size', type=str, default=DEFAULT_STEP_SIZE,
-                        help=f'Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 1y, 100). '
+                        help=f'Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 100). '
                              f'Default: {DEFAULT_STEP_SIZE}')
     parser.add_argument('-t', '--target', type=str, default=DEFAULT_TARGET,
                         help=f'Target object (e.g. sun, moon, mars). Default: {DEFAULT_TARGET}')
@@ -120,16 +120,31 @@ def is_float(num: str):
         return False
 
 
-def is_valid_time(time: str):
+def is_valid_date(date: str) -> bool:
     """
-    Checks if the parameter is a valid time
+    Checks if date is a valid date of the YYYY-MM-DD format
+
+    :param date: The date to be checked
+    :return: True if the date is a valid date, otherwise False
+    """
+    time_regex = re.compile(r'^[1-9]\d{3}-\d{2}-\d{2}$')
+    if not time_regex.match(date):
+        return False
+    try:
+        year, month, day = date.split('-')
+        datetime.datetime(year=int(year), month=int(month), day=int(day))
+        return True
+    except ValueError:
+        return False
+
+
+def is_valid_julian_date(time: str) -> bool:
+    """
+    Checks if time is a valid julian date where time starts with JD and is followed by a positive number
     :param time: The parameter to check
     :return: True if the parameter is a valid time otherwise False
     """
-    # Regex for time format
-    time_regex = re.compile(r'^[1-9]\d{3}-\d{2}-\d{2}$')
-
-    return time_regex.match(time) or (time.startswith('JD') and is_float(time[2:]))
+    return time.startswith('JD') and is_float(time[2:]) and float(time[2:]) > 0
 
 
 def validate_input(start_time: str, stop_time: str, step_size: str, output: str) -> ErrorCode:
@@ -139,23 +154,18 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
 
     :param start_time: Start time in the format YYYY-MM-DD or JD#
     :param stop_time: Stop time in the format YYYY-MM-DD or JD#
-    :param step_size: Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 1y, 100)
+    :param step_size: Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 100)
     :param output: Output file name in the format *.bin
     """
-
-    # Check if the start time is in the correct format
-    if not is_valid_time(start_time):
-        logging.critical('Start time must be in the format YYYY-MM-DD or JD#')
-        return ErrorCode.INVALID_START_TIME
-
-    # Checks if the stop time is in the correct format
-    if not is_valid_time(stop_time):
-        logging.critical('Stop time must be in the format YYYY-MM-DD or JD#')
-        return ErrorCode.INVALID_STOP_TIME
+    # Checks if the start_time and stop_time have valid datetime formats that are the same format
+    if not (is_valid_date(start_time) and is_valid_date(stop_time)) \
+        and not (is_valid_julian_date(start_time) and is_valid_julian_date(stop_time)):
+        logging.critical("Start time or stop time do not both have the same format of YYYY-MM-DD or JD#")
+        return ErrorCode.INVALID_DATE_TIME
 
     # Checks if the step size is in the correct format
-    if not ((step_size[-1] in ['y', 'm', 'd', 'h', 's'] and step_size[:-1].isnumeric()) or step_size.isnumeric()):
-        logging.critical('Step size must be in the format #y, #m, #d, #h, #s, or #. Where # is an integer')
+    if not ((step_size[-1] in ['m', 'd', 'h', 's'] and step_size[:-1].isnumeric()) or step_size.isnumeric()):
+        logging.critical('Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer')
         return ErrorCode.INVALID_STEP_SIZE
 
     # Checks if the output file is in the correct format

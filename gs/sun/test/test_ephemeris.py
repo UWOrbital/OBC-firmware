@@ -31,20 +31,42 @@ def test_is_float_true(arg):
 def test_is_float_false(arg):
     assert not ephemeris.is_float(arg)
 
+
 @pytest.mark.parametrize("arg", [
     ("JD2451545.0"),
     ("JD2451545"),
-    ("2020-01-02"),
+    ("JD1.1"),
 ])
-def test_is_valid_true(arg):
-    assert ephemeris.is_valid_time(arg)
+def test_is_valid_julian_true(arg):
+    assert ephemeris.is_valid_julian_date(arg)
+
 
 @pytest.mark.parametrize("arg", [
     ("2020-01-02 12:00:00"),
+    ("JD0"),
+    ("JD-1"),
     ("24")
 ])
-def test_is_valid_false(arg):
-    assert not ephemeris.is_valid_time(arg)
+def test_is_valid_julian_false(arg):
+    assert not ephemeris.is_valid_julian_date(arg)
+
+
+@pytest.mark.parametrize("arg", [
+    ("2020-01-01"),
+    ("2024-12-31"),
+])
+def test_is_valid_date_true(arg):
+    assert ephemeris.is_valid_date(arg)
+
+
+@pytest.mark.parametrize("arg", [
+    ("2020-01-02 12:00:00"),
+    ("JD0"),
+    ("JD-1"),
+    ("24")
+])
+def test_is_valid_date_false(arg):
+    assert not ephemeris.is_valid_date(arg)
 
 
 @pytest.mark.parametrize("min_jd, max_jd, count, expected", [
@@ -127,17 +149,17 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
     ("2023-07-20", "2023-07-25", "1d", "output.bin", ErrorCode.SUCCESS),
     ("2023-07-20", "2023-07-25", "1w", "output.bin", ErrorCode.INVALID_STEP_SIZE),
     ("2023-07-20", "2023-07-25", "1m", "output.dat", ErrorCode.INVALID_OUTPUT_FILE),
-    ("2023-07-20", "2023-07-25", "1y", "output.bin", ErrorCode.SUCCESS),
     ("2023-07-20", "2023-07-25", "invalid", "output.bin", ErrorCode.INVALID_STEP_SIZE),
     ("2023-07-20", "2023-07-25", "3", "output.bin", ErrorCode.SUCCESS),
     ("2023-07-20", "2023-07-25", "1h", "output.bin", ErrorCode.SUCCESS),
     ("2023-07-20", "2023-07-25", "1", "output.bin", ErrorCode.SUCCESS),
     ("2023-07-20", "2023-07-25", "100", "output.bin", ErrorCode.SUCCESS),
-    ("2023-07-20", "2023-07-25", "1y", "output.txt", ErrorCode.INVALID_OUTPUT_FILE),
-    ("2023-07-20", "2023-07-25", "1y", "output.bin.txt", ErrorCode.INVALID_OUTPUT_FILE),
-    ("2023-07-20", "2023-07-25", "1y", "output.bin.bin", ErrorCode.SUCCESS),
-    ("JD", "JD100", "1y", "output.bin", ErrorCode.INVALID_START_TIME),
-    ("JD100", "JD", "1y", "output.bin", ErrorCode.INVALID_STOP_TIME),
+    ("2023-07-20", "2023-07-25", "1y", "output.txt", ErrorCode.INVALID_STEP_SIZE),
+    ("2023-07-20", "2023-07-25", "1d", "output.txt", ErrorCode.INVALID_OUTPUT_FILE),
+    ("2023-07-20", "2023-07-25", "1d", "output.bin.txt", ErrorCode.INVALID_OUTPUT_FILE),
+    ("2023-07-20", "2023-07-25", "1d", "output.bin.bin", ErrorCode.SUCCESS),
+    ("JD", "JD100", "1d", "output.bin", ErrorCode.INVALID_DATE_TIME),
+    ("JD100", "JD", "1d", "output.bin", ErrorCode.INVALID_DATE_TIME),
     ("2023-07-20", "2023-07-25", "10w", "output.bin", ErrorCode.INVALID_STEP_SIZE),
     ("2023-07-20", "2023-07-25", "10d", "output.bin", ErrorCode.SUCCESS),
     ("2023-07-20", "2023-07-25", "10d", "output.txt", ErrorCode.INVALID_OUTPUT_FILE),
@@ -352,8 +374,8 @@ $$EOE
     assert ephemeris.find_number_of_data_points(lines) == 12
 
 @pytest.mark.parametrize("error_code_object", [
-    (ErrorCode.INVALID_START_TIME),
-    (ErrorCode.INVALID_STOP_TIME),
+    (ErrorCode.INVALID_DATE_TIME),
+    (ErrorCode.INVALID_DATE_TIME),
     (ErrorCode.INVALID_STEP_SIZE),
     (ErrorCode.INVALID_OUTPUT_FILE),
     (ErrorCode.NO_SIGNATURE_FOUND),
