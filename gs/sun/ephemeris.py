@@ -131,8 +131,7 @@ def is_valid_date(date: str) -> bool:
     if not time_regex.match(date):
         return False
     try:
-        year, month, day = date.split('-')
-        datetime.datetime(year=int(year), month=int(month), day=int(day))
+        to_datetime(date)
         return True
     except ValueError:
         return False
@@ -292,6 +291,32 @@ def write_header(file_output: str, min_jd: float, max_jd: float, count: int, *, 
         # Write the count to the file
         byte_count = struct.pack(DATA_UINT, int(count))
         file.write(bytearray(byte_count))
+
+
+def to_datetime(date: str) -> datetime.datetime:
+    year, month, day = date.split('-')
+    return datetime.datetime(year=int(year), month=int(month), day=int(day))
+
+
+def calculate_number_of_data_points(start_time: str, stop_time: str, step_size: str) -> int:
+    """
+    Calculates the number of data points. This function assumes all inputs are valid and performs
+    no error checking.
+    """
+    difference = 0
+    if start_time.startswith("JD"):
+        difference = float(stop_time[2:]) - float(start_time[2:])
+    else:
+        delta = to_datetime(stop_time) - to_datetime(start_time)
+        difference = delta.days
+    difference += 1
+    if step_size.isnumeric():
+        return int(round(difference / float(step_size)))
+    elif step_size.endswith("d"):
+        return int(difference)
+    elif step_size.endswith("h"):
+        return int(difference * 24)
+    return int(difference * 24 * 60)
 
 
 def find_number_of_data_points(lines: List[str]) -> int:

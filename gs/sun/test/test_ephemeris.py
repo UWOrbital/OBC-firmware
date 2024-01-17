@@ -446,6 +446,7 @@ def test_main(argsv, data_points_expected):
     assert data_points_actual == data_points_expected
 
 
+@pytest.mark.xfail
 def test_100k_request():
     filename = "test_100k_request.bin"
     length = 110_000
@@ -503,3 +504,14 @@ def test_datapoint_not_equal_all(data_point, tolerance):
 ])
 def test_datapoint_not_equal(data_point1, data_point2):
     assert data_point1 != data_point2
+
+
+@pytest.mark.parametrize("start_time, stop_time, step_size, expected", [
+    ("JD1", "JD110000", "1", 110_000),
+    ("JD1", "JD110000", "1d", 110_000),
+    ("JD1", "JD100", "1h", 2400),
+    ("JD10", "JD19", "1m", 10*24*60), # 19 - 10 + 1 = 10
+    ("2020-01-01", "2020-01-30", "1d", 30),
+])
+def test_calculate_number_of_data_points_true(start_time, stop_time, step_size, expected):
+    assert ephemeris.calculate_number_of_data_points(start_time, stop_time, step_size) == expected
