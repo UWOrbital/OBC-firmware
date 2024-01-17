@@ -171,8 +171,6 @@ Options for `EXAMPLE_TYPE` include:
 
 - `FRAM_SPI` - for `test_app_fram_spi`
 
-- `FREERTOS_POSIX` - for `test_app_freertos_posix`
-
 - `LM75BD` - for `test_app_lm75bd`
 
 - `MPU6050` - for `test_app_mpu6050`
