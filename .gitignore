@@ -65,6 +65,3 @@ venv/
 # Python
 __pycache__/
 .pytest_cache/
-
-.project
-.cproject
