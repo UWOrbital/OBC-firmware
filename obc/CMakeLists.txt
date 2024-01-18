@@ -5,9 +5,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/cmake/board_lib_defs.cmake)
 
-set(LD_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ld")
-set(APP_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ld/app_link.ld")
-set(BL_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/ld/bl_link.ld")
+set(LD_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld")
+set(APP_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/app_link.ld")
+set(BL_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/bl_link.ld")
 
 if (DEBUG MATCHES 1)
     set(TARGET_OPTIMIZATION_FLAGS "-Og" "-g" "-gdwarf-3" "-gstrict-dwarf")
