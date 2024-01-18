@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+/* THIS FILE IS ONLY USED BY bl_flash.c */
+
 typedef struct {
   void *start;
   uint32_t length;  // number of 32-bit words

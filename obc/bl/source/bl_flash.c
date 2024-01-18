@@ -8,6 +8,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* DEFINES */
+#define BL_FLASH_APP_SECTORS_MASK 0xFF00U  // Sectors 0-7 are reserved for the bootloader
+#define BL_FLASH_BANK_WIDTH_BYTES 16U      // Programming at an address is limited to the bank width number of bytes
+
 /* PUBLIC FUNCTION DEFINITIONS */
 bl_error_code_t bl_flash_fapiInitBank(uint32_t bankNum) {
   if ((Fapi_initializeFlashBanks(SYS_CLK_FREQ)) != Fapi_Status_Success) {
@@ -18,7 +22,7 @@ bl_error_code_t bl_flash_fapiInitBank(uint32_t bankNum) {
     return BL_ERR_CODE_INVALID_ARG;
   }
 
-  if (Fapi_enableMainBankSectors(0xFF00U) != Fapi_Status_Success) {
+  if (Fapi_enableMainBankSectors(BL_FLASH_APP_SECTORS_MASK) != Fapi_Status_Success) {
     return BL_ERR_CODE_UNKNOWN;
   }
 
@@ -82,8 +86,7 @@ bl_error_code_t bl_flash_fapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint
   register uint32_t src = srcAddr;
   register uint32_t dst = dstAddr;
 
-  // Programming at an address is limited to the bank width number of bytes
-  uint32_t bytesToFlashNext = numBytes < 16 ? numBytes : 16;
+  uint32_t bytesToFlashNext = numBytes < BL_FLASH_BANK_WIDTH_BYTES ? numBytes : BL_FLASH_BANK_WIDTH_BYTES;
 
   while (numBytes > 0) {
     if (Fapi_issueProgrammingCommand((uint32_t *)dst, (uint8_t *)src, (uint32_t)bytesToFlashNext, NULL, 0,
@@ -100,7 +103,7 @@ bl_error_code_t bl_flash_fapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint
 
     numBytes -= bytesToFlashNext;
 
-    if (numBytes < 16) {
+    if (numBytes < BL_FLASH_BANK_WIDTH_BYTES) {
       bytesToFlashNext = numBytes;
     }
   }

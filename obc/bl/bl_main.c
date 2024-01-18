@@ -12,6 +12,10 @@ extern uint32_t __ramFuncsSize__;
 extern uint32_t __ramFuncsRunStart__;
 extern uint32_t __ramFuncsRunEnd__;
 
+/* DEFINES */
+#define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
+#define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
+
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
 
@@ -116,12 +120,13 @@ int main(void) {
 
         bl_flash_fapiInitBank(0U);
 
-        // Receive image in chunks of 128 bytes and write to flash
+        // Receive image in chunks and write to flash
         uint32_t numAppBytesToFlash = appHeader.size;
         while (numAppBytesToFlash > 0) {
-          uint8_t recvBuffer[128] = {0U};
+          uint8_t recvBuffer[BL_BIN_RX_CHUNK_SIZE] = {0U};
 
-          uint32_t numBytesToRead = (numAppBytesToFlash > 128) ? 128 : numAppBytesToFlash;
+          uint32_t numBytesToRead =
+              (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
 
           bl_uart_readBytes(BL_UART_SCIREG_2, recvBuffer, numBytesToRead);
 
@@ -136,7 +141,7 @@ int main(void) {
         bl_uart_writeBytes(BL_UART_SCIREG_1, strlen("Fixing ECC\r\n"), (uint8_t *)"Fixing ECC\r\n");
 
         // Fix the ECC for any flash memory that was erased, but not overwritten by the new app
-        uint8_t eccFixWriteBuf[128] = {0U};
+        uint8_t eccFixWriteBuf[BL_ECC_FIX_CHUNK_SIZE] = {0U};
         memset(eccFixWriteBuf, 0xFFU, sizeof(eccFixWriteBuf));  // Erased flash defaults to 0xFF
 
         const uint32_t eccFixTotalBytes =
@@ -145,7 +150,8 @@ int main(void) {
 
         uint32_t eccFixBytesLeft = eccFixTotalBytes;
         while (eccFixBytesLeft > 0) {
-          const uint32_t numBytesToWrite = (eccFixBytesLeft > 128U) ? 128U : eccFixBytesLeft;
+          const uint32_t numBytesToWrite =
+              (eccFixBytesLeft > BL_ECC_FIX_CHUNK_SIZE) ? BL_ECC_FIX_CHUNK_SIZE : eccFixBytesLeft;
 
           const uint32_t baseAddr = APP_START_ADDRESS + appHeader.size + 1U;
           const uint32_t addr = baseAddr + (eccFixTotalBytes - eccFixBytesLeft);
