@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dangle/force-obc-tests-compile-32-bits
 
 jobs:
   build:
