@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
+set(GCC_32BIT_COMPILE_FLAG "-m32")
+
+set(GCC_32BIT_LINKER_FLAG "-m elf_i386")
+
 # Set the toolchain file before the project is declared
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     # Download the toolchain if it doesn't exist
@@ -34,6 +38,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES Test)
     enable_language(C CXX)
     enable_testing()
     add_subdirectory(test)
+    add_compile_options (${GCC_32BIT_COMPILE_FLAGS})
 endif()
 
 # Build tiny-aes and lib-correct libs
