@@ -32,7 +32,6 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 target_include_directories(${TEST_BINARY}
     PRIVATE
     ${CMAKE_SOURCE_DIR}/obc/sys
-    ${CMAKE_SOURCE_DIR}/obc/sys/fs_wrapper
     ${CMAKE_SOURCE_DIR}/obc/sys/time
     ${CMAKE_SOURCE_DIR}/obc/sys/utils
     ${CMAKE_SOURCE_DIR}/obc/sys/logging
