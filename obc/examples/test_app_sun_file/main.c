@@ -115,25 +115,6 @@ void vTask1(void *pvParameters) {
       .julianDate = 99.000000000, .x = 4.391066938786460E+07, .y = 1.459188402378541E+08, .z = 2.131411070142508E+06};
   STOP_ON_ERROR("sunFileReadDataPoint index=98", sunFileReadDataPoint(98, &readData));
   sciPrintf("Expected: ", closePositionData(expected3, readData));
-
-  // Get number of data points after JD
-
-  uint32_t count;
-  STOP_ON_ERROR("sunFileGetNumDataPointsAfterJD JD=1", sunFileGetNumDataPointsAfterJD(1, &count));
-  sciPrintf("Expected count for JD=1: 98\r\n");
-  sciPrintf("Count for JD=1: %d\r\n", count);
-
-  STOP_ON_ERROR("sunFileGetNumDataPointsAfterJD JD=33", sunFileGetNumDataPointsAfterJD(33, &count));
-  sciPrintf("Expected count for JD=33: 66\r\n");
-  sciPrintf("Count for JD=33: %d\r\n", count);
-
-  STOP_ON_ERROR("sunFileGetNumDataPointsAfterJD JD=98", sunFileGetNumDataPointsAfterJD(98, &count));
-  sciPrintf("Expected count for JD=98: 1\r\n");
-  sciPrintf("Count for JD=98: %d\r\n", count);
-
-  STOP_ON_ERROR("sunFileGetNumDataPointsAfterJD JD=2.5", sunFileGetNumDataPointsAfterJD(2.5, &count));
-  sciPrintf("Expected count for JD=2.5: 97\r\n");
-  sciPrintf("Count for JD=2.5: %d\r\n", count);
 }
 
 int main() {

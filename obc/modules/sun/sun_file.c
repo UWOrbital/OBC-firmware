@@ -166,14 +166,3 @@ obc_error_code_t sunFileGetIndexOfJD(julian_date_t jd, uint32_t *index) {
   *index = (jd - minJD) / stepSize;
   return OBC_ERR_CODE_SUCCESS;
 }
-
-obc_error_code_t sunFileGetNumDataPointsAfterJD(julian_date_t jd, uint32_t *number) {
-  if (number == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-  uint32_t index;
-  obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sunFileGetIndexOfJD(jd, &index));
-  *number = numberOfDataPoints - index - 1;
-  return OBC_ERR_CODE_SUCCESS;
-}

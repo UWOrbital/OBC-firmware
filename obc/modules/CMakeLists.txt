@@ -48,7 +48,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/logger/logger.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_utils.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_file.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun/ephemeris.c
     ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_mgr.c
 )
 
