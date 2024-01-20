@@ -13,6 +13,8 @@ extern uint32_t __ramFuncsRunStart__;
 extern uint32_t __ramFuncsRunEnd__;
 
 /* DEFINES */
+// These values were chosen so that the UART transfers and flash writes are quick, but don't
+// use too much RAM
 #define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
 #define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
 
@@ -51,7 +53,7 @@ int main(void) {
         bl_uart_writeBytes(BL_UART_SCIREG_1, strlen("Waiting for input\r\n"), (uint8_t *)"Waiting for input\r\n");
 
         char c = '\0';
-        bl_uart_readBytes(BL_UART_SCIREG_2, (uint8_t *)&c, 1U);
+        bl_uart_readBytes(BL_UART_SCIREG_2, (uint8_t *)&c, 1);
 
         if (c == 'd') {
           state = BL_STATE_DOWNLOAD_IMAGE;
@@ -159,10 +161,6 @@ int main(void) {
           bl_flash_fapiBlockWrite(addr, (uint32_t)eccFixWriteBuf, numBytesToWrite);
 
           eccFixBytesLeft -= numBytesToWrite;
-        }
-
-        if (state == BL_STATE_IDLE) {
-          break;
         }
 
         bl_uart_writeBytes(BL_UART_SCIREG_1, strlen("Finished writing to flash\r\n"),
