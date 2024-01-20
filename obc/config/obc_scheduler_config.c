@@ -18,7 +18,7 @@
 #define TASK_COMMS_MGR_NAME "comms_mgr"
 #define TASK_COMMS_DOWNLINK_ENCODER_NAME "comms_encoder"
 #define TASK_COMMS_UPLINK_DECODER_NAME "comms_decoder"
-#define TASK_EPS_MGR_NAME "eps_mgr"
+#define TASK_PWR_MGR_NAME "pwr_mgr"
 #define TASK_PAYLOAD_MGR_NAME "payload_mgr"
 #define TASK_TIMEKEEPER_NAME "timekeeper"
 #define TASK_DIGITAL_WATCHDOG_MGR_NAME "digital_wdg_mgr"
@@ -34,7 +34,7 @@
 #define TASK_COMMS_MGR_STACK_SIZE 1024U
 #define TASK_COMMS_DOWNLINK_ENCODER_STACK_SIZE 512U
 #define TASK_COMMS_UPLINK_DECODER_STACK_SIZE 1024U
-#define TASK_EPS_MGR_STACK_SIZE 1024U
+#define TASK_PWR_MGR_STACK_SIZE 1024U
 #define TASK_PAYLOAD_MGR_STACK_SIZE 1024U
 #define TASK_TIMEKEEPER_STACK_SIZE 1024U
 #define TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE 128U
@@ -54,7 +54,7 @@
 #define TASK_COMMS_MGR_PRIORITY TASK_COMMS_PRIORITY
 #define TASK_COMMS_UPLINK_DECODE_PRIORITY TASK_COMMS_PRIORITY
 #define TASK_COMMS_DOWNLINK_ENCODE_PRIORITY TASK_COMMS_PRIORITY
-#define TASK_EPS_MGR_PRIORITY 3U
+#define TASK_PWR_MGR_PRIORITY 3U
 #define TASK_STATS_COLLECTOR_PRIORITY 4U
 #define TASK_ALARM_MGR_PRIORITY 4U
 #define TASK_STATE_MGR_PRIORITY 5U
@@ -81,7 +81,7 @@ extern void obcTaskInitCommandMgr(void);
 extern void obcTaskInitCommsMgr(void);
 extern void obcTaskInitCommsDownlinkEncoder(void);
 extern void obcTaskInitCommsUplinkDecoder(void);
-extern void obcTaskInitEpsMgr(void);
+extern void obcTaskInitPwrMgr(void);
 extern void obcTaskInitPayloadMgr(void);
 extern void obcTaskInitTimekeeper(void);
 extern void obcTaskInitAlarmMgr(void);
@@ -96,7 +96,7 @@ extern void obcTaskFunctionCommandMgr(void *params);
 extern void obcTaskFunctionCommsMgr(void *params);
 extern void obcTaskFunctionCommsDownlinkEncoder(void *params);
 extern void obcTaskFunctionCommsUplinkDecoder(void *params);
-extern void obcTaskFunctionEpsMgr(void *params);
+extern void obcTaskFunctionPwrMgr(void *params);
 extern void obcTaskFunctionPayloadMgr(void *params);
 extern void obcTaskFunctionTimekeeper(void *params);
 extern void obcTaskFunctionSwWatchdog(void *params);
@@ -127,8 +127,8 @@ static StaticTask_t obcTaskBufferCommsDownlinkEncoder;
 static StackType_t obcTaskStackCommsUplinkDecoder[TASK_COMMS_UPLINK_DECODER_STACK_SIZE];
 static StaticTask_t obcTaskBufferCommsUplinkDecoder;
 
-static StackType_t obcTaskStackEpsMgr[TASK_EPS_MGR_STACK_SIZE];
-static StaticTask_t obcTaskBufferEpsMgr;
+static StackType_t obcTaskStackPwrMgr[TASK_PWR_MGR_STACK_SIZE];
+static StaticTask_t obcTaskBufferPwrMgr;
 
 static StackType_t obcTaskStackPayloadMgr[TASK_PAYLOAD_MGR_STACK_SIZE];
 static StaticTask_t obcTaskBufferPayloadMgr;
@@ -214,15 +214,15 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionCommsUplinkDecoder,
             .taskInit = obcTaskInitCommsUplinkDecoder,
         },
-    [OBC_SCHEDULER_CONFIG_ID_EPS_MGR] =
+    [OBC_SCHEDULER_CONFIG_ID_PWR_MGR] =
         {
-            .taskName = TASK_EPS_MGR_NAME,
-            .taskStack = obcTaskStackEpsMgr,
-            .taskBuffer = &obcTaskBufferEpsMgr,
-            .stackSize = TASK_EPS_MGR_STACK_SIZE,
-            .priority = TASK_EPS_MGR_PRIORITY,
-            .taskFunc = obcTaskFunctionEpsMgr,
-            .taskInit = obcTaskInitEpsMgr,
+            .taskName = TASK_PWR_MGR_NAME,
+            .taskStack = obcTaskStackPwrMgr,
+            .taskBuffer = &obcTaskBufferPwrMgr,
+            .stackSize = TASK_PWR_MGR_STACK_SIZE,
+            .priority = TASK_PWR_MGR_PRIORITY,
+            .taskFunc = obcTaskFunctionPwrMgr,
+            .taskInit = obcTaskInitPwrMgr,
         },
     [OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR] =
         {

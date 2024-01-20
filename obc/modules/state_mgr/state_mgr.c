@@ -95,7 +95,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PWR_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
@@ -111,7 +111,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PWR_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
