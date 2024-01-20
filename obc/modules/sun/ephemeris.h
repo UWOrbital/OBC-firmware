@@ -11,9 +11,10 @@ extern "C" {
 #endif
 
 /**
- * @brief Initializes the sun position module. This should only be called once
+ * @brief Initializes the sun position module. It is safe to call this function
+ * multiple times.
  */
-obc_error_code_t initSunPosition(void);
+obc_error_code_t sunPositionInit(void);
 
 /**
  * @brief Gets the sun position at the given julian date
@@ -21,10 +22,13 @@ obc_error_code_t initSunPosition(void);
  * @attention buffer must be a valid pointer
  * @param jd The julian date (or close to it) to get the sun position at
  * @param buffer The buffer to store the sun position in
- *
- * @details May modify the file used for storing the data points
  */
 obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer);
+
+/**
+ * @brief Returns the name of the file used for the sun position data
+ */
+const char *sunPositionGetFileName(void);
 
 #ifdef __cplusplus
 }

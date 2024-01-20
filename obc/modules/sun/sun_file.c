@@ -8,8 +8,6 @@
 #define SUN_FILE_HEADER_SIZE 20U
 #define SUN_FILE_DATA_POINT_SIZE 12U
 
-// TODO: Handle if the module is not initialized
-
 // Cache data
 static julian_date_t minJD = -1;
 static julian_date_t maxJD = -1;
@@ -42,7 +40,7 @@ static obc_error_code_t sunFileSeek(int64_t location) {
   int64_t offSet = red_lseek(fileID, location, RED_SEEK_SET);
   if (offSet < 0) {
     LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
-    return OBC_ERR_CODE_INVALID_STATE;  // TODO: Change this
+    return OBC_ERR_CODE_INVALID_STATE;
   }
   return OBC_ERR_CODE_SUCCESS;
 }
