@@ -37,7 +37,7 @@ typedef struct position_data_t {
 bool equalsPositionData(const position_data_t data1, const position_data_t data2);
 
 /**
- * @brief Returns true if the data points 1 and 2 have the same coordinates and julian date
+ * @brief Returns true if the data points 1 and 2 have the close coordinates and julian date
  */
 bool closePositionData(const position_data_t data1, const position_data_t data2);
 

@@ -38,7 +38,7 @@ obc_error_code_t sunFileGetMaxJD(julian_date_t *jd);
 obc_error_code_t sunFileJDInRange(julian_date_t jd, bool *buff);
 
 /**
- * @brief Reads the data point from the file at the index into the buff
+ * @brief Reads the data point from the file at the index into the buff. Doesnt not perform linear interpolation
  * @attention Requires that jd is a valid pointer and that the index less than the number of data points
  * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
  */

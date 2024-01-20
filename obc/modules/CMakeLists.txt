@@ -49,7 +49,7 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_utils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/sun/ephemeris.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_mgr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun/sun_file.c
 )
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})

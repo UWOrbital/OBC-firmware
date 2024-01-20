@@ -55,6 +55,8 @@ dkms.conf
 .vscode/
 .idea/
 *.swp
+compile_commands.json
+.cache/
 
 # HALCoGen-generated main file
 **/sys_main.c

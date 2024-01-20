@@ -2,6 +2,7 @@
 
 #include "obc_errors.h"
 #include "obc_logging.h"
+#include "sun_utils.h"
 
 #include <stdint.h>
 
@@ -12,7 +13,7 @@ extern "C" {
 /**
  * @brief Initializes the sun position module. This should only be called once
  */
-void initSunPosition(void);
+obc_error_code_t initSunPosition(void);
 
 /**
  * @brief Gets the sun position at the given julian date
