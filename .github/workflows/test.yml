@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - dangle/force-obc-tests-compile-32-bits
 
 jobs:
   build:
@@ -12,7 +11,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install gcc-multilib
+    - name: Install gcc-multilib and g++-multilib
       run: sudo apt-get update && sudo apt-get install -y gcc-multilib g++-multilib
     - name: Configure CMake
       run: |
