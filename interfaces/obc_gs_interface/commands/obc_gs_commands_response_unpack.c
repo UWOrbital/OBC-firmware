@@ -27,7 +27,7 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   if (unpackHandlers[response->cmdId] == NULL) return OBC_GS_ERR_CODE_SUCCESS;
 
   unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
-  // obc_gs_error_code_t errCode = ((handler)(response, buffer, &offset));
+  obc_gs_error_code_t errCode = ((handler)(response, buffer, &offset));
   return errCode;
 }
 
@@ -46,5 +46,5 @@ static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* respo
   if (response == NULL || buffer == NULL || offset == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
   response->obcResetResponse.data1 = unpackFloat(buffer, offset);
   response->obcResetResponse.data2 = unpackUint32(buffer, offset);
-  return OBC_GS_ERR_CODE_SUCCESS;
+  return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
 }
