@@ -14,12 +14,12 @@ TEST(packCommandResponse, unpackCommandResponse) {
       .cmdId = execObCResetCmd, .success = true, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
-  obc_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
-  ASSERT_EQ(errCode, OBC_ERR_CODE_SUCCESS);
+  obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
   cmd_unpacked_response_t deserializedResponse = {0};
   errCode = unpackCommandResponse(buffer, &deserializedResponse);
-  ASSERT_EQ(errCode, OBC_ERR_CODE_SUCCESS);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
   EXPECT_EQ(deserializedResponse.cmdId, unpackedResponse.cmdId);
   EXPECT_EQ(deserializedResponse.success, unpackedResponse.success);

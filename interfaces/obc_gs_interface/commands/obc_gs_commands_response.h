@@ -4,8 +4,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "obc_errors.h"
-
 #define CMD_ARGUMENT_SIZE 1U
 
 #define CMD_ID_SHIFT 4
