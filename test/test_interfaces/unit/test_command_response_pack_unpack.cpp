@@ -18,7 +18,7 @@ TEST(packCommandResponse, unpackCommandResponse) {
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
-  std::cout << " GOT HERE 2" << std::endl;
+
   cmd_unpacked_response_t deserializedResponse = {0};
   errCode = unpackCommandResponse(buffer, &deserializedResponse);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
