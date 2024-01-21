@@ -15,14 +15,19 @@ static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* respo
 
 static const unpack_cmd_handler_t unpackHandlers[] = {[execObCResetCmd] = &unpackObcResetResponse};
 
+// Shamelessly stolen from the other file
+#define MAX_CMD_RESPONSE_ID ((sizeof(unpackHandlers) / sizeof(unpack_cmd_handler_t)) - 1)
+
 obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response_t* response) {
   if (response == NULL || buffer == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
 
   uint32_t offset;
   cmd_callback_encoded_t encodedResp = (cmd_callback_encoded_t)unpackUint8(buffer, &offset);
   _decodeResponse(encodedResp, &response->cmdId, &offset);
-  unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
 
+  if (unpackHandlers[response->cmdId] == NULL) return OBC_GS_ERR_CODE_SUCCESS;
+
+  unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
   obc_gs_error_code_t errCode;
   RETURN_IF_ERROR_CODE((*handler)(response, buffer, offset));
   return OBC_GS_ERR_CODE_SUCCESS;
@@ -31,6 +36,8 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
 static obc_gs_error_code_t _decodeResponse(cmd_callback_encoded_t encodedResponse, cmd_callback_id_t* id,
                                            bool* success) {
   *id = (cmd_callback_id_t)((encodedResponse & CMD_ID_MASK) >> CMD_ID_SHIFT);
+
+  if (*id > MAX_CMD_RESPONSE_ID) return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
   *success = (bool)(encodedResponse & CMD_RESPONSE_SUCCESS_MASK);
 }
 
