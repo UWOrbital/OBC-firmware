@@ -21,7 +21,8 @@ typedef enum {
   downlinkLogsCmd,
   microSDCmd,
   pingCmd,
-  donwlinkTelemCmd
+  donwlinkTelemCmd,
+  NUM_CMD_CALLBACKS
 } cmd_callback_id_t;
 
 typedef struct {
