@@ -16,8 +16,7 @@ static const unpack_cmd_handler_t unpackHandlers[NUM_CMD_CALLBACKS] = {[execObCR
 obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response_t* response) {
   if (response == NULL || buffer == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
 
-  uint32_t offset;
-
+  uint32_t offset = 0;
   cmd_callback_encoded_t encodedResp = (cmd_callback_encoded_t)unpackUint8(buffer, &offset);
   obc_gs_error_code_t errCode = _decodeResponse(encodedResp, &response->cmdId, &response->success);
   if (errCode != OBC_GS_ERR_CODE_SUCCESS) return errCode;
@@ -43,5 +42,5 @@ static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* respo
   if (response == NULL || buffer == NULL || offset == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
   response->obcResetResponse.data1 = unpackFloat(buffer, offset);
   response->obcResetResponse.data2 = unpackUint32(buffer, offset);
-  return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
+  return OBC_GS_ERR_CODE_SUCCESS;
 }

@@ -29,19 +29,17 @@ TEST(pack_unpack_command_responses, packResponse) {
   EXPECT_EQ(data1, (float)0.02);
 }
 
-// CMD_EXEC_OBC_RESET
-/*
 TEST(pack_unpack_command_responses, unpackCommandResponse) {
-  std::cout << " GOT HERE " << std::endl;
   cmd_unpacked_response_t unpackedResponse = {
       .success = true, .cmdId = execObCResetCmd, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
-  std::cout << buffer[0] << std::endl;
+
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
   cmd_unpacked_response_t deserializedResponse = {0};
+
   errCode = unpackCommandResponse(buffer, &deserializedResponse);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
@@ -50,4 +48,3 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
   EXPECT_EQ(deserializedResponse.obcResetResponse.data1, unpackedResponse.obcResetResponse.data1);
   EXPECT_EQ(deserializedResponse.obcResetResponse.data2, unpackedResponse.obcResetResponse.data2);
 }
-*/
