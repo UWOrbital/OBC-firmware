@@ -48,3 +48,27 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
   EXPECT_EQ(deserializedResponse.obcResetResponse.data1, unpackedResponse.obcResetResponse.data1);
   EXPECT_EQ(deserializedResponse.obcResetResponse.data2, unpackedResponse.obcResetResponse.data2);
 }
+
+TEST(pack_unpack_command_responses, packInvalidCommand) {
+  cmd_unpacked_response_t unpackedResponse = {.success = false, .cmdId = donwlinkTelemCmd, .obcResetResponse = {0}};
+
+  uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
+  obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
+
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(buffer[0], 0x50);
+
+  cmd_unpacked_response_t deserializedResponse = {0};
+  errCode = unpackCommandResponse(buffer, &deserializedResponse);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  EXPECT_EQ(deserializedResponse.cmdId, unpackedResponse.cmdId);
+}
+
+TEST(pack_unpack_command_responses, unpackInvalidCommand) {
+  uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {[0] = 0xF1};
+
+  cmd_unpacked_response_t deserializedResponse = {0};
+  obc_gs_error_code_t errCode = unpackCommandResponse(buffer, &deserializedResponse);
+  EXPECT_EQ(errCode, OBC_GS_ERR_CODE_UNSUPPORTED_CMD);
+}

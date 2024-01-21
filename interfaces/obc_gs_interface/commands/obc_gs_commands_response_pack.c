@@ -19,6 +19,7 @@ obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_
 
   packUint8((uint8_t)encoded, buffer, &offset);
   pack_cmd_handler_t handler = packHandlers[response.cmdId];
+  if (handler == NULL) return OBC_GS_ERR_CODE_SUCCESS;
 
   obc_gs_error_code_t errCode = ((handler)(response, buffer, &offset));
   return errCode;
