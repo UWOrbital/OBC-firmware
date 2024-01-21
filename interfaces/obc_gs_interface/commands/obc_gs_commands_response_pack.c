@@ -11,7 +11,7 @@ static cmd_callback_encoded_t _encodeResponse(cmd_callback_id_t id, bool success
 
 static obc_gs_error_code_t packObcResetResponse(cmd_unpacked_response_t response, uint8_t* buffer, uint32_t* offset);
 
-static const pack_cmd_handler_t packHandlers[] = {[execObCResetCmd] = &packObcResetResponse};
+static const pack_cmd_handler_t packHandlers[] = {[execObCResetCmd] = packObcResetResponse};
 
 obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_t* buffer) {
   cmd_callback_encoded_t encoded = _encodeResponse(response.cmdId, response.success);
@@ -20,7 +20,7 @@ obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_
   packUint8((uint8_t)encoded, buffer, &offset);
   pack_cmd_handler_t handler = packHandlers[response.cmdId];
 
-  obc_gs_error_code_t errCode = ((*handler)(response, buffer, &offset));
+  obc_gs_error_code_t errCode = ((handler)(response, buffer, &offset));
   return errCode;
 }
 
