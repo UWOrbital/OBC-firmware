@@ -57,7 +57,7 @@ void obcTaskFunctionPwrMgr(void *pvParameters) {
 void overcurrentInterruptCallback(void) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-  pwr_event_t event = {.eventId = PWR_MANAGER_OVERCURRENT_DETECTED};
+  pwr_event_t event = {.eventID = PWR_MANAGER_OVERCURRENT_DETECTED};
   xQueueSendToFrontFromISR(pwrQueueHandle, (void *)&event, &xHigherPriorityTaskWoken);
 
   if (xHigherPriorityTaskWoken) {
