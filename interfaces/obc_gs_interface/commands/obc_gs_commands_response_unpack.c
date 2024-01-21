@@ -22,15 +22,15 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   uint32_t offset;
 
   cmd_callback_encoded_t encodedResp = (cmd_callback_encoded_t)unpackUint8(buffer, &offset);
-  response->cmdId = 0;
-  obc_gs_error_code_t errCode = 0;
-  //= _decodeResponse(encodedResp, &response->cmdId, &response->success);
+  obc_gs_error_code_t errCode = _decodeResponse(encodedResp, &response->cmdId, &response->success);
 
   if (errCode != OBC_GS_ERR_CODE_SUCCESS) return errCode;
   if (unpackHandlers[response->cmdId] == NULL) return OBC_GS_ERR_CODE_SUCCESS;
 
   unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
+  /*
   errCode = ((handler)(response, buffer, &offset));
+  */
   return errCode;
 }
 
