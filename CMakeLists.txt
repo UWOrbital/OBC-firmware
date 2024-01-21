@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-# Add compile flag for 32 bit
-set(32BIT_COMPILE_FLAG "-m32")
-
 
 # Set the toolchain file before the project is declared
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
@@ -38,7 +35,20 @@ if(${CMAKE_BUILD_TYPE} MATCHES Test)
     enable_language(C CXX)
     enable_testing()
     add_subdirectory(test)
-    add_compile_options (${32BIT_COMPILE_FLAGS})
+    add_compile_options(-m32)
+
+    add_link_options(-m32)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+# Set compiler flags for 32-bit
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+
+# Set linker flags for 32-bit
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
+
+# Set shared library flags for 32 bits
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -m32")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -m32")
 endif()
 
 # Build tiny-aes and lib-correct libs

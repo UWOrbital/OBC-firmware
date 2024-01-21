@@ -30,6 +30,9 @@ set(SOURCES
 )
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
+if(${CMAKE_BUILD_TYPE} MATCHES Test)
+target_compile_options(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE -m32)
+endif()
 target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
 
 target_link_libraries(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE

@@ -8,7 +8,10 @@ add_library(${LIBCORRECT_LIB} STATIC
     source/reed-solomon/polynomial.c
     source/reed-solomon/reed-solomon.c
 )
+if(${CMAKE_BUILD_TYPE} MATCHES Test)
 
+target_compile_options(${LIBCORRECT_LIB} PRIVATE -m32)
+endif()
 target_include_directories(${LIBCORRECT_LIB} PUBLIC
     include
 )

@@ -1,5 +1,6 @@
 set(TEST_BINARY obc-firmware-tests)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
 
 set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/sys/time/obc_time_utils.c
@@ -27,6 +28,10 @@ set(TEST_SOURCES
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
 
 add_executable(${TEST_BINARY} ${TEST_SOURCES})
+
+target_compile_options(${TEST_BINARY} PRIVATE -m32)
+
+target_link_options(${TEST_BINARY} PRIVATE -m32)
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
