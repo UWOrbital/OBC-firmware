@@ -21,7 +21,7 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
 
   uint32_t offset;
   cmd_callback_encoded_t encodedResp = (cmd_callback_encoded_t)unpackUint8(buffer, &offset);
-  _decodeResponse(encodedResp, &response->cmdId, &offset);
+  _decodeResponse(encodedResp, &response->cmdId, &response->success);
 
   if (unpackHandlers[response->cmdId] == NULL) return OBC_GS_ERR_CODE_SUCCESS;
 
@@ -36,6 +36,7 @@ static obc_gs_error_code_t _decodeResponse(cmd_callback_encoded_t encodedRespons
 
   if (*id > MAX_CMD_RESPONSE_ID) return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
   *success = (bool)(encodedResponse & CMD_RESPONSE_SUCCESS_MASK);
+  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer,
