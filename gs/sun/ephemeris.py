@@ -589,11 +589,4 @@ def main(argsv: str | None = None) -> List[DataPoint]:
 
 
 if __name__ == "__main__":
-    import cProfile
-    import pstats
-
-    with cProfile.Profile() as pr:
-        main()
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.TIME)
-    stats.dump_stats("profile.prof")
+    main()
