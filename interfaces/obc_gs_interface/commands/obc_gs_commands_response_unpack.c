@@ -24,9 +24,17 @@ obc_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response_t*
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE((*handler)(response, buffer, offset));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t _decodeResponse(cmd_callback_encoded_t encodedResponse, cmd_callback_id_t* id, bool* success) {
   *id = (cmd_callback_id_t)((encodedResponse & CMD_ID_MASK) >> CMD_ID_SHIFT);
   *success = (bool)(encodedResponse & CMD_RESPONSE_SUCCESS_MASK);
+}
+
+static obc_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer, uint32_t* offset) {
+  if (response == NULL || buffer == NULL || offset == NULL) return OBC_ERR_CODE_INVALID_ARG;
+  response->obcResetResponse.data1 = unpackFloat(buffer, offset);
+  response->obcResetResponse.data2 = unpackUint32(buffer, offset);
+  return OBC_ERR_CODE_SUCCESS;
 }

@@ -23,6 +23,7 @@ obc_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_t* 
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE((*handler)(response, buffer, offset));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static cmd_callback_encoded_t _encodeResponse(cmd_callback_id_t id, bool success) {
@@ -31,4 +32,11 @@ static cmd_callback_encoded_t _encodeResponse(cmd_callback_id_t id, bool success
   response |= ((uint8_t)id << CMD_ID_SHIFT);
   response |= successBit;
   return response;
+}
+
+static obc_error_code_t packObcResetResponse(cmd_unpacked_response_t response, uint8_t* buffer, uint32_t* offset) {
+  if (buffer == NULL || offset == NULL) return OBC_ERR_CODE_INVALID_ARG;
+  packFloat(response.obcResetResponse.data1, buffer, offset);
+  packUint32(response.obcResetResponse.data2, buffer, offset);
+  return OBC_ERR_CODE_SUCCESS;
 }
