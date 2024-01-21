@@ -552,6 +552,7 @@ def main(argsv: str | None = None) -> List[DataPoint]:
     write_header(args.output, start_time, step_size, data_count, args.exclude)
 
     data_points = []
+    lines_written = 0
     print_debug_header()
 
     with open(args.output, "ab") as file:
@@ -566,23 +567,24 @@ def main(argsv: str | None = None) -> List[DataPoint]:
                 # Parse the line of data
                 logging.debug(f"Line being parsed: {i}")
                 output = i[:-1].split(", ")
-                output.pop(1)
 
                 # Parse, store and write the data point
                 logging.info(f"Output written: {output}")
+                # 1st element of parsed string is the date in YYYY-MM-DD format
                 data_point = DataPoint(
                     float(output[0]),
-                    float(output[1]),
                     float(output[2]),
                     float(output[3]),
+                    float(output[4]),
                 )
                 data_points.append(data_point)
                 write_data(data_point, file)
+                lines_written = count
 
     # Write the header, print debug header
     print_debug_header(True)
 
-    print(f"Lines written: {data_count}")
+    print(f"Lines written: {lines_written + 1}")
     return data_points
 
 
