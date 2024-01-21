@@ -24,9 +24,9 @@ TEST(pack_unpack_command_responses, packResponse) {
   float data1 = unpackFloat(buffer, &offset);
   uint32_t data2 = unpackUint32(buffer, &offset);
 
-  EXPECT_EQ(encoded, 0xF1);
-  EXPECT_EQ(data1, 0.02);
+  EXPECT_EQ(encoded, 0x01);
   EXPECT_EQ(data2, 2);
+  EXPECT_EQ(data1, (float)0.02);
 }
 
 // CMD_EXEC_OBC_RESET
