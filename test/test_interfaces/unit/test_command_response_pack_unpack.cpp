@@ -66,7 +66,7 @@ TEST(pack_unpack_command_responses, packInvalidCommand) {
 }
 
 TEST(pack_unpack_command_responses, unpackInvalidCommand) {
-  const uint8_t maxNumber = ((uint8_t)NUM_CMD_CALLBACKS << CMD_ID_SHIFT) & 0x01;
+  const uint8_t maxNumber = ((uint8_t)NUM_CMD_CALLBACKS << CMD_ID_SHIFT) | 0x01;
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {[0] = maxNumber};
 
   cmd_unpacked_response_t deserializedResponse = {0};
