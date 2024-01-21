@@ -22,7 +22,7 @@ TEST(packCommandResponse, unpackCommandResponse) {
   cmd_unpacked_response_t deserializedResponse = {0};
   errCode = unpackCommandResponse(buffer, &deserializedResponse);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
-
+  std::cout << " GOT HERE 2" << std::endl;
   EXPECT_EQ(deserializedResponse.cmdId, unpackedResponse.cmdId);
   EXPECT_EQ(deserializedResponse.success, unpackedResponse.success);
   EXPECT_EQ(deserializedResponse.obcResetResponse.data1, unpackedResponse.obcResetResponse.data1);

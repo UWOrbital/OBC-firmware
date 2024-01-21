@@ -20,6 +20,8 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   if (response == NULL || buffer == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
 
   uint32_t offset;
+  return OBC_GS_ERR_CODE_SUCCESS;
+  /*
   cmd_callback_encoded_t encodedResp = (cmd_callback_encoded_t)unpackUint8(buffer, &offset);
   obc_gs_error_code_t errCode = _decodeResponse(encodedResp, &response->cmdId, &response->success);
 
@@ -29,6 +31,7 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
   errCode = ((handler)(response, buffer, &offset));
   return errCode;
+  */
 }
 
 static obc_gs_error_code_t _decodeResponse(cmd_callback_encoded_t encodedResponse, cmd_callback_id_t* id,
