@@ -23,9 +23,12 @@ import datetime
 SUPPORTED_VERSION: Final[str] = "1.2"
 NUMBER_OF_HEADER_DOUBLES: Final[int] = 2
 RELATIVE_TOLERANCE: Final[float] = 1e-7
+JD_OF_JANUARY_1_2000: Final[float] = 2451544.500000000
+JANUARY_1_2000: Final[datetime.date] = datetime.date(year=2000, month=1, day=1)
+API_LIMIT: Final[int] = 90_000
 
 # Print values
-_LOGGING_LEVELS = [logging.WARNING, logging.INFO, logging.DEBUG]
+LOGGING_LEVELS = [logging.WARNING, logging.INFO, logging.DEBUG]
 DEFAULT_PRINT_WARNING: Final[int] = 0  # Prints the required output
 
 # Data types
@@ -55,6 +58,7 @@ class ErrorCode(Enum):
     NO_SIGNATURE_FOUND = 4
     INVALID_REQUEST400 = 5
     INVALID_REQUEST = 6
+    UNKNOWN = 7
 
 
 @dataclass
@@ -173,7 +177,7 @@ def is_valid_date(date: str) -> bool:
     if not time_regex.match(date):
         return False
     try:
-        to_datetime(date)
+        to_date(date)
         return True
     except ValueError:
         return False
@@ -186,6 +190,19 @@ def is_valid_julian_date(time: str) -> bool:
     :return: True if the parameter is a valid time otherwise False
     """
     return time.startswith("JD") and is_float(time[2:]) and float(time[2:]) > 0
+
+
+def convert_date_to_jd(time: str) -> float:
+    """
+    Converts the inputted time to a jd if it is a datetime of the format YYYY-MM-DD.
+    If it is a jd#, then the number part is returned. This function doesnt not perform error
+    checking.
+    """
+    if time.startswith("JD"):
+        return float(time[2:])
+    difference = to_date(time) - JANUARY_1_2000
+
+    return JD_OF_JANUARY_1_2000 + difference.days
 
 
 def validate_input(
@@ -268,6 +285,11 @@ def validate_response(response: Response) -> ErrorCode:
         logging.critical(f"{response.status_code = }")
         return ErrorCode.INVALID_REQUEST
 
+    data = json.loads(response.text)
+    if data.get("error") is not None:
+        logging.critical(data.get("error"))
+        return ErrorCode.UNKNOWN
+
     return ErrorCode.SUCCESS
 
 
@@ -312,7 +334,13 @@ def write_data(data: DataPoint, file_name: str):
 
 
 def write_header(
-    file_output: str, min_jd: float, max_jd: float, count: int, *, write_to_file=True
+    file_output: str,
+    min_jd: float,
+    step_size: float,
+    count: int,
+    exclude: str = "none",
+    *,
+    write_to_file=True,
 ):
     """
     Writes the data header (min_jd, step_size, count) the output file
@@ -330,7 +358,10 @@ def write_header(
     if not os.path.exists(file_output):
         open(file_output, "wb").close()
 
-    data = [min_jd, calculate_step_size(min_jd, max_jd, count)]
+    data = [min_jd, step_size]
+
+    if exclude != "none":
+        count -= 1
 
     # Write the data to the file
     with open(file_output, "rb+") as file:
@@ -349,71 +380,26 @@ def write_header(
         file.write(bytearray(byte_count))
 
 
-def to_datetime(date: str) -> datetime.datetime:
+def to_date(date: str) -> datetime.date:
     year, month, day = date.split("-")
-    return datetime.datetime(year=int(year), month=int(month), day=int(day))
+    return datetime.date(year=int(year), month=int(month), day=int(day))
 
 
 def calculate_number_of_data_points(
-    start_time: str, stop_time: str, step_size: str
+    start_time: float, stop_time: float, step_size: str
 ) -> int:
     """
     Calculates the number of data points. This function assumes all inputs are valid and performs
     no error checking.
     """
-    difference = 0
-    if start_time.startswith("JD"):
-        difference = float(stop_time[2:]) - float(start_time[2:])
-    else:
-        delta = to_datetime(stop_time) - to_datetime(start_time)
-        difference = delta.days
-    difference += 1
+    difference = stop_time - start_time
     if step_size.isnumeric():
-        return int(round(difference / float(step_size)))
+        return int(step_size) + 1
     elif step_size.endswith("d"):
-        return int(difference)
+        return int(difference / int(step_size[:-1])) + 1
     elif step_size.endswith("h"):
-        return int(difference * 24)
-    return int(difference * 24 * 60)
-
-
-def find_number_of_data_points(lines: List[str]) -> int:
-    """
-    Finds the number of data points in the data
-
-    :param lines: The lines of the data
-    :return: The number of data points
-    """
-    total_count = 0
-    start = False
-    for i in lines:
-        # Start of data
-        if i.startswith("$$SOE"):
-            start = True
-        # End of data
-        if i.startswith("$$EOE"):
-            start = False
-        # Data point
-        if start and not i.startswith("$$SOE"):
-            total_count += 1
-
-    return total_count
-
-
-def allocate_header(write_to_file: bool, file_output: str):
-    """
-    Overwrites the output file and allocates the space for the header
-
-    :param write_to_file: If True then the header is written to the file
-    :param file_output: The output file
-    """
-    if not write_to_file:
-        return None
-
-    # Writes SIZE_OF_HEADER bytes to the file
-    with open(file_output, "wb") as file:
-        b = bytes(SIZE_OF_HEADER)
-        file.write(b)
+        return int(difference * 24 / int(step_size[:-1])) + 1
+    return int(difference * 24 * 60 / int(step_size[:-1])) + 1
 
 
 def calculate_step_size(
@@ -454,37 +440,39 @@ def exit_program_on_error(error_code: ErrorCode):
         sys.exit(error_code.value)
 
 
-def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
+def extract_data_lines(lines: List[str]) -> List[str]:
     """
-    Main function of the program
-    :param argsv: The arguments to be parsed, similar to sys.argv
-    :param write_to_file: NOT USED
+    Finds the number of data points in the data
+
+    :param lines: The lines of the data
+    :return: The number of data points
     """
+    output = []
+    start = False
+    for i in lines:
+        # Start of data
+        if i.startswith("$$SOE"):
+            start = True
+        # End of data
+        if i.startswith("$$EOE"):
+            start = False
+        # Data point
+        if start and not i.startswith("$$SOE"):
+            output.append(i)
 
-    # Parse the arguments and validate them
-    if isinstance(argsv, str):
-        args = define_parser().parse_args(argsv.split())
-    else:
-        args = define_parser().parse_args()
-    exit_program_on_error(
-        validate_input(args.start_time, args.stop_time, args.step_size, args.output)
-    )
+    return output
 
-    # Set up logging
-    logging.basicConfig(
-        filename=args.log,
-        level=_LOGGING_LEVELS[args.print],
-        encoding="utf-8",
-        format="%(asctime)s %(levelname)s (Line: %(lineno)d):  %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-    )
 
+def get_lines_from_api(
+    start_time: float, stop_time: float, step_size: int, target: str
+) -> List[str]:
     # Get the data from the API and validate it
     url = (
         f"https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM=YES&EPHEM_TYPE=VECTORS&COMMAND="
-        f"{args.target}&OBJ_DATA=NO&STEP_SIZE={args.step_size}&START_TIME={args.start_time}&STOP_TIME="
-        f"{args.stop_time}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1"
+        f"{target}&OBJ_DATA=NO&STEP_SIZE={step_size}&START_TIME=JD{str(start_time)}&STOP_TIME="
+        f"JD{str(stop_time)}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1"
     )
+    logging.critical(url)
 
     response = requests.get(url)
     exit_program_on_error(validate_response(response))
@@ -499,67 +487,114 @@ def main(argsv: str | None = None, *, write_to_file=True) -> List[DataPoint]:
 
     # Start processing the data taken from API
     lines = data.get("result").split("\n")
+    return extract_data_lines(lines)
 
-    # Find total number of lines to be written
-    total_count = find_number_of_data_points(lines)
 
-    # Overwrite the output file and allocates the space for the header
-    allocate_header(write_to_file, args.output)
+def main(argsv: str | None = None) -> List[DataPoint]:
+    """
+    Main function of the program
+    :param argsv: The arguments to be parsed, similar to sys.argv
+    """
 
-    start = False
-    count = 0
-    lines_written = 0
-    min_jd = 0
-    max_jd = 0
+    # Parse the arguments and validate them
+    if isinstance(argsv, str):
+        args = define_parser().parse_args(argsv.split())
+    else:
+        args = define_parser().parse_args()
+    exit_program_on_error(
+        validate_input(args.start_time, args.stop_time, args.step_size, args.output)
+    )
+
+    # Set up logging
+    logging.basicConfig(
+        filename=args.log,
+        level=LOGGING_LEVELS[args.print],
+        encoding="utf-8",
+        format="%(asctime)s %(levelname)s (Line: %(lineno)d):  %(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+    )
+
+    start_time = convert_date_to_jd(args.start_time)
+    stop_time = convert_date_to_jd(args.stop_time)
+    data_count = calculate_number_of_data_points(start_time, stop_time, args.step_size)
+    try:
+        step_size = calculate_step_size(start_time, stop_time, data_count)
+    except ValueError as e:
+        logging.critical(e)
+        sys.exit(-2)
+
+    # Make requests to api
+    lines = []
+    request_count = data_count // API_LIMIT
+    request_step = step_size * API_LIMIT
+    logging.critical(step_size)
+    logging.critical(request_count)
+    for i in range(request_count):
+        lines.extend(
+            get_lines_from_api(
+                start_time + i * request_step,
+                start_time + (i + 1) * request_step,
+                API_LIMIT,
+                args.target,
+            )
+        )
+        lines.pop()
+    lines.extend(
+        get_lines_from_api(
+            start_time + request_count * request_step,
+            stop_time,
+            data_count - API_LIMIT * request_count - 1,
+            args.target,
+        )
+    )
+
+    # Delete file if it exists
+    if os.path.exists(args.output):
+        os.remove(args.output)
+
+    # Write header
+    write_header(args.output, start_time, step_size, data_count, args.exclude)
+
     data_points = []
     print_debug_header()
 
     # Loop over response
-    for i in lines:
-        if i.startswith("$$SOE"):
-            start = True
-        if i.startswith("$$EOE"):
-            start = False
-        # If the line is not the start or end of the data then it is a line of data
-        if start and not i.startswith("$$SOE"):
-            # Depends on the exclude flag
-            if not (
-                (count == 0 and (args.exclude == "both" or args.exclude == "first"))
-                or (count == total_count - 1)
-                and (args.exclude == "both" or args.exclude == "last")
-            ):
-                # Parse the line of data
-                logging.debug(f"Line being parsed: {i}")
-                output = i[:-1].split(", ")
-                output.pop(1)
+    for count, i in enumerate(lines):
+        # Depends on the exclude flag
+        if not (
+            (count == 0 and (args.exclude == "both" or args.exclude == "first"))
+            or (count == data_count - 1)
+            and (args.exclude == "both" or args.exclude == "last")
+        ):
+            # Parse the line of data
+            logging.debug(f"Line being parsed: {i}")
+            output = i[:-1].split(", ")
+            output.pop(1)
 
-                # Store the maximum JD
-                jd = float(output[0])
-                if min_jd == 0:
-                    min_jd = jd
-                max_jd = jd
-
-                # Parse, store and write the data point
-                logging.info(f"Output written: %s", output)
-                data_point = DataPoint(
-                    float(output[0]),
-                    float(output[1]),
-                    float(output[2]),
-                    float(output[3]),
-                )
-                data_points.append(data_point)
-                write_data(data_point, args.output)
-
-                lines_written += 1
-            count += 1
+            # Parse, store and write the data point
+            logging.info(f"Output written: {output}")
+            data_point = DataPoint(
+                float(output[0]),
+                float(output[1]),
+                float(output[2]),
+                float(output[3]),
+            )
+            data_points.append(data_point)
+            write_data(data_point, args.output)
 
     # Write the header, print debug header
-    write_header(args.output, min_jd, max_jd, lines_written)
     print_debug_header(True)
 
-    print(f"Lines written: {lines_written}")
+    print(f"Lines written: {data_count}")
     return data_points
 
 
 if __name__ == "__main__":
-    main()
+    import cProfile
+    import pstats
+
+    with cProfile.Profile() as pr:
+        main()
+    stats = pstats.Stats(pr)
+    stats.sort_stats(pstats.SortKey.TIME)
+#    stats.dump_stats("profile.prof")
