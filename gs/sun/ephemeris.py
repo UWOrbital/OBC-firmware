@@ -11,7 +11,7 @@ import struct
 import sys
 import logging
 import re
-from typing import Final
+from typing import BinaryIO, Final
 from typing import List
 from dataclasses import dataclass
 from math import isclose
@@ -309,7 +309,7 @@ def print_debug_header(reverse=False):
     logging.info("-" * 130)
 
 
-def write_data(data: DataPoint, file_name: str):
+def write_data(data: DataPoint, file: BinaryIO):
     """
     Write the parameter data to the given file
 
@@ -317,20 +317,19 @@ def write_data(data: DataPoint, file_name: str):
     :param data: Data to be written
     """
     # Appends the data to the file and prints the expected data written if applicable
-    with open(file_name, "ab") as file:
-        logging.debug(f"\tData written: {data}")
+    logging.debug(f"\tData written: {data}")
 
-        # Write the x value
-        bx = struct.pack(DATA_FLOAT, data.x)
-        file.write(bytearray(bx))
+    # Write the x value
+    bx = struct.pack(DATA_FLOAT, data.x)
+    file.write(bytearray(bx))
 
-        # Write the y value
-        by = struct.pack(DATA_FLOAT, data.y)
-        file.write(bytearray(by))
+    # Write the y value
+    by = struct.pack(DATA_FLOAT, data.y)
+    file.write(bytearray(by))
 
-        # Write the z value
-        bz = struct.pack(DATA_FLOAT, data.z)
-        file.write(bytearray(bz))
+    # Write the z value
+    bz = struct.pack(DATA_FLOAT, data.z)
+    file.write(bytearray(bz))
 
 
 def write_header(
@@ -472,7 +471,6 @@ def get_lines_from_api(
         f"{target}&OBJ_DATA=NO&STEP_SIZE={step_size}&START_TIME=JD{str(start_time)}&STOP_TIME="
         f"JD{str(stop_time)}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1"
     )
-    logging.critical(url)
 
     response = requests.get(url)
     exit_program_on_error(validate_response(response))
@@ -527,8 +525,6 @@ def main(argsv: str | None = None) -> List[DataPoint]:
     lines = []
     request_count = data_count // API_LIMIT
     request_step = step_size * API_LIMIT
-    logging.critical(step_size)
-    logging.critical(request_count)
     for i in range(request_count):
         lines.extend(
             get_lines_from_api(
@@ -558,29 +554,30 @@ def main(argsv: str | None = None) -> List[DataPoint]:
     data_points = []
     print_debug_header()
 
-    # Loop over response
-    for count, i in enumerate(lines):
-        # Depends on the exclude flag
-        if not (
-            (count == 0 and (args.exclude == "both" or args.exclude == "first"))
-            or (count == data_count - 1)
-            and (args.exclude == "both" or args.exclude == "last")
-        ):
-            # Parse the line of data
-            logging.debug(f"Line being parsed: {i}")
-            output = i[:-1].split(", ")
-            output.pop(1)
+    with open(args.output, "ab") as file:
+        # Loop over response
+        for count, i in enumerate(lines):
+            # Depends on the exclude flag
+            if not (
+                (count == 0 and (args.exclude == "both" or args.exclude == "first"))
+                or (count == data_count - 1)
+                and (args.exclude == "both" or args.exclude == "last")
+            ):
+                # Parse the line of data
+                logging.debug(f"Line being parsed: {i}")
+                output = i[:-1].split(", ")
+                output.pop(1)
 
-            # Parse, store and write the data point
-            logging.info(f"Output written: {output}")
-            data_point = DataPoint(
-                float(output[0]),
-                float(output[1]),
-                float(output[2]),
-                float(output[3]),
-            )
-            data_points.append(data_point)
-            write_data(data_point, args.output)
+                # Parse, store and write the data point
+                logging.info(f"Output written: {output}")
+                data_point = DataPoint(
+                    float(output[0]),
+                    float(output[1]),
+                    float(output[2]),
+                    float(output[3]),
+                )
+                data_points.append(data_point)
+                write_data(data_point, file)
 
     # Write the header, print debug header
     print_debug_header(True)
@@ -597,4 +594,4 @@ if __name__ == "__main__":
         main()
     stats = pstats.Stats(pr)
     stats.sort_stats(pstats.SortKey.TIME)
-#    stats.dump_stats("profile.prof")
+    stats.dump_stats("profile.prof")

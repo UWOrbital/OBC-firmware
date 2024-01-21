@@ -68,9 +68,10 @@ def test_parse_file():
         ephemeris.DataPoint(2, 7, 8, 9),
     ]
 
-    for data_point in data_points_actual:
-        # Tested in test_write_data()
-        ephemeris.write_data(data_point, file)
+    with open(file, "ab") as f:
+        for data_point in data_points_actual:
+            # Tested in test_write_data()
+            ephemeris.write_data(data_point, f)
 
     # Read the data points from the file and delete the file
     data_points_expected = ep.parse_file(file)
