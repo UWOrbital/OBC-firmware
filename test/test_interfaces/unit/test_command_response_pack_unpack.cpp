@@ -11,7 +11,7 @@
 // CMD_EXEC_OBC_RESET
 TEST(packCommandResponse, unpackCommandResponse) {
   cmd_unpacked_response_t unpackedResponse = {
-      .cmdId = execObCResetCmd, .success = true, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
+      .success = true, .cmdId = execObCResetCmd, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
