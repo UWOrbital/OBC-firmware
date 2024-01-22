@@ -12,6 +12,12 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Unpack a buffer of chars to a struct of type cmd_unpacked_response_t representing the response of a command.
+ * @param buffer A buffer of bytes from which to read the packed data
+ * @return Error code indicating if the write was successful. OBC_GS_ERR_CODE_UNSUPPORTED_CMD if the unpacked cmd was
+ * not valid.
+ */
 obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response_t* response);
 
 #ifdef __cplusplus

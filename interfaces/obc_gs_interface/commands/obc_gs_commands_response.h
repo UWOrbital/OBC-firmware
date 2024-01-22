@@ -6,7 +6,7 @@
 
 #define CMD_ARGUMENT_SIZE 1U
 
-#define CMD_ID_SHIFT 4
+#define CMD_ID_SHIFT 4U
 #define CMD_ID_MASK 0xF0
 
 #define CMD_RESPONSE_SUCCESS_MASK 0x01
