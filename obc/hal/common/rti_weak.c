@@ -1,5 +1,5 @@
 #include <FreeRTOSConfig.h>
-#if (configGENERATE_RUN_TIME_STATS == 1)
+#if (ENABLE_TASK_STATS_COLLECTOR == 1)
 
 #include <rti.h>
 #include <reg_rti.h>
