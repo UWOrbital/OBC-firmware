@@ -8,6 +8,7 @@
 // Serial config
 #define UART_PRINT_REG scilinREG
 #define UART_READ_REG scilinREG
+#define UART_VN100_REG sciREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG3
@@ -28,15 +29,15 @@
 #define CAM_CS_1 2UL
 #define CAM_CS_2 3UL
 
-// Supervisor DEBUG LED
-#define SUPERVISOR_DEBUG_LED_GIO_PORT gioPORTB
-#define SUPERVISOR_DEBUG_LED_GIO_BIT 1
+// State Manager DEBUG LED
+#define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTB
+#define STATE_MGR_DEBUG_LED_GIO_BIT 1
 
 // Comms pin numbers for ISR
-#define CC1120_RX_THR_PKT_gioPORTB_PIN 3U      // cc1120 GIO0
-#define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U  // cc1120 GIO2
-#define CC1120_TX_THR_PKT_hetPORT1_PIN 30U     // cc1120 GIO3
-#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
+#define CC1120_RX_THR_PKT_gioPORTB_PIN 3U     // cc1120 GIO0
+#define CC1120_PKT_SYNC_RXTX_gioPORTA_PIN 6U  // cc1120 GIO2
+#define CC1120_TX_THR_PKT_gioPORTA_PIN 7U     // cc1120 GIO3
+#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_gioPORTA_PIN
 
 #define DS3232_INT_PORT gioPORTA
 #define DS3232_INT_PIN 0U
@@ -55,6 +56,7 @@
 // Serial config
 #define UART_PRINT_REG sciREG
 #define UART_READ_REG sciREG
+#define UART_VN100_REG scilinREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG1
@@ -75,18 +77,18 @@
 #define CAM_CS_1 1UL
 #define CAM_CS_2 2UL
 
-// Supervisor DEBUG LED
-#define SUPERVISOR_DEBUG_LED_GIO_PORT gioPORTA
-#define SUPERVISOR_DEBUG_LED_GIO_BIT 5
+// State Manager DEBUG LED
+#define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTA
+#define STATE_MGR_DEBUG_LED_GIO_BIT 5
 
 #define DS3232_INT_PORT gioPORTA
 #define DS3232_INT_PIN 0U
 
 // Comms pin numbers for ISR
-#define CC1120_RX_THR_PKT_gioPORTB_PIN 3U      // cc1120 GIO0
-#define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U  // cc1120 GIO2
-#define CC1120_TX_THR_PKT_hetPORT1_PIN 30U     // cc1120 GIO3
-#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
+#define CC1120_RX_THR_PKT_gioPORTB_PIN 3U     // cc1120 GIO0
+#define CC1120_PKT_SYNC_RXTX_gioPORTA_PIN 6U  // cc1120 GIO2
+#define CC1120_TX_THR_PKT_gioPORTA_PIN 7U     // cc1120 GIO3
+#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_gioPORTA_PIN
 
 // RFFM6404 pin numbers
 #define RFFM6404_TR_PIN_NUM 6U
@@ -102,6 +104,7 @@
 // Serial config
 #define UART_PRINT_REG sciREG
 #define UART_READ_REG sciREG
+#define UART_VN100_REG scilinREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG5
@@ -127,10 +130,10 @@
 #define DS3232_INT_PIN 0U
 
 // CC1120 GPIO and HET config
-#define CC1120_RX_THR_PKT_gioPORTB_PIN 3U      // cc1120 GIO0
-#define CC1120_PKT_SYNC_RXTX_hetPORT1_PIN 28U  // cc1120 GIO2
-#define CC1120_TX_THR_PKT_hetPORT1_PIN 30U     // cc1120 GIO3
-#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_hetPORT1_PIN
+#define CC1120_RX_THR_PKT_gioPORTB_PIN 3U     // cc1120 GIO0
+#define CC1120_PKT_SYNC_RXTX_gioPORTA_PIN 6U  // cc1120 GIO2
+#define CC1120_TX_THR_PKT_gioPORTA_PIN 7U     // cc1120 GIO3
+#define CC1120_SYNC_EVENT_PIN CC1120_PKT_SYNC_RXTX_gioPORTA_PIN
 
 // RFFM6404 pin numbers
 #define RFFM6404_TR_PIN_NUM 6U
@@ -142,6 +145,10 @@
 #define RFFM6404_EN_PIN_PORT gioPORTA
 #define RFFM6404_BYP_PIN_PORT gioPORTB
 
+// TPL5010 pin numbers
+#define TPL5010_WAKE_PIN 0
+#define TPL5010_DONE_PIN 1
+#define TPL5010_GIO_PORT gioPORTB
 #else
 #error Board configuration not defined
 #endif

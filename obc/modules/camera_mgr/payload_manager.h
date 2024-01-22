@@ -10,7 +10,7 @@
  *
  * Enum containing all possible event IDs passed to the payload event queue.
  */
-typedef enum { PAYLOAD_MANAGER_NULL_EVENT_ID } payload_event_id_t;
+typedef enum { PAYLOAD_MANAGER_NULL_EVENT_ID, SECONDARY_PAYLOAD_MANAGER_EVENT_ID } payload_event_id_t;
 
 /**
  * @union	payload_event_data_t
@@ -37,11 +37,6 @@ typedef struct {
 #define PAYLOAD_MANAGER_QUEUE_ITEM_SIZE sizeof(payload_event_t)
 #define PAYLOAD_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define PAYLOAD_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
-
-/**
- * @brief	Initialize the Payload Manager task and associated FreeRTOS constructs (queues, timers, etc.)
- */
-void initPayloadManager(void);
 
 /**
  * @brief	Send an event to the Payload Manager queue.

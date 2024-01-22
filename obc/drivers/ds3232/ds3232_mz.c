@@ -327,8 +327,6 @@ obc_error_code_t getTemperatureRTC(float *temperature) {
 
   *temperature = (float)val * DS3232_TEMP_RESOLUTION;
 
-  LOG_DEBUG("DS3232 Temperature: %f", *temperature);
-
   return OBC_ERR_CODE_SUCCESS;
 }
 

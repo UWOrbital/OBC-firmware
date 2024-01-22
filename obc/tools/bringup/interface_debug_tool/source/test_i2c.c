@@ -1,5 +1,5 @@
 #include "test_i2c.h"
-#include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_i2c_io.h"
 
 #define I2C_MUTEX_TIMEOUT portMAX_DELAY

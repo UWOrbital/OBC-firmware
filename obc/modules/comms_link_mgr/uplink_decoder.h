@@ -15,13 +15,6 @@
 obc_error_code_t handleCommands(uint8_t *cmdBytes);
 
 /**
- * @brief initializes the decode data pipeline task
- *
- * @return void
- */
-void initDecodeTask(void);
-
-/**
  * @brief send a received packet to the decode data pipeline to be sent to command manager
  *
  * @param data pointer to a single byte

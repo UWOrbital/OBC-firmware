@@ -22,11 +22,6 @@ typedef struct {
 } encode_event_t;
 
 /**
- * @brief Initializes the telemetry encoding task and queue
- */
-void initTelemEncodeTask(void);
-
-/**
  * @brief Sends downlink data to encoding task queue
  *
  * @param queueMsg - Includes command ID, and either a telemetry batch ID or a telemetry_data_t array
