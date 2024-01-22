@@ -4,8 +4,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define CMD_ID_SHIFT 4U
-#define CMD_ID_MASK 0xF0
 #define CMD_RESPONSE_SUCCESS_MASK 0x01
 #define CMD_RESPONSE_MAX_PACKED_SIZE sizeof(cmd_unpacked_response_t)
 

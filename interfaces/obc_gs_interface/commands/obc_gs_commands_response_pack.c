@@ -7,16 +7,17 @@
 #include "obc_gs_commands_response_pack.h"
 
 typedef obc_gs_error_code_t (*pack_cmd_handler_t)(cmd_unpacked_response_t, uint8_t*, uint32_t*);
-static cmd_callback_encoded_t _encodeResponse(cmd_callback_id_t id, bool success);
+static cmd_callback_encoded_t _encodeResponse(bool success);
 
 static obc_gs_error_code_t packObcResetResponse(cmd_unpacked_response_t response, uint8_t* buffer, uint32_t* offset);
 
 static const pack_cmd_handler_t packHandlers[NUM_CMD_CALLBACKS] = {[execObCResetCmd] = packObcResetResponse};
 
 obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_t* buffer) {
-  cmd_callback_encoded_t encoded = _encodeResponse(response.cmdId, response.success);
+  cmd_callback_encoded_t encoded = _encodeResponse(response.success);
   uint32_t offset = 0;
 
+  packUint8((uint8_t)response.cmdId, buffer, &offset);
   packUint8((uint8_t)encoded, buffer, &offset);
   pack_cmd_handler_t handler = packHandlers[response.cmdId];
   if (handler == NULL) return OBC_GS_ERR_CODE_SUCCESS;
@@ -25,10 +26,9 @@ obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_
   return errCode;
 }
 
-static cmd_callback_encoded_t _encodeResponse(cmd_callback_id_t id, bool success) {
+static cmd_callback_encoded_t _encodeResponse(bool success) {
   uint8_t successBit = (success) ? 0x01 : 0x00;
   cmd_callback_encoded_t response = 0;
-  response |= ((uint8_t)id << CMD_ID_SHIFT);
   response |= successBit;
   return response;
 }

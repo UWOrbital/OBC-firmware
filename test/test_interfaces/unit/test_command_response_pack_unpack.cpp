@@ -20,10 +20,12 @@ TEST(pack_unpack_command_responses, packResponse) {
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
   uint32_t offset = 0;
+  uint8_t cmdId = unpackUint8(buffer, &offset);
   uint8_t encoded = unpackUint8(buffer, &offset);
   float data1 = unpackFloat(buffer, &offset);
   uint32_t data2 = unpackUint32(buffer, &offset);
 
+  EXPECT_EQ(cmdId, (uint8_t)execObCResetCmd);
   EXPECT_EQ(encoded, 0x01);
   EXPECT_EQ(data2, 2);
   EXPECT_EQ(data1, (float)0.02);
@@ -56,7 +58,8 @@ TEST(pack_unpack_command_responses, packInvalidCommand) {
   obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
 
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
-  EXPECT_EQ(buffer[0], 0x50);
+  EXPECT_EQ(buffer[0], (uint8_t)unpackedResponse.cmdId);
+  EXPECT_EQ(buffer[1], 0x00);
 
   cmd_unpacked_response_t deserializedResponse = {0};
   errCode = unpackCommandResponse(buffer, &deserializedResponse);
@@ -66,7 +69,7 @@ TEST(pack_unpack_command_responses, packInvalidCommand) {
 }
 
 TEST(pack_unpack_command_responses, unpackInvalidCommand) {
-  const uint8_t maxNumber = ((uint8_t)NUM_CMD_CALLBACKS << CMD_ID_SHIFT) | 0x01;
+  const uint8_t maxNumber = (uint8_t)NUM_CMD_CALLBACKS;
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {[0] = maxNumber};
 
   cmd_unpacked_response_t deserializedResponse = {0};
