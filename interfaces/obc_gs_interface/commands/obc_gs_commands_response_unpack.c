@@ -23,8 +23,9 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   obc_gs_error_code_t errCode = _decodeResponse(encodedResp, &response->success);
   if (errCode != OBC_GS_ERR_CODE_SUCCESS) return errCode;
 
-  if (unpackHandlers[response->cmdId] == NULL) return OBC_GS_ERR_CODE_SUCCESS;
   unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
+  if (handler == NULL) return OBC_GS_ERR_CODE_SUCCESS;
+
   errCode = ((handler)(response, buffer, &offset));
   return errCode;
 }

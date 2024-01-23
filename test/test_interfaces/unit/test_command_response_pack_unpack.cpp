@@ -16,7 +16,7 @@ TEST(pack_unpack_command_responses, packResponse) {
       .success = true, .cmdId = execObCResetCmd, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
-  obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
+  obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
   uint32_t offset = 0;
@@ -36,7 +36,7 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
       .success = true, .cmdId = execObCResetCmd, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
-  obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
+  obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
 
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
@@ -55,7 +55,7 @@ TEST(pack_unpack_command_responses, packInvalidCommand) {
   cmd_unpacked_response_t unpackedResponse = {.success = false, .cmdId = donwlinkTelemCmd, .obcResetResponse = {0}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
-  obc_gs_error_code_t errCode = packCommandResponse(unpackedResponse, buffer);
+  obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
 
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(buffer[0], (uint8_t)unpackedResponse.cmdId);

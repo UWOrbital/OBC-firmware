@@ -19,7 +19,7 @@ extern "C" {
  * @return Error code indicating if the packing operation was successful. Error code OBC_GS_ERR_CODE_INVALID_ARG if the
  * buffer is NULL.
  */
-obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t response, uint8_t *buffer);
+obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t* response, uint8_t* buffer);
 
 #ifdef __cplusplus
 }
