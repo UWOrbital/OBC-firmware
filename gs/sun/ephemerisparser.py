@@ -2,17 +2,17 @@
 # Test harness for test_ephemeris.py
 from __future__ import annotations
 
-# Standard library imports
-from typing import List, BinaryIO
-import struct
-from dataclasses import dataclass
-
 # Local application imports
 from . import ephemeris
 from .ephemeris import DataPoint
 
+# Standard library imports
+from typing import List, BinaryIO
+import struct
+import dataclasses
 
-@dataclass
+
+@dataclasses.dataclass
 class Header:
     """
     Data class to store the header information

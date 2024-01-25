@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # 3rd party imports
-from requests import Response
 import requests
 
 # Standard library imports
@@ -11,11 +10,10 @@ import struct
 import sys
 import logging
 import re
-from typing import BinaryIO, Final
-from typing import List
-from dataclasses import dataclass
-from math import isclose
-from enum import Enum
+from typing import BinaryIO, Final, Iterable, List
+import dataclasses
+import math
+import enum
 import os
 import datetime
 
@@ -50,7 +48,7 @@ SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF
 
 
 # Error codes enumerator
-class ErrorCode(Enum):
+class ErrorCode(enum.Enum):
     SUCCESS = 0
     INVALID_DATE_TIME = 1
     INVALID_STEP_SIZE = 2
@@ -61,7 +59,7 @@ class ErrorCode(Enum):
     UNKNOWN = 7
 
 
-@dataclass
+@dataclasses.dataclass
 class DataPoint:
     """
     Data class to store a position data point
@@ -79,10 +77,10 @@ class DataPoint:
         :return: True if the two data points are equal otherwise False
         """
         return (
-            isclose(self.jd, other.jd, rel_tol=RELATIVE_TOLERANCE)
-            and isclose(self.x, other.x, rel_tol=RELATIVE_TOLERANCE)
-            and isclose(self.y, other.y, rel_tol=RELATIVE_TOLERANCE)
-            and isclose(self.z, other.z, rel_tol=RELATIVE_TOLERANCE)
+            math.isclose(self.jd, other.jd, rel_tol=RELATIVE_TOLERANCE)
+            and math.isclose(self.x, other.x, rel_tol=RELATIVE_TOLERANCE)
+            and math.isclose(self.y, other.y, rel_tol=RELATIVE_TOLERANCE)
+            and math.isclose(self.z, other.z, rel_tol=RELATIVE_TOLERANCE)
         )
 
 
@@ -153,7 +151,7 @@ def define_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def is_float(num: str):
+def is_float(num: str) -> bool:
     """
     Checks if the parameter is a float
     :param num: The parameter to check
@@ -265,7 +263,7 @@ def check_version(data: dict) -> ErrorCode:
 
 # Not testable as we can't simulate a Response object
 # Code taken from horizon API with slight modifications
-def validate_response(response: Response) -> ErrorCode:
+def validate_response(response: requests.Response) -> ErrorCode:
     """
     Validates the responses. It handles the 400 status error code specifically. It also makes sure that the status code
     is always 200 (success) for the rest of the script
@@ -294,7 +292,7 @@ def validate_response(response: Response) -> ErrorCode:
 
 
 # Not testable as it is a print statement used for debugging
-def print_debug_header(reverse=False):
+def print_debug_header(reverse=False) -> None:
     """
     Prints the header of the data printed, used for debugging purposes
 
@@ -309,7 +307,7 @@ def print_debug_header(reverse=False):
     logging.info("-" * 130)
 
 
-def write_data(data: DataPoint, file: BinaryIO):
+def write_data(data: DataPoint, file: BinaryIO) -> None:
     """
     Write the parameter data to the given file
 
@@ -340,7 +338,7 @@ def write_header(
     exclude: str = "none",
     *,
     write_to_file=True,
-):
+) -> None:
     """
     Writes the data header (min_jd, step_size, count) the output file
 
@@ -429,7 +427,7 @@ def calculate_step_size(
     return (max_jd - min_jd) / (number_of_data_points - 1)
 
 
-def exit_program_on_error(error_code: ErrorCode):
+def exit_program_on_error(error_code: ErrorCode) -> None:
     """
     Exits the program with the given error code if it is not a success
 
@@ -439,7 +437,7 @@ def exit_program_on_error(error_code: ErrorCode):
         sys.exit(error_code.value)
 
 
-def extract_data_lines(lines: List[str]) -> List[str]:
+def extract_data_lines(lines: Iterable[str]) -> List[str]:
     """
     Finds the number of data points in the data
 
