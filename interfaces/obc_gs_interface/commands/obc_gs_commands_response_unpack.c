@@ -1,16 +1,16 @@
+#include "data_unpack_utils.h"
+#include "obc_gs_commands_response_unpack.h"
+
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-
-#include "data_unpack_utils.h"
-#include "obc_gs_commands_response_unpack.h"
 
 typedef obc_gs_error_code_t (*unpack_cmd_handler_t)(cmd_unpacked_response_t*, uint8_t*, uint32_t*);
 static obc_gs_error_code_t _decodeResponse(cmd_callback_encoded_t encodedResponse, bool* success);
 
 static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer, uint32_t* offset);
 
-static const unpack_cmd_handler_t unpackHandlers[NUM_CMD_CALLBACKS] = {[execObCResetCmd] = unpackObcResetResponse};
+static const unpack_cmd_handler_t unpackHandlers[NUM_CMD_CALLBACKS] = {[EXEC_OBC_RESET_CMD] = unpackObcResetResponse};
 
 obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response_t* response) {
   if (response == NULL || buffer == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;

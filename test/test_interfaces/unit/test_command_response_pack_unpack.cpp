@@ -2,18 +2,16 @@
 #include "obc_gs_commands_response_pack.h"
 #include "obc_gs_commands_response_unpack.h"
 #include "obc_gs_commands_response.h"
-
 #include "data_unpack_utils.h"
-
 #include "obc_gs_errors.h"
-#include <iostream>
 
+#include <iostream>
 #include <gtest/gtest.h>
 #include <stdbool.h>
 
 TEST(pack_unpack_command_responses, packResponse) {
   cmd_unpacked_response_t unpackedResponse = {
-      .success = true, .cmdId = execObCResetCmd, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
+      .success = true, .cmdId = EXEC_OBC_RESET_CMD, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
@@ -25,7 +23,7 @@ TEST(pack_unpack_command_responses, packResponse) {
   float data1 = unpackFloat(buffer, &offset);
   uint32_t data2 = unpackUint32(buffer, &offset);
 
-  EXPECT_EQ(cmdId, (uint8_t)execObCResetCmd);
+  EXPECT_EQ(cmdId, (uint8_t)EXEC_OBC_RESET_CMD);
   EXPECT_EQ(encoded, 0x01);
   EXPECT_EQ(data2, 2);
   EXPECT_EQ(data1, (float)0.02);
@@ -33,7 +31,7 @@ TEST(pack_unpack_command_responses, packResponse) {
 
 TEST(pack_unpack_command_responses, unpackCommandResponse) {
   cmd_unpacked_response_t unpackedResponse = {
-      .success = true, .cmdId = execObCResetCmd, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
+      .success = true, .cmdId = EXEC_OBC_RESET_CMD, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
@@ -52,7 +50,7 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
 }
 
 TEST(pack_unpack_command_responses, packInvalidCommand) {
-  cmd_unpacked_response_t unpackedResponse = {.success = false, .cmdId = donwlinkTelemCmd, .obcResetResponse = {0}};
+  cmd_unpacked_response_t unpackedResponse = {.success = false, .cmdId = DOWNLINK_TELEM_CMD, .obcResetResponse = {0}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);

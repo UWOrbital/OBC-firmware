@@ -1,19 +1,20 @@
 
+#include "data_pack_utils.h"
+#include "obc_gs_commands_response_pack.h"
+
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-
-#include "data_pack_utils.h"
-#include "obc_gs_commands_response_pack.h"
 
 typedef obc_gs_error_code_t (*pack_cmd_handler_t)(cmd_unpacked_response_t*, uint8_t*, uint32_t*);
 static cmd_callback_encoded_t _encodeResponse(bool success);
 
 static obc_gs_error_code_t packObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer, uint32_t* offset);
 
-static const pack_cmd_handler_t packHandlers[NUM_CMD_CALLBACKS] = {[execObCResetCmd] = packObcResetResponse};
+static const pack_cmd_handler_t packHandlers[NUM_CMD_CALLBACKS] = {[EXEC_OBC_RESET_CMD] = packObcResetResponse};
 
 obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t* response, uint8_t* buffer) {
+  if (buffer == NULL || response == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
   cmd_callback_encoded_t encoded = _encodeResponse(response->success);
   uint32_t offset = 0;
 
@@ -34,7 +35,7 @@ static cmd_callback_encoded_t _encodeResponse(bool success) {
 }
 
 static obc_gs_error_code_t packObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer, uint32_t* offset) {
-  if (buffer == NULL || offset == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
+  if (buffer == NULL || offset == NULL || response == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
   packFloat(response->obcResetResponse.data1, buffer, offset);
   packUint32(response->obcResetResponse.data2, buffer, offset);
   return OBC_GS_ERR_CODE_SUCCESS;
