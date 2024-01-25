@@ -33,7 +33,7 @@
 
 unsigned long ulGetRunTimeCounterValue(void);
 void vConfigureTimerForRunTimeStats(void);
-#define configGENERATE_RUN_TIME_STATS 1
+#define configGENERATE_RUN_TIME_STATS ENABLE_TASK_STATS_COLLECTOR
 
 #define configUSE_CO_ROUTINES 0
 #define configMAX_CO_ROUTINE_PRIORITIES (2)
