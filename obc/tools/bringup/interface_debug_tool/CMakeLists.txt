@@ -25,6 +25,7 @@ endif()
 
 target_compile_definitions(debug-tool.out PRIVATE
     ${BOARD_TYPE}
+    ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
 target_sources(debug-tool.out PUBLIC
