@@ -21,7 +21,7 @@
 
 #include <stddef.h>
 #include <stdio.h>            /* This example main program uses printf/fflush */
-#include "onboad_env_modelling.h"      /* Model header file */
+#include "onboard_env_modelling.h"      /* Model header file */
 
 /*
  * Associating rt_OneStep with a real-time clock or interrupt service routine
@@ -43,7 +43,7 @@ void rt_OneStep(void)
 
   /* Check for overrun */
   if (OverrunFlag) {
-    rtmSetErrorStatus(rtM, "Overrun");
+    rtmSetErrorStatus(onboard_env_model_rt_object, "Overrun");
     return;
   }
 
@@ -91,7 +91,7 @@ int_T main(int_T argc, const char *argv[])
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((NULL));
-  while (rtmGetErrorStatus(rtM) == (NULL)) {
+  while (rtmGetErrorStatus(onboard_env_model_rt_object) == (NULL)) {
     /*  Perform application tasks here */
   }
 

@@ -25,14 +25,14 @@
 #define NumBitsPerChar                 8U
 
 /* External inputs (root inport signals with default storage) */
-ExtU rtU;
+attitude_control_model_ext_inputs_t attitude_control_model_ext_inputs;
 
 /* External outputs (root outports fed by signals with default storage) */
-ExtY rtY;
+attitude_control_model_ext_outputs_t attitude_control_model_ext_outputs;
 
 /* Real-time model */
-static RT_MODEL rtM_;
-RT_MODEL *const rtM = &rtM_;
+static RT_MODEL_attitude_control rtM_;
+RT_MODEL_attitude_control *const attitude_control_model_rt_object= &rtM_;
 static real_T rtGetNaN(void);
 static real32_T rtGetNaNF(void);
 
@@ -45,8 +45,8 @@ extern real32_T rtInfF;
 extern real32_T rtMinusInfF;
 extern real32_T rtNaNF;
 static void rt_InitInfAndNaN(size_t realSize);
-static boolean_T rtIsInf(real_T value);
-static boolean_T rtIsInfF(real32_T value);
+// static boolean_T rtIsInf(real_T value);
+// static boolean_T rtIsInfF(real32_T value);
 static boolean_T rtIsNaN(real_T value);
 static boolean_T rtIsNaNF(real32_T value);
 typedef struct {
@@ -132,17 +132,17 @@ static void rt_InitInfAndNaN(size_t realSize)
   rtMinusInfF = rtGetMinusInfF();
 }
 
-/* Test if value is infinite */
-static boolean_T rtIsInf(real_T value)
-{
-  return (boolean_T)((value==rtInf || value==rtMinusInf) ? 1U : 0U);
-}
+// /* Test if value is infinite */
+// static boolean_T rtIsInf(real_T value)
+// {
+//   return (boolean_T)((value==rtInf || value==rtMinusInf) ? 1U : 0U);
+// }
 
-/* Test if single-precision value is infinite */
-static boolean_T rtIsInfF(real32_T value)
-{
-  return (boolean_T)(((value)==rtInfF || (value)==rtMinusInfF) ? 1U : 0U);
-}
+// /* Test if single-precision value is infinite */
+// static boolean_T rtIsInfF(real32_T value)
+// {
+//   return (boolean_T)(((value)==rtInfF || (value)==rtMinusInfF) ? 1U : 0U);
+// }
 
 /* Test if value is not a number */
 static boolean_T rtIsNaN(real_T value)
@@ -261,33 +261,33 @@ void attitude_control_step(void)
    *  Product: '<S5>/Product2'
    *  Product: '<S5>/Product3'
    */
-  rtb_Product2_l = ((rtU.com_quat_body[0] * rtU.com_quat_body[0] +
-                     rtU.com_quat_body[1] * rtU.com_quat_body[1]) +
-                    rtU.com_quat_body[2] * rtU.com_quat_body[2]) +
-    rtU.com_quat_body[3] * rtU.com_quat_body[3];
+  rtb_Product2_l = ((attitude_control_model_ext_inputs.com_quat_body[0] * attitude_control_model_ext_inputs.com_quat_body[0] +
+                     attitude_control_model_ext_inputs.com_quat_body[1] * attitude_control_model_ext_inputs.com_quat_body[1]) +
+                    attitude_control_model_ext_inputs.com_quat_body[2] * attitude_control_model_ext_inputs.com_quat_body[2]) +
+    attitude_control_model_ext_inputs.com_quat_body[3] * attitude_control_model_ext_inputs.com_quat_body[3];
 
   /* Product: '<S2>/Divide' incorporates:
    *  Inport: '<Root>/com_quat_body'
    */
-  rtb_Sum_b = rtU.com_quat_body[0] / rtb_Product2_l;
+  rtb_Sum_b = attitude_control_model_ext_inputs.com_quat_body[0] / rtb_Product2_l;
 
   /* Product: '<S2>/Divide1' incorporates:
    *  Inport: '<Root>/com_quat_body'
    *  UnaryMinus: '<S4>/Unary Minus'
    */
-  rtb_Product1 = -rtU.com_quat_body[1] / rtb_Product2_l;
+  rtb_Product1 = -attitude_control_model_ext_inputs.com_quat_body[1] / rtb_Product2_l;
 
   /* Product: '<S2>/Divide2' incorporates:
    *  Inport: '<Root>/com_quat_body'
    *  UnaryMinus: '<S4>/Unary Minus1'
    */
-  rtb_Product2 = -rtU.com_quat_body[2] / rtb_Product2_l;
+  rtb_Product2 = -attitude_control_model_ext_inputs.com_quat_body[2] / rtb_Product2_l;
 
   /* Product: '<S2>/Divide3' incorporates:
    *  Inport: '<Root>/com_quat_body'
    *  UnaryMinus: '<S4>/Unary Minus2'
    */
-  rtb_Product2_l = -rtU.com_quat_body[3] / rtb_Product2_l;
+  rtb_Product2_l = -attitude_control_model_ext_inputs.com_quat_body[3] / rtb_Product2_l;
 
   /* Sum: '<S6>/Sum' incorporates:
    *  Inport: '<Root>/curr_quat_body'
@@ -296,10 +296,10 @@ void attitude_control_step(void)
    *  Product: '<S6>/Product2'
    *  Product: '<S6>/Product3'
    */
-  rtb_Sign = ((rtb_Sum_b * rtU.est_curr_quat_body[0] - rtb_Product1 *
-               rtU.est_curr_quat_body[1]) - rtb_Product2 *
-              rtU.est_curr_quat_body[2]) - rtb_Product2_l *
-    rtU.est_curr_quat_body[3];
+  rtb_Sign = ((rtb_Sum_b * attitude_control_model_ext_inputs.est_curr_quat_body[0] - rtb_Product1 *
+               attitude_control_model_ext_inputs.est_curr_quat_body[1]) - rtb_Product2 *
+              attitude_control_model_ext_inputs.est_curr_quat_body[2]) - rtb_Product2_l *
+    attitude_control_model_ext_inputs.est_curr_quat_body[3];
 
   /* Signum: '<S1>/Sign' */
   if (rtIsNaN(rtb_Sign)) {
@@ -335,18 +335,18 @@ void attitude_control_step(void)
    *  Sum: '<S8>/Sum'
    *  Sum: '<S9>/Sum'
    */
-  rtY.comm_wheel_torque_body[0] = (((rtb_Sum_b * rtU.est_curr_quat_body[1] +
-    rtb_Product1 * rtU.est_curr_quat_body[0]) + rtb_Product2 *
-    rtU.est_curr_quat_body[3]) - rtb_Product2_l * rtU.est_curr_quat_body[2]) *
-    0.2 * rtb_Sign + 0.1 * rtU.est_curr_ang_vel_body[0];
-  rtY.comm_wheel_torque_body[1] = (((rtb_Sum_b * rtU.est_curr_quat_body[2] -
-    rtb_Product1 * rtU.est_curr_quat_body[3]) + rtb_Product2 *
-    rtU.est_curr_quat_body[0]) + rtb_Product2_l * rtU.est_curr_quat_body[1]) *
-    0.2 * rtb_Sign + 0.1 * rtU.est_curr_ang_vel_body[1];
-  rtY.comm_wheel_torque_body[2] = (((rtb_Sum_b * rtU.est_curr_quat_body[3] +
-    rtb_Product1 * rtU.est_curr_quat_body[2]) - rtb_Product2 *
-    rtU.est_curr_quat_body[1]) + rtb_Product2_l * rtU.est_curr_quat_body[0]) *
-    0.2 * rtb_Sign + 0.1 * rtU.est_curr_ang_vel_body[2];
+  attitude_control_model_ext_outputs.comm_wheel_torque_body[0] = (((rtb_Sum_b * attitude_control_model_ext_inputs.est_curr_quat_body[1] +
+    rtb_Product1 * attitude_control_model_ext_inputs.est_curr_quat_body[0]) + rtb_Product2 *
+    attitude_control_model_ext_inputs.est_curr_quat_body[3]) - rtb_Product2_l * attitude_control_model_ext_inputs.est_curr_quat_body[2]) *
+    0.2 * rtb_Sign + 0.1 * attitude_control_model_ext_inputs.est_curr_ang_vel_body[0];
+  attitude_control_model_ext_outputs.comm_wheel_torque_body[1] = (((rtb_Sum_b * attitude_control_model_ext_inputs.est_curr_quat_body[2] -
+    rtb_Product1 * attitude_control_model_ext_inputs.est_curr_quat_body[3]) + rtb_Product2 *
+    attitude_control_model_ext_inputs.est_curr_quat_body[0]) + rtb_Product2_l * attitude_control_model_ext_inputs.est_curr_quat_body[1]) *
+    0.2 * rtb_Sign + 0.1 * attitude_control_model_ext_inputs.est_curr_ang_vel_body[1];
+  attitude_control_model_ext_outputs.comm_wheel_torque_body[2] = (((rtb_Sum_b * attitude_control_model_ext_inputs.est_curr_quat_body[3] +
+    rtb_Product1 * attitude_control_model_ext_inputs.est_curr_quat_body[2]) - rtb_Product2 *
+    attitude_control_model_ext_inputs.est_curr_quat_body[1]) + rtb_Product2_l * attitude_control_model_ext_inputs.est_curr_quat_body[0]) *
+    0.2 * rtb_Sign + 0.1 * attitude_control_model_ext_inputs.est_curr_ang_vel_body[2];
 }
 
 /* Model initialize function */

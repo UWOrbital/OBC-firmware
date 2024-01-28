@@ -38,7 +38,7 @@
 #endif
 
 /* Forward declaration for rtModel */
-typedef struct tag_RTM RT_MODEL;
+typedef struct tag_RTM_attitude_determination RT_MODEL_attitude_determination;
 
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
@@ -66,16 +66,16 @@ typedef struct {
   real_T ref_aam[3];                   /* '<Root>/ref_aam' */
   real_T mes_aam[3];                   /* '<Root>/mes_aam' */
   real_T steve_mes[3];                 /* '<Root>/steve_mes' */
-} ExtU;
+} attitude_determination_model_ext_inputs_t;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
   real_T meas_ang_vel_body[3];         /* '<Root>/meas_ang_vel_body' */
   real_T meas_quat_body[4];            /* '<Root>/meas_quat_body' */
-} ExtY;
+} attitude_determination_model_ext_outputs_t;
 
 /* Real-time Model Data Structure */
-struct tag_RTM {
+struct tag_RTM_attitude_determination {
   const char_T * volatile errorStatus;
 };
 
@@ -83,10 +83,10 @@ struct tag_RTM {
 extern DW rtDW;
 
 /* External inputs (root inport signals with default storage) */
-extern ExtU rtU;
+extern attitude_determination_model_ext_inputs_t attitude_determination_model_ext_inputs;
 
 /* External outputs (root outports fed by signals with default storage) */
-extern ExtY rtY;
+extern attitude_determination_model_ext_outputs_t attitude_determination_model_ext_outputs;
 
 /* Constant parameters (default storage) */
 extern const ConstP rtConstP;
@@ -96,7 +96,7 @@ extern void attitude_determination_and_vehi_initialize(void);
 extern void attitude_determination_and_vehi_step(void);
 
 /* Real-time Model object */
-extern RT_MODEL *const rtM;
+extern RT_MODEL_attitude_determination *const attitude_determinataion_model_rt_object;
 
 /*-
  * These blocks were eliminated from the model due to optimizations:

@@ -38,7 +38,7 @@
 #endif
 
 /* Forward declaration for rtModel */
-typedef struct tag_RTM RT_MODEL;
+typedef struct tag_RTM_attitude_control RT_MODEL_attitude_control;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
@@ -46,31 +46,31 @@ typedef struct {
   real_T est_curr_quat_body[4];        /* '<Root>/curr_quat_body' */
   real_T com_quat_body[4];             /* '<Root>/com_quat_body' */
   real_T mag_field_body[3];            /* '<Root>/mag_field_body' */
-} ExtU;
+} attitude_control_model_ext_inputs_t;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
   real_T comm_wheel_torque_body[3];    /* '<Root>/comm_wheel_torque_body' */
   real_T comm_mag_dipole_body[3];      /* '<Root>/comm_mag_dipole_body' */
-} ExtY;
+} attitude_control_model_ext_outputs_t;
 
 /* Real-time Model Data Structure */
-struct tag_RTM {
+struct tag_RTM_attitude_control {
   const char_T * volatile errorStatus;
 };
 
 /* External inputs (root inport signals with default storage) */
-extern ExtU rtU;
+extern attitude_control_model_ext_inputs_t attitude_control_model_ext_inputs;
 
 /* External outputs (root outports fed by signals with default storage) */
-extern ExtY rtY;
+extern attitude_control_model_ext_outputs_t attitude_control_model_ext_outputs;
 
 /* Model entry point functions */
 extern void attitude_control_initialize(void);
 extern void attitude_control_step(void);
 
 /* Real-time Model object */
-extern RT_MODEL *const rtM;
+extern RT_MODEL_attitude_control *const attitude_control_model_rt_object;
 
 /*-
  * These blocks were eliminated from the model due to optimizations:

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(ONBOARD_ENV_MODELLING_LIB onboard_env_modelling)
+set(ONBOARD_ENV_MODELLING_LIB onboard-env-modelling)
 
 add_library(${ONBOARD_ENV_MODELLING_LIB} STATIC
-    source/onboad_env_modelling.c 
+    source/onboard_env_modelling.c 
     source/ert_main.c
 )
 

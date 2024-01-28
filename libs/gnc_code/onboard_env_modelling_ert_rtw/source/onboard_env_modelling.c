@@ -19,19 +19,19 @@
  * Validation result: Not run
  */
 
-#include "onboad_env_modelling.h"
+#include "onboard_env_modelling.h"
 #include <math.h>
 #include "rtwtypes.h"
 
 /* External inputs (root inport signals with default storage) */
-ExtU rtU;
+onboard_env_model_ext_intputs_t onboard_env_model_ext_intputs;
 
 /* External outputs (root outports fed by signals with default storage) */
-ExtY rtY;
+onboard_env_model_ext_outputs_t onboard_env_model_ext_outputs;
 
 /* Real-time model */
-static RT_MODEL rtM_;
-RT_MODEL *const rtM = &rtM_;
+static RT_MODEL_onboard_model rtM_;
+RT_MODEL_onboard_model *const onboard_env_model_rt_object = &rtM_;
 
 /* Model step function */
 void onboad_env_modelling_step(void)
@@ -41,8 +41,8 @@ void onboad_env_modelling_step(void)
   /* MATLAB Function: '<S1>/Regenerates from UV Values' incorporates:
    *  Inport: '<Root>/steve_values'
    */
-  b = sqrt((1.0 - rtU.steve_values[0] * rtU.steve_values[0]) - rtU.steve_values
-           [1] * rtU.steve_values[1]);
+  b = sqrt((1.0 - onboard_env_model_ext_intputs.steve_values[0] * onboard_env_model_ext_intputs.steve_values[0]) - onboard_env_model_ext_intputs.steve_values
+           [1] * onboard_env_model_ext_intputs.steve_values[1]);
 
   /* Outport: '<Root>/r_ref_com_est' incorporates:
    *  Inport: '<Root>/r_sat_com'
@@ -52,15 +52,15 @@ void onboad_env_modelling_step(void)
    *  Product: '<S2>/Element Product'
    *  Sum: '<S2>/Sum'
    */
-  rtY.r_ref_com_est[0] = ((rtU.r_sat_com_ax1[1] * rtU.r_sat_com[2] -
-    rtU.r_sat_com[1] * rtU.r_sat_com_ax1[2]) * rtU.steve_values[1] +
-    rtU.r_sat_com[0] * rtU.steve_values[0]) + rtU.r_sat_com_ax1[0] * b;
+  onboard_env_model_ext_outputs.r_ref_com_est[0] = ((onboard_env_model_ext_intputs.r_sat_com_ax1[1] * onboard_env_model_ext_intputs.r_sat_com[2] -
+    onboard_env_model_ext_intputs.r_sat_com[1] * onboard_env_model_ext_intputs.r_sat_com_ax1[2]) * onboard_env_model_ext_intputs.steve_values[1] +
+    onboard_env_model_ext_intputs.r_sat_com[0] * onboard_env_model_ext_intputs.steve_values[0]) + onboard_env_model_ext_intputs.r_sat_com_ax1[0] * b;
 
   /* Outport: '<Root>/estimated_expect_ang_acc_body' incorporates:
    *  Inport: '<Root>/magnetorquer comm'
    *  MATLAB Function: '<S1>/MATLAB Function6'
    */
-  rtY.estimated_expect_ang_acc_body[0] = rtU.commanded_mag_dipole_body[0];
+  onboard_env_model_ext_outputs.estimated_expect_ang_acc_body[0] = onboard_env_model_ext_intputs.commanded_mag_dipole_body[0];
 
   /* Outport: '<Root>/r_ref_com_est' incorporates:
    *  Inport: '<Root>/r_sat_com'
@@ -70,15 +70,15 @@ void onboad_env_modelling_step(void)
    *  Product: '<S2>/Element Product'
    *  Sum: '<S2>/Sum'
    */
-  rtY.r_ref_com_est[1] = ((rtU.r_sat_com[0] * rtU.r_sat_com_ax1[2] -
-    rtU.r_sat_com_ax1[0] * rtU.r_sat_com[2]) * rtU.steve_values[1] +
-    rtU.steve_values[0] * rtU.r_sat_com[1]) + rtU.r_sat_com_ax1[1] * b;
+  onboard_env_model_ext_outputs.r_ref_com_est[1] = ((onboard_env_model_ext_intputs.r_sat_com[0] * onboard_env_model_ext_intputs.r_sat_com_ax1[2] -
+    onboard_env_model_ext_intputs.r_sat_com_ax1[0] * onboard_env_model_ext_intputs.r_sat_com[2]) * onboard_env_model_ext_intputs.steve_values[1] +
+    onboard_env_model_ext_intputs.steve_values[0] * onboard_env_model_ext_intputs.r_sat_com[1]) + onboard_env_model_ext_intputs.r_sat_com_ax1[1] * b;
 
   /* Outport: '<Root>/estimated_expect_ang_acc_body' incorporates:
    *  Inport: '<Root>/magnetorquer comm'
    *  MATLAB Function: '<S1>/MATLAB Function6'
    */
-  rtY.estimated_expect_ang_acc_body[1] = rtU.commanded_mag_dipole_body[1];
+  onboard_env_model_ext_outputs.estimated_expect_ang_acc_body[1] = onboard_env_model_ext_intputs.commanded_mag_dipole_body[1];
 
   /* Outport: '<Root>/r_ref_com_est' incorporates:
    *  Inport: '<Root>/r_sat_com'
@@ -88,15 +88,15 @@ void onboad_env_modelling_step(void)
    *  Product: '<S2>/Element Product'
    *  Sum: '<S2>/Sum'
    */
-  rtY.r_ref_com_est[2] = ((rtU.r_sat_com_ax1[0] * rtU.r_sat_com[1] -
-    rtU.r_sat_com[0] * rtU.r_sat_com_ax1[1]) * rtU.steve_values[1] +
-    rtU.steve_values[0] * rtU.r_sat_com[2]) + rtU.r_sat_com_ax1[2] * b;
+  onboard_env_model_ext_outputs.r_ref_com_est[2] = ((onboard_env_model_ext_intputs.r_sat_com_ax1[0] * onboard_env_model_ext_intputs.r_sat_com[1] -
+    onboard_env_model_ext_intputs.r_sat_com[0] * onboard_env_model_ext_intputs.r_sat_com_ax1[1]) * onboard_env_model_ext_intputs.steve_values[1] +
+    onboard_env_model_ext_intputs.steve_values[0] * onboard_env_model_ext_intputs.r_sat_com[2]) + onboard_env_model_ext_intputs.r_sat_com_ax1[2] * b;
 
   /* Outport: '<Root>/estimated_expect_ang_acc_body' incorporates:
    *  Inport: '<Root>/magnetorquer comm'
    *  MATLAB Function: '<S1>/MATLAB Function6'
    */
-  rtY.estimated_expect_ang_acc_body[2] = rtU.commanded_mag_dipole_body[2];
+  onboard_env_model_ext_outputs.estimated_expect_ang_acc_body[2] = onboard_env_model_ext_intputs.commanded_mag_dipole_body[2];
 }
 
 /* Model initialize function */

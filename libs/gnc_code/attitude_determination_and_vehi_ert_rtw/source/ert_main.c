@@ -43,7 +43,7 @@ void rt_OneStep(void)
 
   /* Check for overrun */
   if (OverrunFlag) {
-    rtmSetErrorStatus(rtM, "Overrun");
+    rtmSetErrorStatus(attitude_determinataion_model_rt_object, "Overrun");
     return;
   }
 
@@ -91,7 +91,7 @@ int_T main(int_T argc, const char *argv[])
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((NULL));
-  while (rtmGetErrorStatus(rtM) == (NULL)) {
+  while (rtmGetErrorStatus(attitude_determinataion_model_rt_object) == (NULL)) {
     /*  Perform application tasks here */
   }
 

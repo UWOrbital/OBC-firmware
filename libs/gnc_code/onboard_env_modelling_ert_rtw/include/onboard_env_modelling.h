@@ -38,7 +38,7 @@
 #endif
 
 /* Forward declaration for rtModel */
-typedef struct tag_RTM RT_MODEL;
+typedef struct tag_RTM_onboard_model RT_MODEL_onboard_model;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
@@ -46,32 +46,32 @@ typedef struct {
   real_T r_sat_com_ax1[3];             /* '<Root>/r_sat_com' */
   real_T r_sat_com[3];                 /* '<Root>/r_sat_com_ax1' */
   real_T steve_values[2];              /* '<Root>/steve_values' */
-} ExtU;
+} onboard_env_model_ext_intputs_t;
 
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
   real_T estimated_expect_ang_acc_body[3];
                                     /* '<Root>/estimated_expect_ang_acc_body' */
   real_T r_ref_com_est[3];             /* '<Root>/r_ref_com_est' */
-} ExtY;
+} onboard_env_model_ext_outputs_t;
 
 /* Real-time Model Data Structure */
-struct tag_RTM {
+struct tag_RTM_onboard_model {
   const char_T * volatile errorStatus;
 };
 
 /* External inputs (root inport signals with default storage) */
-extern ExtU rtU;
+extern onboard_env_model_ext_intputs_t onboard_env_model_ext_intputs;
 
 /* External outputs (root outports fed by signals with default storage) */
-extern ExtY rtY;
+extern onboard_env_model_ext_outputs_t onboard_env_model_ext_outputs;
 
 /* Model entry point functions */
 extern void onboad_env_modelling_initialize(void);
 extern void onboad_env_modelling_step(void);
 
 /* Real-time Model object */
-extern RT_MODEL *const rtM;
+extern RT_MODEL_onboard_model *const onboard_env_model_rt_object;
 
 /*-
  * The generated code includes comments that allow you to trace directly

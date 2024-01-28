@@ -28,14 +28,14 @@
 DW rtDW;
 
 /* External inputs (root inport signals with default storage) */
-ExtU rtU;
+attitude_determination_model_ext_inputs_t attitude_determination_model_ext_inputs;
 
 /* External outputs (root outports fed by signals with default storage) */
-ExtY rtY;
+attitude_determination_model_ext_outputs_t attitude_determination_model_ext_outputs;
 
 /* Real-time model */
-static RT_MODEL rtM_;
-RT_MODEL *const rtM = &rtM_;
+static RT_MODEL_attitude_determination rtM_;
+RT_MODEL_attitude_determination *const attitude_determinataion_model_rt_object = &rtM_;
 
 /* Forward declaration for local functions */
 static void quatrotate(const real_T q[4], real_T v[3]);
@@ -253,9 +253,9 @@ void attitude_determination_and_vehi_step(void)
    *  Inport: '<Root>/sat_to_sun_unit_ref'
    *  Math: '<S1>/Transpose1'
    */
-  rtb_hat_omega[0] = rtU.sat_to_sun_unit_ref[0];
-  rtb_hat_omega[1] = rtU.sat_to_sun_unit_ref[1];
-  rtb_hat_omega[2] = rtU.sat_to_sun_unit_ref[2];
+  rtb_hat_omega[0] = attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[0];
+  rtb_hat_omega[1] = attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[1];
+  rtb_hat_omega[2] = attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[2];
   quatrotate(rtDW.q_n2m, rtb_hat_omega);
   H[0] = 0.0;
   H[3] = -rtb_hat_omega[2];
@@ -324,7 +324,7 @@ void attitude_determination_and_vehi_step(void)
       P_2 += H[3 * a_tmp + k] * 0.0;
     }
 
-    tmp_1[k] = (rtU.mes_ss[k] - rtb_hat_omega[k]) - P_2;
+    tmp_1[k] = (attitude_determination_model_ext_inputs.mes_ss[k] - rtb_hat_omega[k]) - P_2;
   }
 
   P_2 = tmp_1[1];
@@ -360,9 +360,9 @@ void attitude_determination_and_vehi_step(void)
     }
   }
 
-  rtb_hat_omega[0] = rtU.earth_mag_field_ref[0];
-  rtb_hat_omega[1] = rtU.earth_mag_field_ref[1];
-  rtb_hat_omega[2] = rtU.earth_mag_field_ref[2];
+  rtb_hat_omega[0] = attitude_determination_model_ext_inputs.earth_mag_field_ref[0];
+  rtb_hat_omega[1] = attitude_determination_model_ext_inputs.earth_mag_field_ref[1];
+  rtb_hat_omega[2] = attitude_determination_model_ext_inputs.earth_mag_field_ref[2];
   quatrotate(rtDW.q_n2m, rtb_hat_omega);
   H[0] = 0.0;
   H[3] = -rtb_hat_omega[2];
@@ -423,7 +423,7 @@ void attitude_determination_and_vehi_step(void)
       P_2 += H[3 * a_tmp + k] * delta_x[a_tmp];
     }
 
-    tmp_1[k] = (rtU.mes_mag[k] - rtb_hat_omega[k]) - P_2;
+    tmp_1[k] = (attitude_determination_model_ext_inputs.mes_mag[k] - rtb_hat_omega[k]) - P_2;
   }
 
   P_2 = tmp_1[1];
@@ -474,9 +474,9 @@ void attitude_determination_and_vehi_step(void)
   q_n2m[1] /= P_2;
   q_n2m[2] /= P_2;
   q_n2m[3] /= P_2;
-  rtb_hat_omega[0] = rtU.omega[0] - rtDW.beta[0];
-  rtb_hat_omega[1] = rtU.omega[1] - rtDW.beta[1];
-  rtb_hat_omega[2] = rtU.omega[2] - rtDW.beta[2];
+  rtb_hat_omega[0] = attitude_determination_model_ext_inputs.omega[0] - rtDW.beta[0];
+  rtb_hat_omega[1] = attitude_determination_model_ext_inputs.omega[1] - rtDW.beta[1];
+  rtb_hat_omega[2] = attitude_determination_model_ext_inputs.omega[2] - rtDW.beta[2];
   tmp[0] = 0.0;
   tmp[1] = rtb_hat_omega[0];
   tmp[2] = rtb_hat_omega[1];
@@ -592,15 +592,15 @@ void attitude_determination_and_vehi_step(void)
   /* Outport: '<Root>/meas_ang_vel_body' incorporates:
    *  Math: '<S1>/Transpose2'
    */
-  rtY.meas_ang_vel_body[0] = rtb_hat_omega[0];
-  rtY.meas_ang_vel_body[1] = rtb_hat_omega[1];
-  rtY.meas_ang_vel_body[2] = rtb_hat_omega[2];
+  attitude_determination_model_ext_outputs.meas_ang_vel_body[0] = rtb_hat_omega[0];
+  attitude_determination_model_ext_outputs.meas_ang_vel_body[1] = rtb_hat_omega[1];
+  attitude_determination_model_ext_outputs.meas_ang_vel_body[2] = rtb_hat_omega[2];
 
   /* Outport: '<Root>/meas_quat_body' */
-  rtY.meas_quat_body[0] = rtb_q_n2m_idx_0;
-  rtY.meas_quat_body[1] = rtb_q_n2m_idx_1;
-  rtY.meas_quat_body[2] = rtb_q_n2m_idx_2;
-  rtY.meas_quat_body[3] = rtb_q_n2m_idx_3;
+  attitude_determination_model_ext_outputs.meas_quat_body[0] = rtb_q_n2m_idx_0;
+  attitude_determination_model_ext_outputs.meas_quat_body[1] = rtb_q_n2m_idx_1;
+  attitude_determination_model_ext_outputs.meas_quat_body[2] = rtb_q_n2m_idx_2;
+  attitude_determination_model_ext_outputs.meas_quat_body[3] = rtb_q_n2m_idx_3;
 }
 
 /* Model initialize function */
