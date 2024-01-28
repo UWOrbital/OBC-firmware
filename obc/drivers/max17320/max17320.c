@@ -72,7 +72,7 @@ static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value) {
   uint8_t slaveAddr = 0, internalAddr = 0;
   obc_error_code_t errCode = 0;
   RETURN_IF_ERROR_CODE(mapMemoryAddressToSlave(addr, &internalAddr, &slaveAddr));
-  RETURN_IF_ERROR_CODE(i2cReadReg(slaveAddr, addr, buffer, 2));
+  RETURN_IF_ERROR_CODE(i2cReadReg(slaveAddr, internalAddr, buffer, 2));
 
   *value = (buffer[1] << 8) | buffer[0];
   return OBC_ERR_CODE_SUCCESS;
