@@ -28,10 +28,15 @@ obc_error_code_t readBmsRegister(bms_register_t* data) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(initiateRead((uint16_t)data->address, &dataValue));
 
-  if (data->isThreshold)
-    data->threshold =
-        (bms_threshold_value_t){.lowerThreshold = dataValue & 0xFF, .upperThreshold = (dataValue >> 8) & 0xFF};
-  else
+  bms_threshold_value_t threshold = {0};
+  if (data->isThreshold) {
+    switch (data->address) {
+      default:
+        threshold =
+            (bms_threshold_value_t){.lowerThreshold = dataValue & 0xFF, .upperThreshold = (dataValue >> 8) & 0xFF};
+    }
+    data->threshold = threshold;
+  } else
     data->configurationValue = dataValue;
 
   return OBC_ERR_CODE_SUCCESS;
@@ -40,8 +45,12 @@ obc_error_code_t readBmsRegister(bms_register_t* data) {
 obc_error_code_t writeBmsRegister(bms_register_t* data) {
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint16_t dataValue = (data->isThreshold) ? ((data->threshold.upperThreshold << 8) & data->threshold.lowerThreshold)
-                                           : data->configurationValue;
+  uint16_t dataValue = 0;
+  switch (data->address) {
+    default:
+      dataValue = (data->isThreshold) ? ((data->threshold.upperThreshold << 8) & data->threshold.lowerThreshold)
+                                      : data->configurationValue;
+  }
 
   obc_error_code_t errCode = 0;
   RETURN_IF_ERROR_CODE(initiateWrite(data->address, dataValue));
