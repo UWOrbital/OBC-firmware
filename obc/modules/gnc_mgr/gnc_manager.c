@@ -75,6 +75,10 @@ void rtOnboardModelStep(void) {
   real_T referenceEstimateY = onboard_env_model_ext_outputs.r_ref_com_est[1];
   real_T referenceEstimateZ = onboard_env_model_ext_outputs.r_ref_com_est[2];
 
+  sciPrintf("Onboard modelling outputs are: \r\n");
+  sciPrintf("Angular Body: (%lf,%lf,%lf)", angularBodyX, angularBodyY, angularBodyZ);
+  sciPrintf("Reference Estimate: (%lf,%lf,%lf)", referenceEstimateX, referenceEstimateY, referenceEstimateZ);
+
   /* Indicate task complete */
   OverrunFlag = false;
 
@@ -148,6 +152,11 @@ void rtAttitudeDeterminationModelStep(void) {
   real_T quaterionZ = attitude_determination_model_ext_outputs.meas_quat_body[2];
   real_T quaterionW = attitude_determination_model_ext_outputs.meas_quat_body[3];
 
+  sciPrintf("Attitude determintation outputs are: \r\n");
+  sciPrintf("Angular Velocity: (%lf,%lf,%lf)", measuredAngularVelocityX, measuredAngularVelocityY,
+            measuredAngularVelocityZ);
+  sciPrintf("Quatereions: (%lf,%lf,%lf,%lf)", quaterionX, quaterionY, quaterionZ, quaterionW);
+
   /* Indicate task complete */
   OverrunFlag = false;
 
@@ -185,7 +194,7 @@ void rtAttitudeControlModelStep(void) {
   attitude_control_model_ext_inputs.est_curr_quat_body[0] = cos(DEGREES_TO_RADIANS(-30));
   attitude_control_model_ext_inputs.est_curr_quat_body[1] = sin(DEGREES_TO_RADIANS(-30) / sqrt(3));
   attitude_control_model_ext_inputs.est_curr_quat_body[2] = sin(DEGREES_TO_RADIANS(-30) / sqrt(3));
-  attitude_control_model_ext_inputs.est_curr_quat_body[2] = 0.0;
+  attitude_control_model_ext_inputs.est_curr_quat_body[3] = 0.0;
 
   attitude_control_model_ext_inputs.mag_field_body[0] = 1.0;
   attitude_control_model_ext_inputs.mag_field_body[1] = 1.0;
@@ -204,6 +213,10 @@ void rtAttitudeControlModelStep(void) {
   real_T commandedWheelTorqueZ = attitude_control_model_ext_outputs.comm_wheel_torque_body[2];
 
   /* Use the outputs to control actuators */
+
+  sciPrintf("Attitude control outputs are: \r\n");
+  sciPrintf("Wheel Torque: (%lf,%lf,%lf)", commandedWheelTorqueX, commandedWheelTorqueY, commandedWheelTorqueZ);
+  sciPrintf("Quatereions: (%lf,%lf,%lf)", commandedDipoleX, commandedDipoleY, commandedDipoleZ);
 
   /* Indicate task complete */
   OverrunFlag = false;

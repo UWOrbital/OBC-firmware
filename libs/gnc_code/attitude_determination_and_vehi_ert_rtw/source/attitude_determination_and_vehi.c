@@ -27,6 +27,9 @@
 /* Block signals and states (default storage) */
 DW rtDW;
 
+/* Constant parameters (default storage) */
+const ConstP rtConstP;
+
 /* External inputs (root inport signals with default storage) */
 attitude_determination_model_ext_inputs_t attitude_determination_model_ext_inputs;
 
