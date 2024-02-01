@@ -19,7 +19,7 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   if (response->cmdId >= NUM_CMD_CALLBACKS) return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
 
   obc_gs_error_code_t errCode = 0;
-  cmd_response_error_code_t encodedResp = (cmd_response_error_code_t)unpackUint8(buffer, &offset);
+  response->errCode = (cmd_response_error_code_t)unpackUint8(buffer, &offset);
   unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
   if (handler == NULL) return OBC_GS_ERR_CODE_SUCCESS;
 

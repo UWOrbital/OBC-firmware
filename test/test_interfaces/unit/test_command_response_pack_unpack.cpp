@@ -31,7 +31,7 @@ TEST(pack_unpack_command_responses, packResponse) {
 
 TEST(pack_unpack_command_responses, unpackCommandResponse) {
   cmd_unpacked_response_t unpackedResponse = {
-      .errCode = CMD_RESPONSE_SUCCESS, .cmdId = EXEC_OBC_RESET_CMD, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
+      .errCode = CMD_RESPONSE_ERROR, .cmdId = EXEC_OBC_RESET_CMD, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
@@ -51,14 +51,14 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
 
 TEST(pack_unpack_command_responses, packInvalidCommand) {
   cmd_unpacked_response_t unpackedResponse = {
-      .errCode = CMD_RESPONSE_SUCCESS, .cmdId = DOWNLINK_TELEM_CMD, .obcResetResponse = {0}};
+      .errCode = CMD_RESPONSE_ERROR, .cmdId = DOWNLINK_TELEM_CMD, .obcResetResponse = {0}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
 
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(buffer[0], (uint8_t)unpackedResponse.cmdId);
-  EXPECT_EQ(buffer[1], 0x00);
+  EXPECT_EQ(buffer[1], CMD_RESPONSE_ERROR);
 
   cmd_unpacked_response_t deserializedResponse = {CMD_RESPONSE_SUCCESS};
   errCode = unpackCommandResponse(buffer, &deserializedResponse);
