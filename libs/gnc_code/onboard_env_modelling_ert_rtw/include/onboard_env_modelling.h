@@ -43,8 +43,8 @@ typedef struct tag_RTM_onboard_model RT_MODEL_onboard_model;
 /* External inputs (root inport signals with default storage) */
 typedef struct {
   real_T commanded_mag_dipole_body[3]; /* '<Root>/magnetorquer comm' */
-  real_T r_sat_com_ax1[3];             /* '<Root>/r_sat_com' */
-  real_T r_sat_com[3];                 /* '<Root>/r_sat_com_ax1' */
+  real_T r_sat_com[3];                 /* '<Root>/r_sat_com' */
+  real_T r_sat_com_ax1[3];             /* '<Root>/r_sat_com_ax1' */
   real_T steve_values[2];              /* '<Root>/steve_values' */
 } onboard_env_model_ext_intputs_t;
 

@@ -1,6 +1,7 @@
 #include "obc_digital_watchdog.h"
 #include "obc_errors.h"
 #include "obc_scheduler_config.h"
+#include "obc_print.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -10,11 +11,19 @@
 #include "attitude_control.h"
 #include "attitude_determination_and_vehi.h"
 #include "onboard_env_modelling.h"
+#include "vn100.h"
+#include "bd621x.h"
 
 #include <sys_common.h>
 #include <gio.h>
+#include <math.h>
 
+#define PI (3.141592653589793)
 #define GNC_TASK_PERIOD_MS 50 /* 50ms period or 20Hz */
+#define DEGREES_TO_RADIANS(theta) (theta * PI / 180)
+
+obc_error_code_t errCode;
+vn100_binary_packet_t vn100Packet;
 
 void rtOnboardModelStep(void);
 void rtAttitudeDeterminationModelStep(void);
@@ -39,21 +48,20 @@ void rtOnboardModelStep(void) {
   /* Idea: Setup the semaphore timeout here*/
 
   /* Set model inputs here | Currently setting mock values for inputs */
-  onboard_env_model_ext_intputs.commanded_mag_dipole_body[0] = 1.0;
-  onboard_env_model_ext_intputs.commanded_mag_dipole_body[1] = 1.0;
-  onboard_env_model_ext_intputs.commanded_mag_dipole_body[2] = 1.0;
+  onboard_env_model_ext_intputs.commanded_mag_dipole_body[0] = 5.83;
+  onboard_env_model_ext_intputs.commanded_mag_dipole_body[1] = 2.12;
+  onboard_env_model_ext_intputs.commanded_mag_dipole_body[2] = -0.4;
 
-  onboard_env_model_ext_intputs.r_sat_com[0] = 1.0;
-  onboard_env_model_ext_intputs.r_sat_com[1] = 1.0;
-  onboard_env_model_ext_intputs.r_sat_com[2] = 1.0;
+  onboard_env_model_ext_intputs.r_sat_com[0] = (6371 + 408) * 1000;
+  onboard_env_model_ext_intputs.r_sat_com[1] = 0.0;
+  onboard_env_model_ext_intputs.r_sat_com[2] = 0.0;
 
   onboard_env_model_ext_intputs.r_sat_com_ax1[0] = 1.0;
   onboard_env_model_ext_intputs.r_sat_com_ax1[1] = 1.0;
   onboard_env_model_ext_intputs.r_sat_com_ax1[2] = 1.0;
 
-  onboard_env_model_ext_intputs.steve_values[0] = 1.0;
-  onboard_env_model_ext_intputs.steve_values[1] = 1.0;
-  onboard_env_model_ext_intputs.steve_values[2] = 1.0;
+  onboard_env_model_ext_intputs.steve_values[0] = 0.0;
+  onboard_env_model_ext_intputs.steve_values[1] = 0.0;
 
   /* Step the model */
   onboad_env_modelling_step();
@@ -63,9 +71,9 @@ void rtOnboardModelStep(void) {
   real_T angularBodyY = onboard_env_model_ext_outputs.estimated_expect_ang_acc_body[1];
   real_T angularBodyZ = onboard_env_model_ext_outputs.estimated_expect_ang_acc_body[2];
 
-  real_T commandEstimateX = onboard_env_model_ext_outputs.r_ref_com_est[0];
-  real_T commandEstimateY = onboard_env_model_ext_outputs.r_ref_com_est[1];
-  real_T commandEstimateZ = onboard_env_model_ext_outputs.r_ref_com_est[2];
+  real_T referenceEstimateX = onboard_env_model_ext_outputs.r_ref_com_est[0];
+  real_T referenceEstimateY = onboard_env_model_ext_outputs.r_ref_com_est[1];
+  real_T referenceEstimateZ = onboard_env_model_ext_outputs.r_ref_com_est[2];
 
   /* Indicate task complete */
   OverrunFlag = false;
@@ -92,21 +100,21 @@ void rtAttitudeDeterminationModelStep(void) {
   /* Re-enable timer or interrupt here */
   /* Set model inputs here */
 
-  attitude_determination_model_ext_inputs.earth_mag_field_ref[0] = 1.0;
-  attitude_determination_model_ext_inputs.earth_mag_field_ref[1] = 1.0;
-  attitude_determination_model_ext_inputs.earth_mag_field_ref[2] = 1.0;
+  attitude_determination_model_ext_inputs.earth_mag_field_ref[0] = -300;
+  attitude_determination_model_ext_inputs.earth_mag_field_ref[1] = 500;
+  attitude_determination_model_ext_inputs.earth_mag_field_ref[2] = 28000;
 
-  attitude_determination_model_ext_inputs.mes_aam[0] = 1.0;
-  attitude_determination_model_ext_inputs.mes_aam[1] = 1.0;
-  attitude_determination_model_ext_inputs.mes_aam[2] = 1.0;
+  attitude_determination_model_ext_inputs.mes_aam[0] = -0.2;
+  attitude_determination_model_ext_inputs.mes_aam[1] = -8.13;
+  attitude_determination_model_ext_inputs.mes_aam[2] = 0.05;
 
-  attitude_determination_model_ext_inputs.mes_mag[0] = 1.0;
-  attitude_determination_model_ext_inputs.mes_mag[1] = 1.0;
-  attitude_determination_model_ext_inputs.mes_mag[2] = 1.0;
+  attitude_determination_model_ext_inputs.mes_mag[0] = -356;
+  attitude_determination_model_ext_inputs.mes_mag[1] = 487;
+  attitude_determination_model_ext_inputs.mes_mag[2] = 26840;
 
-  attitude_determination_model_ext_inputs.mes_ss[0] = 1.0;
-  attitude_determination_model_ext_inputs.mes_ss[1] = 1.0;
-  attitude_determination_model_ext_inputs.mes_ss[2] = 1.0;
+  attitude_determination_model_ext_inputs.mes_ss[0] = 0.94;
+  attitude_determination_model_ext_inputs.mes_ss[1] = 0.75;
+  attitude_determination_model_ext_inputs.mes_ss[2] = 0.67;
 
   attitude_determination_model_ext_inputs.omega[0] = 1.0;
   attitude_determination_model_ext_inputs.omega[1] = 1.0;
@@ -116,25 +124,24 @@ void rtAttitudeDeterminationModelStep(void) {
   attitude_determination_model_ext_inputs.r_sat_com_ax1[1] = 1.0;
   attitude_determination_model_ext_inputs.r_sat_com_ax1[2] = 1.0;
 
-  attitude_determination_model_ext_inputs.ref_aam[0] = 1.0;
-  attitude_determination_model_ext_inputs.ref_aam[1] = 1.0;
-  attitude_determination_model_ext_inputs.ref_aam[2] = 1.0;
+  attitude_determination_model_ext_inputs.ref_aam[0] = -0.01;
+  attitude_determination_model_ext_inputs.ref_aam[1] = -8.29;
+  attitude_determination_model_ext_inputs.ref_aam[2] = 0.01;
 
   attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[0] = 1.0;
-  attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[1] = 1.0;
-  attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[2] = 1.0;
+  attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[1] = 0.0;
+  attitude_determination_model_ext_inputs.sat_to_sun_unit_ref[2] = 0.0;
 
-  attitude_determination_model_ext_inputs.steve_mes[0] = 1.0;
-  attitude_determination_model_ext_inputs.steve_mes[1] = 1.0;
-  attitude_determination_model_ext_inputs.steve_mes[2] = 1.0;
+  attitude_determination_model_ext_inputs.steve_mes[0] = 0.4;
+  attitude_determination_model_ext_inputs.steve_mes[1] = -0.3;
 
   /* Step the model */
   attitude_determination_and_vehi_step();
 
   /* Get model outputs here */
-  real_T angularVelocityX = attitude_determination_model_ext_outputs.meas_ang_vel_body[0];
-  real_T angularVelocityY = attitude_determination_model_ext_outputs.meas_ang_vel_body[1];
-  real_T angularVelocityZ = attitude_determination_model_ext_outputs.meas_ang_vel_body[2];
+  real_T measuredAngularVelocityX = attitude_determination_model_ext_outputs.meas_ang_vel_body[0];
+  real_T measuredAngularVelocityY = attitude_determination_model_ext_outputs.meas_ang_vel_body[1];
+  real_T measuredAngularVelocityZ = attitude_determination_model_ext_outputs.meas_ang_vel_body[2];
 
   real_T quaterionX = attitude_determination_model_ext_outputs.meas_quat_body[0];
   real_T quaterionY = attitude_determination_model_ext_outputs.meas_quat_body[1];
@@ -166,17 +173,19 @@ void rtAttitudeControlModelStep(void) {
   /* Re-enable timer or interrupt here */
   /* Set model inputs here */
 
-  attitude_control_model_ext_inputs.com_quat_body[0] = 1.0;
-  attitude_control_model_ext_inputs.com_quat_body[1] = 1.0;
-  attitude_control_model_ext_inputs.com_quat_body[2] = 1.0;
+  attitude_control_model_ext_inputs.com_quat_body[0] = sin(DEGREES_TO_RADIANS(25));
+  attitude_control_model_ext_inputs.com_quat_body[1] = cos(DEGREES_TO_RADIANS(25) / sqrt(2));
+  attitude_control_model_ext_inputs.com_quat_body[2] = cos(DEGREES_TO_RADIANS(24) / sqrt(2));
+  attitude_control_model_ext_inputs.com_quat_body[3] = 0.0;
 
-  attitude_control_model_ext_inputs.est_curr_ang_vel_body[0] = 1.0;
-  attitude_control_model_ext_inputs.est_curr_ang_vel_body[1] = 1.0;
-  attitude_control_model_ext_inputs.est_curr_ang_vel_body[2] = 1.0;
+  attitude_control_model_ext_inputs.est_curr_ang_vel_body[0] = 0.1;
+  attitude_control_model_ext_inputs.est_curr_ang_vel_body[1] = -0.05;
+  attitude_control_model_ext_inputs.est_curr_ang_vel_body[2] = 0.03;
 
-  attitude_control_model_ext_inputs.est_curr_quat_body[0] = 1.0;
-  attitude_control_model_ext_inputs.est_curr_quat_body[1] = 1.0;
-  attitude_control_model_ext_inputs.est_curr_quat_body[2] = 1.0;
+  attitude_control_model_ext_inputs.est_curr_quat_body[0] = cos(DEGREES_TO_RADIANS(-30));
+  attitude_control_model_ext_inputs.est_curr_quat_body[1] = sin(DEGREES_TO_RADIANS(-30) / sqrt(3));
+  attitude_control_model_ext_inputs.est_curr_quat_body[2] = sin(DEGREES_TO_RADIANS(-30) / sqrt(3));
+  attitude_control_model_ext_inputs.est_curr_quat_body[2] = 0.0;
 
   attitude_control_model_ext_inputs.mag_field_body[0] = 1.0;
   attitude_control_model_ext_inputs.mag_field_body[1] = 1.0;
@@ -186,13 +195,15 @@ void rtAttitudeControlModelStep(void) {
   attitude_control_step();
 
   /* Get model outputs here */
-  real_T dipoleX = attitude_control_model_ext_outputs.comm_mag_dipole_body[0];
-  real_T dipoleY = attitude_control_model_ext_outputs.comm_mag_dipole_body[1];
-  real_T dipoleZ = attitude_control_model_ext_outputs.comm_mag_dipole_body[2];
+  real_T commandedDipoleX = attitude_control_model_ext_outputs.comm_mag_dipole_body[0];
+  real_T commandedDipoleY = attitude_control_model_ext_outputs.comm_mag_dipole_body[1];
+  real_T commandedDipoleZ = attitude_control_model_ext_outputs.comm_mag_dipole_body[2];
 
-  real_T wheelTorqueX = attitude_control_model_ext_outputs.comm_wheel_torque_body[0];
-  real_T wheelTorqueY = attitude_control_model_ext_outputs.comm_wheel_torque_body[1];
-  real_T wheelTorqueZ = attitude_control_model_ext_outputs.comm_wheel_torque_body[2];
+  real_T commandedWheelTorqueX = attitude_control_model_ext_outputs.comm_wheel_torque_body[0];
+  real_T commandedWheelTorqueY = attitude_control_model_ext_outputs.comm_wheel_torque_body[1];
+  real_T commandedWheelTorqueZ = attitude_control_model_ext_outputs.comm_wheel_torque_body[2];
+
+  /* Use the outputs to control actuators */
 
   /* Indicate task complete */
   OverrunFlag = false;
@@ -224,6 +235,12 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     feedDigitalWatchdog();
 
     /* Place GNC Tasks here */
+
+    errCode = vn100ReadBinaryOutputs(&vn100Packet);
+
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      sciPrintf("Error reading from VN-100 - Error code %d", errCode);
+    }
 
     /* Refresh GNC outputs */
     rtOnboardModelStep();
