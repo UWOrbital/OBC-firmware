@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 typedef obc_gs_error_code_t (*unpack_cmd_handler_t)(cmd_unpacked_response_t*, uint8_t*, uint32_t*);
-static obc_gs_error_code_t _decodeResponse(cmd_callback_encoded_t encodedResponse, bool* success);
 
 static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer, uint32_t* offset);
 
@@ -19,21 +18,13 @@ obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_unpacked_response
   response->cmdId = unpackUint8(buffer, &offset);
   if (response->cmdId >= NUM_CMD_CALLBACKS) return OBC_GS_ERR_CODE_UNSUPPORTED_CMD;
 
-  cmd_callback_encoded_t encodedResp = (cmd_callback_encoded_t)unpackUint8(buffer, &offset);
-  obc_gs_error_code_t errCode = _decodeResponse(encodedResp, &response->success);
-  if (errCode != OBC_GS_ERR_CODE_SUCCESS) return errCode;
-
+  obc_gs_error_code_t errCode = 0;
+  cmd_response_error_code_t encodedResp = (cmd_response_error_code_t)unpackUint8(buffer, &offset);
   unpack_cmd_handler_t handler = unpackHandlers[response->cmdId];
   if (handler == NULL) return OBC_GS_ERR_CODE_SUCCESS;
 
   errCode = ((handler)(response, buffer, &offset));
   return errCode;
-}
-
-static obc_gs_error_code_t _decodeResponse(cmd_callback_encoded_t encodedResponse, bool* success) {
-  if (success == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
-  *success = (bool)(encodedResponse & 0x01);
-  return OBC_GS_ERR_CODE_SUCCESS;
 }
 
 static obc_gs_error_code_t unpackObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer,
