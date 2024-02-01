@@ -17,11 +17,19 @@
 #define INA230_REG_BUFF_SIZE 2U
 
 // TODO: init func
+obc_error_code_t ina230Init(ina230_config_t *config) {
+  obc_error_code_t errCode;
+
+  if (!config) return OBC_ERR_CODE_INVALID_ARG;
+
+  // write config and calibration
+  // return OBC_ERR_CODE_SUCCESS;
+}
 
 // TODO: write config func
 
 // TODO: read config func
 
-// TODO: calibration?
+// TODO: write calibration func
 
 // TODO: current, voltage, power funcs

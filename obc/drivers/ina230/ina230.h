@@ -1,5 +1,15 @@
 #pragma once
 
+typedef enum {
+  POWER_DOWN,
+  SHUNT_VOLT_TRIG,
+  BUS_VOLT_TRIG,
+  SHUNT_AND_BUS_TRIG,
+  SHUNT_VOLT_CTS,
+  BUS_VOLT_CTS,
+  SHUNT_AND_BUS_CTS
+} ina230_opmode_t;
+
 /**
  * @struct Configuration struct for INA230 sensor
  *
@@ -12,5 +22,5 @@ typedef struct {
   uint16_t sampleSize;
   float busVoltCT;
   float shuntVoltCT;
-  char[] opMode;
+  ina230_opmode_t opMode;
 } ina230_config_t;
