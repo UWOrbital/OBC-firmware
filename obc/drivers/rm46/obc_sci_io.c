@@ -95,7 +95,9 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   return errCode;
 }
 
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, sciBASE_t *sciReg) {
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, 
+                              size_t transferCompleteTimeoutTicks, sciBASE_t *sciReg) {
+  obc_error_code_t errCode;
   if (!(sciReg == scilinREG || sciReg == sciREG)) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -104,14 +106,33 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciMutex : sciLinMutex;
+  SemaphoreHandle_t mutex = NULL;
+  SemaphoreHandle_t transferCompleteSemaphore = NULL;
+
+  if (sciReg == sciREG) {
+    mutex = sciMutex;
+    transferCompleteSemaphore = sciTransferComplete;
+  } else {
+    mutex = sciLinMutex;
+    transferCompleteSemaphore = sciLinTransferComplete;
+  }
+
   configASSERT(mutex != NULL);
+  configASSERT(transferCompleteSemaphore != NULL);
 
   if (xSemaphoreTake(mutex, uartMutexTimeoutTicks) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
+  // Start asynchronous write
   sciSend(sciReg, numBytes, buf);
+
+  // Wait for transfer to complete
+  if (xSemaphoreTake(transferCompleteSemaphore, transferCompleteTimeoutTicks) != pdTRUE) {
+    errCode = OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
+  } else {
+    errCode = OBC_ERR_CODE_SUCCESS;
+  }
 
   xSemaphoreGive(mutex);
   return OBC_ERR_CODE_SUCCESS;
