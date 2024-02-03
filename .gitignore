@@ -54,6 +54,8 @@ dkms.conf
 # IDE files
 .vscode/
 .idea/
+compile_commands.json
+.cache/
 
 # HALCoGen-generated main file
 **/sys_main.c
@@ -68,3 +70,4 @@ venv/
 # Python
 __pycache__/
 .pytest_cache/
+*.egg-info/

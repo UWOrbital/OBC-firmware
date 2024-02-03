@@ -1,4 +1,10 @@
-pre-commit==3.3.3
+# Regular dependencies
 requests==2.31.0
-pytest==7.4.0
 pyserial==3.5
+
+# Development dependencies
+pre-commit==3.3.3
+pytest==7.4.0
+pytest-cov==4.1.0
+pypy==1.8.0
+flake8==7.0.0
