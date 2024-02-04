@@ -76,8 +76,8 @@ void rtOnboardModelStep(void) {
   real_T referenceEstimateZ = onboard_env_model_ext_outputs.r_ref_com_est[2];
 
   sciPrintf("Onboard modelling outputs are: \r\n");
-  sciPrintf("Angular Body: (%lf,%lf,%lf)", angularBodyX, angularBodyY, angularBodyZ);
-  sciPrintf("Reference Estimate: (%lf,%lf,%lf)", referenceEstimateX, referenceEstimateY, referenceEstimateZ);
+  sciPrintf("Angular Body: (%lf,%lf,%lf) \r\n", angularBodyX, angularBodyY, angularBodyZ);
+  sciPrintf("Reference Estimate: (%lf,%lf,%lf) \r\n", referenceEstimateX, referenceEstimateY, referenceEstimateZ);
 
   /* Indicate task complete */
   OverrunFlag = false;
@@ -153,9 +153,9 @@ void rtAttitudeDeterminationModelStep(void) {
   real_T quaterionW = attitude_determination_model_ext_outputs.meas_quat_body[3];
 
   sciPrintf("Attitude determintation outputs are: \r\n");
-  sciPrintf("Angular Velocity: (%lf,%lf,%lf)", measuredAngularVelocityX, measuredAngularVelocityY,
+  sciPrintf("Angular Velocity: (%lf,%lf,%lf) \r\n", measuredAngularVelocityX, measuredAngularVelocityY,
             measuredAngularVelocityZ);
-  sciPrintf("Quatereions: (%lf,%lf,%lf,%lf)", quaterionX, quaterionY, quaterionZ, quaterionW);
+  sciPrintf("Quatereions: (%lf,%lf,%lf,%lf) \r\n", quaterionX, quaterionY, quaterionZ, quaterionW);
 
   /* Indicate task complete */
   OverrunFlag = false;
@@ -215,8 +215,8 @@ void rtAttitudeControlModelStep(void) {
   /* Use the outputs to control actuators */
 
   sciPrintf("Attitude control outputs are: \r\n");
-  sciPrintf("Wheel Torque: (%lf,%lf,%lf)", commandedWheelTorqueX, commandedWheelTorqueY, commandedWheelTorqueZ);
-  sciPrintf("Quatereions: (%lf,%lf,%lf)", commandedDipoleX, commandedDipoleY, commandedDipoleZ);
+  sciPrintf("Wheel Torque: (%lf,%lf,%lf) \r\n", commandedWheelTorqueX, commandedWheelTorqueY, commandedWheelTorqueZ);
+  sciPrintf("Quatereions: (%lf,%lf,%lf) \r\n", commandedDipoleX, commandedDipoleY, commandedDipoleZ);
 
   /* Indicate task complete */
   OverrunFlag = false;
@@ -245,22 +245,40 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
 
   /* Run GNC tasks periodically at 20 Hz */
   while (1) {
-    feedDigitalWatchdog();
-
     /* Place GNC Tasks here */
 
-    errCode = vn100ReadBinaryOutputs(&vn100Packet);
+    TickType_t startTime = xTaskGetTickCount();
+    sciPrintf("Starting GNC Task at %d ms \r\n", startTime);
 
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error reading from VN-100 - Error code %d", errCode);
-    }
+    // errCode = vn100ReadBinaryOutputs(&vn100Packet);
+
+    // if (errCode != OBC_ERR_CODE_SUCCESS) {
+    //   sciPrintf("Error reading from VN-100 - Error code %d \r\n", errCode);
+    // }
 
     /* Refresh GNC outputs */
+    gioToggleBit(gioPORTA, 0);
     rtOnboardModelStep();
+    gioToggleBit(gioPORTA, 0);
+    TickType_t onboardModelElapsedTime = xTaskGetTickCount() - startTime;
+    sciPrintf("Elapsed Time of onboard model: %d ms \r\n", onboardModelElapsedTime);
 
+    gioToggleBit(gioPORTA, 0);
     rtAttitudeDeterminationModelStep();
+    gioToggleBit(gioPORTA, 0);
+    TickType_t attitudeDeterminationElapsedTime = xTaskGetTickCount() - onboardModelElapsedTime;
+    sciPrintf("Elapsed Time of attitude determination model: %d ms \r\n", attitudeDeterminationElapsedTime);
 
+    gioToggleBit(gioPORTA, 0);
     rtAttitudeControlModelStep();
+    gioToggleBit(gioPORTA, 0);
+    TickType_t attitudeControlElapsedTime = xTaskGetTickCount() - attitudeDeterminationElapsedTime;
+    sciPrintf("Elapsed Time of attitude control model: %d ms \r\n", attitudeControlElapsedTime);
+
+    TickType_t totalElapsedTime = xTaskGetTickCount() - startTime;
+    sciPrintf("Total elapsed Time of all algorithms: %d ms \r\n", totalElapsedTime);
+
+    feedDigitalWatchdog();
 
     /* This will automatically update the xLastWakeTime variable to be the last unblocked time, set to delay for 50ms */
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
