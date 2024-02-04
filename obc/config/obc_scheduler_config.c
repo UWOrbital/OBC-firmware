@@ -26,6 +26,7 @@
 #define TASK_HEALTH_COLLECTOR_NAME "health_collector"
 #define TASK_STATS_COLLECTOR_NAME "stats_collector"
 #define TASK_LOGGER_NAME "logger"
+#define TASK_GNC_MGR_NAME "gnc_mgr"
 
 // Task stack sizes in words
 #define TASK_STATE_MGR_STACK_SIZE 1024U
@@ -42,6 +43,7 @@
 #define TASK_HEALTH_COLLECTOR_STACK_SIZE 256U
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
 #define TASK_LOGGER_STACK_SIZE 512U
+#define TASK_GNC_MGR_STACK_SIZE 512U
 
 // All task priorities must be in [0, OBC_SCHEDULER_MAX_PRIORITY]
 #define OBC_SCHEDULER_MAX_PRIORITY configMAX_PRIORITIES - 1U
@@ -55,12 +57,13 @@
 #define TASK_COMMS_UPLINK_DECODE_PRIORITY TASK_COMMS_PRIORITY
 #define TASK_COMMS_DOWNLINK_ENCODE_PRIORITY TASK_COMMS_PRIORITY
 #define TASK_EPS_MGR_PRIORITY 3U
+#define TASK_GNC_MGR_PRIORITY 3U
 #define TASK_STATS_COLLECTOR_PRIORITY 4U
 #define TASK_ALARM_MGR_PRIORITY 4U
 #define TASK_STATE_MGR_PRIORITY 5U
+#define TASK_LOGGER_PRIORITY 5U
 #define TASK_TIMEKEEPER_PRIORITY 6U
 #define TASK_DIGITAL_WATCHDOG_MGR_PRIORITY OBC_SCHEDULER_MAX_PRIORITY
-#define TASK_LOGGER_PRIORITY 5U
 
 /* TYPEDEFS */
 typedef struct {
@@ -88,6 +91,7 @@ extern void obcTaskInitAlarmMgr(void);
 extern void obcTaskInitHealthCollector(void);
 extern void obcTaskInitStatsCollector(void);
 extern void obcTaskInitLogger(void);
+extern void obcTaskInitGncMgr(void);
 
 /* TASK FUNCTION PROTOTYPES */
 extern void obcTaskFunctionStateMgr(void *params);
@@ -104,6 +108,7 @@ extern void obcTaskFunctionAlarmMgr(void *params);
 extern void obcTaskFunctionHealthCollector(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
 extern void obcTaskFunctionLogger(void *params);
+extern void obcTaskFunctionGncMgr(void *params);
 
 /* PRIVATE FUNCTION PROTOTYPES */
 static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID);
@@ -147,6 +152,9 @@ static StaticTask_t obcTaskBufferHealthCollector;
 
 static StackType_t obcTaskStackLogger[TASK_LOGGER_STACK_SIZE];
 static StaticTask_t obcTaskBufferLogger;
+
+static StackType_t obcTaskStackGncMgr[TASK_GNC_MGR_STACK_SIZE];
+static StaticTask_t obcTaskBufferGncMgr;
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
 static StackType_t obcTaskStackTaskStatsCollector[TASK_STATS_COLLECTOR_STACK_SIZE];
@@ -283,6 +291,16 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = TASK_LOGGER_PRIORITY,
             .taskFunc = obcTaskFunctionLogger,
             .taskInit = obcTaskInitLogger,
+        },
+    [OBC_SCHEDULER_CONFIG_ID_GNC_MGR] =
+        {
+            .taskName = TASK_GNC_MGR_NAME,
+            .taskStack = obcTaskStackGncMgr,
+            .taskBuffer = &obcTaskBufferGncMgr,
+            .stackSize = TASK_GNC_MGR_STACK_SIZE,
+            .priority = TASK_GNC_MGR_PRIORITY,
+            .taskFunc = obcTaskFunctionGncMgr,
+            .taskInit = obcTaskInitGncMgr,
         },
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
