@@ -70,8 +70,8 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
   /* Initialize critical peripherals */
-  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
-  LOG_IF_ERROR_CODE(initTime());         // RTC
+  // LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
+  LOG_IF_ERROR_CODE(initTime());  // RTC
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
@@ -95,7 +95,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PWR_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_POWER_MGR);
@@ -113,7 +113,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PWR_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_POWER_MGR);
