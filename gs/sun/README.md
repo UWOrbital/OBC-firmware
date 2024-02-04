@@ -14,8 +14,8 @@ usage: ephemeris.py [-h] [-s STEP_SIZE] [-t TARGET] [-o OUTPUT] [-d] [-p {0,1,2}
 Position Ephemeris Retriever
 
 positional arguments:
--  start_time            Start time in the format YYYY-MM-DD or JD#
--  stop_time             Stop time in the format YYYY-MM-DD or JD#
+-  start_time            Start time in the format YYYY-MM-DD or JD#. Must be the same format as stop time.
+-  stop_time             Stop time in the format YYYY-MM-DD or JD#. Must be the same format as start time.
 
 options:
 -  -h, --help           <br>

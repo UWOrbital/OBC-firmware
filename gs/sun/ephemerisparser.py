@@ -2,21 +2,22 @@
 # Test harness for test_ephemeris.py
 from __future__ import annotations
 
-# Standard library imports
-from typing import List, BinaryIO
-import struct
-from dataclasses import dataclass
-
 # Local application imports
 from . import ephemeris
 from .ephemeris import DataPoint
 
+# Standard library imports
+from typing import List, BinaryIO
+import struct
+import dataclasses
 
-@dataclass
+
+@dataclasses.dataclass
 class Header:
     """
     Data class to store the header information
     """
+
     start_time: float
     step_size: float
     num_data_points: int
@@ -28,14 +29,16 @@ def parse_header(file: str) -> Header:
 
     :param file: The file to read from
     """
-    with open(file, "rb") as file:
-        file.seek(0)
+    with open(file, "rb") as f:
+        f.seek(0)
         # Read 2 double values
-        start_time = get_single_data_point(file, False)
-        step_size = get_single_data_point(file, False)
+        start_time = get_single_data_point(f, False)
+        step_size = get_single_data_point(f, False)
 
         # Read 1 uint value
-        num_data_points = int(struct.unpack(ephemeris.DATA_UINT, file.read(ephemeris.SIZE_OF_INT))[0])
+        num_data_points = int(
+            struct.unpack(ephemeris.DATA_UINT, f.read(ephemeris.SIZE_OF_INT))[0]
+        )
         return Header(start_time, step_size, num_data_points)
 
 
@@ -68,14 +71,18 @@ def parse_file(file: str) -> List[DataPoint]:
     output = []
     header = parse_header(file)
 
-    with open(file, "rb") as file:
-        file.seek(ephemeris.SIZE_OF_HEADER)
+    with open(file, "rb") as f:
+        f.seek(ephemeris.SIZE_OF_HEADER)
 
         # Read and calculate the data points
         for i in range(header.num_data_points):
             jd = header.start_time + (i * header.step_size)
-            data_point = DataPoint(jd, get_single_data_point(file),
-                                   get_single_data_point(file), get_single_data_point(file))
+            data_point = DataPoint(
+                jd,
+                get_single_data_point(f),
+                get_single_data_point(f),
+                get_single_data_point(f),
+            )
             output.append(data_point)
 
     return output
