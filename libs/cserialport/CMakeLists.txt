@@ -10,6 +10,7 @@ add_library(${CSERIALPORT_LIB} STATIC
     source/SerialPortInfoBase.cpp
     source/SerialPortInfoUnixBase.cpp    
     source/SerialPortUnixBase.cpp
+    bindings/c/cserialport.cpp
 )
 
 elseif(WIN32)
@@ -20,6 +21,7 @@ add_library(${CSERIALPORT_LIB} STATIC
     source/SerialPortInfoBase.cpp
     source/SerialPortInfoWinBase.cpp
     source/SerialPortWinBase.cpp
+    bindings/c/cserialport.cpp
 )
 endif()
 
