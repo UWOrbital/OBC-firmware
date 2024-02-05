@@ -23,19 +23,19 @@ static const bl_uart_reg_config_t bl_uart_reg_config[] = {
 };
 
 /* PUBLIC FUNCTIONS */
-void bl_uart_init(void) {
+void blUartInit(void) {
   sciInit();
 
   sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG_1].sciReg, bl_uart_reg_config[BL_UART_SCIREG_1].baud);
   sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG_2].sciReg, bl_uart_reg_config[BL_UART_SCIREG_2].baud);
 }
 
-void bl_uart_readBytes(bl_uart_reg_t reg, uint8_t *buf, uint32_t numBytes) {
+void blUartReadBytes(bl_uart_reg_t reg, uint8_t *buf, uint32_t numBytes) {
   for (uint32_t i = 0U; i < numBytes; i++) {
     buf[i] = (uint8_t)sciReceiveByte(bl_uart_reg_config[reg].sciReg);
   }
 }
 
-void bl_uart_writeBytes(bl_uart_reg_t reg, uint32_t numBytes, uint8_t *buf) {
+void blUartWriteBytes(bl_uart_reg_t reg, uint32_t numBytes, uint8_t *buf) {
   sciSend(bl_uart_reg_config[reg].sciReg, numBytes, buf);
 }

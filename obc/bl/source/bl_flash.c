@@ -13,7 +13,7 @@
 #define BL_FLASH_BANK_WIDTH_BYTES 16U      // Programming at an address is limited to the bank width number of bytes
 
 /* PUBLIC FUNCTION DEFINITIONS */
-bl_error_code_t bl_flash_fapiInitBank(uint32_t bankNum) {
+bl_error_code_t blFlashFapiInitBank(uint32_t bankNum) {
   if ((Fapi_initializeFlashBanks(SYS_CLK_FREQ)) != Fapi_Status_Success) {
     return BL_ERR_CODE_UNKNOWN;
   }
@@ -27,13 +27,13 @@ bl_error_code_t bl_flash_fapiInitBank(uint32_t bankNum) {
   }
 
   // Possible infinite loop, but watchdog should reset the device if it gets stuck
-  bl_flash_waitFsmReady();
-  bl_flash_waitFsmStatusSuccess();
+  blFlashWaitFsmReady();
+  blFlashWaitFsmStatusSuccess();
 
   return BL_ERR_CODE_SUCCESS;
 }
 
-uint8_t bl_flash_sectorOfAddr(uint32_t addr) {
+uint8_t blFlashSectorOfAddr(uint32_t addr) {
   uint8_t sector = 0U;
   for (uint8_t i = 0U; i < NUM_FLASH_SECTORS; i++) {
     const uint32_t sectorStartAddr = (uint32_t)(flashSectors[i].start);
@@ -48,15 +48,15 @@ uint8_t bl_flash_sectorOfAddr(uint32_t addr) {
   return sector;
 }
 
-uint32_t bl_flash_sectorStartAddr(uint8_t sector) { return (uint32_t)(flashSectors[sector].start); }
+uint32_t blFlashSectorStartAddr(uint8_t sector) { return (uint32_t)(flashSectors[sector].start); }
 
-uint32_t bl_flash_sectorEndAddr(uint8_t sector) {
+uint32_t blFlashSectorEndAddr(uint8_t sector) {
   return (uint32_t)(flashSectors[sector].start) + flashSectors[sector].length;
 }
 
-uint8_t bl_flash_getNumSectors(void) { return NUM_FLASH_SECTORS; }
+uint8_t blFlashGetNumSectors(void) { return NUM_FLASH_SECTORS; }
 
-bl_error_code_t bl_flash_fapiBlockErase(uint32_t startAddr, uint32_t size) {
+bl_error_code_t blFlashFapiBlockErase(uint32_t startAddr, uint32_t size) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
   const uint32_t endAddr = startAddr + size;
@@ -64,8 +64,8 @@ bl_error_code_t bl_flash_fapiBlockErase(uint32_t startAddr, uint32_t size) {
   // Find the start and end of the sectors to erase. Assume flashSectors is sorted
   // by start address, and that the first sector starts at address 0
 
-  const uint8_t startSector = bl_flash_sectorOfAddr(startAddr);
-  const uint8_t endSector = bl_flash_sectorOfAddr(endAddr);
+  const uint8_t startSector = blFlashSectorOfAddr(startAddr);
+  const uint8_t endSector = blFlashSectorOfAddr(endAddr);
 
   for (uint8_t i = startSector; i < endSector + 1U; i++) {
     if (Fapi_issueAsyncCommandWithAddress(Fapi_EraseSector, flashSectors[i].start) != Fapi_Status_Success) {
@@ -73,14 +73,14 @@ bl_error_code_t bl_flash_fapiBlockErase(uint32_t startAddr, uint32_t size) {
       break;
     }
 
-    bl_flash_waitFsmReady();
-    bl_flash_waitFsmStatusSuccess();
+    blFlashWaitFsmReady();
+    blFlashWaitFsmStatusSuccess();
   }
 
   return errCode;
 }
 
-bl_error_code_t bl_flash_fapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32_t numBytes) {
+bl_error_code_t blFlashFapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32_t numBytes) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
   register uint32_t src = srcAddr;
@@ -95,8 +95,8 @@ bl_error_code_t bl_flash_fapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint
       break;
     }
 
-    bl_flash_waitFsmReady();
-    bl_flash_waitFsmStatusSuccess();
+    blFlashWaitFsmReady();
+    blFlashWaitFsmStatusSuccess();
 
     src += bytesToFlashNext;
     dst += bytesToFlashNext;
@@ -111,7 +111,7 @@ bl_error_code_t bl_flash_fapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint
   return errCode;
 }
 
-bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize) {
+bool blFlashIsStartAddrValid(uint32_t addr, uint32_t binSize) {
   const uint32_t lastFlashAddr =
       (uint32_t)flashSectors[NUM_FLASH_SECTORS - 1].start + flashSectors[NUM_FLASH_SECTORS - 1].length;
 
@@ -140,13 +140,13 @@ bool bl_flash_isStartAddrValid(uint32_t addr, uint32_t binSize) {
   return true;
 }
 
-void bl_flash_waitFsmReady(void) {
+void blFlashWaitFsmReady(void) {
   while (FAPI_CHECK_FSM_READY_BUSY != Fapi_Status_FsmReady) {
     asm(" NOP");
   }
 }
 
-void bl_flash_waitFsmStatusSuccess(void) {
+void blFlashWaitFsmStatusSuccess(void) {
   while (FAPI_GET_FSM_STATUS != Fapi_Status_Success) {
     asm(" NOP");
   }

@@ -11,7 +11,7 @@ typedef enum {
  * @brief Initialize the UART module
  *
  */
-void bl_uart_init(void);
+void blUartInit(void);
 
 /**
  * @brief Read a stream of bytes from the UART
@@ -20,7 +20,7 @@ void bl_uart_init(void);
  * @param buf Buffer to read into
  * @param numBytes Number of bytes to read
  */
-void bl_uart_readBytes(bl_uart_reg_t uartReg, uint8_t *buf, uint32_t numBytes);
+void blUartReadBytes(bl_uart_reg_t uartReg, uint8_t *buf, uint32_t numBytes);
 
 /**
  * @brief Write a stream of bytes to the UART
@@ -29,4 +29,4 @@ void bl_uart_readBytes(bl_uart_reg_t uartReg, uint8_t *buf, uint32_t numBytes);
  * @param buf Buffer to write from
  * @param numBytes Number of bytes to write
  */
-void bl_uart_writeBytes(bl_uart_reg_t uartReg, uint32_t numBytes, uint8_t *buf);
+void blUartWriteBytes(bl_uart_reg_t uartReg, uint32_t numBytes, uint8_t *buf);
