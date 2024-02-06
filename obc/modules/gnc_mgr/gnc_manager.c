@@ -1,4 +1,5 @@
 #include "obc_digital_watchdog.h"
+#include "digital_watchdog_mgr.h"
 #include "obc_errors.h"
 #include "obc_scheduler_config.h"
 #include "obc_print.h"
@@ -181,8 +182,8 @@ void rtAttitudeControlModelStep(void) {
 
   /* Save FPU context here (if necessary) */
   /* Re-enable timer or interrupt here */
-  /* Set model inputs here */
 
+  /* Set model inputs here */
   attitude_control_model_ext_inputs.com_quat_body[0] = sin(DEGREES_TO_RADIANS(25));
   attitude_control_model_ext_inputs.com_quat_body[1] = cos(DEGREES_TO_RADIANS(25) / sqrt(2));
   attitude_control_model_ext_inputs.com_quat_body[2] = cos(DEGREES_TO_RADIANS(24) / sqrt(2));
@@ -262,24 +263,25 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     rtOnboardModelStep();
     gioToggleBit(gioPORTA, 0);
     TickType_t onboardModelElapsedTime = xTaskGetTickCount() - startTime;
-    sciPrintf("Elapsed Time of onboard model: %d ms \r\n", onboardModelElapsedTime);
 
     gioToggleBit(gioPORTA, 0);
     rtAttitudeDeterminationModelStep();
     gioToggleBit(gioPORTA, 0);
-    TickType_t attitudeDeterminationElapsedTime = xTaskGetTickCount() - onboardModelElapsedTime;
-    sciPrintf("Elapsed Time of attitude determination model: %d ms \r\n", attitudeDeterminationElapsedTime);
+    TickType_t attitudeDeterminationElapsedTime = xTaskGetTickCount() - (onboardModelElapsedTime + startTime);
 
     gioToggleBit(gioPORTA, 0);
     rtAttitudeControlModelStep();
     gioToggleBit(gioPORTA, 0);
-    TickType_t attitudeControlElapsedTime = xTaskGetTickCount() - attitudeDeterminationElapsedTime;
-    sciPrintf("Elapsed Time of attitude control model: %d ms \r\n", attitudeControlElapsedTime);
+    TickType_t attitudeControlElapsedTime = xTaskGetTickCount() - (attitudeDeterminationElapsedTime + startTime);
 
     TickType_t totalElapsedTime = xTaskGetTickCount() - startTime;
+
+    sciPrintf("Elapsed Time of onboard model: %d ms \r\n", onboardModelElapsedTime);
+    sciPrintf("Elapsed Time of attitude determination model: %d ms \r\n", attitudeDeterminationElapsedTime);
+    sciPrintf("Elapsed Time of attitude control model: %d ms \r\n", attitudeControlElapsedTime);
     sciPrintf("Total elapsed Time of all algorithms: %d ms \r\n", totalElapsedTime);
 
-    feedDigitalWatchdog();
+    digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
 
     /* This will automatically update the xLastWakeTime variable to be the last unblocked time, set to delay for 50ms */
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
