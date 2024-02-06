@@ -138,6 +138,7 @@ void rtAttitudeDeterminationModelStep(void) {
 
   attitude_determination_model_ext_inputs.steve_mes[0] = 0.4;
   attitude_determination_model_ext_inputs.steve_mes[1] = -0.3;
+  attitude_determination_model_ext_inputs.steve_mes[2] = 0.0;
 
   /* Step the model */
   attitude_determination_and_vehi_step();
