@@ -60,3 +60,7 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
     * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
   *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
+
+__attribute__((weak)) void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName ) {
+  return;
+}

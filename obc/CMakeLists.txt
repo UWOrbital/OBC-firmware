@@ -128,6 +128,7 @@ add_subdirectory(bl)
 target_link_libraries(OBC-bl.out PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
+    f021_api_archive
 )
 
 # Tools

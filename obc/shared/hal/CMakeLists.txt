@@ -139,6 +139,12 @@ add_library(${HAL_LIB_OPTIMIZE} STATIC)
 target_include_directories(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 target_sources(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_SOURCES})
 
+if (DEBUG MATCHES 1)
+    target_compile_options(${HAL_LIB_OPTIMIZE} PRIVATE -O0)
+else()
+    target_compile_options(${HAL_LIB_OPTIMIZE} PRIVATE -O2)
+endif()
+
 # Higher optimization levels on some hal files will break firmware for some reason
 # Compile them with no optimizations
 add_library(${HAL_LIB_NO_OPTIMIZE} OBJECT)
