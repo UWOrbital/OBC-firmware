@@ -31,6 +31,10 @@
 #include <sys_common.h>
 #include <gio.h>
 
+// Rm:
+#include "obc_print.h"
+#include <string.h>
+
 #define COMMS_MAX_DOWNLINK_FRAMES 1000U
 #define RFFM6404_VAPC_REGULAR_POWER_VAL 1.9f
 
@@ -295,37 +299,11 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
 
   initAllCc1120TxRxSemaphores();
   LOG_IF_ERROR_CODE(cc1120Init());
-
+  uint8_t buff[300];
+  memset(buff, 0xA5, 300);
   while (1) {
-    comms_event_t queueMsg;
-
-    if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-      continue;
-    }
-
-    LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      continue;
-    }
-
-    if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-      commsState = COMMS_STATE_DISCONNECTED;
-      continue;
-    }
-
-    if (commsStateFns[commsState] == NULL) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-      commsState = COMMS_STATE_DISCONNECTED;
-      continue;
-    }
-
-    LOG_IF_ERROR_CODE(commsStateFns[commsState]());
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      rffm6404PowerOff();
-      comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
-      sendToCommsManagerQueue(&event);
-    }
+    cc1120Send(buff, 300, 500);
+    sciPrintf("Sent");
   }
 }
 

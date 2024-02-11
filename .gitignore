@@ -64,6 +64,9 @@ dkms.conf
 
 .venv/
 venv/
+.cache/
+compile_commands.json
+*.swp
 
 # Python
 __pycache__/
