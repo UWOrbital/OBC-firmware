@@ -17,58 +17,71 @@ void initADCMutex(void) {
     adcConversionMutex = xSemaphoreCreateMutexStatic(&adcConversionMutexBuffer);
   }
   ASSERT(adcConversionMutex != NULL);
+  return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group, adcData_t *data) {
-  if (adc == NULL || data == NULL) {
+obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group, float *reading,
+                                  TickType_t blockTime) {
+  if (adc == NULL || reading == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  ASSERT(adcConversionMutex != NULL);
+  if (adcConversionMutex == NULL) {
+    return OBC_ERR_CODE_INVALID_STATE;
+  }
 
-  if (xSemaphoreTake(adcConversionMutex, portMAX_DELAY) != pdTRUE) {
+  adcData_t adcData[MAXGROUPSIZE];
+
+  if (adcGetGroupData(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
-  adc->GxSEL[group] = 1 << channel;
-
-  volatile uint32_t *statusReg;
-  if (group == 0) {
-    statusReg = &(adc->EVSR);
-  } else if (group == 1) {
-    statusReg = &(adc->G1SR);
-  } else {
-    statusReg = &(adc->G2SR);
+  adcData_t *ptr = adcData;
+  uint32_t groupSize = s_adcFifoSize[(adc == adcREG1) ? 0U : 1U, group];
+  for (int i = 0; i < groupSize; i++) {
+    if (ptr->id == channel) {
+      *reading = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
+      return OBC_ERR_CODE_SUCCESS;
+    }
   }
 
-  while (!(*statusReg & 0x1))
-    ;
+  return OBC_ERR_CODE_ADC_INVALID_CHANNEL;
+}
 
-  adcStopConversion(adc, group);
-  adcReadSingleData(adc, group, *data);
+obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t group, float *readings, TickType_t blockTime) {
+  if (adc == NULL || readings == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
 
-  xSemaphoreGive(adcConversionMutex);
+  if (adcConversionMutex == NULL) {
+    return OBC_ERR_CODE_INVALID_STATE;
+  }
+
+  adcData_t adcData[MAXGROUPSIZE];
+
+  if (adcGetGroupData(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+  }
+
+  adcData_t *ptr = adcData;
+  float *readingPtr = reading;
+  uint32_t groupSize = s_adcFiFoSize[(adc == adcREG1) ? 0U : 1U, group];
+
+  for (int i = 0; i < groupSize; i++) {
+    *readingPtr = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
+    ptr++;
+    readingPtr++;
+  }
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t adcReadSingleData(adcBASE_t *adc, uint8_t group, adcData_t *data) {
-  unsigned buf;
-  adcData_t *ptr = data;
-
-  buf = adc->GxBUF[group].BUF0;
-  ptr->value = (unsigned short)(buf & 0xFFFU);
-  ptr->id = (unsigned short)((buf >> 16U) & 0x1FU);
-
-  return OBC_ERR_CODE_SUCCESS;
-}
-
-static obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t channel, uint8_t group, adcData_t *data) {
+static obc_error_code_t adcGetGroupReadings(adcBASE_t *adc, uint8_t group, adcData_t *data, TickType_t blockTime) {
   if (adc == NULL || data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xStaticSemaphoreTake(adcConversionMutexBuffer, portMAX_DELAY) != pdTRUE) {
+  if (xStaticSemaphoreTake(adcConversionMutexBuffer, blockTime) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -80,6 +93,7 @@ static obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t channel, uint8_t
   adcStopConversion(adc, group);
 
   adcGetData(adc, group, data);
+
   adcResetFiFo(*adc, group);
 
   xSemaphoreGive(adcConversionMutex);
