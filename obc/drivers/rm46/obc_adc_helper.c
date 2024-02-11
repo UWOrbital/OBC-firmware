@@ -32,7 +32,7 @@ obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group
 
   adcData_t adcData[MAXGROUPSIZE];
 
-  if (adcGetGroupData(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
+  if (adcGetGroupReadings(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -59,7 +59,7 @@ obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t group, float *readings,
 
   adcData_t adcData[MAXGROUPSIZE];
 
-  if (adcGetGroupData(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
+  if (adcGetGroupReadings(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
