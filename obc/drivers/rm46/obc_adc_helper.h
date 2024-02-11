@@ -14,8 +14,11 @@
 
 // Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
 #define MAXGROUPSIZE 16U
-
+// Assumes all groups have same resolution for simplicity. Could make this more flexible/not a macro.
 #define RESOLUTION 12U
+
+// Hardcoded table. # of channels in Groups 0-2 for ADC modules 1-2. Update as necessary.
+const uint32_t adcGroupSize[2U][3U] = {{16U, 16U, 16U}, {16U, 16U, 16U}};
 
 /**
  * @brief Initialize the ADC bus mutex
@@ -23,7 +26,8 @@
 void initADCMutex(void);
 
 /**
- * @note Get data from a single ADC channel
+ * @note Get data from a single ADC channel. ADC conversion mode channel ID should be ENABLED for all groups this is
+ * called for.
  * @param adc Pointer to adc module
  * @param channel Channel number
  * @param group Group number (0-2)

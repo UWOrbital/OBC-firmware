@@ -37,7 +37,7 @@ obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group
   }
 
   adcData_t *ptr = adcData;
-  uint32_t groupSize = s_adcFifoSize[(adc == adcREG1) ? 0U : 1U, group];
+  uint32_t groupSize = adcGroupSize[(adc == adcREG1) ? 0U : 1U, group];
   for (int i = 0; i < groupSize; i++) {
     if (ptr->id == channel) {
       *reading = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
@@ -64,8 +64,8 @@ obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t group, float *readings,
   }
 
   adcData_t *ptr = adcData;
-  float *readingPtr = reading;
-  uint32_t groupSize = s_adcFiFoSize[(adc == adcREG1) ? 0U : 1U, group];
+  float *readingPtr = readings;
+  uint32_t groupSize = adcGroupSize[(adc == adcREG1) ? 0U : 1U, group];
 
   for (int i = 0; i < groupSize; i++) {
     *readingPtr = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
