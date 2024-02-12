@@ -252,26 +252,20 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     TickType_t startTime = xTaskGetTickCount();
     sciPrintf("Starting GNC Task at %d ms \r\n", startTime);
 
-    // errCode = vn100ReadBinaryOutputs(&vn100Packet);
+    errCode = vn100ReadBinaryOutputs(&vn100Packet);
 
-    // if (errCode != OBC_ERR_CODE_SUCCESS) {
-    //   sciPrintf("Error reading from VN-100 - Error code %d \r\n", errCode);
-    // }
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      sciPrintf("Error reading from VN-100 - Error code %d \r\n", errCode);
+    }
 
     /* Refresh GNC outputs */
-    gioToggleBit(gioPORTA, 0);
     rtOnboardModelStep();
-    gioToggleBit(gioPORTA, 0);
     TickType_t onboardModelElapsedTime = xTaskGetTickCount() - startTime;
 
-    gioToggleBit(gioPORTA, 0);
     rtAttitudeDeterminationModelStep();
-    gioToggleBit(gioPORTA, 0);
     TickType_t attitudeDeterminationElapsedTime = xTaskGetTickCount() - (onboardModelElapsedTime + startTime);
 
-    gioToggleBit(gioPORTA, 0);
     rtAttitudeControlModelStep();
-    gioToggleBit(gioPORTA, 0);
     TickType_t attitudeControlElapsedTime = xTaskGetTickCount() - (attitudeDeterminationElapsedTime + startTime);
 
     TickType_t totalElapsedTime = xTaskGetTickCount() - startTime;
