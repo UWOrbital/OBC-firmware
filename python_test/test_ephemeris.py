@@ -442,7 +442,9 @@ $$SOE
 1998-Jan-01 23:00     20 57 24.67 -18 26 08.9    1.216   4.123  2.13974288296371   5.5981098
 1998-Jan-02 00:00     20 57 32.63 -18 25 35.4    1.205   4.111  2.13987759677950   5.5975872
 $$EOE
-    """.split("\n")
+    """.split(
+        "\n"
+    )
     assert len(ephemeris.extract_data_lines(lines)) == 15
 
 
@@ -450,7 +452,9 @@ def test_extract_data_points_no_data():
     lines = """
 $$SOE
 $$EOE
-    """.split("\n")
+    """.split(
+        "\n"
+    )
     assert len(ephemeris.extract_data_lines(lines)) == 0
 
 
@@ -475,7 +479,9 @@ $$SOE
 1998-Jan-01 23:00     20 57 24.67 -18 26 08.9    1.216   4.123  2.13974288296371   5.5981098
 $$EOE
 1998-Jan-02 00:00     20 57 32.63 -18 25 35.4    1.205   4.111  2.13987759677950   5.5975872
-    """.split("\n")
+    """.split(
+        "\n"
+    )
     assert len(ephemeris.extract_data_lines(lines)) == 12
 
 

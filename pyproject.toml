@@ -11,9 +11,10 @@ testpaths = [
 [tool.mypy]
 exclude = [
   "libs/*",
+  "cmake/*",
   "build*",
-  "python_test",
-  "test"
+  "python_test/*",
+  "test/*"
 ]
 mypy_path = "gs:obc/tools"
 strict = true # Should be good to start off with
