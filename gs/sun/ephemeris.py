@@ -383,6 +383,7 @@ def write_header(
 
 
 def to_date(date: str) -> datetime.date:
+    """Converts the given string to a date"""
     year, month, day = date.split("-")
     return datetime.date(year=int(year), month=int(month), day=int(day))
 
