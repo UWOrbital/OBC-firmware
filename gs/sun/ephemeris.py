@@ -248,6 +248,7 @@ def check_version(data: dict) -> ErrorCode:
     """
     Prints out a warning if the version is different from the supported one
     :param data: response.txt
+    :return: ErrorCode.SUCCESS if successful otherwise an error code
     """
     signature = data.get("signature")
 
