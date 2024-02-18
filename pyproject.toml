@@ -3,13 +3,19 @@ requires = ["setuptools>=59.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-# addopts = "--cov=slapping"
+addopts = "--cov=gs --cov=obc/tools -v"
 testpaths = [
-    "tests",
+    "python_test",
 ]
 
 [tool.mypy]
-mypy_path = "."
+exclude = [
+  "libs/*",
+  "build*",
+  "python_test",
+  "test"
+]
+mypy_path = "gs:obc/tools"
 check_untyped_defs = true
 disallow_any_generics = true
 ignore_missing_imports = true

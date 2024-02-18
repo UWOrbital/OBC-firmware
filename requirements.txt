@@ -2,9 +2,12 @@
 requests==2.31.0
 pyserial==3.5
 
+# Typed packages
+types-requests==2.31.0
+
 # Development dependencies
 pre-commit==3.3.3
 pytest==7.4.0
 pytest-cov==4.1.0
-pypy==1.8.0
+mypy==1.8.0
 flake8==7.0.0

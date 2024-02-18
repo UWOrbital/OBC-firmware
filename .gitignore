@@ -64,10 +64,10 @@ compile_commands.json
 
 /build*
 
+# Python
 .venv/
 venv/
-
-# Python
 __pycache__/
 .pytest_cache/
 *.egg-info/
+*.coverage

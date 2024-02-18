@@ -6,8 +6,8 @@ import os
 import struct
 
 # Local Imports
-from sun import ephemerisparser as ep
-from sun import ephemeris
+from gs.sun import ephemerisparser as ep
+from gs.sun import ephemeris
 
 
 @pytest.mark.parametrize(

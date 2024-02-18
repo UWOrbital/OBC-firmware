@@ -5,10 +5,10 @@ import logging
 import os
 import math
 
-from sun import ephemeris
-from sun.ephemeris import ErrorCode
-from sun.ephemeris import DataPoint
-from sun import ephemerisparser as ep
+from gs.sun import ephemeris
+from gs.sun.ephemeris import ErrorCode
+from gs.sun.ephemeris import DataPoint
+from gs.sun import ephemerisparser as ep
 
 
 @pytest.mark.parametrize(
