@@ -67,6 +67,10 @@ def send_bin(file_path: str, com_port: str) -> None:
 
 
 def arg_parse() -> ArgumentParser:
+    """Returns the argument parser
+
+    :return: Parser object
+    """
     parser = ArgumentParser(description="Append custom data to .bin and send")
 
     # Add arguments

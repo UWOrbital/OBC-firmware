@@ -195,6 +195,7 @@ def convert_date_to_jd(time: str) -> float:
     Converts the inputted time to a jd if it is a datetime of the format YYYY-MM-DD.
     If it is a jd#, then the number part is returned. This function doesnt not perform error
     checking.
+
     :param time: The time to convert to jd
     :return: jd of inputted time
     """
@@ -247,6 +248,7 @@ def validate_input(
 def check_version(data: dict) -> ErrorCode:
     """
     Prints out a warning if the version is different from the supported one
+
     :param data: response.txt
     :return: ErrorCode.SUCCESS if successful otherwise an error code
     """
