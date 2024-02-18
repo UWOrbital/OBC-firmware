@@ -195,6 +195,8 @@ def convert_date_to_jd(time: str) -> float:
     Converts the inputted time to a jd if it is a datetime of the format YYYY-MM-DD.
     If it is a jd#, then the number part is returned. This function doesnt not perform error
     checking.
+    :param time: The time to convert to jd
+    :return: jd of inputted time
     """
     if time.startswith("JD"):
         return float(time[2:])
