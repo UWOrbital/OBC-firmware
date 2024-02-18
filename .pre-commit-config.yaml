@@ -16,3 +16,7 @@ repos:
     - id: clang-format
       types_or: [c++, c]
       exclude: '(libs|hal)/.*'
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: '8cd2d4056637e242709fe09f15a36f0b4b682bda'
+    hooks:
+    -   id: mypy
