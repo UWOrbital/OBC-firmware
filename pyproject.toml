@@ -15,3 +15,14 @@ exclude = [
   "test/*"]
 mypy_path = "gs:obc/tools"
 strict = true # Should be good to start off with
+
+[tool.isort]
+profile = "black"
+py_version = 310
+extend_skip_glob = [
+  "build*",
+  "libs/*",
+  "cmake/*",
+  "test/*"]
+skip_gitignore = true
+#line_length = 160 # Same as flake8

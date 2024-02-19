@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.5.0
     hooks:
     - id: trailing-whitespace
       exclude: '(libs|hal)/.*'
@@ -11,7 +11,7 @@ repos:
     - id: check-added-large-files
       exclude: '(libs|hal)/.*'
 -   repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v14.0.6
+    rev: v17.0.6
     hooks:
     - id: clang-format
       types_or: [c++, c]
@@ -20,6 +20,11 @@ repos:
     rev: 24.2.0
     hooks:
     -   id: black
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        #args: ["-c", "-v"]
 -   repo: https://github.com/PyCQA/flake8
     rev: 7.0.0
     hooks:
