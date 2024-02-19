@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-# 3rd party imports
-import requests
-
 # Standard library imports
 import argparse
+import dataclasses
+import datetime
+import enum
 import json
+import logging
+import math
+import os
+import re
 import struct
 import sys
-import logging
-import re
 from typing import BinaryIO, Final, Iterable, List
-import dataclasses
-import math
-import enum
-import os
-import datetime
+
+# 3rd party imports
+import requests
 
 # Script constants
 SUPPORTED_VERSION: Final[str] = "1.2"

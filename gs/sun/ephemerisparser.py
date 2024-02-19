@@ -2,14 +2,15 @@
 # Test harness for test_ephemeris.py
 from __future__ import annotations
 
+import dataclasses
+import struct
+
+# Standard library imports
+from typing import BinaryIO, List
+
 # Local application imports
 from . import ephemeris
 from .ephemeris import DataPoint
-
-# Standard library imports
-from typing import List, BinaryIO
-import struct
-import dataclasses
 
 
 @dataclasses.dataclass

@@ -1,9 +1,10 @@
-from dataclasses import dataclass
 import struct
-import serial
 from argparse import ArgumentParser
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
+
+import serial
 
 OBC_UART_BAUD_RATE: Final = 115200
 

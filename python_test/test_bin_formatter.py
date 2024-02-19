@@ -1,8 +1,8 @@
-from obc.tools.python.bin_formatter import create_bin
+import os
 
 from pytest import mark
 
-import os
+from obc.tools.python.bin_formatter import create_bin
 
 
 # Expected header is the header in bytes

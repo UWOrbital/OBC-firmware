@@ -1,13 +1,13 @@
 # 3rd Party Imports
-import pytest
-
 # Standard Imports
 import os
 import struct
 
+import pytest
+
 # Local Imports
-from gs.sun import ephemerisparser as ep
 from gs.sun import ephemeris
+from gs.sun import ephemerisparser as ep
 
 
 @pytest.mark.parametrize(

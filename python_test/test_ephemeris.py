@@ -1,14 +1,13 @@
+import logging
+import math
+import os
+import struct
+
 import pytest
 
-import struct
-import logging
-import os
-import math
-
 from gs.sun import ephemeris
-from gs.sun.ephemeris import ErrorCode
-from gs.sun.ephemeris import DataPoint
 from gs.sun import ephemerisparser as ep
+from gs.sun.ephemeris import DataPoint, ErrorCode
 
 
 @pytest.mark.parametrize(
