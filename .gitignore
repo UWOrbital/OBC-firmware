@@ -71,3 +71,4 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 *.coverage
+.mypy_cache/
