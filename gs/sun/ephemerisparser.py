@@ -87,3 +87,7 @@ def parse_file(file: str) -> List[DataPoint]:
             output.append(data_point)
 
     return output
+
+
+def checkFlake8() -> None:
+    return None
