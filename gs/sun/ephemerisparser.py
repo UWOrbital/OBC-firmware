@@ -43,7 +43,7 @@ def parse_header(file: str) -> Header:
         return Header(start_time, step_size, num_data_points)
 
 
-def get_single_data_point(file: BinaryIO, is_float=True) -> float:
+def get_single_data_point(file: BinaryIO, is_float: bool = True) -> float:
     """
     Tests the output file to ensure that the data was written correctly
 

@@ -21,7 +21,7 @@ import requests
 SUPPORTED_VERSION: Final[str] = "1.2"
 NUMBER_OF_HEADER_DOUBLES: Final[int] = 2
 RELATIVE_TOLERANCE: Final[float] = 1e-7
-JD_OF_JANUARY_1_2000: Final[float] = 2451544.500000000
+JD_OF_JANUARY_1_2000: Final[float] = 2_451_544.5
 JANUARY_1_2000: Final[datetime.date] = datetime.date(year=2000, month=1, day=1)
 API_LIMIT: Final[int] = 90_000
 
@@ -70,12 +70,15 @@ class DataPoint:
     y: float
     z: float
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """
         Checks if the two data points are equal for our purposes so within a certain tolerance
+
         :param other: The other data point
         :return: True if the two data points are equal otherwise False
         """
+        if not isinstance(other, DataPoint):
+            return NotImplemented
         return (
             math.isclose(self.jd, other.jd, rel_tol=RELATIVE_TOLERANCE)
             and math.isclose(self.x, other.x, rel_tol=RELATIVE_TOLERANCE)
@@ -87,6 +90,7 @@ class DataPoint:
 def define_parser() -> argparse.ArgumentParser:
     """
     Defines the parser for the script
+
     :return: The parser
     """
     parser = argparse.ArgumentParser(description="Position Ephemeris Retriever")
@@ -154,6 +158,7 @@ def define_parser() -> argparse.ArgumentParser:
 def is_float(num: str) -> bool:
     """
     Checks if the parameter is a float
+
     :param num: The parameter to check
     :return: True if the parameter is a float otherwise False
     """
@@ -184,6 +189,7 @@ def is_valid_date(date: str) -> bool:
 def is_valid_julian_date(time: str) -> bool:
     """
     Checks if time is a valid julian date where time starts with JD and is followed by a positive number
+
     :param time: The parameter to check
     :return: True if the parameter is a valid time otherwise False
     """
@@ -245,7 +251,7 @@ def validate_input(
     return ErrorCode.SUCCESS
 
 
-def check_version(data: dict) -> ErrorCode:
+def check_version(data: dict) -> ErrorCode:  # type: ignore
     """
     Prints out a warning if the version is different from the supported one
 
@@ -297,7 +303,7 @@ def validate_response(response: requests.Response) -> ErrorCode:
 
 
 # Not testable as it is a print statement used for debugging
-def print_debug_header(reverse=False) -> None:
+def print_debug_header(reverse: bool = False) -> None:
     """
     Prints the header of the data printed, used for debugging purposes
 
@@ -342,7 +348,7 @@ def write_header(
     count: int,
     exclude: str = "none",
     *,
-    write_to_file=True,
+    write_to_file: bool = True,
 ) -> None:
     """
     Writes the data header (min_jd, step_size, count) the output file
@@ -561,7 +567,7 @@ def main(argsv: str | None = None) -> List[DataPoint]:
 
     with open(args.output, "ab") as file:
         # Loop over response
-        for count, i in enumerate(lines):
+        for count, line in enumerate(lines):
             # Depends on the exclude flag
             if not (
                 (count == 0 and (args.exclude == "both" or args.exclude == "first"))
@@ -570,7 +576,7 @@ def main(argsv: str | None = None) -> List[DataPoint]:
             ):
                 # Parse the line of data
                 logging.debug(f"Line being parsed: {i}")
-                output = i[:-1].split(", ")
+                output = line[:-1].split(", ")
 
                 # Parse, store and write the data point
                 logging.info(f"Output written: {output}")
