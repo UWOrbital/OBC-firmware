@@ -16,14 +16,14 @@ repos:
     - id: clang-format
       types_or: [c++, c]
       exclude: '(libs|hal)/.*'
--   repo: https://github.com/psf/black
-    rev: 24.2.0
-    hooks:
-    -   id: black
 -   repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
+-   repo: https://github.com/psf/black
+    rev: 24.2.0
+    hooks:
+    -   id: black
 -   repo: https://github.com/PyCQA/flake8
     rev: 7.0.0
     hooks:
