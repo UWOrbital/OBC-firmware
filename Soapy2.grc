@@ -1,0 +1,135 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: Soapy2
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Not titled yet
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: frequency
+  id: variable
+  parameters:
+    comment: ''
+    value: '433932000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [752, 64.0]
+    rotation: 0
+    state: true
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '20000000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 12]
+    rotation: 0
+    state: enabled
+- name: blocks_correctiq_0
+  id: blocks_correctiq
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 232.0]
+    rotation: 0
+    state: true
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: soapy.out
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1048, 208.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: from PyQt5 import Qt
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [552, 104.0]
+    rotation: 0
+    state: true
+- name: soapy_hackrf_source_0
+  id: soapy_hackrf_source
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: 'False'
+    bandwidth: '10000'
+    center_freq: frequency
+    comment: ''
+    dev_args: ''
+    gain: '16'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fc32
+    vga: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [512, 216.0]
+    rotation: 0
+    state: true
+
+connections:
+- [blocks_correctiq_0, '0', blocks_file_sink_0, '0']
+- [soapy_hackrf_source_0, '0', blocks_correctiq_0, '0']
+
+metadata:
+  file_format: 1
