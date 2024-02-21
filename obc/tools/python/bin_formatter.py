@@ -9,9 +9,10 @@ import serial
 OBC_UART_BAUD_RATE: Final = 115200
 
 
-# Define header class. This is the header that will be appended to the .bin file
 @dataclass
 class BootloaderHeader:
+    """Define header class. This is the header that will be appended to the .bin file"""
+
     version: int
     bin_size: int
 
@@ -28,14 +29,11 @@ def create_bin(input_path: str, input_version: int) -> str:
     :param input_version: Header version
     :return: The output file path as a string
     """
-
     input_obj = Path(input_path)
 
     input_bin_data = input_obj.read_bytes()
     bin_len = len(input_bin_data)
-    header = BootloaderHeader(
-        version=input_version, bin_size=bin_len
-    )  # Create header struct
+    header = BootloaderHeader(version=input_version, bin_size=bin_len)  # Create header struct
     header_bytes = header.serialize()
 
     output_path = input_path.replace(".bin", "_formatted.bin")
@@ -68,7 +66,8 @@ def send_bin(file_path: str, com_port: str) -> None:
 
 
 def arg_parse() -> ArgumentParser:
-    """Returns the argument parser
+    """
+    Returns the argument parser
 
     :return: Parser object
     """
@@ -82,9 +81,7 @@ def arg_parse() -> ArgumentParser:
         type=str,
         help="Path to the input .bin file.",
     )
-    parser.add_argument(
-        "-p", required=True, dest="port", type=str, help="Serial port number"
-    )
+    parser.add_argument("-p", required=True, dest="port", type=str, help="Serial port number")
     parser.add_argument(
         "-v",
         dest="version",
@@ -97,6 +94,7 @@ def arg_parse() -> ArgumentParser:
 
 
 def main() -> None:
+    """Entry point to script"""
     arg_parser = arg_parse()
     args = arg_parser.parse_args()
 

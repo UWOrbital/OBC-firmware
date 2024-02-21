@@ -1,13 +1,10 @@
-# 3rd Party Imports
-# Standard Imports
 import os
 import struct
 
 import pytest
 
-# Local Imports
 from gs.sun import ephemeris
-from gs.sun import ephemerisparser as ep
+from gs.sun import ephemeris_parser as ep
 
 
 @pytest.mark.parametrize(
@@ -35,9 +32,7 @@ def test_get_single_data_point(ephermeris_data_type, is_float, expected):
     assert value == expected
 
 
-@pytest.mark.parametrize(
-    "expected", [(ep.Header(2451545.0, 20.0, 1000)), (ep.Header(5.0, 20.0, 4))]
-)
+@pytest.mark.parametrize("expected", [(ep.Header(2451545.0, 20.0, 1000)), (ep.Header(5.0, 20.0, 4))])
 def test_parse_header(expected):
     filename = "test_parse_header.bin"
 

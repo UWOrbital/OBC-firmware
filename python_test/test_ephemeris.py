@@ -6,7 +6,7 @@ import struct
 import pytest
 
 from gs.sun import ephemeris
-from gs.sun import ephemerisparser as ep
+from gs.sun import ephemeris_parser as ep
 from gs.sun.ephemeris import DataPoint, ErrorCode
 
 
@@ -113,7 +113,7 @@ def test_suppress_logging1(caplog):
     # Test if logging is suppressed
     logging.error("This message should not be logged")
     assert len(caplog.records) == 0
-    assert "" == caplog.text
+    assert caplog.text == ""
 
 
 @pytest.mark.parametrize(
@@ -276,9 +276,7 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
         ("JD1000", "JD1001", "1m", "output.bin", ErrorCode.SUCCESS),
     ],
 )
-def test_validate_input(
-    start_time, stop_time, step_size, output, expected_result, caplog
-):
+def test_validate_input(start_time, stop_time, step_size, output, expected_result, caplog):
     # Suppress logging messages during the test
     suppress_logging(caplog)
 
@@ -441,9 +439,7 @@ $$SOE
 1998-Jan-01 23:00     20 57 24.67 -18 26 08.9    1.216   4.123  2.13974288296371   5.5981098
 1998-Jan-02 00:00     20 57 32.63 -18 25 35.4    1.205   4.111  2.13987759677950   5.5975872
 $$EOE
-    """.split(
-        "\n"
-    )
+    """.split("\n")
     assert len(ephemeris.extract_data_lines(lines)) == 15
 
 
@@ -451,9 +447,7 @@ def test_extract_data_points_no_data():
     lines = """
 $$SOE
 $$EOE
-    """.split(
-        "\n"
-    )
+    """.split("\n")
     assert len(ephemeris.extract_data_lines(lines)) == 0
 
 
@@ -478,9 +472,7 @@ $$SOE
 1998-Jan-01 23:00     20 57 24.67 -18 26 08.9    1.216   4.123  2.13974288296371   5.5981098
 $$EOE
 1998-Jan-02 00:00     20 57 32.63 -18 25 35.4    1.205   4.111  2.13987759677950   5.5975872
-    """.split(
-        "\n"
-    )
+    """.split("\n")
     assert len(ephemeris.extract_data_lines(lines)) == 12
 
 
@@ -659,13 +651,8 @@ def test_datapoint_not_equal(data_point1, data_point2):
         (1, 2, "3h", 9),
     ],
 )
-def test_calculate_number_of_data_points_true(
-    start_time, stop_time, step_size, expected
-):
-    assert (
-        ephemeris.calculate_number_of_data_points(start_time, stop_time, step_size)
-        == expected
-    )
+def test_calculate_number_of_data_points_true(start_time, stop_time, step_size, expected):
+    assert ephemeris.calculate_number_of_data_points(start_time, stop_time, step_size) == expected
 
 
 @pytest.mark.parametrize(
@@ -705,9 +692,7 @@ def test_100k_request():
     length = 110_000
     data_points_returned = ephemeris.main(f"JD1 JD110001 -s {length} -o {filename}")
     file_size = os.path.getsize(filename)
-    assert (
-        file_size == length * (3 * ephemeris.SIZE_OF_FLOAT) + ephemeris.SIZE_OF_HEADER
-    )
+    assert file_size == length * (3 * ephemeris.SIZE_OF_FLOAT) + ephemeris.SIZE_OF_HEADER
 
     data_points_actual = ep.parse_file(filename)
     os.remove(filename)

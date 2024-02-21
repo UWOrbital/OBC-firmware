@@ -48,8 +48,9 @@ SIZE_OF_INT: Final[int] = 4
 SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF_INT
 
 
-# Error codes enumerator
 class ErrorCode(enum.Enum):
+    """Error codes enumerator"""
+
     SUCCESS = 0
     INVALID_DATE_TIME = 1
     INVALID_STEP_SIZE = 2
@@ -71,7 +72,7 @@ class DataPoint:
 
     def __eq__(self, other: object) -> bool:
         """
-        Checks if the two data points are equal for our purposes so within a certain tolerance
+        Checks if the two data points are within a certain tolerance
 
         :param other: The other data point
         :return: True if the two data points are equal otherwise False
@@ -456,6 +457,15 @@ def extract_data_lines(lines: Iterable[str]) -> list[str]:
 
 
 def get_lines_from_api(start_time: float, stop_time: float, step_size: int, target: str) -> list[str]:
+    """
+    Get the lines from the Horizons API
+
+    :param start_time: Start time of data
+    :param stop_time: Stop time of data
+    :param step_size: Step size of data
+    :param target: Target body
+    :return: Lines of data
+    """
     # Get the data from the API and validate it
     url = (
         f"https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM=YES&EPHEM_TYPE=VECTORS&COMMAND="
