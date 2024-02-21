@@ -492,6 +492,7 @@ def main(argsv: str | None = None) -> list[DataPoint]:
     exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
 
     # Set up logging
+    # TODO: Setup proper logging
     logging.basicConfig(
         filename=args.log,
         level=LOGGING_LEVELS[args.print],
