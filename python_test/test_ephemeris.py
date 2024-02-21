@@ -697,7 +697,3 @@ def test_100k_request():
     os.remove(filename)
 
     assert data_points_returned == data_points_actual
-
-
-def check():
-    return None
