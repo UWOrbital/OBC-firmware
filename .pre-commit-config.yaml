@@ -35,6 +35,6 @@ repos:
   hooks:
     # Run the linter.
     - id: ruff
-        #args: ["--select=N"]
+      args: ["--select=N"]
     # Run the formatter.
     - id: ruff-format
