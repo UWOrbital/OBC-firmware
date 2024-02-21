@@ -42,6 +42,8 @@ select = [
     "ANN",
     # flake8 builtin shadowing
     "A",
+    # Multi-line summary second line-ending
+    "D213"
 ]
 ignore = ["ANN101", "ANN102"]
 fixable = ["ALL"]
