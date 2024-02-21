@@ -6,7 +6,7 @@ import dataclasses
 import struct
 
 # Standard library imports
-from typing import BinaryIO, List
+from typing import BinaryIO
 
 # Local application imports
 from . import ephemeris
@@ -37,9 +37,7 @@ def parse_header(file: str) -> Header:
         step_size = get_single_data_point(f, False)
 
         # Read 1 uint value
-        num_data_points = int(
-            struct.unpack(ephemeris.DATA_UINT, f.read(ephemeris.SIZE_OF_INT))[0]
-        )
+        num_data_points = int(struct.unpack(ephemeris.DATA_UINT, f.read(ephemeris.SIZE_OF_INT))[0])
         return Header(start_time, step_size, num_data_points)
 
 
@@ -63,7 +61,7 @@ def get_single_data_point(file: BinaryIO, is_float: bool = True) -> float:
     return float(float_val)
 
 
-def parse_file(file: str) -> List[DataPoint]:
+def parse_file(file: str) -> list[DataPoint]:
     """
     Tests the output file to ensure that the data was written correctly
 
