@@ -9,98 +9,108 @@
 #include "obc_gs_fec.h"
 #include "obc_gs_aes128.h"
 
-#include "win_uart.h"
-
+#include <cserialport.h>
 #include <aes.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <malloc.h>
 #include <time.h>
 
-#define COM_PORT_NAME_PREFIX "\\\\.\\COM"
-
-/* THIS GROUND STATION IS FOR DEMO PURPOSES */
-/* AND ONLY SENDS A SINGLE COMMAND PER PACKET */
-
-static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                                                      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
 static correct_reed_solomon *rsGs;
 
-static gs_error_code_t decodePacket(packed_ax25_i_frame_t *data, packed_rs_packet_t *rsData);
+static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25data, packed_rs_packet_t *rsData);
+
 static uint32_t getCurrentTime(void);
 
-int main(int argc, char *argv[]) {
+int main(void) {
   gs_error_code_t gsErrCode;
   obc_gs_error_code_t obcGsErrCode;
 
-  if (argc < 3) {
-    printf(
-        "Usage: %s <COM port> <Demo Number>"
-        "\n0: Immediate RTC Sync"
-        "\n1: Immediate Ping"
-        "\n2: Time-tagged Ping (15 sec in future)"
-        "\n",
-        argv[0]);
-    return 1;
-  }
+  char demoNum = 0;
 
-  long int comPort = strtol(argv[1], NULL, 10);
-  if (comPort < 0 || comPort > 255) {
-    printf("Invalid com port: %ld\n", comPort);
-    return 1;
-  }
+  printf(
+      "\n0: Immediate RTC Sync"
+      "\n1: Immediate Ping"
+      "\n2: Time-tagged Ping (15 sec in future)");
 
-  int demoNum = strtol(argv[2], NULL, 10);
+  scanf("%c", &demoNum);
 
-  /* Setup the serial port */
-
-  char comPortName[16] = {0};
-  snprintf(comPortName, sizeof(comPortName), "%s%ld", COM_PORT_NAME_PREFIX, comPort);
-
-  // Declare variables and structures
-  HANDLE hSerial;
-  if (openSerialPort(&hSerial, comPortName) != 0) {
-    printf("Failed to open serial port!");
-    exit(1);
-  }
-
-  DCB dcbSerialParams = {0};
-  dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-  if (getDeviceState(hSerial, &dcbSerialParams) != 0) {
-    printf("Failed to get device state!");
-    return 1;
-  }
-
-  dcbSerialParams.BaudRate = CBR_9600;
-  dcbSerialParams.ByteSize = 8;
-  dcbSerialParams.StopBits = TWOSTOPBITS;
-  dcbSerialParams.Parity = NOPARITY;
-
-  if (setDeviceParameters(hSerial, &dcbSerialParams) != 0) {
-    printf("Failed to set serial parameters!");
-    exit(1);
-  }
-
-  COMMTIMEOUTS timeouts = {0};
-
-  if (demoNum == 2) {
-    timeouts.ReadIntervalTimeout = 30000;  // ms
+  // Check if the input is within the valid range
+  if (demoNum >= 0 && demoNum <= 2) {
+    printf("You entered: %d\n", demoNum);
   } else {
-    timeouts.ReadIntervalTimeout = 2500;  // ms
+    printf("Invalid input. Please enter a number between 0 and 2.\n");
   }
 
-  timeouts.ReadTotalTimeoutConstant = 0;
-  timeouts.ReadTotalTimeoutMultiplier = 0;
-  timeouts.WriteTotalTimeoutConstant = 0;
-  timeouts.WriteTotalTimeoutMultiplier = 0;
-  if (SetCommTimeouts(hSerial, &timeouts) == 0) {
-    printf("Error setting timeouts!");
-    CloseHandle(hSerial);
-    return 1;
+  /* ----------------------------------- Begin CSerialPort setup ------------------------------------------- */
+
+  void *pSerialPort = NULL;
+
+  pSerialPort = CSerialPortMalloc();
+  printf("Version: %s\n\n", CSerialPortGetVersion(pSerialPort));
+
+  printf("Available Friendly Ports:\n");
+
+  struct SerialPortInfoArray portInfoArray = {0};
+  CSerialPortAvailablePortInfos(&portInfoArray);
+
+  for (unsigned int i = 0; i < portInfoArray.size; ++i) {
+    printf("%u - %s %s\n", i + 1, portInfoArray.portInfo[i].portName, portInfoArray.portInfo[i].description);
+  }
+
+  if (portInfoArray.size == 0) {
+    printf("No Valid Port\n");
+  } else {
+    printf("\n");
+
+    unsigned int input = 0;
+    do {
+      printf("Please Input The Index Of Port(1 - %d)\n", portInfoArray.size);
+
+      scanf("%u", &input);
+
+      if (input >= 1 && input <= portInfoArray.size) {
+        break;
+      }
+    } while (1);
+
+    char portName[256] = {0};
+    strcpy(portName, portInfoArray.portInfo[input - 1].portName);
+    printf("Port Name: %s\n", portName);
+
+    CSerialPortAvailablePortInfosFree(&portInfoArray);
+
+    CSerialPortInit(pSerialPort,
+                    portName,    // windows:COM1 Linux:/dev/ttyS0
+                    115200,      // baudrate
+                    ParityNone,  // parity
+                    DataBits8,   // data bit
+                    StopTwo,     // stop bit
+                    FlowNone,    // flow
+                    4096         // read buffer size
+    );
+
+    if (demoNum == 2) {
+      CSerialPortSetReadIntervalTimeout(pSerialPort, 30000);  // read interval timeout
+    } else {
+      CSerialPortSetReadIntervalTimeout(pSerialPort, 2500);  // read interval timeout
+    }
+
+    CSerialPortOpen(pSerialPort);
+
+    printf("Open %s %s\n", portName, 1 == CSerialPortIsOpen(pSerialPort) ? "Success" : "Failed");
+    printf("Code: %d, Message: %s\n", CSerialPortGetLastError(pSerialPort), CSerialPortGetLastErrorMsg(pSerialPort));
   }
 
   printf("Serial port configured!\n");
+
+  /* ------------------------------------------- Demo Code ----------------------------------------------------- */
 
   /* Construct packet */
 
@@ -192,7 +202,7 @@ int main(int argc, char *argv[]) {
     ax25Pkt.data[0] = AX25_FLAG;
     ax25Pkt.data[ax25Pkt.length - 1] = AX25_FLAG;
 
-    long unsigned int bytesWritten = writeSerialPort(hSerial, ax25Pkt.data, ax25Pkt.length);
+    long unsigned int bytesWritten = CSerialPortWriteData(pSerialPort, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
       printf("Failed to write entire AX.25 packet!");
       exit(1);
@@ -206,9 +216,11 @@ int main(int argc, char *argv[]) {
   uint16_t axDataIndex = 0;
   packed_ax25_i_frame_t axData = {0};
   bool startFlagReceived = false;
+
   while (1) {
     uint8_t byte = '\0';
-    if (readSerialPort(hSerial, &byte, 1) == 0) {
+    if (CSerialPortReadData(pSerialPort, &byte, 1) < 0) {
+      printf("Error Reading! \r\n");
       break;
     }
 
@@ -252,12 +264,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (closeSerialPort(hSerial) != 0) {
-    printf("Failed to close serial port!");
-    exit(1);
-  }
+  /* ----------------------------- Disconnect from the Serial Port ----------------------------- */
 
-  return 0;
+  CSerialPortFree(pSerialPort);
 }
 
 static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData) {
