@@ -51,9 +51,14 @@ select = [
     "I",
     # pep8-naming
     "N",
+    # flake8-annotations
+    "ANN",
+    # flake8 builtin shadowing
+    "A",
 ]
 fixable = ["ALL"]
 unfixable = []
+ignore = ["ANN101", "ANN102"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
