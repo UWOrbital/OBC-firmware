@@ -4,7 +4,6 @@ import os
 import struct
 
 import pytest
-
 from gs.sun import ephemeris
 from gs.sun import ephemeris_parser as ep
 from gs.sun.ephemeris import DataPoint, ErrorCode
@@ -698,3 +697,7 @@ def test_100k_request():
     os.remove(filename)
 
     assert data_points_returned == data_points_actual
+
+
+def check():
+    return None
