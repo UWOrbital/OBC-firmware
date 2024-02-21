@@ -62,9 +62,7 @@ class ErrorCode(enum.Enum):
 
 @dataclasses.dataclass
 class DataPoint:
-    """
-    Data class to store a position data point
-    """
+    """Data class to store a position data point"""
 
     jd: float
     x: float
@@ -72,8 +70,7 @@ class DataPoint:
     z: float
 
     def __eq__(self, other: object) -> bool:
-        """
-        Checks if the two data points are equal for our purposes so within a certain tolerance
+        """Checks if the two data points are equal for our purposes so within a certain tolerance
 
         :param other: The other data point
         :return: True if the two data points are equal otherwise False
@@ -89,8 +86,7 @@ class DataPoint:
 
 
 def define_parser() -> argparse.ArgumentParser:
-    """
-    Defines the parser for the script
+    """Defines the parser for the script
 
     :return: The parser
     """
@@ -157,8 +153,7 @@ def define_parser() -> argparse.ArgumentParser:
 
 
 def is_float(num: str) -> bool:
-    """
-    Checks if the parameter is a float
+    """Checks if the parameter is a float
 
     :param num: The parameter to check
     :return: True if the parameter is a float otherwise False
@@ -171,8 +166,7 @@ def is_float(num: str) -> bool:
 
 
 def is_valid_date(date: str) -> bool:
-    """
-    Checks if date is a valid date of the YYYY-MM-DD format
+    """Checks if date is a valid date of the YYYY-MM-DD format
 
     :param date: The date to be checked
     :return: True if the date is a valid date, otherwise False
@@ -188,8 +182,7 @@ def is_valid_date(date: str) -> bool:
 
 
 def is_valid_julian_date(time: str) -> bool:
-    """
-    Checks if time is a valid julian date where time starts with JD and is followed by a positive number
+    """Checks if time is a valid julian date where time starts with JD and is followed by a positive number
 
     :param time: The parameter to check
     :return: True if the parameter is a valid time otherwise False
@@ -198,8 +191,7 @@ def is_valid_julian_date(time: str) -> bool:
 
 
 def convert_date_to_jd(time: str) -> float:
-    """
-    Converts the inputted time to a jd if it is a datetime of the format YYYY-MM-DD.
+    """Converts the inputted time to a jd if it is a datetime of the format YYYY-MM-DD.
     If it is a jd#, then the number part is returned. This function doesnt not perform error
     checking.
 
@@ -214,8 +206,7 @@ def convert_date_to_jd(time: str) -> float:
 
 
 def validate_input(start_time: str, stop_time: str, step_size: str, output: str) -> ErrorCode:
-    """
-    Validates the input arguments created by the define_parser() function. If all the inputs are valid then it will
+    """Validates the input arguments created by the define_parser() function. If all the inputs are valid then it will
     do return a success code otherwise it return an error code
 
     :param start_time: Start time in the format YYYY-MM-DD or JD#
@@ -244,8 +235,7 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
 
 
 def check_version(data: dict) -> ErrorCode:  # type: ignore
-    """
-    Prints out a warning if the version is different from the supported one
+    """Prints out a warning if the version is different from the supported one
 
     :param data: response.txt
     :return: ErrorCode.SUCCESS if successful otherwise an error code
@@ -297,8 +287,7 @@ def validate_response(response: requests.Response) -> ErrorCode:
 
 # Not testable as it is a print statement used for debugging
 def print_debug_header(reverse: bool = False) -> None:
-    """
-    Prints the header of the data printed, used for debugging purposes
+    """Prints the header of the data printed, used for debugging purposes
 
     :param reverse: If True then reverses the order of the header and prints and extra seperator line
     """
@@ -310,8 +299,7 @@ def print_debug_header(reverse: bool = False) -> None:
 
 
 def write_data(data: DataPoint, file: BinaryIO) -> None:
-    """
-    Write the parameter data to the given file
+    """Write the parameter data to the given file
 
     :param file_name: The output file name
     :param data: Data to be written
@@ -341,8 +329,7 @@ def write_header(
     *,
     write_to_file: bool = True,
 ) -> None:
-    """
-    Writes the data header (min_jd, step_size, count) the output file
+    """Writes the data header (min_jd, step_size, count) the output file
 
     :param count: The number of the data points
     :param max_jd: The maximum JD value used to calculate the step size
@@ -386,8 +373,7 @@ def to_date(date: str) -> datetime.date:
 
 
 def calculate_number_of_data_points(start_time: float, stop_time: float, step_size: str) -> int:
-    """
-    Calculates the number of data points. This function assumes all inputs are valid and performs
+    """Calculates the number of data points. This function assumes all inputs are valid and performs
     no error checking.
     """
     difference = stop_time - start_time
@@ -401,8 +387,7 @@ def calculate_number_of_data_points(start_time: float, stop_time: float, step_si
 
 
 def calculate_step_size(min_jd: float, max_jd: float, number_of_data_points: int) -> float:
-    """
-    Calculates the step size of the data or raises an error if the parameters are invalid
+    """Calculates the step size of the data or raises an error if the parameters are invalid
 
     :param min_jd: The minimum JD
     :param max_jd: The maximum JD
@@ -425,8 +410,7 @@ def calculate_step_size(min_jd: float, max_jd: float, number_of_data_points: int
 
 
 def exit_program_on_error(error_code: ErrorCode) -> None:
-    """
-    Exits the program with the given error code if it is not a success
+    """Exits the program with the given error code if it is not a success
 
     :param error_code: The error code
     """
@@ -435,8 +419,7 @@ def exit_program_on_error(error_code: ErrorCode) -> None:
 
 
 def extract_data_lines(lines: Iterable[str]) -> list[str]:
-    """
-    Finds the number of data points in the data
+    """Finds the number of data points in the data
 
     :param lines: The lines of the data
     :return: The number of data points
@@ -482,11 +465,9 @@ def get_lines_from_api(start_time: float, stop_time: float, step_size: int, targ
 
 
 def main(argsv: str | None = None) -> list[DataPoint]:
-    """
-    Main function of the program
+    """Main function of the program.
     :param argsv: The arguments to be parsed, similar to sys.argv
     """
-
     # Parse the arguments and validate them
     args = define_parser().parse_args(argsv.split() if isinstance(argsv, str) else None)
     exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
