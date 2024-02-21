@@ -1,12 +1,11 @@
 import os
 
-from pytest import mark
-
+import pytest
 from obc.tools.python.bin_formatter import create_bin
 
 
 # Expected header is the header in bytes
-@mark.parametrize(
+@pytest.mark.parametrize(
     "input_name, bin_version, bin_data, expected_name, expected_header, expect_data",
     [
         (
@@ -35,9 +34,7 @@ from obc.tools.python.bin_formatter import create_bin
         ),
     ],
 )
-def test_create_bin(
-    input_name, bin_version, bin_data, expected_name, expected_header, expect_data
-):
+def test_create_bin(input_name, bin_version, bin_data, expected_name, expected_header, expect_data):
     with open(input_name, "wb") as f:
         f.write(bin_data)
 
