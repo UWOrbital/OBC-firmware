@@ -2,7 +2,6 @@ import os
 import struct
 
 import pytest
-
 from gs.sun import ephemeris
 from gs.sun import ephemeris_parser as ep
 
