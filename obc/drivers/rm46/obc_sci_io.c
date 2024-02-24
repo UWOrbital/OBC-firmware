@@ -135,7 +135,7 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   }
 
   xSemaphoreGive(mutex);
-  return OBC_ERR_CODE_SUCCESS;
+  return errCode;
 }
 
 void sciNotification(sciBASE_t *sci, uint32 flags) {
