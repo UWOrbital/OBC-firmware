@@ -109,8 +109,8 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
       break;
 
     case CUBESAT_STATE_ASSEMBLY:
-      // probably remove this state, for now physically removing jumper on board and then doing power on reset should
-      // bring to this stste not sure if there is a way to detect that in code
+      // TODO: probably remove this state, for now physically removing jumper on board and then doing power on reset
+      // should bring to this stste not sure if there is a way to detect that in code
       break;
 
     case CUBESAT_STATE_LOW_PWR:
@@ -125,6 +125,9 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
           break;
 
         case CUBESAT_STATE_RESET:
+          // TODO: According to the FSM chart, the OBC should just initialize the tasks again after this, so go back to
+          // CUBESAT_STATE_INITIALIZATION state, there isn't really an event which would trigger a state change from the
+          // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here
           break;
 
         default:
