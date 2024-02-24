@@ -1,6 +1,7 @@
 #pragma once
 
 #include "obc_gs_telemetry_id.h"
+#include "state_mgr.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -37,6 +38,8 @@ typedef struct {
 
     uint8_t obcState;
     uint8_t epsState;
+
+    uint8_t resetStateCounter;
 
     uint32_t numCspPacketsRcvd;
   };
