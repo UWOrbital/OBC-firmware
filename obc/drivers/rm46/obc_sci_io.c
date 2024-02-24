@@ -95,7 +95,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   return errCode;
 }
 
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, 
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks,
                               size_t transferCompleteTimeoutTicks, sciBASE_t *sciReg) {
   obc_error_code_t errCode;
   if (!(sciReg == scilinREG || sciReg == sciREG)) {
