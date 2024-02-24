@@ -1,7 +1,6 @@
 #pragma once
 
 #include "obc_gs_telemetry_id.h"
-#include "state_mgr.h"
 
 #include <stdint.h>
 #include <stddef.h>
