@@ -14,7 +14,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100
-    ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010
+    ${CMAKE_CURRENT_SOURCE_DIR}/tca6424
     ${CMAKE_CURRENT_SOURCE_DIR}/ina230
     # TODO: Update cc1120 driver so that it doesn't need to include this
     ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager

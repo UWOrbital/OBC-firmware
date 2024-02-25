@@ -2,6 +2,8 @@
 #include "obc_i2c_io.h"
 #include "tca6424.h"
 
+#include "obc_logging.h"
+
 #define INA230_I2C_ADDRESS_ONE 0b1000000U
 #define INA230_I2C_ADDRESS_TWO 0b1000001U
 
@@ -59,12 +61,15 @@ obc_error_code_t initINA230Interface() {
       writeINA230Register(INA230_ALERT_LIMIT_REGISTER, &shuntAlertINA1Unpacked[0], 2, INA230_I2C_ADDRESS_ONE));
   RETURN_IF_ERROR_CODE(
       writeINA230Register(INA230_ALERT_LIMIT_REGISTER, &shuntAlertINA2Unpacked[0], 2, INA230_I2C_ADDRESS_TWO));
+
+  RETURN_IF_ERROR_CODE(initTca6424PinState());
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
   uint8_t pinLocation = (device == INA230_ONE) ? INA230_ONE_ALERT_PIN : INA230_TWO_ALERT_PIN;
   uint8_t IOPortValue = 0;
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(readTCA6424APinInput(pinLocation, &IOPortValue));
 
   if (IOPortValue == INA230_ALERT_HIGH) {
@@ -72,6 +77,7 @@ obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
     IOPortValue = INA230_DISABLE_LOAD;
     RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, IOPortValue));
   }
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t writeINA230Register(uint8_t regAddress, uint8_t* data, uint8_t size, uint8_t i2cAddress) {
