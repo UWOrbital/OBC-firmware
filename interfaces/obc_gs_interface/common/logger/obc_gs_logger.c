@@ -21,7 +21,7 @@ obc_gs_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  printf("Log Level %d:  %s:%u:    Error Code %u\n", msgLevel, file, line, errCode);
+  printf("Log Level %d:  %s:%lu:    Error Code %lu\n", msgLevel, file, (unsigned long)line, (unsigned long)errCode);
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
@@ -39,7 +39,7 @@ obc_gs_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  printf("Log Level %d:  %s:%u:    %s\n", msgLevel, file, line, msg);
+  printf("Log Level %d:  %s:%lu:    %s\n", msgLevel, file, (unsigned long)line, msg);
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
