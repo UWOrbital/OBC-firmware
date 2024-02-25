@@ -1,8 +1,5 @@
-#include <FreeRTOSConfig.h>
-
-#if (ENABLE_TASK_STATS_COLLECTOR == 1)
-
 #include "runtime_stats.h"
+
 #include <rti.h>
 #include <stdint.h>
 
@@ -19,6 +16,4 @@ void vConfigureRuntimeStats(void) {
  * @brief Returns the tick count.
  * @return Returns the configured timer tick.
  */
-uint32_t systemTickGet(void) { return rtiGetCounterTick(); }
-
-#endif
+uint32_t ulSystemTickGet(void) { return rtiGetCounterOneTick(); }

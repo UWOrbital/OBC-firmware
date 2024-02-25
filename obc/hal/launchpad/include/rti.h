@@ -327,7 +327,7 @@ void rtiNotification(uint32 notification);
  *
  * @return A 32-bit tick value for the Free Counter RTI 1
  */
-uint32_t rtiGetCounterTick();
+uint32_t rtiGetCounterOneTick();
 
 #endif
 /* USER CODE END */
