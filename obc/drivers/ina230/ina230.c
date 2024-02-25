@@ -64,13 +64,13 @@ obc_error_code_t initINA230Interface() {
 
 obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
   uint8_t pinLocation = (device == INA230_ONE) ? INA230_ONE_ALERT_PIN : INA230_TWO_ALERT_PIN;
-  TCA6424A_pin_state_t inaAlertState = {.pinLocation = pinLocation, .IOPortValue = 0};
-  RETURN_IF_ERROR_CODE(readTCA6424APinInput(&inaAlertState));
+  uint8_t IOPortValue = 0;
+  RETURN_IF_ERROR_CODE(readTCA6424APinInput(pinLocation, &IOPortValue));
 
-  if (inaAlertState.IOPortValue == INA230_ALERT_HIGH) {
-    inaAlertState.pinLocation = (device == INA230_ONE) ? INA230_ONE_ENABLE_PIN : INA230_TWO_ENABLE_PIN,
-    inaAlertState.IOPortValue = INA230_DISABLE_LOAD;
-    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(inaAlertState));
+  if (IOPortValue == INA230_ALERT_HIGH) {
+    pinLocation = (device == INA230_ONE) ? INA230_ONE_ENABLE_PIN : INA230_TWO_ENABLE_PIN,
+    IOPortValue = INA230_DISABLE_LOAD;
+    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, IOPortValue));
   }
 }
 
@@ -83,4 +83,14 @@ static obc_error_code_t writeINA230Register(uint8_t regAddress, uint8_t* data, u
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t initTca6424PinState() {}
+static obc_error_code_t initTca6424PinState() {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(configureTCA6424APin(INA230_ONE_ALERT_PIN, TCA6424A_GPIO_CONFIG_INPUT));
+  RETURN_IF_ERROR_CODE(configureTCA6424APin(INA230_TWO_ALERT_PIN, TCA6424A_GPIO_CONFIG_INPUT));
+  RETURN_IF_ERROR_CODE(configureTCA6424APin(INA230_ONE_ENABLE_PIN, TCA6424A_GPIO_CONFIG_OUTPUT));
+  RETURN_IF_ERROR_CODE(configureTCA6424APin(INA230_TWO_ENABLE_PIN, TCA6424A_GPIO_CONFIG_OUTPUT));
+
+  RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(INA230_ONE_ENABLE_PIN, INA230_ENABLE_LOAD));
+  RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(INA230_TWO_ENABLE_PIN, INA230_ENABLE_LOAD));
+  return OBC_ERR_CODE_SUCCESS;
+}
