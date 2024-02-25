@@ -44,6 +44,11 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
   } while (0)
 
 /**
+ * @brief Initialize logger with default logging level
+ */
+void obcGsInitLogger(void);
+
+/**
  * @brief Set the logging level
  *
  * @param newLogLevel The new logging level
