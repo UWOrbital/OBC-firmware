@@ -9,16 +9,6 @@
 #define CMD_RESPONSE_SUCCESS_MASK 0x01
 #define CMD_RESPONSE_MAX_PACKED_SIZE sizeof(cmd_unpacked_response_t)
 
-typedef enum {
-  EXEC_OBC_RESET_CMD,
-  RTL_SYNC_CMD,
-  DOWNLINK_LOGS_CMD,
-  MICRO_SD_CMD,
-  PING_CMD,
-  DOWNLINK_TELEM_CMD,
-  NUM_CMD_CALLBACKS
-} cmd_callback_id_t;
-
 typedef struct {
   float data1;
   uint32_t data2;

@@ -11,7 +11,7 @@
 
 TEST(pack_unpack_command_responses, packResponse) {
   cmd_unpacked_response_t unpackedResponse = {
-      .errCode = CMD_RESPONSE_SUCCESS, .cmdId = EXEC_OBC_RESET_CMD, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
+      .errCode = CMD_RESPONSE_SUCCESS, .cmdId = CMD_EXEC_OBC_RESET, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
@@ -23,15 +23,15 @@ TEST(pack_unpack_command_responses, packResponse) {
   float data1 = unpackFloat(buffer, &offset);
   uint32_t data2 = unpackUint32(buffer, &offset);
 
-  EXPECT_EQ(cmdId, (uint8_t)EXEC_OBC_RESET_CMD);
+  EXPECT_EQ(cmdId, (uint8_t)CMD_EXEC_OBC_RESET);
   EXPECT_EQ(encoded, CMD_RESPONSE_SUCCESS);
-  EXPECT_EQ(data2, 2);
-  EXPECT_EQ(data1, (float)0.02);
+  EXPECT_EQ(data2, unpackedResponse.obcResetResponse.data2);
+  EXPECT_EQ(data1, unpackedResponse.obcResetResponse.data1);
 }
 
 TEST(pack_unpack_command_responses, unpackCommandResponse) {
   cmd_unpacked_response_t unpackedResponse = {
-      .errCode = CMD_RESPONSE_ERROR, .cmdId = EXEC_OBC_RESET_CMD, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
+      .errCode = CMD_RESPONSE_ERROR, .cmdId = CMD_EXEC_OBC_RESET, .obcResetResponse = {.data1 = 0.02, .data2 = 2}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
@@ -51,7 +51,7 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
 
 TEST(pack_unpack_command_responses, packInvalidCommand) {
   cmd_unpacked_response_t unpackedResponse = {
-      .errCode = CMD_RESPONSE_ERROR, .cmdId = DOWNLINK_TELEM_CMD, .obcResetResponse = {0}};
+      .errCode = CMD_RESPONSE_ERROR, .cmdId = CMD_DOWNLINK_TELEM, .obcResetResponse = {0}};
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);

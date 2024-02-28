@@ -7,9 +7,18 @@
 #include <stdbool.h>
 
 typedef obc_gs_error_code_t (*pack_cmd_handler_t)(cmd_unpacked_response_t*, uint8_t*, uint32_t*);
+
+/**
+ * @brief Sample prototype for functions callback functions used to pack data.
+ * @param response The unpacked response which is serialized.
+ * @param buffer A buffer of bytes to which to write the packed data
+ * @param offset A offset of the byte at which we should begin to pack the data.
+ * @return Error code indicating if the packing operation was successful. Error code OBC_GS_ERR_CODE_INVALID_ARG if the
+ * buffer is NULL.
+ */
 static obc_gs_error_code_t packObcResetResponse(cmd_unpacked_response_t* response, uint8_t* buffer, uint32_t* offset);
 
-static const pack_cmd_handler_t packHandlers[NUM_CMD_CALLBACKS] = {[EXEC_OBC_RESET_CMD] = packObcResetResponse};
+static const pack_cmd_handler_t packHandlers[NUM_CMD_CALLBACKS] = {[CMD_EXEC_OBC_RESET] = packObcResetResponse};
 
 obc_gs_error_code_t packCommandResponse(cmd_unpacked_response_t* response, uint8_t* buffer) {
   if (buffer == NULL || response == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
