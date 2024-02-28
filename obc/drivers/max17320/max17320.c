@@ -118,11 +118,10 @@ static obc_error_code_t initiateWrite(uint16_t addr, uint16_t value) {
 static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* internalAddr, uint8_t* slaveAddr) {
   bool isValid;
 
-  isValid = ((addr >= BMS_RANGE_ONE_LOWER && addr <= BMS_RANGE_ONE_UPPER) ||
-             (addr >= BMS_RANGE_TWO_LOWER && addr <= BMS_RANGE_TWO_UPPER));
+  isValid = ((addr <= BMS_RANGE_ONE_UPPER) || (addr >= BMS_RANGE_TWO_LOWER && addr <= BMS_RANGE_TWO_UPPER));
   if (!isValid) return OBC_ERR_CODE_INVALID_ARG;
 
   *internalAddr = addr & BMS_MEM_MAP_MASK;
-  *slaveAddr = (addr >= BMS_RANGE_ONE_LOWER) ? BMS_SLAVE_ADDR_RANGE_TWO : BMS_SLAVE_ADDR_RANGE_ONE;
+  *slaveAddr = (addr >= BMS_RANGE_ONE_UPPER) ? BMS_SLAVE_ADDR_RANGE_TWO : BMS_SLAVE_ADDR_RANGE_ONE;
   return OBC_ERR_CODE_SUCCESS;
 }
