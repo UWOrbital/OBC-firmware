@@ -50,6 +50,8 @@
 #define MAX_MONTH 12U
 #define MAX_YEAR 99U
 
+#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
+
 typedef enum {
   ENABLE_MATCH = 0U,
   DISABLE_MATCH = 1U,
@@ -148,7 +150,7 @@ obc_error_code_t getSecondsRTC(uint8_t *seconds) {
   if (seconds == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_SECONDS, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *seconds = twoDigitDecimalFromBCD(data);
 
@@ -160,7 +162,7 @@ obc_error_code_t getMinutesRTC(uint8_t *minutes) {
   if (minutes == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MINUTES, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *minutes = twoDigitDecimalFromBCD(data);
 
@@ -173,7 +175,7 @@ obc_error_code_t getHourRTC(uint8_t *hours) {
   if (hours == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_HOURS, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *hours = twoDigitDecimalFromBCD(data);
 
@@ -186,7 +188,7 @@ obc_error_code_t getDayRTC(uint8_t *days) {
   if (days == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DAY, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *days = data;
 
@@ -199,7 +201,7 @@ obc_error_code_t getDateRTC(uint8_t *date) {
   if (date == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_DATE, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *date = twoDigitDecimalFromBCD(data);
 
@@ -212,7 +214,7 @@ obc_error_code_t getMonthRTC(uint8_t *month) {
   if (month == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_MONTH, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *month = twoDigitDecimalFromBCD(data & 0x1F);
 
@@ -225,7 +227,7 @@ obc_error_code_t getYearRTC(uint8_t *year) {
   if (year == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_YEAR, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *year = twoDigitDecimalFromBCD(data);
 
@@ -270,7 +272,7 @@ obc_error_code_t getControlRTC(rtc_control_t *control) {
   if (control == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_CONTROL, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   control->EOSC = (data >> 7) & 1;
   control->BBSQW = (data >> 6) & 1;
@@ -288,7 +290,7 @@ obc_error_code_t getStatusRTC(rtc_status_t *status) {
   if (status == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_STATUS, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   status->OSF = (data >> 7) & 1;
   status->BB32KHZ = (data >> 6) & 1;
@@ -306,7 +308,7 @@ obc_error_code_t getAgingOffsetRTC(int8_t *agingOffset) {
   if (agingOffset == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t data;
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &data, 1));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_AGING, &data, 1, I2C_TRANSFER_TIMEOUT));
 
   *agingOffset = (int8_t)data;
 
@@ -319,13 +321,11 @@ obc_error_code_t getTemperatureRTC(float *temperature) {
   if (temperature == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t dataBuff[2];
-  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_TEMP_MSB, dataBuff, 2));
+  RETURN_IF_ERROR_CODE(i2cReadReg(DS3232_I2C_ADDRESS, DS3232_REG_TEMP_MSB, dataBuff, 2, I2C_TRANSFER_TIMEOUT));
 
   int16_t val = ((int8_t)dataBuff[0] << 2) | (dataBuff[1] >> 6);
 
   *temperature = (float)val * DS3232_TEMP_RESOLUTION;
-
-  LOG_DEBUG("DS3232 Temperature: %f", *temperature);
 
   return OBC_ERR_CODE_SUCCESS;
 }

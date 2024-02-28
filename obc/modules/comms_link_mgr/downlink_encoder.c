@@ -1,5 +1,4 @@
 #include "downlink_encoder.h"
-#include "comms_downlink_transmitter.h"
 #include "cc1120_txrx.h"
 #include "obc_gs_fec.h"
 #include "obc_gs_ax25.h"
@@ -8,7 +7,7 @@
 #include "telemetry_manager.h"
 #include "obc_gs_telemetry_pack.h"
 
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_reliance_fs.h"
@@ -22,25 +21,14 @@
 #include <sys_common.h>
 #include <gio.h>
 
-static TaskHandle_t telemEncodeTaskHandle = NULL;
-static StaticTask_t telemEncodeTaskBuffer;
-static StackType_t telemEncodeTaskStack[COMMS_TELEM_ENCODE_STACK_SIZE];
-
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
-#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(comms_event_t)  // Size of the telemetry batch ID
+#define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(encode_event_t)  // Size of the telemetry batch ID
 #define COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
 
 static QueueHandle_t telemEncodeQueueHandle = NULL;
 static StaticQueue_t telemEncodeQueue;
 static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH * COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE];
-
-/**
- * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
- *
- * @param pvParameters - NULL
- */
-static void vTelemEncodeTask(void *pvParameters);
 
 /**
  * @brief Sends data from a telemetry buffer to the CC1120 transmit queue
@@ -87,20 +75,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket);
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset);
 
-/**
- * @brief Initializes the telemetry encoding task and queue
- * @param pvParameters parameters to be passed into the created task
- *
- */
-void initTelemEncodeTask(void *pvParameters) {
-  ASSERT((telemEncodeTaskStack != NULL) && (&telemEncodeTaskBuffer != NULL));
-
-  if (telemEncodeTaskHandle == NULL) {
-    telemEncodeTaskHandle =
-        xTaskCreateStatic(vTelemEncodeTask, COMMS_TELEM_ENCODE_TASK_NAME, COMMS_TELEM_ENCODE_STACK_SIZE, pvParameters,
-                          COMMS_TELEM_ENCODE_TASK_PRIORITY, telemEncodeTaskStack, &telemEncodeTaskBuffer);
-  }
-
+void obcTaskInitCommsDownlinkEncoder(void) {
   if (telemEncodeQueueHandle == NULL) {
     telemEncodeQueueHandle = xQueueCreateStatic(COMMS_TELEM_ENCODE_QUEUE_LENGTH, COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE,
                                                 telemEncodeQueueStack, &telemEncodeQueue);
@@ -113,7 +88,7 @@ void initTelemEncodeTask(void *pvParameters) {
  * @param queueMsg - Includes command ID, and either a telemetry batch ID or a telemetry_data_t array
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
-obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg) {
+obc_error_code_t sendToDownlinkEncodeQueue(encode_event_t *queueMsg) {
   ASSERT(telemEncodeQueueHandle != NULL);
 
   if (xQueueSend(telemEncodeQueueHandle, (void *)queueMsg, COMMS_TELEM_ENCODE_QUEUE_TX_WAIT_PERIOD) == pdPASS) {
@@ -123,45 +98,31 @@ obc_error_code_t sendToDownlinkQueue(comms_event_t *queueMsg) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-/**
- * @brief Puts telemetry data through OSI model layers and queues into the CC1120 transmit queue
- *
- * @param pvParameters - NULL
- */
-static void vTelemEncodeTask(void *pvParameters) {
+void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
   obc_error_code_t errCode;
-  SemaphoreHandle_t cc1120Mutex = *((SemaphoreHandle_t *)pvParameters);
 
   while (1) {
-    comms_event_t queueMsg;
+    encode_event_t queueMsg;
 
     // Wait for a telemetry downlink event
     if (xQueueReceive(telemEncodeQueueHandle, &queueMsg, COMMS_TELEM_ENCODE_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       // TODO: Handle this if necessary
       continue;
     }
-
+    transmit_event_t transmitEvent = {0};
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
-        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-          break;
-        }
+        setCurrentLinkDestAddress(&groundStationCallsign);
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
-        // wait for TX FIFO to be emptied before unlocking the mutex
-        txFifoEmptyCheckBlocking();
-        xSemaphoreGive(cc1120Mutex);
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
-        if (xSemaphoreTake(cc1120Mutex, CC1120_MUTEX_TIMEOUT) != pdTRUE) {
-          LOG_ERROR_CODE(OBC_ERR_CODE_MUTEX_TIMEOUT);
-          break;
-        }
+        setCurrentLinkDestAddress(&groundStationCallsign);
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
-        // wait for TX FIFO to be emptied before unlocking the mutex
-        txFifoEmptyCheckBlocking();
-        xSemaphoreGive(cc1120Mutex);
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -286,7 +247,7 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
     closeTelemetryFile(*fd);
     return errCode;
   }
-  LOG_DEBUG("Sending telemetry file with size: %lu", fileSize);
+  LOG_DEBUG("Sending telemetry file");
 
   // Print telemetry file name
   char fileName[TELEMETRY_FILE_PATH_MAX_LENGTH] = {0};
@@ -296,8 +257,6 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
     closeTelemetryFile(*fd);
     return errCode;
   }
-
-  LOG_DEBUG("Sending telemetry file with name: %s", fileName);
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -313,8 +272,6 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset) {
   obc_error_code_t errCode;
-
-  LOG_DEBUG("Sending telemetry: %u", singleTelem->id);
 
   uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized version of the current piece of telemetry
   uint32_t packedSingleTelemSize = 0;                  // Size of the packed single telemetry
@@ -349,12 +306,12 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
 static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) {
   packed_rs_packet_t fecPkt = {0};  // Holds a 255B RS packet
   unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
-  packed_ax25_i_frame_t ax25Pkt = {0};  // Holds an AX.25 packet
+  transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET};
 
   obc_gs_error_code_t interfaceErr;
 
   // Perform AX.25 framing
-  interfaceErr = ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt, &groundStationCallsign);
+  interfaceErr = ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }
@@ -367,17 +324,18 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
 
   memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
 
-  interfaceErr = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, ax25Pkt.data, &ax25Pkt.length);
+  interfaceErr = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, transmitEvent.ax25Pkt.data,
+                           &transmitEvent.ax25Pkt.length);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_BIT_STUFF_FAILURE;
   }
 
-  ax25Pkt.data[0] = AX25_FLAG;
-  ax25Pkt.data[ax25Pkt.length - 1] = AX25_FLAG;
+  transmitEvent.ax25Pkt.data[0] = AX25_FLAG;
+  transmitEvent.ax25Pkt.data[transmitEvent.ax25Pkt.length - 1] = AX25_FLAG;
 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&ax25Pkt));
+  RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
 
   return OBC_ERR_CODE_SUCCESS;
 }

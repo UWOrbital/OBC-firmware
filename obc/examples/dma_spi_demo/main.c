@@ -1,6 +1,7 @@
 #include "obc_logging.h"
 #include "supervisor.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
 #include "sys_dma.h"
@@ -25,6 +26,8 @@
 
 /* example data Pattern configuration */
 #define D_SIZE 127
+
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 void task(void *pvParameters);
 
@@ -53,7 +56,7 @@ int main(void) {
   dmaEnable();
   initDmaSpiSemaphores();
 
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
 
   _enable_interrupt_();
@@ -78,13 +81,13 @@ void task(void *pvParameters) {
   deassertChipSelect(spiPORT1, 0);
 
   char str[10] = {'\0'};
-  char spaceStr[] = "            "
+  char spaceStr[] = "            ";
 
-      for (uint8_t i = 0; i < D_SIZE; ++i) {
+  for (uint8_t i = 0; i < D_SIZE; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
 
   for (uint8_t i = 0; i < 50; ++i) {
     TX_DATA[i] = 0xff;
@@ -98,9 +101,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 50; ++i) {
     sprintf(str, "%u ", RX_DATA_SECOND[i + 1]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
 
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x55;
@@ -112,9 +115,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x33;
   }
@@ -125,9 +128,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x22;
   }
@@ -138,9 +141,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x11;
   }
@@ -151,9 +154,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   for (uint8_t i = 0; i < 10; ++i) {
     TX_DATA[i] = 0x09;
   }
@@ -164,9 +167,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 10; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   for (uint8_t i = 0; i < 5; ++i) {
     TX_DATA[i] = 0x08;
   }
@@ -177,9 +180,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 5; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   for (uint8_t i = 0; i < 3; ++i) {
     TX_DATA[i] = 0x07;
   }
@@ -190,9 +193,9 @@ void task(void *pvParameters) {
 
   for (uint8_t i = 0; i < 3; ++i) {
     sprintf(str, "%u ", RX_DATA[i]);
-    sciPrintText((unsigned char *)str, 5);
+    sciPrintText((unsigned char *)str, 5, UART_MUTEX_BLOCK_TIME);
   }
-  sciPrintText(spaceStr, 20);
+  sciPrintText(spaceStr, 20, UART_MUTEX_BLOCK_TIME);
   while (1)
     ;
 }

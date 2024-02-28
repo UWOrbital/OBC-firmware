@@ -1,5 +1,6 @@
 #include "obc_spi_io.h"
 #include "obc_sci_io.h"
+#include "obc_print.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -10,6 +11,8 @@
 
 #include <redposix.h>
 #include <string.h>
+
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
@@ -107,7 +110,7 @@ void vTask1(void *pvParameters) {
   sciPrintf("Successfully read from %s\r\n", fname);
 
   sciPrintf("Text read from %s: \r\n", fname);
-  sciPrintText(readBuf, ret);
+  sciPrintText(readBuf, ret, UART_MUTEX_BLOCK_TIME);
 
   ret = red_close(file);
   if (ret < 0) {
@@ -132,7 +135,7 @@ int main(void) {
   sciInit();
   spiInit();
 
-  initSciMutex();
+  initSciPrint();
   initSpiMutex();
 
   sciPrintf("Starting Reliance Edge Demo\r\n");

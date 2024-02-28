@@ -89,17 +89,18 @@
  *----------------------------------------------------------*/
 
 /* USER CODE BEGIN (0) */
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
 /* USER CODE END */
 #define configUSE_PREEMPTION		  1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION	1
 #define configUSE_FPU							1
 #define configUSE_IDLE_HOOK			  0
 #define configUSE_TICK_HOOK			  0
-#define configUSE_TRACE_FACILITY	  0
+#define configUSE_TRACE_FACILITY	  1
 #define configUSE_16_BIT_TICKS		  0
 #define configCPU_CLOCK_HZ			  ( ( unsigned portLONG ) 73333000 ) /* Timer clock. */
 #define configTICK_RATE_HZ			  ( ( TickType_t ) 1000 )
-#define configMAX_PRIORITIES		  ( 5 )
+#define configMAX_PRIORITIES		  ( 12 )
 #define configMINIMAL_STACK_SIZE	  ( ( unsigned portSHORT ) 128 )
 #define configTOTAL_HEAP_SIZE		  ( ( size_t ) 24576 )
 #define configMAX_TASK_NAME_LEN		  ( 16 )
@@ -118,6 +119,7 @@
 
 /* USER CODE BEGIN (2) */
 /* USER CODE END */
+#define configCHECK_FOR_STACK_OVERFLOW 2
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		    0

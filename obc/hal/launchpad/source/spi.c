@@ -39,6 +39,8 @@
 */
 
 /* USER CODE BEGIN (0) */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 /* USER CODE END */
 
 #include "spi.h"
@@ -473,9 +475,9 @@ void spiInit(void)
                   | (uint32)((uint32)0U << 21U)  /* wait on enable */
                   | (uint32)((uint32)0U << 20U)  /* shift direction */
                   | (uint32)((uint32)0U << 17U)  /* clock polarity */
-                  | (uint32)((uint32)0U << 16U)  /* clock phase */
-                  | (uint32)((uint32)72U << 8U) /* baudrate prescale */
-                  | (uint32)((uint32)16U << 0U);  /* data word length */
+                  | (uint32)((uint32)1U << 16U)  /* clock phase */
+                  | (uint32)((uint32)255U << 8U) /* baudrate prescale */
+                  | (uint32)((uint32)8U << 0U);  /* data word length */
 
     /** - Data Format 3 */
     spiREG4->FMT3 = (uint32)((uint32)0U << 24U)  /* wdelay */
@@ -550,7 +552,7 @@ void spiInit(void)
                     | (uint32)((uint32)0U << 11U); /* SOMI */
 
     /* SPI4 set all pins to functional */
-    spiREG4->PC0  =   (uint32)((uint32)1U << 0U)  /* SCS[0] */
+    spiREG4->PC0  =   (uint32)((uint32)0U << 0U)  /* SCS[0] */
                     | (uint32)((uint32)0U << 8U)  /* ENA */
                     | (uint32)((uint32)1U << 9U)  /* CLK */
                     | (uint32)((uint32)1U << 10U)  /* SIMO */
@@ -1212,6 +1214,7 @@ void spiDisableNotification(spiBASE_t *spi, uint32 flags)
     spi->INT0 = (spi->INT0 & (~(flags)));
 
 /* USER CODE BEGIN (33) */
+#pragma GCC diagnostic pop
 /* USER CODE END */
 }
 

@@ -44,12 +44,6 @@ typedef struct {
 } alarm_handler_event_t;
 
 /**
- * @brief Initialize the alarm handler task and associated FreeRTOS constructs (queues, timers, etc.)
- *
- */
-void initAlarmHandler(void);
-
-/**
  * @brief Send an event to the alarm handler queue.
  *
  * @param event Event to send.

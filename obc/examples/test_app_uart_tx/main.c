@@ -1,7 +1,10 @@
 #include "obc_sci_io.h"
+#include "obc_print.h"
 
 #include <gio.h>
 #include <sci.h>
+
+#define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 int main(void) {
   // Initialize hardware.
@@ -9,11 +12,11 @@ int main(void) {
   sciInit();
 
   // Initialize the SCI mutex.
-  initSciMutex();
+  initSciPrint();
 
   while (1) {
     // Send a string of text via SCI
-    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20);
+    sciPrintText((unsigned char *)"Hello from SCI!\r\n", 20, UART_MUTEX_BLOCK_TIME);
 
     // Test sciPrintf
     sciPrintf("Testing sciPrintf: %d %d %s\r\n", 0, 1, "Hello");

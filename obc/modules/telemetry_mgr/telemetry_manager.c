@@ -4,7 +4,8 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
-#include "obc_task_config.h"
+#include "obc_scheduler_config.h"
+#include "downlink_encoder.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -28,20 +29,10 @@
 #define STARTING_TELEMETRY_BATCH_ID 0UL
 
 /**
- * @brief Telemetry Manager task.
- */
-static void telemetryManager(void *pvParameters);
-
-/**
  * @brief Check if it's time to downlink telemetry.
  * @return bool True if it's time to downlink telemetry, false otherwise
  */
 static bool checkDownlinkAlarm(void);
-
-// Telemetry Manager Task
-static TaskHandle_t telemetryTaskHandle = NULL;
-static StaticTask_t telemetryTaskBuffer;
-static StackType_t telemetryTaskStack[TELEMETRY_STACK_SIZE];
 
 // Telemetry Data Queue
 static QueueHandle_t telemetryDataQueueHandle = NULL;
@@ -51,16 +42,9 @@ static uint8_t telemetryDataQueueStack[TELEMETRY_DATA_QUEUE_LENGTH * TELEMETRY_D
 static SemaphoreHandle_t downlinkReady = NULL;
 static StaticSemaphore_t downlinkReadyBuffer;
 
-void initTelemetry(void) {
-  memset(&telemetryTaskBuffer, 0, sizeof(telemetryTaskBuffer));
-  memset(&telemetryTaskStack, 0, sizeof(telemetryTaskStack));
-
+void obcTaskInitTelemetryMgr(void) {
   memset(&telemetryDataQueue, 0, sizeof(telemetryDataQueue));
   memset(&telemetryDataQueueStack, 0, sizeof(telemetryDataQueueStack));
-
-  ASSERT((telemetryTaskStack != NULL) && (&telemetryTaskBuffer != NULL));
-  telemetryTaskHandle = xTaskCreateStatic(telemetryManager, TELEMETRY_NAME, TELEMETRY_STACK_SIZE, NULL,
-                                          TELEMETRY_PRIORITY, telemetryTaskStack, &telemetryTaskBuffer);
 
   ASSERT((telemetryDataQueueStack != NULL) && (&telemetryDataQueue != NULL));
   telemetryDataQueueHandle = xQueueCreateStatic(TELEMETRY_DATA_QUEUE_LENGTH, TELEMETRY_DATA_QUEUE_ITEM_SIZE,
@@ -70,7 +54,7 @@ void initTelemetry(void) {
   downlinkReady = xSemaphoreCreateBinaryStatic(&downlinkReadyBuffer);
 }
 
-static void telemetryManager(void *pvParameters) {
+void obcTaskFunctionTelemetryMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   // TODO: Get batch ID from the FRAM
@@ -101,9 +85,9 @@ static void telemetryManager(void *pvParameters) {
       // TODO: Handle this error
     }
 
-    comms_event_t downlinkEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
+    encode_event_t encodeEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
 
-    LOG_IF_ERROR_CODE(sendToCommsQueue(&downlinkEvent));
+    LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeEvent));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       // TODO: Handle this error, specifically if the queue is full. Other
       // errors should be caught during testing.
