@@ -51,4 +51,12 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdc_bdev.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/sw_watchdog/obc_sw_watchdog.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/max17320/max17320.c
 )
+
+
+target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
+target_sources(OBC-firmware.out PUBLIC ${SOURCES})
+
+target_include_directories(debug-tool.out PUBLIC ${INCLUDES})
+target_sources(debug-tool.out PUBLIC ${SOURCES})
