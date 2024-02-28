@@ -17,6 +17,8 @@
 #define BMS_SLAVE_ADDR_RANGE_ONE 0x6C
 #define BMS_SLAVE_ADDR_RANGE_TWO 0x16
 
+#define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
+
 static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value);
 static obc_error_code_t initiateWrite(uint16_t addr, uint16_t value);
 static obc_error_code_t mapMemoryAddressToSlave(uint16_t addr, uint8_t* internalAddr, uint8_t* slaveAddr);
@@ -81,7 +83,7 @@ static obc_error_code_t initiateRead(uint16_t addr, uint16_t* value) {
   uint8_t slaveAddr = 0, internalAddr = 0;
   obc_error_code_t errCode = 0;
   RETURN_IF_ERROR_CODE(mapMemoryAddressToSlave(addr, &internalAddr, &slaveAddr));
-  RETURN_IF_ERROR_CODE(i2cReadReg(slaveAddr, internalAddr, buffer, 2));
+  RETURN_IF_ERROR_CODE(i2cReadReg(slaveAddr, internalAddr, buffer, 2, I2C_TRANSFER_TIMEOUT));
 
   *value = (buffer[1] << 8) | buffer[0];
   return OBC_ERR_CODE_SUCCESS;
