@@ -8,9 +8,10 @@
 #define BMS_MAX_CONFIGURATION_REGISTERS 12U
 
 typedef enum {
-  Status = 0x0000,
-  RepCap = 0x0005,
-  RepSOC = 0x0006,
+  BMS_STATUS = 0x0000,
+  BMS_REP_CAP = 0x0005,
+  BMS_REP_SOC = 0x0006,
+  BMS_VEMPTY = 0x003A
 } bms_register_addr_t;
 
 typedef struct {
