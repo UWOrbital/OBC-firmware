@@ -1,8 +1,7 @@
-include .env
 
 CC = "${CC_FOLDER_ROOT}/bin/arm-none-eabi-gcc"
-BUILD_DIR = examples/rtc_demo/build
-BIN = rtc_demo.out
+BUILD_DIR = build
+BIN = max17320.out
 
 ARM_FLAGS :=
 ARM_FLAGS += -mcpu=cortex-r4
@@ -34,21 +33,22 @@ CPP_FLAGS += -DLOG_DEFAULT_LEVEL=$(LOG_LEVEL)
 
 INCLUDE_DIRS :=
 INCLUDE_DIRS += -I"${CC_FOLDER_ROOT}/arm-none-eabi/include"
-INCLUDE_DIRS += -I"hal/include"
-INCLUDE_DIRS += -I"common/include"
-INCLUDE_DIRS += -I"examples/rtc_demo"
-INCLUDE_DIRS += -I"drivers/common/include"
-INCLUDE_DIRS += -I"drivers/max17320/
-
+INCLUDE_DIRS += -I"../hal/obc_rev2/include"
+INCLUDE_DIRS += -I"../drivers/*"
+INCLUDE_DIRS += -I"../config/"
+INCLUDE_DIRS += -I"../modules/*"
+INCLUDE_DIRS += -I"../reliance_edge/*"
+INCLUDE_DIRS += -I"../sys/*"
 
 LIBS :=
 
 SRC_DIRS :=
-SRC_DIRS += hal/source
-SRC_DIRS += drivers/source
-SRC_DIRS += common/source
-SRC_DIRS += examples/rtc_demo
-SRC_DIRS += drivers/max17320
+SRC_DIRS += $(wildcard ../hal/common)
+SRC_DIRS += $(wildcard ../hal/obc_rev2/source)
+SRC_DIRS += $(wildcard .../modules/*)
+SRC_DIRS += $(wildcard ../drivers/*)
+SRC_DIRS += $(wildcard ../config/*)
+SRC_DIRS += $(wildcard ../sys/*/)
 
 
 SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
@@ -64,7 +64,7 @@ $(foreach dir,$(OBJ_DIRS), $(shell mkdir -p $(dir)))
 all: $(BUILD_DIR)/$(BIN)
 
 $(BUILD_DIR)/$(BIN): $(OBJS)
-	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -Wl,-Map,$@.map -o $@ $(OBJS) -Wl,-T"hal/source/sys_link.ld"
+	$(CC) $(ARM_FLAGS) $(CC_FLAGS) -o $@ $(OBJS) -Wl,-T"../..//hal/obc_rev2/source/sys_link.ld"
 
 $(BUILD_DIR)/%.o : %.c
 	$(CC) -c $(ARM_FLAGS) $(INCLUDE_DIRS) $(CPP_FLAGS) $(CC_FLAGS) $(LIBS) -o $@ $<
