@@ -98,6 +98,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
@@ -114,6 +115,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif

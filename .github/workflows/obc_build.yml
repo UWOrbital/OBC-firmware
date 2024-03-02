@@ -6,11 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: 'recursive'
 
     - name: Setup
       run: |
+        sudo apt-get update
         sudo apt-get -y install build-essential cmake
 
     - name: Create binary directory
