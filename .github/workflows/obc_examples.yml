@@ -1,0 +1,73 @@
+name: OBC Examples
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build (Examples-Launchpad DMA-SPI)
+      run: |
+	      mkdir build
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=DMA_SPI -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad Fram-PERSIST)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=FRAM_PERSIST -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad Fram-SPI)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=FRAM_SPI -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad LM75BD)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=LM75BD -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad MPU6050)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=MPU6050 -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad Reliance-Edge)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=RE_SD -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad RTC)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=RTC -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad UART_RX)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=UART_RX -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad UART_TX)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=UART_TX -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
+
+    - name: Build (Examples-Launchpad VN100)
+      run: |
+	      cd build
+	      cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=VN100 -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+	      cmake --build .
