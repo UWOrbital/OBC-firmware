@@ -38,7 +38,7 @@ target_include_directories(debug-tool.out PUBLIC
 
 target_link_libraries(debug-tool.out PRIVATE
   tiny-aes
-  lib-correct
+  rs-lib
   obc-gs-interface
   ${HAL_LIB_OPTIMIZE}
   $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>

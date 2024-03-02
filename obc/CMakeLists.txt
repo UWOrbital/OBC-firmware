@@ -55,7 +55,7 @@ add_subdirectory(reliance_edge)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
-    lib-correct
+    rs-lib
     obc-gs-interface
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>

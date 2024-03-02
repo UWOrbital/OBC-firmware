@@ -22,8 +22,6 @@
 const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
-static correct_reed_solomon *rsGs;
-
 static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25data, packed_rs_packet_t *rsData);
 
 static uint32_t getCurrentTime(void);
@@ -152,8 +150,6 @@ int main(void) {
   memset(iv, 1, AES_IV_SIZE);
   AES_ctx_set_iv(&ctx, iv);
 
-  rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
-
   uint32_t cmdPacketOffset = 0;
 
   uint8_t packedSingleCmdSize = 0;
@@ -186,10 +182,10 @@ int main(void) {
     packed_rs_packet_t fecPkt = {0};
 
     // Apply Reed Solomon FEC
-    if ((uint8_t)correct_reed_solomon_encode(rsGs, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE,
-                                             fecPkt.data) < RS_ENCODED_SIZE) {
+    if (rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &fecPkt) != OBC_GS_ERR_CODE_SUCCESS) {
+      printf("Failed FEC encode!");
       exit(1);
-    };
+    }
 
     memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
 
@@ -285,10 +281,8 @@ static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_p
     // clear the info field of the unstuffed packet
     memset(unstuffedPacket.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
-    uint8_t decodedLength = correct_reed_solomon_decode(rsGs, rsData->data, RS_ENCODED_SIZE,
-                                                        unstuffedPacket.data + AX25_INFO_FIELD_POSITION);
-
-    if (decodedLength == -1) {
+    obc_gs_error_code_t rsErrCode = rsDecode(rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
+    if (rsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
       return GS_ERR_CODE_CORRUPTED_MSG;
     }
   }

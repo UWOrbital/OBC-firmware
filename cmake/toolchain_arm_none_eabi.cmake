@@ -42,6 +42,9 @@ add_compile_options(-Wall -Wextra -Werror -Wno-unused-parameter -fstack-protecto
 # Conditional flag for C code
 add_compile_options($<$<COMPILE_LANGUAGE:C>:-std=gnu99>)
 
+# Conditional flag for C++ code
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
+
 # Linker flags
 add_link_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
 
@@ -49,6 +52,7 @@ add_link_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfp
 # Set compilers
 #---------------------------------------------------------------------------------------
 set(CMAKE_C_COMPILER ${TOOLCHAIN_BIN_DIR}/${TOOLCHAIN}-gcc${TOOLCHAIN_EXT} CACHE INTERNAL "C Compiler")
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_BIN_DIR}/${TOOLCHAIN}-g++${TOOLCHAIN_EXT} CACHE INTERNAL "C++ Compiler")
 set(CMAKE_ASM_COMPILER ${TOOLCHAIN_BIN_DIR}/${TOOLCHAIN}-gcc${TOOLCHAIN_EXT} CACHE INTERNAL "ASM Compiler")
 
 set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_DIR}/${${TOOLCHAIN}} ${CMAKE_PREFIX_PATH})

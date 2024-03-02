@@ -122,7 +122,6 @@ void obcTaskInitCommsMgr(void) {
 
   // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
   initializeAesCtx(TEMP_STATIC_KEY);
-  initRs();
 }
 
 static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t *state) {
