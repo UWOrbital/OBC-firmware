@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.15)
 set(SOURCES
     main.c
     common/gs_heap.c
-    common/logger/gs_logger.c
+    logger/gs_logger.c
 )
 
 add_executable(gs.out ${SOURCES})
 
 target_include_directories(gs.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/logger
+    ${CMAKE_CURRENT_SOURCE_DIR}/logger
     ${CMAKE_CURRENT_SOURCE_DIR}/serial_utils
 )
 

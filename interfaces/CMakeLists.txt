@@ -4,7 +4,7 @@ set(OBC_GS_INTERFACE_LIB_NAME obc-gs-interface)
 
 set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/logger
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/logger
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/commands
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/telemetry
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/aes128
@@ -28,7 +28,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec/obc_gs_fec.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/obc_gs_crc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/logger/obc_gs_logger.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/logger/obc_gs_logger.c
 )
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})

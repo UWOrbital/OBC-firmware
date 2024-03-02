@@ -56,6 +56,16 @@ void obcGsInitLogger(void);
 void logSetLevel(log_level_t newLogLevel);
 
 /**
+ * @brief Set the logging level
+ *
+ * @param logBuf Buffer containing data to write to log file
+ * @param logBufLen Length of buffer
+ * @return obc_gs_error_code_t		OBC_GS_ERR_CODE_UNKNOWN 	if error when logging to file
+ * 								OBC_GS_ERR_CODE_SUCCESS			  if message is successfully logged to file
+ */
+obc_gs_error_code_t writeToLogFile(char logBuf[], int logBufLen);
+
+/**
  * @brief Log an error code
  *
  * @param msgLevel				Level of the message
@@ -64,6 +74,7 @@ void logSetLevel(log_level_t newLogLevel);
  * @param errCode       the error code that needs to be logged
  * @return obc_gs_error_code_t		OBC_GS_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
  * 								OBC_GS_ERR_CODE_INVALID_ARG		if file is null
+ *                OBC_GS_ERR_CODE_UNKNOWN       if error logging to file
  * 								OBC_GS_ERR_CODE_SUCCESS			  if message is successfully logged
  *
  */
@@ -78,6 +89,7 @@ obc_gs_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_
  * @param msg           the message that should be logged (MUST BE STATIC)
  * @return obc_gs_error_code_t		OBC_GS_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
  * 								OBC_GS_ERR_CODE_INVALID_ARG		if file or msg are null
+ *                OBC_GS_ERR_CODE_UNKNOWN       if error logging to file
  * 								OBC_GS_ERR_CODE_SUCCESS			if message is successfully logged
  *
  */
