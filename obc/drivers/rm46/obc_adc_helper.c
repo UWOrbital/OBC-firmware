@@ -43,6 +43,7 @@ obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group
       *reading = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
       return OBC_ERR_CODE_SUCCESS;
     }
+    ptr++;
   }
 
   return OBC_ERR_CODE_ADC_INVALID_CHANNEL;
