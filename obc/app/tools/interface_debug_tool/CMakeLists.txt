@@ -8,6 +8,7 @@ set(DEBUG_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/source/test_i2c.c
   ${CMAKE_CURRENT_SOURCE_DIR}/source/test_sci.c
   ${CMAKE_CURRENT_SOURCE_DIR}/source/test_spi.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/test_lm75bd.c
 )
 
 SET(DEBUG_INCLUDES
