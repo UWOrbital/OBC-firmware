@@ -1,6 +1,7 @@
+import dataclasses
 import struct
+import time
 from argparse import ArgumentParser
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
@@ -9,16 +10,27 @@ import serial
 OBC_UART_BAUD_RATE: Final = 115200
 
 
-@dataclass
+@dataclasses.dataclass
 class BootloaderHeader:
-    """Define header class. This is the header that will be appended to the .bin file"""
+    """Header for the application binary"""
 
     version: int
     bin_size: int
 
+    HEADER_FMT: Final[str] = "<II"
+
     def serialize(self) -> bytes:
         """Returns the serialized version of the object"""
-        return struct.pack("<II", self.version, self.bin_size)
+        return struct.pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size)
+
+    @staticmethod
+    def get_header_size() -> int:
+        """Returns the size of the header in bytes"""
+        return struct.calcsize(BootloaderHeader.HEADER_FMT)
+
+    def __str__(self) -> str:
+        """Returns a string representation of the object"""
+        return f"Header Size: {BootloaderHeader.get_header_size()}, Version: {self.version}, Bin Size: {self.bin_size}"
 
 
 def create_bin(input_path: str, input_version: int) -> str:
@@ -29,16 +41,17 @@ def create_bin(input_path: str, input_version: int) -> str:
     :param input_version: Header version
     :return: The output file path as a string
     """
-    input_obj = Path(input_path)
+    program_bin = Path(input_path).read_bytes()
+    program_size_bytes = len(program_bin)
 
-    input_bin_data = input_obj.read_bytes()
-    bin_len = len(input_bin_data)
-    header = BootloaderHeader(version=input_version, bin_size=bin_len)  # Create header struct
+    header = BootloaderHeader(version=input_version, bin_size=program_size_bytes)
     header_bytes = header.serialize()
+
+    print(header)  # TODO: Replace with logging
 
     output_path = input_path.replace(".bin", "_formatted.bin")
     output_obj = Path(output_path)
-    output_obj.write_bytes(header_bytes + input_bin_data)
+    output_obj.write_bytes(header_bytes + program_bin)
 
     return output_path
 
@@ -52,6 +65,10 @@ def send_bin(file_path: str, com_port: str) -> None:
     """
 
     file_obj = Path(file_path)
+    data = file_obj.read_bytes()
+    if len(data) < BootloaderHeader.get_header_size():
+        print("File too small to contain header. Exiting...")
+        return
 
     # Open serial port and write binary to device via UART
     with serial.Serial(
@@ -61,8 +78,41 @@ def send_bin(file_path: str, com_port: str) -> None:
         stopbits=serial.STOPBITS_TWO,
         timeout=1,
     ) as ser:
-        data = file_obj.read_bytes()
-        ser.write(data)
+        # TODO: Improve transfer protocol
+
+        # Start program download
+        ser.write("d".encode("ascii"))
+        time.sleep(0.1)
+
+        # Send header
+        ser.write(data[0 : BootloaderHeader.get_header_size()])
+        time.sleep(0.1)
+
+        # Wait for user to initiate transfer
+        while input("Enter 1 to start program transfer: ") != "1":
+            pass
+
+        # Bootloader expects a 'D' to be sent before the app
+        ser.write("D".encode("ascii"))
+        time.sleep(0.1)
+
+        # Send app in chunks of 128 bytes
+        total_bytes_to_write = len(data) - BootloaderHeader.get_header_size()
+        num_bytes_written = 0
+        while num_bytes_written < total_bytes_to_write:
+            chunk_size = 128
+
+            if total_bytes_to_write - num_bytes_written >= chunk_size:
+                ser.write(data[8 + num_bytes_written : 8 + num_bytes_written + chunk_size])
+                num_bytes_written += chunk_size
+                time.sleep(0.1)
+            else:
+                ser.write(data[num_bytes_written + 8 :])
+                num_bytes_written += total_bytes_to_write - num_bytes_written
+
+            print(f"{num_bytes_written}/{total_bytes_to_write} bytes sent")
+
+        print("Done writing app")
 
 
 def arg_parse() -> ArgumentParser:
