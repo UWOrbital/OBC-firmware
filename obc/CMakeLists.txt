@@ -15,7 +15,11 @@ else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
-add_executable(OBC-firmware.out main.c)
+if (${EXAMPLE} MATCHES 1)
+    add_executable(OBC-firmware.out examples/test_max17320/main.c)
+else()
+    add_executable(OBC-firmware.out main.c)
+endif()
 
 target_link_options(OBC-firmware.out PRIVATE
     -specs=nosys.specs
