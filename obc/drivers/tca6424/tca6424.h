@@ -35,7 +35,7 @@
 #define TCA6424A_GPIO_HIGH 1U
 #define TCA6424A_GPIO_LOW 0U
 
-typedef enum { TCA6424A_GPIO_CONFIG_INPUT, TCA6424A_GPIO_CONFIG_OUTPUT } TCA6424A_gpio_config_t;
+typedef enum { TCA6424A_GPIO_CONFIG_OUTPUT = 0x00, TCA6424A_GPIO_CONFIG_INPUT } TCA6424A_gpio_config_t;
 
 obc_error_code_t configureTCA6424APin(uint8_t pinLocation, TCA6424A_gpio_config_t gpioPinConfig);
 obc_error_code_t readTCA6424APinInput(uint8_t pinLocation, uint8_t* IOPortValue);
