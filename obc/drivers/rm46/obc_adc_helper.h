@@ -47,8 +47,9 @@ typedef enum { ADC1, ADC2 } ADC_module_t;
 
 typedef enum { EVENT, GROUP1, GROUP2 } ADC_group_t;
 
-// Hardcoded table. # of channels in each Group 0-2 for ADC modules 1-2. Update as necessary.
-const uint32_t adcGroupSize[2U][3U] = {{0U, 0U, 0U}, {0U, 0U, 0U}};
+// Hardcoded table. # of channels in each Group 0-2 for ADC modules 1-2. All set to 1 for testing purposes.
+// **IMPORTANT** Should be updated to reflect the amount of channels assigned to each group of both ADC modules
+const uint32_t adcGroupSize[2U][3U] = {{1U, 1U, 1U}, {1U, 1U, 1U}};
 
 /**
  * @brief Initialize the ADC bus mutex

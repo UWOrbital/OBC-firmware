@@ -93,8 +93,8 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
 
   adcStartConversion(adcReg, groupNum);
 
-  while (!adcIsConversionComplete(adcReg, groupNum)) {
-  }
+  while (!adcIsConversionComplete(adcReg, groupNum))
+    ;
 
   adcStopConversion(adcReg, groupNum);
 
