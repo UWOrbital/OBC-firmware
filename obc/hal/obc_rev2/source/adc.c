@@ -95,7 +95,7 @@ void adcInit(void)
     *     - Enable/Disable continuous conversion
     */
     adcREG1->GxMODECR[0U] = (uint32)ADC_12_BIT
-                          | (uint32)0x00000000U
+                          | (uint32)0x00000020U
                           | (uint32)0x00000000U;
 
     /** - Setup event group hardware trigger
@@ -121,7 +121,7 @@ void adcInit(void)
     *     - Enable/Disable continuous conversion
     */
     adcREG1->GxMODECR[1U] = (uint32)ADC_12_BIT
-                          | (uint32)0x00000000U
+                          | (uint32)0x00000020U
                           | (uint32)0x00000000U
                           | (uint32)0x00000000U;
 
@@ -148,7 +148,7 @@ void adcInit(void)
      *     - Enable/Disable continuous conversion
      */
     adcREG1->GxMODECR[2U] = (uint32)ADC_12_BIT
-                          | (uint32)0x00000000U
+                          | (uint32)0x00000020U
                           | (uint32)0x00000000U
                           | (uint32)0x00000000U;
 

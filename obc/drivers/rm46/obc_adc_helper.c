@@ -20,7 +20,7 @@ void initADCMutex(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group, float *reading,
+obc_error_code_t adcGetSingleData(ADC_module_t adc, uint8_t channel, ADC_group_t group, float *reading,
                                   TickType_t blockTime) {
   if (adc == NULL || reading == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -29,18 +29,19 @@ obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group
   if (adcConversionMutex == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
+  adcBASE_t *adcReg = (adc == ADC1) ? (adcBASE_t *)0xFFF7C000U : (adcBASE_t *)0xFFF7C200U;
 
   adcData_t adcData[MAXGROUPSIZE];
 
-  if (adcGetGroupReadings(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
+  if (adcGetGroupReadings(adcReg, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
-  adcData_t *ptr = adcData;
+  adcData_t *ptr = &adcData[0];
   uint32_t groupSize = adcGroupSize[(adc == adcREG1) ? 0U : 1U, group];
   for (int i = 0; i < groupSize; i++) {
     if (ptr->id == channel) {
-      *reading = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
+      *reading = (float)(1 << RESOLUTION) / ((float)(*ptr->value)) * 5.00;
       return OBC_ERR_CODE_SUCCESS;
     }
     ptr++;
@@ -49,7 +50,7 @@ obc_error_code_t adcGetSingleData(adcBASE_t *adc, uint8_t channel, uint8_t group
   return OBC_ERR_CODE_ADC_INVALID_CHANNEL;
 }
 
-obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t group, float *readings, TickType_t blockTime) {
+obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *readings, TickType_t blockTime) {
   if (adc == NULL || readings == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -60,16 +61,15 @@ obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t group, float *readings,
 
   adcData_t adcData[MAXGROUPSIZE];
 
-  if (adcGetGroupReadings(adc, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_MUTEX_TIMEOUT;
-  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE((adcGetGroupReadings(adc, group, adcData, blockTime)))
 
-  adcData_t *ptr = adcData;
-  float *readingPtr = readings;
+  adcData_t *ptr = &adcData[0];
+  float *readingPtr = &readings[0];
   uint32_t groupSize = adcGroupSize[(adc == adcREG1) ? 0U : 1U, group];
 
   for (int i = 0; i < groupSize; i++) {
-    *readingPtr = (float)(1 << RESOLUTION) / ((float)(ptr->value)) * 5.00;
+    *readingPtr = (float)(1 << RESOLUTION) / ((float)(*ptr->value)) * 5.00;
     ptr++;
     readingPtr++;
   }
@@ -77,7 +77,8 @@ obc_error_code_t adcGetGroupData(adcBASE_t *adc, uint8_t group, float *readings,
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t adcGetGroupReadings(adcBASE_t *adc, uint8_t group, adcData_t *data, TickType_t blockTime) {
+static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group, adcData_t *data,
+                                            TickType_t blockTime) {
   if (adc == NULL || data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -86,16 +87,18 @@ static obc_error_code_t adcGetGroupReadings(adcBASE_t *adc, uint8_t group, adcDa
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
-  adcStartConversion(adc, group);
+  adcBASE_t *adcReg = (adc == ADC1) ? adcREG1 : adcREG2;
+  // ADC HAL functions expect group value to be a uint32
+  uint32_t groupNum = (group == EVENT) ? 0U : (group == GROUP1) ? 1U : 2U;
 
-  while (!adcIsConversionComplete(adc, group))
-    ;
+  adcStartConversion(adcReg, groupNum);
 
-  adcStopConversion(adc, group);
+  while (!adcIsConversionComplete(adcReg, groupNum)) {
+  }
 
-  adcGetData(adc, group, data);
+  adcStopConversion(adcReg, groupNum);
 
-  adcResetFiFo(*adc, group);
+  adcGetData(adcReg, groupNum, data);
 
   xSemaphoreGive(adcConversionMutex);
 

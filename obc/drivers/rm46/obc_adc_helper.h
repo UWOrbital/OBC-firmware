@@ -3,6 +3,7 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_adc_helper.h"
+#include "reg_adc.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -14,11 +15,40 @@
 
 // Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
 #define MAXGROUPSIZE 16U
-// Assumes all groups have same resolution for simplicity. Could make this more flexible/not a macro.
+// Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
 #define RESOLUTION 12U
 
-// Hardcoded table. # of channels in Groups 0-2 for ADC modules 1-2. Update as necessary.
-const uint32_t adcGroupSize[2U][3U] = {{16U, 16U, 16U}, {16U, 16U, 16U}};
+#define ADC_CHANNEL_0 0U
+#define ADC_CHANNEL_1 1U
+#define ADC_CHANNEL_2 2U
+#define ADC_CHANNEL_3 3U
+#define ADC_CHANNEL_4 4U
+#define ADC_CHANNEL_5 5U
+#define ADC_CHANNEL_6 6U
+#define ADC_CHANNEL_7 7U
+#define ADC_CHANNEL_8 8U
+#define ADC_CHANNEL_9 9U
+#define ADC_CHANNEL_10 10U
+#define ADC_CHANNEL_11 11U
+#define ADC_CHANNEL_12 12U
+#define ADC_CHANNEL_13 13U
+#define ADC_CHANNEL_14 14U
+#define ADC_CHANNEL_15 15U
+#define ADC_CHANNEL_16 16U
+#define ADC_CHANNEL_17 17U
+#define ADC_CHANNEL_18 18U
+#define ADC_CHANNEL_19 19U
+#define ADC_CHANNEL_20 20U
+#define ADC_CHANNEL_21 21U
+#define ADC_CHANNEL_22 22U
+#define ADC_CHANNEL_23 23U
+
+typedef enum { ADC1, ADC2 } ADC_module_t;
+
+typedef enum { EVENT, GROUP1, GROUP2 } ADC_group_t;
+
+// Hardcoded table. # of channels in each Group 0-2 for ADC modules 1-2. Update as necessary.
+const uint32_t adcGroupSize[2U][3U] = {{0U, 0U, 0U}, {0U, 0U, 0U}};
 
 /**
  * @brief Initialize the ADC bus mutex
