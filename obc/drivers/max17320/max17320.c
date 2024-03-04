@@ -1,5 +1,4 @@
 #include "max17320.h"
-
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_i2c_io.h"

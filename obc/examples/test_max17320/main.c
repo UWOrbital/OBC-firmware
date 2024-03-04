@@ -4,10 +4,9 @@
 #include "obc_logging.h"
 #include "max17320.h"
 
-#include "op_codes.h"
-
-#include "test_sci.h"
-#include "test_i2c.h"
+#include "obc_scheduler_config.h"
+#include "state_mgr.h"
+#include <FreeRTOS.h>
 
 #include <sys_common.h>
 #include <sci.h>
