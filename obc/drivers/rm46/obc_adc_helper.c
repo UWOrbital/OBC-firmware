@@ -1,13 +1,4 @@
-#include "obc_logging.h"
-#include "obc_errors.h"
 #include "obc_adc_helper.h"
-
-#include <FreeRTOS.h>
-#include <os_portmacro.h>
-#include <os_semphr.h>
-#include <os_task.h>
-
-#include <adc.h>
 
 static SemaphoreHandle_t adcConversionMutex = NULL;
 static StaticSemaphore_t adcConversionMutexBuffer;
@@ -20,7 +11,7 @@ void initADCMutex(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t adcGetSingleData(ADC_module_t adc, uint8_t channel, ADC_group_t group, float *reading,
+obc_error_code_t adcGetSingleData(ADC_module_t adc, uint32_t channel, ADC_group_t group, float *reading,
                                   TickType_t blockTime) {
   if (adc == NULL || reading == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -29,22 +20,20 @@ obc_error_code_t adcGetSingleData(ADC_module_t adc, uint8_t channel, ADC_group_t
   if (adcConversionMutex == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
-  adcBASE_t *adcReg = (adc == ADC1) ? (adcBASE_t *)0xFFF7C000U : (adcBASE_t *)0xFFF7C200U;
 
   adcData_t adcData[MAXGROUPSIZE];
 
-  if (adcGetGroupReadings(adcReg, group, adcData, blockTime) != OBC_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_MUTEX_TIMEOUT;
-  }
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
 
-  adcData_t *ptr = &adcData[0];
-  uint32_t groupSize = adcGroupSize[(adc == adcREG1) ? 0U : 1U, group];
+  uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U, group];
+
   for (int i = 0; i < groupSize; i++) {
-    if (ptr->id == channel) {
-      *reading = (float)(1 << RESOLUTION) / ((float)(*ptr->value)) * 5.00;
+    if (adcData[i].id == channel) {
+      *reading =
+          (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / (float)(1 << RESOLUTION) - REF_VOLTAGE_LOW;
       return OBC_ERR_CODE_SUCCESS;
     }
-    ptr++;
   }
 
   return OBC_ERR_CODE_ADC_INVALID_CHANNEL;
@@ -62,16 +51,13 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
   adcData_t adcData[MAXGROUPSIZE];
 
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE((adcGetGroupReadings(adc, group, adcData, blockTime)))
+  RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
 
-  adcData_t *ptr = &adcData[0];
-  float *readingPtr = &readings[0];
-  uint32_t groupSize = adcGroupSize[(adc == adcREG1) ? 0U : 1U, group];
+  uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U, group];
 
   for (int i = 0; i < groupSize; i++) {
-    *readingPtr = (float)(1 << RESOLUTION) / ((float)(*ptr->value)) * 5.00;
-    ptr++;
-    readingPtr++;
+    readings[i] =
+        (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / (float)(1 << RESOLUTION) - REF_VOLTAGE_LOW;
   }
 
   return OBC_ERR_CODE_SUCCESS;
@@ -88,17 +74,15 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
   }
 
   adcBASE_t *adcReg = (adc == ADC1) ? adcREG1 : adcREG2;
-  // ADC HAL functions expect group value to be a uint32
-  uint32_t groupNum = (group == EVENT) ? 0U : (group == GROUP1) ? 1U : 2U;
 
-  adcStartConversion(adcReg, groupNum);
+  adcStartConversion(adcReg, group);
 
-  while (!adcIsConversionComplete(adcReg, groupNum))
+  while (!adcIsConversionComplete(adcReg, group))
     ;
 
-  adcStopConversion(adcReg, groupNum);
+  adcStopConversion(adcReg, group);
 
-  adcGetData(adcReg, groupNum, data);
+  adcGetData(adcReg, group, data);
 
   xSemaphoreGive(adcConversionMutex);
 

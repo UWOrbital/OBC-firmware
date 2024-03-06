@@ -2,7 +2,7 @@
 
 #include "obc_logging.h"
 #include "obc_errors.h"
-#include "obc_adc_helper.h"
+#include "adc.h"
 #include "reg_adc.h"
 
 #include <FreeRTOS.h>
@@ -10,7 +10,6 @@
 #include <os_semphr.h>
 #include <os_task.h>
 
-#include <adc.h>
 #include <stdint.h>
 
 // Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
@@ -43,12 +42,15 @@
 #define ADC_CHANNEL_22 22U
 #define ADC_CHANNEL_23 23U
 
+#define REF_VOLTAGE_HIGH 5.0f
+#define REF_VOLTAGE_LOW 0.0f
+
 typedef enum { ADC1, ADC2 } ADC_module_t;
 
-typedef enum { EVENT, GROUP1, GROUP2 } ADC_group_t;
+typedef enum { EVENT = 0U, GROUP1, GROUP2 } ADC_group_t;
 
-// Hardcoded table. # of channels in each Group 0-2 for ADC modules 1-2. All set to 1 for testing purposes.
-// **IMPORTANT** Should be updated to reflect the amount of channels assigned to each group of both ADC modules
+/* Hardcoded table. # of channels in each Group 0-2 for ADC modules 1-2. All set to 1 for testing purposes.
+**IMPORTANT** Should be updated to reflect the amount of channels assigned to each group of both ADC modules */
 const uint32_t adcGroupSize[2U][3U] = {{1U, 1U, 1U}, {1U, 1U, 1U}};
 
 /**
