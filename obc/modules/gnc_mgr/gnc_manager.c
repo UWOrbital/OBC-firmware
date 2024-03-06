@@ -24,12 +24,10 @@
 #define MAX_GNC_TASK_PERIOD_MS 100
 #define DEGREES_TO_RADIANS(theta) (theta * M_PI / 180)
 
-static SemaphoreHandle_t gncMutex;
-StaticSemaphore_t gncMutexBuffer;
-
 uint16_t GncTaskPeriod = DEFAULT_GNC_TASK_PERIOD_MS;
+uint32_t cycleNum = 1;
+uint32_t cyclesToDelay = 1;
 
-obc_error_code_t errCode;
 vn100_binary_packet_t vn100Packet;
 
 void rtOnboardModelStep(void);
@@ -234,25 +232,17 @@ void rtAttitudeControlModelStep(void) {
   /* Enable interrupts here */
 }
 
-obc_error_code_t setGncTaskPeriod(uint16_t period) {
-  // Take the mutex to ensure exclusive access to the global variable
-  if (xSemaphoreTake(gncMutex, portMAX_DELAY) == pdTRUE) {
-    if (period <= 0 || period > MAX_GNC_TASK_PERIOD_MS) {
-      // Release the mutex before returning
-      xSemaphoreGive(gncMutex);
-      return OBC_ERR_CODE_INVALID_ARG;
-    }
-
-    GncTaskPeriod = period;
-
-    // Release the mutex before returning
-    xSemaphoreGive(gncMutex);
-
-    return OBC_ERR_CODE_SUCCESS;
-  } else {
-    // Couldn't take the mutex, handle error
-    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
+  /* If the period exceeds 50ms, set to block for another interval (e.g 100ms is one blocked cycle for 50ms and then)*/
+  if (periodMs > DEFAULT_GNC_TASK_PERIOD_MS) {
+    cyclesToDelay = periodMs / DEFAULT_GNC_TASK_PERIOD_MS;
+  } else if (periodMs <= 0) {
+    return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  GncTaskPeriod = periodMs;
+
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 void obcTaskInitGncMgr(void) {
@@ -264,9 +254,6 @@ void obcTaskInitGncMgr(void) {
 
   /* Initialize the attitude control algorithms */
   attitude_control_initialize();
-
-  /* Initialize mutex */
-  gncMutex = xSemaphoreCreateMutexStatic(&gncMutexBuffer);
 }
 
 void obcTaskFunctionGncMgr(void *pvParameters) {
@@ -277,11 +264,19 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
 
   /* Run GNC tasks periodically at 20 Hz */
   while (1) {
+    /* Check in with the watchdog */
+    digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
+    if (cycleNum % cyclesToDelay != 0) {
+      cycleNum++;
+      continue;
+    }
+
     /* Place GNC Tasks here */
 
     TickType_t startTime = xTaskGetTickCount();
     sciPrintf("Starting GNC Task at %d ms \r\n", startTime);
 
+    obc_error_code_t errCode;
     errCode = vn100ReadBinaryOutputs(&vn100Packet);
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
@@ -304,8 +299,6 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     sciPrintf("Elapsed Time of attitude determination model: %d ms \r\n", attitudeDeterminationElapsedTime);
     sciPrintf("Elapsed Time of attitude control model: %d ms \r\n", attitudeControlElapsedTime);
     sciPrintf("Total elapsed Time of all algorithms: %d ms \r\n", totalElapsedTime);
-
-    digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
 
     /* This will automatically update the xLastWakeTime variable to be the last unblocked time, set to delay for 50ms */
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GncTaskPeriod));
