@@ -48,9 +48,9 @@ obc_error_code_t camReadReg(uint8_t addr, uint8_t *rx_data, camera_t cam) {
 
 obc_error_code_t camWriteByte(uint8_t byte, camera_t cam) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
+  // RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
   errCode = spiTransmitByte(CAM_SPI_REG, &cam_config[cam].spi_config, byte);
-  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
+  // RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
   return errCode;
 }
 
@@ -63,11 +63,11 @@ obc_error_code_t camWriteSensorReg16_8(uint32_t regID, uint8_t regDat) {
   return i2cSendTo(CAM_I2C_WR_ADDR, 3, reg_tx_data, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT);
 }
 
-obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t *regDat) {
-  // Todo: regID is byteswapped for some reason so 0x3138 needs to be input as 0x3831
+obc_error_code_t camReadSensorReg16_8(uint32_t regID, uint8_t *regDat) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(i2cSendTo(0x3C, 2, &regID, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
-  RETURN_IF_ERROR_CODE(i2cReceiveFrom(0x3C, 1, regDat, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
+  uint8_t reg_id_tx_data[2] = {(regID >> 8), (regID & 0x00FF)};
+  RETURN_IF_ERROR_CODE(i2cSendTo(CAM_I2C_WR_ADDR, 2, reg_id_tx_data, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
+  RETURN_IF_ERROR_CODE(i2cReceiveFrom(CAM_I2C_RD_ADDR, 1, regDat, I2C_MUTEX_TIMEOUT, I2C_TRANSFER_TIMEOUT));
   return errCode;
 }
 
@@ -94,6 +94,6 @@ obc_error_code_t tcaSelect(camera_t cam) {
 uint8_t getBit(uint8_t addr, uint8_t bit, camera_t cam) {
   uint8_t temp;
   camReadReg(addr, &temp, cam);
-  temp = temp & (1 << bit);
+  temp = temp & bit;
   return temp;
 }

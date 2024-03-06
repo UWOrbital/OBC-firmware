@@ -60,7 +60,7 @@ obc_error_code_t captureImage(camera_t cam);
  * @brief Read back image data
  * @param cam The camera to read from
  */
-obc_error_code_t readFifoBurst(camera_t cam);
+obc_error_code_t readFifoBurst(uint8_t* buffer, size_t length, uint32_t* bytesWritten, camera_t cam);
 
 /**
  * @brief Checks if image capture has been completed
@@ -68,3 +68,10 @@ obc_error_code_t readFifoBurst(camera_t cam);
  * @return Returns true if capture is complete
  */
 bool isCaptureDone(camera_t cam);
+
+/**
+ * @brief Reads length of image in FIFO
+ * @param length pointer to uint32_t to store value
+ * @param cam The camera to check
+ */
+obc_error_code_t readFifoLength(uint32_t* length, camera_t cam);

@@ -13,7 +13,7 @@
 #define ARDUCHIP_FRAMES \
   0x01  // FRAME control register, Bit[2:0] = Number of frames to be captured  //  On 5MP_Plus platforms bit[2:0] = 7
         // means continuous capture until frame buffer is full
-#define CAP_DONE_MASK 0x04
+#define CAP_DONE_MASK 0x08
 #define BURST_FIFO_READ 0x3C  // Burst FIFO read operation
 
 #define ARDUCHIP_FIFO 0x04  // FIFO and I2C control
@@ -42,6 +42,7 @@ obc_error_code_t initCam(void) {
   obc_error_code_t errCode;
   // Reset camera
   RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
+  vTaskDelay(pdMS_TO_TICKS(2));
   // Setup at 320x420 resolution
   RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_QVGA_Preview_Config), PREVIEW_CONFIG_LEN));
   vTaskDelay(pdMS_TO_TICKS(1));
@@ -60,7 +61,7 @@ obc_error_code_t initCam(void) {
     // Image horizontal control
     RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3801, 0xb0));
     // Image compression
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x4407, 0x08));
+    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x4407, 0x04));
     // Lens correction
     RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5888, 0x00));
     // Image processor setup
@@ -114,11 +115,13 @@ obc_error_code_t captureImage(camera_t cam) {
   obc_error_code_t errCode;
   errCode = flushFifo(cam);
   if (!errCode) {
-    errCode = startCapture(cam);
-  }
-  if (!errCode) {
     errCode = clearFifoFlag(cam);
   }
+
+  if (!errCode) {
+    errCode = startCapture(cam);
+  }
+
   return errCode;
 }
 
@@ -132,15 +135,14 @@ obc_error_code_t readFifoLength(uint32_t *length, camera_t cam) {
   RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE1, &rx_data, cam));
   len1 = rx_data;
   RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE2, &rx_data, cam));
-  len1 = rx_data;
+  len2 = rx_data;
   RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE3, &rx_data, cam));
-  len1 = (rx_data & 0x7f);
+  len3 = (rx_data & 0x7f);
 
   *length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
   return errCode;
 }
 
-// Todo: Not hardware tested
 obc_error_code_t readFifoBurst(camera_t cam) {
   obc_error_code_t errCode;
   int32_t file = 0;
