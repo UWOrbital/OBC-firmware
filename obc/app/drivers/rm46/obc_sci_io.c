@@ -52,7 +52,7 @@ void initSciMutex(void) {
 }
 
 obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks,
-                              size_t transferCompleteTimeoutTicks, sciBASE_t *sciReg) {
+                              TickType_t transferCompleteTimeoutTicks, sciBASE_t *sciReg) {
   obc_error_code_t errCode;
 
   if (!(sciReg == scilinREG || sciReg == sciREG)) {
@@ -96,7 +96,7 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
 }
 
 obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks,
-                              size_t transferCompleteTimeoutTicks, sciBASE_t *sciReg) {
+                              TickType_t transferCompleteTimeoutTicks, sciBASE_t *sciReg) {
   obc_error_code_t errCode;
   if (!(sciReg == scilinREG || sciReg == sciREG)) {
     return OBC_ERR_CODE_INVALID_ARG;

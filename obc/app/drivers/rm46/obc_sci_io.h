@@ -25,7 +25,7 @@ void initSciMutex(void);
  * @param sciReg Pointer to SCI register to read from
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks,
+obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, TickType_t blockTimeTicks,
                               sciBASE_t *sciReg);
 
 /**
@@ -38,5 +38,5 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
  * @param sciReg Pointer to SCI register to transmit bytes to
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, size_t blockTimeTicks,
+obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMutexTimeoutTicks, TickType_t blockTimeTicks,
                               sciBASE_t *sciReg);
