@@ -35,7 +35,7 @@ static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 
-uint8_t resetReason = RESET_REASON_UNKNOWN;
+extern uint8_t resetReason;
 
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.

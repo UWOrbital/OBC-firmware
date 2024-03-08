@@ -64,7 +64,7 @@
 
 #include "errata_SSWF021_45.h"
 /* USER CODE BEGIN (1) */
-extern obc_reset_reason_t resetReason;
+obc_reset_reason_t resetReason = RESET_REASON_UNKNOWN;
 /* USER CODE END */
 
 
