@@ -3,6 +3,8 @@
 #include "obc_privilege.h"
 #include "obc_scheduler_config.h"
 #include "obc_logging.h"
+#include "obc_persistent.h"
+#include "sys_common.h"
 
 #include <system.h>
 
@@ -120,7 +122,10 @@ void obcTaskFunctionSwWatchdog(void *params) {
     if (allTasksCheckedIn) {
       feedDigitalWatchdog();
     } else {
-      LOG_ERROR_CODE(DIGITAL_WATCHDOG_ERROR_CODE_OFFSET + i);
+      obc_error_code_t errCode;
+      obc_reset_reason_t resetReason = RESET_REASON_DIG_WATCHDOG_RESET + i + 1;
+      LOG_IF_ERROR_CODE(
+          setPersistentData(OBC_PERSIST_SECTION_ID_RESET_REASON, &resetReason, sizeof(obc_reset_reason_t)));
       vTaskSuspend(NULL);  // suspend this task and wait for reset
     }
     vTaskDelay(FEEDING_PERIOD);

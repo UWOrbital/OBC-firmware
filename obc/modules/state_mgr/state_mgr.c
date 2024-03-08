@@ -9,6 +9,8 @@
 #include "obc_state_handle.h"
 #include "obc_state_defs.h"
 #include "obc_time.h"
+#include "obc_reset.h"
+#include "obc_persistent.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -34,6 +36,8 @@ static StaticQueue_t stateMgrQueue;
 static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
+
+uint8_t resetReason = RESET_REASON_UNKNOWN;
 
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
@@ -73,6 +77,24 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   // LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
   LOG_IF_ERROR_CODE(initTime());  // RTC
 
+  initFRAM();  // FRAM storage (OBC)
+
+  /* if reset was done in software then read fram for reason */
+  if (resetReason == RESET_REASON_SW_RESET || resetReason == RESET_REASON_CPU_RESET ||
+      resetReason == RESET_REASON_DIG_WATCHDOG_RESET) {
+    obc_reset_reason_t storedReason = RESET_REASON_UNKNOWN;
+    LOG_IF_ERROR_CODE(
+        getPersistentData(OBC_PERSIST_SECTION_ID_RESET_REASON, &storedReason, sizeof(obc_reset_reason_t)));
+    if (storedReason != RESET_REASON_UNKNOWN) {
+      resetReason = storedReason;
+    }
+  }
+
+  LOG_ERROR_CODE(resetReason + RESET_REASON_ERROR_CODE_OFFSET);
+
+  resetReason = RESET_REASON_UNKNOWN;
+  LOG_IF_ERROR_CODE(setPersistentData(OBC_PERSIST_SECTION_ID_RESET_REASON, &resetReason, sizeof(obc_reset_reason_t)));
+
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
       .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
@@ -84,8 +106,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   };
 
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
-
-  initFRAM();  // FRAM storage (OBC)
 
   // Initialize the state of each module. This will not start any tasks.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);

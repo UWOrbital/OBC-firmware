@@ -64,6 +64,7 @@
 
 #include "errata_SSWF021_45.h"
 /* USER CODE BEGIN (1) */
+extern obc_reset_reason_t resetReason;
 /* USER CODE END */
 
 
@@ -134,6 +135,7 @@ void _c_int00(void)
     if ((SYS_EXCEPTION & POWERON_RESET) != 0U)
     {		
 /* USER CODE BEGIN (12) */
+        resetReason = RESET_REASON_POWER_ON;
 /* USER CODE END */
         /* Add condition to check whether PLL can be started successfully */
         if (_errata_SSWF021_45_both_plls(PLL_RETRIES) != 0U)
@@ -159,6 +161,7 @@ void _c_int00(void)
         Add user code here to handle oscillator failure */
 
 /* USER CODE BEGIN (16) */
+        resetReason = RESET_REASON_OSC_FAILURE_RESET;
 /* USER CODE END */
     }
     /*SAFETYMCUSW 139 S MR:13.7 <APPROVED> "Hardware status bit read check" */
@@ -173,6 +176,7 @@ void _c_int00(void)
         {
             /* Add user code here to handle watchdog violation. */ 
 /* USER CODE BEGIN (17) */
+            resetReason = RESET_REASON_DIG_WATCHDOG_RESET;
 /* USER CODE END */
 
             /* Clear the Watchdog reset flag in Exception Status register */ 
@@ -183,6 +187,7 @@ void _c_int00(void)
         }
         else
         {
+            resetReason = RESET_REASON_ICEPICK_RESET;
             /* Clear the ICEPICK reset flag in Exception Status register */ 
             SYS_EXCEPTION = ICEPICK_RESET;
 /* USER CODE BEGIN (19) */
@@ -197,6 +202,7 @@ void _c_int00(void)
         by toggling the "CPU RESET" bit of the CPU Reset Control Register. */
 
 /* USER CODE BEGIN (20) */
+        resetReason = RESET_REASON_CPU_RESET;
 /* USER CODE END */
 
         /* clear all reset status flags */
@@ -213,6 +219,7 @@ void _c_int00(void)
         Add user code to handle software reset. */
 		
 /* USER CODE BEGIN (22) */
+        resetReason = RESET_REASON_SW_RESET;
 /* USER CODE END */
 	}
     else
@@ -221,6 +228,7 @@ void _c_int00(void)
         Add user code to handle external reset. */
 
 /* USER CODE BEGIN (23) */
+        resetReason = RESET_REASON_EXTERNAL_RESET;
 /* USER CODE END */
 	}
 
