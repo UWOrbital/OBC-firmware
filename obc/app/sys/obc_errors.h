@@ -1,6 +1,7 @@
 #pragma once
 
 #define RELIANCE_EDGE_ERROR_CODES_OFFSET 1000U
+#define DIGITAL_WATCHDOG_ERROR_CODE_OFFSET 950U
 #define RESET_REASON_ERROR_CODE_OFFSET 900U
 
 typedef enum {
@@ -105,6 +106,10 @@ typedef enum {
 
   /* Reset Reason errors 900-949 */
   /* See obc_reset_reason_t enum for mapping */
+
+  /* watchdog errors 950-974 */
+  /* values are mapped as (DIGITAL_WATCHDOG_ERROR_CODE_OFFSET + enum value of task in obc_scheduler_config_id_t)*/
+  OBC_ERR_CODE_STATE_MGR_NOT_CHECKED_IN = 950,
 
   /* Reliance edge errors */
   // Values are mapped as (ORIGINAL_RED_ERRCODE + RELIANCE_EDGE_ERROR_CODES_OFFSET)

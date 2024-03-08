@@ -127,6 +127,7 @@ void obcTaskFunctionSwWatchdog(void *params) {
     if (allTasksCheckedIn) {
       feedDigitalWatchdog();
     } else {
+      LOG_ERROR_CODE(DIGITAL_WATCHDOG_ERROR_CODE_OFFSET + i);
       obc_error_code_t errCode;
       obc_reset_reason_t resetReason = RESET_REASON_DIG_WATCHDOG_RESET + i + 1;
       LOG_IF_ERROR_CODE(
