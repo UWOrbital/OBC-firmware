@@ -12,7 +12,7 @@
 typedef struct {
   float data1;
   uint32_t data2;
-} obc_cmd_reset_response_t;
+} obc_cmd_reset_response_t;  // This is only a sample response. Implement an actual one
 
 typedef enum { CMD_RESPONSE_SUCCESS = 0x0, CMD_RESPONSE_ERROR } cmd_response_error_code_t;
 
