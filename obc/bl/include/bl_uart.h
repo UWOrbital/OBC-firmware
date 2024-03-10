@@ -3,8 +3,7 @@
 #include <stdint.h>
 
 typedef enum {
-  BL_UART_SCIREG_1 = 0,
-  BL_UART_SCIREG_2 = 1,
+  BL_UART_SCIREG = 0,
 } bl_uart_reg_t;
 
 /**
