@@ -70,8 +70,11 @@ obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
+static void sendStartupMessages(void) {}
+
 obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state_t *state) {
-  if (state = NULL) {
+  obc_error_code_t errCode;
+  if (state == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   switch (*state) {
@@ -93,7 +96,7 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
           resetCounter++;
           telemetry_data_t resetTelem = {
               .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = resetCounter};
-          RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
+          RETURN_IF_ERROR_CODE(addTelemetryData(&resetTelem));
           return OBC_ERR_CODE_SUCCESS;
           break;
 
@@ -120,20 +123,24 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
           resetCounter++;
           telemetry_data_t resetTelem = {
               .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = resetCounter};
-          RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
-          return OBC_ERR_CODE_SUCCESS;
-          break;
 
-        case CUBESAT_STATE_RESET:
-          // TODO: According to the FSM chart, the OBC should just initialize the tasks again after this, so go back to
-          // CUBESAT_STATE_INITIALIZATION state, there isn't really an event which would trigger a state change from the
-          // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here
+          RETURN_IF_ERROR_CODE(addTelemetryData(&resetTelem));
+          return OBC_ERR_CODE_SUCCESS;
           break;
 
         default:
           return OBC_ERR_CODE_INVALID_STATE;
           break;
       }
+    case CUBESAT_STATE_RESET:
+      // TODO: According to the FSM chart, the OBC should just initialize the tasks again after this, so go back to
+      // CUBESAT_STATE_INITIALIZATION state, there isn't really an event which would trigger a state change from the
+      // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here
+      break;
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE;
+      break;
   }
 }
 
@@ -212,7 +219,11 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
     state_mgr_event_t tasksRunningEvent = {
         .eventID = STATE_MGR_TASKS_RUNNING_EVENT_ID,
-        .data = 0,
+        .data =
+            {
+                .i = 0,
+            },
+
     };
     sendToStateMgrEventQueue(&tasksRunningEvent);
   }
