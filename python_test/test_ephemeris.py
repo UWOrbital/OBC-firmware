@@ -1,14 +1,12 @@
-import pytest
-
-import struct
 import logging
-import os
 import math
+import os
+import struct
 
-from sun import ephemeris
-from sun.ephemeris import ErrorCode
-from sun.ephemeris import DataPoint
-from sun import ephemerisparser as ep
+import pytest
+from gs.sun import ephemeris
+from gs.sun import ephemeris_parser as ep
+from gs.sun.ephemeris import DataPoint, ErrorCode
 
 
 @pytest.mark.parametrize(
@@ -114,7 +112,7 @@ def test_suppress_logging1(caplog):
     # Test if logging is suppressed
     logging.error("This message should not be logged")
     assert len(caplog.records) == 0
-    assert "" == caplog.text
+    assert caplog.text == ""
 
 
 @pytest.mark.parametrize(
@@ -277,9 +275,7 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
         ("JD1000", "JD1001", "1m", "output.bin", ErrorCode.SUCCESS),
     ],
 )
-def test_validate_input(
-    start_time, stop_time, step_size, output, expected_result, caplog
-):
+def test_validate_input(start_time, stop_time, step_size, output, expected_result, caplog):
     # Suppress logging messages during the test
     suppress_logging(caplog)
 
@@ -654,13 +650,8 @@ def test_datapoint_not_equal(data_point1, data_point2):
         (1, 2, "3h", 9),
     ],
 )
-def test_calculate_number_of_data_points_true(
-    start_time, stop_time, step_size, expected
-):
-    assert (
-        ephemeris.calculate_number_of_data_points(start_time, stop_time, step_size)
-        == expected
-    )
+def test_calculate_number_of_data_points_true(start_time, stop_time, step_size, expected):
+    assert ephemeris.calculate_number_of_data_points(start_time, stop_time, step_size) == expected
 
 
 @pytest.mark.parametrize(
@@ -700,9 +691,7 @@ def test_100k_request():
     length = 110_000
     data_points_returned = ephemeris.main(f"JD1 JD110001 -s {length} -o {filename}")
     file_size = os.path.getsize(filename)
-    assert (
-        file_size == length * (3 * ephemeris.SIZE_OF_FLOAT) + ephemeris.SIZE_OF_HEADER
-    )
+    assert file_size == length * (3 * ephemeris.SIZE_OF_FLOAT) + ephemeris.SIZE_OF_HEADER
 
     data_points_actual = ep.parse_file(filename)
     os.remove(filename)

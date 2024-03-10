@@ -54,14 +54,19 @@ dkms.conf
 # IDE files
 .vscode/
 .idea/
+compile_commands.json
+.cache/
 
 .env
 
 /build*
 
+# Python
 .venv/
 venv/
-
-# Python
 __pycache__/
 .pytest_cache/
+*.egg-info/
+*.coverage
+.mypy_cache/
+.ruff_cache/
