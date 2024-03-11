@@ -81,6 +81,7 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
   while (!adcIsConverionComplete(adcReg, group)) {
     if (totalAttempts == 1) {
       adcStopConversion(adcReg, group);
+      adcResetFifo(adcReg, group);
       xSemaphoreGive(adcConversionMutex);
       return OBC_ERR_CODE_ADC_FAILURE;
     }
