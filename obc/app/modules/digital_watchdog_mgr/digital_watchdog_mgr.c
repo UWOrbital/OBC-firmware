@@ -2,7 +2,7 @@
 #include "obc_digital_watchdog.h"
 #include "obc_privilege.h"
 #include "obc_scheduler_config.h"
-#include "obc_logging.h"
+#include "logger.h"
 
 #include <system.h>
 

@@ -1,4 +1,4 @@
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_errors.h"
 
 #include <stdarg.h>
@@ -17,10 +17,17 @@ void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
 void logSetOutputLocation(log_output_location_t newOutputLocation) { outputLocation = newOutputLocation; }
 
-obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
-  if (msgLevel < logLevel) return OBC_ERR_CODE_LOG_MSG_SILENCED;
+error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+  if (msgLevel < logLevel) {
+    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_LOG_MSG_SILENCED};
+    return returnCode;
+  }
 
-  if (file == NULL) return OBC_ERR_CODE_INVALID_ARG;
+  if (file == NULL) {
+    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    return returnCode;
+  }
 
-  return OBC_ERR_CODE_SUCCESS;
+  error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_SUCCESS};
+  return returnCode;
 }

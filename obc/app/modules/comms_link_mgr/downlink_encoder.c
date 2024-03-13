@@ -8,7 +8,7 @@
 #include "obc_gs_telemetry_pack.h"
 
 #include "obc_scheduler_config.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_errors.h"
 #include "obc_reliance_fs.h"
 #include "comms_manager.h"

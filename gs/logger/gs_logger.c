@@ -1,4 +1,4 @@
-#include "gs_logger.h"
+#include "logger.h"
 #include "gs_errors.h"
 
 #include <string.h>
@@ -6,37 +6,93 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define LOG_FILE_NAME "gs_log.log"
+
 #define MAX_UINT32_STRING_SIZE 11U
+#define MAX_MSG_SIZE 128U
+#define MAX_FNAME_LINENUM_SIZE 128U
+// Extra 10 for the small extra pieces in "%s - %s\r\n"
+#define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
 static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 static log_level_t logLevel;
 
-void gsInitLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
+/**
+ * @brief Write a message/error to a log file
+ *
+ * @param logBuf Buffer containing data to write to log file
+ * @param logBufLen Length of buffer
+ * @return gs_error_code_t - indicating whether the logging was successful.
+ */
+static gs_error_code_t writeToLogFile(char logBuf[], int logBufLen);
+
+void initLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
 
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
-gs_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+static gs_error_code_t writeToLogFile(char logBuf[], int logBufLen) {
+  FILE *fpointer = fopen(LOG_FILE_NAME, "a");
+  if (fpointer == NULL) {
+    return GS_ERR_CODE_FAILED_FILE_OPEN;
+  }
+  if (fwrite(logBuf, sizeof(char), logBufLen, fpointer) != (size_t)logBufLen) {
+    fclose(fpointer);
+    return GS_ERR_CODE_FAILED_FILE_WRITE;
+  }
+  if (fclose(fpointer) != 0) {
+    return GS_ERR_CODE_FAILED_FILE_CLOSE;
+  }
+
+  return GS_ERR_CODE_SUCCESS;
+}
+
+error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
   // Convert error code to string
   char errCodeStr[MAX_UINT32_STRING_SIZE] = {0};
-  snprintf(errCodeStr, MAX_UINT32_STRING_SIZE, "%lu", (unsigned long)errCode);
+  int errCodeStrLen = 0;
+  errCodeStrLen = snprintf(errCodeStr, MAX_UINT32_STRING_SIZE, "%lu", (unsigned long)errCode);
+  if (errCodeStrLen < 0) {
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_INVALID_ARG};
+    return returnCode;
+  }
+  if ((uint32_t)errCodeStrLen >= MAX_UINT32_STRING_SIZE) {
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_BUFF_TOO_SMALL};
+    return returnCode;
+  }
 
   return logMsg(msgLevel, file, line, errCodeStr);
 }
 
-gs_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
+error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
   if (msgLevel < logLevel) {
-    return GS_ERR_CODE_LOG_MSG_SILENCED;
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_LOG_MSG_SILENCED};
+    return returnCode;
   }
 
   if (file == NULL) {
-    return GS_ERR_CODE_INVALID_ARG;
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_INVALID_ARG};
+    return returnCode;
   }
 
   if (msg == NULL) {
-    return GS_ERR_CODE_INVALID_ARG;
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_INVALID_ARG};
+    return returnCode;
   }
 
-  printf("%-5s -> %s:%lu - %s\r\n", LEVEL_STRINGS[msgLevel], file, (unsigned long)line, msg);
+  // Construct log entry
+  char logBuf[MAX_LOG_SIZE] = {0};
+  int logBufLen = 0;
+  logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%-5s -> %s:%lu - %s\r\n", LEVEL_STRINGS[msgLevel], file,
+                       (unsigned long)line, msg);
+  if (logBufLen < 0) {
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_INVALID_ARG};
+    return returnCode;
+  }
+  if ((uint32_t)logBufLen >= MAX_LOG_SIZE) {
+    error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = GS_ERR_CODE_BUFF_TOO_SMALL};
+    return returnCode;
+  }
 
-  return GS_ERR_CODE_SUCCESS;
+  error_code_t returnCode = {.type = GS_ERROR_CODE, .gsError = writeToLogFile(logBuf, logBufLen)};
+  return returnCode;
 }

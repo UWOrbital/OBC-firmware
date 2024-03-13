@@ -70,3 +70,6 @@ __pycache__/
 *.coverage
 .mypy_cache/
 .ruff_cache/
+
+# Log File
+*.log

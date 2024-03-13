@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.15)
 SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/fs_wrapper
-    ${CMAKE_CURRENT_SOURCE_DIR}/logging
     ${CMAKE_CURRENT_SOURCE_DIR}/persistent
     ${CMAKE_CURRENT_SOURCE_DIR}/print
     ${CMAKE_CURRENT_SOURCE_DIR}/time
     ${CMAKE_CURRENT_SOURCE_DIR}/utils
+    ${CMAKE_SOURCE_DIR}/interfaces/logging
 )
 
 SET(SOURCES

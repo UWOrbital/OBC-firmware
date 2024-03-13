@@ -10,7 +10,7 @@
 #include "obc_gs_command_data.h"
 #include "command_manager.h"
 #include "obc_scheduler_config.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "comms_manager.h"
 
 #include <FreeRTOS.h>

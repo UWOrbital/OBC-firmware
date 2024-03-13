@@ -11,7 +11,7 @@
 #include "sdc_diskio.h"
 #include "sdc_rm46.h"
 #include "obc_spi_io.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_assert.h"
 #include "obc_board_config.h"
 

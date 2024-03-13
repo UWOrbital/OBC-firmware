@@ -12,6 +12,10 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec
 
     ${CMAKE_CURRENT_SOURCE_DIR}/data_pack_unpack
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/logging
+    ${CMAKE_SOURCE_DIR}/gs/common # gs_errors.h
+    ${CMAKE_SOURCE_DIR}/obc/app/sys # obc_errors.h
 )
 
 set(SOURCES
