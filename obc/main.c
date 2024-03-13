@@ -1,5 +1,7 @@
 #include "comms_manager.h"
+#include "downlink_encoder.h"
 #include "obc_errors.h"
+#include "obc_gs_telemetry_data.h"
 #include "obc_logging.h"
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
@@ -67,11 +69,12 @@ int main(void) {
 */
   static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
   obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
 
   // The state_mgr is the only task running initially.
   // obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
   // obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
-
   vTaskStartScheduler();
 }

@@ -1,3 +1,5 @@
+#include "os_projdefs.h"
+#define COMMS_PHY_UART 0
 #include "comms_manager.h"
 #include "obc_board_config.h"
 #include "uplink_decoder.h"
@@ -299,11 +301,16 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
 
   initAllCc1120TxRxSemaphores();
   LOG_IF_ERROR_CODE(cc1120Init());
-  uint8_t buff[300];
-  memset(buff, 0xA5, 300);
+  telemetry_data_t telemData = {
+      .obcState = 0xa5,
+      .id = TELEM_OBC_STATE,
+  };
+  encode_event_t data = {.eventID = DOWNLINK_DATA_BUFFER,
+                         .telemetryDataBuffer = {.telemData = {telemData}, .bufferSize = 1}};
+#include "downlink_encoder.h"
   while (1) {
-    cc1120Send(buff, 300, 500);
-    sciPrintf("Sent");
+    sendToDownlinkEncodeQueue(&data);
+    LOG_IF_ERROR_CODE(handleDownlinkingState());
   }
 }
 
@@ -499,9 +506,7 @@ static obc_error_code_t handleUplinkingState(void) {
 
 static obc_error_code_t handleDownlinkingState(void) {
   obc_error_code_t errCode;
-#if COMMS_PHY != COMMS_PHY_UART
   RETURN_IF_ERROR_CODE(rffm6404ActivateTx(RFFM6404_VAPC_REGULAR_POWER_VAL));
-#endif
   for (uint16_t i = 0; i < COMMS_MAX_DOWNLINK_FRAMES; ++i) {
     transmit_event_t transmitEvent;
     // poll the transmit queue
@@ -509,21 +514,17 @@ static obc_error_code_t handleDownlinkingState(void) {
       LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_EMPTY);
     }
     if (transmitEvent.eventID == DOWNLINK_PACKET) {
-#if COMMS_PHY == COMMS_PHY_UART
-      RETURN_IF_ERROR_CODE(sciSendBytes((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
-                                        portMAX_DELAY, UART_PRINT_REG));
-#else
+#define CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT pdMS_TO_TICKS(1000)
       RETURN_IF_ERROR_CODE(cc1120Send((uint8_t *)transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length,
                                       CC1120_TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT));
-#endif
     } else if (transmitEvent.eventID == END_DOWNLINK) {
       break;
     } else {
       LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
     }
   }
-  comms_event_t finishedDownlinkEvent = {.eventID = COMMS_EVENT_DOWNLINK_FINISHED};
-  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&finishedDownlinkEvent));
+  // comms_event_t finishedDownlinkEvent = {.eventID = COMMS_EVENT_DOWNLINK_FINISHED};
+  // RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&finishedDownlinkEvent));
   return OBC_ERR_CODE_SUCCESS;
 }
 
