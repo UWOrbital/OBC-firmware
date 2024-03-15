@@ -11,6 +11,7 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec
 
     ${CMAKE_CURRENT_SOURCE_DIR}/data_pack_unpack
+    ${CMAKE_SOURCE_DIR}/gs/common
 )
 
 set(SOURCES

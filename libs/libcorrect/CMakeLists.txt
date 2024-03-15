@@ -11,4 +11,5 @@ add_library(${LIBCORRECT_LIB} STATIC
 
 target_include_directories(${LIBCORRECT_LIB} PUBLIC
     include
+    ${CMAKE_SOURCE_DIR}/gs/common
 )
