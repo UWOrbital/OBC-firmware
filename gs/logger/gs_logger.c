@@ -47,6 +47,7 @@ static gs_error_code_t writeToLogFile(char logBuf[], int logBufLen) {
 }
 
 error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+  printf("GS\n");
   // Convert error code to string
   char errCodeStr[MAX_UINT32_STRING_SIZE] = {0};
   int errCodeStrLen = 0;

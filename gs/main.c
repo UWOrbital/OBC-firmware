@@ -1,11 +1,12 @@
+#include "gs_errors.h"
 #include "obc_gs_command_pack.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 
-#include "obc_gs_errors.h"
-#include "gs_errors.h"
+#include "logger.h"
 
 #include "obc_gs_ax25.h"
+#include "obc_gs_errors.h"
 #include "obc_gs_fec.h"
 #include "obc_gs_aes128.h"
 
@@ -30,7 +31,8 @@ static uint32_t getCurrentTime(void);
 
 int main(void) {
   gs_error_code_t gsErrCode;
-  obc_gs_error_code_t obcGsErrCode;
+  obc_gs_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(OBC_GS_ERR_CODE_UNKNOWN);
 
   char demoNum = 0;
 
@@ -177,8 +179,8 @@ int main(void) {
 
     // Perform AX.25 framing
     setCurrentLinkDestAddress(&groundStationCallsign);
-    obcGsErrCode = ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt);
-    if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    errCode = ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt);
+    if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
       printf("Failed to send AX.25 I-Frame!");
       exit(1);
     }
@@ -193,8 +195,8 @@ int main(void) {
 
     memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
 
-    obcGsErrCode = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, ax25Pkt.data, &ax25Pkt.length);
-    if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    errCode = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, ax25Pkt.data, &ax25Pkt.length);
+    if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
       printf("Failed to stuff AX.25 packet!");
       exit(1);
     }

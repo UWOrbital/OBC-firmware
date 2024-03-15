@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
 set(SOURCES
-    main.c
+  #main.c
     common/gs_heap.c
-    logger/gs_logger.c
+      logger/gs_logger.c
 )
 
 add_executable(gs.out ${SOURCES})

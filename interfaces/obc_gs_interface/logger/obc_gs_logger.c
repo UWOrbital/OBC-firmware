@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define LOG_FILE_NAME "obc_gs_log.log"
+#define OBC_GS_LOG_FILE_NAME "obc_gs_log.log"
 
 #define MAX_UINT32_STRING_SIZE 11U
 #define MAX_MSG_SIZE 128U
@@ -33,7 +33,7 @@ void initLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
 static obc_gs_error_code_t writeToLogFile(char logBuf[], int logBufLen) {
-  FILE *fpointer = fopen(LOG_FILE_NAME, "a");
+  FILE *fpointer = fopen(OBC_GS_LOG_FILE_NAME, "a");
   if (fpointer == NULL) {
     return OBC_GS_ERR_CODE_FAILED_FILE_OPEN;
   }
@@ -49,6 +49,7 @@ static obc_gs_error_code_t writeToLogFile(char logBuf[], int logBufLen) {
 }
 
 error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+  printf("OBC GS\n");
 // If build type is OBC, send event to logger queue, otherwise log to file
 #ifdef BOARD_TYPE
   if (msgLevel < logLevel) {

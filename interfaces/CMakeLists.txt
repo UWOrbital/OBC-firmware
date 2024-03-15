@@ -33,6 +33,7 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/obc_gs_crc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/logger/obc_gs_logger.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
