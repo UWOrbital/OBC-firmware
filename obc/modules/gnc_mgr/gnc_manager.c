@@ -233,15 +233,16 @@ void rtAttitudeControlModelStep(void) {
 }
 
 obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
-  /* If the period exceeds 50ms, set to block for another interval (e.g 100ms is one blocked cycle for 50ms and then)*/
+  /* If the period exceeds 50ms, set to block for another interval (e.g 100ms is one blocked cycle for 50ms and then
+   * running the full GNC code for the other 50ms)*/
   if (periodMs > DEFAULT_GNC_TASK_PERIOD_MS) {
     cyclesToDelay = periodMs / DEFAULT_GNC_TASK_PERIOD_MS;
+    return OBC_ERR_CODE_SUCCESS;
   } else if (periodMs <= 0) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   GncTaskPeriod = periodMs;
-
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -269,6 +270,10 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     if (cycleNum % cyclesToDelay != 0) {
       cycleNum++;
       continue;
+    } else {
+      /* Reset the cycleNum back to 1 if cycleNum % cyclesToDelay == 0, meaning that it has delayed enough times and
+       * cycleNum can increment again. */
+      cycleNum = 1;
     }
 
     /* Place GNC Tasks here */
