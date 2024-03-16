@@ -54,8 +54,8 @@ dkms.conf
 # IDE files
 .vscode/
 .idea/
-.cache/
-compile_commands.json
+# .cache/
+# compile_commands.json
 
 # HALCoGen-generated main file
 **/sys_main.c
