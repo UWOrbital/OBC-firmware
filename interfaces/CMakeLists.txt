@@ -30,7 +30,11 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/obc_gs_crc.c
 )
 
-add_library(${OBC_GS_INTERFACE_LIB_NAME} SHARED ${SOURCES})
+if (${CMAKE_BUILD_TYPE} MATCHES GS)
+    add_library(${OBC_GS_INTERFACE_LIB_NAME} SHARED ${SOURCES})
+else()
+    add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
+endif()
 target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
 
 target_link_libraries(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE
