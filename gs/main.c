@@ -19,6 +19,8 @@
 #include <malloc.h>
 #include <time.h>
 
+#include <obc_gs_crc.h>
+
 const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
@@ -27,6 +29,9 @@ static gs_error_code_t decodePacket(packed_ax25_i_frame_t *ax25data, packed_rs_p
 static uint32_t getCurrentTime(void);
 
 int main(void) {
+  const uint8_t data[] = {1, 2, 3};
+  printf("%d\n", calculateCrc16Ccitt(data, 3));
+  return 0;
   gs_error_code_t gsErrCode;
   obc_gs_error_code_t obcGsErrCode;
 

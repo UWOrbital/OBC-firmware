@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 set(RS_LIB rs-lib)
 
-add_library(${RS_LIB} STATIC 
+add_library(${RS_LIB} SHARED 
     source/rs_wrapper.cpp
 )
 
