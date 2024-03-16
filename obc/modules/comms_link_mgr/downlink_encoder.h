@@ -28,3 +28,4 @@ typedef struct {
  * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
  */
 obc_error_code_t sendToDownlinkEncodeQueue(encode_event_t *queueMsg);
+obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData);

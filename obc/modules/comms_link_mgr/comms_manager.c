@@ -305,11 +305,9 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
       .obcState = 0xa5,
       .id = TELEM_OBC_STATE,
   };
-  encode_event_t data = {.eventID = DOWNLINK_DATA_BUFFER,
-                         .telemetryDataBuffer = {.telemData = {telemData}, .bufferSize = 1}};
 #include "downlink_encoder.h"
   while (1) {
-    sendToDownlinkEncodeQueue(&data);
+    LOG_IF_ERROR_CODE(sendTelemetryBuffer(&telemData, 1));
     LOG_IF_ERROR_CODE(handleDownlinkingState());
   }
 }

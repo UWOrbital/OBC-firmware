@@ -117,9 +117,9 @@ blocks:
     comment: ''
     ctrlpanel: 'False'
     fc: frequency
-    fftsize: '1024'
+    fftsize: '32768'
     freqhalf: 'True'
-    grid: 'False'
+    grid: 'True'
     gui_hint: ''
     label: Relative Gain
     label1: ''

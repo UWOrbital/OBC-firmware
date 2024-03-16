@@ -37,7 +37,7 @@ static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH * COMMS_TEL
  * @param numTelemetryData - Number of telemetry data points in the buffer
  * @return obc_error_code_t
  */
-static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData);
+// static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData);
 
 /**
  * @brief Reads chunks of telemetry out of a file and sends it into the CC1120 transmit queue
@@ -138,7 +138,7 @@ void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
  * @param numTelemetryData - Number of telemetry data points in the buffer
  * @return obc_error_code_t
  */
-static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData) {
+obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData) {
   obc_error_code_t errCode;
 
   if (telemetryDataBuffer == NULL) {

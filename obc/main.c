@@ -67,11 +67,11 @@ int main(void) {
     cc1120Send(buff, 300, 500);
   }
 */
-  static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
+  static comms_state_t commsManagerState = COMMS_STATE_DOWNLINKING;
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+  // obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
   obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+  // obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
 
   // The state_mgr is the only task running initially.
   // obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
