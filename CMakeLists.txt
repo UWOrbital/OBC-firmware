@@ -16,6 +16,12 @@ else()
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
+if (${CMAKE_BUILD_TYPE} MATCHES GS)
+  set(LIBRARY_TYPE SHARED)
+else()
+  set(LIBRARY_TYPE STATIC)
+endif()
+
 project(OrbitalSw)
 
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
