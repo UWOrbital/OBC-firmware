@@ -23,7 +23,7 @@
 #define TASK_TIMEKEEPER_NAME "timekeeper"
 #define TASK_DIGITAL_WATCHDOG_MGR_NAME "digital_wdg_mgr"
 #define TASK_ALARM_MGR_NAME "alarm_handler"
-#define TASK_HEALTH_COLLECTOR_NAME "health_collector"
+#define TASK_THERMAL_MGR_NAME "thermal_mgr"
 #define TASK_STATS_COLLECTOR_NAME "stats_collector"
 #define TASK_LOGGER_NAME "logger"
 
@@ -39,7 +39,7 @@
 #define TASK_TIMEKEEPER_STACK_SIZE 1024U
 #define TASK_DIGITAL_WATCHDOG_MGR_STACK_SIZE 128U
 #define TASK_ALARM_MGR_STACK_SIZE 512U
-#define TASK_HEALTH_COLLECTOR_STACK_SIZE 256U
+#define TASK_THERMAL_MGR_STACK_SIZE 256U
 #define TASK_STATS_COLLECTOR_STACK_SIZE 1024U
 #define TASK_LOGGER_STACK_SIZE 512U
 
@@ -48,7 +48,7 @@
 #define TASK_IDLE_PRIORITY 0U
 #define TASK_COMMAND_MGR_PRIORITY 1U
 #define TASK_TELEMETRY_MGR_PRIORITY 1U
-#define TASK_HEALTH_COLLECTOR_PRIORITY 1U
+#define TASK_THERMAL_MGR_PRIORITY 1U
 #define TASK_PAYLOAD_MGR_PRIORITY 1U
 #define TASK_COMMS_PRIORITY 2U  // Comms tasks must have the same priority
 #define TASK_COMMS_MGR_PRIORITY TASK_COMMS_PRIORITY
@@ -85,7 +85,7 @@ extern void obcTaskInitEpsMgr(void);
 extern void obcTaskInitPayloadMgr(void);
 extern void obcTaskInitTimekeeper(void);
 extern void obcTaskInitAlarmMgr(void);
-extern void obcTaskInitHealthCollector(void);
+extern void obcTaskInitThermalMgr(void);
 extern void obcTaskInitStatsCollector(void);
 extern void obcTaskInitLogger(void);
 
@@ -101,7 +101,7 @@ extern void obcTaskFunctionPayloadMgr(void *params);
 extern void obcTaskFunctionTimekeeper(void *params);
 extern void obcTaskFunctionSwWatchdog(void *params);
 extern void obcTaskFunctionAlarmMgr(void *params);
-extern void obcTaskFunctionHealthCollector(void *params);
+extern void obcTaskFunctionThermalMgr(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
 extern void obcTaskFunctionLogger(void *params);
 
@@ -142,8 +142,8 @@ static StaticTask_t obcTaskBufferSwWatchdog;
 static StackType_t obcTaskStackAlarmMgr[TASK_ALARM_MGR_STACK_SIZE];
 static StaticTask_t obcTaskBufferAlarmMgr;
 
-static StackType_t obcTaskStackHealthCollector[TASK_HEALTH_COLLECTOR_STACK_SIZE];
-static StaticTask_t obcTaskBufferHealthCollector;
+static StackType_t obcTaskStackThermalMgr[TASK_THERMAL_MGR_STACK_SIZE];
+static StaticTask_t obcTaskBufferThermalMgr;
 
 static StackType_t obcTaskStackLogger[TASK_LOGGER_STACK_SIZE];
 static StaticTask_t obcTaskBufferLogger;
@@ -264,15 +264,15 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskFunc = obcTaskFunctionAlarmMgr,
             .taskInit = obcTaskInitAlarmMgr,
         },
-    [OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR] =
+    [OBC_SCHEDULER_CONFIG_ID_THERMAL_MGR] =
         {
-            .taskName = TASK_HEALTH_COLLECTOR_NAME,
-            .taskStack = obcTaskStackHealthCollector,
-            .taskBuffer = &obcTaskBufferHealthCollector,
-            .stackSize = TASK_HEALTH_COLLECTOR_STACK_SIZE,
-            .priority = TASK_HEALTH_COLLECTOR_PRIORITY,
-            .taskFunc = obcTaskFunctionHealthCollector,
-            .taskInit = obcTaskInitHealthCollector,
+            .taskName = TASK_THERMAL_MGR_NAME,
+            .taskStack = obcTaskStackThermalMgr,
+            .taskBuffer = &obcTaskBufferThermalMgr,
+            .stackSize = TASK_THERMAL_MGR_STACK_SIZE,
+            .priority = TASK_THERMAL_MGR_PRIORITY,
+            .taskFunc = obcTaskFunctionThermalMgr,
+            .taskInit = obcTaskInitThermalMgr,
         },
     [OBC_SCHEDULER_CONFIG_ID_LOGGER] =
         {

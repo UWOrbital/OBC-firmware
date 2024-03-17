@@ -32,7 +32,7 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/eps_mgr/eps_manager.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/health_collector/health_collector.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/thermal_mgr/thermal_mgr.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/state_mgr/state_mgr.c
 
