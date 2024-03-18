@@ -1,7 +1,6 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "obc_gs_errors.h"
 #include "gs_errors.h"
 
 #include <stdio.h>
@@ -10,26 +9,24 @@
 #include <stddef.h>
 
 /**
- * @enum error_type_t
- * @brief Error code types enum.
+ * @enum logger_error_type_t
+ * @brief Logger error code types enum.
  *
- * Enum containing all error code types.
+ * Enum containing all error code types that logger can return.
  */
 typedef enum {
   OBC_ERROR_CODE,
-  OBC_GS_ERROR_CODE,
   GS_ERROR_CODE,
-} error_type_t;
+} logger_error_type_t;
 
-// Define a general structure to hold the error code and its type
+// Define a general structure to hold the logger error code and its type
 typedef struct {
-  error_type_t type;
+  logger_error_type_t type;
   union {
     obc_error_code_t obcError;
-    obc_gs_error_code_t obcGsError;
     gs_error_code_t gsError;
   };
-} error_code_t;
+} logger_error_code_t;
 
 /**
  * @enum log_output_location_t
@@ -135,10 +132,10 @@ void logSetLevel(log_level_t newLogLevel);
  * @param file					File of message
  * @param line					Line of message
  * @param errCode       The error code that needs to be logged
- * @return error_code_t with success code if log is successful.
+ * @return logger_error_code_t with success code if log is successful.
  *
  */
-error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
+logger_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
 
 /**
  * @brief Log a message
@@ -147,10 +144,10 @@ error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line,
  * @param file					File of message
  * @param line					Line of message
  * @param msg           The message that should be logged (MUST BE STATIC)
- * @return error_code_t with success code if log is successful.
+ * @return logger_error_code_t with success code if log is successful.
  *
  */
-error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg);
+logger_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg);
 
 /**
  * @brief Log an error code from ISR
@@ -159,10 +156,10 @@ error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const
  * @param file					File of message
  * @param line					Line of message
  * @param errCode       The error code that needs to be logged
- * @return error_code_t with success code if log is successful.
+ * @return logger_error_code_t with success code if log is successful.
  *
  */
-error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
+logger_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
 
 /**
  * @brief Log a message from ISR
@@ -171,16 +168,7 @@ error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_
  * @param file					File of message
  * @param line					Line of message
  * @param msg           The message that should be logged (MUST BE STATIC)
- * @return error_code_t with success code if log is successful.
+ * @return logger_error_code_t with success code if log is successful.
  *
  */
-error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t line, const char *msg);
-
-/**
- * @brief Sends an event to the logger queue
- *
- * @param event Pointer to the event to send
- * @param blockTimeTicks Maximum time to wait for available space in queue
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue.
- */
-obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks);
+logger_error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t line, const char *msg);

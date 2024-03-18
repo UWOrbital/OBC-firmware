@@ -7,7 +7,6 @@ SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/print
     ${CMAKE_CURRENT_SOURCE_DIR}/time
     ${CMAKE_CURRENT_SOURCE_DIR}/utils
-    ${CMAKE_SOURCE_DIR}/interfaces/logging
 )
 
 SET(SOURCES

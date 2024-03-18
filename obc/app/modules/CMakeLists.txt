@@ -47,7 +47,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper/timekeeper.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/task_stats_collector.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/logger/logger.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/logger/obc_logger.c
 
 )
 

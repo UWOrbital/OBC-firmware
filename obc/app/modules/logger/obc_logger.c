@@ -37,6 +37,15 @@ static StaticQueue_t loggerQueue;
 static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
 
 /**
+ * @brief Sends an event to the logger queue
+ *
+ * @param event Pointer to the event to send
+ * @param blockTimeTicks Maximum time to wait for available space in queue
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue.
+ */
+static obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks);
+
+/**
  * @brief Sends an event to the logger queue from an ISR
  *
  * @param event Pointer to the event to send
@@ -134,7 +143,7 @@ void obcTaskFunctionLogger(void *pvParameters) {
   }
 }
 
-obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks) {
+static obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks) {
   if (loggerQueueHandle == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
@@ -169,14 +178,16 @@ static obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event) {
 
 void logSetOutputLocation(log_output_location_t newOutputLocation) { outputLocation = newOutputLocation; }
 
-error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+logger_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+  logger_error_code_t returnCode = {.type = OBC_ERROR_CODE};
+
   if (msgLevel < logLevel) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_LOG_MSG_SILENCED};
+    returnCode.obcError = OBC_ERR_CODE_LOG_MSG_SILENCED;
     return returnCode;
   }
 
   if (file == NULL) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    returnCode.obcError = OBC_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
 
@@ -186,43 +197,45 @@ error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t line,
                              .errCode = errCode};
 
   // send the event to the logger queue and don't try to log any error that occurs
-  error_code_t returnCode = {.type = OBC_ERROR_CODE,
-                             .obcError = sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD)};
+  returnCode.obcError = sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
   return returnCode;
 }
 
-error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
+logger_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
+  logger_error_code_t returnCode = {.type = OBC_ERROR_CODE};
+
   if (msgLevel < logLevel) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_LOG_MSG_SILENCED};
+    returnCode.obcError = OBC_ERR_CODE_LOG_MSG_SILENCED;
     return returnCode;
   }
 
   if (file == NULL) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    returnCode.obcError = OBC_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
 
   if (msg == NULL) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    returnCode.obcError = OBC_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
 
   logger_event_t logEvent = {
       .logEntry = {.logType = LOG_TYPE_MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
-  error_code_t returnCode = {.type = OBC_ERROR_CODE,
-                             .obcError = sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD)};
+  returnCode.obcError = sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
   return returnCode;
 }
 
-error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+logger_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode) {
+  logger_error_code_t returnCode = {.type = OBC_ERROR_CODE};
+
   if (msgLevel < logLevel) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_LOG_MSG_SILENCED};
+    returnCode.obcError = OBC_ERR_CODE_LOG_MSG_SILENCED;
     return returnCode;
   }
 
   if (file == NULL) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    returnCode.obcError = OBC_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
 
@@ -232,29 +245,31 @@ error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uint32_
                              .errCode = errCode};
 
   // send the event to the logger queue and don't try to log any error that occurs
-  error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = sendToLoggerQueueFromISR(&logEvent)};
+  returnCode.obcError = sendToLoggerQueueFromISR(&logEvent);
   return returnCode;
 }
 
-error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
+logger_error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t line, const char *msg) {
+  logger_error_code_t returnCode = {.type = OBC_ERROR_CODE};
+
   if (msgLevel < logLevel) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_LOG_MSG_SILENCED};
+    returnCode.obcError = OBC_ERR_CODE_LOG_MSG_SILENCED;
     return returnCode;
   }
 
   if (file == NULL) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    returnCode.obcError = OBC_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
 
   if (msg == NULL) {
-    error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = OBC_ERR_CODE_INVALID_ARG};
+    returnCode.obcError = OBC_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
 
   logger_event_t logEvent = {
       .logEntry = {.logType = LOG_TYPE_MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
-  error_code_t returnCode = {.type = OBC_ERROR_CODE, .obcError = sendToLoggerQueueFromISR(&logEvent)};
+  returnCode.obcError = sendToLoggerQueueFromISR(&logEvent);
   return returnCode;
 }

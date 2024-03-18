@@ -23,7 +23,6 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
-    ${CMAKE_SOURCE_DIR}/interfaces/logging
 )
 
 target_link_libraries(${TEST_BINARY}
