@@ -6,7 +6,7 @@
 
 #include "obc_errors.h"
 #include "alarm_handler.h"
-#include "obc_reset.h"
+#include "sys_common.h"
 
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
