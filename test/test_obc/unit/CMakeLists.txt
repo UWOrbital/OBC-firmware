@@ -7,7 +7,6 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common/obc_gs_crc.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
-    ${CMAKE_SOURCE_DIR}/test/mocks/sys_common.h
 )
 
 set(TEST_MOCKS
@@ -46,6 +45,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
     ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
+    ${CMAKE_SOURCE_DIR}/test/mocks
 )
 
 target_link_libraries(${TEST_BINARY}
