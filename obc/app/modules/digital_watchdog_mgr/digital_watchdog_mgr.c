@@ -129,6 +129,7 @@ void obcTaskFunctionSwWatchdog(void *params) {
     } else {
       LOG_ERROR_CODE(DIGITAL_WATCHDOG_ERROR_CODE_OFFSET + i);
       obc_error_code_t errCode;
+      // map the task that failed to check in to a reaset reason
       obc_reset_reason_t resetReason = RESET_REASON_DIG_WATCHDOG_RESET + i + 1;
       LOG_IF_ERROR_CODE(
           setPersistentData(OBC_PERSIST_SECTION_ID_RESET_REASON, &resetReason, sizeof(obc_reset_reason_t)));
