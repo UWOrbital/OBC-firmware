@@ -18,6 +18,11 @@ static const obc_persist_config_t obcPersistConfig[] = {
                                           .sectionSize = sizeof(alarm_mgr_persist_t),
                                           .dataSize = sizeof(alarm_mgr_persist_data_t),
                                           .sectionCount = OBC_PERSISTENT_MAX_SUBINDEX_ALARM},
+    [OBC_PERSIST_SECTION_ID_RESET_REASON] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(resetReason),
+                                             .sectionSize = sizeof(obc_reset_reason_persist_t),
+                                             .dataSize = sizeof(obc_reset_reason_persist_data_t),
+                                             .sectionCount = OBC_PERSISTENT_MIN_SUBINDEX}
+
 };
 
 STATIC_ASSERT(sizeof(obc_persist_t) <= FRAM_MAX_ADDRESS, "obc_persist_t exceeds available FRAM space");
