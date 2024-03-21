@@ -21,12 +21,6 @@ extern uint32_t __ramFuncsRunEnd__;
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
 
-// If this header changes, update the host utility
-typedef struct {
-  uint32_t version;
-  uint32_t size;
-} app_header_t;
-
 typedef enum {
   BL_STATE_IDLE,
   BL_STATE_DOWNLOAD_IMAGE,
