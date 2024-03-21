@@ -1,5 +1,6 @@
 #include "bl_config.h"
 #include "bl_flash.h"
+#include "bl_common.h"
 #include "bl_uart.h"
 
 #include <stdio.h>
