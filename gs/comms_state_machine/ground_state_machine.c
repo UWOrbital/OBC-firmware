@@ -9,13 +9,11 @@
 
 #define MAX_AX25_BUFFER_SIZE 200
 
-static gs_command_t* commandBuffer = {0};
 static const gs_command_t DEFAULT_COMMAND = {.command = U_FRAME_CMD_ACK, .operation = TERMINATE};
-static ground_station_state_t groundStationState = {0};
+static gs_state_t groundStationState = {0};
 
-static xQueueHandle gsEventQueue = NULL;
-
-typedef gs_error_code_t* ground_state_handler(void);
+typedef gs_error_code_t* ground_state_handler_t(void*);
+static ground_state_handler_t gsCommandCallback = NULL;
 
 static gs_error_code_t GSStateSendConnHandler();
 static gs_error_code_t GSStateAwaitConnAckHandler();
@@ -25,17 +23,11 @@ static gs_error_code_t GSStateSendDiscAck();
 
 static gs_error_code_t processDownlinkedData(packed_ax25_i_frame_t data);
 
-static ground_state_handler* state_handlers[] = {[GS_STATE_SEND_CONN] = GSStateSendConnHandler,
-                                                 [GS_STATE_AWAIT_CONN_ACK] = GSStateAwaitConnAckHandler,
-                                                 [GS_STATE_UPLINK_COMMANDS] = GSStateUplinkCommands,
-                                                 [GS_STATE_DOWNLINK_TELEMTRY] = GSStateDowlinkTelemtry,
-                                                 [GS_STATE_SEND_DISC_ACK] = GSStateSendDiscAck};
-
-void vGroundStationTask(void* gsEventParameter) {
-  while (1) {
-    if (updateGroundStationState(&groundStationState, *event) != OBC_GS_ERR_CODE_SUCCESS) };
-  vTaskDelete(NULL);
-}
+static ground_state_handler_t state_handlers[] = {[GS_STATE_SEND_CONN] = GSStateSendConnHandler,
+                                                  [GS_STATE_AWAIT_CONN_ACK] = GSStateAwaitConnAckHandler,
+                                                  [GS_STATE_UPLINK_COMMANDS] = GSStateUplinkCommands,
+                                                  [GS_STATE_DOWNLINK_TELEMTRY] = GSStateDowlinkTelemtry,
+                                                  [GS_STATE_SEND_DISC_ACK] = GSStateSendDiscAck};
 
 gs_error_code_t setCommandBuffer(gs_command_t* buffer, uint8_t size) {
   memcpy(commandBuffer, buffer, size * sizeof(gs_command_t));
@@ -49,8 +41,8 @@ gs_error_code_t initializeGroundStation(gs_command_t* buffer) {
   memcpy(buffer, &DEFAULT_COMMAND, MAX_COMMAND_BUFFER_SIZE);
 }
 
-gs_error_code_t updateGroundStationState(ground_station_state_t* state, ground_station_event_t event) {
-  ground_station_state_t nextState = GS_STATE_DISCONNECTED;
+gs_error_code_t updateGroundStationState(gs_state_t* state, gs_event_t event) {
+  gs_state_t nextState = GS_STATE_DISCONNECTED;
 
   switch (*state) {
     case GS_STATE_DISCONNECTED:
