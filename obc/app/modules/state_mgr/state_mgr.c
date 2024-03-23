@@ -95,7 +95,7 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
       return handleInitializationState(event, state);
 
     case CUBESAT_STATE_NOMINAL:
-      handleNormalState(event, state);
+      return handleNormalState(event, state);
 
     case CUBESAT_STATE_ASSEMBLY:
       // TODO: probably remove this state, for now physically removing jumper on board and then doing power on reset
