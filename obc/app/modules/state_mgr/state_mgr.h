@@ -51,8 +51,3 @@ typedef struct {
  * @return The error code
  */
 obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event);
-
-obc_error_code_t handleInitializationState(state_mgr_event_id_t event, state_mgr_state_t *state);
-obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state);
-obc_error_code_t handleAssemblyState();
-obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state);

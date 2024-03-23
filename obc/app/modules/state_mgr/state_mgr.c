@@ -39,6 +39,11 @@ static state_mgr_state_t cubeSatState = CUBESAT_STATE_INITIALIZATION;
  */
 static void sendStartupMessages(void);
 
+static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, state_mgr_state_t *state);
+static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state);
+static obc_error_code_t handleAssemblyState();
+static obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state);
+
 static obc_error_code_t resetStateCounter(void);
 
 /**
@@ -78,35 +83,35 @@ static obc_error_code_t resetStateCounter(void) {
   telemetry_data_t resetTelem = {
       .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = resetCounter};
   RETURN_IF_ERROR_CODE(addTelemetryData(&resetTelem));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state_t *state) {
-  state_mgr_state_t tempStateVariable;
   if (state == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   switch (*state) {
     case CUBESAT_STATE_INITIALIZATION:
-      handleInitializationState(event, &tempStateVariable);
-      *state = tempStateVariable;
+      return handleInitializationState(event, state);
 
     case CUBESAT_STATE_NOMINAL:
-      handleNormalState(event, &tempStateVariable);
-      *state = tempStateVariable;
+      handleNormalState(event, state);
 
     case CUBESAT_STATE_ASSEMBLY:
       // TODO: probably remove this state, for now physically removing jumper on board and then doing power on reset
-      // should bring to this stste not sure if there is a way to implement that in code
-      break;
+      // should bring to this stste not sure if there is a way to implement that in code. Returning invalid state for
+      // now
+      return handleAssemblyState();
 
     case CUBESAT_STATE_LOW_PWR:
-      handleLowPwrState(event, &tempStateVariable);
-      *state = tempStateVariable;
+      return handleLowPwrState(event, state);
+
     case CUBESAT_STATE_RESET:
       // TODO: According to the FSM chart, the OBC should just initialize the tasks again after this, so go back to
       // CUBESAT_STATE_INITIALIZATION state, there isn't really an event which would trigger a state change from the
-      // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here
-      break;
+      // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here, Returning invalid
+      // state for now
+      return OBC_ERR_CODE_INVALID_STATE;
 
     default:
       return OBC_ERR_CODE_INVALID_STATE;
@@ -231,7 +236,7 @@ obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t
   }
 }
 
-obc_error_code_t handleAssemblyState() {}
+obc_error_code_t handleAssemblyState() { return OBC_ERR_CODE_INVALID_STATE; }
 
 obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state) {
   switch (event) {
