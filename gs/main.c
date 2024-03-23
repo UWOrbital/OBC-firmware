@@ -4,6 +4,7 @@
 
 #include "obc_gs_errors.h"
 #include "gs_errors.h"
+#include "logger.h"
 
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"

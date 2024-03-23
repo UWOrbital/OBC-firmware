@@ -1,7 +1,7 @@
 #include "ds3232_mz.h"
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_bit_ops.h"
 
 #include <stdint.h>

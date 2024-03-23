@@ -2,7 +2,7 @@
 #include "obc_time.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_persistent.h"
 #include "obc_scheduler_config.h"
 #include "ds3232_mz.h"

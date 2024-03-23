@@ -1,5 +1,5 @@
 #include "obc_reliance_fs.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_errors.h"
 
 #include <redposix.h>

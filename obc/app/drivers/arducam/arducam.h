@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #include "obc_errors.h"
-#include "obc_logging.h"
+#include "logger.h"
 
 #include "camera_reg.h"
 

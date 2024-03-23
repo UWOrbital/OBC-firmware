@@ -1,7 +1,7 @@
 #pragma once
 
 #include "obc_errors.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_spi_io.h"
 #include <stdint.h>
 
