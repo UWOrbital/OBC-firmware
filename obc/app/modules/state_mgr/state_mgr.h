@@ -12,7 +12,18 @@
  */
 typedef enum {
   STATE_MGR_NULL_EVENT_ID,
+  STATE_MGR_RESET_EVENT_ID,
+  STATE_MGR_LOWPWR_EVENT_ID,
+  STATE_MGR_TASKS_RUNNING_EVENT_ID,
 } state_mgr_event_id_t;
+
+typedef enum {
+  CUBESAT_STATE_INITIALIZATION,
+  CUBESAT_STATE_NOMINAL,
+  CUBESAT_STATE_ASSEMBLY,
+  CUBESAT_STATE_LOW_PWR,
+  CUBESAT_STATE_RESET,
+} state_mgr_state_t;
 
 /**
  * @union	state_mgr_event_data_t
