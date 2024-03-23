@@ -114,7 +114,6 @@ async def send_bin(file_path: str, com_port: str) -> None:
             else:
                 ser.write(data[num_bytes_written + 8 :])
                 num_bytes_written += total_bytes_to_write - num_bytes_written
-                await asyncio.sleep(0.1)
 
             print(f"{num_bytes_written}/{total_bytes_to_write} bytes sent")
 
@@ -141,8 +140,8 @@ async def read_log(com_port: str) -> None:
                 log_line = ser.readline().decode("utf-8")
                 if log_line:
                     log_reader.info(log_line)
-        except serial.SerialException:
-            log_reader.error(log_line)
+        except serial.SerialException as e:
+            log_reader.error(e)
 
 
 def arg_parse() -> ArgumentParser:
@@ -151,7 +150,7 @@ def arg_parse() -> ArgumentParser:
 
     :return: Parser object
     """
-    parser = ArgumentParser(description="Append custom data to .bin, send amd log_reader")
+    parser = ArgumentParser(description="Append custom data to .bin and send")
 
     # Add arguments
     parser.add_argument(
