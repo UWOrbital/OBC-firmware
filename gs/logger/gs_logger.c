@@ -24,18 +24,18 @@ static log_level_t logLevel;
  * @param logBufLen Length of buffer
  * @return gs_error_code_t - indicating whether the logging was successful.
  */
-static gs_error_code_t writeToLogFile(const char logBuf[], int logBufLen);
+static gs_error_code_t writeToLogFile(const char logBuf[], size_t logBufLen);
 
 void initLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
 
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
-static gs_error_code_t writeToLogFile(const char logBuf[], int logBufLen) {
+static gs_error_code_t writeToLogFile(const char logBuf[], size_t logBufLen) {
   FILE *fpointer = fopen(LOG_FILE_NAME, "a");
   if (fpointer == NULL) {
     return GS_ERR_CODE_FAILED_FILE_OPEN;
   }
-  if (fwrite(logBuf, sizeof(char), logBufLen, fpointer) != (size_t)logBufLen) {
+  if (fwrite(logBuf, sizeof(char), logBufLen, fpointer) != logBufLen) {
     fclose(fpointer);
     return GS_ERR_CODE_FAILED_FILE_WRITE;
   }
@@ -51,12 +51,12 @@ logger_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_
 
   // Convert error code to string
   char errCodeStr[MAX_UINT32_STRING_SIZE] = {0};
-  int errCodeStrLen = snprintf(errCodeStr, MAX_UINT32_STRING_SIZE, "%lu", (unsigned long)errCode);
+  int32_t errCodeStrLen = snprintf(errCodeStr, MAX_UINT32_STRING_SIZE, "%lu", (unsigned long)errCode);
   if (errCodeStrLen < 0) {
     returnCode.gsError = GS_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
-  if ((uint32_t)errCodeStrLen >= MAX_UINT32_STRING_SIZE) {
+  if (errCodeStrLen >= MAX_UINT32_STRING_SIZE) {
     returnCode.gsError = GS_ERR_CODE_BUFF_TOO_SMALL;
     return returnCode;
   }
@@ -84,13 +84,13 @@ logger_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line
 
   // Construct log entry
   char logBuf[MAX_LOG_SIZE] = {0};
-  int logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%-5s -> %s:%lu - %s\r\n", LEVEL_STRINGS[msgLevel], file,
-                           (unsigned long)line, msg);
+  int32_t logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%-5s -> %s:%lu - %s\r\n", LEVEL_STRINGS[msgLevel], file,
+                               (unsigned long)line, msg);
   if (logBufLen < 0) {
     returnCode.gsError = GS_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
-  if ((uint32_t)logBufLen >= MAX_LOG_SIZE) {
+  if (logBufLen >= MAX_LOG_SIZE) {
     returnCode.gsError = GS_ERR_CODE_BUFF_TOO_SMALL;
     return returnCode;
   }
