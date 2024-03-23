@@ -85,9 +85,23 @@ Skip this section if you set up a Docker development environment.
     sudo apt-get update
     sudo apt-get install build-essential
     ```
-3. Choose the environment where you'll be running `git commit` (either WSL2 or the host). In that environment, install Python 3.8+ and pip if they're not already installed. Then, run the following in the OBC-firmware directory:
+3. Choose the environment where you'll be running `git commit` (either WSL2 or the host) and install Python 3.10 and pip. (Only required for Python devs)
+   A. If using WSL, follow the instructions under the `Linux` section 2.
+
+   B. If you are using Windows. Run the following commands in the OBC-firmware directory:
+
+   Install Python 3.10.12: https://www.python.org/downloads/release/python-31012/
+   ```sh
+   C:\path\to\python\executable -m venv .venv
+   .\Scripts\bin\activate
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+
+4. Setup pre-commit.
+    In the WSL, under the OBC-firmware directory, run the following commands:
     ```sh
-    pip install -r requirements.txt # You may want to create a Python virtual env before this
+    pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
     pre-commit install
     ```
     - You may receive a message in yellow saying where pre-commit.exe was installed and that you need to add it to PATH
@@ -100,31 +114,53 @@ You'll be using WSL2 primarily for building the firmware and running tests.
 #### **MacOS**
 Skip this section if you set up a Docker development environment.
 
-Install required build tools (CMake, Make, gcc)
+1. Install required build tools (CMake, Make, gcc)
 ```sh
 brew install cmake
 brew install make
 brew install gcc
 ```
 
-Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
+2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
+
+Run the following commands in the OBC-firmware directory:
 ```sh
-pip install -r requirements.txt # You may want to create a Python virtual env before this
+brew install python@3.10
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+3. Setup pre-commit
+```sh
+pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
 
 #### **Linux**
 Skip this section if you set up a Docker development environment.
 
-Install required build tools (CMake, Make, gcc)
+1. Install required build tools (CMake, Make, gcc)
 ```sh
 sudo apt-get update
 sudo apt-get install build-essential
 ```
 
-Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
+2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
+
+Run the following commands in the OBC-firmware directory:
 ```sh
-pip install -r requirements.txt # You may want to create a Python virtual env before this
+sudo apt-get install python3.10
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+3. Setup pre-commit
+```sh
+pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
 
@@ -390,9 +426,7 @@ class ErrorCode(enum.Enum):
 
 #### Grouping Imports
 
-- Local imports (e.g. `import cc1120_driver`)
-- External library imports (e.g. `import requests`)  (Must be included in the `requirements.txt`)
-- Standard library imports (e.g. `import math`)
+Handled by pre-commit
 
 #### Notes about imports
 
@@ -424,7 +458,6 @@ bar()
 
 - Only imports, function, class, and constants declarations and the `if __name__ == '__main__'` should be in module scope
 - Entry point to a script or program should be through the `main` function
-- Use double quotes for strings `"` over single quotes `'`
 - Add a trailing comma after elements of a list, if you wish to make/preserve each element on a separate line
 
 **[Back to top](#table-of-contents)**
