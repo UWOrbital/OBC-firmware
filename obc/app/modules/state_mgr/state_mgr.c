@@ -6,8 +6,6 @@
 #include "obc_logging.h"
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
-#include "obc_state_handle.h"
-#include "obc_state_defs.h"
 #include "obc_time.h"
 
 #include "fm25v20a.h"
@@ -41,16 +39,7 @@ static state_mgr_state_t cubeSatState = CUBESAT_STATE_INITIALIZATION;
  */
 static void sendStartupMessages(void);
 
-static void resetStateCounter(void);
-
-/**
- * @brief Change the current state of the OBC
- *
- * @param newState The new state of the OBC
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
- * @warning This function is not thread safe. It should only be called from the supervisor task.
- */
-static obc_error_code_t changeStateOBC(uint8_t newState);
+static obc_error_code_t resetStateCounter(void);
 
 /**
  * @brief determines what the next Cubesat state should be and sets it to that state
@@ -83,25 +72,15 @@ obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
 
 static void sendStartupMessages(void) {}
 
-static void resetStateCounter(void) {
+static obc_error_code_t resetStateCounter(void) {
+  obc_error_code_t errCode;
   resetCounter++;
   telemetry_data_t resetTelem = {
       .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = resetCounter};
   RETURN_IF_ERROR_CODE(addTelemetryData(&resetTelem));
 }
 
-static obc_error_code_t changeStateOBC(uint8_t newState) {
-  obc_error_code_t errCode;
-
-  currStateOBC = newState;
-  telemetry_data_t telemData = {.id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .obcState = currStateOBC};
-  RETURN_IF_ERROR_CODE(addTelemetryData(&telemData));
-
-  return OBC_ERR_CODE_SUCCESS;
-}
-
 obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state_t *state) {
-  obc_error_code_t errCode;
   state_mgr_state_t tempStateVariable;
   if (state == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
