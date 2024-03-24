@@ -92,16 +92,18 @@ int main(void) {
 
         errCode = blFlashFapiInitBank(0U);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          blUartWriteBytes(BL_UART_SCIREG, strlen("Failed to init flash, error code: %d\r\n", errCode),
-                           (uint8_t *)"Failed to init flash, error code: %d\r\n", errCode);
+          int errCodeLength = strlen("Failed to init flash, error code: ") + strlen("%d\r\n", errCode);
+          blUartWriteBytes(BL_UART_SCIREG, errCodeLength, (uint8_t *)"Failed to init flash, error code: %d\r\n",
+                           errCode);
           state = BL_STATE_IDLE;
           break;
         }
 
         errCode = blFlashFapiBlockErase(APP_START_ADDRESS, appHeader.size);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          blUartWriteBytes(BL_UART_SCIREG, strlen("Failed to erase flash, error code: %d\r\n", errCode),
-                           (uint8_t *)"Failed to init flash, error code: %d\r\n", errCode);
+          int errCodeLength = strlen("Failed to init flash, error code: ") + strlen("%d\r\n", errCode);
+          blUartWriteBytes(BL_UART_SCIREG, errCodeLength, (uint8_t *)"Failed to init flash, error code: %d\r\n",
+                           errCode);
           state = BL_STATE_IDLE;
           break;
         }

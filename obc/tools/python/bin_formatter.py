@@ -141,7 +141,7 @@ async def read_log(com_port: str) -> None:
                 if log_line:
                     log_reader.info(log_line)
         except serial.SerialException as e:
-            log_reader.error(e)
+            log_reader.exception(e)
 
 
 def arg_parse() -> ArgumentParser:
@@ -160,10 +160,8 @@ def arg_parse() -> ArgumentParser:
         type=str,
         help="Path to the input .bin file.",
     )
-    parser.add_argument("-p_bin", required=True, dest="bin_port", type=str, help="Serial port number")
-    parser.add_argument(
-        "-p_read", required=True, dest="read_port", type=str, help="Serial port number used to read logs"
-    )
+    parser.add_argument("-p", required=True, dest="port", type=str, help="Serial port number")
+
     parser.add_argument(
         "-v",
         dest="version",
@@ -181,8 +179,8 @@ async def main() -> None:
     args = arg_parser.parse_args()
     output_file = create_bin(args.input_path, args.version)
     await asyncio.gather(
-        send_bin(output_file, args.bin_port),
-        read_log(args.read_port),
+        send_bin(output_file, args.port),
+        read_log(args.port),
     )
 
 
