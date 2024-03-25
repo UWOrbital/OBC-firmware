@@ -15,6 +15,32 @@
 
 #include <string.h>
 
+static StaticTask_t taskBuffer;
+static StackType_t taskStack[1024];
+
+void vTaskCode(void* pvParameters) {
+  sciPrintf("Starting BMS test.... \r\n");
+
+  obc_error_code_t errCode;
+  bms_register_t bmsRegister = {.address = BMS_VEMPTY, .isThreshold = 0, .configurationValue = 0xDEAD};
+  errCode = writeBmsRegister(&bmsRegister);
+
+  if (errCode != OBC_ERR_CODE_SUCCESS)
+    sciPrintf("Did not recieve Success error code during write, errorCode is %d \r\n", errCode);
+
+  bms_register_t bmsRegisterCopy = bmsRegister;
+  bmsRegisterCopy.configurationValue = 0x00;
+  errCode = readBmsRegister(&bmsRegisterCopy);
+  if (errCode != OBC_ERR_CODE_SUCCESS)
+    sciPrintf("Did not recieve Success error code during read, receieved %d \r\n", errCode);
+
+  if (bmsRegisterCopy.configurationValue != bmsRegister.configurationValue)
+    sciPrintf("Did not recieve the expected value. Recieved %X \r\n", bmsRegisterCopy.configurationValue);
+
+  while (1)
+    ;
+}
+
 int main(void) {
   sciInit();
   i2cInit();
@@ -22,21 +48,7 @@ int main(void) {
   initSciMutex();
   initI2CMutex();
 
-  sciPrintf("Starting BMS test.... \r\n");
+  xTaskCreateStatic(vTaskCode, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);
 
-  obc_error_code_t errCode;
-  bms_register_t bmsRegister = {.address = BMS_VEMPTY, .isThreshold = 0, .configurationValue = 0xDEAD};
-  errCode = writeBmsRegister(&bmsRegister);
-
-  if (errCode != OBC_ERR_CODE_SUCCESS) sciPrintf("Did not recieve Success error code during write  \r\n");
-
-  bms_register_t bmsRegisterCopy = bmsRegister;
-  bmsRegisterCopy.configurationValue = 0x00;
-  errCode = readBmsRegister(&bmsRegisterCopy);
-  if (errCode != OBC_ERR_CODE_SUCCESS) sciPrintf("Did not recieve Success error code during read \r\n");
-  if (bmsRegisterCopy.configurationValue != bmsRegister.configurationValue)
-    sciPrintf("Did not recieve the expected value. Recieved %X \r\n", bmsRegisterCopy.configurationValue);
-
-  while (1)
-    ;
+  vTaskStartScheduler();
 }
