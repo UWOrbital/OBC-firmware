@@ -1,5 +1,6 @@
 #include "bl_config.h"
 #include "bl_flash.h"
+#include "bl_common.h"
 #include "bl_uart.h"
 
 #include <stdio.h>
@@ -20,12 +21,6 @@ extern uint32_t __ramFuncsRunEnd__;
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
-
-// If this header changes, update the host utility
-typedef struct {
-  uint32_t version;
-  uint32_t size;
-} app_header_t;
 
 typedef enum {
   BL_STATE_IDLE,
