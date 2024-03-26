@@ -40,3 +40,4 @@ typedef enum { TCA6424A_GPIO_CONFIG_OUTPUT = 0x00, TCA6424A_GPIO_CONFIG_INPUT } 
 obc_error_code_t configureTCA6424APin(uint8_t pinLocation, TCA6424A_gpio_config_t gpioPinConfig);
 obc_error_code_t readTCA6424APinInput(uint8_t pinLocation, uint8_t* IOPortValue);
 obc_error_code_t driveTCA6424APinOutput(uint8_t pinLocation, uint8_t IOPortValue);
+obc_error_code_t readTCA642CompleteInput(uint32_t* ioPortInput);

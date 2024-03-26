@@ -19,7 +19,7 @@
 #define TCA6424A_CONFIGURATION_PORT_TWO_ADDR 0x0E
 
 #define MAX_PIN_COUNT 7U
-#define MAX_PORT_COUNT 2U
+#define MAX_PORT_COUNT 3U
 
 static obc_error_code_t writeTCA6424ARegister(uint8_t addr, uint8_t* data, uint8_t size);
 static obc_error_code_t readTCA6424ARegister(uint8_t addr, uint8_t* data, uint8_t size);
@@ -27,7 +27,7 @@ static obc_error_code_t readTCA6424ARegister(uint8_t addr, uint8_t* data, uint8_
 obc_error_code_t configureTCA6424APin(uint8_t pinLocation, TCA6424A_gpio_config_t gpioPinConfig) {
   uint8_t pinPort = (pinLocation & 0xF0) >> 4;
   uint8_t pinIndex = pinLocation & 0x0F;
-  if (pinIndex > MAX_PIN_COUNT || pinPort > MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
+  if (pinIndex > MAX_PIN_COUNT || pinPort >= MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t pinState = (gpioPinConfig == TCA6424A_GPIO_CONFIG_INPUT) ? 0x01 : 0x00;
   uint8_t configurationPortAddress = TCA6424A_CONFIGURATION_PORT_ZERO_ADDR + pinPort;
@@ -44,7 +44,7 @@ obc_error_code_t configureTCA6424APin(uint8_t pinLocation, TCA6424A_gpio_config_
 obc_error_code_t driveTCA6424APinOutput(uint8_t pinLocation, uint8_t IOPortValue) {
   uint8_t pinPort = (pinLocation & 0xF0) >> 4;
   uint8_t pinIndex = pinLocation & 0x0F;
-  if (pinIndex > MAX_PIN_COUNT || pinPort > MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
+  if (pinIndex > MAX_PIN_COUNT || pinPort >= MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t outputPortAddress = TCA6424A_OUTPUT_PORT_ZERO_ADDR + pinPort;
   uint8_t outputPort = 0;
@@ -58,10 +58,21 @@ obc_error_code_t driveTCA6424APinOutput(uint8_t pinLocation, uint8_t IOPortValue
   return OBC_ERR_CODE_SUCCESS;
 }
 
+// Relies on autoincrement mode. Must validate.
+obc_error_code_t readTCA642CompleteInput(uint32_t* ioPortInput) {
+  obc_error_code_t errCode;
+  uint8_t results[3] = {0};
+  uint8_t portAddress = TCA6424A_INPUT_PORT_ZERO_ADDR;
+
+  RETURN_IF_ERROR_CODE(readTCA6424ARegister(portAddress, results, MAX_PORT_COUNT));
+  *ioPortInput = ((uint32_t)results[0] | (uint32_t)(results[1] << 8) | (uint32_t)(results[2] << 16));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t readTCA6424APinInput(uint8_t pinLocation, uint8_t* IOPortValue) {
   uint8_t pinPort = (pinLocation & 0xF0) >> 4;
   uint8_t pinIndex = pinLocation & 0x0F;
-  if (pinIndex > MAX_PIN_COUNT || pinPort > MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
+  if (pinIndex > MAX_PIN_COUNT || pinPort >= MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
 
   obc_error_code_t errCode;
   uint8_t IOPortAddress = TCA6424A_INPUT_PORT_ZERO_ADDR + pinPort;

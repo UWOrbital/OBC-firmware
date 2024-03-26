@@ -102,15 +102,17 @@ obc_error_code_t initINA230() {
 }
 
 inline obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
-  uint8_t pinLocation = (device == INA230_DEVICE_ONE) ? INA230_ONE_ALERT_PIN : INA230_TWO_ALERT_PIN;
-  uint8_t IOPortValue = 0;
+  uint32_t IOPortValue = 0;
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(readTCA6424APinInput(pinLocation, &IOPortValue));
+  RETURN_IF_ERROR_CODE(readTCA642CompleteInput(&IOPortValue));
 
-  if (IOPortValue == INA230_ALERT_HIGH) {
-    pinLocation = ina230Devices[device].tcaEnablePort;
-    IOPortValue = INA230_DISABLE_LOAD;
-    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, IOPortValue));
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+    uint8_t pinLocation = ina230Devices[i].tcaEnablePort;
+    uint8_t index = ((pinLocation & 0x0F) + ((pinLocation >> 1) & 0x18));
+    if (IOPortValue & (0b1 << index)) {
+      uint8_t drivePort = INA230_DISABLE_LOAD;
+      RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
+    }
   }
   return OBC_ERR_CODE_SUCCESS;
 }
