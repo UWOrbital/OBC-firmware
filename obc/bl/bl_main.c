@@ -17,6 +17,7 @@ extern uint32_t __ramFuncsRunEnd__;
 // use too much RAM
 #define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
 #define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
+#define BL_MAX_MSG_SIZE 64U
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -92,18 +93,28 @@ int main(void) {
 
         errCode = blFlashFapiInitBank(0U);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          int errCodeLength = strlen("Failed to init flash, error code: ") + strlen("%d\r\n", errCode);
-          blUartWriteBytes(BL_UART_SCIREG, errCodeLength, (uint8_t *)"Failed to init flash, error code: %d\r\n",
-                           errCode);
+          uint8_t blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+          uint32_t blUartWriteBufferLen =
+              snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
+          if (blUartWriteBufferLen < 0) {
+            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                             (uint8_t *)"Error with processing message buffer length\r\n");
+          }
+          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
 
         errCode = blFlashFapiBlockErase(APP_START_ADDRESS, appHeader.size);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          int errCodeLength = strlen("Failed to init flash, error code: ") + strlen("%d\r\n", errCode);
-          blUartWriteBytes(BL_UART_SCIREG, errCodeLength, (uint8_t *)"Failed to init flash, error code: %d\r\n",
-                           errCode);
+          uint8_t blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+          uint32_t blUartWriteBufferLen =
+              snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
+          if (blUartWriteBufferLen < 0) {
+            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                             (uint8_t *)"Error with processing message buffer length\r\n");
+          }
+          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
