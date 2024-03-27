@@ -94,7 +94,7 @@ int main(void) {
         errCode = blFlashFapiInitBank(0U);
         if (errCode != BL_ERR_CODE_SUCCESS) {
           uint8_t blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
-          uint32_t blUartWriteBufferLen =
+          int32_t blUartWriteBufferLen =
               snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
           if (blUartWriteBufferLen < 0) {
             blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
@@ -108,7 +108,7 @@ int main(void) {
         errCode = blFlashFapiBlockErase(APP_START_ADDRESS, appHeader.size);
         if (errCode != BL_ERR_CODE_SUCCESS) {
           uint8_t blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
-          uint32_t blUartWriteBufferLen =
+          int32_t blUartWriteBufferLen =
               snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
           if (blUartWriteBufferLen < 0) {
             blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
