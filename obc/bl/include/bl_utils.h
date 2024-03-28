@@ -98,6 +98,12 @@ static const uint32_t crc32_table[] = {
     0x84fbdbd0, 0x9abc8bd5, 0x9e7d9662, 0x933eb0bb, 0x97ffad0c, 0xafb010b1, 0xab710d06, 0xa6322bdf, 0xa2f33668,
     0xbcb4666d, 0xb8757bda, 0xb5365d03, 0xb1f740b4};
 
-uint32_t computeCRC32Checksum(uint8_t* byteData, uint32_t length, uint32_t seed);
+#ifdef __cplusplus
+extern "C" {
+#endif
+uint32_t computeCRC32Checksum(const uint8_t* byteData, uint16_t length);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -8,8 +8,9 @@
 static bl_error_code_t corruptedFlashApplicationCallback();
 
 bl_error_code_t verifyBinaryChecksum(app_header_t* header) {
-  if (computeCRC32Checksum((uint8_t*)APP_START_ADDRESS, header->size, header->blChecksum.seed) !=
-      header->blChecksum.crc32Checksum) {
+  if (computeCRC32Checksum((uint8_t*)APP_START_ADDRESS, header->size) != header->blChecksum.crc32Checksum) {
     RETURN_IF_ERROR_CODE(corruptedFlashApplicationCallback());
   }
 }
+
+static bl_error_code_t corruptedFlashApplicationCallback() { return BL_ERR_CODE_SUCCESS; }
