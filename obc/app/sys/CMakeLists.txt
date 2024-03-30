@@ -17,7 +17,6 @@ SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/time/obc_time.c
     ${CMAKE_CURRENT_SOURCE_DIR}/time/obc_time_utils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_crc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_heap.c
 )
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
