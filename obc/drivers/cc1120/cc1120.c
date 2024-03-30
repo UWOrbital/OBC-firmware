@@ -456,7 +456,8 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
 obc_error_code_t cc1120ReadTemp(float* temp) {
   // Write 0x80 to reg IOCFG1 to enable analog mode.
   // https://www.ti.com/lit/ug/swru295e/swru295e.pdf?ts=1709851860789, p71.
-  cc1120WriteSpi(CC1120_REGS_IOCFG1, 0x80, 1);
+  const uint8_t toggleOn = 0x80;
+  cc1120WriteSpi(CC1120_REGS_IOCFG1, &toggleOn, 1);
 
   // Read the analog value from the GPIO1 pin.
   float reading;
@@ -471,5 +472,6 @@ obc_error_code_t cc1120ReadTemp(float* temp) {
 
   // Write 0x00 to reg IOCFG1 to reenable digital mode.
   // https://www.ti.com/lit/ug/swru295e/swru295e.pdf?ts=1709851860789, p71.
-  cc1120WriteSpi(CC1120_REGS_IOCFG1, CC1120_DEFAULTS_IOCFG1, 1);
+  const uint8_t toggleOff = 0x0;
+  cc1120WriteSpi(CC1120_REGS_IOCFG1, &toggleOff, 1);
 }
