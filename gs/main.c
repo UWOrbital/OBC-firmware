@@ -30,14 +30,14 @@ int main(void) {
   gs_error_code_t gsErrCode;
   obc_gs_error_code_t obcGsErrCode;
 
-  char demoNum = 0;
+  uint32_t demoNum = 0;
 
   printf(
       "\n0: Immediate RTC Sync"
       "\n1: Immediate Ping"
       "\n2: Time-tagged Ping (15 sec in future)");
 
-  scanf("%c", &demoNum);
+  scanf("%u", &demoNum);
 
   // Check if the input is within the valid range
   if (demoNum >= 0 && demoNum <= 2) {
