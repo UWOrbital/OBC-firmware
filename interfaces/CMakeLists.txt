@@ -23,6 +23,9 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/telemetry/obc_gs_telemetry_pack.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/telemetry/obc_gs_telemetry_unpack.c
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/commands/obc_gs_commands_response_pack.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/commands/obc_gs_commands_response_unpack.c
+
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/aes128/obc_gs_aes128.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/ax25/obc_gs_ax25.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec/obc_gs_fec.c
