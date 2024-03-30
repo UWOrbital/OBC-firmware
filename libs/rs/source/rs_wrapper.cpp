@@ -10,17 +10,13 @@ constexpr uint8_t ECC_LENGTH = 32;
 static RS::ReedSolomon<MSG_LENGTH, ECC_LENGTH> rs;
 
 void rs_init() {
-    // Initialize the single instance if needed
-    // For example, if your class has an initialization method, call it here
+  // Initialize the single instance if needed
+  // For example, if your class has an initialization method, call it here
 }
 
-void rs_encode(void* msg, void* encoded) {
-    rs.Encode(msg, encoded);
-}
+void rs_encode(const void* msg, void* encoded) { rs.Encode(msg, encoded); }
 
-int rs_decode(void* encoded, void* repaired) {
-    return rs.Decode(encoded, repaired);
-}
+int rs_decode(void* encoded, void* repaired) { return rs.Decode(encoded, repaired); }
 
 #ifdef __cplusplus
 }

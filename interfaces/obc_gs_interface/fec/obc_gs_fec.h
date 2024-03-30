@@ -26,7 +26,7 @@ extern "C" {
  * @param telemData packed telemtry data array that needs to be encoded
  * @param rsData 255 byte array with the reed solomon encoded data
  */
-obc_gs_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData);
+obc_gs_error_code_t rsEncode(const uint8_t *telemData, packed_rs_packet_t *rsData);
 
 /**
  * @brief Decodes the reed solomon data
@@ -35,7 +35,7 @@ obc_gs_error_code_t rsEncode(uint8_t *telemData, packed_rs_packet_t *rsData);
  * @param decodedData pointer to a uint8_t array of size 223B
  * @param decodedDataLen length of the decodedData array
  */
-obc_gs_error_code_t rsDecode(packed_rs_packet_t *rsData, uint8_t *decodedData, uint8_t decodedDataLen);
+obc_gs_error_code_t rsDecode(const packed_rs_packet_t *rsData, uint8_t *decodedData, uint8_t decodedDataLen);
 
 #ifdef __cplusplus
 }

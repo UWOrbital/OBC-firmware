@@ -1,4 +1,5 @@
 #pragma once
+// This file is just a wrapper around the rs library. Use obc_gs_fec instead
 
 #include <stdint.h>
 #include <stddef.h>
