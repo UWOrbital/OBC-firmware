@@ -448,30 +448,33 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
 }
 
 /**
- * @brief Reads the temperature into `temp` using the CC1120 temperature sensor 
+ * @brief Reads the temperature into `temp` using the CC1120 temperature sensor
  *
  * @param temp - The location to store the temperature reading
  * @return obc_error_code_t - Whether or not the register read was successful
  */
-obc_error_code_t cc1120ReadTemp(float* temp) {
+obc_error_code_t cc1120ReadTemp(float *temp) {
+  obc_error_code_t errCode;
   // Write 0x80 to reg IOCFG1 to enable analog mode.
   // https://www.ti.com/lit/ug/swru295e/swru295e.pdf?ts=1709851860789, p71.
   const uint8_t toggleOn = 0x80;
-  cc1120WriteSpi(CC1120_REGS_IOCFG1, &toggleOn, 1);
+  RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG1, &toggleOn, 1));
 
   // Read the analog value from the GPIO1 pin.
   float reading;
   TickType_t readTempTicks = CC1120_TEMP_BLOCK_TICKS;
 
   // Using ADC module 1, channel 1, group 1 for now.
-  adcGetSingleData(ADC1, 1, 1, &reading, readTempTicks);
+  RETURN_IF_ERROR_CODE(adcGetSingleData(ADC1, 1, 1, &reading, readTempTicks));
 
   // Typical temperature coefficient for Vdd=3V is 2.6733mV/C, with 728.55mv at 0C.
-  https://www.ti.com/lit/an/swra415d/swra415d.pdf?ts=1709859129032, p2.
+  // https://www.ti.com/lit/an/swra415d/swra415d.pdf?ts=1709859129032, p2.
   *temp = (reading - CC1120_TEMP_3V_0DEG) / CC1120_TEMP_3V_COEFF;
 
   // Write 0x00 to reg IOCFG1 to reenable digital mode.
   // https://www.ti.com/lit/ug/swru295e/swru295e.pdf?ts=1709851860789, p71.
   const uint8_t toggleOff = 0x0;
-  cc1120WriteSpi(CC1120_REGS_IOCFG1, &toggleOff, 1);
+  RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG1, &toggleOff, 1));
+
+  return OBC_ERR_CODE_SUCCESS;
 }

@@ -158,12 +158,12 @@ obc_error_code_t cc1120GetBytesInTxFifo(uint8_t *numBytes);
 obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes);
 
 /**
- * @brief Reads the temperature into `temp` using the CC1120 temperature sensor 
+ * @brief Reads the temperature into `temp` using the CC1120 temperature sensor
  *
  * @param temp - The location to store the temperature reading
  * @return obc_error_code_t - Whether or not the register read was successful
  */
-obc_error_code_t cc1120ReadTemp(float* temp);
+obc_error_code_t cc1120ReadTemp(float *temp);
 
 /**
  * @brief Gets the state of the CC1120 from the MARCSTATE register
