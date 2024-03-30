@@ -1,31 +1,40 @@
-#include "health_collector.h"
+#include "thermal_mgr.h"
 #include "lm75bd.h"
 #include "obc_time.h"
 #include "telemetry_manager.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "obc_scheduler_config.h"
+#include <obc_digital_watchdog.h>
+#include "digital_watchdog_mgr.h"
 
 #include <FreeRTOS.h>
+#include <os_portmacro.h>
 #include <os_task.h>
-#include <sys_common.h>
+#include <os_queue.h>
 
-#define HEALTH_COLLECTION_PERIOD_MS 60000UL
+#define THERMAL_MGR_PERIOD_MS 1000
 
-static obc_error_code_t collectObcLm75bdTemp(void);
+void obcTaskInitThermalMgr() {}
+ static obc_error_code_t collectObcLm75bdTemp(void);
 
-void obcTaskInitHealthCollector(void) {}
-
-void obcTaskFunctionHealthCollector(void* pvParameters) {
+void obcTaskFunctionThermalMgr(void* pvParameters) {
   obc_error_code_t errCode;
+  TickType_t xLastWakeTime;
+
+  xLastWakeTime = xTaskGetTickCount();
 
   while (1) {
     LOG_IF_ERROR_CODE(collectObcLm75bdTemp());
-    vTaskDelay(pdMS_TO_TICKS(HEALTH_COLLECTION_PERIOD_MS));
-  }
+    digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_THERMAL_MGR);
+
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(THERMAL_MGR_PERIOD_MS));
+  } 
+
+ 
 }
 
-static obc_error_code_t collectObcLm75bdTemp(void) {
+ static obc_error_code_t collectObcLm75bdTemp(void) {
   obc_error_code_t errCode;
 
   float temp = 0.0f;
@@ -36,4 +45,5 @@ static obc_error_code_t collectObcLm75bdTemp(void) {
   RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
 
   return OBC_ERR_CODE_SUCCESS;
-}
+
+ }
