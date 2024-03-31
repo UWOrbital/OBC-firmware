@@ -116,7 +116,7 @@ void crcInit(void)
 
    /** - Setup CRC value low for channel 1 and channel 2*/
     crcREG->REGL1=0x00000000U;
-    crcREG->REGL2=0x0000000FU;
+    crcREG->REGL2=0x00000000U;
 
    /** - Setup CRC value high for channel 1 and channel 2*/
     crcREG->REGH1=0xFFFFFFFFU;
