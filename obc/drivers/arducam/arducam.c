@@ -11,258 +11,491 @@
 #include <spi.h>
 #include <i2c.h>
 #include <redposix.h>
+#include <string.h>
 
-// Camera FIFO Control (SPI) defines
-#define ARDUCHIP_TRIG 0x41     // Trigger source
-#define ARDUCHIP_TIM 0x03      // Timing control
-#define VSYNC_LEVEL_MASK 0x02  // 0 = High active , 		1 = Low active
-#define ARDUCHIP_FRAMES \
-  0x01  // FRAME control register, Bit[2:0] = Number of frames to be captured  //  On 5MP_Plus platforms bit[2:0] = 7
-        // means continuous capture until frame buffer is full
-#define CAP_DONE_MASK 0x08
-#define BURST_FIFO_READ 0x3C  // Burst FIFO read operation
+// Constants
 
-#define ARDUCHIP_FIFO 0x04  // FIFO and I2C control
-#define FIFO_CLEAR_MASK 0x01
-#define FIFO_START_MASK 0x02
-#define MAX_FIFO_SIZE 0x7FFFFF  // 8MByte
+#define ARDUCAM_DELAY_2MS pdMS_TO_TICKS(2)
 
-#define FIFO_SIZE1 0x42  // Camera write FIFO size[7:0] for burst to read
-#define FIFO_SIZE2 0x43  // Camera write FIFO size[15:8]
-#define FIFO_SIZE3 0x44  // Camera write FIFO size[18:16]
+// Arduchip masks
+#define ARDUCHIP_WRITE_MASK 0x80
+#define ARDUCAM_RESET_CPLD_MASK 0x80
+
+// Arduchip Opcodes
+#define OP_READ_TEST_REG 0x00
+#define OP_READ_CAPTURE_CONTROL_REG 0x01
+#define OP_READ_SENSOR_TIMING_CONTROL_REG 0x03
+#define OP_READ_FIFO_CONTROL_REG 0x04
+#define OP_READ_SENSOR_POWER_CONTROL_REG 0x06
+#define OP_RESET_CPLD (0x07 | ARDUCHIP_WRITE_MASK)
+#define OP_FIFO_BURST_READ 0x3C
+#define OP_FIFO_READ 0x3D
+#define OP_READ_FW_VERSION 0x40
+#define OP_READ_CAPTURE_STATUS_REG 0x41
+#define OP_READ_FIFO_SIZE_LOWER 0x42
+#define OP_READ_FIFO_SIZE_MIDDLE 0x43
+#define OP_READ_FIFO_SIZE_UPPER 0x44
+#define OP_WRITE_TEST_REG (OP_READ_TEST_REG | ARDUCHIP_WRITE_MASK)
+#define OP_WRITE_CAPTURE_CONTROL_REG (OP_READ_CAPTURE_CONTROL_REG | ARDUCHIP_WRITE_MASK)
+#define OP_WRITE_SENSOR_TIMING_CONTROL_REG (OP_READ_SENSOR_TIMING_CONTROL_REG | ARDUCHIP_WRITE_MASK)
+#define OP_WRITE_FIFO_CONTROL_REG (OP_READ_FIFO_CONTROL_REG | ARDUCHIP_WRITE_MASK)
+#define OP_WRITE_SENSOR_POWER_CONTROL_REG (OP_READ_SENSOR_POWER_CONTROL_REG | ARDUCHIP_WRITE_MASK)
 
 // Camera Img Sensor (I2C) defines
 #define CAM_I2C_ADDR 0x3C
-
 #define I2C_MUTEX_TIMEOUT portMAX_DELAY
 #define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
 
-static uint8_t m_fmt;
-// Todo: support multiple image captures in different files
-static const char fname[] = "image.jpg";
-
 // SPI values
 static spiDAT1_t arducamSPIDataFmt = {.CS_HOLD = 0, .CSNR = SPI_CS_NONE, .DFSEL = CAM_SPI_DATA_FORMAT, .WDEL = 0};
-static cam_settings_t cam_config[] = {
-    [PRIMARY] = {.cs_num = CAM_CS_1},
-    [SECONDARY] = {.cs_num = CAM_CS_2},
+
+static const uint8_t cameraCS[CAMERA_COUNT] = {
+    [PRIMARY] = CAM_CS_1,
+    [SECONDARY] = CAM_CS_2,
 };
 
-void setFormat(image_format_t fmt) {
-  if (fmt == BMP)
-    m_fmt = BMP;
-  else if (fmt == RAW)
-    m_fmt = RAW;
-  else
-    m_fmt = JPEG;
-}
+static camera_id_t selectedCamera = PRIMARY;
 
-obc_error_code_t initCam(void) {
+typedef enum opcode {
+  ARDUCAM_READ_TEST_REG,
+  ARDUCAM_WRITE_TEST_REG,
+  ARDUCAM_READ_CAPTURE_CONTROL_REG,
+  ARDUCAM_WRITE_CAPTURE_CONTROL_REG,
+  ARDUCAM_READ_SENSOR_TIMING_CONTROL_REG,
+  ARDUCAM_WRITE_SENSOR_TIMING_CONTROL_REG,
+  ARDUCAM_READ_FIFO_CONTROL_REG,
+  ARDUCAM_WRITE_FIFO_CONTROL_REG,
+  ARDUCAM_READ_SENSOR_POWER_CONTROL_REG,
+  ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG,
+  ARDUCAM_FIFO_BURST_READ,
+  ARDUCAM_FIFO_READ,
+  ARDUCAM_READ_FW_VERSION,
+  ARDUCAM_READ_CAPTURE_STATUS_REG,
+  ARDUCAM_READ_FIFO_SIZE_LOWER,
+  ARDUCAM_READ_FIFO_SIZE_MIDDLE,
+  ARDUCAM_READ_FIFO_SIZE_UPPER,
+  ARDUCAM_RESET_CPLD,
+} opcode_t;
+
+void selectCamera(camera_id_t cameraID) { selectedCamera = cameraID; }
+
+camera_id_t getSelectedCamera(void) { return selectedCamera; }
+
+// CS assumed to be asserted
+static obc_error_code_t arducamTransmitOpcode(opcode_t opcode) {
   obc_error_code_t errCode;
-  // Reset camera
-  RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
-  vTaskDelay(pdMS_TO_TICKS(2));
-  // Setup at 320x420 resolution
-  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_QVGA_Preview_Config), PREVIEW_CONFIG_LEN));
-  vTaskDelay(pdMS_TO_TICKS(1));
-  if (m_fmt == JPEG) {
-    vTaskDelay(pdMS_TO_TICKS(1));
-    // Switch to JPEG capture
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_JPEG_Capture_QSXGA_Config), JPEG_CONFIG_LEN));
-    // Switch to lowest JPEG resolution
-    RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
-
-    vTaskDelay(pdMS_TO_TICKS(1));
-    // Vertical flip
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3818, 0xa8));
-    // Pixel binning
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3621, 0x10));
-    // Image horizontal control
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3801, 0xb0));
-    // Image compression
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x4407, 0x04));
-    // Lens correction
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5888, 0x00));
-    // Image processor setup
-    RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5000, 0xFF));
-  }
-  return errCode;
-}
-
-obc_error_code_t ov5642SetJpegSize(image_resolution_t size) {
-  obc_error_code_t errCode;
-  switch (size) {
-    // Todo: all other resolutions are unimplemented
-    case OV5642_320x240:
-      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
+  switch (opcode) {
+    case ARDUCAM_READ_TEST_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_TEST_REG));
       break;
-    case OV5642_640x480:
-      // camWriteSensorRegs16_8(ov5642_640x480);
+    case ARDUCAM_WRITE_TEST_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_WRITE_TEST_REG));
       break;
-    case OV5642_1024x768:
-      // camWriteSensorRegs16_8(ov5642_1024x768);
+    case ARDUCAM_READ_CAPTURE_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_CAPTURE_CONTROL_REG));
       break;
-    case OV5642_1280x960:
-      // camWriteSensorRegs16_8(ov5642_1280x960);
+    case ARDUCAM_WRITE_CAPTURE_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_WRITE_CAPTURE_CONTROL_REG));
       break;
-    case OV5642_1600x1200:
-      // camWriteSensorRegs16_8(ov5642_1600x1200);
+    case ARDUCAM_READ_SENSOR_TIMING_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_SENSOR_TIMING_CONTROL_REG));
       break;
-    case OV5642_2048x1536:
-      // camWriteSensorRegs16_8(ov5642_2048x1536);
+    case ARDUCAM_WRITE_SENSOR_TIMING_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_WRITE_SENSOR_TIMING_CONTROL_REG));
       break;
-    case OV5642_2592x1944:
-      // camWriteSensorRegs16_8(ov5642_2592x1944);
+    case ARDUCAM_READ_FIFO_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_FIFO_CONTROL_REG));
+      break;
+    case ARDUCAM_WRITE_FIFO_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_WRITE_FIFO_CONTROL_REG));
+      break;
+    case ARDUCAM_READ_SENSOR_POWER_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_SENSOR_POWER_CONTROL_REG));
+      break;
+    case ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_WRITE_SENSOR_POWER_CONTROL_REG));
+      break;
+    case ARDUCAM_FIFO_BURST_READ:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_FIFO_BURST_READ));
+      break;
+    case ARDUCAM_FIFO_READ:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_FIFO_READ));
+      break;
+    case ARDUCAM_READ_FW_VERSION:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_FW_VERSION));
+      break;
+    case ARDUCAM_READ_CAPTURE_STATUS_REG:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_CAPTURE_STATUS_REG));
+      break;
+    case ARDUCAM_READ_FIFO_SIZE_LOWER:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_FIFO_SIZE_LOWER));
+      break;
+    case ARDUCAM_READ_FIFO_SIZE_MIDDLE:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_FIFO_SIZE_MIDDLE));
+      break;
+    case ARDUCAM_READ_FIFO_SIZE_UPPER:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_READ_FIFO_SIZE_UPPER));
+      break;
+    case ARDUCAM_RESET_CPLD:
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, OP_RESET_CPLD));
       break;
     default:
-      RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamConfig(OV5642_320x240_Config), RES_320_240_CONFIG_LEN));
-      break;
-  }
-
-  return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t flushFifo(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam); }
-
-obc_error_code_t startCapture(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_START_MASK, cam); }
-
-obc_error_code_t clearFifoFlag(camera_t cam) { return camWriteReg(ARDUCHIP_FIFO, FIFO_CLEAR_MASK, cam); }
-
-obc_error_code_t setFifoBurst(camera_t cam) { return camWriteByte(BURST_FIFO_READ, cam); }
-
-obc_error_code_t captureImage(camera_t cam) {
-  obc_error_code_t errCode;
-  errCode = flushFifo(cam);
-  if (!errCode) {
-    errCode = clearFifoFlag(cam);
-  }
-
-  if (!errCode) {
-    errCode = startCapture(cam);
+      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+      errCode = OBC_ERR_CODE_INVALID_ARG;
   }
 
   return errCode;
 }
 
-bool isCaptureDone(camera_t cam) { return (bool)getBit(ARDUCHIP_TRIG, CAP_DONE_MASK, cam); }
-
-obc_error_code_t readFifoLength(uint32_t *length, camera_t cam) {
+obc_error_code_t arducamReadTestReg(uint8_t *buffer) {
   obc_error_code_t errCode;
-  uint32_t len1 = 0, len2 = 0, len3 = 0;
-  uint8_t rx_data = 0;
+  obc_error_code_t prevCode;
 
-  RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE1, &rx_data, cam));
-  len1 = rx_data;
-  RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE2, &rx_data, cam));
-  len2 = rx_data;
-  RETURN_IF_ERROR_CODE(camReadReg(FIFO_SIZE3, &rx_data, cam));
-  len3 = (rx_data & 0x7f);
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
 
-  *length = ((len3 << 16) | (len2 << 8) | len1) & 0x07fffff;
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_TEST_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
   return errCode;
 }
 
-obc_error_code_t readFifoBurst(camera_t cam) {
+obc_error_code_t ardcamWriteTestReg(uint8_t value) {
   obc_error_code_t errCode;
-  int32_t file = 0;
-  uint32_t length = 0;
-  uint8_t temp = 0, temp_last = 0;
-  bool is_header = false;
+  obc_error_code_t prevCode;
 
-  // Open a new image file
-  RETURN_IF_ERROR_CODE(createFile(fname, &file));
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_WRITE_TEST_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, value));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
 
-  readFifoLength(&length, cam);
-  if (length >= MAX_FIFO_SIZE) {
-    // 512 kb
-    errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
-  } else if (length == 0) {
-    // 0 kb
-    errCode = OBC_ERR_CODE_FRAME_SIZE_OUT_OF_RANGE;
+  return errCode;
+}
+
+obc_error_code_t arducamReadCaptureControlReg(uint8_t *buffer) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  RETURN_IF_ERROR_CODE(errCode);
-  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, 1));
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_CAPTURE_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
 
-  // Set fifo to burst mode, receive continuous data until EOF
-  errCode = setFifoBurst(cam);
-  camReadByte(&temp, cam);
-  length--;
-  while (length-- && !errCode) {
-    temp_last = temp;
-    errCode = camReadByte(&temp, cam);
-    if (!errCode) {
-      if (is_header == true) {
-        errCode = writeFile(file, &temp, 1);
-      } else if ((temp == 0xD8) & (temp_last == 0xFF)) {
-        is_header = true;
-        errCode = writeFile(file, &temp_last, 1);
-        if (!errCode) {
-          errCode = writeFile(file, &temp, 1);
-        }
-      }
-      if ((temp == 0xD9) && (temp_last == 0xFF)) {
-        break;
-      }
+  return errCode;
+}
+
+obc_error_code_t arducamWriteCaptureControlReg(uint8_t value) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (value > 7) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_WRITE_CAPTURE_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, value));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamReadSensorTimingControlReg(uint8_t *buffer) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_SENSOR_TIMING_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamWriteSensorTimingControlReg(uint8_t value) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_WRITE_SENSOR_TIMING_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, value));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamReadFIFOControlReg(uint8_t *buffer) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_FIFO_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamWriteFIFOControlReg(uint8_t value) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_WRITE_FIFO_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, value));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamReadSensorPowerControlReg(uint8_t *buffer) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_SENSOR_POWER_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamWriteSensorPowerControlReg(uint8_t value) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, value));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamReadFIFO(uint8_t *buffer) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_FIFO_READ));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamBurstReadFIFO(uint8_t *buffer, size_t bufferSize) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_FIFO_BURST_READ));
+  for (size_t index = 0; (index < bufferSize) && (errCode == OBC_ERR_CODE_SUCCESS); index++) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, &buffer[index]));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  return errCode;
+}
+
+obc_error_code_t arducamReadFWVersion(uint8_t *version) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (version == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_FW_VERSION));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, version));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+  return errCode;
+}
+
+obc_error_code_t arducamReadCaptureStatusReg(uint8_t *status) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  if (status == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_CAPTURE_STATUS_REG));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, status));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+  return errCode;
+}
+
+obc_error_code_t arducamReadFIFOSize(uint32_t *fifoSize) {
+  obc_error_code_t errCode;
+  obc_error_code_t prevCode;
+  uint8_t upper = 0;
+  uint8_t middle = 0;
+  uint8_t lower = 0;
+  if (fifoSize == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  *fifoSize = 0;
+
+  // Get upper bits
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_FIFO_SIZE_UPPER));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, &upper));
+  }
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+
+  // Get middle bits
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+    LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_FIFO_SIZE_MIDDLE));
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, &middle));
     }
-
-    // Todo: Can this be changed to ~15us instead?
-    vTaskDelay(pdMS_TO_TICKS(1));
+    prevCode = errCode;
+    RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+    // Reset overwritten error code
+    errCode = prevCode;
   }
 
-  if (!errCode) {
-    errCode = deassertChipSelect(CAM_SPI_PORT, 1);
-  } else {
-    // If there was an error during capture, deassert without an error check
-    deassertChipSelect(CAM_SPI_PORT, 1);
+  // Get lower bits
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+    LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_READ_FIFO_SIZE_LOWER));
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, &lower));
+    }
+    prevCode = errCode;
+    RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+    // Reset overwritten error code
+    errCode = prevCode;
   }
 
-  if (!errCode) {
-    errCode = closeFile(file);
-  }
+  *fifoSize = upper;
+  *fifoSize = (*fifoSize << 8) | middle;
+  *fifoSize = (*fifoSize << 8) | lower;
 
   return errCode;
 }
 
-uint8_t getBit(uint8_t addr, uint8_t bit, camera_t cam) {
-  uint8_t temp;
-  camReadReg(addr, &temp, cam);
-  temp = temp & bit;
-  return temp;
-}
-
-obc_error_code_t camWriteReg(uint8_t addr, uint8_t data, camera_t cam) {
+obc_error_code_t resetCPLD(void) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
-  addr = addr | 0x80;
-  uint8_t tx[2] = {addr, data};
-  errCode = spiTransmitBytes(CAM_SPI_REG, &arducamSPIDataFmt, tx, 2);
-  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
-  return errCode;
-}
+  obc_error_code_t prevCode;
 
-obc_error_code_t camReadReg(uint8_t addr, uint8_t *rx_data, camera_t cam) {
-  obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
-  addr = addr & 0x7F;
-  errCode = spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, addr);
-  if (!errCode) {
-    errCode = spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, rx_data);
+  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_RESET_CPLD));
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, ARDUCAM_RESET_CPLD_MASK));
   }
-  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
-  return errCode;
-}
+  prevCode = errCode;
+  RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  // Reset overwritten error code
+  errCode = prevCode;
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    vTaskDelay(pdMS_TO_TICKS(2));
+    RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+    LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_RESET_CPLD));
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      LOG_IF_ERROR_CODE(
+          spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, (ARDUCAM_RESET_CPLD_MASK & (~ARDUCAM_RESET_CPLD_MASK))));
+    }
+    // Reset overwritten error code
+    prevCode = errCode;
+    RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
+  }
 
-obc_error_code_t camWriteByte(uint8_t byte, camera_t cam) {
-  obc_error_code_t errCode;
-  // RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
-  errCode = spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, byte);
-  // RETURN_IF_ERROR_CODE(deassertChipSelect(CAM_SPI_PORT, cam_config[cam].cs_num));
   return errCode;
-}
-
-obc_error_code_t camReadByte(uint8_t *byte, camera_t cam) {
-  return spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, byte);
 }
 
 obc_error_code_t camWriteSensorReg16_8(uint32_t regID, uint8_t regDat) {

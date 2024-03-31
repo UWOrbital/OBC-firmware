@@ -179,15 +179,8 @@ static sensor_reg_t OV5642_320x240[RES_320_240_CONFIG_LEN] = {
     {0x5684, 0x0},  {0x5685, 0x0},  {0x5686, 0x7},  {0x5687, 0x98}, {0x3801, 0xb0}, {0xffff, 0xff},
 };
 
-sensor_reg_t* getCamConfig(cam_config_t config) {
-  switch (config) {
-    case OV5642_QVGA_Preview_Config:
-      return OV5642_QVGA_Preview;
-    case OV5642_JPEG_Capture_QSXGA_Config:
-      return OV5642_JPEG_Capture_QSXGA;
-    case OV5642_320x240_Config:
-      return OV5642_320x240;
-    default:
-      return NULL;  // Invalid Config
-  }
-}
+sensor_reg_t* getCamPreviewConfig(void) { return OV5642_QVGA_Preview; }
+
+sensor_reg_t* getCamCaptureConfig(void) { return OV5642_JPEG_Capture_QSXGA; }
+
+sensor_reg_t* getCamResolutionConfig(void) { return OV5642_320x240; }

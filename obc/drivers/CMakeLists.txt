@@ -29,6 +29,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_so_handling.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_dma.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_dma.c
+
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam.c
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_reg.c
 

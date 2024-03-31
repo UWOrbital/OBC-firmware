@@ -14,18 +14,22 @@ typedef struct {
   uint16_t reg;
   uint8_t val;
 } sensor_reg_t;
-
 /**
- * @enum	cam_config_t
- * @brief	Configuration array names to be called with getCamConfig().
- *
- * Configuration array names.
- */
-typedef enum { OV5642_QVGA_Preview_Config, OV5642_JPEG_Capture_QSXGA_Config, OV5642_320x240_Config } cam_config_t;
-
-/**
- * @brief Access camera configuration arrays
+ * @brief Access camera preview configuration arrays
  * @param config  Camera config array name
  * @return Pointer to config array
  */
-sensor_reg_t* getCamConfig(cam_config_t config);
+sensor_reg_t* getCamPreviewConfig(void);
+
+/**
+ * @brief Access camera capture configuration arrays
+ * @param config  Camera config array name
+ * @return Pointer to config array
+ */
+sensor_reg_t* getCamCaptureConfig(void);
+/**
+ * @brief Access camera resolution configuration arrays
+ * @param config  Camera config array name
+ * @return Pointer to config array
+ */
+sensor_reg_t* getCamResolutionConfig(void);

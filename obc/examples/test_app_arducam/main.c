@@ -74,7 +74,7 @@ void vTask1(void *pvParameters) {
   sciPrintf("Read %d from test reg\r\n", byte);
   setFormat(JPEG);
   initCam();
-  camWriteReg(0x03, 0x02, PRIMARY);
+  // camWriteReg(0x03, 0x02, PRIMARY);
   // camWriteSensorReg16_8(0x503d , 0x80);
   // camWriteSensorReg16_8(0x503e, 0x00);
   ov5642SetJpegSize(OV5642_320x240);

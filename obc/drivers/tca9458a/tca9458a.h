@@ -10,4 +10,4 @@
  * @param tca Port number to select
  * @return Error code indicating if an ACK was received
  */
-obc_error_code_t tcaSelect(camera_t cam);
+obc_error_code_t tcaSelect(uint8_t cam);
