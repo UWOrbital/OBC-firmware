@@ -4,11 +4,6 @@
 #include "obc_scheduler_config.h"
 #include "obc_print.h"
 
-#include <FreeRTOS.h>
-#include <os_portmacro.h>
-#include <os_task.h>
-#include <os_semphr.h>
-
 #include "gnc_manager.h"
 #include "attitude_control.h"
 #include "attitude_determination_and_vehi.h"
@@ -16,6 +11,10 @@
 #include "vn100.h"
 #include "bd621x.h"
 
+#include <FreeRTOS.h>
+#include <os_portmacro.h>
+#include <os_task.h>
+#include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
 #include <math.h>
@@ -267,7 +266,7 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   while (1) {
     /* Check in with the watchdog */
     digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
-    if (cycleNum % cyclesToDelay != 0) {
+    if (cycleNum != cyclesToDelay) {
       cycleNum++;
       continue;
     } else {

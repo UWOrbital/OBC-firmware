@@ -324,7 +324,7 @@ void attitude_determination_and_vehi_step(void)
   for (k = 0; k < 3; k++) {
     P_2 = 0.0;
     for (a_tmp = 0; a_tmp < 6; a_tmp++) {
-      P_2 += H[3 * a_tmp + k] * 0.0;
+      P_2 += H[3 * a_tmp + k];
     }
 
     tmp_1[k] = (attitude_determination_model_ext_inputs.mes_ss[k] - rtb_hat_omega[k]) - P_2;
