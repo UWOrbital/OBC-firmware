@@ -120,7 +120,7 @@ obc_error_code_t camConfigureSensor(void) {
   obc_error_code_t errCode;
   // Reset camera
   RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
-  // Setup at 320x420 resolution
+  // Setup Preview resolution
   RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamPreviewConfig(), PREVIEW_CONFIG_LEN));
   vTaskDelay(pdMS_TO_TICKS(1));
 
