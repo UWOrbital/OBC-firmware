@@ -7,7 +7,7 @@
 #include "obc_logging.h"
 
 #include "obc_spi_io.h"
-#include "ov5642_reg.h"
+#include "ov5642_config.h"
 #include "obc_board_config.h"
 
 // Arduchip Constants
@@ -79,7 +79,7 @@ obc_error_code_t arducamReadTestReg(uint8_t* buffer);
  * @param value 1 byte value to be written.
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t ardcamWriteTestReg(uint8_t value);
+obc_error_code_t arducamWriteTestReg(uint8_t value);
 
 /**
  * @brief Read Arducam's Capture Control Register
@@ -230,4 +230,4 @@ obc_error_code_t camReadSensorReg16_8(uint32_t regID, uint8_t* regDat);
  * @param reglist List of registers and data to write
  * @return Error code indicating if the writes were successful
  */
-obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t reglistLen);
+obc_error_code_t camWriteSensorRegs16_8(const sensor_config_t reglist[], uint16_t reglistLen);

@@ -31,7 +31,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_dma.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_reg.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_config.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_mcu.c
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120.c

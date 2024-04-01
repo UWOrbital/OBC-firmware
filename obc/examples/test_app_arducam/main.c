@@ -6,7 +6,7 @@
 #include "obc_print.h"
 
 #include "arducam.h"
-#include "camera_reg.h"
+#include "camera_control.h"
 
 #include <gio.h>
 #include <sci.h>
@@ -17,87 +17,64 @@
 #include <stdio.h>
 
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+#define BUFFER_SIZE 512U
 
-obc_error_code_t readFifoBurst2(uint32_t length) {
-  obc_error_code_t errCode;
-  uint8_t temp = 0, temp_last = 0;
-
-  RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, 1));
-
-  // Set fifo to burst mode, receive continuous data until EOF
-  errCode = camWriteByte(0x3C, PRIMARY);
-  while (length-- && !errCode) {
-    temp_last = temp;
-    errCode = camReadByte(&temp, PRIMARY);
-    sciPrintf("0x%X,", temp);
-    if ((temp == 0xD9) && (temp_last == 0xFF)) {
-      break;
-    }
-    if (length % 30 == 0) {
-      sciPrintf("\r\n", temp);
-    }
-    // // Todo: Can this be changed to ~15us instead?
-    // vTaskDelay(pdMS_TO_TICKS(1));
-  }
-
-  if (!errCode) {
-    errCode = deassertChipSelect(CAM_SPI_PORT, 1);
-  } else {
-    // If there was an error during capture, deassert without an error check
-    deassertChipSelect(CAM_SPI_PORT, 1);
-  }
-
-  return errCode;
-}
-
+#define TASK_STACK_SIZE 2048U
 static StaticTask_t taskBuffer;
-static StackType_t taskStack[1024];
+static StackType_t taskStack[TASK_STACK_SIZE];
 
 void vTask1(void *pvParameters) {
   sciPrintf("Starting Arducam Demo\r\n");
-  // Read Camera ID
+  selectCamera(PRIMARY);
+  initCamera();
+  uint8_t temp;
+  arducamReadSensorPowerControlReg(&temp);
+  sciPrintf("Power Control Reg:0x%X\r\n", temp);
+
+  // Read Camera Sensor ID
   uint8_t cam_id[2] = {0};
   camReadSensorReg16_8(0x300A, &cam_id[0]);
   camReadSensorReg16_8(0x300B, &cam_id[1]);
   sciPrintf("Sensor ID: %X%X\r\n", cam_id[0], cam_id[1]);
-  camWriteReg(0x07, 0x80, PRIMARY);
-  vTaskDelay(pdMS_TO_TICKS(2));
-  camWriteReg(0x07, 0x00, PRIMARY);
-  vTaskDelay(pdMS_TO_TICKS(2));
+
+  // Test Reg operations
   uint8_t byte = 0x55;
   sciPrintf("Writing %d to test reg\r\n", byte);
-  camWriteReg(0x00, byte, PRIMARY);
+  arducamWriteTestReg(byte);
   byte = 0;
-  camReadReg(0x00, &byte, PRIMARY);
+  arducamReadTestReg(&byte);
   sciPrintf("Read %d from test reg\r\n", byte);
-  camReadReg(0x00, &byte, PRIMARY);
-  sciPrintf("Read %d from test reg\r\n", byte);
-  setFormat(JPEG);
-  initCam();
-  // camWriteReg(0x03, 0x02, PRIMARY);
-  // camWriteSensorReg16_8(0x503d , 0x80);
-  // camWriteSensorReg16_8(0x503e, 0x00);
-  ov5642SetJpegSize(OV5642_320x240);
-  vTaskDelay(pdMS_TO_TICKS(2));
 
+  // Camera Configuration
+  sciPrintf("Configuring Camera\r\n");
+  camConfigureSensor();
+
+  // Capture
   sciPrintf("Starting Image Capture\r\n");
-  captureImage(PRIMARY);
-  while (!isCaptureDone(PRIMARY))
+  startImageCapture();
+  while (!isCaptureDone())
     ;
   sciPrintf("Image Capture Done ^_^\r\n");
 
+  // Read image size
   uint32_t img_len = 0;
-  readFifoLength(&img_len, PRIMARY);
+  arducamReadFIFOSize(&img_len);
   sciPrintf("image len: %d \r\n", img_len);
 
-  uint32_t first_half = img_len / 2;
-  uint32_t second_half = img_len - first_half;
+  // Read image from FIFO
+  uint8_t imgBuffer[BUFFER_SIZE];
+  sciPrintf("FIFO Burst Read:\r\n");
+  size_t bytesRead = 0;
+  obc_error_code_t ret;
+  do {
+    ret = readImage(imgBuffer, BUFFER_SIZE, &bytesRead);
+    for (size_t index = 0; index < bytesRead; index++) {
+      sciPrintf("0x%X,", imgBuffer[index]);
+    }
+  } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
 
-  readFifoBurst2(first_half);
-  readFifoLength(&img_len, PRIMARY);
-  sciPrintf("image len: %d \r\n", img_len);
-  readFifoBurst2(second_half);
-
+  // Put Camera on standby (gets pretty hot if left powered on for too long)
+  standbyCamera();
   while (1)
     ;
 }
@@ -113,7 +90,7 @@ int main(void) {
   initSpiMutex();
   initI2CMutex();
 
-  xTaskCreateStatic(vTask1, "Arducam", 1024, NULL, 1, taskStack, &taskBuffer);
+  xTaskCreateStatic(vTask1, "Arducam", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
   vTaskStartScheduler();
 

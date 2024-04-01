@@ -1,5 +1,5 @@
 #include "arducam.h"
-#include "ov5642_reg.h"
+#include "ov5642_config.h"
 
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
@@ -168,7 +168,7 @@ obc_error_code_t arducamReadTestReg(uint8_t *buffer) {
   return errCode;
 }
 
-obc_error_code_t ardcamWriteTestReg(uint8_t value) {
+obc_error_code_t arducamWriteTestReg(uint8_t value) {
   obc_error_code_t errCode;
   obc_error_code_t prevCode;
 
@@ -511,7 +511,7 @@ obc_error_code_t camReadSensorReg16_8(uint32_t regID, uint8_t *regDat) {
   return errCode;
 }
 
-obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t reglistLen) {
+obc_error_code_t camWriteSensorRegs16_8(const sensor_config_t reglist[], uint16_t reglistLen) {
   obc_error_code_t errCode;
 
   for (int i = 0; i < reglistLen; i++) {
