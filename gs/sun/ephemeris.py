@@ -1,27 +1,28 @@
 from __future__ import annotations
 
-# 3rd party imports
-import requests
-
 # Standard library imports
 import argparse
+import dataclasses
+import datetime
+import enum
 import json
+import logging
+import math
+import os
+import re
 import struct
 import sys
-import logging
-import re
-from typing import BinaryIO, Final, Iterable, List
-import dataclasses
-import math
-import enum
-import os
-import datetime
+from collections.abc import Iterable
+from typing import BinaryIO, Final
+
+# 3rd party imports
+import requests
 
 # Script constants
 SUPPORTED_VERSION: Final[str] = "1.2"
 NUMBER_OF_HEADER_DOUBLES: Final[int] = 2
 RELATIVE_TOLERANCE: Final[float] = 1e-7
-JD_OF_JANUARY_1_2000: Final[float] = 2451544.500000000
+JD_OF_JANUARY_1_2000: Final[float] = 2_451_544.5
 JANUARY_1_2000: Final[datetime.date] = datetime.date(year=2000, month=1, day=1)
 API_LIMIT: Final[int] = 90_000
 
@@ -47,8 +48,9 @@ SIZE_OF_INT: Final[int] = 4
 SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF_INT
 
 
-# Error codes enumerator
 class ErrorCode(enum.Enum):
+    """Error codes enumerator"""
+
     SUCCESS = 0
     INVALID_DATE_TIME = 1
     INVALID_STEP_SIZE = 2
@@ -61,21 +63,22 @@ class ErrorCode(enum.Enum):
 
 @dataclasses.dataclass
 class DataPoint:
-    """
-    Data class to store a position data point
-    """
+    """Data class to store a position data point"""
 
     jd: float
     x: float
     y: float
     z: float
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """
-        Checks if the two data points are equal for our purposes so within a certain tolerance
+        Checks if the two data points are within a certain tolerance
+
         :param other: The other data point
         :return: True if the two data points are equal otherwise False
         """
+        if not isinstance(other, DataPoint):
+            return NotImplemented
         return (
             math.isclose(self.jd, other.jd, rel_tol=RELATIVE_TOLERANCE)
             and math.isclose(self.x, other.x, rel_tol=RELATIVE_TOLERANCE)
@@ -87,6 +90,7 @@ class DataPoint:
 def define_parser() -> argparse.ArgumentParser:
     """
     Defines the parser for the script
+
     :return: The parser
     """
     parser = argparse.ArgumentParser(description="Position Ephemeris Retriever")
@@ -154,6 +158,7 @@ def define_parser() -> argparse.ArgumentParser:
 def is_float(num: str) -> bool:
     """
     Checks if the parameter is a float
+
     :param num: The parameter to check
     :return: True if the parameter is a float otherwise False
     """
@@ -184,6 +189,7 @@ def is_valid_date(date: str) -> bool:
 def is_valid_julian_date(time: str) -> bool:
     """
     Checks if time is a valid julian date where time starts with JD and is followed by a positive number
+
     :param time: The parameter to check
     :return: True if the parameter is a valid time otherwise False
     """
@@ -195,6 +201,9 @@ def convert_date_to_jd(time: str) -> float:
     Converts the inputted time to a jd if it is a datetime of the format YYYY-MM-DD.
     If it is a jd#, then the number part is returned. This function doesnt not perform error
     checking.
+
+    :param time: The time to convert to jd
+    :return: jd of inputted time
     """
     if time.startswith("JD"):
         return float(time[2:])
@@ -203,9 +212,7 @@ def convert_date_to_jd(time: str) -> float:
     return JD_OF_JANUARY_1_2000 + difference.days
 
 
-def validate_input(
-    start_time: str, stop_time: str, step_size: str, output: str
-) -> ErrorCode:
+def validate_input(start_time: str, stop_time: str, step_size: str, output: str) -> ErrorCode:
     """
     Validates the input arguments created by the define_parser() function. If all the inputs are valid then it will
     do return a success code otherwise it return an error code
@@ -219,19 +226,12 @@ def validate_input(
     if not (is_valid_date(start_time) and is_valid_date(stop_time)) and not (
         is_valid_julian_date(start_time) and is_valid_julian_date(stop_time)
     ):
-        logging.critical(
-            "Start time or stop time do not both have the same format of YYYY-MM-DD or JD#"
-        )
+        logging.critical("Start time or stop time do not both have the same format of YYYY-MM-DD or JD#")
         return ErrorCode.INVALID_DATE_TIME
 
     # Checks if the step size is in the correct format
-    if not (
-        (step_size[-1] in ["m", "d", "h", "s"] and step_size[:-1].isnumeric())
-        or step_size.isnumeric()
-    ):
-        logging.critical(
-            "Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer"
-        )
+    if not ((step_size[-1] in ["m", "d", "h", "s"] and step_size[:-1].isnumeric()) or step_size.isnumeric()):
+        logging.critical("Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer")
         return ErrorCode.INVALID_STEP_SIZE
 
     # Checks if the output file is in the correct format
@@ -242,10 +242,12 @@ def validate_input(
     return ErrorCode.SUCCESS
 
 
-def check_version(data: dict) -> ErrorCode:
+def check_version(data: dict) -> ErrorCode:  # type: ignore
     """
     Prints out a warning if the version is different from the supported one
+
     :param data: response.txt
+    :return: ErrorCode.SUCCESS if successful otherwise an error code
     """
     signature = data.get("signature")
 
@@ -269,7 +271,8 @@ def validate_response(response: requests.Response) -> ErrorCode:
     is always 200 (success) for the rest of the script
 
     :param response: The response object
-    :return: ErrorCode.SUCCESS if the response is valid otherwise ErrorCode.INVALID_REQUEST400 or ErrorCode.INVALID_REQUEST
+    :return: ErrorCode.SUCCESS if the response is valid otherwise ErrorCode.INVALID_REQUEST400
+    or ErrorCode.INVALID_REQUEST
     """
     if response.status_code == 400:
         data = json.loads(response.text)
@@ -292,7 +295,7 @@ def validate_response(response: requests.Response) -> ErrorCode:
 
 
 # Not testable as it is a print statement used for debugging
-def print_debug_header(reverse=False) -> None:
+def print_debug_header(reverse: bool = False) -> None:
     """
     Prints the header of the data printed, used for debugging purposes
 
@@ -301,9 +304,7 @@ def print_debug_header(reverse=False) -> None:
     if reverse:
         logging.info("-" * 130)
 
-    logging.info(
-        ("\t" * 3) + "JD:" + ("\t" * 4) + "X:" + ("\t" * 5) + "Y:" + ("\t" * 4) + "Z:"
-    )
+    logging.info(("\t" * 3) + "JD:" + ("\t" * 4) + "X:" + ("\t" * 5) + "Y:" + ("\t" * 4) + "Z:")
     logging.info("-" * 130)
 
 
@@ -337,7 +338,7 @@ def write_header(
     count: int,
     exclude: str = "none",
     *,
-    write_to_file=True,
+    write_to_file: bool = True,
 ) -> None:
     """
     Writes the data header (min_jd, step_size, count) the output file
@@ -378,13 +379,12 @@ def write_header(
 
 
 def to_date(date: str) -> datetime.date:
+    """Converts the given string to a date"""
     year, month, day = date.split("-")
     return datetime.date(year=int(year), month=int(month), day=int(day))
 
 
-def calculate_number_of_data_points(
-    start_time: float, stop_time: float, step_size: str
-) -> int:
+def calculate_number_of_data_points(start_time: float, stop_time: float, step_size: str) -> int:
     """
     Calculates the number of data points. This function assumes all inputs are valid and performs
     no error checking.
@@ -399,9 +399,7 @@ def calculate_number_of_data_points(
     return int(difference * 24 * 60 / int(step_size[:-1])) + 1
 
 
-def calculate_step_size(
-    min_jd: float, max_jd: float, number_of_data_points: int
-) -> float:
+def calculate_step_size(min_jd: float, max_jd: float, number_of_data_points: int) -> float:
     """
     Calculates the step size of the data or raises an error if the parameters are invalid
 
@@ -414,9 +412,7 @@ def calculate_step_size(
         raise ValueError("The maximum JD is less than the minimum JD")
 
     if min_jd == max_jd and number_of_data_points > 1:
-        raise ValueError(
-            "The minimum JD is equal to the maximum JD but there is more than one data point"
-        )
+        raise ValueError("The minimum JD is equal to the maximum JD but there is more than one data point")
 
     if number_of_data_points < 1:
         raise ValueError("The number of data points is less than 1")
@@ -437,7 +433,7 @@ def exit_program_on_error(error_code: ErrorCode) -> None:
         sys.exit(error_code.value)
 
 
-def extract_data_lines(lines: Iterable[str]) -> List[str]:
+def extract_data_lines(lines: Iterable[str]) -> list[str]:
     """
     Finds the number of data points in the data
 
@@ -460,9 +456,16 @@ def extract_data_lines(lines: Iterable[str]) -> List[str]:
     return output
 
 
-def get_lines_from_api(
-    start_time: float, stop_time: float, step_size: int, target: str
-) -> List[str]:
+def get_lines_from_api(start_time: float, stop_time: float, step_size: int, target: str) -> list[str]:
+    """
+    Get the lines from the Horizons API
+
+    :param start_time: Start time of data
+    :param stop_time: Stop time of data
+    :param step_size: Step size of data
+    :param target: Target body
+    :return: Lines of data
+    """
     # Get the data from the API and validate it
     url = (
         f"https://ssd.jpl.nasa.gov/api/horizons.api?format=json&MAKE_EPHEM=YES&EPHEM_TYPE=VECTORS&COMMAND="
@@ -486,22 +489,17 @@ def get_lines_from_api(
     return extract_data_lines(lines)
 
 
-def main(argsv: str | None = None) -> List[DataPoint]:
+def main(argsv: str | None = None) -> list[DataPoint]:
     """
-    Main function of the program
+    Main function of the program.
     :param argsv: The arguments to be parsed, similar to sys.argv
     """
-
     # Parse the arguments and validate them
-    if isinstance(argsv, str):
-        args = define_parser().parse_args(argsv.split())
-    else:
-        args = define_parser().parse_args()
-    exit_program_on_error(
-        validate_input(args.start_time, args.stop_time, args.step_size, args.output)
-    )
+    args = define_parser().parse_args(argsv.split() if isinstance(argsv, str) else None)
+    exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
 
     # Set up logging
+    # TODO: Setup proper logging
     logging.basicConfig(
         filename=args.log,
         level=LOGGING_LEVELS[args.print],
@@ -555,7 +553,7 @@ def main(argsv: str | None = None) -> List[DataPoint]:
 
     with open(args.output, "ab") as file:
         # Loop over response
-        for count, i in enumerate(lines):
+        for count, line in enumerate(lines):
             # Depends on the exclude flag
             if not (
                 (count == 0 and (args.exclude == "both" or args.exclude == "first"))
@@ -563,8 +561,8 @@ def main(argsv: str | None = None) -> List[DataPoint]:
                 and (args.exclude == "both" or args.exclude == "last")
             ):
                 # Parse the line of data
-                logging.debug(f"Line being parsed: {i}")
-                output = i[:-1].split(", ")
+                logging.debug(f"Line being parsed: {line}")
+                output = line[:-1].split(", ")
 
                 # Parse, store and write the data point
                 logging.info(f"Output written: {output}")
