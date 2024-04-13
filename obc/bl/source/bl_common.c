@@ -1,6 +1,5 @@
 #include "bl_common.h"
 #include "bl_config.h"
-#include "bl_utils.h"
 #include "bl_errors.h"
 #include "bl_crc.h"
 

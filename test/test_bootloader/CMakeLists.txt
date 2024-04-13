@@ -1,7 +1,7 @@
 set(TEST_BINARY obc-bootloader-tests)
 
 set(TEST_DEPENDENCIES
-    ${CMAKE_SOURCE_DIR}/obc/bl/source/bl_utils.c
+    ${CMAKE_SOURCE_DIR}/obc/bl/source/bl_crc.c
 )
 
 set(TEST_SOURCES
