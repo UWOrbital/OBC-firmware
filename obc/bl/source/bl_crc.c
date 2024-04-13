@@ -17,7 +17,7 @@
 #define CRC_DMA_PORT 0x04  // Only PORT B seems to be valid
 #define CRC_DMA_FRAME_COUNT 0x01U
 #define CRC_DMA_CHANNEL DMA_CH26
-#define CRC_DMA_REQLINE 0x00U
+#define CRC_DMA_REQLINE 26U
 
 static const uint32_t PSA_SIGNATURE_REGISTER = CRC_BASE->PSA_SIGREGH1;
 
