@@ -2,7 +2,6 @@
 #define __BL_COMMON__
 
 #include "bl_errors.h"
-#include "bl_utils.h"
 #include <stdint.h>
 
 typedef struct {

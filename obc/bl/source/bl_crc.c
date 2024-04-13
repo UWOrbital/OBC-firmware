@@ -28,7 +28,6 @@ static crcModConfig_t crcConfig = {0};
 static bl_error_code_t requestCrcDmaTransfer(uint32_t startAddress, uint32_t patternCount);
 
 bl_error_code_t crcInit() {
-  dmaEnable();
   crcInit();
   crcEnableNotification(CRC_BASE, CRC_CH1_CC | CRC_CH1_TO);
 
@@ -80,7 +79,7 @@ static bl_error_code_t requestCrcDmaTransfer(uint32_t startAddress, uint32_t pat
   dmaCtrlPkt.ADDMODERD = ADDR_INC1;
   dmaCtrlPkt.ADDMODEWR = ADDR_FIXED;
   dmaCtrlPkt.PORTASGN = CRC_DMA_PORT;
-  dmaCtrlPkt.RDSIZE = ACCESS_64_BIT;
+  dmaCtrlPkt.RDSIZE = ACCESS_8_BIT;
   dmaCtrlPkt.WRSIZE = ACCESS_64_BIT;
   dmaCtrlPkt.TTYPE = FRAME_TRANSFER;
 
