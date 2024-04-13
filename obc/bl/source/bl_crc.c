@@ -66,7 +66,7 @@ bl_error_code_t performCrcVerification(crc_dma_request_t* request) {
 }
 
 void crcNotification(crcBASE_t* crc, uint32 flags) {
-  if (flags & CRC_CH1_CC) {
+  if (flags == CRC_CH1_CC) {
     crcCompleteFlag = CRC_FLAG_SET;
     return;
   }
