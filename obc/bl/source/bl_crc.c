@@ -35,9 +35,9 @@ bl_error_code_t crcInit() {
   crcTimeoutFlag = CRC_NO_TIMEOUT;
 
   crcConfig.mode = CRC_MODE;
-  crc.crc_channel = CRC_CHANNEL;
-  crc.scount = CRC_SECTOR_COUNT;
-  crc.wdg_preload = CRC_MAX_TIMEOUT;
+  crcConfig.crc_channel = CRC_CHANNEL;
+  crcConfig.scount = CRC_SECTOR_COUNT;
+  crcConfig.wdg_preload = CRC_MAX_TIMEOUT;
 }
 
 bl_error_code_t performCrcVerification(crc_dma_request_t* request) {
