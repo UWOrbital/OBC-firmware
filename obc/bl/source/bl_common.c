@@ -13,4 +13,5 @@ bl_error_code_t verifyBinaryChecksum(app_header_t* header) {
   request.crcExpectedValue = header->blChecksum.crc32Checksum;
 
   RETURN_IF_ERROR_CODE(performCrcVerification(&request));
+  return BL_ERR_CODE_SUCCESS;
 }
