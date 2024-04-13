@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 typedef struct crc_dma_request {
-  void* const crcStartAddress;
+  void* crcStartAddress;
   uint32_t crcElementCount;
   uint64_t crcSeedValue;
   uint64_t crcExpectedValue;
