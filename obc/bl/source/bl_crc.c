@@ -38,6 +38,7 @@ bl_error_code_t blCrcInit() {
   crcConfig.crc_channel = CRC_CHANNEL;
   crcConfig.scount = CRC_SECTOR_COUNT;
   crcConfig.wdg_preload = CRC_MAX_TIMEOUT;
+  return BL_ERR_CODE_SUCCESS;
 }
 
 bl_error_code_t performCrcVerification(crc_dma_request_t* request) {
