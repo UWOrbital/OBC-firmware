@@ -19,7 +19,7 @@
 #define CRC_DMA_CHANNEL DMA_CH26
 #define CRC_DMA_REQLINE 26U
 
-static const uint32_t PSA_SIGNATURE_REGISTER = CRC_BASE->PSA_SIGREGH1;
+static uint32_t PSA_SIGNATURE_REGISTER = CRC_BASE->PSA_SIGREGH1;
 
 static enum { CRC_FLAG_CLEAR, CRC_FLAG_SET } crcCompleteFlag = CRC_FLAG_CLEAR;
 static enum { CRC_TIMED_OUT, CRC_NO_TIMEOUT } crcTimeoutFlag = CRC_NO_TIMEOUT;
@@ -52,12 +52,12 @@ bl_error_code_t performCrcVerification(crc_dma_request_t* request) {
     return BL_ERR_CODE_CRC_TIMEOUT;
   }
 
-  uint64_t crcResult = crcGetSectorSig();
+  uint64_t crcResult = crcGetSectorSig(CRC_BASE, CRC_CHANNEL);
   if (crcResult != request->crcExpectedValue) {
     return BL_ERR_CODE_CRC_FAILURE;
   }
 
-  crcClearCompleteFlag = CRC_FLAG_CLEAR;
+  crcCompleteFlag = CRC_FLAG_CLEAR;
   crcTimeoutFlag = CRC_NO_TIMEOUT;
   return BL_ERR_CODE_SUCCESS;
 }
