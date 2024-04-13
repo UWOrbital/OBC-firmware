@@ -73,7 +73,7 @@ void crcNotification(crcBASE_t* crc, uint32 flags) {
 static bl_error_code_t requestCrcDmaTransfer(uint32_t startAddress, uint32_t patternCount) {
   g_dmaCTRL dmaCtrlPkt = {0};
   dmaCtrlPkt.SADD = startAddress;
-  dmaCtrlPkt.DADD = CRC_PSA_REGISTER;
+  dmaCtrlPkt.DADD = PSA_SIGNATURE_REGISTER;
   dmaCtrlPkt.FRCNT = CRC_DMA_FRAME_COUNT;
   dmaCtrlPkt.ELCNT = patternCount;
   dmaCtrlPkt.ADDMODERD = ADDR_INC1;
