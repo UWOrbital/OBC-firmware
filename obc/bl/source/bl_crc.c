@@ -11,7 +11,7 @@
 #define CRC_SECTOR_COUNT 0x01U
 #define CRC_CHANNEL CRC_CH1
 #define CRC_MODE CRC_SEMI_CPU
-#define CRC_BASE crcReg
+#define CRC_BASE crcREG
 
 // DMA associated signals
 #define CRC_DMA_PORT 0x04  // Only PORT B seems to be valid
@@ -23,7 +23,7 @@ static const uint32_t PSA_SIGNATURE_REGISTER = CRC_BASE->PSA_SIGREGH1;
 
 static enum { CRC_FLAG_CLEAR, CRC_FLAG_SET } crcCompleteFlag = CRC_FLAG_CLEAR;
 static enum { CRC_TIMED_OUT, CRC_NO_TIMEOUT } crcTimeoutFlag = CRC_NO_TIMEOUT;
-static crcModConfig_t crcConfig = {0};
+static crcConfig_t crcConfig = {0};
 
 static bl_error_code_t requestCrcDmaTransfer(uint32_t startAddress, uint32_t patternCount);
 
