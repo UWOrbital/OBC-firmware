@@ -12,6 +12,8 @@ typedef enum {
   BL_ERR_CODE_FAPI_ERASE = 101,
   BL_ERR_CODE_FAPI_PROGRAM = 102,
 
+  BL_ERR_CODE_CRC_FAILURE = 200,
+  BL_ERR_CODE_CRC_TIMEOUT = 201,
 } bl_error_code_t;
 
 #define RETURN_IF_ERROR_CODE(err)      \
