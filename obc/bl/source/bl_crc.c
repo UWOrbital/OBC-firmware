@@ -27,7 +27,7 @@ static crcModConfig_t crcConfig = {0};
 
 static bl_error_code_t requestCrcDmaTransfer(uint32_t startAddress, uint32_t patternCount);
 
-bl_error_code_t crcInit() {
+bl_error_code_t blCrcInit() {
   crcInit();
   crcEnableNotification(CRC_BASE, CRC_CH1_CC | CRC_CH1_TO);
 

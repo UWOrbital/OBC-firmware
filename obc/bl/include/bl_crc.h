@@ -11,7 +11,7 @@ typedef struct crc_dma_request {
   uint64_t crcExpectedValue;
 } crc_dma_request_t;
 
-bl_error_code_t crcInit();
+bl_error_code_t blCrcInit();
 
 bl_error_code_t performCrcVerification(crc_dma_request_t* request);
 
