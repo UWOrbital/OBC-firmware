@@ -19,8 +19,6 @@
 #define CRC_DMA_CHANNEL DMA_CH26
 #define CRC_DMA_REQLINE 26U
 
-static uint32_t PSA_SIGNATURE_REGISTER = 0;
-
 static enum { CRC_FLAG_CLEAR, CRC_FLAG_SET } crcCompleteFlag = CRC_FLAG_CLEAR;
 static enum { CRC_TIMED_OUT, CRC_NO_TIMEOUT } crcTimeoutFlag = CRC_NO_TIMEOUT;
 static crcConfig_t crcConfig = {0};
@@ -33,8 +31,6 @@ bl_error_code_t blCrcInit() {
 
   crcCompleteFlag = CRC_FLAG_CLEAR;
   crcTimeoutFlag = CRC_NO_TIMEOUT;
-
-  PSA_SIGNATURE_REGISTER = CRC_BASE->PSA_SIGREGH1;
 
   crcConfig.mode = CRC_MODE;
   crcConfig.crc_channel = CRC_CHANNEL;
@@ -76,7 +72,7 @@ void crcNotification(crcBASE_t* crc, uint32 flags) {
 static bl_error_code_t requestCrcDmaTransfer(uint32_t startAddress, uint32_t patternCount) {
   g_dmaCTRL dmaCtrlPkt = {0};
   dmaCtrlPkt.SADD = startAddress;
-  dmaCtrlPkt.DADD = PSA_SIGNATURE_REGISTER;
+  dmaCtrlPkt.DADD = (uint32_t)(&CRC_BASE->PSA_SIGREGH1);
   dmaCtrlPkt.FRCNT = CRC_DMA_FRAME_COUNT;
   dmaCtrlPkt.ELCNT = patternCount;
   dmaCtrlPkt.ADDMODERD = ADDR_INC1;
