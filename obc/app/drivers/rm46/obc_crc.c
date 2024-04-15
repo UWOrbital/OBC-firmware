@@ -51,6 +51,10 @@ obc_error_code_t obcCrcInit() {
 }
 
 obc_error_code_t performCrcVerification(crc_dma_request_t* request, TickType_t mutexTimeout, TickType_t dmaTimeout) {
+  if (request == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
   if (xSemaphoreTake(crcMutex, mutexTimeout) != pdPASS) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
