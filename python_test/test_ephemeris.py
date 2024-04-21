@@ -262,6 +262,8 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
         ("2023-07-20", "2023-07-25", "1d", "output.bin.bin", ErrorCode.SUCCESS),
         ("JD", "JD100", "1d", "output.bin", ErrorCode.INVALID_DATE_TIME),
         ("JD100", "JD", "1d", "output.bin", ErrorCode.INVALID_DATE_TIME),
+        ("2023-02-27", "2023-02-29", "1d", "output.bin", ErrorCode.INVALID_DATE_TIME),
+        ("2024-02-27", "2024-02-29", "1d", "output.bin", ErrorCode.SUCCESS),
         ("2023-07-20", "2023-07-25", "10w", "output.bin", ErrorCode.INVALID_STEP_SIZE),
         ("2023-07-20", "2023-07-25", "10d", "output.bin", ErrorCode.SUCCESS),
         (
