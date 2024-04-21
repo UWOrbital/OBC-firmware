@@ -6,6 +6,7 @@ Script for parsing data from the NASA Horizons API used by GNC for onboard algor
 Check the requirements.txt file for the latest version of the requirements (pip install -r requirements.txt)
 - Python
 - Requests (pip install requests)
+- Skyfield (pip install skyfield)
 - PyTest (pip install pytest)
 
 ## Usage:
@@ -50,4 +51,4 @@ Where i = 0, 1, 2, ..., n-1
 
 ## Testing
 Make sure you have `pytest` installed before this.
-Navigate to the `gs\sun` or `gs\sun\test` directory and run `pytest` in the command line
+Navigate to base directory or `\OBC-firmware\python_test` and run `pytest` in the command line
