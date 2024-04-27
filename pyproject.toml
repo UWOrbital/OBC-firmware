@@ -16,6 +16,10 @@ exclude = [
 mypy_path = "gs:obc/tools/python"
 strict = true
 
+[tool.mypy.overrides]
+module = "skyfield"
+ignore_missing_imports = true
+
 [tool.ruff]
 include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py"]
 exclude = [
