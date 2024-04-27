@@ -212,9 +212,9 @@ def convert_date_to_jd(time: str) -> float:
     timescale = load.timescale()
 
     base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.timezone.utc)
-    star_date = timescale.from_datetime(base_date)
+    sky_date = timescale.from_datetime(base_date)
 
-    return star_date.ut1
+    return float(sky_date.ut1)
 
 
 def validate_input(start_time: str, stop_time: str, step_size: str, output: str) -> ErrorCode:
