@@ -48,7 +48,3 @@ show this help message and exit
 ### JD calculation:
 JD = min_jd + i * step_size <br>
 Where i = 0, 1, 2, ..., n-1
-
-## Testing
-Make sure you have `pytest` installed before this.
-Navigate to base directory or `\OBC-firmware\python_test` and run `pytest` in the command line
