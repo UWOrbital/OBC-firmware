@@ -4,6 +4,8 @@ set(BL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/bl_main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_flash.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_uart.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_common.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_crc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/F021_Flash_API/source/Fapi_UserDefinedFunctions.c
 )
 

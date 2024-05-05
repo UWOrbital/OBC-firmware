@@ -188,4 +188,8 @@ typedef enum {
   /** Operation is not supported. */
   OBC_ERR_CODE_RED_ENOTSUPP = 1524,
 
+  OBC_ERR_CODE_CRC_DMA_TIMEOUT = 1100,
+  OBC_ERR_CODE_CRC_FAILURE,
+  OBC_ERR_CODE_CRC_INTERRUPT_FAILURE
+
 } obc_error_code_t;
