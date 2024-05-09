@@ -4,6 +4,9 @@
 #include "lm75bd.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"
+#include "fm25v20a.h"
+#include "rffm6404.h"
+
 
 #include <stdbool.h>
 
@@ -32,6 +35,32 @@ void run_test() {
   } else {
     sciPrintf("Good connection with CC1120 (via SPI)");
   }
+  // Test connection with fram
+  errCode = framWakeUp();
+   if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    sciPrintf("POWER ON TEST FAIL: Bad connection with fram (via SPI)");
+    pass = false;
+  } else {
+    sciPrintf("Good connection with fram (via SPI)");
+  }
+
+  errCode = rffm6404ActivateRecvByp();
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    sciPrintf("POWER ON TEST FAIL: Bad connection with rffm6404 (via GIO)");
+    pass = false;
+  } else {
+    sciPrintf("Good connection with rffm6404 (via GIO)");
+  }
+
+  
+
+
+
+
+
+
 
   // Continue for many peripherals
 
