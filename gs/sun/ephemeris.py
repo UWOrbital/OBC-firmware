@@ -17,12 +17,13 @@ from typing import BinaryIO, Final
 
 # 3rd party imports
 import requests
-from skyfield.api import load
 
 # Script constants
 SUPPORTED_VERSION: Final[str] = "1.2"
 NUMBER_OF_HEADER_DOUBLES: Final[int] = 2
 RELATIVE_TOLERANCE: Final[float] = 1e-7
+JD_OF_JANUARY_1_2000: Final[float] = 2_451_544.5
+JANUARY_1_2000: Final[datetime.date] = datetime.date(year=2000, month=1, day=1)
 API_LIMIT: Final[int] = 90_000
 
 # Print values
@@ -179,9 +180,7 @@ def is_valid_date(date: str) -> bool:
     if not time_regex.match(date):
         return False
     try:
-        year, month, day = date.split("-")
-        datetime.date(year=int(year), month=int(month), day=int(day))
-
+        to_date(date)
         return True
     except ValueError:
         return False
@@ -208,13 +207,9 @@ def convert_date_to_jd(time: str) -> float:
     """
     if time.startswith("JD"):
         return float(time[2:])
+    difference = to_date(time) - JANUARY_1_2000
 
-    timescale = load.timescale()
-
-    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.timezone.utc)
-    sky_date = timescale.from_datetime(base_date)
-
-    return float(sky_date.ut1)
+    return JD_OF_JANUARY_1_2000 + difference.days
 
 
 def validate_input(start_time: str, stop_time: str, step_size: str, output: str) -> ErrorCode:
@@ -381,6 +376,12 @@ def write_header(
         # Write the count to the file
         byte_count = struct.pack(DATA_UINT, int(count))
         file.write(bytearray(byte_count))
+
+
+def to_date(date: str) -> datetime.date:
+    """Converts the given string to a date"""
+    year, month, day = date.split("-")
+    return datetime.date(year=int(year), month=int(month), day=int(day))
 
 
 def calculate_number_of_data_points(start_time: float, stop_time: float, step_size: str) -> int:
