@@ -5,7 +5,7 @@
 #include "obc_reset.h"
 #include "obc_scheduler_config.h"
 #include "state_mgr.h"
-#include <power_on_test.h>>
+#include <power_on_test.h>
 
 #include <FreeRTOS.h>
 #include <os_task.h>
