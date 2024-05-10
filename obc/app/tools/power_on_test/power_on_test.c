@@ -6,7 +6,8 @@
 #include "cc1120_defs.h"
 #include "fm25v20a.h"
 #include "rffm6404.h"
-
+#include "arducam.h"
+#include "ds3232_mz.h"
 
 #include <stdbool.h>
 
@@ -37,7 +38,7 @@ void run_test() {
   }
   // Test connection with fram
   errCode = framWakeUp();
-   if (errCode != OBC_ERR_CODE_SUCCESS) {
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
     sciPrintf("POWER ON TEST FAIL: Bad connection with fram (via SPI)");
     pass = false;
@@ -45,6 +46,7 @@ void run_test() {
     sciPrintf("Good connection with fram (via SPI)");
   }
 
+  // Test connection with rffm6404
   errCode = rffm6404ActivateRecvByp();
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
@@ -54,13 +56,36 @@ void run_test() {
     sciPrintf("Good connection with rffm6404 (via GIO)");
   }
 
-  
+  // Test connection with arducam
+  errCode = initCam();
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (via SPI)");
+    pass = false;
+  } else {
+    sciPrintf("Good connection with Arducam (via SPI)");
+  }
 
+  // Test connection with arducam
+  errCode = initCam();
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (via SPI)");
+    pass = false;
+  } else {
+    sciPrintf("Good connection with Arducam (via SPI)");
+  }
 
-
-
-
-
+  uint8_t placeholder;
+  // Test connection with DS3232
+  errCode = getSecondsRTC(&placeholder);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    sciPrintf("POWER ON TEST FAIL: Bad connection with DS3232 (via I2C)");
+    pass = false;
+  } else {
+    sciPrintf("Good connection with DS3232 (via I2C)");
+  }
 
   // Continue for many peripherals
 
