@@ -68,6 +68,7 @@ add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
+add_subdirectory(app/tools)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes

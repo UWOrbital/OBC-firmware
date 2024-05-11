@@ -8,6 +8,7 @@
 #include "rffm6404.h"
 #include "arducam.h"
 #include "ds3232_mz.h"
+#include "vn100.h"
 
 #include <stdbool.h>
 
@@ -15,10 +16,11 @@ void run_test() {
   obc_error_code_t errCode;
   bool pass = true;
 
-  float placeholder;
+  float placeholder_float;
+  uint8_t placeholder_byte;
 
   // Test connection with LM75BD
-  errCode = readThystLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder);
+  errCode = readThystLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder_float);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
     sciPrintf("POWER ON TEST FAIL: Bad connection with LM75BD (via I2C)");
@@ -36,6 +38,7 @@ void run_test() {
   } else {
     sciPrintf("Good connection with CC1120 (via SPI)");
   }
+
   // Test connection with fram
   errCode = framWakeUp();
   if (errCode != OBC_ERR_CODE_SUCCESS) {
@@ -47,7 +50,7 @@ void run_test() {
   }
 
   // Test connection with rffm6404
-  errCode = rffm6404ActivateRecvByp();
+  errCode = rffm6404ActivateRx();
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
     sciPrintf("POWER ON TEST FAIL: Bad connection with rffm6404 (via GIO)");
@@ -66,19 +69,8 @@ void run_test() {
     sciPrintf("Good connection with Arducam (via SPI)");
   }
 
-  // Test connection with arducam
-  errCode = initCam();
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (via SPI)");
-    pass = false;
-  } else {
-    sciPrintf("Good connection with Arducam (via SPI)");
-  }
-
-  uint8_t placeholder;
   // Test connection with DS3232
-  errCode = getSecondsRTC(&placeholder);
+  errCode = getSecondsRTC(&placeholder_byte);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
     sciPrintf("POWER ON TEST FAIL: Bad connection with DS3232 (via I2C)");
@@ -87,7 +79,15 @@ void run_test() {
     sciPrintf("Good connection with DS3232 (via I2C)");
   }
 
-  // Continue for many peripherals
+  // Test connection with vn100
+  errCode = vn100SetBaudrate(115200);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    sciPrintf("POWER ON TEST FAIL: Bad connection with VN100 (via SCI)");
+    pass = false;
+  } else {
+    sciPrintf("Good connection with VN100 (via SCI)");
+  }
 
   if (pass) {
     sciPrintf("POWER ON TEST COMPLETE: PASS");
