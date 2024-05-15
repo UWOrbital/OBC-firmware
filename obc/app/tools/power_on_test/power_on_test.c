@@ -70,14 +70,16 @@ void run_test() {
   }
 
   // Test connection with arducam - part 2
-  errCode = flushFifo(PRIMARY);  // Now testing SPI interface
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with Arducam (SPI)");
-  } else {
-    LOG_DEBUG("Good connection with Arducam (SPI)");
-  }
+  // TODO: Read from SPI test reg when driver is finished
+
+  // errCode = arducamReadTestReg(&placeholder_byte);  // Now testing SPI interface
+  // pass &= (errCode != OBC_ERR_CODE_SUCCESS);
+  // if (errCode != OBC_ERR_CODE_SUCCESS) {
+  //   LOG_ERROR_CODE(errCode);
+  //   LOG_DEBUG("POWER ON TEST FAIL: Bad connection with Arducam (SPI)");
+  // } else {
+  //   LOG_DEBUG("Good connection with Arducam (SPI)");
+  // }
 
   // Test connection with DS3232
   errCode = getSecondsRTC(&placeholder_byte);
