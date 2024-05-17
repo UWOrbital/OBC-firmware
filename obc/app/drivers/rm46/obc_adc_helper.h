@@ -17,31 +17,6 @@
 // Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
 #define RESOLUTION 12U
 
-#define ADC_CHANNEL_0 0U
-#define ADC_CHANNEL_1 1U
-#define ADC_CHANNEL_2 2U
-#define ADC_CHANNEL_3 3U
-#define ADC_CHANNEL_4 4U
-#define ADC_CHANNEL_5 5U
-#define ADC_CHANNEL_6 6U
-#define ADC_CHANNEL_7 7U
-#define ADC_CHANNEL_8 8U
-#define ADC_CHANNEL_9 9U
-#define ADC_CHANNEL_10 10U
-#define ADC_CHANNEL_11 11U
-#define ADC_CHANNEL_12 12U
-#define ADC_CHANNEL_13 13U
-#define ADC_CHANNEL_14 14U
-#define ADC_CHANNEL_15 15U
-#define ADC_CHANNEL_16 16U
-#define ADC_CHANNEL_17 17U
-#define ADC_CHANNEL_18 18U
-#define ADC_CHANNEL_19 19U
-#define ADC_CHANNEL_20 20U
-#define ADC_CHANNEL_21 21U
-#define ADC_CHANNEL_22 22U
-#define ADC_CHANNEL_23 23U
-
 #define REF_VOLTAGE_HIGH 5.0f
 #define REF_VOLTAGE_LOW 0.0f
 
