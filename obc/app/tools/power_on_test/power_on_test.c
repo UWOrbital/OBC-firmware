@@ -1,5 +1,6 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
+#include "obc_print.h"
 #include "lm75bd.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"
@@ -23,9 +24,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with LM75BD (via I2C)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with LM75BD (via I2C)");
   } else {
-    LOG_DEBUG("Good connection with LM75BD (via I2C)");
+    sciPrintf("Good connection with LM75BD (via I2C)");
   }
 
   // Test connection with CC1120
@@ -33,9 +34,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with CC1120 (via SPI)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with CC1120 (via SPI)");
   } else {
-    LOG_DEBUG("Good connection with CC1120 (via SPI)");
+    sciPrintf("Good connection with CC1120 (via SPI)");
   }
 
   // Test connection with fram
@@ -43,9 +44,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with fram (via SPI)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with fram (via SPI)");
   } else {
-    LOG_DEBUG("Good connection with fram (via SPI)");
+    sciPrintf("Good connection with fram (via SPI)");
   }
 
   // Test connection with rffm6404
@@ -53,9 +54,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with rffm6404 (via GIO)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with rffm6404 (via GIO)");
   } else {
-    LOG_DEBUG("Good connection with rffm6404 (via GIO)");
+    sciPrintf("Good connection with rffm6404 (via GIO)");
   }
   rffm6404PowerOff();  // Return to starting condition
 
@@ -64,9 +65,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with Arducam (I2C)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (I2C)");
   } else {
-    LOG_DEBUG("Good connection with Arducam (I2C)");
+    sciPrintf("Good connection with Arducam (I2C)");
   }
 
   // Test connection with arducam - part 2
@@ -76,9 +77,9 @@ void run_test() {
   // pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   // if (errCode != OBC_ERR_CODE_SUCCESS) {
   //   LOG_ERROR_CODE(errCode);
-  //   LOG_DEBUG("POWER ON TEST FAIL: Bad connection with Arducam (SPI)");
+  //   sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (SPI)");
   // } else {
-  //   LOG_DEBUG("Good connection with Arducam (SPI)");
+  //   sciPrintf("Good connection with Arducam (SPI)");
   // }
 
   // Test connection with DS3232
@@ -86,9 +87,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with DS3232 (via I2C)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with DS3232 (via I2C)");
   } else {
-    LOG_DEBUG("Good connection with DS3232 (via I2C)");
+    sciPrintf("Good connection with DS3232 (via I2C)");
   }
 
   // Test connection with vn100
@@ -96,14 +97,14 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    LOG_DEBUG("POWER ON TEST FAIL: Bad connection with VN100 (via SCI)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with VN100 (via SCI)");
   } else {
-    LOG_DEBUG("Good connection with VN100 (via SCI)");
+    sciPrintf("Good connection with VN100 (via SCI)");
   }
 
   if (pass) {
-    LOG_DEBUG("POWER ON TEST COMPLETE: PASS");
+    sciPrintf("POWER ON TEST COMPLETE: PASS");
   } else {
-    LOG_DEBUG("POWER ON TEST COMPLETE: FAIL - SEE PREVIOUS OUTPUTS");
+    sciPrintf("POWER ON TEST COMPLETE: FAIL - SEE PREVIOUS OUTPUTS");
   }
 }
