@@ -66,6 +66,10 @@ compile_commands.json
 venv/
 __pycache__/
 .pytest_cache/
+
+#matlab
+/matlab
+
 *.egg-info/
 *.coverage
 .mypy_cache/

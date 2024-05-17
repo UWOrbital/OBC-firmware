@@ -85,6 +85,9 @@ target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
+    attitude-control
+    attitude-determination
+    onboard-env-modelling
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
@@ -169,6 +172,9 @@ target_link_libraries(debug-tool.out PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
+    attitude-control
+    attitude-determination
+    onboard-env-modelling
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
