@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 #define VN100_DEFAULT_BAUDRATE 115200U
 #define MAX_SEND_SIZE 120U
@@ -117,7 +116,7 @@ obc_error_code_t vn100ReadBaudrate(uint32_t *baudrate) {
 
   /* For documentation on how these commands are formed, refer to section 5.2.6 of the user manual */
   const char checksum[] = "*XX\r\n";  // Checksum set to "XX", which means to ignore the checksum
-  const char header[] = "$VNRRG,05";  // Header set to read from register 7
+  const char header[] = "$VNRRG,05";  // Header set to read from register 5
   unsigned char buf[MAX_SEND_SIZE] = {'\0'};
 
   size_t headerLength = strlen(header);
@@ -133,11 +132,11 @@ obc_error_code_t vn100ReadBaudrate(uint32_t *baudrate) {
   RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
 
   // Read and parse response
-  unsigned char buf_read[BAUD_READ_RESPONSE_SIZE] = {'\0'};
-  RETURN_IF_ERROR_CODE(sciReadBytes(buf_read, BAUD_READ_RESPONSE_SIZE, portMAX_DELAY,
+  char buf_read[BAUD_READ_RESPONSE_SIZE] = {'\0'};
+  RETURN_IF_ERROR_CODE(sciReadBytes((unsigned char *)buf_read, BAUD_READ_RESPONSE_SIZE, portMAX_DELAY,
                                     pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS), UART_VN100_REG));
 
-  // Find first command
+  // Find first comma
   char *baud_start = strchr(buf_read, ',');
   if (baud_start == NULL) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
@@ -155,13 +154,14 @@ obc_error_code_t vn100ReadBaudrate(uint32_t *baudrate) {
   if (baud_end == NULL) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
   }
+
   char baud_str[7] = {};  // Max 6 chars for baudrate, 1 for null termination
   strncpy(baud_str, baud_start, baud_end - baud_start);
   baud_str[baud_end - baud_start] = '\0';
 
   *baudrate = (uint32_t)atoi(baud_str);  // Convert to an integer
 
-  if (!isValidBaudRate(baudrate)) {
+  if (!isValidBaudRate(*baudrate)) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
   }
 

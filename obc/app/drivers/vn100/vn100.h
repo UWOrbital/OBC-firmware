@@ -43,17 +43,17 @@ obc_error_code_t vn100SetBaudrate(uint32_t baudrate);
  *
  * @return OBC_ERR_CODE_SUCCESS on success, else an error code
  */
-obc_error_code_t vn100ReadBaudrate(uint32_t* baudrate)
+obc_error_code_t vn100ReadBaudrate(uint32_t* baudrate);
 
-    /**
-     * @brief Set the output rate for the ASYNC outputs
-     * @param outputRate The desired baudrate to be set
-     * @note The default factory output rate is 40Hz. But initialized to 10Hz in initVn100()
-     *        Acceptable Output rates: 1Hz, 2Hz, 4Hz, 5Hz, 10Hz, 20Hz, 25Hz, 40Hz, 50Hz, 100Hz, 200Hz
-     *
-     * @return OBC_ERR_CODE_SUCCESS on success, else an error code
-     */
-    obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz);
+/**
+ * @brief Set the output rate for the ASYNC outputs
+ * @param outputRate The desired baudrate to be set
+ * @note The default factory output rate is 40Hz. But initialized to 10Hz in initVn100()
+ *        Acceptable Output rates: 1Hz, 2Hz, 4Hz, 5Hz, 10Hz, 20Hz, 25Hz, 40Hz, 50Hz, 100Hz, 200Hz
+ *
+ * @return OBC_ERR_CODE_SUCCESS on success, else an error code
+ */
+obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz);
 
 /**
  * @brief pause asyncronous outputs from the VN-100
