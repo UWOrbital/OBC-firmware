@@ -18,15 +18,16 @@ void run_test() {
 
   float placeholder_float;
   uint8_t placeholder_byte;
+  uint32_t placeholder_uint32;
 
   // Test connection with LM75BD
   errCode = readThystLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder_float);
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with LM75BD (via I2C)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with LM75BD (via I2C)\r\n");
   } else {
-    sciPrintf("Good connection with LM75BD (via I2C)");
+    sciPrintf("Good connection with LM75BD (via I2C)\r\n");
   }
 
   // Test connection with CC1120
@@ -34,9 +35,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with CC1120 (via SPI)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with CC1120 (via SPI)\r\n");
   } else {
-    sciPrintf("Good connection with CC1120 (via SPI)");
+    sciPrintf("Good connection with CC1120 (via SPI)\r\n");
   }
 
   // Test connection with fram
@@ -44,9 +45,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with fram (via SPI)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with fram (via SPI)\r\n");
   } else {
-    sciPrintf("Good connection with fram (via SPI)");
+    sciPrintf("Good connection with fram (via SPI)\r\n");
   }
 
   // Test connection with rffm6404
@@ -54,9 +55,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with rffm6404 (via GIO)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with rffm6404 (via GIO)\r\n");
   } else {
-    sciPrintf("Good connection with rffm6404 (via GIO)");
+    sciPrintf("Good connection with rffm6404 (via GIO)\r\n");
   }
   rffm6404PowerOff();  // Return to starting condition
 
@@ -65,9 +66,9 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (I2C)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (I2C)\r\n");
   } else {
-    sciPrintf("Good connection with Arducam (I2C)");
+    sciPrintf("Good connection with Arducam (I2C)\r\n");
   }
 
   // Test connection with arducam - part 2
@@ -77,9 +78,9 @@ void run_test() {
   // pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   // if (errCode != OBC_ERR_CODE_SUCCESS) {
   //   LOG_ERROR_CODE(errCode);
-  //   sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (SPI)");
+  //   sciPrintf("POWER ON TEST FAIL: Bad connection with Arducam (SPI)\r\n");
   // } else {
-  //   sciPrintf("Good connection with Arducam (SPI)");
+  //   sciPrintf("Good connection with Arducam (SPI)\r\n");
   // }
 
   // Test connection with DS3232
@@ -87,24 +88,24 @@ void run_test() {
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with DS3232 (via I2C)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with DS3232 (via I2C)\r\n");
   } else {
-    sciPrintf("Good connection with DS3232 (via I2C)");
+    sciPrintf("Good connection with DS3232 (via I2C)\r\n");
   }
 
   // Test connection with vn100
-  errCode = vn100SetBaudrate(115200);
+  errCode = vn100ReadBaudrate(&placeholder_uint32);  // Handles check that response is a valid baudrate
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    sciPrintf("POWER ON TEST FAIL: Bad connection with VN100 (via SCI)");
+    sciPrintf("POWER ON TEST FAIL: Bad connection with VN100 (via SCI)\r\n");
   } else {
-    sciPrintf("Good connection with VN100 (via SCI)");
+    sciPrintf("Good connection with VN100 (via SCI)\r\n");
   }
 
   if (pass) {
-    sciPrintf("POWER ON TEST COMPLETE: PASS");
+    sciPrintf("POWER ON TEST COMPLETE: PASS\r\n");
   } else {
-    sciPrintf("POWER ON TEST COMPLETE: FAIL - SEE PREVIOUS OUTPUTS");
+    sciPrintf("POWER ON TEST COMPLETE: FAIL - SEE PREVIOUS OUTPUTS\r\n");
   }
 }
