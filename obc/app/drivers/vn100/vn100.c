@@ -132,34 +132,34 @@ obc_error_code_t vn100ReadBaudrate(uint32_t *baudrate) {
   RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
 
   // Read and parse response
-  char buf_read[BAUD_READ_RESPONSE_SIZE] = {'\0'};
-  RETURN_IF_ERROR_CODE(sciReadBytes((unsigned char *)buf_read, BAUD_READ_RESPONSE_SIZE, portMAX_DELAY,
+  char readBuf[BAUD_READ_RESPONSE_SIZE] = {'\0'};
+  RETURN_IF_ERROR_CODE(sciReadBytes((unsigned char *)readBuf, BAUD_READ_RESPONSE_SIZE, portMAX_DELAY,
                                     pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS), UART_VN100_REG));
 
   // Find first comma
-  char *baud_start = strchr(buf_read, ',');
-  if (baud_start == NULL) {
+  char *baudStart = strchr(readBuf, ',');
+  if (baudStart == NULL) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
   }
 
   // Move to second comma
-  baud_start = strchr(baud_start + 1, ',');
-  if (baud_start == NULL) {
+  baudStart = strchr(baudStart + 1, ',');
+  if (baudStart == NULL) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
   }
-  baud_start++;  // Move forward one to first character of baudrate
+  baudStart++;  // Move forward one to first character of baudrate
 
   // Find asterisk (end of baudrate)
-  char *baud_end = strchr(buf_read, '*');
-  if (baud_end == NULL) {
+  char *baudEnd = strchr(readBuf, '*');
+  if (baudEnd == NULL) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
   }
 
-  char baud_str[7] = {};  // Max 6 chars for baudrate, 1 for null termination
-  strncpy(baud_str, baud_start, baud_end - baud_start);
-  baud_str[baud_end - baud_start] = '\0';
+  char baudStr[7] = {};  // Max 6 chars for baudrate, 1 for null termination
+  strncpy(baudStr, baudStart, baudEnd - baudStart);
+  baudStr[baudEnd - baudStart] = '\0';
 
-  *baudrate = (uint32_t)atoi(baud_str);  // Convert to an integer
+  *baudrate = (uint32_t)atoi(baudStr);  // Convert to an integer
 
   if (!isValidBaudRate(*baudrate)) {
     return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
