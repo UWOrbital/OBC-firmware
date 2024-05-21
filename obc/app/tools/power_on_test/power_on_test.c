@@ -14,7 +14,7 @@
 #include <stdbool.h>
 
 void log_result(obc_error_code_t retErrorCode, const char *peripheral, const char *protocol) {
-  char *strBuf[100];
+  char strBuf[100];
   if (retErrorCode != OBC_ERR_CODE_SUCCESS) {
     strcat(strBuf, "POWER ON TEST FAIL: Bad connection with ");
     strcat(strBuf, peripheral);
@@ -23,15 +23,15 @@ void log_result(obc_error_code_t retErrorCode, const char *peripheral, const cha
     strcat(strBuf, ")\r\n");
 
     LOG_ERROR_CODE(retErrorCode);
-    sciPrintf(strBuf);
   } else {
     strcat(strBuf, "Good connection with ");
     strcat(strBuf, peripheral);
     strcat(strBuf, " (via ");
     strcat(strBuf, protocol);
     strcat(strBuf, ")\r\n");
-    sciPrintf("Good connection with LM75BD (via I2C)\r\n");
   }
+
+  sciPrintf(strBuf);
 }
 
 void run_test() {
