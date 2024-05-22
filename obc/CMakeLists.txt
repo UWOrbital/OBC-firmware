@@ -153,8 +153,6 @@ target_compile_definitions(debug-tool.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
-add_subdirectory(app/tools/interface_debug_tool)
-
 target_link_libraries(debug-tool.out PRIVATE
     tiny-aes
     lib-correct

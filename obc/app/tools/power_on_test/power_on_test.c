@@ -4,7 +4,6 @@
 #include "lm75bd.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"
-#include "fm25v20a.h"
 #include "rffm6404.h"
 #include "arducam.h"
 #include "ds3232_mz.h"
@@ -12,23 +11,16 @@
 #include "obc_persistent.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
 void log_result(obc_error_code_t retErrorCode, const char *peripheral, const char *protocol) {
-  char strBuf[100];
+  char strBuf[60 + strlen(peripheral) +
+              strlen(protocol)];  // Approx 50 for fail text plus some wiggle room if message changes
   if (retErrorCode != OBC_ERR_CODE_SUCCESS) {
-    strcat(strBuf, "POWER ON TEST FAIL: Bad connection with ");
-    strcat(strBuf, peripheral);
-    strcat(strBuf, " (via ");
-    strcat(strBuf, protocol);
-    strcat(strBuf, ")\r\n");
-
+    snprintf(strBuf, sizeof(strBuf), "POWER ON TEST FAIL: Bad connection with %s (via %s)\r\n", peripheral, protocol);
     LOG_ERROR_CODE(retErrorCode);
   } else {
-    strcat(strBuf, "Good connection with ");
-    strcat(strBuf, peripheral);
-    strcat(strBuf, " (via ");
-    strcat(strBuf, protocol);
-    strcat(strBuf, ")\r\n");
+    snprintf(strBuf, sizeof(strBuf), "Good connection with %s (via %s)\r\n", peripheral, protocol);
   }
 
   sciPrintf(strBuf);
