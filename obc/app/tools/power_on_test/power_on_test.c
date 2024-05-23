@@ -52,19 +52,23 @@ void run_test() {
   // Test connection with fram
   testing_persist_data_t data = {.testData = 0x1818};
   errCode = setPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &data, sizeof(testing_persist_data_t));
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  log_result(errCode, "FRAM (writing)", "SPI");
 
-  testing_persist_data_t readData;
-  errCode = getPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &readData, sizeof(testing_persist_data_t));
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  log_result(errCode, "FRAM (reading)", "SPI");
-
-  if (readData.testData != data.testData) {
-    errCode = OBC_ERR_CODE_PERSISTENT_CORRUPTED;
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
     pass = false;
+  } else {
+    testing_persist_data_t readData;
+    errCode = getPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &readData, sizeof(testing_persist_data_t));
+
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      pass = false;
+    } else {
+      if (readData.testData != data.testData) {
+        errCode = OBC_ERR_CODE_PERSISTENT_CORRUPTED;
+        pass = false;
+      }
+    }
   }
-  log_result(errCode, "FRAM (comparing)", "SPI");
+  log_result(errCode, "FRAM", "SPI");  // errCode logged indicates how far the test got
 
   // Test connection with rffm6404
   errCode = rffm6404ActivateRx();
@@ -102,29 +106,27 @@ void run_test() {
 
   setupFileSystem();
   errCode = createFile(filePath, &fileId);
-  red_open(filePath, RED_O_RDWR | RED_O_APPEND);
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     pass = false;
-    log_result(errCode, "SD Card (create & open file)", "SPI");
   } else {
+    red_open(filePath, RED_O_RDWR | RED_O_APPEND);
     errCode = writeFile(fileId, writeData, strlen(writeData));
+
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       pass = false;
-      log_result(errCode, "SD Card (write)", "SPI");
     } else {
       readFile(fileId, readBuf, strlen(writeData), &placeholder_size);
 
       if (strcmp(writeData, readBuf) != 0) {
-        errCode = OBC_ERR_CODE_UNKNOWN;
+        errCode = OBC_ERR_CODE_FAILED_FILE_READ;
         pass = false;
-        log_result(errCode, "SD Card (compare)", "SPI");
       }
 
       deleteFile(filePath);
     }
   }
-  log_result(errCode, "SD Card (overall)", "SPI");
+  log_result(errCode, "SD Card", "SPI");  // errCode logged indicated how far the test got
 
   if (pass) {
     sciPrintf("POWER ON TEST COMPLETE: PASS\r\n");
