@@ -1,6 +1,9 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_print.h"
+#include "obc_persistent.h"
+#include "obc_reliance_fs.h"
+#include "telemetry_fs_utils.h"
 #include "lm75bd.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"
@@ -8,7 +11,8 @@
 #include "arducam.h"
 #include "ds3232_mz.h"
 #include "vn100.h"
-#include "obc_persistent.h"
+
+#include <redposix.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -33,6 +37,7 @@ void run_test() {
   float placeholder_float;
   uint8_t placeholder_byte;
   uint32_t placeholder_uint32;
+  size_t placeholder_size;
 
   // Test connection with LM75BD
   errCode = readThystLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder_float);
@@ -58,8 +63,8 @@ void run_test() {
   if (readData.testData != data.testData) {
     errCode = OBC_ERR_CODE_PERSISTENT_CORRUPTED;
     pass = false;
-    log_result(errCode, "FRAM (comparing)", "SPI");
   }
+  log_result(errCode, "FRAM (comparing)", "SPI");
 
   // Test connection with rffm6404
   errCode = rffm6404ActivateRx();
@@ -88,6 +93,38 @@ void run_test() {
   errCode = vn100ReadBaudrate(&placeholder_uint32);  // Handles check that response is a valid baudrate
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   log_result(errCode, "VN100", "SCI");
+
+  // Test connection with SD Card
+  int32_t fileId;
+  const char writeData[] = "UW Orbital";
+  const char filePath[] = "/power_on_test.txt";
+  char readBuf[strlen(writeData)];
+
+  setupFileSystem();
+  errCode = createFile(filePath, &fileId);
+  red_open(filePath, RED_O_RDWR | RED_O_APPEND);
+
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    pass = false;
+    log_result(errCode, "SD Card (create & open file)", "SPI");
+  } else {
+    errCode = writeFile(fileId, writeData, strlen(writeData));
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      pass = false;
+      log_result(errCode, "SD Card (write)", "SPI");
+    } else {
+      readFile(fileId, readBuf, strlen(writeData), &placeholder_size);
+
+      if (strcmp(writeData, readBuf) != 0) {
+        errCode = OBC_ERR_CODE_UNKNOWN;
+        pass = false;
+        log_result(errCode, "SD Card (compare)", "SPI");
+      }
+
+      deleteFile(filePath);
+    }
+  }
+  log_result(errCode, "SD Card (overall)", "SPI");
 
   if (pass) {
     sciPrintf("POWER ON TEST COMPLETE: PASS\r\n");
