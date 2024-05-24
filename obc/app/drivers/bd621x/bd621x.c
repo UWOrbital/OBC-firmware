@@ -2,7 +2,7 @@
 
 #include "bd621x.h"
 #include "obc_errors.h"
-#include "obc_logging.h"
+#include "logger.h"
 
 #include <stdlib.h>
 

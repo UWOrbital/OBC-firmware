@@ -2,7 +2,7 @@
 #include "obc_gs_command_data.h"
 #include "obc_reset.h"
 #include "obc_errors.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
 #include "downlink_encoder.h"

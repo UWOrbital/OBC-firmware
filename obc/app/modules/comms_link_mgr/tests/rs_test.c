@@ -1,5 +1,5 @@
 #include "fec.h"
-#include "obc_logging.h"
+#include "logger.h"
 #include "obc_print.h"
 
 void testRs(void) {
