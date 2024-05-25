@@ -170,10 +170,10 @@ static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Da
   switch (command.type) {
     case UPLINK_FLOW_DECODED_CMD:
       RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&command.command));
-      break;
+      return OBC_ERR_CODE_SUCCESS;
     case UPLINK_FLOW_DECODED_DATA:
       RETURN_IF_ERROR_CODE(handleCommands(command.data));
-      break;
+      return OBC_ERR_CODE_SUCCESS;
   }
   return OBC_ERR_CODE_INVALID_STATE;
 }
