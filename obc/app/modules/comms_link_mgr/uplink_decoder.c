@@ -174,9 +174,8 @@ static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Da
     case UPLINK_FLOW_DECODED_DATA:
       RETURN_IF_ERROR_CODE(handleCommands(command.data));
       break;
-    default:
-      return OBC_ERR_CODE_INVALID_STATE;
   }
+  return OBC_ERR_CODE_INVALID_STATE;
 }
 
 /**
