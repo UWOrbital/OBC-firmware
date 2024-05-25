@@ -39,11 +39,6 @@ static state_mgr_state_t cubeSatState = CUBESAT_STATE_INITIALIZATION;
  */
 static void sendStartupMessages(void);
 
-static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, state_mgr_state_t *state);
-static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state);
-static obc_error_code_t handleAssemblyState();
-static obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state);
-
 static obc_error_code_t resetStateCounter(void);
 
 /**
@@ -55,6 +50,47 @@ static obc_error_code_t resetStateCounter(void);
  * @return obc_error_code_t - whether or not the state transition was successful
  */
 static obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state_t *state);
+
+static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  switch (event) {
+    case STATE_MGR_TASKS_RUNNING_EVENT_ID:
+      *state = CUBESAT_STATE_NOMINAL;
+      return OBC_ERR_CODE_SUCCESS;
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
+  }
+}
+
+static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  switch (event) {
+    case STATE_MGR_RESET_EVENT_ID:
+      *state = CUBESAT_STATE_RESET;
+      resetStateCounter();
+      return OBC_ERR_CODE_SUCCESS;
+
+    case STATE_MGR_LOWPWR_EVENT_ID:
+      *state = CUBESAT_STATE_LOW_PWR;
+      return OBC_ERR_CODE_SUCCESS;
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
+  }
+}
+
+static obc_error_code_t handleAssemblyState() { return OBC_ERR_CODE_INVALID_STATE; }
+
+static obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  switch (event) {
+    case STATE_MGR_RESET_EVENT_ID:
+      *state = CUBESAT_STATE_RESET;
+      resetStateCounter();
+      return OBC_ERR_CODE_SUCCESS;
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE;
+  }
+}
 
 void obcTaskInitStateMgr(void) {
   ASSERT((stateMgrQueueStack != NULL) && (&stateMgrQueue != NULL));
@@ -206,46 +242,5 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
     }
 
     LOG_IF_ERROR_CODE(getNextCubeSatState(inMsg.eventID, &cubeSatState));
-  }
-}
-
-obc_error_code_t handleInitializationState(state_mgr_event_id_t event, state_mgr_state_t *state) {
-  switch (event) {
-    case STATE_MGR_TASKS_RUNNING_EVENT_ID:
-      *state = CUBESAT_STATE_NOMINAL;
-      return OBC_ERR_CODE_SUCCESS;
-
-    default:
-      return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-  }
-}
-
-obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state) {
-  switch (event) {
-    case STATE_MGR_RESET_EVENT_ID:
-      *state = CUBESAT_STATE_RESET;
-      resetStateCounter();
-      return OBC_ERR_CODE_SUCCESS;
-
-    case STATE_MGR_LOWPWR_EVENT_ID:
-      *state = CUBESAT_STATE_LOW_PWR;
-      return OBC_ERR_CODE_SUCCESS;
-
-    default:
-      return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
-  }
-}
-
-obc_error_code_t handleAssemblyState() { return OBC_ERR_CODE_INVALID_STATE; }
-
-obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state) {
-  switch (event) {
-    case STATE_MGR_RESET_EVENT_ID:
-      *state = CUBESAT_STATE_RESET;
-      resetStateCounter();
-      return OBC_ERR_CODE_SUCCESS;
-
-    default:
-      return OBC_ERR_CODE_INVALID_STATE;
   }
 }
