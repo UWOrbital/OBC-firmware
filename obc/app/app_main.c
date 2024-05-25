@@ -5,6 +5,7 @@
 #include "obc_reset.h"
 #include "obc_scheduler_config.h"
 #include "state_mgr.h"
+#include "cc1120.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -19,9 +20,21 @@
 #include <het.h>
 
 // This is the stack canary. It should never be overwritten.
-// Ideally, it would be a random value, but we don't have a good source of entropy
-// that we can use.
-void *__stack_chk_guard = (void *)0xDEADBEEF;
+// We are using the CC1120 to generate a random value for the stack canary.
+uintptr_t __stack_chk_guard = 0;
+
+static void __attribute__((constructor, no_stack_protector)) __construct_stk_chk_guard() {
+  if (__stack_chk_guard == 0) {
+    __stack_chk_guard = __stack_chk_guard_init();
+  }
+}
+
+uintptr_t __stack_chk_guard_init(void) {
+  uint8_t received_signal;
+  uintptr_t stack_canary;
+  cc1120Rng(&stack_canary, &received_signal);
+  return stack_canary;
+}
 
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
