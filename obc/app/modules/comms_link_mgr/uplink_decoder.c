@@ -163,8 +163,8 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
 static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData,
                                                    aes_data_t *aesData) {
   obc_error_code_t errCode;
-  uplink_flow_decoded_packet_t command = {0};
-  RETURN_IF_ERROR_CODE(decodePacket(ax25Data, rsData, aesData, &command));
+  uplink_flow_packet_t command = {0};
+  RETURN_IF_ERROR_CODE(uplinkDecodePacket(ax25Data, rsData, aesData, &command));
 
   // Handle the decoded data
   switch (command.type) {

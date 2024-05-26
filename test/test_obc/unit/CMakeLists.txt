@@ -7,6 +7,7 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common/obc_gs_crc.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
+    ${CMAKE_SOURCE_DIR}/obc/app/modules/comms_link_mgr/uplink_flow.c
 )
 
 set(TEST_MOCKS
@@ -21,6 +22,7 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_image_processing.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_vn100_unpack.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_obc_persistent.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_obc_uplink_flow.cpp
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
@@ -45,11 +47,20 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
     ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
+
+    ${CMAKE_SOURCE_DIR}/obc/app/modules/comms_link_mgr
+    ${CMAKE_SOURCE_DIR}/obc/app/modules/telemetry_mgr
+    ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/aes128
+    ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/ax25
+    ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/fec
+    ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/telemetry
 )
 
 target_link_libraries(${TEST_BINARY}
     PRIVATE
     GTest::GTest
+    obc-gs-interface
+    rs-lib
 )
 
 add_test(${TEST_BINARY} ${TEST_BINARY})

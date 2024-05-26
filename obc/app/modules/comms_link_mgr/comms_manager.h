@@ -4,10 +4,6 @@
 #include "telemetry_manager.h"
 #include "obc_gs_ax25.h"
 
-#include <FreeRTOS.h>
-#include <os_semphr.h>
-#include <sys_common.h>
-
 #define MAX_DOWNLINK_TELEM_BUFFER_SIZE 1U
 
 /**

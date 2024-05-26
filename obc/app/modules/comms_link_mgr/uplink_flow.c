@@ -3,8 +3,8 @@
 
 #include <string.h>
 
-obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData,
-                              uplink_flow_decoded_packet_t *command) {
+obc_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData,
+                                    uplink_flow_packet_t *command) {
   if (ax25Data == NULL || rsData == NULL || aesData == NULL || command == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
