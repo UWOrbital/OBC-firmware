@@ -17,7 +17,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-void log_result(obc_error_code_t retErrorCode, const char *peripheral, const char *protocol) {
+static void log_result(obc_error_code_t retErrorCode, const char *peripheral, const char *protocol) {
   char strBuf[60 + strlen(peripheral) +
               strlen(protocol)];  // Approx 50 for fail text plus some wiggle room if message changes
   if (retErrorCode != OBC_ERR_CODE_SUCCESS) {
