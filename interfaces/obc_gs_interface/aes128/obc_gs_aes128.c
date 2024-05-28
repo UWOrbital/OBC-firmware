@@ -38,6 +38,24 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
+obc_gs_error_code_t aes128Encrypt(const uint8_t *data, uint8_t dataBufferLen, aes_data_t *output) {
+  if (data == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (output == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (dataBufferLen != output->ciphertextLen) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  memcpy(output->ciphertext, data, dataBufferLen);
+  AES_ctx_set_iv(&ctx, output->iv);
+  AES_CTR_xcrypt_buffer(&ctx, output->ciphertext, output->ciphertextLen);
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
 /**
  * @brief Initializes the AES context
  *

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "obc_errors.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
@@ -6,6 +7,10 @@
 #include "comms_manager.h"
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
   UPLINK_FLOW_DECODED_CMD = 0,
@@ -30,3 +35,6 @@ typedef struct {
  */
 obc_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData,
                                     uplink_flow_packet_t *command);
+#ifdef __cplusplus
+}
+#endif
