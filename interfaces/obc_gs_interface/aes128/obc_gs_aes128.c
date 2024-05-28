@@ -9,15 +9,6 @@
 // Store the AES context
 static struct AES_ctx ctx;
 
-/**
- * @brief Decrypts the AES blocks
- *
- * @param aesData Pointer to an aes_data_t struct that includes a struct of the IV and data
- * @param output array to store the decrypted data
- * @param outputBufferLen length of the buffer to store the decrypted data
- *
- * @return obc_gs_error_code_t - whether or not the data was successfully decrypted
- */
 obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen) {
   if (aesData == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
