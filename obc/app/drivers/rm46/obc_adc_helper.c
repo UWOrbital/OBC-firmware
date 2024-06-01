@@ -1,7 +1,6 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "adc.h"
-#include "adc.c"
 #include "reg_adc.h"
 #include "obc_adc_helper.h"
 
