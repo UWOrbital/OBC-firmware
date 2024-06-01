@@ -1,6 +1,7 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "adc.h"
+#include "adc.c"
 #include "reg_adc.h"
 #include "obc_adc_helper.h"
 
@@ -62,9 +63,9 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
 
-  uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U, group];
+  uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U][group];
 
-  for (int i = 0; i < groupSize; i++) {
+  for (uint i = 0; i < groupSize; i++) {
     readings[i] =
         (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / (float)(1 << RESOLUTION) - REF_VOLTAGE_LOW;
   }
