@@ -1,9 +1,17 @@
-#include "obc_adc_helper.h"
+#include "obc_logging.h"
+#include "obc_errors.h"
+#include "adc.h"
+#include "reg_adc.h"
+
+#include <FreeRTOS.h>
+#include <os_portmacro.h>
+#include <os_semphr.h>
+#include <os_task.h>
 
 static SemaphoreHandle_t adcConversionMutex = NULL;
 static StaticSemaphore_t adcConversionMutexBuffer;
 
-void initADCMutex(void) {
+obc_error_code_t initADCMutex(void) {
   if (adcConversionMutex == NULL) {
     adcConversionMutex = xSemaphoreCreateMutexStatic(&adcConversionMutexBuffer);
   }
@@ -26,9 +34,9 @@ obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_g
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
 
-  uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U, group];
+  uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U][group];
 
-  for (int i = 0; i < groupSize; i++) {
+  for (uint32_t i = 0; i < groupSize; i++) {
     if (adcData[i].id == channel) {
       *reading =
           (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / (float)(1 << RESOLUTION) - REF_VOLTAGE_LOW;
@@ -69,7 +77,7 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xStaticSemaphoreTake(adcConversionMutexBuffer, blockTime) != pdTRUE) {
+  if (xSemaphoreTake(adcConversionMutex, blockTime) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
@@ -78,8 +86,8 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
   adcStartConversion(adcReg, group);
 
   uint8_t totalAttempts = 0;
-  while (!adcIsConverionComplete(adcReg, group)) {
-    if (totalAttempts == 1) {
+  while (!adcIsConversionComplete(adcReg, group)) {
+    if (totalAttempts >= 5) {
       adcStopConversion(adcReg, group);
       adcResetFifo(adcReg, group);
       xSemaphoreGive(adcConversionMutex);

@@ -58,7 +58,7 @@ const uint32_t adcGroupSize[2U][3U] = {{2U, 1U, 1U}, {1U, 1U, 1U}};
 /**
  * @brief Initialize the ADC bus mutex
  */
-void initADCMutex(void);
+obc_error_code_t initADCMutex(void);
 
 /**
  * @note Get data from a single ADC channel. ADC conversion mode channel ID should be ENABLED for all groups this is
