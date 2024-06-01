@@ -22,7 +22,7 @@ obc_error_code_t initADCMutex(void) {
 
 obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_group_t group, float *reading,
                                   TickType_t blockTime) {
-  if (adc == NULL || reading == NULL) {
+  if (reading == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -49,7 +49,7 @@ obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_g
 }
 
 obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *readings, TickType_t blockTime) {
-  if (adc == NULL || readings == NULL) {
+  if (readings == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -74,7 +74,7 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
 
 static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group, adcData_t *data,
                                             TickType_t blockTime) {
-  if (adc == NULL || data == NULL) {
+  if (data == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
@@ -90,7 +90,6 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
   while (!adcIsConversionComplete(adcReg, group)) {
     if (totalAttempts >= 5) {
       adcStopConversion(adcReg, group);
-      adcResetFifo(adcReg, group);
       xSemaphoreGive(adcConversionMutex);
       return OBC_ERR_CODE_ADC_FAILURE;
     }
