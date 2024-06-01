@@ -2,6 +2,7 @@
 #include "obc_errors.h"
 #include "adc.h"
 #include "reg_adc.h"
+#include "obc_adc_helper"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
