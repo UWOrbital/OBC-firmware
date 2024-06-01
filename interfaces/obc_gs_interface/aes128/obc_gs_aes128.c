@@ -47,12 +47,7 @@ obc_gs_error_code_t aes128Encrypt(const uint8_t *data, uint8_t dataBufferLen, ae
   AES_CTR_xcrypt_buffer(&ctx, output->ciphertext, output->ciphertextLen);
   return OBC_GS_ERR_CODE_SUCCESS;
 }
-/**
- * @brief Initializes the AES context
- *
- * @param key - The key to decrypt the AES blocks with
- * @return obc_gs_error_code_t - whether or not the context was successfully initialized
- */
+
 obc_gs_error_code_t initializeAesCtx(const uint8_t *key) {
   if (key == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;

@@ -1,4 +1,5 @@
 #include "uplink_decoder.h"
+#include "obc_errors.h"
 #include "obc_gs_aes128.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
@@ -45,8 +46,7 @@ static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
-static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData,
-                                                   aes_data_t *aesData);
+static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -124,9 +124,7 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
         if (axDataIndex > 2) {
           axData.length = axDataIndex;
 
-          packed_rs_packet_t rsData = {0};
-          aes_data_t aesData = {0};
-          LOG_IF_ERROR_CODE(decodePacketAndSendCommand(&axData, &rsData, &aesData));
+          LOG_IF_ERROR_CODE(decodePacketAndSendCommand(&axData));
 
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
@@ -160,22 +158,46 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
  *
  * @return obc_error_code_t - whether or not the data was completely decoded successfully
  */
-static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData,
-                                                   aes_data_t *aesData) {
+static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data) {
   obc_error_code_t errCode;
+  obc_gs_error_code_t interfaceErr;
   uplink_flow_packet_t command = {0};
-  RETURN_IF_ERROR_CODE(uplinkDecodePacket(ax25Data, rsData, aesData, &command));
+
+  interfaceErr = (uplinkDecodePacket(ax25Data, &command));
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_UPLINK_FLOW_DECODE_FAILURE;
+  }
 
   // Handle the decoded data
   switch (command.type) {
-    case UPLINK_FLOW_DECODED_CMD:
-      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&command.command));
-      return OBC_ERR_CODE_SUCCESS;
+    case UPLINK_FLOW_DECODED_UFRAME_CMD: {
+      comms_event_t commsEvent = {0};
+
+      switch (command.command) {
+        case U_FRAME_CMD_CONN:
+          commsEvent.eventID = COMMS_EVENT_CONN_RECEIVED;
+          RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
+          return OBC_ERR_CODE_SUCCESS;
+
+        case U_FRAME_CMD_DISC:
+          commsEvent.eventID = COMMS_EVENT_DISC_RECEIVED;
+          RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
+          return OBC_ERR_CODE_SUCCESS;
+
+        case U_FRAME_CMD_ACK:
+          commsEvent.eventID = COMMS_EVENT_ACK_RECEIVED;
+          RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
+          return OBC_ERR_CODE_SUCCESS;
+
+        default:
+          return OBC_ERR_CODE_INVALID_ARG;
+      }
+    }
     case UPLINK_FLOW_DECODED_DATA:
       RETURN_IF_ERROR_CODE(handleCommands(command.data));
       return OBC_ERR_CODE_SUCCESS;
   }
-  return OBC_ERR_CODE_INVALID_STATE;
+  return OBC_ERR_CODE_INVALID_ARG;
 }
 
 /**

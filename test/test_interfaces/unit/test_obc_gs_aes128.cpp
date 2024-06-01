@@ -17,7 +17,7 @@ TEST(TestAes128, TestAes128EncryptDecrypt) {
                                    0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
   uint8_t inputBufferLen = AES_BLOCK_SIZE;
 
-  uint8_t output[AES_BLOCK_SIZE];
+  uint8_t output[AES_BLOCK_SIZE] = {0};
   uint8_t outputBufferLen = AES_BLOCK_SIZE;
 
   ASSERT_EQ(initializeAesCtx(TEMP_STATIC_KEY), OBC_GS_ERR_CODE_SUCCESS);

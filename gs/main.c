@@ -143,6 +143,7 @@ int main(void) {
       exit(1);
   }
 
+  /* Setup encryption */
   struct AES_ctx ctx = {0};
   AES_init_ctx(&ctx, TEMP_STATIC_KEY);
 
@@ -150,6 +151,7 @@ int main(void) {
   memset(iv, 1, AES_IV_SIZE);
   AES_ctx_set_iv(&ctx, iv);
 
+  /* Pack command message */
   uint32_t cmdPacketOffset = 0;
 
   uint8_t packedSingleCmdSize = 0;
@@ -159,6 +161,7 @@ int main(void) {
     exit(1);
   }
 
+  /* Encrypt and send command message */
   uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
 
   memcpy(encryptedCmd + AES_IV_SIZE, packedSingleCmd, packedSingleCmdSize);
@@ -198,6 +201,7 @@ int main(void) {
     ax25Pkt.data[0] = AX25_FLAG;
     ax25Pkt.data[ax25Pkt.length - 1] = AX25_FLAG;
 
+    /* Write data to serial port */
     long unsigned int bytesWritten = CSerialPortWriteData(pSerialPort, ax25Pkt.data, ax25Pkt.length);
     if (bytesWritten < ax25Pkt.length) {
       printf("Failed to write entire AX.25 packet!");
