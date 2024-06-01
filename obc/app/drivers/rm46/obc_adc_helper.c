@@ -33,7 +33,7 @@ obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_g
   adcData_t adcData[MAXGROUPSIZE];
 
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
+  RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, &adcData, blockTime));
 
   uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U][group];
 
@@ -60,11 +60,11 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
   adcData_t adcData[MAXGROUPSIZE];
 
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
+  RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, &adcData, blockTime));
 
   uint32_t groupSize = adcGroupSize[(adc == ADC1) ? 0U : 1U][group];
 
-  for (uint i = 0; i < groupSize; i++) {
+  for (uint32_t i = 0; i < groupSize; i++) {
     readings[i] =
         (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / (float)(1 << RESOLUTION) - REF_VOLTAGE_LOW;
   }
