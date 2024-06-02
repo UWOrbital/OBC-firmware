@@ -26,16 +26,7 @@
 #include "cc1120_mcu.h"
 
 // This is the stack canary. It should never be overwritten.
-// Ideally, it would be a random value, but we don't have a good source of entropy
-// that we can use.
-void *__stack_chk_guard = (void *)0xDEADBEEF;
-
-void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
-
-/*
-
-// Stack canary generated with cc1120. Need to find a way to run it before main and to store it
-
+// We are using the CC1120 to generate a random value for the stack canary.
 uint8_t __stack_chk_guard = 0;
 uint8_t __stack_chk_guard_init(void);
 
@@ -54,7 +45,31 @@ uint8_t __stack_chk_guard_init(void) {
 
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
-*/
+/// @brief stack canary function check
+// There should be a reset when stack overflow occurs
+
+static StackType_t stack[1024];
+static StaticTask_t taskBuf;
+
+void vTask(void *pvParameters);
+void vTask(void *pvParameters) {
+  cc1120Init();
+
+  for (int i = 1; i < 3; i++) {
+    obc_error_code_t errCode;
+
+    uint8_t canaryValue = 0;
+    uint8_t receiver = 0;
+    LOG_IF_ERROR_CODE(cc1120Rng(&canaryValue, &receiver));
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      sciPrintf("can't read from ext address \r\n");
+    } else {
+      sciPrintf("random value: %x , fifo: %x\r\n", canaryValue, receiver);
+    }
+  }
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  vTaskDelete(NULL);
+}
 
 int main(void) {
   // Run hardware initialization code
@@ -76,6 +91,10 @@ int main(void) {
   // The state_mgr is the only task running initially.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
+
+  sciPrintf("Testing stack canary \n");
+
+  xTaskCreateStatic(vTask, "stack canary test", 1024, NULL, 1, stack, &taskBuf);
 
   vTaskStartScheduler();
 }
