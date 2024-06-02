@@ -82,6 +82,7 @@ obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax2
   uint8_t ciphertext[AES_DECRYPTED_SIZE] = {0};
   aes_data_t aesData = {0};
   aesData.ciphertext = ciphertext;
+  aesData.ciphertextLen = AES_DECRYPTED_SIZE;
   memcpy(aesData.iv, aesKey, AES_IV_SIZE);
 
   interfaceErr = aes128Encrypt(command->data, AES_DECRYPTED_SIZE, &aesData);
@@ -89,9 +90,15 @@ obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax2
     return interfaceErr;
   }
 
+  // Format data for AX.25
+  uint8_t ax25InfoField[RS_ENCODED_SIZE] = {0};
+  memcpy(ax25InfoField, aesData.iv, AES_IV_SIZE);
+  memcpy(ax25InfoField + AES_IV_SIZE, aesData.ciphertext,
+         AES_DECRYPTED_SIZE < RS_ENCODED_SIZE - AES_IV_SIZE ? AES_DECRYPTED_SIZE : RS_ENCODED_SIZE - AES_IV_SIZE);
+
   // Send I Frame
   unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
-  interfaceErr = ax25SendIFrame(ciphertext, AES_DECRYPTED_SIZE, &unstuffedAx25Pkt);
+  interfaceErr = ax25SendIFrame(ax25InfoField, RS_ENCODED_SIZE, &unstuffedAx25Pkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return interfaceErr;
   }

@@ -31,6 +31,8 @@ typedef struct {
  * @param rsData pointer to the Reed-Solomon packet (used for data storage and contents may be overwritten)
  * @param aesData pointer to the AES packet (used for data storage and contents may be overwritten)
  * @param command pointer to the command (result)
+ *
+ * @return OBC_GS_ERR_CODE_SUCCESS if the packet was successfully decoded, otherwise an error code
  */
 obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_flow_packet_t *command);
 
@@ -40,6 +42,11 @@ obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_f
  * @param command pointer to the command to be encoded
  * @param ax25Data pointer to AX.25 packet (result)
  * @param aesKey pointer to the AES key used for encryption
+ *
+ * @note The AES key must be 16 bytes long
+ * @note Callsign must be set before calling this function
+ *
+ * @return OBC_GS_ERR_CODE_SUCCESS if the packet was successfully encoded, otherwise an error code
  */
 obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax25_i_frame_t *ax25Data,
                                        const uint8_t *aesKey);
