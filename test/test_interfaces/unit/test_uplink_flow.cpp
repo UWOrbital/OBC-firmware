@@ -1,4 +1,4 @@
-#include "uplink_flow.h"
+#include "obc_gs_uplink_flow.h"
 
 #include <gtest/gtest.h>
 #include <cstring>

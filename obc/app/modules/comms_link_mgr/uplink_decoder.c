@@ -13,7 +13,7 @@
 #include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "comms_manager.h"
-#include "uplink_flow.h"
+#include "obc_gs_uplink_flow.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

@@ -1,4 +1,4 @@
-#include "uplink_flow.h"
+#include "obc_gs_uplink_flow.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_errors.h"
 #include "obc_gs_fec.h"

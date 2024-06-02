@@ -33,7 +33,7 @@ set(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/obc_gs_crc.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/comms_flow/uplink_flow.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/comms_flow/obc_gs_uplink_flow.c
 )
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})

@@ -8,7 +8,7 @@
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
 #include "obc_gs_aes128.h"
-#include "uplink_flow.h"
+#include "obc_gs_uplink_flow.h"
 
 #include <cserialport.h>
 #include <aes.h>
