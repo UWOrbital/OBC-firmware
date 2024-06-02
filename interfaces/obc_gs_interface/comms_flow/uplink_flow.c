@@ -72,7 +72,7 @@ obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax2
   if (command == NULL || ax25Data == NULL || aesKey == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
-  // TODO: Handle the case where the command is a U frame
+  // TODO: Handle the case where the command is a U frame, then remove this guard
   if (command->type != UPLINK_FLOW_DECODED_DATA) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
