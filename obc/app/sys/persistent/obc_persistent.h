@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include "obc_errors.h"
-#include "alarm_handler.h"
+#include "obc_gs_command_data.h"
 
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
@@ -78,10 +78,21 @@ typedef struct {
 } obc_time_persist_t;
 
 // alarm_mgr module
+// Alarm handler callback definition for persistent
+typedef union {
+  obc_error_code_t (*defaultCallback)(void);
+  obc_error_code_t (*cmdCallback)(cmd_msg_t *);
+} alarm_handler_callback_def_persist_t;
+
+typedef enum {
+  ALARM_TYPE_DEFAULT_PERSIST,
+  ALARM_TYPE_TIME_TAGGED_CMD_PERSIST,
+} alarm_type_persist_t;
+
 typedef struct {
   uint32_t unixTime;
-  alarm_type_t type;
-  alarm_handler_callback_def_t callbackDef;
+  alarm_type_persist_t type;
+  alarm_handler_callback_def_persist_t callbackDef;
   union {
     cmd_msg_t cmdMsg;
   };
