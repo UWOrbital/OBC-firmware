@@ -17,6 +17,7 @@
 #define ALARM_HANDLER_QUEUE_ITEM_SIZE sizeof(alarm_handler_event_t)
 #define ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
 #define ALARM_HANDLER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define OBC_PERSISTENT_MAX_SUBINDEX_ALARM 24U
 
 static QueueHandle_t alarmHandlerQueueHandle;
 static StaticQueue_t alarmHandlerQueue;
