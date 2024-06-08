@@ -7,6 +7,7 @@
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
+#include "obc_persistent.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -30,16 +31,16 @@
 static QueueHandle_t stateMgrQueueHandle = NULL;
 static StaticQueue_t stateMgrQueue;
 static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
-static uint8_t resetCounter = 0;
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 static state_mgr_state_t cubeSatState = CUBESAT_STATE_INITIALIZATION;
+state_mgr_persist_data_t stateMgrResetData = {0};
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
  */
 static void sendStartupMessages(void);
 
-static obc_error_code_t resetStateCounter(void);
+static obc_error_code_t resetStateCounter();
 
 /**
  * @brief determines what the next Cubesat state should be and sets it to that state
@@ -56,7 +57,9 @@ static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, st
     case STATE_MGR_TASKS_RUNNING_EVENT_ID:
       *state = CUBESAT_STATE_NOMINAL;
       return OBC_ERR_CODE_SUCCESS;
-
+    case STATE_MGR_DETUMBLING_EVENT_ID:
+      *state = CUBESAT_STATE_DETUMBLING;
+      return OBC_ERR_CODE_SUCCESS;
     default:
       return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
   }
@@ -65,7 +68,10 @@ static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, st
 static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state) {
   switch (event) {
     case STATE_MGR_RESET_EVENT_ID:
+      obc_error_code_t errCode;
       *state = CUBESAT_STATE_RESET;
+      RETURN_IF_ERROR_CODE(
+          getPersistentData(OBC_PERSIST_SECTION_ID_STATE_MGR, &stateMgrResetData, sizeof(state_mgr_persist_data_t)));
       resetStateCounter();
       return OBC_ERR_CODE_SUCCESS;
 
@@ -78,7 +84,13 @@ static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_
   }
 }
 
-static obc_error_code_t handleAssemblyState() { return OBC_ERR_CODE_INVALID_STATE; }
+static obc_error_code_t handleAssemblyState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  return OBC_ERR_CODE_INVALID_STATE;
+}
+
+static obc_error_code_t handleDetumblingState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  return OBC_ERR_CODE_INVALID_STATE;
+}
 
 static obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state) {
   switch (event) {
@@ -113,12 +125,14 @@ obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
 
 static void sendStartupMessages(void) {}
 
-static obc_error_code_t resetStateCounter(void) {
+static obc_error_code_t resetStateCounter() {
   obc_error_code_t errCode;
-  resetCounter++;
+  stateMgrResetData.resetCounter++;
   telemetry_data_t resetTelem = {
-      .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = resetCounter};
+      .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = stateMgrResetData.resetCounter};
   RETURN_IF_ERROR_CODE(addTelemetryData(&resetTelem));
+  RETURN_IF_ERROR_CODE(
+      setPersistentData(OBC_PERSIST_SECTION_ID_STATE_MGR, &stateMgrResetData, sizeof(state_mgr_persist_data_t)));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -137,7 +151,7 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
       // TODO: probably remove this state, for now physically removing jumper on board and then doing power on reset
       // should bring to this stste not sure if there is a way to implement that in code. Returning invalid state for
       // now
-      return handleAssemblyState();
+      return handleAssemblyState(event, state);
 
     case CUBESAT_STATE_LOW_PWR:
       return handleLowPwrState(event, state);
@@ -148,6 +162,9 @@ obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state
       // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here, Returning invalid
       // state for now
       return OBC_ERR_CODE_INVALID_STATE;
+
+    case CUBESAT_STATE_DETUMBLING:
+      return handleDetumblingState(event, state);
 
     default:
       return OBC_ERR_CODE_INVALID_STATE;
