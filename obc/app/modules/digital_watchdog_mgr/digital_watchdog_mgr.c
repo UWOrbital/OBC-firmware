@@ -89,11 +89,6 @@ static watchdog_task_info_t watchdogTaskArray[] = {
             .taskTimeoutTicks = TASK_GNC_MGR_WATCHDOG_TIMEOUT,
         },
 
-    [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
-        {
-            .taskTimeoutTicks = TASK_STATE_MGR_WATCHDOG_TIMEOUT,
-        },
-
 #if ENABLE_TASK_STATS_COLLECTOR == 1
     [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
         {
