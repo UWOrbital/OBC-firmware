@@ -28,6 +28,7 @@
 #define TASK_LOGGER_WATCHDOG_TIMEOUT portMAX_DELAY
 #define TASK_DIGITAL_WATCHDOG_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
 #define TASK_GNC_MGR_WATCHDOG_TIMEOUT pdMS_TO_TICKS(100)
+#define TASK_STATE_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
 
 typedef struct {
   uint32_t taskTimeoutTicks;
@@ -86,6 +87,11 @@ static watchdog_task_info_t watchdogTaskArray[] = {
     [OBC_SCHEDULER_CONFIG_ID_GNC_MGR] =
         {
             .taskTimeoutTicks = TASK_GNC_MGR_WATCHDOG_TIMEOUT,
+        },
+
+    [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
+        {
+            .taskTimeoutTicks = TASK_STATE_MGR_WATCHDOG_TIMEOUT,
         },
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
