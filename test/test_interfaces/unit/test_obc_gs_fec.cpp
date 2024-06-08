@@ -11,14 +11,14 @@ TEST(TestFecEncodeDecode, EncodeDecodeZeroData) {
 
   memset(data, 0xFF, RS_DECODED_SIZE);
 
-  ASSERT_EQ(rsEncode(data, &encodedData), 0);
+  ASSERT_EQ(rsEncode(data, &encodedData), OBC_GS_ERR_CODE_SUCCESS);
 
   // Corrupt the data
   encodedData.data[0] ^= 0b10000001;
   encodedData.data[222] ^= 0b10100011;
 
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), 0);
+  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), OBC_GS_ERR_CODE_SUCCESS);
 
   EXPECT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
 }
@@ -34,13 +34,13 @@ TEST(TestFecEncodeDecode, EncodeDecodeNonZero) {
     data[i] = (uint8_t)(seed & 0xFF);
   }
 
-  ASSERT_EQ(rsEncode(data, &encodedData), 0);
+  ASSERT_EQ(rsEncode(data, &encodedData), OBC_GS_ERR_CODE_SUCCESS);
 
   // Corrupt the data
   encodedData.data[0] ^= 0b10000001;
   encodedData.data[222] ^= 0b10100011;
 
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), 0);
+  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
 }
