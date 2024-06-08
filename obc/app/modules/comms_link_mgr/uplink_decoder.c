@@ -176,22 +176,21 @@ static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Da
       switch (command.command) {
         case U_FRAME_CMD_CONN:
           commsEvent.eventID = COMMS_EVENT_CONN_RECEIVED;
-          RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
-          return OBC_ERR_CODE_SUCCESS;
+          break;
 
         case U_FRAME_CMD_DISC:
           commsEvent.eventID = COMMS_EVENT_DISC_RECEIVED;
-          RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
-          return OBC_ERR_CODE_SUCCESS;
+          break;
 
         case U_FRAME_CMD_ACK:
           commsEvent.eventID = COMMS_EVENT_ACK_RECEIVED;
-          RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
-          return OBC_ERR_CODE_SUCCESS;
+          break;
 
         default:
           return OBC_ERR_CODE_INVALID_ARG;
       }
+      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
+      return OBC_ERR_CODE_SUCCESS;
     }
     case UPLINK_FLOW_DECODED_DATA:
       RETURN_IF_ERROR_CODE(handleCommands(command.data));
