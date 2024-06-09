@@ -2,6 +2,7 @@
 requests==2.31.0
 pyserial==3.5
 skyfield==1.48
+loguru==0.7.2
 
 # Typed packages
 types-requests==2.31.0
