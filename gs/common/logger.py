@@ -22,15 +22,7 @@ def logger_setup(*, enqueue: bool = False, diagnose: bool = True) -> None:
     logger.remove()
 
     # Log everything to a file
-    logger.add(
-        "gs_python.log",
-        serialize=True,
-        format=DEFAULT_LOG_FORMAT,
-        rotation="1 week",
-        retention="1 month",
-        enqueue=enqueue,
-        diagnose=diagnose,
-    )
+    logger_setup_file(enqueue=enqueue, diagnose=diagnose)
 
     # Log info to stdout
     logger.add(
@@ -49,6 +41,19 @@ def logger_setup(*, enqueue: bool = False, diagnose: bool = True) -> None:
         format=DEFAULT_LOG_FORMAT,
         level="WARNING",
         colorize=True,
+        enqueue=enqueue,
+        diagnose=diagnose,
+    )
+
+
+def logger_setup_file(*, enqueue: bool = False, diagnose: bool = True) -> None:
+    """Set up the logger to log everything to a file."""
+    logger.add(
+        "gs_python.log",
+        serialize=True,
+        format=DEFAULT_LOG_FORMAT,
+        rotation="1 week",
+        retention="1 month",
         enqueue=enqueue,
         diagnose=diagnose,
     )

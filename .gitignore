@@ -60,6 +60,7 @@ compile_commands.json
 .env
 
 /build*
+*.log
 
 # Python
 .venv/
