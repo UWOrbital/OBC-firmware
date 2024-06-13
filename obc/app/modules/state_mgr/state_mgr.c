@@ -34,7 +34,7 @@ static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 static state_mgr_state_t cubeSatState = CUBESAT_STATE_INITIALIZATION;
-state_mgr_persist_data_t stateMgrResetData = {0};
+static state_mgr_persist_data_t stateMgrResetData = {0};
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
  */
@@ -68,10 +68,7 @@ static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, st
 static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state) {
   switch (event) {
     case STATE_MGR_RESET_EVENT_ID:
-      obc_error_code_t errCode;
       *state = CUBESAT_STATE_RESET;
-      RETURN_IF_ERROR_CODE(
-          getPersistentData(OBC_PERSIST_SECTION_ID_STATE_MGR, &stateMgrResetData, sizeof(state_mgr_persist_data_t)));
       resetStateCounter();
       return OBC_ERR_CODE_SUCCESS;
 
@@ -127,6 +124,8 @@ static void sendStartupMessages(void) {}
 
 static obc_error_code_t resetStateCounter() {
   obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(
+      getPersistentData(OBC_PERSIST_SECTION_ID_STATE_MGR, &stateMgrResetData, sizeof(state_mgr_persist_data_t)));
   stateMgrResetData.resetCounter++;
   telemetry_data_t resetTelem = {
       .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = stateMgrResetData.resetCounter};
