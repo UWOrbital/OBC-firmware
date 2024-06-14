@@ -23,7 +23,9 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   /* Run GNC tasks periodically at 20 Hz */
   while (1) {
     digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
-    LOG_INFO("HELLO");
+    for (int i = 0; i < 10; i++) {
+      LOG_ERROR_CODE(OBC_ERR_CODE_UNKNOWN);
+    }
     /* This will automatically update the xLastWakeTime variable to be the last unblocked time */
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
   }
