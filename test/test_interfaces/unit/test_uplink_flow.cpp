@@ -1,4 +1,5 @@
 #include "obc_gs_uplink_flow.h"
+#include "obc_gs_ax25.h"
 
 #include <gtest/gtest.h>
 #include <cstring>
@@ -18,6 +19,7 @@ TEST(TestInterfaceUplinkFlow, Data) {
   uplink_flow_packet_t input = {.data = {1, 2, 3, 4, 5, 6, 7, 8}, .type = UPLINK_FLOW_DECODED_DATA};
   uint8_t aesKey[AES_KEY_SIZE] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
 
+  setCurrentLinkDestAddress(&groundStationCallsign);
   ASSERT_EQ(uplinkEncodePacket(&input, &ax25Data, aesKey), OBC_GS_ERR_CODE_SUCCESS);
 
   uplink_flow_packet_t output = {.data = {0}, .type = UPLINK_FLOW_DECODED_DATA};

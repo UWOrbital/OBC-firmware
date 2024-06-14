@@ -163,6 +163,7 @@ int main(void) {
     uplink_flow_packet_t command = {.data = {0}, .type = UPLINK_FLOW_DECODED_DATA};
     memcpy(command.data, packedSingleCmd,
            packedSingleCmdSize < AES_DECRYPTED_SIZE ? packedSingleCmdSize : AES_DECRYPTED_SIZE);
+    setCurrentLinkDestAddress(&groundStationCallsign);
     obcGsErrCode = uplinkEncodePacket(&command, &ax25Pkt, TEMP_STATIC_KEY);
     if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
       printf("Failed to encode packet!");
@@ -188,7 +189,7 @@ int main(void) {
   while (1) {
     uint8_t byte = '\0';
     if (CSerialPortReadData(pSerialPort, &byte, 1) < 0) {
-      printf("Error Reading! \r\n");
+      printf("Error Reading! \n");
       break;
     }
 

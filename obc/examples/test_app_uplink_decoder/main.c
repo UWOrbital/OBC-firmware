@@ -50,13 +50,14 @@ void vTaskFunction(void *pvParameters) {
       ;
   }
 
-  uplink_flow_packet_t packet = {0};
+  uplink_flow_packet_t packet = {.data = {0}, .type = UPLINK_FLOW_DECODED_DATA};
   memcpy(packet.data, packedSingleCmd,
          packedSingleCmdSize < AES_DECRYPTED_SIZE ? packedSingleCmdSize : AES_DECRYPTED_SIZE);
 
   sciPrintf("Encoding packet\r\n");
   packed_ax25_i_frame_t ax25Data = {0};
 
+  setCurrentLinkDestAddress(&groundStationCallsign);
   gsErrCode = uplinkEncodePacket(&packet, &ax25Data, TEMP_STATIC_KEY);
   if (gsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
     sciPrintf("uplinkEncodePacket returned %d\r\n", gsErrCode);
