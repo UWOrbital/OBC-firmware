@@ -54,10 +54,12 @@ void vTaskFunction(void *pvParameters) {
   memcpy(packet.data, packedSingleCmd,
          packedSingleCmdSize < AES_DECRYPTED_SIZE ? packedSingleCmdSize : AES_DECRYPTED_SIZE);
 
+  sciPrintf("Setting uplink dest address\r\n");
+  setCurrentLinkDestAddress(&groundStationCallsign);
+
   sciPrintf("Encoding packet\r\n");
   packed_ax25_i_frame_t ax25Data = {0};
 
-  setCurrentLinkDestAddress(&groundStationCallsign);
   gsErrCode = uplinkEncodePacket(&packet, &ax25Data, TEMP_STATIC_KEY);
   if (gsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
     sciPrintf("uplinkEncodePacket returned %d\r\n", gsErrCode);
@@ -66,14 +68,17 @@ void vTaskFunction(void *pvParameters) {
       ;
   }
 
+  sciPrintf("Start sending data to the decode data queue\r\n");
   obc_error_code_t errCode;
   for (uint16_t i = 0; i < ax25Data.length; i++) {
     sciPrintf("Sending data at %d\r\n", i);
     STOP_ON_ERROR("Sending data", sendToDecodeDataQueue(&ax25Data.data[i]));
   }
+  sciPrintf("Data finished sending. Sending UPLINK FINISHED EVENT to comms manager\r\n");
 
   comms_event_t uplinkFinishedEvent = {.eventID = COMMS_EVENT_UPLINK_FINISHED};
   STOP_ON_ERROR("sendToCommsManagerQueue", sendToCommsManagerQueue(&uplinkFinishedEvent));
+  sciPrintf("Finished demo\r\n");
   while (1)
     ;
 }
