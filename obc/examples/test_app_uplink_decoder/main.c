@@ -74,6 +74,9 @@ int main(void) {
   initSciPrint();
   initSpiMutex();
 
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
