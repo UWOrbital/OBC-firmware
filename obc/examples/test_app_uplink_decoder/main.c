@@ -1,11 +1,8 @@
-#include "obc_gs_command_data.h"
 #include "obc_print.h"
 #include "obc_scheduler_config.h"
-#include "obc_gs_uplink_flow.h"
 #include "obc_spi_io.h"
 #include "comms_manager.h"
 #include "uplink_decoder.h"
-#include "obc_gs_command_pack.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -77,11 +74,15 @@ int main(void) {
   initSciPrint();
   initSpiMutex();
 
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
 
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
   obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
