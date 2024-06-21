@@ -9,6 +9,7 @@
 #define AES_KEY_SIZE 16U
 #define AES_IV_SIZE 16U
 #define AES_DECRYPTED_SIZE RS_DECODED_SIZE - AES_IV_SIZE
+#define AES_KEY_BITS 128U
 
 typedef struct {
   uint8_t iv[AES_IV_SIZE];
