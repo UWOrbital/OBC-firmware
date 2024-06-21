@@ -15,6 +15,8 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_telemetry_pack_unpack.cpp
     ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_ax25.cpp
     ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_fec.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_aes_128_gcm_decrypt.cpp
+
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
