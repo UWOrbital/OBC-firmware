@@ -4,7 +4,6 @@
 #include <aes.h>
 
 #include "mbedtls/gcm.h"
-// library docs:
 // https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/gcm_8h/#gcm_8h_1af264b64b26c4720188b530cfccddb4ef
 
 #include <stdint.h>
