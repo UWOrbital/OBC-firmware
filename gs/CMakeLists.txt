@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 
 set(SOURCES
     main.c
-    common/gs_heap.c
 )
 
 add_executable(gs.out ${SOURCES})
@@ -17,16 +16,21 @@ target_compile_options(gs.out PUBLIC -Wall -g)
 if(UNIX)
     target_link_libraries(gs.out PUBLIC
         tiny-aes
-        lib-correct
+        rs-lib
         obc-gs-interface
         CSerialPort
+        Threads::Threads
 )
 elseif(WIN32)
     target_link_libraries(gs.out PUBLIC
         tiny-aes
-        lib-correct
+        rs-lib
         obc-gs-interface
         CSerialPort
         setupapi
+        Threads::Threads
 )
 endif()
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)

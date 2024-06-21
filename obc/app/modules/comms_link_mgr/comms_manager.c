@@ -25,6 +25,7 @@
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
+#include <os_semphr.h>
 
 #include <redposix.h>
 
@@ -122,7 +123,6 @@ void obcTaskInitCommsMgr(void) {
 
   // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
   initializeAesCtx(TEMP_STATIC_KEY);
-  initRs();
 }
 
 static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t *state) {
@@ -294,7 +294,9 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
   initAllCc1120TxRxSemaphores();
+#if COMMS_PHY != COMM_PHY_UART
   LOG_IF_ERROR_CODE(cc1120Init());
+#endif
 
   while (1) {
     comms_event_t queueMsg;
@@ -322,7 +324,9 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
 
     LOG_IF_ERROR_CODE(commsStateFns[commsState]());
     if (errCode != OBC_ERR_CODE_SUCCESS) {
+#if COMMS_PHY != COMM_PHY_UART
       rffm6404PowerOff();
+#endif
       comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
       sendToCommsManagerQueue(&event);
     }
@@ -350,9 +354,11 @@ obc_error_code_t sendToCC1120TransmitQueue(transmit_event_t *event) {
 }
 
 static obc_error_code_t handleDisconnectedState(void) {
-  obc_error_code_t errCode;
   clearCurrentLinkDestAddress();
+#if COMMS_PHY != COMM_PHY_UART
+  obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(rffm6404PowerOff());
+#endif
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -551,7 +557,9 @@ static obc_error_code_t handleDownlinkingState(void) {
 
 static obc_error_code_t handleEnterEmergencyState(void) {
   obc_error_code_t errCode;
+#if COMMS_PHY != COMMS_PHY_UART
   RETURN_IF_ERROR_CODE(cc1120Init());
+#endif
   comms_event_t emergInitializedEvent = {.eventID = COMMS_EVENT_EMERG_INITIALIZED};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&emergInitializedEvent));
   return OBC_ERR_CODE_SUCCESS;

@@ -50,6 +50,8 @@ target_include_directories(${TEST_BINARY}
 target_link_libraries(${TEST_BINARY}
     PRIVATE
     GTest::GTest
+    obc-gs-interface
+    rs-lib
 )
 
 add_test(${TEST_BINARY} ${TEST_BINARY})
