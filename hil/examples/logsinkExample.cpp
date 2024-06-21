@@ -10,8 +10,6 @@
 #define logFile "logsink.txt"
 #define timeperiod 10
 
-LogSink logger("/dev/ttyS0", 115200, "logsink.txt");
-
 TEST(LogIntegrationTest, Generated_Logs) {
     // Did it Read?
     std::ifstream read;
@@ -74,13 +72,4 @@ TEST(LogIntegrationTest, TimeFrame_Logs){
         prevtime = stoi(buffcurrent);
     }
     read.close();
-}
-
-int main(int argc, char **argv){
-    LogSink logger("/dev/ttyS0", 115200, "logsink.txt");
-    logger.runFor(15);
-   
-    ::testing::InitGoogleTest(&argc, argv);
-    int result = RUN_ALL_TESTS();
-    return result;
 }
