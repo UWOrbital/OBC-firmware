@@ -1,4 +1,5 @@
 #include "obc_gs_command_pack.h"
+#include "obc_gs_command_unpack.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 
@@ -101,7 +102,7 @@ void generatePingPacketData(void) {
     printf("Encoded packet data is equal to expected packet data\n");
   }
 
-  uplink_flow_packet_t output = {.data = {0}, .type = UPLINK_FLOW_DECODED_DATA};
+  uplink_flow_packet_t output = {0};
   gsErrCode = (uplinkDecodePacket(&ax25Data, &output));
   if (gsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
     printf("uplinkDecodePacket returned %d\n", gsErrCode);
@@ -110,6 +111,19 @@ void generatePingPacketData(void) {
   printf("Packet original vs output from encoding %d (0 for true)\n",
          memcmp(packet.data, output.data, AES_DECRYPTED_SIZE));
   // printf("gsErrCode: %d\n", gsErrCode);
+  // Unpack the command Message
+  cmd_msg_t cmdMsgOutput = {0};
+  uint32_t cmdPacketOffsetOutput = 0;
+  printData(output.data, AES_DECRYPTED_SIZE);
+  gsErrCode = unpackCmdMsg(output.data, &cmdPacketOffsetOutput, &cmdMsgOutput);
+  if (gsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
+    printf("unpackCmdMsg returned %d\n", gsErrCode);
+    exit(1);
+  }
+  printf("Unpacked command message: ");
+  printf("ID: %d, Timestamp: %d, isTimeTagged: %d\n", cmdMsgOutput.id, cmdMsgOutput.timestamp,
+         cmdMsgOutput.isTimeTagged);
+  printf("cmdPacketOffsetOutput: %d\n", cmdPacketOffsetOutput);
 }
 
 int main(void) {
