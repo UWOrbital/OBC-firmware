@@ -61,7 +61,7 @@ void LogSink::uartReadThread(){
                         timeinfo = localtime(&rawtime);
                         strftime (timer, 80, "[%r]", timeinfo);    
                         times = timer;
-                        buffer = "["+times+"] "+buffer;
+                        buffer = times+" "+buffer;
 
                         m_queueLock.lock();
                         m_logQueue.push(buffer);

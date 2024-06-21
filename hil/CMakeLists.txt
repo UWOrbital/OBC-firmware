@@ -6,10 +6,11 @@ set(SOURCES
 
 add_executable(hil.out ${SOURCES})
 
-target_include_directories(hil.out PUBLIC
+target_include_directories(hil.out PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/logsink
 )
 
-target_compile_options(hil.out PUBLIC -Wall -g)
+target_compile_options(hil.out PUBLIC -Wall -g -pthread)
 
-#target_link_libraries(hil.out PUBLIC)
-        
+target_link_libraries(hil.out PUBLIC wiringPi)
+
+add_subdirectory(logsink)
