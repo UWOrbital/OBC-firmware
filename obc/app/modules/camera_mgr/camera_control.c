@@ -16,12 +16,12 @@ obc_error_code_t initCamera(void) {
   return errCode;
 }
 
-obc_error_code_t isCaptureDone(bool* caputreStatus) {
+obc_error_code_t isCaptureDone(void) {
   obc_error_code_t errCode;
   uint8_t status;
-  LOG_IF_ERROR_CODE(arducamReadCaptureStatusReg(&status));
-  *caputreStatus = (errCode == OBC_ERR_CODE_SUCCESS) ? (bool)(status & STATUS_CAPTURE_DONE_MASK) : false;
-  return errCode;
+  RETURN_IF_ERROR_CODE(arducamReadCaptureStatusReg(&status));
+  return ((bool)(status & STATUS_CAPTURE_DONE_MASK)) ? OBC_ERR_CODE_CAMERA_CAPTURE_COMPLETE
+                                                     : OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE;
 }
 
 obc_error_code_t startImageCapture(void) {
