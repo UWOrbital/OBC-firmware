@@ -10,11 +10,12 @@ obc_error_code_t initCamera(void);
 
 /**
  * @brief Returns status of capture.
- * @note Will return true if errors occur. Capture is done, just incorrectly.
+ * @param captureStatus pointer to bool that will store capture status.
+ * @note Will return false if errors occur. Make sure to check for error codes.
  *
- * @return true if capture is done.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-bool isCaptureDone(void);
+obc_error_code_t isCaptureDone(bool* captureStatus);
 
 /**
  * @brief Starts image capture on selected camera.

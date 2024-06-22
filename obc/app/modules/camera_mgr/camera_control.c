@@ -5,8 +5,9 @@ static uint32_t FIFOReadPtr[CAMERA_COUNT] = {0};
 
 obc_error_code_t initCamera(void) {
   obc_error_code_t errCode;
-  memset(totalBytesToRead, 0, sizeof(size_t) * CAMERA_COUNT);
-  memset(FIFOReadPtr, 0, sizeof(size_t) * CAMERA_COUNT);
+  camera_id_t selectedCamera = getSelectedCamera();
+  totalBytesToRead[selectedCamera] = 0;
+  FIFOReadPtr[selectedCamera] = 0;
   RETURN_IF_ERROR_CODE(resetCPLD());
   // Make sure sensor is powered and reset is not asserted (reset is active low).
   RETURN_IF_ERROR_CODE(arducamWriteSensorPowerControlReg(SENSOR_POWER_EN_MASK | SENSOR_RESET_MASK));
@@ -15,11 +16,12 @@ obc_error_code_t initCamera(void) {
   return errCode;
 }
 
-bool isCaptureDone(void) {
+obc_error_code_t isCaptureDone(bool* caputreStatus) {
   obc_error_code_t errCode;
   uint8_t status;
   LOG_IF_ERROR_CODE(arducamReadCaptureStatusReg(&status));
-  return (errCode == OBC_ERR_CODE_SUCCESS) ? (bool)(status & STATUS_CAPTURE_DONE_MASK) : true;
+  *caputreStatus = (errCode == OBC_ERR_CODE_SUCCESS) ? (bool)(status & STATUS_CAPTURE_DONE_MASK) : false;
+  return errCode;
 }
 
 obc_error_code_t startImageCapture(void) {
