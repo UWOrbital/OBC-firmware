@@ -17,15 +17,16 @@
 // Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
 #define RESOLUTION 12U
 
-#define REF_VOLTAGE_HIGH 5.0f
+// VCCAD is 3.0V +- 0.1
+#define REF_VOLTAGE_HIGH 3.1f
 #define REF_VOLTAGE_LOW 0.0f
 
-typedef enum { ADC1, ADC2 } ADC_module_t;
+typedef enum { ADC1 = 0U, ADC2 } ADC_module_t;
 
 typedef enum { EVENT = 0U, GROUP1, GROUP2 } ADC_group_t;
 
 typedef enum {
-  ADC_CHANNEL_0 = 1U,
+  ADC_CHANNEL_0 = 0U,
   ADC_CHANNEL_1,
   ADC_CHANNEL_2,
   ADC_CHANNEL_3,
@@ -50,10 +51,6 @@ typedef enum {
   ADC_CHANNEL_22,
   ADC_CHANNEL_23
 } ADC_channel_t;
-
-/* Hardcoded table. # of channels in each Group 0-2 for ADC modules 1-2. All set to 1 for testing purposes.
-**IMPORTANT** Should be updated to reflect the amount of channels assigned to each group of both ADC modules */
-const uint32_t adcGroupSize[2U][3U] = {{2U, 1U, 1U}, {1U, 1U, 1U}};
 
 /**
  * @brief Initialize the ADC bus mutex
