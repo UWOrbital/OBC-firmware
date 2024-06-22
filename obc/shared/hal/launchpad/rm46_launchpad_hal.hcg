@@ -338,9 +338,7 @@
       <HDRADC>
         <NAME>adc.h</NAME>
       </HDRADC>
-      <SRCADC>
-        <NAME>adc.c</NAME>
-      </SRCADC>
+      <SRCADC/>
       <HET1ASMHDR>
         <NAME/>
       </HET1ASMHDR>
@@ -722,7 +720,7 @@
         <PATH>include\adc.h</PATH>
       </HDRADC>
       <SRCADC>
-        <PATH>source\adc.c</PATH>
+        <PATH/>
       </SRCADC>
     </FILENAMES>
   </ADC>
