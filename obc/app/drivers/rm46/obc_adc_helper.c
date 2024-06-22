@@ -100,7 +100,7 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
   uint32_t groupSize = adcGroupLengths[(adc == ADC1) ? 0U : 1U][group];
 
   for (uint32_t i = 0; i < groupSize; i++) {
-    *reading =
+    readings[i] =
         (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / ((float)(1 << RESOLUTION) - REF_VOLTAGE_LOW);
   }
 
