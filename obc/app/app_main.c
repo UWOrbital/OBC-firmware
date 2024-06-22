@@ -28,33 +28,24 @@
 // This is the stack canary. It should never be overwritten.
 // Ideally, it would be a random value, but we don't have a good source of entropy
 // that we can use.
-void *__stack_chk_guard = (void *)0xDEADBEEF;
+uint8_t __stack_chk_guard = 0xDE;
 
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
-/*
-
-// Stack canary generated with cc1120. Need to find a way to run it before main and to store it
-
-uint8_t __stack_chk_guard = 0;
 uint8_t __stack_chk_guard_init(void);
 
-static void __attribute__((constructor, no_stack_protector)) __construct_stk_chk_guard() {
-  if (__stack_chk_guard == 0) {
-    __stack_chk_guard = __stack_chk_guard_init();
-  }
-}
-
-uint8_t __stack_chk_guard_init(void) {
+uint8_t __stack_chk_guard_change(void) {
   uint8_t received_signal;
   uint8_t stack_canary;
   cc1120Rng(&stack_canary, &received_signal);
   return stack_canary;
 }
 
-void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
-
-*/
+static void __attribute__((no_stack_protector)) __construct_stk_chk_guard() {
+  if (__stack_chk_guard == 0xDE) {
+    __stack_chk_guard = __stack_chk_guard_change();
+  }
+}
 
 int main(void) {
   // Run hardware initialization code
@@ -64,7 +55,6 @@ int main(void) {
   spiInit();
   canInit();
   hetInit();
-  cc1120Init();
 
   _enable_interrupt_();
 
@@ -72,7 +62,9 @@ int main(void) {
   initSciMutex();
   initI2CMutex();
   initSpiMutex();
-
+  cc1120Init();
+  __construct_stk_chk_guard();
+  __stack_chk_fail();
   // The state_mgr is the only task running initially.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
