@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 /* DEFINES */
+#define BL_UART_SCIREG_1_BAUD 115200U
+#define BL_UART_SCIREG_2_BAUD 115200U
 #define BL_UART_SCIREG_BAUD 115200U
 
 /* TYPEDEFS */
@@ -17,6 +19,8 @@ typedef struct {
 
 /* PRIVATE VARIABLES */
 static const bl_uart_reg_config_t bl_uart_reg_config[] = {
+    [BL_UART_SCIREG_1] = {BL_UART_SCIREG_1_BAUD, sciREG},
+    [BL_UART_SCIREG_2] = {BL_UART_SCIREG_2_BAUD, scilinREG},
     [BL_UART_SCIREG] = {BL_UART_SCIREG_BAUD, sciREG},
 };
 
