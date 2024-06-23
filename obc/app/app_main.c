@@ -28,11 +28,11 @@
 // This is the stack canary. It should never be overwritten.
 // Ideally, it would be a random value, but we don't have a good source of entropy
 // that we can use.
-uint8_t __stack_chk_guard = 0xDE;
+void *__stack_chk_guard = (void *)0xdeadbeef;
 
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
-uint8_t __stack_chk_guard_init(void);
+uint32_t __stack_chk_guard_init(void);
 
 uint8_t __stack_chk_guard_change(void) {
   uint8_t received_signal;
@@ -42,8 +42,8 @@ uint8_t __stack_chk_guard_change(void) {
 }
 
 static void __attribute__((no_stack_protector)) __construct_stk_chk_guard() {
-  if (__stack_chk_guard == 0xDE) {
-    __stack_chk_guard = __stack_chk_guard_change();
+  if (__stack_chk_guard == (void *)0xdeadbeef) {
+    __stack_chk_guard = (void *)(uint32_t)__stack_chk_guard_change();
   }
 }
 
