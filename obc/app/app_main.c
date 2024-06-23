@@ -34,17 +34,33 @@ void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
 uint32_t __stack_chk_guard_init(void);
 
-uint8_t __stack_chk_guard_change(void) {
-  uint8_t received_signal;
-  uint8_t stack_canary;
-  cc1120Rng(&stack_canary, &received_signal);
-  return stack_canary;
+uint32_t __stack_chk_guard_change(void) {
+  uint32_t new_stack_guard = 0;
+  for (int8_t i = 0; i < 4; i++) {
+    uint8_t received_signal;
+    uint8_t stack_canary;
+    cc1120Rng(&stack_canary, &received_signal);
+    (new_stack_guard) = (new_stack_guard << 8) | stack_canary;
+  }
+  return new_stack_guard;
 }
 
 static void __attribute__((no_stack_protector)) __construct_stk_chk_guard() {
   if (__stack_chk_guard == (void *)0xdeadbeef) {
-    __stack_chk_guard = (void *)(uint32_t)__stack_chk_guard_change();
+    __stack_chk_guard = (void *)__stack_chk_guard_change();
   }
+}
+
+void stack_overflows_here();
+
+const char *buffer_long = "This is a long long string";
+
+void stack_overflows_here() {
+  char buffer_short[20];
+
+  strcpy(buffer_short, buffer_long);
+
+  printf("Overflow case run.");
 }
 
 int main(void) {
@@ -64,7 +80,7 @@ int main(void) {
   initSpiMutex();
   cc1120Init();
   __construct_stk_chk_guard();
-  __stack_chk_fail();
+  stack_overflows_here();
   // The state_mgr is the only task running initially.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
