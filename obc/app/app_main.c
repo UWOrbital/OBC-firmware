@@ -68,7 +68,6 @@ int main(void) {
   initSpiMutex();
   cc1120Init();
   __construct_stk_chk_guard();
-  stack_overflows_here();
   // The state_mgr is the only task running initially.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
