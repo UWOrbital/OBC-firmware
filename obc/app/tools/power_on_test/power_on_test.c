@@ -17,12 +17,31 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define MAX_MSG_SIZE 128U
+#define MAX_FNAME_LINENUM_SIZE 128U
+#define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
+
+static void log_error(const char *file, uint32_t line, uint32_t errCode) {
+  char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
+  snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LOG_ERROR, file, line);
+
+  char logBuf[MAX_LOG_SIZE] = {0};
+  int logBufLen = 0;
+
+  // Prepare entire output
+  logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, errCode);
+
+  sciPrintf(logBuf);
+}
+
 static void log_result(obc_error_code_t retErrorCode, const char *peripheral, const char *protocol) {
   char strBuf[60 + strlen(peripheral) +
               strlen(protocol)];  // Approx 50 for fail text plus some wiggle room if message changes
   if (retErrorCode != OBC_ERR_CODE_SUCCESS) {
     snprintf(strBuf, sizeof(strBuf), "POWER ON TEST FAIL: Bad connection with %s (via %s)\r\n", peripheral, protocol);
-    LOG_ERROR_CODE(retErrorCode);
+
+    // This occurs prior to FreeRTOS taking over, cannot send errors to logger queue via typical means
+    log_error(__FILE__, __LINE__, retErrorCode);
   } else {
     snprintf(strBuf, sizeof(strBuf), "Good connection with %s (via %s)\r\n", peripheral, protocol);
   }
