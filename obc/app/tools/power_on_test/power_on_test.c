@@ -23,13 +23,12 @@
 
 static void log_error(const char *file, uint32_t line, uint32_t errCode) {
   char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
-  snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LOG_ERROR, file, line);
+  snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", "ERROR", file, line);
 
   char logBuf[MAX_LOG_SIZE] = {0};
-  int logBufLen = 0;
 
   // Prepare entire output
-  logBufLen = snprintf(logBuf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, errCode);
+  snprintf(logBuf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, errCode);
 
   sciPrintf(logBuf);
 }
