@@ -5,7 +5,6 @@
 #include "obc_reset.h"
 #include "obc_scheduler_config.h"
 #include "state_mgr.h"
-#include "power_on_test.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -41,9 +40,6 @@ int main(void) {
   initSciMutex();
   initI2CMutex();
   initSpiMutex();
-
-  // Run power on test (checks communication with peripherals)
-  run_test();
 
   // The state_mgr is the only task running initially.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);

@@ -7,6 +7,7 @@
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
+#include "power_on_test.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -61,6 +62,9 @@ static void sendStartupMessages(void) {}
 
 void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
+
+  // Run power on test - checks connections with peripherals, logs errors
+  run_test();
 
   ASSERT(stateMgrQueueHandle != NULL);
 
