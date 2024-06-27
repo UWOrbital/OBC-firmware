@@ -42,7 +42,7 @@ static void logResult(obc_error_code_t retErrorCode, const char *peripheral, con
     // This occurs prior to FreeRTOS taking over, cannot send errors to logger queue via typical means
     // log_error(__FILE__, __LINE__, retErrorCode);
 
-    LOG_DEBUG(retErrorCode);
+    LOG_ERROR_CODE(retErrorCode);
   } else {
     snprintf(strBuf, sizeof(strBuf), "Good connection with %s (via %s)\r\n", peripheral, protocol);
   }
