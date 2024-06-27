@@ -64,7 +64,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   // Run power on test - checks connections with peripherals, logs errors
-  run_test();
+  runTest();
 
   ASSERT(stateMgrQueueHandle != NULL);
 
