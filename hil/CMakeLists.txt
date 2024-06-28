@@ -11,6 +11,9 @@ target_include_directories(hil.out PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/logsink
 
 target_compile_options(hil.out PUBLIC -Wall -g -pthread)
 
-target_link_libraries(hil.out PUBLIC wiringPi)
+target_link_libraries(hil.out PUBLIC wiringPi gtest gtest_main)
 
 add_subdirectory(logsink)
+
+#put an if statment for adding examples
+add_subdirectory(examples)

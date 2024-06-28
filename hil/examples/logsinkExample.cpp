@@ -63,8 +63,7 @@ TEST(LogIntegrationTest, TimeFrame_Logs){
     read.open(logFile);
     char buffarr[256];
     std::string buffstr, buffcurrent;
-    bool ok = true;
-    int index = 0, prevtime = 100;
+    int prevtime = 100;
     while(read.getline(buffarr, 256)){
         buffstr = buffarr;
         buffcurrent = buffstr.substr(7, 2);
