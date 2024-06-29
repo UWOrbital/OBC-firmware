@@ -10,5 +10,7 @@ void resetSystem(obc_reset_reason_t reason) {
 
   systemREG1->SYSECR |= RESET_SYSTEM_MASK;
 
+  while (1)
+    ;
   portRESET_PRIVILEGE(xRunningPrivileged);
 }

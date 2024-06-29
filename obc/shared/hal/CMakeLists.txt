@@ -12,6 +12,7 @@ set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/het.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/i2c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/notification.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_assert.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/os_croutine.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/os_event_groups.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/os_heap.c
@@ -51,6 +52,7 @@ set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/het.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/i2c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/notification.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_assert.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/os_croutine.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/os_event_groups.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/os_heap.c
@@ -90,6 +92,7 @@ set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/het.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/i2c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/notification.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_assert.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_croutine.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_event_groups.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_heap.c
