@@ -1,4 +1,4 @@
-#include "obc_adc_helper.h"
+#include "obc_adc.h"
 #include "obc_sci_io.h"
 #include "obc_errors.h"
 #include "obc_print.h"

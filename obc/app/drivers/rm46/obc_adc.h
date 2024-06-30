@@ -12,15 +12,6 @@
 
 #include <stdint.h>
 
-// Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
-#define MAX_GROUP_SIZE 16U
-// Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
-#define RESOLUTION 12U
-
-// VCCAD is 3.0V +- 0.1
-#define REF_VOLTAGE_HIGH 3.1f
-#define REF_VOLTAGE_LOW 0.0f
-
 typedef enum { ADC1 = 0U, ADC2 } ADC_module_t;
 
 typedef enum { EVENT = 0U, GROUP1, GROUP2 } ADC_group_t;

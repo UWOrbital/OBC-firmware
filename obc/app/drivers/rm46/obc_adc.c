@@ -2,7 +2,7 @@
 #include "obc_errors.h"
 #include "adc.h"
 #include "reg_adc.h"
-#include "obc_adc_helper.h"
+#include "obc_adc.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -12,7 +12,16 @@
 static SemaphoreHandle_t adcConversionMutex = NULL;
 static StaticSemaphore_t adcConversionMutexBuffer;
 
-const uint32_t adcGroupLengths[2U][3U] = {{1U, 8U, 1U}, {1U, 1U, 1U}};
+// Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
+#define MAX_GROUP_SIZE 16U
+// Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
+#define RESOLUTION 12U
+
+// VCCAD is 3.0V +- 0.1
+#define REF_VOLTAGE_HIGH 3.1f
+#define REF_VOLTAGE_LOW 0.0f
+
+const uint32_t adcGroupLengths[2U][3U] = {{16U, 16U, 16U}, {16U, 16U, 16U}};
 
 void initADCMutex(void) {
   if (adcConversionMutex == NULL) {
@@ -64,7 +73,7 @@ obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_g
     return OBC_ERR_CODE_INVALID_STATE;
   }
 
-  adcData_t adcData[MAXGROUPSIZE];
+  adcData_t adcData[MAX_GROUP_SIZE];
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
@@ -91,7 +100,7 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
     return OBC_ERR_CODE_INVALID_STATE;
   }
 
-  adcData_t adcData[MAXGROUPSIZE];
+  adcData_t adcData[MAX_GROUP_SIZE];
 
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
@@ -100,7 +109,7 @@ obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *rea
 
   for (uint32_t i = 0; i < groupSize; i++) {
     readings[i] =
-        (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / ((float)(1 << RESOLUTION) - REF_VOLTAGE_LOW);
+        (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / ((float)(1 << RESOLUTION)) + REF_VOLTAGE_LOW;
   }
 
   return OBC_ERR_CODE_SUCCESS;
