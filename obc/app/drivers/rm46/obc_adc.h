@@ -46,7 +46,7 @@ typedef enum {
 /**
  * @brief Initialize the ADC bus mutex
  */
-obc_error_code_t initADCMutex(void);
+void initADCMutex(void);
 
 /**
  * @note Get data from a single ADC channel. ADC conversion mode channel ID should be ENABLED for all groups this is
