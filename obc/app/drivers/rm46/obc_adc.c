@@ -12,14 +12,13 @@
 static SemaphoreHandle_t adcConversionMutex = NULL;
 static StaticSemaphore_t adcConversionMutexBuffer;
 
-const uint32_t adcGroupLengths[2U][3U] = {{1U, 2U, 1U}, {1U, 1U, 1U}};
+const uint32_t adcGroupLengths[2U][3U] = {{1U, 8U, 1U}, {1U, 1U, 1U}};
 
-obc_error_code_t initADCMutex(void) {
+void initADCMutex(void) {
   if (adcConversionMutex == NULL) {
     adcConversionMutex = xSemaphoreCreateMutexStatic(&adcConversionMutexBuffer);
   }
   ASSERT(adcConversionMutex != NULL);
-  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group, adcData_t *data,

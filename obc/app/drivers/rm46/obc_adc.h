@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 // Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
-#define MAXGROUPSIZE 16U
+#define MAX_GROUP_SIZE 16U
 // Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
 #define RESOLUTION 12U
 
