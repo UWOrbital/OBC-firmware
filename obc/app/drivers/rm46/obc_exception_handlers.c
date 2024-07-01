@@ -12,7 +12,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
 __attribute__((noreturn)) void freertosConfigAssert(const char *pcFile, unsigned long ulLine) {
   logErrorCode(LOG_FATAL, pcFile, ulLine, OBC_ERR_CODE_FREERTOS_ASSERT_FAIL);
 
-  vTaskDelay(5);
+  vTaskDelay(15);
 
   resetSystem(RESET_REASON_FREERTOS_ASSERT_FAIL);
 }
