@@ -1,1 +1,1 @@
-target_sources(hil.out PUBLIC logsink.cpp)
+target_sources(log_module PUBLIC logsink.cpp)

@@ -23,6 +23,7 @@ class LogSink {
     
 
     public:
+    std::string m_fileName;
     LogSink(std::string uartPort, int baudRate, std::string outputFile);
     ~LogSink();
     int start();

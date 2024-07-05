@@ -1,1 +1,0 @@
-target_sources(hil.out PUBLIC logsinkExample.cpp)

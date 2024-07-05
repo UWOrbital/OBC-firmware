@@ -7,12 +7,14 @@
 #include <ctime>
 
 
-LogSink::LogSink(std::string uartPort, int baudRate, std::string outputFile){
-    m_outputFile.open(outputFile);
+LogSink::LogSink(std::string uartPort, int baudRate, std::string OutputFile){
+    m_fileName = OutputFile;
+    m_outputFile.open(m_fileName);
     if(!m_outputFile.is_open()){
         std::cerr<<"Could Not Open File. Errno "<<errno<<std::endl;
         return;
     }
+    m_outputFile.close();
     m_serialFd = serialOpen(uartPort.c_str(), baudRate);
     if(m_serialFd == -1){
         std::cerr<<"Could not open UART Port. Errno "<<errno<<std::endl;
@@ -94,6 +96,7 @@ void LogSink::writeFileThread(){
 
 }
 int LogSink::start(){
+    m_outputFile.open(m_fileName);
     m_isRunning = true;
     m_readThread = std::thread(&LogSink::uartReadThread, this);
     m_writeThread = std::thread(&LogSink::writeFileThread, this);
@@ -104,4 +107,5 @@ void LogSink::stop(){
     m_isRunning = false;
     m_readThread.join();
     m_writeThread.join();
+    m_outputFile.close();
 }
