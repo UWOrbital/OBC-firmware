@@ -6,8 +6,8 @@
 #include <iostream>
 #include <ctime>
 
-LogSink::LogSink(std::string uartPort, int baudRate, std::string OutputFile) {
-  m_fileName = OutputFile;
+LogSink::LogSink(std::string uartPort, int baudRate, std::string outputFile) {
+  m_fileName = outputFile;
   m_outputFile.open(m_fileName);
   if (!m_outputFile.is_open()) {
     std::cerr << "Could Not Open File. Errno " << errno << std::endl;
@@ -35,41 +35,37 @@ void LogSink::uartReadThread() {
   struct pollfd uartWait;
   uartWait.fd = m_serialFd;
   uartWait.events = POLLIN;
-
-  time_t rawtime;
-  struct tm* timeinfo;
+  time_t rawTime;
+  struct tm* timeInfo;
   char timer[80];
   std::string times;
 
   while (m_isRunning) {
     int ret = poll(&uartWait, 1, -1);
-    if (ret == 1) {
-      int bytesAvailable = serialDataAvail(m_serialFd);
-      if (bytesAvailable < 0) {
-        printf("Couldn't Read Data, Errno %d\n", errno);
-        exit(-1);
-      } else if (bytesAvailable >= 0) {
-        for (int i = 0; i < bytesAvailable; i++) {
-          char character = serialGetchar(m_serialFd);
-          buffer += character;
-          if (character == '\n') {
-            time(&rawtime);
-            timeinfo = localtime(&rawtime);
-            strftime(timer, 80, "[%r]", timeinfo);
-            times = timer;
-            buffer = times + " " + buffer;
-
-            m_queueLock.lock();
-            m_logQueue.push(buffer);
-            m_queueLock.unlock();
-            buffer = "";
-            m_queueSemaphore.release();
-          }
-        }
-      }
+    if (ret != 1)
+      continue;
+    int bytesAvailable = serialDataAvail(m_serialFd);
+    if (bytesAvailable < 0) {
+      printf("Couldn't Read Data, Errno %d\n", errno);
+      exit(-1);
     }
-  }
+    for (int i = 0; i < bytesAvailable; i++) {
+      char character = serialGetchar(m_serialFd);
+      buffer += character;
+      if (character != '\n')
+        continue;
+      time(&rawTime);
+      timeInfo = localtime(&rawTime);
+      strftime(timer, 80, "[%r]", timeInfo);
+      times = timer;
+      buffer = times + " " + buffer;
 
+      m_queueLock.lock();
+      m_logQueue.push(buffer);
+      m_queueLock.unlock();
+      buffer = "";
+      m_queueSemaphore.release();
+  }
   m_queueSemaphore.release();
 }
 void LogSink::writeFileThread() {

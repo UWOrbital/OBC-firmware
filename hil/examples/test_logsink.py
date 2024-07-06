@@ -15,9 +15,9 @@ sys.path.insert(0, build_dir)
 
 
 @pytest.fixture(scope="session")
-def instance() -> None:
+def log_file_instance() -> None:
     """
-    @brief setup instance for tests to generate file
+    @brief setup log_file_instance. for tests to generate file
     """
     filename = "logsink.txt"
     logger = log_module.LogSink("/dev/ttyS0", 115200, filename)
@@ -28,21 +28,21 @@ def instance() -> None:
     os.remove(filename)
 
 
-def test_log_generation(instance: str) -> None:
+def test_log_generation(log_file_instance: str) -> None:
     """
     @brief checks to see if the file can be read
-    @param generated file from instance test fixture
+    @param generated file from log_file_instance test fixture
     """
-    with open(instance) as f:
-        assert f.readable() is True
+    with open(log_file_instance) as f:
+        assert f.readable()
 
 
-def test_num_lines(instance: str) -> None:
+def test_num_lines(log_file_instance: str) -> None:
     """
     @brief checks for log count in file
-    @param generated file from instance test fixture
+    @param generated file from log_file_instance test fixture
     """
-    with open(instance) as f:
+    with open(log_file_instance) as f:
         c = 0
         for x in f:
             if x != "":
@@ -50,13 +50,13 @@ def test_num_lines(instance: str) -> None:
         assert c >= MIN_LOGS
 
 
-def test_specific_logs(instance: str) -> None:
+def test_specific_logs(log_file_instance: str) -> None:
     """
     @brief checks for specific generated log in file
-    @param generated file from instance test fixture
+    @param generated file from log_file_instance test fixture
     """
     found = False
-    with open(instance) as f:
+    with open(log_file_instance) as f:
         for x in f:
             x = x[15:]
             if x == SPECIFIC_LOG:
@@ -65,12 +65,12 @@ def test_specific_logs(instance: str) -> None:
     assert found is True
 
 
-def test_timely_logs(instance: str) -> None:
+def test_timely_logs(log_file_instance: str) -> None:
     """
     @brief checks for logs being generated in specific time intervals
-    @param generated file from instance test fixture
+    @param generated file from log_file_instance test fixture
     """
     prevtime = 100
-    with open(instance) as f:
+    with open(log_file_instance) as f:
         for x in f:
             assert (int(x[7:9]) - prevtime) < MAX_TIME
