@@ -24,7 +24,7 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   while (1) {
     digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
     for (int i = 0; i < 10; i++) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_UNKNOWN);
+      LOG_ERROR_CODE(i);
     }
     /* This will automatically update the xLastWakeTime variable to be the last unblocked time */
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
