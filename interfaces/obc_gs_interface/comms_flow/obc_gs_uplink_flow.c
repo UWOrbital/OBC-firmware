@@ -10,25 +10,23 @@ obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_f
   if (ax25Data == NULL || command == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
-
-  packed_rs_packet_t rsData = {0};
-  obc_gs_error_code_t interfaceErr;
-
   // perform bit unstuffing
-  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
-  interfaceErr = ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, &unstuffedPacket.length);
+  unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
+  obc_gs_error_code_t interfaceErr =
+      ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedAx25Pkt.data, &unstuffedAx25Pkt.length);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return interfaceErr;
   }
 
-  if (unstuffedPacket.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
+  if (unstuffedAx25Pkt.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
     // If the second least significant bit was a 1 it is a U Frame
     // copy the unstuffed data into rsData
-    memcpy(rsData.data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
+    packed_rs_packet_t rsData = {0};
+    memcpy(rsData.data, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
     // clear the info field of the unstuffed packet
-    memset(unstuffedPacket.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
+    memset(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
-    interfaceErr = rsDecode(&rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
+    interfaceErr = rsDecode(&rsData, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
     if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
       return interfaceErr;
     }
@@ -36,11 +34,11 @@ obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_f
 
   // check for a valid ax25 frame and return the command response if necessary
   u_frame_cmd_t recievedCmd = {0};
-  interfaceErr = ax25Recv(&unstuffedPacket, &recievedCmd);
+  interfaceErr = ax25Recv(&unstuffedAx25Pkt, &recievedCmd);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return interfaceErr;
   }
-  if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
+  if (unstuffedAx25Pkt.length != AX25_MINIMUM_I_FRAME_LEN) {
     if (recievedCmd != U_FRAME_CMD_CONN && recievedCmd != U_FRAME_CMD_ACK && recievedCmd != U_FRAME_CMD_DISC) {
       return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
     }
@@ -53,8 +51,8 @@ obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_f
   aes_data_t aesData = {0};
   aesData.ciphertext = ciphertext;
 
-  memcpy(aesData.iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
-  memcpy(aesData.ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
+  memcpy(aesData.iv, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
+  memcpy(aesData.ciphertext, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
          RS_DECODED_SIZE - AES_IV_SIZE);
   aesData.ciphertextLen = AES_DECRYPTED_SIZE;
 
@@ -67,7 +65,7 @@ obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_f
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
-obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax25_i_frame_t *ax25Data,
+obc_gs_error_code_t uplinkEncodePacket(const uplink_flow_packet_t *command, packed_ax25_i_frame_t *ax25Data,
                                        const uint8_t *aesKey) {
   if (command == NULL || ax25Data == NULL || aesKey == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
@@ -91,22 +89,27 @@ obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax2
   }
 
   // Format data for AX.25
-  uint8_t ax25InfoField[RS_ENCODED_SIZE] = {0};
+  uint8_t ax25InfoField[RS_DECODED_SIZE] = {0};
   memcpy(ax25InfoField, aesData.iv, AES_IV_SIZE);
   memcpy(ax25InfoField + AES_IV_SIZE, aesData.ciphertext,
-         AES_DECRYPTED_SIZE < RS_ENCODED_SIZE - AES_IV_SIZE ? AES_DECRYPTED_SIZE : RS_ENCODED_SIZE - AES_IV_SIZE);
+         AES_DECRYPTED_SIZE < RS_DECODED_SIZE - AES_IV_SIZE ? AES_DECRYPTED_SIZE : RS_DECODED_SIZE - AES_IV_SIZE);
 
   // Send I Frame
   unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
-  interfaceErr = ax25SendIFrame(ax25InfoField, RS_ENCODED_SIZE, &unstuffedAx25Pkt);
+  interfaceErr = ax25SendIFrame(ax25InfoField, RS_DECODED_SIZE, &unstuffedAx25Pkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return interfaceErr;
   }
 
-  packed_rs_packet_t rsData = {0};
-  interfaceErr = rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &rsData);
-  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    return interfaceErr;
+  if (unstuffedAx25Pkt.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
+    // If the second least significant bit was a 1 it is a U Frame
+    // then rs encode the data
+    packed_rs_packet_t rsData = {0};
+    interfaceErr = rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &rsData);
+    if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+      return interfaceErr;
+    }
+    memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, rsData.data, RS_ENCODED_SIZE);
   }
 
   // Stuff the data, this should be the last step
@@ -117,6 +120,5 @@ obc_gs_error_code_t uplinkEncodePacket(uplink_flow_packet_t *command, packed_ax2
 
   ax25Data->data[0] = AX25_FLAG;
   ax25Data->data[ax25Data->length - 1] = AX25_FLAG;
-
   return OBC_GS_ERR_CODE_SUCCESS;
 }
