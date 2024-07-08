@@ -1,16 +1,17 @@
 import os
 import sys
 import time
-import pytest
 
-MIN_LOGS = 5
-SPECIFIC_LOG = "Temperature: 0.000000"
-MAX_TIME = 10
+import pytest
 
 # scoping custom c++ wrapper module in path
 build_dir = os.path.join(os.path.dirname(__file__), "..", "..", "build_hil", "hil")
 sys.path.insert(0, build_dir)
 import log_module
+
+MIN_LOGS = 5
+SPECIFIC_LOG = "Temperature: 0.000000"
+MAX_TIME = 10
 
 
 @pytest.fixture(scope="session")
