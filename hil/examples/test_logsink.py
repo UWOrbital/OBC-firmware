@@ -1,8 +1,6 @@
 import os
 import sys
 import time
-
-import log_module
 import pytest
 
 MIN_LOGS = 5
@@ -12,6 +10,7 @@ MAX_TIME = 10
 # scoping custom c++ wrapper module in path
 build_dir = os.path.join(os.path.dirname(__file__), "..", "..", "build_hil", "hil")
 sys.path.insert(0, build_dir)
+import log_module
 
 
 @pytest.fixture(scope="session")

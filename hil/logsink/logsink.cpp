@@ -66,6 +66,8 @@ void LogSink::uartReadThread() {
     }
     m_queueSemaphore.release();
   }
+}
+
   void LogSink::writeFileThread() {
     while (m_isRunning) {
       m_queueSemaphore.acquire();
