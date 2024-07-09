@@ -4,10 +4,8 @@
 #include "obc_gs_command_id.h"
 
 #include "obc_gs_errors.h"
-#include "gs_errors.h"
 
 #include "obc_gs_ax25.h"
-#include "obc_gs_fec.h"
 #include "obc_gs_aes128.h"
 #include "obc_gs_uplink_flow.h"
 
