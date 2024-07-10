@@ -196,7 +196,7 @@ ctest --verbose
 From the top-level directory, run the following to build the example source file.
 ```
 mkdir build_examples && cd build_examples
-cmake .. _DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=[EXAMPLE_TO_BE_COMPILED]
+cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=[EXAMPLE_TO_BE_COMPILED]
 cmake --build .
 ```
 Options for `EXAMPLE_TYPE` include:
@@ -221,10 +221,15 @@ Options for `EXAMPLE_TYPE` include:
 
 - `VN100` - for `vn100_demo`
 
+Instructions on how to add examples:
 
-
-
-
+- Decide on a code for the example, the code must only contain uppercase letters, numbers and/or `_` referred to as CODE from now on
+- Add the code and destination above to the list of examples in the form to the `README.md`: `CODE` - for `example_name`
+- Add the following to the `OBC/CMakeLists.txt` above the comment that says `# ADD MORE EXAMPLES ABOVE THIS COMMENT`
+```
+elseif(${CMAKE_BUILD_EXAMPLE} MATCHES CODE)
+	add_executable(OBC-firmware.out path_to_main_file_in_example)
+```
 
 ### Flashing
 To flash the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.
