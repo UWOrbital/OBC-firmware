@@ -44,9 +44,9 @@ jobs:
       - name: Create binary directory
         run: |
           mkdir build
-          cd build
 
       - name: Build (Examples-${{ matrix.board }} ${{ matrix.example }})
         run: |
+          cd build
           cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -DDEBUG=1
           cmake --build .
