@@ -15,10 +15,6 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install build-essential cmake
 
-    - name: Create binary directory
-      run: |
-        mkdir build
-
   build:
     runs-on: ubuntu-latest
     needs: setup
@@ -45,8 +41,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Create binary directory
+        run: |
+          mkdir build
+          cd build
+
       - name: Build (Examples-${{ matrix.board }} ${{ matrix.example }})
         run: |
-          cd build
           cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -DDEBUG=1
           cmake --build .
