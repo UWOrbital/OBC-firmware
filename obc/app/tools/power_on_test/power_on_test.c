@@ -55,12 +55,12 @@ void runTest() {
   bool pass = true;
 
   float placeholder_float;
-  uint8_t placeholder_byte;
+  // uint8_t placeholder_byte;
   uint32_t placeholder_uint32;
   size_t placeholder_size;
 
   // Test connection with LM75BD
-  errCode = readThystLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder_float);
+  errCode = readTempLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder_float);
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   logResult(errCode, "LM75BD", "I2C");
 
@@ -97,9 +97,9 @@ void runTest() {
   rffm6404PowerOff();  // Return to starting condition
 
   // Test connection with arducam - part 1
-  errCode = initCam();  // Init does a lot of writing to registers over I2C
+  errCode = flushFifo(PRIMARY);  // Init does a lot of writing to registers over I2C
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "Arducam (Init)", "I2C");
+  logResult(errCode, "Arducam", "SPI");
 
   // Test connection with arducam - part 2
   // TODO: Read from SPI test reg when driver is finished
@@ -109,7 +109,7 @@ void runTest() {
   // logResult(errCode, "Arducam", "SPI");
 
   // Test connection with DS3232
-  errCode = getSecondsRTC(&placeholder_byte);
+  errCode = getTemperatureRTC(&placeholder_float);
   pass &= (errCode != OBC_ERR_CODE_SUCCESS);
   logResult(errCode, "DS3232", "I2C");
 
