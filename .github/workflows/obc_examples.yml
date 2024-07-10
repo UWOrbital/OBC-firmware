@@ -48,5 +48,5 @@ jobs:
       - name: Build (Examples-${{ matrix.board }} ${{ matrix.example }})
         run: |
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -DDEBUG=1
-          cmake --build .
+          cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -G"Unix Makefiles" -DDEBUG=1
+          make
