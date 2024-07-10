@@ -25,6 +25,10 @@ else()
     set(CUSTOM_START_ADDRESS 0x00040000)
 endif()
 
+# Pass the address to the linker
+add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
+
+# Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
 	add_executable(OBC-firmware.out app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
@@ -55,10 +59,6 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
 else()
 	message (FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
 endif()
-
-# Pass the address to the linker
-add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
-
 
 add_executable(OBC-bl.out)
 add_executable(debug-tool.out)
