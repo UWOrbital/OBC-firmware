@@ -230,6 +230,7 @@ Instructions on how to add examples:
 elseif(${CMAKE_BUILD_EXAMPLE} MATCHES CODE)
 	add_executable(OBC-firmware.out path_to_main_file_in_example)
 ```
+Where `path_to_main_file_in_example` is relative to the project root, see `OBC/CMakeLists.txt` for examples
 
 ### Flashing
 To flash the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.

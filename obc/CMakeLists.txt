@@ -30,7 +30,7 @@ add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 
 # Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
-  add_compile_options(-Werror) # TODO: Move this back to down_arm_toolchain once all examples warnings are fixed
+  add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
 	add_executable(OBC-firmware.out app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
 	if (${EXAMPLE_TYPE} MATCHES DMA_SPI)
