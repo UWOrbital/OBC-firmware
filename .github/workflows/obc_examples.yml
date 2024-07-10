@@ -18,7 +18,6 @@ jobs:
     - name: Create binary directory
       run: |
         mkdir build
-        cd build
 
   build:
     runs-on: ubuntu-latest
@@ -32,9 +31,9 @@ jobs:
             FRAM_PERSIST,
             FRAM_SPI,
             LM75BD,
-            MPU6050,
+            # MPU6050,
             RE_SD,
-            RTC,
+            # RTC,
             UART_RX,
             UART_TX,
             VN100,
@@ -48,5 +47,6 @@ jobs:
 
       - name: Build (Examples-${{ matrix.board }} ${{ matrix.example }})
         run: |
+          cd build
           cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -DDEBUG=1
           cmake --build .
