@@ -202,35 +202,27 @@ cmake --build .
 Options for `EXAMPLE_TYPE` include:
 
 - `DMA_SPI` - for `dma_spi_demo`
-
 - `FRAM_PERSIST` - for `test_app_fram_persist`
-
 - `FRAM_SPI` - for `test_app_fram_spi`
-
 - `LM75BD` - for `test_app_lm75bd`
-
 - `MPU6050` - for `test_app_mpu6050`
-
 - `RE_SD` - for `test_app_reliance_sd`
-
 - `RTC`- for `test_app_rtc`
-
 - `UART_RX` - for `test_app_uart_rx`
-
 - `UART_TX` - for `test_app_uart_tx`
-
 - `VN100` - for `vn100_demo`
 
 Instructions on how to add examples:
 
-- Decide on a code for the example, the code must only contain uppercase letters, numbers and/or `_` referred to as CODE from now on
-- Add the code and destination above to the list of examples in the form to the `README.md`: `CODE` - for `example_name`
+- Decide on a code for the example, the code must only contain uppercase letters, numbers and/or `_` referred to as `EXAMPLE_ID` from now on
+- Add the code and destination above to the list of examples in the form to the `README.md`: `EXAMPLE_ID` - for `example_name`
 - Add the following to the `OBC/CMakeLists.txt` above the comment that says `# ADD MORE EXAMPLES ABOVE THIS COMMENT`
 ```
-elseif(${CMAKE_BUILD_EXAMPLE} MATCHES CODE)
+elseif(${CMAKE_BUILD_EXAMPLE} MATCHES EXAMPLE_ID)
 	add_executable(OBC-firmware.out path_to_main_file_in_example)
 ```
-Where `path_to_main_file_in_example` is relative to the project root, see `OBC/CMakeLists.txt` for examples
+  Where `path_to_main_file_in_example` is relative to the project root, see `OBC/CMakeLists.txt` for examples
+- Add the `EXAMPLE_ID` to the `.github/workflows/obc_examples.yml` above the comment that starts with `# ADD NEW EXAMPLES ABOVE THIS LINE`
 
 ### Flashing
 To flash the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.
