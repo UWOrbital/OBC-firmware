@@ -87,7 +87,7 @@ static void writeToAllAlarms() {
   for (uint32_t i = 0; i < OBC_PERSISTENT_MAX_SUBINDEX_ALARM; ++i) {
     alarm_mgr_persist_data_t alarmIn = {
         .unixTime = i,
-        .type = ALARM_TYPE_TIME_TAGGED_CMD,
+        .type = ALARM_TYPE_TIME_TAGGED_CMD_PERSIST,
     };
     ASSERT_EQ(setPersistentDataByIndex(OBC_PERSIST_SECTION_ID_ALARM_MGR, i, &alarmIn, sizeof(alarm_mgr_persist_data_t)),
               OBC_ERR_CODE_SUCCESS);
