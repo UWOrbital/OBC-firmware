@@ -5,6 +5,11 @@
 #include "obc_gs_aes128.h"
 
 #include <string.h>
+#include <stdbool.h>
+
+static bool ax25IsIFrame(const packed_ax25_i_frame_t *ax25Data) {
+  return ~(ax25Data->data[AX25_CONTROL_BYTES_POSITION] & (0x1));  // Last bit must be 0
+}
 
 obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_flow_packet_t *command) {
   if (ax25Data == NULL || command == NULL) {
@@ -18,8 +23,8 @@ obc_gs_error_code_t uplinkDecodePacket(packed_ax25_i_frame_t *ax25Data, uplink_f
     return interfaceErr;
   }
 
-  if (unstuffedAx25Pkt.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
-    // If the second least significant bit was a 1 it is a U Frame
+  if (ax25IsIFrame(ax25Data)) {
+    // Only decode data if the packet is an I frame
     // copy the unstuffed data into rsData
     packed_rs_packet_t rsData = {0};
     memcpy(rsData.data, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
@@ -101,9 +106,8 @@ obc_gs_error_code_t uplinkEncodePacket(const uplink_flow_packet_t *command, pack
     return interfaceErr;
   }
 
-  if (unstuffedAx25Pkt.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
-    // If the second least significant bit was a 1 it is a U Frame
-    // then rs encode the data
+  if (ax25IsIFrame(ax25Data)) {
+    // rs encode the data for only iframe packets
     packed_rs_packet_t rsData = {0};
     interfaceErr = rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &rsData);
     if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
