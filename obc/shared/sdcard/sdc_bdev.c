@@ -1,8 +1,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifndef NO_FREERTOS
+// Defines for app only and not BL
 #include <FreeRTOS.h>
 #include <os_task.h>
+
+#include "obc_logging.h"
+#else
+// Use bl loogger
+#include "bl_logging.h"
+#endif
 
 #include <sys_common.h>
 #include <gio.h>
@@ -11,7 +19,6 @@
 #include "sdc_diskio.h"
 #include "sdc_rm46.h"
 #include "obc_spi_io.h"
-#include "obc_logging.h"
 #include "obc_assert.h"
 #include "obc_board_config.h"
 

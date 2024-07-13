@@ -35,6 +35,8 @@ add_executable(debug-tool.out)
 # Shared
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
+add_subdirectory(shared/sdcard)
+add_subdirectory(shared/obc_spi_io)
 
 # Application
 target_link_options(OBC-firmware.out PRIVATE
@@ -121,6 +123,7 @@ target_compile_definitions(OBC-bl.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    NO_FREERTOS
 )
 
 add_subdirectory(bl)

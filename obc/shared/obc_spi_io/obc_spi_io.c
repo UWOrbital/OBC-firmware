@@ -1,10 +1,21 @@
 #include "obc_spi_io.h"
 #include "obc_errors.h"
-#include "obc_logging.h"
 
+#ifndef NO_FREERTOS
+// Includes for app only and not BL
 #include <FreeRTOS.h>
 #include <os_task.h>
 #include <os_semphr.h>
+#include "obc_logging.h"
+
+// definnes for app only and not BL
+#define BL_VERSION 0
+#else
+// Use bl logger
+#include "bl_logging.h"
+
+#define BL_VERSION 1
+#endif
 
 #include <gio.h>
 #include <spi.h>
@@ -42,15 +53,22 @@ static SemaphoreHandle_t spiMutexes[NUM_SPI_PORTS];
 static StaticSemaphore_t spiMutexBuffers[NUM_SPI_PORTS];
 
 void initSpiMutex(void) {
-  for (int i = 0; i < NUM_SPI_PORTS; i++) {
-    spiMutexes[i] = xSemaphoreCreateRecursiveMutexStatic(&spiMutexBuffers[i]);
+  if (!BL_VERSION) {
+    for (int i = 0; i < NUM_SPI_PORTS; i++) {
+      spiMutexes[i] = xSemaphoreCreateRecursiveMutexStatic(&spiMutexBuffers[i]);
 
-    // configASSERT used since ASSERT may log to microSD card (a SPI device)
-    configASSERT(spiMutexes[i]);
+      // configASSERT used since ASSERT may log to microSD card (a SPI device)
+      configASSERT(spiMutexes[i]);
+    }
   }
 }
 
 obc_error_code_t spiTakeBusMutex(spiBASE_t *spi) {
+  // If running bl, no need for mutex, simply return
+  if (BL_VERSION) {
+    return OBC_ERR_CODE_SUCCESS;
+  }
+
   obc_error_code_t errCode;
 
   SemaphoreHandle_t spiMutex;
@@ -64,6 +82,11 @@ obc_error_code_t spiTakeBusMutex(spiBASE_t *spi) {
 }
 
 obc_error_code_t spiReleaseBusMutex(spiBASE_t *spi) {
+  // If running bl, no need for mutex, simply return
+  if (BL_VERSION) {
+    return OBC_ERR_CODE_SUCCESS;
+  }
+
   obc_error_code_t errCode;
 
   SemaphoreHandle_t spiMutex;
@@ -239,15 +262,32 @@ obc_error_code_t spiTransmitAndReceiveBytes(spiBASE_t *spiReg, spiDAT1_t *spiDat
 }
 
 static void spiLogErrors(uint32_t spiErr) {
-  if (spiErr & SPI_FLAG_DLENERR) LOG_ERROR_CODE(OBC_ERR_CODE_SPI_DATA_LENGTH_ERROR);
-  if (spiErr & SPI_FLAG_TIMEOUT) LOG_ERROR_CODE(OBC_ERR_CODE_SPI_TIMEOUT);
-  if (spiErr & SPI_FLAG_PARERR) LOG_ERROR_CODE(OBC_ERR_CODE_SPI_PARITY_ERROR);
-  if (spiErr & SPI_FLAG_DESYNC) LOG_ERROR_CODE(OBC_ERR_CODE_SPI_DESYNC_ERROR);
-  if (spiErr & SPI_FLAG_BITERR) LOG_ERROR_CODE(OBC_ERR_CODE_SPI_BIT_ERROR);
-  if (spiErr & SPI_FLAG_RXOVRNINT) LOG_ERROR_CODE(OBC_ERR_CODE_SPI_RX_OVERRUN);
+  if (spiErr & SPI_FLAG_DLENERR) {
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_DATA_LENGTH_ERROR);
+  }
+  if (spiErr & SPI_FLAG_TIMEOUT) {
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_TIMEOUT);
+  }
+  if (spiErr & SPI_FLAG_PARERR) {
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_PARITY_ERROR);
+  }
+  if (spiErr & SPI_FLAG_DESYNC) {
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_DESYNC_ERROR);
+  }
+  if (spiErr & SPI_FLAG_BITERR) {
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_BIT_ERROR);
+  }
+  if (spiErr & SPI_FLAG_RXOVRNINT) {
+    LOG_ERROR_CODE(OBC_ERR_CODE_SPI_RX_OVERRUN);
+  }
 }
 
 bool isSpiBusOwner(SemaphoreHandle_t spiMutex) {
+  // If running bl, guaranteed to be only task using bus.
+  if (BL_VERSION) {
+    return true;
+  }
+
   portENTER_CRITICAL();
   TaskHandle_t owner = xSemaphoreGetMutexHolder(spiMutex);
   portEXIT_CRITICAL();
@@ -256,6 +296,12 @@ bool isSpiBusOwner(SemaphoreHandle_t spiMutex) {
 }
 
 obc_error_code_t getSpiMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex) {
+  // If running bl, guaranteed to be only task using bus
+  if (BL_VERSION) {
+    *mutex = NULL;
+    return OBC_ERR_CODE_SUCCESS;
+  }
+
   if (spi == NULL || mutex == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
