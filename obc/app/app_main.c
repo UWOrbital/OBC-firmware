@@ -21,6 +21,8 @@
 
 // This is the stack canary. It should never be overwritten.
 
+#define STACK_BYTES 4
+
 void *__stack_chk_guard = (void *)0xDEADBEEF;
 
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
@@ -28,14 +30,21 @@ void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 uint32_t __stack_chk_guard_init(void);
 
 uint32_t __stack_chk_guard_change(void) {
-  uint32_t new_stack_guard = 0;
-  for (int8_t i = 0; i < 4; i++) {
-    uint8_t received_signal;
-    uint8_t stack_canary;
-    cc1120Rng(&stack_canary, &received_signal);
-    (new_stack_guard) = (new_stack_guard << 8) | stack_canary;
+  obc_error_code_t errCode;
+  uint32_t newStackGuard = 0;
+  for (uint8_t i = 0; i < STACK_BYTES; i++) {
+    uint8_t randomByte;
+    errCode = cc1120Rng(&randomByte);
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      (newStackGuard) = (newStackGuard << 8) | randomByte;
+    } else {
+      LOG_ERROR_CODE(errCode);
+      errCode = OBC_ERR_CODE_FAILED_STACK_CANARY;
+      LOG_ERROR_CODE(errCode);
+      return 0xDEADBEEF;
+    }
   }
-  return new_stack_guard;
+  return newStackGuard;
 }
 
 static void __attribute__((no_stack_protector)) __construct_stk_chk_guard() {

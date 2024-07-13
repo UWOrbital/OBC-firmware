@@ -5,7 +5,7 @@
 #include "obc_spi_io.h"
 #include <stdint.h>
 
-#define CC1120_SPI_REG spiREG3
+#define CC1120_SPI_REG spiREG4
 #define CC1120_SPI_PORT spiPORT3
 #define CC1120_SPI_CS 1
 #define CC1120_SPI_FMT SPI_FMT_2
