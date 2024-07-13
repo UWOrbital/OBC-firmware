@@ -22,7 +22,7 @@ SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_reset.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_sci_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_io.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_so_handling.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_exception_handlers.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_spi_dma.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_dma.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_gio_ctrl.c
