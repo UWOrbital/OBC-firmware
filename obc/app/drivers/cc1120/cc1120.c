@@ -8,8 +8,17 @@
 #define BURST_BIT 1 << 6
 
 #define CHIP_READY_MASK 1 << 7
-#define CHIP_READY 0
 #define CHIP_STATE 0b1110000
+#define CHIP_READY 0
+
+#define RX_ERROR_MASK 0b110 << 3
+#define TX_ERROR_MASK 0b111 << 3
+
+#define RX_ERROR 0b110 << 3
+#define TX_ERROR 0b111 << 3
+
+#define RX_STROBE 0x3A
+#define TX_STROBE 0x3B
 
 static const register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 0 to RXFIFO_THR_PKT
@@ -355,10 +364,20 @@ obc_error_code_t cc1120WriteFifoDirect(uint8_t addr, uint8_t data[], uint8_t len
 obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
   obc_error_code_t errCode;
   uint8_t ccStatus;
-
+  uint8_t errorStatus;
   // TODO: This is a hacky way to do this. We should implement a mutex + timeout.
   for (uint8_t i = 1; i <= 5; i++) {
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
+    if ((ccStatus & RX_ERROR_MASK) == RX_ERROR) {
+      RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(RX_STROBE, &errorStatus));
+      //handle strobe
+      return ;
+    }
+    if ((ccStatus & TX_ERROR_MASK) == TX_ERROR) {
+      RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(TX_STROBE, &errorStatus));
+      //handle strobe
+      return ;
+    }
     if ((ccStatus & CHIP_READY_MASK) == CHIP_READY) {
       return OBC_ERR_CODE_SUCCESS;
     }
