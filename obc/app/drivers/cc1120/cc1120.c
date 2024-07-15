@@ -370,13 +370,11 @@ obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
     if ((ccStatus & RX_ERROR_MASK) == RX_ERROR) {
       RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(RX_STROBE, &errorStatus));
-      //handle strobe
-      return ;
+      // handle strobe
     }
     if ((ccStatus & TX_ERROR_MASK) == TX_ERROR) {
       RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(TX_STROBE, &errorStatus));
-      //handle strobe
-      return ;
+      // handle strobe
     }
     if ((ccStatus & CHIP_READY_MASK) == CHIP_READY) {
       return OBC_ERR_CODE_SUCCESS;
