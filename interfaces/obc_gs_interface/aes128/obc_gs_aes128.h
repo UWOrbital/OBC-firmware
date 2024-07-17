@@ -8,12 +8,13 @@
 #define AES_IV_SIZE 16U
 #define AES_DECRYPTED_SIZE RS_DECODED_SIZE - AES_IV_SIZE
 #define AES_KEY_BITS 128U
+#define AES_TAG_SIZE 16
 
 typedef struct {
   uint8_t iv[AES_IV_SIZE];
   uint8_t *ciphertext;
   size_t ciphertextLen;
-  uint8_t tag[16];
+  uint8_t tag[AES_TAG_SIZE];
   size_t tagLen;
 } aes_data_t;
 
