@@ -15,7 +15,7 @@ void gcmInit(const uint8_t *key) {
 
 obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen,
                                const uint8_t *additionalData, size_t additionalDataLen, uint8_t *output) {
-  if (plaintext == NULL || aesData->iv == NULL || output == NULL || aesData->tag == NULL) {
+  if (aesData == NULL || plaintext == NULL || aesData->iv == NULL || output == NULL || aesData->tag == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
