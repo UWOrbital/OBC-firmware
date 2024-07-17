@@ -11,11 +11,11 @@
 #define CHIP_STATE 0b1110000
 #define CHIP_READY 0
 
-#define RX_ERROR_MASK 0b110 << 3
-#define TX_ERROR_MASK 0b111 << 3
+#define RX_FIFO_ERROR_MASK 0b110 << 3
+#define TX_FIFO_ERROR_MASK 0b111 << 3
 
-#define RX_ERROR 0b110 << 3
-#define TX_ERROR 0b111 << 3
+#define RX_FIFO_ERROR 0b110 << 3
+#define TX_FIFO_ERROR 0b111 << 3
 
 #define RX_STROBE 0x3A
 #define TX_STROBE 0x3B
@@ -368,11 +368,11 @@ obc_error_code_t cc1120SendByteReceiveStatus(uint8_t data) {
   // TODO: This is a hacky way to do this. We should implement a mutex + timeout.
   for (uint8_t i = 1; i <= 5; i++) {
     RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(data, &ccStatus));
-    if ((ccStatus & RX_ERROR_MASK) == RX_ERROR) {
+    if ((ccStatus & RX_FIFO_ERROR_MASK) == RX_FIFO_ERROR) {
       RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(RX_STROBE, &errorStatus));
       return OBC_ERR_CODE_RX_OVERUNDERFLOW;
     }
-    if ((ccStatus & TX_ERROR_MASK) == TX_ERROR) {
+    if ((ccStatus & TX_FIFO_ERROR_MASK) == TX_FIFO_ERROR) {
       RETURN_IF_ERROR_CODE(mcuCC1120SpiTransfer(TX_STROBE, &errorStatus));
       return OBC_ERR_CODE_TX_OVERUNDERFLOW;
     }
