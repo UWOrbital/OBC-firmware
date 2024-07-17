@@ -50,7 +50,6 @@ INCLUDE_DIRS += -I"reliance_edge/core/include"
 INCLUDE_DIRS += -I"reliance_edge/os/freertos/include"
 INCLUDE_DIRS += -I"reliance_edge/projects/freertos_rm46/host"
 
-INCLUDE_DIRS += -I"tiny_aes"
 INCLUDE_DIRS += -I"libcorrect/include"
 
 LIBS :=
@@ -81,9 +80,6 @@ SRC_DIRS += reliance_edge/os/freertos/services
 SRC_DIRS += reliance_edge/posix
 SRC_DIRS += reliance_edge/util
 SRC_DIRS += reliance_edge/projects/freertos_rm46/host
-
-# Tiny AES
-SRC_DIRS += tiny_aes
 
 # libcorrect for reed solomon forward error correction
 SRC_DIRS += libcorrect/src/reed-solomon
