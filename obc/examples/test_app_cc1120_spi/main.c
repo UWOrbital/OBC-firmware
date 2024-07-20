@@ -3,7 +3,6 @@
 #include "obc_spi_io.h"
 
 #include "cc1120_spi_tests.h"
-#include "rs_test.h"
 
 #include "FreeRTOS.h"
 #include "os_task.h"
@@ -30,8 +29,7 @@ void initTestTask(void) {
 
 static void vTestTask(void* pvParameters) {
   // Run the E2E SPI read test
-  // cc1120TestSpiRead();
-  testRs();
+  cc1120TestSpiRead();
   while (1) {
   }
 }
@@ -42,8 +40,8 @@ int main(void) {
   spiInit();
 
   // Initialize logger
-  initLogger();
-  logSetLevel(LOG_DEBUG);
+  // initLogger();
+  // logSetLevel(LOG_DEBUG);
 
   // Initialize bus mutexes
   initSciMutex();
