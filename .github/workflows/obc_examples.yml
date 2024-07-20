@@ -35,6 +35,8 @@ jobs:
             UART_RX,
             UART_TX,
             VN100,
+            # CC1120_SPI,
+            RS,
 
             # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
           ]

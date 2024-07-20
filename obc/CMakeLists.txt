@@ -54,6 +54,11 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
 		add_executable(OBC-firmware.out examples/test_app_uart_tx/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES VN100)
 		add_executable(OBC-firmware.out examples/vn100_demo/test_binary_reading/main.c)
+  elseif(${EXAMPLE_TYPE} MATCHES CC1120_SPI)
+    add_executable(OBC-firmware.out examples/test_app_cc1120_spi/main.c examples/test_app_cc1120_spi/cc1120_spi_tests.c)
+    target_include_directories (OBC-firmware.out PRIVATE examples/test_app_cc1120_spi)
+  elseif(${EXAMPLE_TYPE} MATCHES RS)
+    add_executable(OBC-firmware.out examples/test_app_rs/main.c)
 
   # ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()
