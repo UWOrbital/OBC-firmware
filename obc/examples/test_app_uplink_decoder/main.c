@@ -57,7 +57,7 @@ void vTaskFunction(void *pvParameters) {
   obc_error_code_t errCode;
   for (uint16_t i = 0; i < ax25Data.length; i++) {
     uint8 byte = ax25Data.data[i];
-    sciPrintf("Sending data at %d=%d\r\n", i, byte);
+    sciPrintf("Sending data at %d=%x\r\n", i, byte);
     STOP_ON_ERROR("Sending data", sendToDecodeDataQueue(&byte));
   }
   sciPrintf("Data finished sending. Sending UPLINK FINISHED EVENT to comms manager\r\n");

@@ -145,7 +145,7 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
       }
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
-        sciPrintf("Received byte: %d at %d\r\n", byte, axDataIndex - 1);
+        sciPrintf("Received byte: %x at %d\r\n", byte, axDataIndex - 1);
       }
     }
   }
@@ -167,6 +167,7 @@ static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Da
   uplink_flow_packet_t command = {0};
 
   interfaceErr = (uplinkDecodePacket(ax25Data, &command));
+  sciPrintf("After upLinkDecodePacket\r\n");
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_UPLINK_FLOW_DECODE_FAILURE;
   }
