@@ -10,6 +10,7 @@
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"
 #include "command_manager.h"
+#include "obc_print.h"
 #include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "comms_manager.h"
@@ -124,6 +125,7 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
         if (axDataIndex > 2) {
           axData.length = axDataIndex;
 
+          sciPrintf("Decoding packet sent\r\n");
           LOG_IF_ERROR_CODE(decodePacketAndSendCommand(&axData));
 
           // Restart the decoding process
@@ -143,6 +145,7 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
       }
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
+        sciPrintf("Received byte: %d at %d\r\n", byte, axDataIndex - 1);
       }
     }
   }
@@ -167,6 +170,8 @@ static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Da
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_UPLINK_FLOW_DECODE_FAILURE;
   }
+  sciPrintf("Decoded packet successfully\r\n");
+  sciPrintf("Command type: %d\r\n", command.type);
 
   // Handle the decoded data
   switch (command.type) {

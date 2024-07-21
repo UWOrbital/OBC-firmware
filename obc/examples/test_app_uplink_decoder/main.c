@@ -1,3 +1,4 @@
+#include "hal_stdtypes.h"
 #include "obc_print.h"
 #include "obc_scheduler_config.h"
 #include "obc_spi_io.h"
@@ -55,8 +56,9 @@ void vTaskFunction(void *pvParameters) {
   sciPrintf("Start sending data to the decode data queue\r\n");
   obc_error_code_t errCode;
   for (uint16_t i = 0; i < ax25Data.length; i++) {
-    sciPrintf("Sending data at %d\r\n", i);
-    STOP_ON_ERROR("Sending data", sendToDecodeDataQueue(&ax25Data.data[i]));
+    uint8 byte = ax25Data.data[i];
+    sciPrintf("Sending data at %d=%d\r\n", i, byte);
+    STOP_ON_ERROR("Sending data", sendToDecodeDataQueue(&byte));
   }
   sciPrintf("Data finished sending. Sending UPLINK FINISHED EVENT to comms manager\r\n");
 
