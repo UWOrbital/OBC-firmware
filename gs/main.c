@@ -92,6 +92,8 @@ void generatePingPacketData(void) {
 }
 
 int main(void) {
+  generatePingPacketData();
+  return 0;
   obc_gs_error_code_t obcGsErrCode;
 
   uint32_t demoNum = 0;
