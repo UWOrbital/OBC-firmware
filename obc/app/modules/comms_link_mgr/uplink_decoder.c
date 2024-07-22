@@ -77,6 +77,8 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
     }
     sciPrintf("Sending command to command manager\r\n");
     sciPrintf("Command ID: %d\r\n", command.id);
+    sciPrintf("Command isTimeTagged: %d\r\n", command.isTimeTagged);
+    sciPrintf("Command timestamp: %d\r\n", command.timestamp);
 
     RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
   }
