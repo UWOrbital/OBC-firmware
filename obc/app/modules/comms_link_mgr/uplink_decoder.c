@@ -81,6 +81,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
     sciPrintf("Command timestamp: %d\r\n", command.timestamp);
 
     RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
+    sciPrintf("After sendToCommandQueue\r\n");
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -132,6 +133,7 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
 
           sciPrintf("Decoding packet sent\r\n");
           LOG_IF_ERROR_CODE(decodePacketAndSendCommand(&axData));
+          sciPrintf("Decoded packet sent\r\n");
 
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
