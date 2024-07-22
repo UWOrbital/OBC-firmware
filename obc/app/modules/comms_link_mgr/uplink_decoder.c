@@ -75,6 +75,8 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
     if (unpackCmdMsg(cmdBytes, &bytesUnpacked, &command) != OBC_GS_ERR_CODE_SUCCESS) {
       return OBC_ERR_CODE_FAILED_UNPACK;
     }
+    sciPrintf("Sending command to command manager\r\n");
+    sciPrintf("Command ID: %d\r\n", command.id);
 
     RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
   }
