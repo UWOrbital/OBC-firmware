@@ -162,6 +162,14 @@ static bool ax25IsIFrame(const packed_ax25_i_frame_t *ax25Data) {
   return ~(ax25Data->data[AX25_CONTROL_BYTES_POSITION] & (0x1));  // Last bit must be 0
 }
 
+static void printData(uint8_t *data, uint32_t len) {
+  sciPrintf("{");
+  for (uint32_t i = 0; i < len; ++i) {
+    sciPrintf("0x%x, ", data[i]);
+  }
+  sciPrintf("}\n");
+}
+
 static obc_gs_error_code_t uplinkDecodePacketDemo(packed_ax25_i_frame_t *ax25Data, uplink_flow_packet_t *command) {
   if (ax25Data == NULL || command == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
@@ -185,6 +193,7 @@ static obc_gs_error_code_t uplinkDecodePacketDemo(packed_ax25_i_frame_t *ax25Dat
     // clear the info field of the unstuffed packet
     memset(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
+    printData(rsData.data, RS_ENCODED_SIZE);
     sciPrintf("Before rsDecode\r\n");
     interfaceErr = rsDecode(&rsData, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
     if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
