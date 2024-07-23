@@ -165,9 +165,9 @@ static bool ax25IsIFrame(const packed_ax25_i_frame_t *ax25Data) {
 static void printData(uint8_t *data, uint32_t len) {
   sciPrintf("{");
   for (uint32_t i = 0; i < len; ++i) {
-    sciPrintf("0x%x, ", data[i]);
+    sciPrintf("0x%x, \r\n", data[i]);
   }
-  sciPrintf("}\n");
+  sciPrintf("}\r\n");
 }
 
 static obc_gs_error_code_t uplinkDecodePacketDemo(packed_ax25_i_frame_t *ax25Data, uplink_flow_packet_t *command) {

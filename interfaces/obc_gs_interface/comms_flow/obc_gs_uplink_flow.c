@@ -15,7 +15,7 @@ static bool ax25IsIFrame(const packed_ax25_i_frame_t *ax25Data) {
 // #include <stdio.h>
 //   printf("{");
 //   for (uint32_t i = 0; i < len; ++i) {
-//     printf("0x%x, ", data[i]);
+//     printf("0x%x, \n", data[i]);
 //   }
 //   printf("}\n");
 // }
