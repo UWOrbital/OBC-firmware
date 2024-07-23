@@ -180,10 +180,12 @@ static obc_gs_error_code_t uplinkDecodePacketDemo(packed_ax25_i_frame_t *ax25Dat
     // Only decode data if the packet is an I frame
     // copy the unstuffed data into rsData
     packed_rs_packet_t rsData = {0};
+    sciPrintf("Length of unstuffed packet: %d\r\n", unstuffedAx25Pkt.length);
     memcpy(rsData.data, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
     // clear the info field of the unstuffed packet
     memset(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
+    sciPrintf("Before rsDecode\r\n");
     interfaceErr = rsDecode(&rsData, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
     if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
       return interfaceErr;
