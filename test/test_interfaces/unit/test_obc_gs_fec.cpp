@@ -44,3 +44,21 @@ TEST(TestFecEncodeDecode, EncodeDecodeNonZero) {
   ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
 }
+
+// Attempt to replicate rs_test.c as closely as possible
+TEST(TestFecEncodeDecode, EncodeDecodeHelloWorld) {
+  packed_rs_packet_t encodedData = {0};
+  packed_telem_packet_t telemData = {.data = {'-'}};
+
+  const char *testData = "Hello world!";
+  const size_t testDataLen = strlen(testData);
+  for (int i = 0; i < testDataLen; i++) {
+    telemData.data[i] = (uint8_t)testData[i];
+  }
+
+  ASSERT_EQ(rsEncode(telemData.data, &encodedData), OBC_GS_ERR_CODE_SUCCESS);
+
+  uint8_t decodedData[RS_DECODED_SIZE] = {0};
+  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), OBC_GS_ERR_CODE_SUCCESS);
+  EXPECT_EQ(memcmp(decodedData, telemData.data, testDataLen), 0);
+}
