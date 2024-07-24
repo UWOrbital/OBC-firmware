@@ -47,7 +47,7 @@ TEST(TestFecEncodeDecode, EncodeDecodeNonZero) {
 
 // Attempt to replicate rs_test.c as closely as possible
 TEST(TestFecEncodeDecode, EncodeDecodeHelloWorld) {
-  packed_rs_packet_t encodedData = {0};
+  packed_rs_packet_t rsData = {0};
   packed_telem_packet_t telemData = {.data = {'-'}};
 
   const char *testData = "Hello world!";
@@ -56,9 +56,10 @@ TEST(TestFecEncodeDecode, EncodeDecodeHelloWorld) {
     telemData.data[i] = (uint8_t)testData[i];
   }
 
-  ASSERT_EQ(rsEncode(telemData.data, &encodedData), OBC_GS_ERR_CODE_SUCCESS);
+  ASSERT_EQ(rsEncode(telemData.data, &rsData), OBC_GS_ERR_CODE_SUCCESS);
+  rsData.data[0] = 'a';
 
   uint8_t decodedData[RS_DECODED_SIZE] = {0};
-  ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), OBC_GS_ERR_CODE_SUCCESS);
+  ASSERT_EQ(rsDecode(&rsData, decodedData, RS_DECODED_SIZE), OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_EQ(memcmp(decodedData, telemData.data, testDataLen), 0);
 }
