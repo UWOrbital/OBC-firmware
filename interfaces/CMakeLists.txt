@@ -9,6 +9,8 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/aes128
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/ax25
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/rs
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/comms_flow
 
     ${CMAKE_CURRENT_SOURCE_DIR}/data_pack_unpack
 )
@@ -30,6 +32,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec/obc_gs_fec.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/common/obc_gs_crc.c
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/comms_flow/obc_gs_uplink_flow.c
 )
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
@@ -37,5 +41,5 @@ target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
 
 target_link_libraries(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE
     tiny-aes
-    lib-correct
+    rs-lib
 )
