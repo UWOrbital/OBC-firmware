@@ -21,6 +21,10 @@
 // Extra 10 for the small extra pieces in "%s - %s\r\n"
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
+// Spam detection variables
+#define MAX_REPEATED_MESSAGES 3U
+#define SPAM_TIMEFRAME 10U
+
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
@@ -36,6 +40,15 @@ static log_output_location_t outputLocation;
 static QueueHandle_t loggerQueueHandle = NULL;
 static StaticQueue_t loggerQueue;
 static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
+
+// Spam detector
+typedef struct {
+    char errorMessage[MAX_MSG_SIZE];
+    uint32_t count;
+    time_t lastLogged;
+} logSpamDetector_t;
+
+static logSpamDetector_t spamDetector;
 
 /**
  * @brief Sends an event to the logger queue
@@ -67,6 +80,8 @@ void obcTaskInitLogger(void) {
 
 void obcTaskFunctionLogger(void *pvParameters) {
   char *fname = LOG_FILE_NAME;
+  memset(&spamDetector, 0, sizeof(spamDetector));
+
   while (1) {
     logger_event_t queueMsg;
     if (xQueueReceive(loggerQueueHandle, &queueMsg, LOGGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
@@ -126,6 +141,29 @@ void obcTaskFunctionLogger(void *pvParameters) {
         LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
         continue;
     }
+
+    // Spam detection
+    time_t currentTime = time(NULL);
+    if (strcmp(spamDetector.errorMessage, logBuf) == 0) {
+      if (difftime(currentTime, spamDetector.lastLogged) <= SPAM_TIMEFRAME) {
+        spamDetector.count++;
+        if (spamDetector.count == MAX_REPEATED_MESSAGES) {
+          LOG_ERROR_CODE(OBC_ERR_CODE_SPAM_DETECTED);
+          continue;
+        }
+      } else {
+        // Timeframe passed
+        spamDetector.count = 1;
+        spamDetector.lastLogged = currentTime;
+      }
+    } else {
+      // New log error message
+      strcpy(spamDetector.errorMessage, logBuf);
+      spamDetector.count = 1;
+      spamDetector.lastLogged = currentTime;
+    }
+
+    // Log the message
     if (outputLocation == LOG_TO_SDCARD) {
       int32_t fdescriptor = red_open(fname, RED_O_WRONLY | RED_O_APPEND | RED_O_CREAT);
       if (fdescriptor == -1) {

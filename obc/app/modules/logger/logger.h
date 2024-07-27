@@ -4,6 +4,7 @@
 #include "obc_logging.h"
 
 #include <stdio.h>
+#include <time.h>
 
 typedef struct {
   log_entry_t logEntry;
