@@ -1,7 +1,7 @@
 #include "obc_gs_aes128.h"
 #include "obc_gs_errors.h"
 
-#include <mbed/include/gcm.h>
+#include <gcm.h>
 #include <stdint.h>
 #include <string.h>
 

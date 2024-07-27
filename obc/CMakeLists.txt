@@ -70,7 +70,7 @@ add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
 
 target_link_libraries(OBC-firmware.out PRIVATE
-    tiny-aes
+    mbed
     lib-correct
     obc-gs-interface
     ${HAL_LIB_OPTIMIZE}
@@ -155,7 +155,7 @@ target_compile_definitions(debug-tool.out PRIVATE
 add_subdirectory(app/tools/interface_debug_tool)
 
 target_link_libraries(debug-tool.out PRIVATE
-    tiny-aes
+    mbed
     lib-correct
     obc-gs-interface
     ${HAL_LIB_OPTIMIZE}

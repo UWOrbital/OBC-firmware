@@ -26,8 +26,9 @@
  */
 
 #ifndef MBEDTLS_CONFIG_H
-#define MBEDTLS_CONFIG_H
-
+// #define MBEDTLS_CONFIG_H
+#define MBEDTLS_CONFIG_FILE "mbedtls_config.h"
+#if 0
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
 #define _CRT_SECURE_NO_DEPRECATE 1
 #endif
@@ -2507,5 +2508,6 @@
 #endif
 
 #include "check_config.h"
+#endif
 
 #endif /* MBEDTLS_CONFIG_H */

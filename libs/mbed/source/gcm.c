@@ -30,19 +30,19 @@
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
+#include "config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
 
 #if defined(MBEDTLS_GCM_C)
 
-#include "mbedtls/gcm.h"
+#include "gcm.h"
 
 #include <string.h>
 
 #if defined(MBEDTLS_AESNI_C)
-#include "mbedtls/aesni.h"
+#include "aesni.h"
 #endif
 
 #if defined(MBEDTLS_SELF_TEST) && defined(MBEDTLS_AES_C)
