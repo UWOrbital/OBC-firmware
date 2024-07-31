@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 
-find_package(pybind11 REQUIRED)
-
-pybind11_add_module(log_module bindings.cpp)
-
-target_include_directories(log_module PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/logsink
+set(SOURCES
+    hil_main.cpp
 )
 
-target_compile_options(log_module PUBLIC -Wall -g -pthread)
+add_executable(hil.out ${SOURCES})
 
-target_link_libraries(log_module PUBLIC wiringPi)
+target_include_directories(hil.out PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/logsink
+)
+
+target_compile_options(hil.out PUBLIC -Wall -g -pthread)
+
+target_link_libraries(hil.out PUBLIC wiringPi gtest gtest_main)
 
 add_subdirectory(logsink)
+
+#put an if statment for adding examples
+add_subdirectory(examples)

@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=59.0", "wheel"]
+
+requires = ["setuptools>=59.0", "wheel", "cmake>=3.22"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
@@ -21,7 +22,7 @@ module = "skyfield.*"
 ignore_missing_imports = true
 
 [tool.ruff]
-include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py"]
+include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py", "build_hil/hil/*.so"]
 exclude = [
   "libs/*",
   "cmake/*",
