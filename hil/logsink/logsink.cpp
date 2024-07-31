@@ -68,31 +68,31 @@ void LogSink::uartReadThread() {
   }
 }
 
-  void LogSink::writeFileThread() {
-    while (m_isRunning) {
-      m_queueSemaphore.acquire();
+void LogSink::writeFileThread() {
+  while (m_isRunning) {
+    m_queueSemaphore.acquire();
 
-      if (!m_logQueue.empty()) {
-        m_queueLock.lock();
-        std::string temp = m_logQueue.front();
-        m_logQueue.pop();
-        m_queueLock.unlock();
-        // std::cout<<temp;
-        m_outputFile << temp;
-      }
+    if (!m_logQueue.empty()) {
+      m_queueLock.lock();
+      std::string temp = m_logQueue.front();
+      m_logQueue.pop();
+      m_queueLock.unlock();
+      // std::cout<<temp;
+      m_outputFile << temp;
     }
   }
-  int LogSink::start() {
-    m_outputFile.open(m_fileName);
-    m_isRunning = true;
-    m_readThread = std::thread(&LogSink::uartReadThread, this);
-    m_writeThread = std::thread(&LogSink::writeFileThread, this);
+}
+int LogSink::start() {
+  m_outputFile.open(m_fileName);
+  m_isRunning = true;
+  m_readThread = std::thread(&LogSink::uartReadThread, this);
+  m_writeThread = std::thread(&LogSink::writeFileThread, this);
 
-    return 0;
-  }
-  void LogSink::stop() {
-    m_isRunning = false;
-    m_readThread.join();
-    m_writeThread.join();
-    m_outputFile.close();
-  }
+  return 0;
+}
+void LogSink::stop() {
+  m_isRunning = false;
+  m_readThread.join();
+  m_writeThread.join();
+  m_outputFile.close();
+}
