@@ -22,7 +22,7 @@ module = "skyfield.*"
 ignore_missing_imports = true
 
 [tool.ruff]
-include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py", "build_hil/hil/*.so"]
+include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py"]
 exclude = [
   "libs/*",
   "cmake/*",
