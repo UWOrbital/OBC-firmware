@@ -1,4 +1,5 @@
 #include "camera_control.h"
+#include "tca9458a.h"
 
 static uint32_t totalBytesToRead[CAMERA_COUNT] = {0};
 static uint32_t FIFOReadPtr[CAMERA_COUNT] = {0};
@@ -7,8 +8,8 @@ obc_error_code_t selectCamera(camera_id_t cameraID) {
   // Set SPI bus of selected camera
   selectCameraSPIBus(cameraID);
 
-  // TODO: Add I2C mux select for camera
-
+  // TODO: Validate I2C mux driver code and properly integrate with control code
+  // RETURN_IF_ERROR_CODE(tcaSelect((uint8_t) cameraID));
   return OBC_ERR_CODE_SUCCESS;
 }
 

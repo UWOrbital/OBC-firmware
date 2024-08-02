@@ -12,6 +12,9 @@
 #define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
 
 // TODO: Fully develop and test this driver
+// 1. Check if more features need to be implemented
+// 2. Test driver
+// 3. Integrate with camera control
 
 obc_error_code_t tcaSelect(uint8_t portNum) {
   uint8_t tca = 0;
