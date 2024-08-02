@@ -47,7 +47,7 @@ typedef enum {
  *
  * @param cameraID Camera ID of the camera to be selected.
  */
-void selectCamera(camera_id_t cameraID);
+void selectCameraSPIBus(camera_id_t cameraID);
 
 /**
  * @brief Returns the camera id of the selected camera.

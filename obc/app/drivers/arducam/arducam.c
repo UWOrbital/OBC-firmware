@@ -77,7 +77,7 @@ typedef enum opcode {
   ARDUCAM_RESET_CPLD,
 } opcode_t;
 
-void selectCamera(camera_id_t cameraID) { selectedCamera = cameraID; }
+void selectCameraSPIBus(camera_id_t cameraID) { selectedCamera = cameraID; }
 
 camera_id_t getSelectedCamera(void) { return selectedCamera; }
 

@@ -3,6 +3,15 @@
 static uint32_t totalBytesToRead[CAMERA_COUNT] = {0};
 static uint32_t FIFOReadPtr[CAMERA_COUNT] = {0};
 
+obc_error_code_t selectCamera(camera_id_t cameraID) {
+  // Set SPI bus of selected camera
+  selectCameraSPIBus(cameraID);
+
+  // TODO: Add I2C mux select for camera
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t initCamera(void) {
   obc_error_code_t errCode;
   camera_id_t selectedCamera = getSelectedCamera();
