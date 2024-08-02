@@ -2,7 +2,6 @@
 
 #include "stdint.h"
 #include "obc_spi_io.h"
-#include "ov5642_reg.h"
 #include "obc_board_config.h"
 
 /**
