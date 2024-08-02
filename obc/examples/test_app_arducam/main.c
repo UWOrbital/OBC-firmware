@@ -52,7 +52,7 @@ void vTask1(void *pvParameters) {
   // Capture
   sciPrintf("Starting Image Capture\r\n");
   startImageCapture();
-  while (!isCaptureDone())
+  while (isCaptureDone() == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
     ;
   sciPrintf("Image Capture Done ^_^\r\n");
 
