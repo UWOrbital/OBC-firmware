@@ -128,6 +128,9 @@ obc_error_code_t resetCamera(void) {
   return errCode;
 }
 
+// TODO: Find proper config settings and capture sequence
+// Following config step is ripped straight from arduino arducam example files, unsure how
+// Camera is generating images, just super under exposed, brightness super low
 obc_error_code_t camConfigureSensor(void) {
   obc_error_code_t errCode;
   // Reset camera
