@@ -9,6 +9,7 @@
 #define UART_PRINT_REG scilinREG
 #define UART_READ_REG scilinREG
 #define UART_VN100_REG sciREG
+#define UART_BL_REG scilinREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG3
@@ -59,6 +60,7 @@
 #define UART_PRINT_REG sciREG
 #define UART_READ_REG sciREG
 #define UART_VN100_REG scilinREG
+#define UART_BL_REG sciREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG1
@@ -107,6 +109,7 @@
 #define UART_PRINT_REG sciREG
 #define UART_READ_REG sciREG
 #define UART_VN100_REG scilinREG
+#define UART_BL_REG sciREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG5

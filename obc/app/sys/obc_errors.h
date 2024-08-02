@@ -23,6 +23,7 @@ typedef enum {
   OBC_ERR_CODE_FAILED_UNPACK = 15,
   OBC_ERR_CODE_FAILED_PACK = 16,
   OBC_ERR_CODE_INVALID_STATE_TRANSITION = 17,
+  OBC_ERR_CODE_FREERTOS_ASSERT_FAIL = 18,
 
   /* Driver Errors 100 - 199*/
   OBC_ERR_CODE_SPI_FAILURE = 100,
@@ -190,5 +191,4 @@ typedef enum {
 
   /** Operation is not supported. */
   OBC_ERR_CODE_RED_ENOTSUPP = 1524,
-
 } obc_error_code_t;

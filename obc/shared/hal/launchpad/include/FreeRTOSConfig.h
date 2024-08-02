@@ -158,6 +158,10 @@
 #define INCLUDE_xTaskGetIdleTaskHandle      1
 
 /* USER CODE BEGIN (4) */
+void freertosConfigAssert( const char * pcFile, unsigned long ulLine);
+
+#define configASSERT( x ) if( ( x ) == pdFALSE ) freertosConfigAssert(__FILE__, __LINE__);
+#ifndef configASSERT
 /* USER CODE END */
 
 
@@ -165,6 +169,7 @@
 #define configASSERT( x ) if( ( x ) == pdFALSE ) { taskDISABLE_INTERRUPTS(); for( ;; ); }
 
 /* USER CODE BEGIN (5) */
+#endif
 #undef configSUPPORT_STATIC_ALLOCATION
 #define configSUPPORT_STATIC_ALLOCATION 1
 
