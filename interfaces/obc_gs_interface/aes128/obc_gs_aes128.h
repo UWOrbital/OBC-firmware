@@ -23,7 +23,7 @@ typedef struct {
  *
  * * @param key - The key to decrypt the AES blocks with (128 bit?)
  */
-void gcmInit(const uint8_t *key);
+void initializeAesCtx(const uint8_t *key);
 
 /**
  * @brief  Decrypts the AES blocks in GCM mode.
@@ -42,7 +42,7 @@ void gcmInit(const uint8_t *key);
  * OBC_GS_ERR_CODE_AUTH_FAILED if the authentication fails, and OBC_GS_ERR_CODE_INVALID_ARG for invalid input
  * parameters.
  */
-obc_gs_error_code_t gcmDecrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen);
+obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen);
 
 /**
  * @brief Encrypts the AES blocks in GCM mode.
