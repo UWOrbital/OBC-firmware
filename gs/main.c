@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <malloc.h>
+// #include <malloc.h>
 #include <time.h>
 
 const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -145,12 +145,10 @@ int main(void) {
       exit(1);
   }
 
-  struct AES_ctx ctx = {0};
-  AES_init_ctx(&ctx, TEMP_STATIC_KEY);
+  initializeAesCtx(TEMP_STATIC_KEY);
 
   uint8_t iv[AES_IV_SIZE] = {0};
   memset(iv, 1, AES_IV_SIZE);
-  AES_ctx_set_iv(&ctx, iv);
 
   rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
 
@@ -164,10 +162,14 @@ int main(void) {
   }
 
   uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
+  aes_data_t aesData = {0};
+  memcpy(aesData.iv, iv, AES_IV_SIZE);
 
-  memcpy(encryptedCmd + AES_IV_SIZE, packedSingleCmd, packedSingleCmdSize);
-
-  AES_CTR_xcrypt_buffer(&ctx, encryptedCmd + AES_IV_SIZE, AES_DECRYPTED_SIZE);
+  if (gcmEncrypt(&aesData, packedSingleCmd, packedSingleCmdSize, NULL, 0, encryptedCmd + AES_IV_SIZE) !=
+      OBC_GS_ERR_CODE_SUCCESS) {
+    printf("Failed to encrypt command message!");
+    exit(1);
+  }
 
   memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
