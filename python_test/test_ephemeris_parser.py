@@ -2,8 +2,8 @@ import os
 import struct
 
 import pytest
-from gs.sun import ephemeris
-from gs.sun import ephemeris_parser as ep
+from gs.backend.sun import ephemeris
+from gs.backend.sun import ephemeris_parser as ep
 
 
 @pytest.mark.parametrize(
