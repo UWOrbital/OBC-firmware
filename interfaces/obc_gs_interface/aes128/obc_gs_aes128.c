@@ -34,7 +34,8 @@ obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, si
   }
 }
 
-obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen) {
+obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen,
+                                  const uint8_t *additionalData, size_t additionalDataLen) {
   // print the aes data tag
   printf("INSIDE FUNC: ");
   for (size_t i = 0; i < aesData->tagLen; ++i) {
@@ -56,8 +57,8 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  int result = mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE, NULL, 0,
-                                        aesData->tag, aesData->tagLen, aesData->ciphertext, output);
+  int result = mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE, additionalData,
+                                        additionalDataLen, aesData->tag, aesData->tagLen, aesData->ciphertext, output);
 
   switch (result) {
     case 0:

@@ -46,7 +46,8 @@ void initializeAesCtx(const uint8_t *key);
  * OBC_GS_ERR_CODE_AUTH_FAILED if the authentication fails, and OBC_GS_ERR_CODE_INVALID_ARG for invalid input
  * parameters.
  */
-obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen);
+obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen,
+                                  const uint8_t *additionalData, size_t additionalDataLen);
 
 /**
  * @brief Encrypts the AES blocks in GCM mode.

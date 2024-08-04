@@ -5,8 +5,6 @@
 #include <cstring>  // Include for memcpy and memcmp
 
 TEST(TestEncryptionDecryption, EncryptDecrypt) {
-  // ASSERT_EQ(1, 1);
-
   // Initialize key
   uint8_t key[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -44,25 +42,27 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
       gcmEncrypt(&aesDataEncrypt, plaintext, plaintextLen, additionalData, additionalDataLen, ciphertext);
   ASSERT_EQ(encResult, OBC_GS_ERR_CODE_SUCCESS);
 
-  // Print the ciphertext for debugging
+  // Print the ciphertext for debugging in hex
   printf("Ciphertext: ");
   for (size_t i = 0; i < plaintextLen; ++i) {
     printf("%02x", ciphertext[i]);
   }
   printf("\n");
 
-  // Print the tag for debugging
+  // Print the tag for debugging in hex
   printf("Tag: ");
   for (size_t i = 0; i < tagLen; ++i) {
     printf("%02x", aesDataEncrypt.tag[i]);
   }
   printf("\n");
-  // print size of tag
-  printf("check in test: ");
+
+  // Additional debug: Check the tag after encryption
+  printf("Tag after encryption in test: ");
+  for (size_t i = 0; i < aesDataEncrypt.tagLen; ++i) {
+    printf("%02x", aesDataEncrypt.tag[i]);
+  }
   printf("\n");
-  printf("Size: %d\n", aesDataEncrypt.tagLen);
-  // print type
-  printf("Type: %d\n", aesDataEncrypt.tag[0]);
+
   // Prepare aes_data_t structure for decryption
   aes_data_t aesDataDecrypt;
   memcpy(aesDataDecrypt.iv, iv, AES_IV_SIZE);
@@ -71,13 +71,21 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   memcpy(aesDataDecrypt.tag, aesDataEncrypt.tag, tagLen);
   aesDataDecrypt.tagLen = tagLen;
 
-  // Decrypt the ciphertext
-  obc_gs_error_code_t decResult = aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen);
+  // Additional debug: Check the tag before decryption
+  printf("Tag before decryption in test: ");
+  for (size_t i = 0; i < aesDataDecrypt.tagLen; ++i) {
+    printf("%02x", aesDataDecrypt.tag[i]);
+  }
+  printf("\n");
 
-  // Print the decrypted text for debugging
-  printf("Decrypted: ");
+  // Decrypt the ciphertext
+  obc_gs_error_code_t decResult =
+      aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen, additionalData, additionalDataLen);
+
+  // Print the decrypted text for debugging in hex
+  printf("Decrypted (hex): ");
   for (size_t i = 0; i < plaintextLen; ++i) {
-    printf("%c", decrypted[i]);
+    printf("%02x", decrypted[i]);
   }
   printf("\n");
 
@@ -88,10 +96,10 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   }
   printf("\n");
 
-  // Print the plaintext
-  printf("Plaintext: ");
+  // Print the plaintext for debugging in hex
+  printf("Plaintext (hex): ");
   for (size_t i = 0; i < plaintextLen; ++i) {
-    printf("%c", plaintext[i]);
+    printf("%02x", plaintext[i]);
   }
   printf("\n");
 

@@ -28,9 +28,13 @@
  * We use the algorithm described as Shoup's method with 4-bit tables in
  * [MGV] 4.1, pp. 12-13, to enhance speed without using too much memory.
  */
+#include <stdio.h>
+#include <string.h>
 
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "config.h"
+
+
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
@@ -480,20 +484,28 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
     unsigned char check_tag[16];
     size_t i;
     int diff;
+    printf("Entering mbedtls_gcm_auth_decrypt\n");
+    printf("Length: %zu, IV length: %zu, Add length: %zu, Tag length: %zu\n", length, iv_len, add_len, tag_len);
+
 
     if( ( ret = mbedtls_gcm_crypt_and_tag( ctx, MBEDTLS_GCM_DECRYPT, length,
                                    iv, iv_len, add, add_len,
                                    input, output, tag_len, check_tag ) ) != 0 )
     {
+        printf("mbedtls_gcm_crypt_and_tag failed here 1");
+
         return( ret );
     }
 
     /* Check tag in "constant-time" */
     for( diff = 0, i = 0; i < tag_len; i++ )
         diff |= tag[i] ^ check_tag[i];
+        printf("Tag byte %zu: Expected 0x%02x, Got 0x%02x\n", i, tag[i], check_tag[i]);
+
 
     if( diff != 0 )
     {
+        printf("Tag mismatch detected\n");
         mbedtls_zeroize( output, length );
         return( MBEDTLS_ERR_GCM_AUTH_FAILED );
     }
