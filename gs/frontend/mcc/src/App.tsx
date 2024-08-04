@@ -5,12 +5,14 @@ import MissionCommands from './MissionCommands'
 import TelemetryData from './TelemetryData'
 import ARORequests from './ARORequests'
 import Logs from './Logs'
+import NotFound from './NotFound'
 
 function App() {
   return (
     <BrowserRouter>
       <Header />
       <Routes>
+        <Route path="*" element={<NotFound />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="/mission-commands" element={<MissionCommands />} />
         <Route path="/telemetry-data" element={<TelemetryData />} />
