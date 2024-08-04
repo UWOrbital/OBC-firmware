@@ -11,17 +11,17 @@ function Header() {
       </Nav.Item>
       <Nav.Item className="item">
         <Nav.Link eventKey="link-2">
-          <Link to="missioncommands">Mission Commands</Link>
+          <Link to="/mission-commands">Mission Commands</Link>
         </Nav.Link>
       </Nav.Item>
       <Nav.Item className="item">
         <Nav.Link eventKey="link-3">
-          <Link to="telemetrydata">Telemetry Data</Link>
+          <Link to="/telemetry-data">Telemetry Data</Link>
         </Nav.Link>
       </Nav.Item>
       <Nav.Item className="item">
         <Nav.Link eventKey="link-4">
-          <Link to="arorequests">ARO Requests</Link>
+          <Link to="/aro-requests">ARO Requests</Link>
         </Nav.Link>
       </Nav.Item>
     </Nav>

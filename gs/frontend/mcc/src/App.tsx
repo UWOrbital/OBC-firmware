@@ -12,9 +12,9 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="missioncommands" element={<MissionCommands />} />
-        <Route path="telemetrydata" element={<TelemetryData />} />
-        <Route path="arorequests" element={<ARORequests />} />
+        <Route path="/mission-commands" element={<MissionCommands />} />
+        <Route path="/telemetry-data" element={<TelemetryData />} />
+        <Route path="/aro-requests" element={<ARORequests />} />
       </Routes>
       <Logs />
     </BrowserRouter>
