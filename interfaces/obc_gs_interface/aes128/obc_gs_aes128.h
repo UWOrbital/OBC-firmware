@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define AES_BLOCK_SIZE 16U
 #define AES_KEY_SIZE 16U
 #define AES_IV_SIZE 16U
@@ -64,3 +68,6 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
  */
 obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen,
                                const uint8_t *additionalData, size_t additionalDataLen, uint8_t *output);
+#ifdef __cplusplus
+}
+#endif

@@ -10,7 +10,7 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
   // Initialize GCM context
-  gcmInit(key);
+  initializeAesCtx(key);
 
   // Prepare plaintext
   const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
@@ -51,7 +51,7 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   aesDataDecrypt.tagLen = tagLen;
 
   // Decrypt the ciphertext
-  obc_gs_error_code_t decResult = gcmDecrypt(&aesDataDecrypt, decrypted, plaintextLen);
+  obc_gs_error_code_t decResult = aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen);
   ASSERT_EQ(decResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Verify the decrypted text matches the original plaintext
