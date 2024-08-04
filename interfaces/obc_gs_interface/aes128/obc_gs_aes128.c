@@ -4,6 +4,7 @@
 #include <gcm.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 static mbedtls_gcm_context gcm_ctx;
 
@@ -34,6 +35,19 @@ obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, si
 }
 
 obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen) {
+  // print the aes data tag
+  printf("INSIDE FUNC: ");
+  for (size_t i = 0; i < aesData->tagLen; ++i) {
+    printf("%02x", aesData->tag[i]);
+  }
+  printf("\n");
+  printf("check inside function");
+
+  printf("\n");
+  // print size
+  printf("Size: %d\n", aesData->tagLen);
+  // print type
+  printf("Type: %d\n", aesData->tag[0]);
   if (aesData == NULL || output == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
