@@ -14,24 +14,29 @@ TEST(LogIntegrationTest, Generated_Logs) {
   // Did it Read?
   std::ifstream read;
   read.open(LOG_FILE);
-  ASSERT_TRUE(read.is_open());
-  char temp = '_';
-  read >> temp;
-  ASSERT_TRUE(temp != ' ' && temp != '\n');
-  read.close();
+  EXPECT_TRUE(read.is_open())
+  if(read.is_open()){
+    char temp = '_';
+    read >> temp;
+    ASSERT_TRUE(temp != ' ' && temp != '\n');
+    read.close();
+  }
 }
 
 TEST(LogIntegrationTest, Number_Logs) {
   // Did it read expected times?
   std::ifstream read;
   read.open(LOG_FILE);
-  char buff[256];
-  int count;
-  while (read.getline(buff, 256)) {
-    count++;
+  EXPECT_TRUE(read.is_open())
+  if(read.is_open()){
+    char buff[256];
+    int count;
+    while (read.getline(buff, 256)) {
+      count++;
+    }
+    ASSERT_TRUE(count > MIN_LOGS_AQUIRED) << "Required: " << MIN_LOGS_AQUIRED << " Iterated: " << count;
+    read.close();
   }
-  ASSERT_TRUE(count > MIN_LOGS_AQUIRED) << "Required: " << MIN_LOGS_AQUIRED << " Iterated: " << count;
-  read.close();
 }
 
 TEST(LogIntegrationTest, Speific_Logs) {
@@ -39,21 +44,24 @@ TEST(LogIntegrationTest, Speific_Logs) {
 
   std::ifstream read;
   read.open(LOG_FILE);
-  char buffarr[256];
-  std::string buffstr;
-  int count = 0;
-  bool found = false;
-  while (read.getline(buffarr, 256)) {
-    buffstr = buffarr;
+  EXPECT_TRUE(read.is_open())
+  if(read.is_open()){
+    char buffarr[256];
+    std::string buffstr;
+    int count = 0;
+    bool found = false;
+    while (read.getline(buffarr, 256)) {
+      buffstr = buffarr;
 
-    if (buffstr.find(SPECIFIC_LOG) != std::string::npos) {
-      found = true;
-      break;
+      if (buffstr.find(SPECIFIC_LOG) != std::string::npos) {
+        found = true;
+        break;
+      }
+      count++;
     }
-    count++;
+    ASSERT_TRUE(found) << "Iterated " << count << " times!";
+    read.close();
   }
-  ASSERT_TRUE(found) << "Iterated " << count << " times!";
-  read.close();
 }
 
 TEST(LogIntegrationTest, TimeFrame_Logs) {
@@ -61,17 +69,20 @@ TEST(LogIntegrationTest, TimeFrame_Logs) {
 
   std::ifstream read;
   read.open(LOG_FILE);
-  char buffarr[256];
-  std::string buffstr, buffcurrent;
-  bool ok = true;
-  int index = 0, prevtime = 100;
-  while (read.getline(buffarr, 256)) {
-    buffstr = buffarr;
-    buffcurrent = buffstr.substr(7, 2);
-    ASSERT_TRUE(std::stoi(buffcurrent) - prevtime < TIME_PERIOD)
-        << "buffcurrent is " << buffcurrent << " and " << std::stoi(buffcurrent) << " prevtime is " << prevtime << " "
-        << std::stoi(buffcurrent) - prevtime << " is >= than 10";
-    prevtime = stoi(buffcurrent);
+  EXPECT_TRUE(read.is_open())
+  if(read.is_open()){
+    char buffarr[256];
+    std::string buffstr, buffcurrent;
+    bool ok = true;
+    int index = 0, prevtime = 100;
+    while (read.getline(buffarr, 256)) {
+      buffstr = buffarr;
+      buffcurrent = buffstr.substr(7, 2);
+      ASSERT_TRUE(std::stoi(buffcurrent) - prevtime < TIME_PERIOD)
+          << "buffcurrent is " << buffcurrent << " and " << std::stoi(buffcurrent) << " prevtime is " << prevtime << " "
+          << std::stoi(buffcurrent) - prevtime << " is >= than 10";
+      prevtime = stoi(buffcurrent);
+    }
+    read.close();
   }
-  read.close();
 }
