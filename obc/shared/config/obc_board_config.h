@@ -6,8 +6,8 @@
 
 #ifdef RM46_LAUNCHPAD
 // Serial config
-#define UART_PRINT_REG sciREG
-#define UART_READ_REG sciREG
+#define UART_PRINT_REG scilinREG
+#define UART_READ_REG scilinREG
 #define UART_VN100_REG sciREG
 #define UART_BL_REG scilinREG
 
