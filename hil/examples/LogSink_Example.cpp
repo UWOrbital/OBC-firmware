@@ -30,7 +30,7 @@ TEST(LogIntegrationTest, Number_Logs) {
   EXPECT_TRUE(read.is_open())
   if(read.is_open()){
     char buff[256];
-    int count;
+    int count = 0;
     while (read.getline(buff, 256)) {
       count++;
     }
