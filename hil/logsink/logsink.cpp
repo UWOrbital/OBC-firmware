@@ -5,6 +5,8 @@
 #include <poll.h>
 #include <iostream>
 #include <ctime>
+#include <stdexcept>
+
 
 LogSink::LogSink(std::string uartPort, int baudRate, std::string outputFile) {
   m_fileName = outputFile;
@@ -43,8 +45,7 @@ void LogSink::uartReadThread() {
     if (ret != 1) continue;
     int bytesAvailable = serialDataAvail(m_serialFd);
     if (bytesAvailable < 0) {
-      printf("Couldn't Read Data, Errno %d\n", errno);
-      exit(-1);
+      throw std::runtime_error("Couldn't Read Data, Errno "+std::to_string(errno));
     }
     for (int i = 0; i < bytesAvailable; i++) {
       char character = serialGetchar(m_serialFd);
