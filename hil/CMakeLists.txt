@@ -15,5 +15,4 @@ target_link_libraries(hil.out PUBLIC wiringPi gtest gtest_main)
 
 add_subdirectory(logsink)
 
-#put an if statment for adding examples
 add_subdirectory(examples)
