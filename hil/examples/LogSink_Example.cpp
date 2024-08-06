@@ -15,7 +15,7 @@ TEST(LogIntegrationTest, Generated_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   EXPECT_TRUE(read.is_open())
-  if(read.is_open()){
+  if (read.is_open()) {
     char temp = '_';
     read >> temp;
     ASSERT_TRUE(temp != ' ' && temp != '\n');
@@ -28,7 +28,7 @@ TEST(LogIntegrationTest, Number_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   EXPECT_TRUE(read.is_open())
-  if(read.is_open()){
+  if (read.is_open()) {
     char buff[256];
     int count = 0;
     while (read.getline(buff, 256)) {
@@ -45,7 +45,7 @@ TEST(LogIntegrationTest, Speific_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   EXPECT_TRUE(read.is_open())
-  if(read.is_open()){
+  if (read.is_open()) {
     char buffarr[256];
     std::string buffstr;
     int count = 0;
@@ -70,7 +70,7 @@ TEST(LogIntegrationTest, TimeFrame_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   EXPECT_TRUE(read.is_open())
-  if(read.is_open()){
+  if (read.is_open()) {
     char buffarr[256];
     std::string buffstr, buffcurrent;
     bool ok = true;

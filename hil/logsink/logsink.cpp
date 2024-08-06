@@ -7,7 +7,6 @@
 #include <ctime>
 #include <stdexcept>
 
-
 LogSink::LogSink(std::string uartPort, int baudRate, std::string outputFile) {
   m_fileName = outputFile;
   m_outputFile.open(m_fileName);
@@ -45,7 +44,7 @@ void LogSink::uartReadThread() {
     if (ret != 1) continue;
     int bytesAvailable = serialDataAvail(m_serialFd);
     if (bytesAvailable < 0) {
-      throw std::runtime_error("Couldn't Read Data, Errno "+std::to_string(errno));
+      throw std::runtime_error("Couldn't Read Data, Errno " + std::to_string(errno));
     }
     for (int i = 0; i < bytesAvailable; i++) {
       char character = serialGetchar(m_serialFd);
@@ -96,6 +95,4 @@ void LogSink::stop() {
   m_outputFile.close();
 }
 
-bool LogSink::isRunning() const{
-  return m_isRunning;
-}
+bool LogSink::isRunning() const { return m_isRunning; }
