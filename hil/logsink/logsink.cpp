@@ -24,8 +24,6 @@ LogSink::LogSink(std::string uartPort, int baudRate, std::string outputFile) {
 LogSink::~LogSink() {
   if (m_isRunning) {
     stop();
-    m_readThread.join();
-    m_writeThread.join();
   }
   serialClose(m_serialFd);
   m_outputFile.close();
