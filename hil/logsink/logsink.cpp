@@ -96,3 +96,7 @@ void LogSink::stop() {
   m_writeThread.join();
   m_outputFile.close();
 }
+
+bool LogSink::isRunning() const{
+  return m_isRunning;
+}
