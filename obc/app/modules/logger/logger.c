@@ -30,7 +30,7 @@
 #define GET_TIMESTAMP getCurrentDateTime()
 #define GET_TIMESTAMP_FROM_ISR getCurrentDateTimeinISR()
 #elif defined(LOG_UNIX)
-#define GET_TIMESTAMP getCurrentUnixTime
+#define GET_TIMESTAMP getCurrentUnixTime()
 #define GET_TIMESTAMP_FROM_ISR getCurrentUnixTimeInISR()
 #endif
 
@@ -97,10 +97,10 @@ void obcTaskFunctionLogger(void *pvParameters) {
     int ret = 0;
 
 #if defined(LOG_DATE_TIME)
-    ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%02u-%02u-%02u_%02u-%02u-%02u %-5s -> %s:%lu",
-                   queueMsg.timestamp.date.year, queueMsg.timestamp.date.month, queueMsg.timestamp.date.date,
-                   queueMsg.timestamp.time.hours, queueMsg.timestamp.time.minutes, queueMsg.timestamp.time.seconds,
-                   LEVEL_STRINGS[queueMsg.logEntry.logLevel], queueMsg.file, queueMsg.line);
+    rtc_date_time_t *currDate = &queueMsg.timestamp;
+    ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%02u-%02u-%02u_%02u-%02u-%02u %-5s -> %s:%lu", currDate->date.year,
+                   currDate->date.month, currDate->date.date, currDate->time.hours, currDate->time.minutes,
+                   currDate->time.seconds, LEVEL_STRINGS[queueMsg.logEntry.logLevel], queueMsg.file, queueMsg.line);
 #elif defined(LOG_UNIX)
     ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%u %-5s -> %s:%lu", queueMsg.timestamp,
                    LEVEL_STRINGS[queueMsg.logEntry.logLevel], queueMsg.file, queueMsg.line);

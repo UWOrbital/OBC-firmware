@@ -104,13 +104,13 @@ rtc_date_time_t getCurrentDateTimeinISR(void) {
   return dateTime;
 }
 
-void setCurrentUnixTime(uint32_t unixTime) {
+static void setCurrentUnixTime(uint32_t unixTime) {
   vPortEnterCritical();
   currTime = unixTime;
   vPortExitCritical();
 }
 
-void setCurrentDateTime(rtc_date_time_t datetime) {
+static void setCurrentDateTime(rtc_date_time_t datetime) {
   vPortEnterCritical();
   currDataTime = datetime;
   vPortExitCritical();

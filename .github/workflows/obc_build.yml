@@ -11,6 +11,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install build-essential cmake
+        export REPO_ROOT=$(git rev-parse --show-toplevel)
+
 
     - name: Create binary directory
       run: |
