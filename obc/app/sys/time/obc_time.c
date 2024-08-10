@@ -117,6 +117,11 @@ void setCurrentDateTime(rtc_date_time_t datetime) {
 }
 
 void incrementCurrentUnixTime(void) { Atomic_Increment_u32(&currTime); }
+void incrementCurrentDateTime(void) {
+  vPortEnterCritical();
+  currDataTime.time.seconds++;
+  vPortExitCritical();
+}
 
 obc_error_code_t syncUnixTime(void) {
   obc_error_code_t errCode;

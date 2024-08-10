@@ -47,6 +47,12 @@ rtc_date_time_t getCurrentDateTimeinISR(void);
 void incrementCurrentUnixTime(void);
 
 /**
+ * @brief Increment the current date time by 1 second.
+ * @warning This function should not be called from an ISR.
+ */
+void incrementCurrentDateTime(void);
+
+/**
  * @brief Sync the unix time with the RTC.
  *
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code.
