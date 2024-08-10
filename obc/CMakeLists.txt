@@ -62,7 +62,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
 if(DEFINED ENV{REPO_ROOT})
     add_compile_definitions(SOURCE_PATH="$ENV{REPO_ROOT}/")
 else()
-    message(FATAL_ERROR "REPO_ROOT environment variable is not set.")
+    message(FATAL_ERROR "REPO_ROOT environment variable is not set. Try running \"export REPO_ROOT=$(git rev-parse --show-toplevel)\"")
 endif()
 
 target_include_directories(OBC-firmware.out PUBLIC
