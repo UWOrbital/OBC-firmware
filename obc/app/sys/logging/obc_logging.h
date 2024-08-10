@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 #include <stdarg.h>
+#include <string.h>
+
+#define __FILE_FROM_REPO_ROOT__ \
+  (strstr(__FILE__, SOURCE_PATH) ? strstr(__FILE__, SOURCE_PATH) + sizeof(SOURCE_PATH) - 1 : __FILE__)
 
 /**
  * @enum log_output_location_t
@@ -38,22 +42,22 @@ typedef enum { LOG_TYPE_ERROR_CODE = 0, LOG_TYPE_MSG = 1 } log_type_t;
 #define LOG_DEFAULT_LEVEL LOG_TRACE
 #endif
 
-#define LOG_TRACE(msg) logMsg(LOG_TRACE, __FILE__, __LINE__, msg)
-#define LOG_DEBUG(msg) logMsg(LOG_DEBUG, __FILE__, __LINE__, msg)
-#define LOG_INFO(msg) logMsg(LOG_INFO, __FILE__, __LINE__, msg)
-#define LOG_WARN(msg) logMsg(LOG_WARN, __FILE__, __LINE__, msg)
-#define LOG_ERROR(msg) logMsg(LOG_ERROR, __FILE__, __LINE__, msg)
-#define LOG_FATAL(msg) logMsg(LOG_FATAL, __FILE__, __LINE__, msg)
+#define LOG_TRACE(msg) logMsg(LOG_TRACE, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_DEBUG(msg) logMsg(LOG_DEBUG, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_INFO(msg) logMsg(LOG_INFO, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_WARN(msg) logMsg(LOG_WARN, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_ERROR(msg) logMsg(LOG_ERROR, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_FATAL(msg) logMsg(LOG_FATAL, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
 
-#define LOG_TRACE_FROM_ISR(msg) logMsgFromISR(LOG_TRACE, __FILE__, __LINE__, msg)
-#define LOG_DEBUG_FROM_ISR(msg) logMsgFromISR(LOG_DEBUG, __FILE__, __LINE__, msg)
-#define LOG_INFO_FROM_ISR(msg) logMsgFromISR(LOG_INFO, __FILE__, __LINE__, msg)
-#define LOG_WARN_FROM_ISR(msg) logMsgFromISR(LOG_WARN, __FILE__, __LINE__, msg)
-#define LOG_ERROR_FROM_ISR(msg) logMsgFromISR(LOG_ERROR, __FILE__, __LINE__, msg)
-#define LOG_FATAL_FROM_ISR(msg) logMsgFromISR(LOG_FATAL, __FILE__, __LINE__, msg)
+#define LOG_TRACE_FROM_ISR(msg) logMsgFromISR(LOG_TRACE, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_DEBUG_FROM_ISR(msg) logMsgFromISR(LOG_DEBUG, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_INFO_FROM_ISR(msg) logMsgFromISR(LOG_INFO, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_WARN_FROM_ISR(msg) logMsgFromISR(LOG_WARN, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_ERROR_FROM_ISR(msg) logMsgFromISR(LOG_ERROR, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
+#define LOG_FATAL_FROM_ISR(msg) logMsgFromISR(LOG_FATAL, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
 
-#define LOG_ERROR_CODE(errCode) logErrorCode(LOG_ERROR, __FILE__, __LINE__, errCode)
-#define LOG_ERROR_CODE_FROM_ISR(errCode) logErrorCodeFromISR(LOG_ERROR, __FILE__, __LINE__, errCode)
+#define LOG_ERROR_CODE(errCode) logErrorCode(LOG_ERROR, __FILE_FROM_REPO_ROOT__, __LINE__, errCode)
+#define LOG_ERROR_CODE_FROM_ISR(errCode) logErrorCodeFromISR(LOG_ERROR, __FILE_FROM_REPO_ROOT__, __LINE__, errCode)
 
 #define RETURN_IF_ERROR_CODE(_ret)         \
   do {                                     \

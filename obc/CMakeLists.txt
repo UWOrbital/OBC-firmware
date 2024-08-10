@@ -59,6 +59,12 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
+if(DEFINED ENV{REPO_ROOT})
+    add_compile_definitions(SOURCE_PATH="$ENV{REPO_ROOT}/")
+else()
+    message(FATAL_ERROR "REPO_ROOT environment variable is not set.")
+endif()
+
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
 )
