@@ -167,6 +167,7 @@ pre-commit install
 ### Building
 
 #### **OBC Firmware**
+Before building for the first time run this once to set up an env variable: `export REPO_ROOT=$(git rev-parse --show-toplevel)`
 From the top-level directory, run the following to build the OBC firmware.
 ```
 mkdir build_arm && cd build_arm
