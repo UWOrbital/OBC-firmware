@@ -59,11 +59,15 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
-if(DEFINED ENV{REPO_ROOT})
-    add_compile_definitions(SOURCE_PATH="$ENV{REPO_ROOT}/")
-else()
-    message(FATAL_ERROR "REPO_ROOT environment variable is not set. Try running \"export REPO_ROOT=$(git rev-parse --show-toplevel)\"")
-endif()
+# Determine the root of the repository
+execute_process(
+    COMMAND git rev-parse --show-toplevel
+    OUTPUT_VARIABLE REPO_ROOT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Set the SOURCE_PATH using the detected REPO_ROOT
+add_compile_definitions(SOURCE_PATH="${REPO_ROOT}/")
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
