@@ -23,5 +23,6 @@ add_custom_target(
 
 add_library(wiringpi INTERFACE)
 target_include_directories(wiringpi INTERFACE ${wiringpi_SOURCE_DIR})
-target_link_libraries(wiringpi INTERFACE ${wiringpi_BINARY_DIR}/wiringPi)
+target_link_libraries(wiringpi INTERFACE ${wiringpi_BINARY_DIR}/wiringPi.a)
+
 # ---------------------------------------------------------------
