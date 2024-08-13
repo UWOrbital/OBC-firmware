@@ -5,6 +5,10 @@
 #include <fstream>
 #include <wiringPi.h>
 #include <mutex>
+#define XSTR(x) STR(x)
+#define STR(x) #x
+
+#pragma message "CPP STD " XSTR(__cplusplus)
 
 class LogSink {
  private:
