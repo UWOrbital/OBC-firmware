@@ -4,8 +4,6 @@ on: [push, pull_request]
 jobs:
   build-linux:
     runs-on: self-hosted
-    matrix:
-      compiler: [ latest, gcc-latest, g++-latest ]
 
     defaults:
       run:
