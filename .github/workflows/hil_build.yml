@@ -15,5 +15,5 @@ jobs:
     - name: Build
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=HIL -G"Unix Makefiles"
+        cmake .. -DCMAKE_BUILD_TYPE=HIL
         make
