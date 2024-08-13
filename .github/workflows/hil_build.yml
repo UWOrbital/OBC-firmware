@@ -2,7 +2,7 @@ name: HIL Build
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-linux:
     runs-on: self-hosted
     defaults:
       run:
