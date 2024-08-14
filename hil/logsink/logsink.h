@@ -5,11 +5,6 @@
 #include <fstream>
 #include <wiringPi.h>
 #include <mutex>
-#define XSTR(x) STR(x)
-#define STR(x) #x
-
-#pragma message "CPP STD " XSTR(__cplusplus)
-#pragma message "GCC v" XSTR(__GNUC__) "." XSTR(__GNUC_MINOR__) "." XSTR(__GNUC_PATCHLEVEL__)
 
 class LogSink {
  private:

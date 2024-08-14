@@ -20,5 +20,6 @@ jobs:
     - name: Build
       run: |
         cd build_hil
+        #Seems like we need to force the cxx standard here for it to be set in actions
         cmake .. -DCMAKE_BUILD_TYPE=HIL -DCMAKE_CXX_STANDARD=20
         make
