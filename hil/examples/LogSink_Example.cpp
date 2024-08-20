@@ -18,7 +18,7 @@ TEST(LogIntegrationTest, Generated_Logs) {
   if (read.is_open()) {
     char temp = '_';
     read >> temp;
-    ASSERT_TRUE(temp != ' ' && temp != '\n');
+    EXPECT_TRUE(temp != ' ' && temp != '\n');
     read.close();
   }
 }
@@ -34,7 +34,7 @@ TEST(LogIntegrationTest, Number_Logs) {
     while (read.getline(buff, 256)) {
       count++;
     }
-    ASSERT_TRUE(count > MIN_LOGS_AQUIRED) << "Required: " << MIN_LOGS_AQUIRED << " Iterated: " << count;
+    EXPECT_TRUE(count > MIN_LOGS_AQUIRED) << "Required: " << MIN_LOGS_AQUIRED << " Iterated: " << count;
     read.close();
   }
 }
@@ -59,7 +59,7 @@ TEST(LogIntegrationTest, Speific_Logs) {
       }
       count++;
     }
-    ASSERT_TRUE(found) << "Iterated " << count << " times!";
+    EXPECT_TRUE(found) << "Iterated " << count << " times!";
     read.close();
   }
 }
@@ -77,7 +77,7 @@ TEST(LogIntegrationTest, TimeFrame_Logs) {
     while (read.getline(buffarr, 256)) {
       buffstr = buffarr;
       buffcurrent = buffstr.substr(7, 2);
-      ASSERT_TRUE(std::stoi(buffcurrent) - prevtime < TIME_PERIOD)
+      EXPECT_TRUE(std::stoi(buffcurrent) - prevtime < TIME_PERIOD)
           << "buffcurrent is " << buffcurrent << " and " << std::stoi(buffcurrent) << " prevtime is " << prevtime << " "
           << std::stoi(buffcurrent) - prevtime << " is >= than 10";
       prevtime = stoi(buffcurrent);
