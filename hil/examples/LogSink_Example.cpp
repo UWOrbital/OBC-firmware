@@ -1,7 +1,8 @@
 /*
-@brief  Simple LogSink unit test flow for validating integrated software on hardware ie. LM75BD log validation on the Rev1 board.
-        Generated Logs simply checks if any logs have been outputed, Number Logs validates the number of logs after running for a duration,
-        Specific Logs validates if the LogSink fetched a certain log, and Timeframe Logs validates the file output speed of the logs.
+@brief  Simple LogSink unit test flow for validating integrated software on hardware ie. LM75BD log validation on the
+Rev1 board. Generated Logs simply checks if any logs have been outputed, Number Logs validates the number of logs after
+running for a duration, Specific Logs validates if the LogSink fetched a certain log, and Timeframe Logs validates the
+file output speed of the logs.
 */
 #include "logsink.h"
 #include <iostream>
