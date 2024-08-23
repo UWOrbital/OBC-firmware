@@ -21,12 +21,11 @@ TEST(LogIntegrationTest, Generated_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   ASSERT_TRUE(read.is_open());
-  if (read.is_open()) {
-    char temp = '_';
-    read >> temp;
-    EXPECT_TRUE(temp != ' ' && temp != '\n');
-    read.close();
-  }
+
+  char temp = '_';
+  read >> temp;
+  EXPECT_TRUE(temp != ' ' && temp != '\n');
+  read.close();
 }
 
 TEST(LogIntegrationTest, Number_Logs) {
@@ -34,15 +33,14 @@ TEST(LogIntegrationTest, Number_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   ASSERT_TRUE(read.is_open());
-  if (read.is_open()) {
-    char buff[256];
-    int count = 0;
-    while (read.getline(buff, 256)) {
-      count++;
-    }
-    EXPECT_TRUE(count > MIN_LOGS_AQUIRED) << "Required: " << MIN_LOGS_AQUIRED << " Iterated: " << count;
-    read.close();
+
+  char buff[256];
+  int count = 0;
+  while (read.getline(buff, 256)) {
+    count++;
   }
+  EXPECT_TRUE(count > MIN_LOGS_AQUIRED) << "Required: " << MIN_LOGS_AQUIRED << " Iterated: " << count;
+  read.close();
 }
 
 TEST(LogIntegrationTest, Speific_Logs) {
@@ -51,23 +49,21 @@ TEST(LogIntegrationTest, Speific_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   ASSERT_TRUE(read.is_open());
-  if (read.is_open()) {
-    char buffarr[256];
-    std::string buffstr;
-    int count = 0;
-    bool found = false;
-    while (read.getline(buffarr, 256)) {
-      buffstr = buffarr;
+  char buffarr[256];
+  std::string buffstr;
+  int count = 0;
+  bool found = false;
+  while (read.getline(buffarr, 256)) {
+    buffstr = buffarr;
 
-      if (buffstr.find(SPECIFIC_LOG) != std::string::npos) {
-        found = true;
-        break;
-      }
-      count++;
+    if (buffstr.find(SPECIFIC_LOG) != std::string::npos) {
+      found = true;
+      break;
     }
-    EXPECT_TRUE(found) << "Iterated " << count << " times!";
-    read.close();
+    count++;
   }
+  EXPECT_TRUE(found) << "Iterated " << count << " times!";
+  read.close();
 }
 
 TEST(LogIntegrationTest, TimeFrame_Logs) {
@@ -76,18 +72,16 @@ TEST(LogIntegrationTest, TimeFrame_Logs) {
   std::ifstream read;
   read.open(LOG_FILE);
   ASSERT_TRUE(read.is_open());
-  if (read.is_open()) {
-    char buffarr[256];
-    std::string buffstr, buffcurrent;
-    int prevtime = 100;
-    while (read.getline(buffarr, 256)) {
-      buffstr = buffarr;
-      buffcurrent = buffstr.substr(7, 2);
-      EXPECT_TRUE(std::stoi(buffcurrent) - prevtime < TIME_PERIOD)
-          << "buffcurrent is " << buffcurrent << " and " << std::stoi(buffcurrent) << " prevtime is " << prevtime << " "
-          << std::stoi(buffcurrent) - prevtime << " is >= than 10";
-      prevtime = stoi(buffcurrent);
-    }
-    read.close();
+  char buffarr[256];
+  std::string buffstr, buffcurrent;
+  int prevtime = 100;
+  while (read.getline(buffarr, 256)) {
+    buffstr = buffarr;
+    buffcurrent = buffstr.substr(7, 2);
+    EXPECT_TRUE(std::stoi(buffcurrent) - prevtime < TIME_PERIOD)
+        << "buffcurrent is " << buffcurrent << " and " << std::stoi(buffcurrent) << " prevtime is " << prevtime << " "
+        << std::stoi(buffcurrent) - prevtime << " is >= than 10";
+    prevtime = stoi(buffcurrent);
   }
+  read.close();
 }
