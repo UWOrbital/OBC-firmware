@@ -26,5 +26,5 @@ class LogSink {
   bool isRunning() const;
   ~LogSink();
   int start();
-  void stop();
+  int stop();
 };

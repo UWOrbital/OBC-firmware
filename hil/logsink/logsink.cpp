@@ -88,11 +88,12 @@ int LogSink::start() {
 
   return 0;
 }
-void LogSink::stop() {
+int LogSink::stop() {
   m_isRunning = false;
   m_readThread.join();
   m_writeThread.join();
   m_outputFile.close();
+  return 0;
 }
 
 bool LogSink::isRunning() const { return m_isRunning; }
