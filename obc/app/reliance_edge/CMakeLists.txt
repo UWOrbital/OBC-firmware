@@ -47,6 +47,17 @@ set(SOURCES
     projects/freertos_rm46/host/redconf.c
 )
 
+
+set (BL_INCLUDES
+    include
+)
+
+set (BL_SOURCES
+
+)
+
+
+
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDE_DIRS})
 target_sources(OBC-firmware.out PUBLIC ${SOURCES})
 

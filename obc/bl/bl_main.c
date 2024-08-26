@@ -129,6 +129,8 @@ void blSdcDonwloadImage() {
     numAppBytesToFlash -= numBytesToRead;
   }
 
+  red_close(file);
+
   blUartWriteBytes(BL_UART_SCIREG_1, strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
 
   // Fix the ECC for any flash memory that was erased, but not overwritten by the new app
@@ -167,10 +169,10 @@ int main(void) {
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
 
   if (SDC_APP_LOAD) {
-    blSdcDonwloadImage()
+    blSdcDonwloadImage();
 
-        // Go to the application's entry point
-        uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
+    // Go to the application's entry point
+    uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
     ((appStartFunc_t)appStartAddress)();
 
     blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to run application\r\n"),

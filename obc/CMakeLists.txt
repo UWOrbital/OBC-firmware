@@ -37,6 +37,8 @@ add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
 add_subdirectory(shared/sdcard)
 add_subdirectory(shared/obc_spi_io)
+add_subdirectory(shared/obc_errors)
+add_subdirectory(shared/utils)
 
 # Application
 target_link_options(OBC-firmware.out PRIVATE
