@@ -5,10 +5,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <sys/stat.h>
-#include <errno.h>
 
-#define LOG_FILE_DIRECTORY "log_output/"
 #define LOG_FILE_NAME "gs_log.log"
 
 #define MAX_UINT32_STRING_SIZE 11U
@@ -34,18 +31,7 @@ void initLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
 static gs_error_code_t writeToLogFile(const char logBuf[], size_t logBufLen) {
-  // Create log output directory if it does not exist
-  if (mkdir(LOG_FILE_DIRECTORY) != 0) {
-    if (errno != EEXIST) {
-      return GS_ERR_CODE_MKDIR_FAILED;
-    }
-  }
-
-  // Construct full log file path
-  char log_file_path[MAX_FNAME_LINENUM_SIZE];
-  snprintf(log_file_path, MAX_FNAME_LINENUM_SIZE, "%s%s", LOG_FILE_DIRECTORY, LOG_FILE_NAME);
-
-  FILE *fpointer = fopen(log_file_path, "a");
+  FILE *fpointer = fopen(LOG_FILE_NAME, "a");
   if (fpointer == NULL) {
     return GS_ERR_CODE_FAILED_FILE_OPEN;
   }
