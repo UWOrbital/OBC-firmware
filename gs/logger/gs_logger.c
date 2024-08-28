@@ -35,7 +35,7 @@ void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
 static gs_error_code_t writeToLogFile(const char logBuf[], size_t logBufLen) {
   // Create log output directory if it does not exist
-  if (mkdir(LOG_FILE_DIRECTORY, 0700) != 0) {
+  if (mkdir(LOG_FILE_DIRECTORY) != 0) {
     if (errno != EEXIST) {
       return GS_ERR_CODE_MKDIR_FAILED;
     }
