@@ -10,7 +10,8 @@
 
 // Must feed the watchdog before the timeout period expires
 // This value should provide some margin
-#define FEEDING_PERIOD pdMS_TO_TICKS(300)
+// Should be atleast twice as fast as the fastest timeout
+#define FEEDING_PERIOD pdMS_TO_TICKS(50)
 
 /* Task timeouts for watchdog */
 #define TASK_STATE_MGR_WATCHDOG_TIMEOUT portMAX_DELAY
@@ -105,6 +106,11 @@ void obcTaskFunctionSwWatchdog(void *params) {
   prvRaisePrivilege();
 
   initDigitalWatchdog();
+
+  // initialize all tasks as checked in
+  for (uint8_t i = 0; i < OBC_SCHEDULER_TASK_COUNT; i++) {
+    digitalWatchdogTaskCheckIn(i);
+  }
 
   while (1) {
     bool allTasksCheckedIn = true;
