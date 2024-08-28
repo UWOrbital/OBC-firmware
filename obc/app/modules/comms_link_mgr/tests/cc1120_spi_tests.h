@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 #include "cc1120.h"
-#include "logger.h"
+#include "logging.h"
 
 /**
  * @brief E2E test for SPI read function.

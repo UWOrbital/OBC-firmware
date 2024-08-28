@@ -3,7 +3,7 @@
 #include "fm25v20a.h"
 #include "obc_assert.h"
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_crc.h"
 
 #include <string.h>

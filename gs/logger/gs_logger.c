@@ -1,11 +1,14 @@
-#include "logger.h"
+#include "logging.h"
 #include "gs_errors.h"
 
 #include <string.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <errno.h>
 
+#define LOG_FILE_DIRECTORY "log_output/"
 #define LOG_FILE_NAME "gs_log.log"
 
 #define MAX_UINT32_STRING_SIZE 11U
@@ -31,14 +34,27 @@ void initLogger(void) { logLevel = LOG_DEFAULT_LEVEL; }
 void logSetLevel(log_level_t newLogLevel) { logLevel = newLogLevel; }
 
 static gs_error_code_t writeToLogFile(const char logBuf[], size_t logBufLen) {
-  FILE *fpointer = fopen(LOG_FILE_NAME, "a");
+  // Create log output directory if it does not exist
+  if (mkdir(LOG_FILE_DIRECTORY, 0700) != 0) {
+    if (errno != EEXIST) {
+      return GS_ERR_CODE_MKDIR_FAILED;
+    }
+  }
+
+  // Construct full log file path
+  char log_file_path[MAX_FNAME_LINENUM_SIZE];
+  snprintf(log_file_path, MAX_FNAME_LINENUM_SIZE, "%s%s", LOG_FILE_DIRECTORY, LOG_FILE_NAME);
+
+  FILE *fpointer = fopen(log_file_path, "a");
   if (fpointer == NULL) {
     return GS_ERR_CODE_FAILED_FILE_OPEN;
   }
+
   if (fwrite(logBuf, sizeof(char), logBufLen, fpointer) != logBufLen) {
     fclose(fpointer);
     return GS_ERR_CODE_FAILED_FILE_WRITE;
   }
+
   if (fclose(fpointer) != 0) {
     return GS_ERR_CODE_FAILED_FILE_CLOSE;
   }
@@ -56,6 +72,7 @@ logger_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_
     returnCode.gsError = GS_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
+
   if (errCodeStrLen >= MAX_UINT32_STRING_SIZE) {
     returnCode.gsError = GS_ERR_CODE_BUFF_TOO_SMALL;
     return returnCode;
@@ -90,6 +107,7 @@ logger_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line
     returnCode.gsError = GS_ERR_CODE_INVALID_ARG;
     return returnCode;
   }
+
   if (logBufLen >= MAX_LOG_SIZE) {
     returnCode.gsError = GS_ERR_CODE_BUFF_TOO_SMALL;
     return returnCode;

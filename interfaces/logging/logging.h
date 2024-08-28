@@ -29,18 +29,6 @@ typedef struct {
 } logger_error_code_t;
 
 /**
- * @enum log_output_location_t
- * @brief Log output location enum.
- *
- * Enum containing all locations to output logs to.
- */
-typedef enum { LOG_TO_SDCARD, LOG_TO_UART } log_output_location_t;
-
-#ifndef LOG_DEFAULT_OUTPUT_LOCATION
-#define LOG_DEFAULT_OUTPUT_LOCATION LOG_TO_UART
-#endif
-
-/**
  * @enum log_level_t
  * @brief Log levels enum.
  *
@@ -51,26 +39,6 @@ typedef enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL, L
 #ifndef LOG_DEFAULT_LEVEL
 #define LOG_DEFAULT_LEVEL LOG_TRACE
 #endif
-
-// Define a bit field structure for the log type and log level
-typedef struct {
-  unsigned int logType : 1;   // 1 bit for log type (0 for LOG_TYPE_ERROR_CODE, 1 for LOG_TYPE_MSG)
-  unsigned int logLevel : 3;  // 3 bits for log level
-} log_entry_t;
-
-// Define the log enum based on the bit field structure
-typedef enum { LOG_TYPE_ERROR_CODE = 0, LOG_TYPE_MSG = 1 } log_type_t;
-
-// Define a structure for the OBC event logger
-typedef struct {
-  log_entry_t logEntry;
-  const char *file;
-  uint32_t line;
-  union {
-    uint32_t errCode;
-    const char *msg;
-  };
-} logger_event_t;
 
 #define LOG_TRACE(msg) logMsg(LOG_TRACE, __FILE__, __LINE__, msg)
 #define LOG_DEBUG(msg) logMsg(LOG_DEBUG, __FILE__, __LINE__, msg)
@@ -110,13 +78,6 @@ typedef struct {
  * @brief Initialize the logger
  */
 void initLogger(void);
-
-/**
- * @brief Set the output location
- *
- * @param newOutputLocation The new output location
- */
-void logSetOutputLocation(log_output_location_t newOutputLocation);
 
 /**
  * @brief Set the logging level

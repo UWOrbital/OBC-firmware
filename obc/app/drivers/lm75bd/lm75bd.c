@@ -1,6 +1,6 @@
 #include "lm75bd.h"
 #include "obc_i2c_io.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
 

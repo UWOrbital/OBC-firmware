@@ -1,6 +1,6 @@
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_reliance_fs.h"

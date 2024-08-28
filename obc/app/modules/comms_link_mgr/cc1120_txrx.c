@@ -1,5 +1,5 @@
 #include "cc1120_txrx.h"
-#include "logger.h"
+#include "logging.h"
 #include "cc1120_mcu.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"

@@ -2,7 +2,7 @@
 #include "obc_assert.h"
 #include "obc_board_config.h"
 #include "obc_print.h"
-#include "logger.h"
+#include "logging.h"
 
 #include <sci.h>
 #include <stdarg.h>

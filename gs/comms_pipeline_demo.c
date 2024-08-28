@@ -7,7 +7,7 @@
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 #include "ax25.h"
 #include "fec.h"
 #include "aes128.h"

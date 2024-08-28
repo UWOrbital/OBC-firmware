@@ -3,7 +3,7 @@
 #include "obc_scheduler_config.h"
 #include "obc_print.h"
 #include "obc_privilege.h"
-#include "logger.h"
+#include "logging.h"
 
 #include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>

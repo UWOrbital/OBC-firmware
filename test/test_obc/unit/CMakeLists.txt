@@ -43,6 +43,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/reliance_edge/include # redconf.h
     ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
     ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
+    ${CMAKE_SOURCE_DIR}/obc/app/modules/logger
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
     ${CMAKE_SOURCE_DIR}/interfaces/logging
     ${CMAKE_SOURCE_DIR}/gs/common # gs_errors.h

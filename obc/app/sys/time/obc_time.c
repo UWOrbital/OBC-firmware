@@ -1,7 +1,7 @@
 #include "obc_time.h"
 #include "obc_time_utils.h"
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_assert.h"
 #include "ds3232_mz.h"
 

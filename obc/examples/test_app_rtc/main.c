@@ -1,6 +1,6 @@
 #include "obc_i2c_io.h"
 #include "obc_sci_io.h"
-#include "logger.h"
+#include "logging.h"
 #include "ds3232_mz.h"
 #include "obc_print.h"
 

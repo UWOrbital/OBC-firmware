@@ -1,4 +1,5 @@
 #include "logger.h"
+#include "logging.h"
 #include "obc_errors.h"
 
 #include <stdarg.h>

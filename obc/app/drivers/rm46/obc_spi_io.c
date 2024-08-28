@@ -1,6 +1,6 @@
 #include "obc_spi_io.h"
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>

@@ -5,7 +5,7 @@
 #include "obc_gs_aes128.h"
 #include "obc_gs_fec.h"
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_scheduler_config.h"
 #include "telemetry_manager.h"
 #include "telemetry_fs_utils.h"

@@ -1,7 +1,7 @@
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
 #include "obc_assert.h"
-#include "logger.h"
+#include "logging.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

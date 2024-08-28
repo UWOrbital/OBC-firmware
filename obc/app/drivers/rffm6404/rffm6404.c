@@ -1,5 +1,5 @@
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 #include "gio.h"
 #include "max5360.h"
 #include "obc_board_config.h"

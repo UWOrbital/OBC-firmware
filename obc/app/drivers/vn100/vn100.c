@@ -1,6 +1,6 @@
 #include "obc_errors.h"
 #include "obc_board_config.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_sci_io.h"
 #include "vn100.h"
 

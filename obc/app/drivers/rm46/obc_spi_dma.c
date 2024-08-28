@@ -2,7 +2,7 @@
 #include "spi.h"
 #include "sys_dma.h"
 #include "obc_errors.h"
-#include "logger.h"
+#include "logging.h"
 #include "obc_privilege.h"
 #include "obc_spi_io.h"
 #include "obc_dma.h"
