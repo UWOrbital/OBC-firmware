@@ -15,7 +15,8 @@ const InputForm = () => {
 		// Show a map centered at latitude / longitude.
 	});
 
-	const handleSubmit = (event) => {
+	const handleSubmit = (_: any) => {
+		// TODO: Use the proper type for this
 		const submission = {
 			latitude,
 			longitude,
@@ -29,6 +30,16 @@ const InputForm = () => {
 		alert("Thanks for submitting!");
 	};
 
+	const handleLatitudeChange = (event: any) => {
+		// TODO: Use the proper type for this
+		setLatitude(event.target.value as number); // TODO: Use the proper type for this
+	};
+
+	const handleLongitudeChange = (event: any) => {
+		// TODO: Use the proper type for this
+		setLongitude(event.target.value as number); // TODO: Use the proper type for this
+	};
+
 	return (
 		<form onSubmit={handleSubmit} id="main-form">
 			<label>Latitude</label>
@@ -37,7 +48,7 @@ const InputForm = () => {
 				type="text"
 				placeholder="Enter your coordinates"
 				value={latitude}
-				onChange={(event) => setLatitude(event.target.value)}
+				onChange={handleLatitudeChange}
 			/>
 			<label>Longitude</label>
 			<input
@@ -45,7 +56,7 @@ const InputForm = () => {
 				type="text"
 				placeholder="Enter your coordinates"
 				value={longitude}
-				onChange={(event) => setLongitude(event.target.value)}
+				onChange={handleLongitudeChange}
 			/>
 			<label>Call Sign</label>
 			<input
