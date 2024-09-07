@@ -22,8 +22,11 @@ repos:
     - id: ruff
       args: ["--fix"]
     - id: ruff-format
--   repo: https://github.com/biomejs/pre-commit
-    rev: "v0.4.0"
+-   repo: local
     hooks:
-    -   id: biome-check
-        additional_dependencies: ["@biomejs/biome@1.4.1"]
+      - id: local-biome-format
+        name: biome format
+        entry: npx biome format --write --files-ignore-unknown=true --no-errors-on-unmatched ./gs/frontend/aro/src/ ./gs/frontend/mcc/src/
+        language: system
+        types: [text]
+        files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css)$"
