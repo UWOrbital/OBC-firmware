@@ -46,7 +46,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES Test)
     add_subdirectory(test)
 endif()
 
-# Build tiny-aes and lib-correct libs
+# Build external libs
 add_subdirectory(libs)
 
 # Build interface libs

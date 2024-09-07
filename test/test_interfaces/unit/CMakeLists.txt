@@ -5,7 +5,7 @@ set(TEST_DEPENDENCIES
 )
 
 set(TEST_MOCKS
-    ${CMAKE_SOURCE_DIR}/test/mocks/mock_heap.c
+
 )
 
 set(TEST_SOURCES
@@ -16,6 +16,9 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_ax25.cpp
     ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_fec.cpp
     ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_command_response_pack_unpack.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_aes128.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_aes128.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_uplink_flow.cpp
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
@@ -30,8 +33,8 @@ target_include_directories(${TEST_BINARY}
 target_link_libraries(${TEST_BINARY}
     PRIVATE
     GTest::GTest
-    lib-correct
     obc-gs-interface
+    rs-lib
 )
 
 add_test(${TEST_BINARY} ${TEST_BINARY})

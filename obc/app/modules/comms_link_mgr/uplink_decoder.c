@@ -1,4 +1,5 @@
 #include "uplink_decoder.h"
+#include "obc_errors.h"
 #include "obc_gs_aes128.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
@@ -9,9 +10,11 @@
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_data.h"
 #include "command_manager.h"
+#include "obc_print.h"
 #include "obc_scheduler_config.h"
 #include "obc_logging.h"
 #include "comms_manager.h"
+#include "obc_gs_uplink_flow.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -44,7 +47,7 @@ static QueueHandle_t decodeDataQueueHandle = NULL;
 static StaticQueue_t decodeDataQueue;
 static uint8_t decodeDataQueueStack[DECODE_DATA_QUEUE_LENGTH * DECODE_DATA_QUEUE_ITEM_SIZE];
 
-static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData);
+static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data);
 
 /**
  * @brief parses the completely decoded data and sends it to the command manager and detects end of transmission
@@ -63,6 +66,7 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
   // Keep unpacking cmdBytes into cmd_msg_t commands to send to command manager until we have unpacked all the bytes in
   // cmdBytes If the command id is the id for end of transmission, isStillUplinking should be set to false
   while (bytesUnpacked < AES_DECRYPTED_SIZE) {
+    sciPrintf("byte: %x\r\n", cmdBytes[bytesUnpacked]);
     if (cmdBytes[bytesUnpacked] == CMD_END_OF_FRAME) {
       // means we have reached the end of the packet and rest can be ignored
       return OBC_ERR_CODE_SUCCESS;
@@ -71,8 +75,13 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
     if (unpackCmdMsg(cmdBytes, &bytesUnpacked, &command) != OBC_GS_ERR_CODE_SUCCESS) {
       return OBC_ERR_CODE_FAILED_UNPACK;
     }
+    sciPrintf("Sending command to command manager\r\n");
+    sciPrintf("Command ID: %d\r\n", command.id);
+    sciPrintf("Command isTimeTagged: %d\r\n", command.isTimeTagged);
+    sciPrintf("Command timestamp: %d\r\n", command.timestamp);
 
     RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
+    sciPrintf("After sendToCommandQueue\r\n");
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -122,9 +131,9 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
         if (axDataIndex > 2) {
           axData.length = axDataIndex;
 
-          packed_rs_packet_t rsData = {0};
-          aes_data_t aesData = {0};
-          LOG_IF_ERROR_CODE(decodePacket(&axData, &rsData, &aesData));
+          sciPrintf("Decoding packet sent\r\n");
+          LOG_IF_ERROR_CODE(decodePacketAndSendCommand(&axData));
+          sciPrintf("Decoded packet sent\r\n");
 
           // Restart the decoding process
           memset(&axData, 0, sizeof(axData));
@@ -143,13 +152,93 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
       }
       if (startFlagReceived) {
         axData.data[axDataIndex++] = byte;
+        sciPrintf("Received byte: %x at %d\r\n", byte, axDataIndex - 1);
       }
     }
   }
 }
 
+static bool ax25IsIFrame(const packed_ax25_i_frame_t *ax25Data) {
+  return ~(ax25Data->data[AX25_CONTROL_BYTES_POSITION] & (0x1));  // Last bit must be 0
+}
+
+static void printData(uint8_t *data, uint32_t len) {
+  sciPrintf("{");
+  for (uint32_t i = 0; i < len; ++i) {
+    sciPrintf("0x%x, \r\n", data[i]);
+  }
+  sciPrintf("}\r\n");
+}
+
+static obc_gs_error_code_t uplinkDecodePacketDemo(packed_ax25_i_frame_t *ax25Data, uplink_flow_packet_t *command) {
+  if (ax25Data == NULL || command == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+  sciPrintf("In uplinkDecodePacket\r\n");
+  // perform bit unstuffing
+  unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
+  obc_gs_error_code_t interfaceErr =
+      ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedAx25Pkt.data, &unstuffedAx25Pkt.length);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return interfaceErr;
+  }
+  sciPrintf("After ax25Unstuff\r\n");
+
+  if (ax25IsIFrame(ax25Data)) {
+    // Only decode data if the packet is an I frame
+    // copy the unstuffed data into rsData
+    packed_rs_packet_t rsData = {0};
+    sciPrintf("Length of unstuffed packet: %d\r\n", unstuffedAx25Pkt.length);
+    memcpy(rsData.data, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
+    // clear the info field of the unstuffed packet
+    memset(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
+    // decode the info field and store it in the unstuffed packet
+    printData(rsData.data, RS_ENCODED_SIZE);
+    sciPrintf("Before rsDecode\r\n");
+    interfaceErr = rsDecode(&rsData, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
+    if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+      return interfaceErr;
+    }
+  }
+  sciPrintf("After rsDecode\r\n");
+
+  // check for a valid ax25 frame and return the command response if necessary
+  u_frame_cmd_t recievedCmd = {0};
+  interfaceErr = ax25Recv(&unstuffedAx25Pkt, &recievedCmd);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return interfaceErr;
+  }
+  sciPrintf("After ax25Recv\r\n");
+  if (unstuffedAx25Pkt.length != AX25_MINIMUM_I_FRAME_LEN) {
+    if (recievedCmd != U_FRAME_CMD_CONN && recievedCmd != U_FRAME_CMD_ACK && recievedCmd != U_FRAME_CMD_DISC) {
+      return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
+    }
+    command->type = UPLINK_FLOW_DECODED_UFRAME_CMD;
+    command->command = recievedCmd;
+    return OBC_GS_ERR_CODE_SUCCESS;
+  }
+  sciPrintf("UFrame check passed\r\n");
+  // Decrypt packet
+  uint8_t ciphertext[AES_DECRYPTED_SIZE] = {0};
+  aes_data_t aesData = {0};
+  aesData.ciphertext = ciphertext;
+
+  memcpy(aesData.iv, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
+  memcpy(aesData.ciphertext, unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
+         RS_DECODED_SIZE - AES_IV_SIZE);
+  aesData.ciphertextLen = AES_DECRYPTED_SIZE;
+
+  interfaceErr = aes128Decrypt(&aesData, command->data, AES_DECRYPTED_SIZE);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return interfaceErr;
+  }
+  command->type = UPLINK_FLOW_DECODED_DATA;
+
+  return OBC_GS_ERR_CODE_SUCCESS;
+}
+
 /**
- * @brief completely decode a recieved packet
+ * @brief completely decode a received packet and send the command to the command manager
  *
  * @param data - packed ax25 packet with received data
  * @param rsData - holds packed reed solomon data
@@ -158,69 +247,48 @@ void obcTaskFunctionCommsUplinkDecoder(void *pvParameters) {
  *
  * @return obc_error_code_t - whether or not the data was completely decoded successfully
  */
-static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_packet_t *rsData, aes_data_t *aesData) {
-  obc_gs_error_code_t interfaceErr;
-
-  // perform bit unstuffing
-  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
-  interfaceErr = ax25Unstuff(ax25Data->data, ax25Data->length, unstuffedPacket.data, &unstuffedPacket.length);
-  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_AX25_DECODE_FAILURE;
-  }
-
-  if (unstuffedPacket.data[AX25_CONTROL_BYTES_POSITION] & (0x01 << 1)) {
-    // If the second least significant bit was a 1 it is a U Frame
-    // copy the unstuffed data into rsData
-    memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
-    // clear the info field of the unstuffed packet
-    memset(unstuffedPacket.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
-    // decode the info field and store it in the unstuffed packet
-    interfaceErr = rsDecode(rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
-    if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-      return OBC_ERR_CODE_FEC_DECODE_FAILURE;
-    }
-  }
-
+static obc_error_code_t decodePacketAndSendCommand(packed_ax25_i_frame_t *ax25Data) {
   obc_error_code_t errCode;
-  // check for a valid ax25 frame and perform the command response if necessary
-  u_frame_cmd_t recievedCmd = {0};
-  interfaceErr = ax25Recv(&unstuffedPacket, &recievedCmd);
+  obc_gs_error_code_t interfaceErr;
+  uplink_flow_packet_t command = {0};
+
+  interfaceErr = (uplinkDecodePacketDemo(ax25Data, &command));
+  sciPrintf("After upLinkDecodePacket\r\n");
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_INVALID_AX25_PACKET;
+    return OBC_ERR_CODE_UPLINK_FLOW_DECODE_FAILURE;
   }
-  if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
-    if (recievedCmd == U_FRAME_CMD_CONN) {
-      comms_event_t connEvent = {.eventID = COMMS_EVENT_CONN_RECEIVED};
-      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&connEvent));
+  sciPrintf("Decoded packet successfully\r\n");
+  sciPrintf("Command type: %d\r\n", command.type);
+
+  // Handle the decoded data
+  switch (command.type) {
+    case UPLINK_FLOW_DECODED_UFRAME_CMD: {
+      comms_event_t commsEvent = {0};
+
+      switch (command.command) {
+        case U_FRAME_CMD_CONN:
+          commsEvent.eventID = COMMS_EVENT_CONN_RECEIVED;
+          break;
+
+        case U_FRAME_CMD_DISC:
+          commsEvent.eventID = COMMS_EVENT_DISC_RECEIVED;
+          break;
+
+        case U_FRAME_CMD_ACK:
+          commsEvent.eventID = COMMS_EVENT_ACK_RECEIVED;
+          break;
+
+        default:
+          return OBC_ERR_CODE_INVALID_ARG;
+      }
+      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&commsEvent));
       return OBC_ERR_CODE_SUCCESS;
-    } else if (recievedCmd == U_FRAME_CMD_ACK) {
-      comms_event_t ackEvent = {.eventID = COMMS_EVENT_ACK_RECEIVED};
-      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&ackEvent));
-      return OBC_ERR_CODE_SUCCESS;
-    } else if (recievedCmd == U_FRAME_CMD_DISC) {
-      comms_event_t discEvent = {.eventID = COMMS_EVENT_DISC_RECEIVED};
-      RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&discEvent));
-    } else {
-      return OBC_ERR_CODE_INVALID_AX25_PACKET;
     }
+    case UPLINK_FLOW_DECODED_DATA:
+      RETURN_IF_ERROR_CODE(handleCommands(command.data));
+      return OBC_ERR_CODE_SUCCESS;
   }
-  uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
-  aesData->ciphertext = ciphertext;
-
-  memcpy(aesData->iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
-  memcpy(aesData->ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
-         RS_DECODED_SIZE - AES_IV_SIZE);
-  aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
-
-  uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
-  interfaceErr = aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE);
-  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
-  }
-
-  RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
-
-  return OBC_ERR_CODE_SUCCESS;
+  return OBC_ERR_CODE_INVALID_ARG;
 }
 
 /**
