@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 
 const InputForm = () => {
 	const [latitude, setLatitude] = useState(0);
@@ -30,22 +30,22 @@ const InputForm = () => {
 		alert("Thanks for submitting!");
 	};
 
-	const handleLatitudeChange = (event: any) => {
-		// TODO: Use the proper type for this
-		setLatitude(event.target.value as number); // TODO: Use the proper type for this
+	const handleLatitudeChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const value = parseFloat(event.target.value);
+		setLatitude(value);
 	};
 
-	const handleLongitudeChange = (event: any) => {
-		// TODO: Use the proper type for this
-		setLongitude(event.target.value as number); // TODO: Use the proper type for this
-	};
+	const handleLongitudeChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const value = parseFloat(event.target.value);
 
+		setLongitude(value);
+	};
 	return (
 		<form onSubmit={handleSubmit} id="main-form">
 			<label>Latitude</label>
 			<input
 				required
-				type="text"
+				type="number"
 				placeholder="Enter your coordinates"
 				value={latitude}
 				onChange={handleLatitudeChange}
@@ -53,7 +53,7 @@ const InputForm = () => {
 			<label>Longitude</label>
 			<input
 				required
-				type="text"
+				type="number"
 				placeholder="Enter your coordinates"
 				value={longitude}
 				onChange={handleLongitudeChange}
