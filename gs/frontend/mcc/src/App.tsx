@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Header from "./Header";
-import Dashboard from "./Dashboard";
-import MissionCommands from "./MissionCommands";
-import TelemetryData from "./TelemetryData";
-import ARORequests from "./ARORequests";
-import Logs from "./Logs";
-import NotFound from "./NotFound";
+import Header from "./common/Header";
+import Dashboard from "./dashboard/Dashboard";
+import MissionCommands from "./mission_commands/MissionCommands";
+import TelemetryData from "./telemetry/TelemetryData";
+import ARORequests from "./aro_requests/ARORequests";
+import Logs from "./common/Logs";
+import NotFound from "./common/NotFound";
 
 function App() {
 	return (
