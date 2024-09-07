@@ -97,7 +97,7 @@ void obcTaskFunctionLogger(void *pvParameters) {
     int ret = 0;
 
 #if defined(LOG_DATE_TIME)
-    rtc_date_time_t *currDate = &queueMsg.timestamp;
+    const rtc_date_time_t *currDate = &queueMsg.timestamp;
     ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%02u-%02u-%02u_%02u-%02u-%02u %-5s -> %s:%lu", currDate->date.year,
                    currDate->date.month, currDate->date.date, currDate->time.hours, currDate->time.minutes,
                    currDate->time.seconds, LEVEL_STRINGS[queueMsg.logEntry.logLevel], queueMsg.file, queueMsg.line);
