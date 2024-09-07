@@ -7,7 +7,7 @@
 // #define MBEDTLS_PLATFORM_MEMORY
 
 // // Enable platform support
-// #define MBEDTLS_PLATFORM_C
+#define MBEDTLS_PLATFORM_C
 
 // // Enable platform memory functions
 // #define MBEDTLS_PLATFORM_MEMORY
