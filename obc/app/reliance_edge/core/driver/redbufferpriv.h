@@ -150,7 +150,7 @@
     be specified: this is what IS_POWER_OF_2() is checking for.
 */
 #define BFLAG_TYPE_IS_VALID(flags) \
-  ((((flags)&BFLAG_META_MASK) == 0U) || IS_POWER_OF_2(((flags)&BFLAG_META_MASK) & ~BFLAG_META))
+  ((((flags) & BFLAG_META_MASK) == 0U) || IS_POWER_OF_2(((flags) & BFLAG_META_MASK) & ~BFLAG_META))
 
 /*  An invalid block number.  Used to indicate buffers which are not currently
     in use.

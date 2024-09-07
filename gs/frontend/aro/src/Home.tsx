@@ -1,11 +1,11 @@
 import InputForm from "./InputForm";
 
 function Home() {
-  return (
-    <>
-      <InputForm />
-    </>
-  );
+	return (
+		<>
+			<InputForm />
+		</>
+	);
 }
 
 export default Home;

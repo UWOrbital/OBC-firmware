@@ -26,7 +26,7 @@ repos:
     hooks:
       - id: local-biome-format
         name: biome format
-        entry: npx biome format --write --files-ignore-unknown=true --no-errors-on-unmatched ./gs/frontend/aro/src/ ./gs/frontend/mcc/src/
+        entry: npx biome format --write --files-ignore-unknown=true --no-errors-on-unmatched --json-formatter-enabled=false ./gs/frontend/aro/src/ ./gs/frontend/mcc/src/
         language: system
         types: [text]
         files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css)$"
