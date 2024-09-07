@@ -498,14 +498,14 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
     }
 
     /* Check tag in "constant-time" */
-    for( diff = 0, i = 0; i < tag_len; i++ )
+    for( diff = 0, i = 0; i < tag_len; i++ ){
         diff |= tag[i] ^ check_tag[i];
-        printf("Tag byte %zu: Expected 0x%02x, Got 0x%02x\n", i, tag[i], check_tag[i]);
+        // printf("Tag byte %zu: Expected 0x%02x, Got 0x%02x\n", i, tag[i], check_tag[i]);
 
-
+    }
     if( diff != 0 )
     {
-        printf("Tag mismatch detected\n");
+        // printf("Tag mismatch detected\n");
         mbedtls_zeroize( output, length );
         return( MBEDTLS_ERR_GCM_AUTH_FAILED );
     }
