@@ -42,27 +42,6 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
       gcmEncrypt(&aesDataEncrypt, plaintext, plaintextLen, additionalData, additionalDataLen, ciphertext);
   ASSERT_EQ(encResult, OBC_GS_ERR_CODE_SUCCESS);
 
-  // Print the ciphertext for debugging in hex
-  printf("Ciphertext: ");
-  for (size_t i = 0; i < plaintextLen; ++i) {
-    printf("%02x", ciphertext[i]);
-  }
-  printf("\n");
-
-  // Print the tag for debugging in hex
-  printf("Tag: ");
-  for (size_t i = 0; i < tagLen; ++i) {
-    printf("%02x", aesDataEncrypt.tag[i]);
-  }
-  printf("\n");
-
-  // Additional debug: Check the tag after encryption
-  printf("Tag after encryption in test: ");
-  for (size_t i = 0; i < aesDataEncrypt.tagLen; ++i) {
-    printf("%02x", aesDataEncrypt.tag[i]);
-  }
-  printf("\n");
-
   // Prepare aes_data_t structure for decryption
   aes_data_t aesDataDecrypt;
   memcpy(aesDataDecrypt.iv, iv, AES_IV_SIZE);
@@ -71,42 +50,12 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   memcpy(aesDataDecrypt.tag, aesDataEncrypt.tag, tagLen);
   aesDataDecrypt.tagLen = tagLen;
 
-  // Additional debug: Check the tag before decryption
-  printf("Tag before decryption in test: ");
-  for (size_t i = 0; i < aesDataDecrypt.tagLen; ++i) {
-    printf("%02x", aesDataDecrypt.tag[i]);
-  }
-  printf("\n");
-
   // Decrypt the ciphertext
   obc_gs_error_code_t decResult =
       aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen, additionalData, additionalDataLen);
 
-  // Print the decrypted text for debugging in hex
-  printf("Decrypted (hex): ");
-  for (size_t i = 0; i < plaintextLen; ++i) {
-    printf("%02x", decrypted[i]);
-  }
-  printf("\n");
-
-  // Print the tag after decryption
-  printf("Tag after Decryption: ");
-  for (size_t i = 0; i < tagLen; ++i) {
-    printf("%02x", aesDataDecrypt.tag[i]);
-  }
-  printf("\n");
-
-  // Print the plaintext for debugging in hex
-  printf("Plaintext (hex): ");
-  for (size_t i = 0; i < plaintextLen; ++i) {
-    printf("%02x", plaintext[i]);
-  }
-  printf("\n");
-
-  // Print decResult
-  printf("DecResult: %d\n", decResult);
-  // ASSERT_EQ(decResult, OBC_GS_ERR_CODE_SUCCESS);
+  ASSERT_EQ(decResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Verify the decrypted text matches the original plaintext
-  // EXPECT_EQ(memcmp(plaintext, decrypted, plaintextLen), 0);
+  EXPECT_EQ(memcmp(plaintext, decrypted, plaintextLen), 0);
 }
