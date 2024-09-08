@@ -56,6 +56,11 @@ dkms.conf
 .idea/
 compile_commands.json
 .cache/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 .env
 
@@ -86,5 +91,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Frontend build
-*/dist
-*/dist-ssr
+*dist
+*dist-ssr
+*.local
