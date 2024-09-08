@@ -26,4 +26,5 @@ jobs:
           npm ci
       - name: Build ${{matrix.project}}
         run: |
+          cd ./gs/frontend/${{matrix.project}}
           npm run build
