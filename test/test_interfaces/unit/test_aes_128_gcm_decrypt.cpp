@@ -114,5 +114,4 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
 
   // Check that the decryption failed due to authentication failure
   ASSERT_EQ(decResult, OBC_GS_ERR_CODE_AUTH_FAILED);
-  ASSERT_EQ(decResult, OBC_GS_ERR_CODE_SUCCESS);
 }
