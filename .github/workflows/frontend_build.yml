@@ -1,9 +1,5 @@
 name: Frontend Build
-on: push
-  # pull_request:
-  # push:
-  #   branches:
-  #     - main
+on: [push, pull_request]
 
 jobs:
   build:
