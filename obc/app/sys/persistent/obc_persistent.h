@@ -92,6 +92,17 @@ typedef struct {
   alarm_mgr_persist_data_t data;
 } alarm_mgr_persist_t;
 
+// state_mgr module
+
+typedef struct {
+  uint8_t resetCounter;
+} state_mgr_persist_data_t;
+
+typedef struct {
+  obc_persist_section_header_t header;
+  state_mgr_persist_data_t data;
+} state_mgr_persist_t;
+
 /*---------------------------------------------------------------------------*/
 
 /**
@@ -101,6 +112,7 @@ typedef struct {
 typedef struct {
   obc_time_persist_t obcTime;
   alarm_mgr_persist_t alarmMgr[OBC_PERSISTENT_MAX_SUBINDEX_ALARM];
+  state_mgr_persist_t stateMgr;
 } obc_persist_t;
 
 #define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))
@@ -111,7 +123,7 @@ typedef struct {
 typedef enum {
   OBC_PERSIST_SECTION_ID_OBC_TIME = 0,
   OBC_PERSIST_SECTION_ID_ALARM_MGR,
-
+  OBC_PERSIST_SECTION_ID_STATE_MGR,
   OBC_PERSIST_SECTION_ID_COUNT  // Must always be last
 } obc_persist_section_id_t;
 

@@ -38,6 +38,8 @@ typedef struct {
     uint8_t obcState;
     uint8_t epsState;
 
+    uint8_t resetStateCounter;
+
     uint32_t numCspPacketsRcvd;
   };
 

@@ -7,6 +7,7 @@
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
+#include "obc_persistent.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -32,11 +33,73 @@ static StaticQueue_t stateMgrQueue;
 static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
 
 static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
-
+static state_mgr_state_t cubeSatState = CUBESAT_STATE_INITIALIZATION;
+static state_mgr_persist_data_t stateMgrResetData = {0};
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
  */
 static void sendStartupMessages(void);
+
+static obc_error_code_t resetStateCounter();
+
+/**
+ * @brief determines what the next Cubesat state should be and sets it to that state
+ *
+ * @param event the comms manager event triggering a state transition
+ * @param state pointer to comms state variable
+ *
+ * @return obc_error_code_t - whether or not the state transition was successful
+ */
+static obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state_t *state);
+
+static obc_error_code_t handleInitializationState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  switch (event) {
+    case STATE_MGR_TASKS_RUNNING_EVENT_ID:
+      *state = CUBESAT_STATE_NOMINAL;
+      return OBC_ERR_CODE_SUCCESS;
+    case STATE_MGR_DETUMBLING_EVENT_ID:
+      *state = CUBESAT_STATE_DETUMBLING;
+      return OBC_ERR_CODE_SUCCESS;
+    default:
+      return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
+  }
+}
+
+static obc_error_code_t handleNormalState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  switch (event) {
+    case STATE_MGR_RESET_EVENT_ID:
+      *state = CUBESAT_STATE_RESET;
+      resetStateCounter();
+      return OBC_ERR_CODE_SUCCESS;
+
+    case STATE_MGR_LOWPWR_EVENT_ID:
+      *state = CUBESAT_STATE_LOW_PWR;
+      return OBC_ERR_CODE_SUCCESS;
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE_TRANSITION;
+  }
+}
+
+static obc_error_code_t handleAssemblyState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  return OBC_ERR_CODE_INVALID_STATE;
+}
+
+static obc_error_code_t handleDetumblingState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  return OBC_ERR_CODE_INVALID_STATE;
+}
+
+static obc_error_code_t handleLowPwrState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  switch (event) {
+    case STATE_MGR_RESET_EVENT_ID:
+      *state = CUBESAT_STATE_RESET;
+      resetStateCounter();
+      return OBC_ERR_CODE_SUCCESS;
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE;
+  }
+}
 
 void obcTaskInitStateMgr(void) {
   ASSERT((stateMgrQueueStack != NULL) && (&stateMgrQueue != NULL));
@@ -59,69 +122,129 @@ obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
 
 static void sendStartupMessages(void) {}
 
+static obc_error_code_t resetStateCounter() {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(
+      getPersistentData(OBC_PERSIST_SECTION_ID_STATE_MGR, &stateMgrResetData, sizeof(state_mgr_persist_data_t)));
+  stateMgrResetData.resetCounter++;
+  telemetry_data_t resetTelem = {
+      .id = TELEM_OBC_STATE, .timestamp = getCurrentUnixTime(), .resetStateCounter = stateMgrResetData.resetCounter};
+  RETURN_IF_ERROR_CODE(addTelemetryData(&resetTelem));
+  RETURN_IF_ERROR_CODE(
+      setPersistentData(OBC_PERSIST_SECTION_ID_STATE_MGR, &stateMgrResetData, sizeof(state_mgr_persist_data_t)));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t getNextCubeSatState(state_mgr_event_id_t event, state_mgr_state_t *state) {
+  if (state == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  switch (*state) {
+    case CUBESAT_STATE_INITIALIZATION:
+      return handleInitializationState(event, state);
+
+    case CUBESAT_STATE_NOMINAL:
+      return handleNormalState(event, state);
+
+    case CUBESAT_STATE_ASSEMBLY:
+      // TODO: probably remove this state, for now physically removing jumper on board and then doing power on reset
+      // should bring to this stste not sure if there is a way to implement that in code. Returning invalid state for
+      // now
+      return handleAssemblyState(event, state);
+
+    case CUBESAT_STATE_LOW_PWR:
+      return handleLowPwrState(event, state);
+
+    case CUBESAT_STATE_RESET:
+      // TODO: According to the FSM chart, the OBC should just initialize the tasks again after this, so go back to
+      // CUBESAT_STATE_INITIALIZATION state, there isn't really an event which would trigger a state change from the
+      // CUBESAT_STATE_RESET state. Left blank for now as I am not sure what needs to be done here, Returning invalid
+      // state for now
+      return OBC_ERR_CODE_INVALID_STATE;
+
+    case CUBESAT_STATE_DETUMBLING:
+      return handleDetumblingState(event, state);
+
+    default:
+      return OBC_ERR_CODE_INVALID_STATE;
+  }
+}
+
 void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   ASSERT(stateMgrQueueHandle != NULL);
 
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+  if (cubeSatState == CUBESAT_STATE_INITIALIZATION) {
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
-  /* Initialize critical peripherals */
-  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
-  LOG_IF_ERROR_CODE(initTime());         // RTC
+    /* Initialize critical peripherals */
+    // LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
+    LOG_IF_ERROR_CODE(initTime());  // RTC
 
-  lm75bd_config_t config = {
-      .devAddr = LM75BD_OBC_I2C_ADDR,
-      .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
-      .osFaultQueueSize = 2,
-      .osPolarity = LM75BD_OS_POL_ACTIVE_LOW,
-      .osOperationMode = LM75BD_OS_OP_MODE_COMP,
-      .overTempThresholdCelsius = 125.0f,
-      .hysteresisThresholdCelsius = 75.0f,
-  };
+    lm75bd_config_t config = {
+        .devAddr = LM75BD_OBC_I2C_ADDR,
+        .devOperationMode = LM75BD_DEV_OP_MODE_NORMAL,
+        .osFaultQueueSize = 2,
+        .osPolarity = LM75BD_OS_POL_ACTIVE_LOW,
+        .osOperationMode = LM75BD_OS_OP_MODE_COMP,
+        .overTempThresholdCelsius = 125.0f,
+        .hysteresisThresholdCelsius = 75.0f,
+    };
 
-  LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
+    LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
-  initFRAM();  // FRAM storage (OBC)
+    initFRAM();  // FRAM storage (OBC)
 
-  // Initialize the state of each module. This will not start any tasks.
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
+    // Initialize the state of each module. This will not start any tasks.
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
+    obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
 
-  /* Create all tasks*/
-  taskENTER_CRITICAL();
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
-  obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
+    /* Create all tasks*/
+    taskENTER_CRITICAL();
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_TELEMETRY_MGR);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMAND_MGR);
+    obcSchedulerCreateTaskWithArgs(OBC_SCHEDULER_CONFIG_ID_COMMS_MGR, &commsManagerState);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_EPS_MGR);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
-  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR);
-  taskEXIT_CRITICAL();
+    obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR);
+    taskEXIT_CRITICAL();
 
-  /* Send initial messages to system queues */
-  sendStartupMessages();
+    /* Send initial messages to system queues */
+    sendStartupMessages();
+
+    state_mgr_event_t tasksRunningEvent = {
+        .eventID = STATE_MGR_TASKS_RUNNING_EVENT_ID,
+        .data =
+            {
+                .i = 0,
+            },
+
+    };
+    sendToStateMgrEventQueue(&tasksRunningEvent);
+  }
 
   while (1) {
     state_mgr_event_t inMsg;
@@ -134,9 +257,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
       continue;
     }
 
-    switch (inMsg.eventID) {
-      default:
-        LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_EVENT);
-    }
+    LOG_IF_ERROR_CODE(getNextCubeSatState(inMsg.eventID, &cubeSatState));
   }
 }
