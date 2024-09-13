@@ -30,35 +30,37 @@ add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 
 # Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
+    set(${OUT_FILE_NAME}, OBC-firmware.out)
   add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
-	add_executable(OBC-firmware.out app/app_main.c)
+	add_executable(${OUT_FILE_NAME} app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
+    set(${OUT_FILE_NAME}, OBC-firmware-${EXAMPLE_TYPE}.out)
 	if (${EXAMPLE_TYPE} MATCHES DMA_SPI)
-		add_executable(OBC-firmware.out examples/dma_spi_demo/main.c)
+		add_executable(${OUT_FILE_NAME} examples/dma_spi_demo/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES FRAM_PERSIST)
-		add_executable(OBC-firmware.out examples/test_app_fram_persist/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_fram_persist/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES FRAM_SPI)
-		add_executable(OBC-firmware.out examples/test_app_fram_spi/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_fram_spi/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES LM75BD)
-		add_executable(OBC-firmware.out examples/test_app_lm75bd/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_lm75bd/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES MPU6050)
-		add_executable(OBC-firmware.out examples/test_app_mpu6050/main.c examples/test_app_mpu6050/source/mpu6050.c)
-		target_include_directories (OBC-firmware.out PRIVATE examples/test_app_mpu6050/include)
+		add_executable(${OUT_FILE_NAME} examples/test_app_mpu6050/main.c examples/test_app_mpu6050/source/mpu6050.c)
+		target_include_directories (${OUT_FILE_NAME} PRIVATE examples/test_app_mpu6050/include)
 	elseif(${EXAMPLE_TYPE} MATCHES RE_SD)
-		add_executable(OBC-firmware.out examples/test_app_reliance_edge_sd/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_reliance_edge_sd/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES RTC)
-		add_executable(OBC-firmware.out examples/test_app_rtc/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_rtc/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES UART_RX)
-		add_executable(OBC-firmware.out examples/test_app_uart_rx/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_uart_rx/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES UART_TX)
-		add_executable(OBC-firmware.out examples/test_app_uart_tx/main.c)
+		add_executable(${OUT_FILE_NAME} examples/test_app_uart_tx/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES VN100)
-		add_executable(OBC-firmware.out examples/vn100_demo/test_binary_reading/main.c)
+		add_executable(${OUT_FILE_NAME} examples/vn100_demo/test_binary_reading/main.c)
   elseif(${EXAMPLE_TYPE} MATCHES CC1120_SPI)
-    add_executable(OBC-firmware.out examples/test_app_cc1120_spi/main.c examples/test_app_cc1120_spi/cc1120_spi_tests.c)
-    target_include_directories (OBC-firmware.out PRIVATE examples/test_app_cc1120_spi)
+    add_executable(${OUT_FILE_NAME} examples/test_app_cc1120_spi/main.c examples/test_app_cc1120_spi/cc1120_spi_tests.c)
+    target_include_directories (${OUT_FILE_NAME} PRIVATE examples/test_app_cc1120_spi)
   elseif(${EXAMPLE_TYPE} MATCHES RS)
-    add_executable(OBC-firmware.out examples/test_app_rs/main.c)
+    add_executable(${OUT_FILE_NAME} examples/test_app_rs/main.c)
 
   # ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()
@@ -76,16 +78,16 @@ add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
 
 # Application
-target_link_options(OBC-firmware.out PRIVATE
+target_link_options(${OUT_FILE_NAME} PRIVATE
     -specs=nosys.specs
     -Wl,-Map=OBC-firmware.map -T${APP_LINKER_SCRIPT}
     -Wl,--print-memory-usage
     -Wl,-L${LD_DIR_PATH}
 )
 
-target_compile_options(OBC-firmware.out PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
+target_compile_options(${OUT_FILE_NAME} PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
 
-target_compile_definitions(OBC-firmware.out PRIVATE
+target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     ${BOARD_TYPE}
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
@@ -97,7 +99,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
-target_include_directories(OBC-firmware.out PUBLIC
+target_include_directories(${OUT_FILE_NAME} PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
 )
 
@@ -108,7 +110,7 @@ add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
 
-target_link_libraries(OBC-firmware.out PRIVATE
+target_link_libraries(${OUT_FILE_NAME} PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
@@ -128,9 +130,9 @@ add_custom_command(
                                                                      --only-section=.init_array
                                                                      --only-section=.fini_array
                                                                      --only-section=.data
-                                                                        OBC-firmware.out OBC-firmware.bin
+                                                                        ${OUT_FILE_NAME} OBC-firmware.bin
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS OBC-firmware.out
+    DEPENDS ${OUT_FILE_NAME}
     COMMENT "Generating OBC-firmware.bin"
 )
 
