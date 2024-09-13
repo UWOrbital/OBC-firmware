@@ -30,7 +30,7 @@ add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 
 # Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
-    set(${OUT_FILE_NAME}, OBC-firmware.out)
+    set(OUT_FILE_NAME OBC-firmware.out)
   add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
 	add_executable(${OUT_FILE_NAME} app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
