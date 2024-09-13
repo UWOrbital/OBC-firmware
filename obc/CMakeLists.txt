@@ -34,7 +34,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES OBC)
   add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
 	add_executable(${OUT_FILE_NAME} app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
-    set(${OUT_FILE_NAME}, OBC-firmware-${EXAMPLE_TYPE}.out)
+    set(OUT_FILE_NAME OBC-firmware-${EXAMPLE_TYPE}.out)
 	if (${EXAMPLE_TYPE} MATCHES DMA_SPI)
 		add_executable(${OUT_FILE_NAME} examples/dma_spi_demo/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES FRAM_PERSIST)
