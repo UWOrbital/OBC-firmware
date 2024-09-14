@@ -31,10 +31,12 @@ add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 # Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     set(OUT_FILE_NAME OBC-firmware.out)
+    set(BIN_FILE_NAME OBC-firmware.bin)
   add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
 	add_executable(${OUT_FILE_NAME} app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
     set(OUT_FILE_NAME OBC-firmware-${EXAMPLE_TYPE}.out)
+    set(BIN_FILE_NAME OBC-firmware-${EXAMPLE_TYPE}.bin)
 	if (${EXAMPLE_TYPE} MATCHES DMA_SPI)
 		add_executable(${OUT_FILE_NAME} examples/dma_spi_demo/main.c)
 	elseif(${EXAMPLE_TYPE} MATCHES FRAM_PERSIST)
@@ -119,8 +121,9 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
 )
 
 # Generate .bin for the app
+string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
 add_custom_command(
-    OUTPUT OBC-firmware.bin
+    OUTPUT ${BIN_FILE_NAME}
     COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.intvecs
                                                                      --only-section=.kernelTEXT
                                                                      --only-section=.text
@@ -130,16 +133,16 @@ add_custom_command(
                                                                      --only-section=.init_array
                                                                      --only-section=.fini_array
                                                                      --only-section=.data
-                                                                        ${OUT_FILE_NAME} OBC-firmware.bin
+                                                                     ${OUT_FILE_NAME} ${BIN_FILE_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${OUT_FILE_NAME}
-    COMMENT "Generating OBC-firmware.bin"
+    COMMENT commentStr
 )
 
 add_custom_target(
     OBC-firmware_bin
     ALL
-    DEPENDS OBC-firmware.bin
+    DEPENDS ${BIN_FILE_NAME}
 )
 
 # Bootloader
