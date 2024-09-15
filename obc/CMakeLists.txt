@@ -28,6 +28,16 @@ endif()
 # Pass the address to the linker
 add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 
+# Determine the root of the repository
+execute_process(
+    COMMAND git rev-parse --show-toplevel
+    OUTPUT_VARIABLE REPO_ROOT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Set the SOURCE_PATH using the detected REPO_ROOT
+add_compile_definitions(SOURCE_PATH="${REPO_ROOT}/")
+
 # Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     set(OUT_FILE_NAME OBC-firmware.out)
