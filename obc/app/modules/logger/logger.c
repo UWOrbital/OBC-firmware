@@ -2,6 +2,7 @@
 #include "obc_logging.h"
 #include "obc_errors.h"
 #include "obc_print.h"
+#include "obc_time.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -22,6 +23,16 @@
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
+
+#if defined(LOG_DATE_TIME)
+// When logging over the air to ground station, we should timestamp using UNIX and have a tool to convert unix to date
+// time on the GS side for all the logs but for development it's easier to log as date time
+#define GET_TIMESTAMP getCurrentDateTime()
+#define GET_TIMESTAMP_FROM_ISR getCurrentDateTimeinISR()
+#elif defined(LOG_UNIX)
+#define GET_TIMESTAMP getCurrentUnixTime()
+#define GET_TIMESTAMP_FROM_ISR getCurrentUnixTimeInISR()
+#endif
 
 static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
@@ -84,8 +95,20 @@ void obcTaskFunctionLogger(void *pvParameters) {
     // File & line number
     char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
     int ret = 0;
+
+#if defined(LOG_DATE_TIME)
+    const rtc_date_time_t *currDate = &queueMsg.timestamp;
+    ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%02u-%02u-%02u_%02u-%02u-%02u %-5s -> %s:%lu", currDate->date.year,
+                   currDate->date.month, currDate->date.date, currDate->time.hours, currDate->time.minutes,
+                   currDate->time.seconds, LEVEL_STRINGS[queueMsg.logEntry.logLevel], queueMsg.file, queueMsg.line);
+#elif defined(LOG_UNIX)
+    ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%u %-5s -> %s:%lu", queueMsg.timestamp,
+                   LEVEL_STRINGS[queueMsg.logEntry.logLevel], queueMsg.file, queueMsg.line);
+#else
     ret = snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", LEVEL_STRINGS[queueMsg.logEntry.logLevel],
                    queueMsg.file, queueMsg.line);
+#endif
+
     if (ret < 0) {
       LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
       continue;
@@ -192,6 +215,10 @@ obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t l
                              .line = line,
                              .errCode = errCode};
 
+#if defined(LOG_DATE_TIME) || defined(LOG_UNIX)
+  logEvent.timestamp = GET_TIMESTAMP;
+#endif
+
   // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
@@ -212,6 +239,10 @@ obc_error_code_t logMsg(log_level_t msgLevel, const char *file, uint32_t line, c
   logger_event_t logEvent = {
       .logEntry = {.logType = LOG_TYPE_MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
 
+#if defined(LOG_DATE_TIME) || defined(LOG_UNIX)
+  logEvent.timestamp = GET_TIMESTAMP;
+#endif
+
   return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
 
@@ -228,6 +259,10 @@ obc_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uin
                              .file = file,
                              .line = line,
                              .errCode = errCode};
+
+#if defined(LOG_DATE_TIME) || defined(LOG_UNIX)
+  logEvent.timestamp = GET_TIMESTAMP_FROM_ISR;
+#endif
 
   // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueueFromISR(&logEvent);
@@ -248,6 +283,10 @@ obc_error_code_t logMsgFromISR(log_level_t msgLevel, const char *file, uint32_t 
 
   logger_event_t logEvent = {
       .logEntry = {.logType = LOG_TYPE_MSG, .logLevel = msgLevel}, .file = file, .line = line, .msg = msg};
+
+#if defined(LOG_DATE_TIME) || defined(LOG_UNIX)
+  logEvent.timestamp = GET_TIMESTAMP_FROM_ISR;
+#endif
 
   return sendToLoggerQueueFromISR(&logEvent);
 }

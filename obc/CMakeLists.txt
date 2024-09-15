@@ -50,6 +50,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     ${BOARD_TYPE}
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
+    LOG_DATE_TIME
     DEBUG=${DEBUG}
     CMD_POLICY=${CMD_POLICY}
     COMMS_PHY=${COMMS_PHY}
@@ -57,6 +58,16 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
+
+# Determine the root of the repository
+execute_process(
+    COMMAND git rev-parse --show-toplevel
+    OUTPUT_VARIABLE REPO_ROOT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# Set the SOURCE_PATH using the detected REPO_ROOT
+add_compile_definitions(SOURCE_PATH="${REPO_ROOT}/")
 
 target_include_directories(OBC-firmware.out PUBLIC
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
@@ -145,6 +156,7 @@ target_compile_definitions(debug-tool.out PRIVATE
     ${BOARD_TYPE}
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
+    LOG_DATE_TIME
     DEBUG=${DEBUG}
     CMD_POLICY=${CMD_POLICY}
     COMMS_PHY=${COMMS_PHY}
