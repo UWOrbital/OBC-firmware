@@ -219,8 +219,8 @@ Instructions on how to add examples:
 - Add the code and destination above to the list of examples in the form to the `README.md`: `EXAMPLE_ID` - for `example_name`
 - Add the following to the `OBC/CMakeLists.txt` above the comment that says `# ADD MORE EXAMPLES ABOVE THIS COMMENT`
 ```
-elseif(${CMAKE_BUILD_EXAMPLE} MATCHES EXAMPLE_ID)
-	add_executable(OBC-firmware.out path_to_main_file_in_example)
+elseif(${EXAMPLE_TYPE} MATCHES EXAMPLE_ID)
+	add_executable(${OUT_FILE_NAME} path_to_main_file_in_example)
 ```
   Where `path_to_main_file_in_example` is relative to the project root, see `OBC/CMakeLists.txt` for examples
 - Add the `EXAMPLE_ID` to the `.github/workflows/obc_examples.yml` above the comment that starts with `# ADD NEW EXAMPLES ABOVE THIS LINE`
