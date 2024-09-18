@@ -25,18 +25,20 @@ static obc_error_code_t writeTCA6424ARegister(uint8_t addr, uint8_t* data, uint8
 static obc_error_code_t readTCA6424ARegister(uint8_t addr, uint8_t* data, uint8_t size);
 
 obc_error_code_t configureTCA6424APin(uint8_t pinLocation, TCA6424A_gpio_config_t gpioPinConfig) {
-  uint8_t pinPort = (pinLocation & 0xF0) >> 4;
-  uint8_t pinIndex = pinLocation & 0x0F;
+  uint8_t pinPort = (pinLocation & 0xF0) >> 4;  // port 0, 1, or 2
+  uint8_t pinIndex = pinLocation & 0x0F;        // pin number in a port
   if (pinIndex > MAX_PIN_COUNT || pinPort >= MAX_PORT_COUNT) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t pinState = (gpioPinConfig == TCA6424A_GPIO_CONFIG_INPUT) ? 0x01 : 0x00;
-  uint8_t configurationPortAddress = TCA6424A_CONFIGURATION_PORT_ZERO_ADDR + pinPort;
+  uint8_t pinState = (gpioPinConfig == TCA6424A_GPIO_CONFIG_INPUT) ? 0x01 : 0x00;  // input is 1, output is 0
+  uint8_t configurationPortAddress =
+      TCA6424A_CONFIGURATION_PORT_ZERO_ADDR + pinPort;  // configuration address for specific port
   uint8_t configurationPort = 0;
 
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(readTCA6424ARegister(configurationPortAddress, &configurationPort, 1));
+  RETURN_IF_ERROR_CODE(
+      readTCA6424ARegister(configurationPortAddress, &configurationPort, 1));  // read current configuration
 
-  configurationPort |= (pinState << pinIndex);
+  configurationPort |= (pinState << pinIndex);  // set the 1 bit for the port
   RETURN_IF_ERROR_CODE(writeTCA6424ARegister(configurationPortAddress, &configurationPort, 1));
   return OBC_ERR_CODE_SUCCESS;
 }
