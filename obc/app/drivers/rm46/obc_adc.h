@@ -62,7 +62,7 @@ void initADCMutex(void);
  * OBC_ERR_CODE_SUCCESS if conversion completed and analog data is obtained,
  * OBC_ERR_CODE_ADC_INVALID_CHANNEL if conversion completed but channel number is not found
  */
-obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_group_t group, float *reading,
+obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_group_t group, float *reading,
                                   TickType_t blockTime);
 
 /**
@@ -76,4 +76,4 @@ obc_error_code_t adcGetSingleData(ADC_module_t adc, ADC_channel_t channel, ADC_g
  * OBC_ERR_CODE_MUTEX_TIMEOUT if unable to obtain ADC mutex,
  * OBC_ERR_CODE_SUCCESS if conversions completed and analog data is obtained
  */
-obc_error_code_t adcGetGroupData(ADC_module_t adc, ADC_group_t group, float *readings, TickType_t blockTime);
+obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, float *readings, TickType_t blockTime);
