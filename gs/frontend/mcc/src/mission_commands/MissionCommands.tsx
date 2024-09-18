@@ -11,12 +11,16 @@ function MissionCommands() {
 	const inputRef = useRef(null);
 
 	useEffect(() => {
-		let command = localStorage.getItem(MISSON_COMMAND_PREFIX + "command");
-		let response = localStorage.getItem(MISSON_COMMAND_PREFIX + "response");
-		if (!command) return;
-		if (!response) return;
-		setCommands(command);
-		setCommandResponse(response);
+		try {
+			const command = localStorage.getItem(MISSON_COMMAND_PREFIX + "command");
+			const response = localStorage.getItem(MISSON_COMMAND_PREFIX + "response");
+			if (!command) return;
+			if (!response) return;
+			setCommands(command);
+			setCommandResponse(response);
+		} catch (error) {
+			console.error(error);
+		}
 	}, []);
 
 	// const handleChange = (event) => {
@@ -25,21 +29,32 @@ function MissionCommands() {
 	// }
 
 	const handleCommand = () => {
-		const requestOptions = {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ command: commands }),
-		};
-		fetch("http://localhost:5000/mission-control", requestOptions)
-			.then((response) => response.json())
-			.then((data) => {
-				setCommandResponse(data.response);
-				localStorage.setItem(MISSON_COMMAND_PREFIX + "response", data.response);
-			});
+		try {
+			const requestOptions = {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ command: commands }),
+			};
+			fetch("http://localhost:5000/mission-control", requestOptions)
+				.then((response) => response.json())
+				.then((data) => {
+					setCommandResponse(data.response);
+					localStorage.setItem(
+						MISSON_COMMAND_PREFIX + "response",
+						data.response,
+					);
+				});
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	const clear = () => {
-		localStorage.clear();
+		try {
+			localStorage.clear();
+		} catch (error) {
+			console.error(error);
+		}
 		setCommands("");
 		setCommandResponse("");
 		// inputRef.current.value = ''
