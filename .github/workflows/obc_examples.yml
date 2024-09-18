@@ -1,0 +1,56 @@
+name: OBC Build
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install build-essential cmake
+
+
+    - name: Create binary directory
+      run: |
+        mkdir build
+        cd build
+        export REPO_ROOT=$(git rev-parse --show-toplevel)
+
+    - name: Build (Release-Launchpad)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=0
+        make
+
+    - name: Build (Release-OBC Rev1)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
+        make
+
+    - name: Build (Release-OBC Rev2)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=0
+        make
+
+    - name: Build (Debug-Launchpad)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+        make
+
+    - name: Build (Debug-OBC Rev1)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=1
+        make
+
+    - name: Build (Debug-OBC Rev2)
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=1
+        make
