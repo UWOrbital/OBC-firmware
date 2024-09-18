@@ -12,9 +12,9 @@
 
 #include <stdint.h>
 
-typedef enum { ADC1 = 0U, ADC2 } ADC_module_t;
+typedef enum { ADC1 = 0U, ADC2 } adc_module_t;
 
-typedef enum { EVENT = 0U, GROUP1, GROUP2 } ADC_group_t;
+typedef enum { EVENT = 0U, GROUP1, GROUP2 } adc_group_t;
 
 typedef enum {
   ADC_CHANNEL_0 = 0U,
@@ -41,7 +41,7 @@ typedef enum {
   ADC_CHANNEL_21,
   ADC_CHANNEL_22,
   ADC_CHANNEL_23
-} ADC_channel_t;
+} adc_channel_t;
 
 /**
  * @brief Initialize the ADC bus mutex

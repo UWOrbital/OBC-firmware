@@ -14,16 +14,32 @@ static StaticSemaphore_t adcConversionMutexBuffer;
 
 // Should be configured to max FIFO size for all groups, so that an adcData_t array of a proper size can be made
 #define MAX_GROUP_SIZE 16U
+
 // Assumes all groups have same resolution for simplicity. Could make this more flexible/an enum.
 #define RESOLUTION 12U
 
-// VCCAD is 3.0V +- 0.1
-#define REF_VOLTAGE_HIGH 3.1f
+// VCCAD is 3.3V
+#define REF_VOLTAGE_HIGH 3.3f
 #define REF_VOLTAGE_LOW 0.0f
 
-const uint32_t adcGroupLengths[2U][3U] = {{16U, 16U, 16U}, {16U, 16U, 16U}};
+// Arbitrary
+#define ADC_MAX_WAIT_CYCLES 5
 
-void initADCMutex(void) {
+typedef enum {
+  ADC1_GROUP0_NUM_CHANNELS = 16U,
+  ADC1_GROUP1_NUM_CHANNELS = 16U,
+  ADC1_GROUP2_NUM_CHANNELS = 16U,
+  ADC2_GROUP0_NUM_CHANNELS = 16U,
+  ADC2_GROUP1_NUM_CHANNELS = 16U,
+  ADC2_GROUP2_NUM_CHANNELS = 16U
+} adc_group_channels_t;
+
+const uint32_t adcGroupLengths[2U][3U] = {
+    {ADC1_GROUP0_NUM_CHANNELS, ADC1_GROUP1_NUM_CHANNELS, ADC1_GROUP2_NUM_CHANNELSU},
+    {ADC2_GROUP0_NUM_CHANNELS, ADC2_GROUP1_NUM_CHANNELS, ADC2_GROUP2_NUM_CHANNELS}};
+
+void initADC(void) {
+  adcInit();
   if (adcConversionMutex == NULL) {
     adcConversionMutex = xSemaphoreCreateMutexStatic(&adcConversionMutexBuffer);
   }
@@ -45,8 +61,8 @@ static obc_error_code_t adcGetGroupReadings(ADC_module_t adc, ADC_group_t group,
   adcStartConversion(adcReg, group);
 
   uint8_t totalAttempts = 0;
-  while (!adcIsConversionComplete(adcReg, group) && totalAttempts < 6) {
-    if (totalAttempts >= 5) {
+  while (!adcIsConversionComplete(adcReg, group)) {
+    if (totalAttempts >= ADC_MAX_WAIT_CYCLES) {
       adcStopConversion(adcReg, group);
       xSemaphoreGive(adcConversionMutex);
       return OBC_ERR_CODE_ADC_FAILURE;
