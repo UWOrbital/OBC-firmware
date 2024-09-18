@@ -99,7 +99,7 @@ obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_g
   for (uint32_t i = 0; i < groupSize; i++) {
     if (adcData[i].id == channel) {
       *reading = (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) /
-                 ((float)(1 << RESOLUTION) - REF_VOLTAGE_LOW);
+                 ((float)(1 << RESOLUTION) + REF_VOLTAGE_LOW);
       return OBC_ERR_CODE_SUCCESS;
     }
   }
