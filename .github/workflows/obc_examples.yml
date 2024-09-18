@@ -8,16 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install build-essential cmake
-  build:
-    runs-on: ubuntu-latest
     needs: setup
 
     strategy:
@@ -51,4 +41,4 @@ jobs:
         run: |
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -G"Unix Makefiles" -DDEBUG=1
-          makename: OBC Build
+          make
