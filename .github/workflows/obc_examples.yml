@@ -1,9 +1,14 @@
-name: OBC Build
-on: [push, pull_request]
+name: OBC Examples
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
 
@@ -11,46 +16,39 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get -y install build-essential cmake
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
 
+    strategy:
+      matrix:
+        example:
+          [
+            DMA_SPI,
+            FRAM_PERSIST,
+            FRAM_SPI,
+            LM75BD,
+            # MPU6050,
+            RE_SD,
+            # RTC,
+            UART_RX,
+            UART_TX,
+            VN100,
+            # CC1120_SPI,
+            RS,
 
-    - name: Create binary directory
-      run: |
-        mkdir build
-        cd build
-        export REPO_ROOT=$(git rev-parse --show-toplevel)
+            # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
+          ]
+        board:  [RM46_LAUNCHPAD]
 
-    - name: Build (Release-Launchpad)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=0
-        make
+    steps:
+      - uses: actions/checkout@v3
 
-    - name: Build (Release-OBC Rev1)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
-        make
-
-    - name: Build (Release-OBC Rev2)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=0
-        make
-
-    - name: Build (Debug-Launchpad)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
-        make
-
-    - name: Build (Debug-OBC Rev1)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=1
-        make
-
-    - name: Build (Debug-OBC Rev2)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=1
-        make
+      - name: Create binary directory
+        run: |
+          mkdir build
+      - name: Build (Examples-${{ matrix.board }} ${{ matrix.example }})
+        run: |
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -G"Unix Makefiles" -DDEBUG=1
+          makename: OBC Build
