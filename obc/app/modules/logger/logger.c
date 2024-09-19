@@ -43,7 +43,7 @@ static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
 
 // Spam detector
 typedef struct {
-    char errorMessage[MAX_MSG_SIZE];
+    TaskHandle_t tx;
     uint32_t count;
     time_t lastLogged;
 } logSpamDetector_t;
@@ -144,11 +144,15 @@ void obcTaskFunctionLogger(void *pvParameters) {
 
     // Spam detection
     time_t currentTime = time(NULL);
-    if (strcmp(spamDetector.errorMessage, logBuf) == 0) {
+    TaskHandle_t tx = xTaskGetCurrentTaskHandle();
+
+    if (tx == spamDetector.tx) {
       if (difftime(currentTime, spamDetector.lastLogged) <= SPAM_TIMEFRAME) {
         spamDetector.count++;
-        if (spamDetector.count == MAX_REPEATED_MESSAGES) {
-          LOG_ERROR_CODE(OBC_ERR_CODE_SPAM_DETECTED);
+        if (spamDetector.count >= MAX_REPEATED_MESSAGES) {
+          if (spamDetector.count == MAX_REPEATED_MESSAGES) {
+            LOG_ERROR_CODE(OBC_ERR_CODE_SPAM_DETECTED);
+          }
           continue;
         }
       } else {
@@ -158,7 +162,7 @@ void obcTaskFunctionLogger(void *pvParameters) {
       }
     } else {
       // New log error message
-      strcpy(spamDetector.errorMessage, logBuf);
+      spamDetector.tx = tx;
       spamDetector.count = 1;
       spamDetector.lastLogged = currentTime;
     }
