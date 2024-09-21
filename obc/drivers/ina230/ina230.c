@@ -199,20 +199,23 @@ static obc_error_code_t initTca6424PinState() {
 }
 
 // function to get shunt voltage
+// i2cAddress = ina230 device address
+// shuntVoltage = pointer to store shuntVoltage
 
 obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) {
   if (shuntVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t shuntVoltageRaw[2] = {0};
+  uint8_t shuntVoltageRaw[2] = {0};  // store 2 bytes of shunt voltage
   obc_error_code_t errCode;
 
   // Read the 16-bit shunt voltage register
-  RETURN_IF_ERROR_CODE(i2cReadReg(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2, 2));
+  errCode = i2cReadRegister(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2);
+  if (errCode != OBC_ERR_CODE_SUCCESS) return errCode;
 
-  // Combine the two 8-bit register values into a 16-bit value
+  // Combine the two bytes into a 16-bit value
   int16_t shuntVoltageValue = (shuntVoltageRaw[0] << 8) | shuntVoltageRaw[1];
 
-  // Convert the raw shunt voltage value to actual voltage (in volts)
+  // Convert to actual voltage
   *shuntVoltage = shuntVoltageValue * INA230_SHUNT_VOLTAGE_LSB;
 
   return OBC_ERR_CODE_SUCCESS;
@@ -226,11 +229,11 @@ obc_error_code_t getINA230ShuntVoltageForDevice(uint8_t deviceIndex, float* shun
   // Retrieve the I2C address for the specified INA230 device
   uint8_t i2cAddress = ina230Devices[deviceIndex].i2cDeviceAddress;
 
-  // Use the existing function to get the shunt voltage
+  // Get the shunt voltage
   return getINA230ShuntVoltage(i2cAddress, shuntVoltage);
 }
 
-void exampleUsage() {
+void main_usage() {
   float shuntVoltage = 0;
 
   // Call the function for INA230 device 1 (index 0)
