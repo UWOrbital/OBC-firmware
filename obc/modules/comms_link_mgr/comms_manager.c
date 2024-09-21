@@ -17,6 +17,9 @@
 #include "rffm6404.h"
 #include "obc_privilege.h"
 
+#include "ina230.h"
+#include "tca6424.h"
+
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
 #endif
@@ -290,43 +293,47 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
 }
 
 void obcTaskFunctionCommsMgr(void *pvParameters) {
-  obc_error_code_t errCode;
-  comms_state_t commsState = *((comms_state_t *)pvParameters);
+  initINA230();
 
-  initAllCc1120TxRxSemaphores();
-  LOG_IF_ERROR_CODE(cc1120Init());
+  main_usage();
 
-  while (1) {
-    comms_event_t queueMsg;
+  // obc_error_code_t errCode;
+  // comms_state_t commsState = *((comms_state_t *)pvParameters);
 
-    if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-      continue;
-    }
+  // initAllCc1120TxRxSemaphores();
+  // LOG_IF_ERROR_CODE(cc1120Init());
 
-    LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      continue;
-    }
+  // while (1) {
+  //   comms_event_t queueMsg;
 
-    if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-      commsState = COMMS_STATE_DISCONNECTED;
-      continue;
-    }
+  //   if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+  //     continue;
+  //   }
 
-    if (commsStateFns[commsState] == NULL) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-      commsState = COMMS_STATE_DISCONNECTED;
-      continue;
-    }
+  //   LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
+  //   if (errCode != OBC_ERR_CODE_SUCCESS) {
+  //     continue;
+  //   }
 
-    LOG_IF_ERROR_CODE(commsStateFns[commsState]());
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      rffm6404PowerOff();
-      comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
-      sendToCommsManagerQueue(&event);
-    }
-  }
+  //   if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
+  //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+  //     commsState = COMMS_STATE_DISCONNECTED;
+  //     continue;
+  //   }
+
+  //   if (commsStateFns[commsState] == NULL) {
+  //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+  //     commsState = COMMS_STATE_DISCONNECTED;
+  //     continue;
+  //   }
+
+  //   LOG_IF_ERROR_CODE(commsStateFns[commsState]());
+  //   if (errCode != OBC_ERR_CODE_SUCCESS) {
+  //     rffm6404PowerOff();
+  //     comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
+  //     sendToCommsManagerQueue(&event);
+  //   }
+  // }
 }
 
 /**
