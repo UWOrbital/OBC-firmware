@@ -177,3 +177,8 @@ void i2cNotification(i2cBASE_t *i2c, uint32 flags) {
 
   portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
+
+// void inaAlertTriggered() {
+//   // if int triggered, alert state manager
+//   sendToStateMgrEventQueue();
+// }

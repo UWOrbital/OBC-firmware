@@ -26,8 +26,8 @@
 #define INA230_MASK_ENABLE_REGISTER_ADDR 0x06U
 #define INA230_ALERT_LIMIT_REGISTER_ADDR 0x07U
 #define INA230_CALIBRATION_REGISTER_ADDR 0x08U
-#define INA230_SHUNT_VOLTAGE_REGISTER_ADDR 0x01U  // where to find?
-#define INA230_SHUNT_VOLTAGE_LSB 0.0000025f       // 2.5 µV per bit
+#define INA230_SHUNT_VOLTAGE_REGISTER_ADDR 0x01U
+#define INA230_SHUNT_VOLTAGE_LSB 0.0000025f
 
 #define INA230_CONFIG_MODE_SHIFT 0U
 #define INA230_CONFIG_SHU_SHIFT 3U
@@ -43,9 +43,13 @@
 
 #define INA230_MASK_ENABLE_TRANSPARENT_MODE_SET_MASK 1U
 
+// macros for lsb, shunt resistor, and calibration value
 #define INA230_CURRENT_LSB 0.001f   // 1 mA, current least significant bit
 #define INA230_SHUNT_RESISTOR 0.1f  // 0.1 ohms, shunt resistor value
 #define INA230_CALIBRATION_VALUE (uint16_t)(0.00512 / (INA230_CURRENT_LSB * INA230_SHUNT_RESISTOR))
+
+// buffer sizes
+#define INA_REG_CONF_BUFF_SIZE 2
 
 // ------------------  INA230 Device Configuration ------------- //
 typedef struct {
@@ -66,10 +70,6 @@ typedef struct {
   uint16_t calibrationRegister;
   uint16_t alertRegister;
 } ina230_config_t;
-
-// there should also be macros for current LSB value (we can use 1mA for now)
-// and also shunt resistor value and a macro for the value to set the configuration register to based off these
-// (equation 1 pg 16)
 
 static const ina230_config_t ina230Devices[] = {[INA230_DEVICE_ONE] = {.i2cDeviceAddress = INA230_I2C_ADDRESS_ONE,
                                                                        .tcaAlertPort = INA230_ONE_ALERT_PIN,
@@ -206,14 +206,20 @@ obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) 
   if (shuntVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t shuntVoltageRaw[2] = {0};  // store 2 bytes of shunt voltage
+  uint8_t configBuff[INA_REG_CONF_BUFF_SIZE] = {0};
   obc_error_code_t errCode;
 
   // Read the 16-bit shunt voltage register
-  errCode = i2cReadRegister(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2);
+  errCode = i2cReadReg(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2, 2);  // last param not sure
   if (errCode != OBC_ERR_CODE_SUCCESS) return errCode;
 
   // Combine the two bytes into a 16-bit value
   int16_t shuntVoltageValue = (shuntVoltageRaw[0] << 8) | shuntVoltageRaw[1];
+
+  // Check if the value is negative (MSB is set)
+  if (shuntVoltageValue & 0x8000) {                        // if MSB is 1
+    shuntVoltageValue = (shuntVoltageValue ^ 0xFFFF) + 1;  // Convert to two's complement
+  }
 
   // Convert to actual voltage
   *shuntVoltage = shuntVoltageValue * INA230_SHUNT_VOLTAGE_LSB;
@@ -246,8 +252,28 @@ void main_usage() {
   }
 }
 
+// general disable function for ina230 device
+
+obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
+  uint32_t IOPortValue = 0;
+  obc_error_code_t errCode;
+
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+    uint8_t pinLocation =
+        ina230Devices[i].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
+    uint8_t index = ((pinLocation & 0x0F) +
+                     ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
+    // disbale
+    uint8_t drivePort = INA230_DISABLE_LOAD;
+    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
+  }
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 // function to get bus voltage
 
 // function to get power
 
 // function to get current
+
+// fucntion to loop through all ina 230 devices and get shunt voltage
