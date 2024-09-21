@@ -12,10 +12,12 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install build-essential cmake
 
+
     - name: Create binary directory
       run: |
         mkdir build
         cd build
+        export REPO_ROOT=$(git rev-parse --show-toplevel)
 
     - name: Build (Release-Launchpad)
       run: |
