@@ -1,10 +1,11 @@
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./Home";
-import About from "./About";
-import Donate from "./Donate";
 import Navbar from "./Navbar";
 import NotFound from "./NotFound";
+import InputForm from "./InputForm";
+import Requests from "./Requests";
+import Profile from "./Profile";
 
 function App() {
 	return (
@@ -13,8 +14,9 @@ function App() {
 			<Routes>
 				<Route path="*" element={<NotFound />} />
 				<Route path="/" element={<Home />} />
-				<Route path="about" element={<About />} />
-				<Route path="donate" element={<Donate />} />
+				<Route path="/new-request" element={<InputForm />} />
+				<Route path="/requests" element={<Requests />} />
+				<Route path="/profile" element={<Profile />} />
 			</Routes>
 		</BrowserRouter>
 	);
