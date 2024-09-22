@@ -1,11 +1,11 @@
-import "./App.css";
+import "App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./Home";
-import Navbar from "./Navbar";
-import NotFound from "./NotFound";
-import InputForm from "./InputForm";
-import Requests from "./Requests";
-import Profile from "./Profile";
+import Home from "home/Home";
+import Navbar from "common/Navbar";
+import NotFound from "common/NotFound";
+import InputForm from "new-request/InputForm";
+import Requests from "requests/Requests";
+import Profile from "profile/Profile";
 
 function App() {
 	return (

@@ -1,9 +1,7 @@
-import InputForm from "./InputForm";
-
 function Home() {
 	return (
 		<>
-			<InputForm />
+			<h1>Home</h1>
 		</>
 	);
 }
