@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ProfileData } from "./profile-data";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { updateProfile } from "./profile-api";
 
 const ProfileForm = (props: ProfileData) => {
 	const [isEdit, setIsEdit] = useState(false);
@@ -14,6 +15,11 @@ const ProfileForm = (props: ProfileData) => {
 	const onSubmit: SubmitHandler<ProfileData> = (data: ProfileData) => {
 		console.log(data);
 		setIsEdit(false);
+		try {
+			updateProfile(data);
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	// TODO: Add better error handling
