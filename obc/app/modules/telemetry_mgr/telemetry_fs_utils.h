@@ -95,3 +95,11 @@ obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t
  * @return obc_error_code_t
  */
 obc_error_code_t createAndOpenTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId);
+
+/**
+ * @brief Deletes a telemetry file given its batch ID
+ *
+ * @param telemBatchId The telemetry batch ID; used to delete the correct file
+ * @return obc_error_code_t
+ */
+obc_error_code_t deleteTelemetryFile(uint32_t telemBatchId);

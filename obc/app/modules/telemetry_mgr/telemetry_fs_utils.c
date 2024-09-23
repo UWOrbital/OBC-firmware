@@ -152,3 +152,21 @@ obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t
 
   return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t deleteTelemetryFile(uint32_t telemBatchId) {
+  obc_error_code_t errCode;
+
+  unsigned char telemFilePathBuffer[TELEMETRY_FILE_PATH_MAX_LENGTH] = {'\0'};
+  RETURN_IF_ERROR_CODE(
+      constructTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
+
+  if (red_unlink((const char *)telemFilePathBuffer) != 0) {
+    // An error occured; fetch errno
+    if (red_errno == RED_ENOENT) {
+      return OBC_ERR_CODE_INVALID_FILE_NAME;
+    }
+    return OBC_ERR_CODE_FAILED_FILE_DELETE;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}

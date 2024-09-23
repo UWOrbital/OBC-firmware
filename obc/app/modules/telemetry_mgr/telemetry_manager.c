@@ -28,6 +28,8 @@
 
 #define STARTING_TELEMETRY_BATCH_ID 0UL
 
+#define MAX_TELEMETRY_FILE_COUNT 256UL
+
 /**
  * @brief Check if it's time to downlink telemetry.
  * @return bool True if it's time to downlink telemetry, false otherwise
@@ -93,9 +95,18 @@ void obcTaskFunctionTelemetryMgr(void *pvParameters) {
       // errors should be caught during testing.
     }
 
-    // The lifetime of the CubeSat should not allow for this to overflow.
-    // However, if it does, we can wrap around to 0 and start overwriting old files.
     telemetryBatchId++;
+    if (telemetryBatchId >= MAX_TELEMETRY_FILE_COUNT) {
+      telemetryBatchId = 0;
+    }
+
+    // Deletes the already existing, outdated file (if there was one)
+    LOG_IF_ERROR_CODE(deleteTelemetryFile(telemetryBatchId));
+    if (errCode == OBC_ERR_CODE_INVALID_FILE_NAME) {
+      // This error is normal: for the first files (up until MAX_TELEMETRY_FILE_COUNT),
+      // there won't be any outdated file to delete
+      errCode = OBC_ERR_CODE_SUCCESS;
+    }
 
     // TODO: Save batch ID to FRAM
 
