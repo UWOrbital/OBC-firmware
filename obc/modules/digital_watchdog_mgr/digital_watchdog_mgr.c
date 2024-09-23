@@ -5,7 +5,7 @@
 #include "obc_logging.h"
 
 #include <system.h>
-
+//testing
 #include <stdint.h>
 
 // Must feed the watchdog before the timeout period expires
@@ -110,7 +110,7 @@ void obcTaskFunctionSwWatchdog(void *params) {
                                              ? (currentTick - watchdogTaskArray[i].taskLastCheckInTick)
                                              : ((UINT32_MAX - watchdogTaskArray[i].taskLastCheckInTick) + currentTick +
                                                 1);  // Calculate the tick between last checkin and current tick
-
+//ff
       // The task does not respond after timeout period
       if (ticksSinceLastCheckin > watchdogTaskArray[i].taskTimeoutTicks) {
         allTasksCheckedIn = false;
