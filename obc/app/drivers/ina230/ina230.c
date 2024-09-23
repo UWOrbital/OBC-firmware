@@ -208,9 +208,10 @@ static obc_error_code_t initTca6424PinState() {
 obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) {
   if (shuntVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
-  uint8_t shuntVoltageRaw[2] = {0};  // store 2 bytes of shunt voltage
-  uint8_t configBuff[INA_REG_CONF_BUFF_SIZE] = {0};
+  uint8_t shuntVoltageRaw[INA_REG_CONF_BUFF_SIZE] = {0};  // store 2 bytes of shunt voltage
   obc_error_code_t errCode;
+
+  if (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO) return OBC_ERR_CODE_INVALID_ARG;
 
   // Read the 16-bit shunt voltage register
   errCode = i2cReadReg(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2, 2);  // last param not sure
@@ -259,21 +260,21 @@ void main_usage() {
 
 // general disable function for ina230 device
 
-// obc_error_code_t Disable(ina230_device_t device) {
-//   uint32_t IOPortValue = 0;
-//   obc_error_code_t errCode;
+obc_error_code_t disableNoAlert(ina230_device_t device) {
+  uint32_t IOPortValue = 0;
+  obc_error_code_t errCode;
 
-//   for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
-//     uint8_t pinLocation =
-//         ina230Devices[i].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
-//     uint8_t index = ((pinLocation & 0x0F) +
-//                      ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
-//     // disbale
-//     uint8_t drivePort = INA230_DISABLE_LOAD;
-//     RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
-//   }
-//   return OBC_ERR_CODE_SUCCESS;
-// }
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+    uint8_t pinLocation =
+        ina230Devices[i].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
+    uint8_t index = ((pinLocation & 0x0F) +
+                     ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
+    // disbale
+    uint8_t drivePort = INA230_DISABLE_LOAD;
+    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
+  }
+  return OBC_ERR_CODE_SUCCESS;
+}
 
 // function to get bus voltage
 

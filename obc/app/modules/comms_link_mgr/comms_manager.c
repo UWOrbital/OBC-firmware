@@ -295,45 +295,55 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
 void obcTaskFunctionCommsMgr(void *pvParameters) {
   initINA230();
 
-  main_usage();
+  obc_error_code_t errCode;
+  comms_state_t commsState = *((comms_state_t *)pvParameters);
 
-  // obc_error_code_t errCode;
-  // comms_state_t commsState = *((comms_state_t *)pvParameters);
+  initAllCc1120TxRxSemaphores();
+  LOG_IF_ERROR_CODE(cc1120Init());
 
-  // initAllCc1120TxRxSemaphores();
-  // LOG_IF_ERROR_CODE(cc1120Init());
+  while (1) {
+    printf("Entered while loop\n");
+    float shuntVoltage = 0;
+    // Call the function for INA230 device 1 (index 0)
+    obc_error_code_t errCode = getINA230ShuntVoltageForDevice(0, &shuntVoltage);
+    // print shunt volatge
+    printf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
 
-  // while (1) {
-  //   comms_event_t queueMsg;
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      printf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
+    } else {
+      printf("Error reading shunt voltage for INA230 Device 1\n");
+    }
+    //   comms_event_t queueMsg;
 
-  //   if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-  //     continue;
-  //   }
+    //   if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    //     continue;
+    //   }
 
-  //   LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
-  //   if (errCode != OBC_ERR_CODE_SUCCESS) {
-  //     continue;
-  //   }
+    //   LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
+    //   if (errCode != OBC_ERR_CODE_SUCCESS) {
+    //     continue;
+    //   }
 
-  //   if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
-  //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-  //     commsState = COMMS_STATE_DISCONNECTED;
-  //     continue;
-  //   }
+    //   if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
+    //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+    //     commsState = COMMS_STATE_DISCONNECTED;
+    //     continue;
+    //   }
 
-  //   if (commsStateFns[commsState] == NULL) {
-  //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-  //     commsState = COMMS_STATE_DISCONNECTED;
-  //     continue;
-  //   }
+    //   if (commsStateFns[commsState] == NULL) {
+    //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+    //     commsState = COMMS_STATE_DISCONNECTED;
+    //     continue;
+    //   }
 
-  //   LOG_IF_ERROR_CODE(commsStateFns[commsState]());
-  //   if (errCode != OBC_ERR_CODE_SUCCESS) {
-  //     rffm6404PowerOff();
-  //     comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
-  //     sendToCommsManagerQueue(&event);
-  //   }
-  // }
+    //   LOG_IF_ERROR_CODE(commsStateFns[commsState]());
+    //   if (errCode != OBC_ERR_CODE_SUCCESS) {
+    //     rffm6404PowerOff();
+    //     comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
+    //     sendToCommsManagerQueue(&event);
+    //   }
+  }
 }
 
 /**

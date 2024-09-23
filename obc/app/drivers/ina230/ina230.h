@@ -10,3 +10,4 @@ obc_error_code_t readAndDisableIfAlert(ina230_device_t device);
 obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage);
 obc_error_code_t getINA230ShuntVoltageForDevice(uint8_t deviceIndex, float* shuntVoltage);
 void main_usage();
+obc_error_code_t disableNoAlert(ina230_device_t device);
