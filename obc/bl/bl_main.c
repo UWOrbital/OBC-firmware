@@ -1,7 +1,7 @@
 #include "bl_config.h"
 #include "bl_flash.h"
 #include "bl_uart.h"
-
+#include "bl_errors.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -17,6 +17,7 @@ extern uint32_t __ramFuncsRunEnd__;
 // use too much RAM
 #define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
 #define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
+#define BL_MAX_MSG_SIZE 64U
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -50,10 +51,10 @@ int main(void) {
   while (1) {
     switch (state) {
       case BL_STATE_IDLE: {
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Waiting for input\r\n"), (uint8_t *)"Waiting for input\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Waiting for input\r\n"), (uint8_t *)"Waiting for input\r\n");
 
         char c = '\0';
-        blUartReadBytes(BL_UART_SCIREG_2, (uint8_t *)&c, 1);
+        blUartReadBytes(BL_UART_SCIREG, (uint8_t *)&c, 1);
 
         if (c == 'd') {
           state = BL_STATE_DOWNLOAD_IMAGE;
@@ -66,53 +67,65 @@ int main(void) {
         break;
       }
       case BL_STATE_DOWNLOAD_IMAGE: {
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Downloading application\r\n"),
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Downloading application\r\n"),
                          (uint8_t *)"Downloading application\r\n");
 
         uint8_t recvBuffer[sizeof(app_header_t)] = {0U};
 
-        blUartReadBytes(BL_UART_SCIREG_2, recvBuffer, sizeof(app_header_t));
+        blUartReadBytes(BL_UART_SCIREG, recvBuffer, sizeof(app_header_t));
 
         app_header_t appHeader = {0};
         memcpy((void *)&appHeader, (void *)recvBuffer, sizeof(app_header_t));
 
         if (appHeader.size == 0U) {
-          blUartWriteBytes(BL_UART_SCIREG_1, strlen("Invalid image size\r\n"), (uint8_t *)"Invalid image size\r\n");
+          blUartWriteBytes(BL_UART_SCIREG, strlen("Invalid image size\r\n"), (uint8_t *)"Invalid image size\r\n");
           state = BL_STATE_IDLE;
           break;
         }
 
         if (!blFlashIsStartAddrValid(APP_START_ADDRESS, appHeader.size)) {
-          blUartWriteBytes(BL_UART_SCIREG_1, strlen("Invalid start address\r\n"),
-                           (uint8_t *)"Invalid start address\r\n");
+          blUartWriteBytes(BL_UART_SCIREG, strlen("Invalid start address\r\n"), (uint8_t *)"Invalid start address\r\n");
           state = BL_STATE_IDLE;
           break;
         }
 
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Received header\r\n"), (uint8_t *)"Received header\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Received header\r\n"), (uint8_t *)"Received header\r\n");
 
         errCode = blFlashFapiInitBank(0U);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to init flash\r\n"), (uint8_t *)"Failed to init flash\r\n");
+          char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+          int32_t blUartWriteBufferLen =
+              snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
+          if (blUartWriteBufferLen < 0) {
+            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                             (uint8_t *)"Error with processing message buffer length\r\n");
+          }
+          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
 
         errCode = blFlashFapiBlockErase(APP_START_ADDRESS, appHeader.size);
         if (errCode != BL_ERR_CODE_SUCCESS) {
-          blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to erase flash\r\n"),
-                           (uint8_t *)"Failed to erase flash\r\n");
+          char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+          int32_t blUartWriteBufferLen =
+              snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
+          if (blUartWriteBufferLen < 0) {
+            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                             (uint8_t *)"Error with processing message buffer length\r\n");
+          }
+          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
 
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Erased flash\r\n"), (uint8_t *)"Erased flash\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Erased flash\r\n"), (uint8_t *)"Erased flash\r\n");
 
         // Host will send a 'D' before sending the image
         while (1) {
           char waitChar = '\0';
 
-          blUartReadBytes(BL_UART_SCIREG_2, (uint8_t *)&waitChar, 1U);
+          blUartReadBytes(BL_UART_SCIREG, (uint8_t *)&waitChar, 1U);
 
           if (waitChar == 'D') {
             break;
@@ -129,7 +142,7 @@ int main(void) {
           uint32_t numBytesToRead =
               (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
 
-          blUartReadBytes(BL_UART_SCIREG_2, recvBuffer, numBytesToRead);
+          blUartReadBytes(BL_UART_SCIREG, recvBuffer, numBytesToRead);
 
           blFlashFapiBlockWrite(APP_START_ADDRESS + (appHeader.size - numAppBytesToFlash), (uint32_t)recvBuffer,
                                 numBytesToRead);
@@ -137,9 +150,9 @@ int main(void) {
           numAppBytesToFlash -= numBytesToRead;
         }
 
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
 
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Fixing ECC\r\n"), (uint8_t *)"Fixing ECC\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Fixing ECC\r\n"), (uint8_t *)"Fixing ECC\r\n");
 
         // Fix the ECC for any flash memory that was erased, but not overwritten by the new app
         uint8_t eccFixWriteBuf[BL_ECC_FIX_CHUNK_SIZE] = {0U};
@@ -162,14 +175,14 @@ int main(void) {
           eccFixBytesLeft -= numBytesToWrite;
         }
 
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Finished writing to flash\r\n"),
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Finished writing to flash\r\n"),
                          (uint8_t *)"Finished writing to flash\r\n");
 
         state = BL_STATE_IDLE;
         break;
       }
       case BL_STATE_ERASE_IMAGE: {
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("NOT IMPLEMENTED\r\n"), (uint8_t *)"NOT IMPLEMENTED\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("NOT IMPLEMENTED\r\n"), (uint8_t *)"NOT IMPLEMENTED\r\n");
 
         // TODO: Erase entire application space
 
@@ -177,13 +190,13 @@ int main(void) {
         break;
       }
       case BL_STATE_RUN_APP: {
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
 
         // Go to the application's entry point
         uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
         ((appStartFunc_t)appStartAddress)();
 
-        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to run application\r\n"),
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Failed to run application\r\n"),
                          (uint8_t *)"Failed to run application\r\n");
 
         // TODO: Restart device if application fails to run or returns

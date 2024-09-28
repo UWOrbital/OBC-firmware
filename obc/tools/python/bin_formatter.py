@@ -1,6 +1,7 @@
+import asyncio
 import dataclasses
+import logging
 import struct
-import time
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Final
@@ -8,6 +9,10 @@ from typing import Final
 import serial
 
 OBC_UART_BAUD_RATE: Final = 115200
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+bin_header_logger = logging.getLogger("bin_header_logger")
+log_reader = logging.getLogger("log_reader")
 
 
 @dataclasses.dataclass
@@ -47,7 +52,7 @@ def create_bin(input_path: str, input_version: int) -> str:
     header = BootloaderHeader(version=input_version, bin_size=program_size_bytes)
     header_bytes = header.serialize()
 
-    print(header)  # TODO: Replace with logging
+    bin_header_logger.info(header)
 
     output_path = input_path.replace(".bin", "_formatted.bin")
     output_obj = Path(output_path)
@@ -56,7 +61,7 @@ def create_bin(input_path: str, input_version: int) -> str:
     return output_path
 
 
-def send_bin(file_path: str, com_port: str) -> None:
+async def send_bin(file_path: str, com_port: str) -> None:
     """
     Sends .bin file over UART serial port
 
@@ -82,11 +87,11 @@ def send_bin(file_path: str, com_port: str) -> None:
 
         # Start program download
         ser.write("d".encode("ascii"))
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
 
         # Send header
         ser.write(data[0 : BootloaderHeader.get_header_size()])
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
 
         # Wait for user to initiate transfer
         while input("Enter 1 to start program transfer: ") != "1":
@@ -94,7 +99,7 @@ def send_bin(file_path: str, com_port: str) -> None:
 
         # Bootloader expects a 'D' to be sent before the app
         ser.write("D".encode("ascii"))
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
 
         # Send app in chunks of 128 bytes
         total_bytes_to_write = len(data) - BootloaderHeader.get_header_size()
@@ -105,7 +110,7 @@ def send_bin(file_path: str, com_port: str) -> None:
             if total_bytes_to_write - num_bytes_written >= chunk_size:
                 ser.write(data[8 + num_bytes_written : 8 + num_bytes_written + chunk_size])
                 num_bytes_written += chunk_size
-                time.sleep(0.1)
+                await asyncio.sleep(0.1)
             else:
                 ser.write(data[num_bytes_written + 8 :])
                 num_bytes_written += total_bytes_to_write - num_bytes_written
@@ -113,6 +118,30 @@ def send_bin(file_path: str, com_port: str) -> None:
             print(f"{num_bytes_written}/{total_bytes_to_write} bytes sent")
 
         print("Done writing app")
+
+
+async def read_log(com_port: str) -> None:
+    """
+    Reads logs from a specific port
+
+    :param com_port: Com port for UART communication
+    """
+
+    with serial.Serial(
+        com_port,
+        baudrate=OBC_UART_BAUD_RATE,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_TWO,
+        timeout=1,
+    ) as ser:
+        try:
+            while True:
+                await asyncio.sleep(0.1)
+                log_line = ser.readline().decode("utf-8")
+                if log_line:
+                    log_reader.info(log_line)
+        except serial.SerialException as e:
+            log_reader.exception(e)
 
 
 def arg_parse() -> ArgumentParser:
@@ -132,6 +161,7 @@ def arg_parse() -> ArgumentParser:
         help="Path to the input .bin file.",
     )
     parser.add_argument("-p", required=True, dest="port", type=str, help="Serial port number")
+
     parser.add_argument(
         "-v",
         dest="version",
@@ -143,14 +173,16 @@ def arg_parse() -> ArgumentParser:
     return parser
 
 
-def main() -> None:
+async def main() -> None:
     """Entry point to script"""
     arg_parser = arg_parse()
     args = arg_parser.parse_args()
-
     output_file = create_bin(args.input_path, args.version)
-    send_bin(output_file, args.port)
+    await asyncio.gather(
+        send_bin(output_file, args.port),
+        read_log(args.port),
+    )
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

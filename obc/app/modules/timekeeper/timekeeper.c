@@ -38,7 +38,10 @@ void obcTaskFunctionTimekeeper(void *pvParameters) {
       // TODO: Deal with errors
       LOG_IF_ERROR_CODE(syncUnixTime());
     } else {
+      vPortEnterCritical();
       incrementCurrentUnixTime();
+      incrementCurrentDateTime();
+      vPortExitCritical();
     }
 
     // Send Unix time to fram
