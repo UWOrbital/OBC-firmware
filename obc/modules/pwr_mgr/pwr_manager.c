@@ -22,8 +22,8 @@ static uint8_t pwrQueueStack[PWR_MANAGER_QUEUE_LENGTH * PWR_MANAGER_QUEUE_ITEM_S
 void obcTaskInitPwrMgr(void) {
   ASSERT((pwrQueueStack != NULL) && (&pwrQueue != NULL));
   if (pwrQueueHandle == NULL) {
-    pwrQueueHandle = 
-        xQueueCreateStatic(PWR_MANAGER_QUEUE_LENGTH, PWR_MANAGER_QUEUE_ITEM_SIZE, pwrQueueStack, &pwrQueue);
+    pwrQueueHandle = xQueueCreateStatic(
+        PWR_MANAGER_QUEUE_LENGTH, PWR_MANAGER_QUEUE_ITEM_SIZE, pwrQueueStack, &pwrQueue);
   }
 }
 
