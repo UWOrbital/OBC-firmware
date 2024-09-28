@@ -2,7 +2,23 @@ name: Ground Station Build
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-linux:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create binary directory
+      run: |
+        mkdir build
+    - name: Build
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
+        make
+
+  build-windows:
     runs-on: windows-latest
     defaults:
       run:
