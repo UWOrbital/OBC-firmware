@@ -12,6 +12,7 @@
  */
 typedef enum {
   PWR_MANAGER_OVERCURRENT_DETECTED,
+  PWR_MANAGER_EVENT_NONE,
 } pwr_event_id_t;
 
 /**

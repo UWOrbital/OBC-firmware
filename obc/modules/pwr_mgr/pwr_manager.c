@@ -22,8 +22,7 @@ static uint8_t pwrQueueStack[PWR_MANAGER_QUEUE_LENGTH * PWR_MANAGER_QUEUE_ITEM_S
 void obcTaskInitPwrMgr(void) {
   ASSERT((pwrQueueStack != NULL) && (&pwrQueue != NULL));
   if (pwrQueueHandle == NULL) {
-    pwrQueueHandle =
-        xQueueCreateStatic(PWR_MANAGER_QUEUE_LENGTH, PWR_MANAGER_QUEUE_ITEM_SIZE, pwrQueueStack, &pwrQueue);
+    pwrQueueHandle = xQueueCreateStatic(PWR_MANAGER_QUEUE_LENGTH, PWR_MANAGER_QUEUE_ITEM_SIZE, pwrQueueStack, &pwrQueue);
   }
 }
 
@@ -43,13 +42,14 @@ void obcTaskFunctionPwrMgr(void *pvParameters) {
 
   while (1) {
     pwr_event_t queueMsg;
+    queueMsg.eventID = PWR_MANAGER_EVENT_NONE;
     if (xQueueReceive(pwrQueueHandle, &queueMsg, PWR_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-      continue;
-    }
-
-    switch (queueMsg.eventID) {
-      case PWR_MANAGER_OVERCURRENT_DETECTED:
-        break;
+      switch (queueMsg.eventID) {
+        case PWR_MANAGER_OVERCURRENT_DETECTED:
+          break;
+        case PWR_MANAGER_EVENT_NONE:
+          break;
+      }
     }
   }
 }
