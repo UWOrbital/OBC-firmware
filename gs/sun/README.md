@@ -6,6 +6,7 @@ Script for parsing data from the NASA Horizons API used by GNC for onboard algor
 Check the requirements.txt file for the latest version of the requirements (pip install -r requirements.txt)
 - Python
 - Requests (pip install requests)
+- Skyfield (pip install skyfield)
 - PyTest (pip install pytest)
 
 ## Usage:
@@ -14,8 +15,8 @@ usage: ephemeris.py [-h] [-s STEP_SIZE] [-t TARGET] [-o OUTPUT] [-d] [-p {0,1,2}
 Position Ephemeris Retriever
 
 positional arguments:
--  start_time            Start time in the format YYYY-MM-DD or JD#
--  stop_time             Stop time in the format YYYY-MM-DD or JD#
+-  start_time            Start time in the format YYYY-MM-DD or JD#. Must be the same format as stop time.
+-  stop_time             Stop time in the format YYYY-MM-DD or JD#. Must be the same format as start time.
 
 options:
 -  -h, --help           <br>
@@ -47,7 +48,3 @@ show this help message and exit
 ### JD calculation:
 JD = min_jd + i * step_size <br>
 Where i = 0, 1, 2, ..., n-1
-
-## Testing
-Make sure you have `pytest` installed before this.
-Navigate to the `gs\sun` or `gs\sun\test` directory and run `pytest` in the command line

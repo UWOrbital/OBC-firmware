@@ -6,7 +6,9 @@ This repository holds all the code written by UW Orbital's firmware team. This i
 
 - [Getting Started](#getting-started)
 - [Contributing](#contributing)
-- [Style Guide](#style-guide)
+- [C Style Guide](#c-style-guide)
+- [Python Style Guide](#python-style-guide)
+- [Pytest Style Guide](#pytest-style-guide)
 - [Authors](#authors)
 
 **[Back to top](#table-of-contents)**
@@ -83,9 +85,23 @@ Skip this section if you set up a Docker development environment.
     sudo apt-get update
     sudo apt-get install build-essential
     ```
-3. Choose the environment where you'll be running `git commit` (either WSL2 or the host). In that environment, install Python 3.8+ and pip if they're not already installed. Then, run the following in the OBC-firmware directory:
+3. Choose the environment where you'll be running `git commit` (either WSL2 or the host) and install Python 3.10 and pip. (Only required for Python devs)
+   A. If using WSL, follow the instructions under the `Linux` section 2.
+
+   B. If you are using Windows. Run the following commands in the OBC-firmware directory:
+
+   Install Python 3.10.12: https://www.python.org/downloads/release/python-31012/
+   ```sh
+   C:\path\to\python\executable -m venv .venv
+   .\Scripts\bin\activate
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+
+4. Setup pre-commit.
+    In the WSL, under the OBC-firmware directory, run the following commands:
     ```sh
-    pip install -r requirements.txt # You may want to create a Python virtual env before this
+    pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
     pre-commit install
     ```
     - You may receive a message in yellow saying where pre-commit.exe was installed and that you need to add it to PATH
@@ -98,31 +114,53 @@ You'll be using WSL2 primarily for building the firmware and running tests.
 #### **MacOS**
 Skip this section if you set up a Docker development environment.
 
-Install required build tools (CMake, Make, gcc)
+1. Install required build tools (CMake, Make, gcc)
 ```sh
 brew install cmake
 brew install make
 brew install gcc
 ```
 
-Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
+2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
+
+Run the following commands in the OBC-firmware directory:
 ```sh
-pip install -r requirements.txt # You may want to create a Python virtual env before this
+brew install python@3.10
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+3. Setup pre-commit
+```sh
+pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
 
 #### **Linux**
 Skip this section if you set up a Docker development environment.
 
-Install required build tools (CMake, Make, gcc)
+1. Install required build tools (CMake, Make, gcc)
 ```sh
 sudo apt-get update
 sudo apt-get install build-essential
 ```
 
-Install Python 3.8+ and pip if they're not already installed, then run the following commands in the OBC-firmware directory:
+2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
+
+Run the following commands in the OBC-firmware directory:
 ```sh
-pip install -r requirements.txt # You may want to create a Python virtual env before this
+sudo apt-get install python3.10
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+```
+
+3. Setup pre-commit
+```sh
+pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
 
@@ -181,7 +219,7 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 
 **[Back to top](#table-of-contents)**
 
-## Style Guide
+## C Style Guide
 
 ### Comments
 
@@ -243,6 +281,192 @@ Some of these rules don't apply in certain cases. Use your better judgement. To 
 8. Compile with all possible warnings active; all warnings should then be addressed before release of the software.
 9. Use the preprocessor sparingly
 10. Restrict functions to a single printed page
+
+**[Back to top](#table-of-contents)**
+
+## Python Style Guide
+
+- We will be following the Python language style guide [PEP8](https://peps.python.org/pep-0008/)
+- If there are any discrepancies between this style guide and PEP8, this style guide takes precedence.
+
+### Type Hinting Convention
+
+All function and method parameters (except for the `self` and `cls` parameters) and return signatures should be type hinted.
+
+```python
+def my_add(num1: int, num2: int) -> int:
+	"""
+	@brief Adds two numbers together
+
+	@param num1 - The first number to add.
+	@param num2 - The second number to add.
+	@return Returns the sum of the two numbers.
+	"""
+	return num1 + num2
+```
+
+### Comments
+
+#### Single Line Comments
+
+Variable and function names should be descriptive enough to understand even without comments. Comments are needed to describe any complicated logic. Use `#` for single-line comments.
+
+#### Function and Method Comments
+
+Function and method comments using `""" """` should exist below the function declaration. For methods, the `self` or `cls` parameter does not require a description.
+
+```python
+def my_add(num1: int, num2: int) -> int:
+	"""
+	@brief Adds two numbers together
+
+	@param num1 - The first number to add.
+	@param num2 - The second number to add.
+	@return Returns the sum of the two numbers.
+	"""
+	return num1 + num2
+```
+
+```python
+def increase_x(self, count: int) -> None:
+	"""
+	@brief Increases the x attribute by the count.
+
+	@param count - Count to increase the x attribute by.
+	"""
+	self.x += count
+```
+
+#### File Header Comments
+
+File comments are not required
+
+#### Class Comments
+
+- Class comments should exist after the class definition
+- Provide a brief description given class purpose
+- Provide a section in the class comment listing the attributes, their type and purpose
+- Enum class comments do not require listing the attributes
+
+```python
+class PointTwoDimension:
+	"""
+	@brief Class for storing a 2D point
+	@attribute x (int) - x coordinate of the point
+	@attribute y (int) - y coordinate of the point
+	"""
+
+	def __init__(x: int, y: int):
+		self.x = x
+		self.y = y
+
+@dataclasses.dataclass
+class PointTwoDimension:
+	"""
+	@brief Class for storing a 2D point
+	@attribute x (int) - x coordinate of the point
+	@attribute y (int) - y coordinate of the point
+	"""
+
+	x: int
+	y: int
+```
+ ```python
+import enum
+
+# No comments required
+class ErrorCode(enum.Enum):
+    """
+    @brief Enum for the error codes
+    """
+
+    SUCCESS = 0
+    INVALID_ARG = 1
+```
+
+### Naming Conventions
+
+- `variable_names`, `field_names` and `function_constants` in snake_case
+- `_private_field_names`, and `_private_method_names()` in \_snake_case
+- `function_names()` and `method_names()` in snake_case
+- `CONSTANT_NAMES: Final` and `ENUM_OPTIONS` in CAPITAL_SNAKE_CASE for module and class constants (not for local constant)
+- `file_names` in snake_case
+- `ClassName` in PascalCase
+    ```python
+    # For brevity, the class comments were removed but they should be in real code
+    import dataclasses
+
+    @dataclasses.dataclass
+    class PointTwoDimension:
+    	x: int
+    	y: int
+
+    class PointTwoDimension:
+    	def __init__(x: int, y: int):
+    		self.x = x
+    		self.y = y
+    ```
+
+
+- `EnumName` in PascalCase
+
+    ```python
+    import enum
+
+    class ErrorCode(enum.Enum):
+    	SUCCESS = 0
+    	INVALID_ARG = 1
+
+    # Accessing:
+    ErrorCode.SUCCESS  # <ErrorCode.SUCCESS: 0>
+    ErrorCode.INVALID_ARG  # <ErrorCode.INVALID_ARG: 1>
+    ```
+
+### Imports
+
+#### Grouping Imports
+
+Handled by pre-commit
+
+#### Notes about imports
+
+- Imports should only be used at the top of the file (no function or scoped imports)
+- Only modules should be imported
+
+```python
+# module1 contains very_long_module_name and function foo and variable var.
+#   very_long_module_name contains bar
+
+# Yes:
+from module1 import very_long_module_name as module2  # Casting to shorter name
+import module1
+
+module1.foo()
+module1.var
+module2.bar()
+
+# No:
+from module1.very_long_module_name import bar
+from module1 import foo, var
+
+foo()
+var
+bar()
+```
+
+### Other Style Guide Points
+
+- Only imports, function, class, and constants declarations and the `if __name__ == '__main__'` should be in module scope
+- Entry point to a script or program should be through the `main` function
+- Add a trailing comma after elements of a list, if you wish to make/preserve each element on a separate line
+
+**[Back to top](#table-of-contents)**
+
+## Pytest Style Guide
+
+- All functions that are to be tested should go into a Python file starting with `test_`
+- All functions that are to be tested **must** start with `test_` (This is a Pytest requirement)
+- Type hints are optional for Pytest functions (functions that start with `test_` in a Pytest file)
 
 **[Back to top](#table-of-contents)**
 
