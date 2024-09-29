@@ -8,8 +8,8 @@
 #include <os_semphr.h>
 #include "obc_logging.h"
 
-// definnes for app only and not BL
 #define BL_VERSION 0
+
 #else
 // Use bl logger
 #include "bl_logging.h"

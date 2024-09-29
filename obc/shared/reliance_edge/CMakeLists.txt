@@ -48,12 +48,51 @@ set(SOURCES
 )
 
 
-set (BL_INCLUDES
+set (BL_INCLUDE_DIRS
     include
+    core/include
+    os/baremetal/include
+    projects/freertos_rm46/host
 )
 
 set (BL_SOURCES
-
+    bdev/bdev.c
+    core/driver/blockio.c
+    core/driver/buffer.c
+    core/driver/buffercmn.c
+    core/driver/core.c
+    core/driver/dir.c
+    core/driver/format.c
+    core/driver/imap.c
+    core/driver/imapextern.c
+    core/driver/imapinline.c
+    core/driver/inode.c
+    core/driver/inodedata.c
+    core/driver/redbufferpriv.h
+    core/driver/volume.c
+    fse/fse.c
+    os/baremetal/services/osassert.c
+    os/baremetal/services/osbdev.c
+    os/baremetal/services/osbdev_fatfs.h
+    os/baremetal/services/osclock.c
+    os/baremetal/services/osmutex.c
+    os/baremetal/services/osoutput.c
+    os/baremetal/services/ostask.c
+    os/baremetal/services/ostimestamp.c
+    os/baremetal/services/osuidgid.c
+    posix/path.c
+    posix/posix.c
+    util/bitmap.c
+    util/crc.c
+    util/endian.c
+    util/ftype.c
+    util/heap.c
+    util/memory.c
+    util/namelen.c
+    util/perm.c
+    util/sign.c
+    util/string.c
+    projects/freertos_rm46/host/redconf.c
 )
 
 
@@ -61,8 +100,8 @@ set (BL_SOURCES
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDE_DIRS})
 target_sources(OBC-firmware.out PUBLIC ${SOURCES})
 
-target_include_directories(OBC-bl.out PUBLIC ${INCLUDE_DIRS})
-target_sources(OBC-bl.out PUBLIC ${SOURCES})
+target_include_directories(OBC-bl.out PUBLIC ${BL_INCLUDE_DIRS})
+target_sources(OBC-bl.out PUBLIC ${BL_SOURCES})
 
 target_include_directories(debug-tool.out PUBLIC ${INCLUDE_DIRS})
 target_sources(debug-tool.out PUBLIC ${SOURCES})

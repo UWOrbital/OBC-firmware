@@ -82,6 +82,8 @@ STATIC_ASSERT(SDC_ACTION_NUM_ATTEMPTS_DEFAULT <= 255, "SDC_ACTION_NUM_ATTEMPTS_D
 
 #define SDC_MOSI_HIGH 0xFFU  // Keep MOSI high during read operations
 
+#define CLOCK_SPEED_HZ 300000  // Clock speed of RM46 (used for baremetal delay function)
+
 /*---------------------------------------------*/
 /* Global Variables                            */
 /*---------------------------------------------*/
@@ -104,6 +106,18 @@ static sdc_power_t powerFlag = POWER_OFF;  /* indicates if "power" is on */
 /*---------------------------------------------*/
 
 /**
+ * @brief Delays execution by specifed number of miliseconds without by
+ * iterating over a for loop
+ */
+void delayBaremetalms(uint32_t ms) {
+  uint8_t cyclesPerIteration = 8;  // Rough estimate of cycles per iteration
+  unsigned long cycles = (ms * (CLOCK_SPEED_HZ / 1000)) / cyclesPerIteration;
+  for (unsigned long i = 0; i < cycles; i++) {
+    __asm__ __volatile__("nop");  // No-operation instruction
+  }
+}
+
+/**
  * @brief Check if card is ready
  *
  * @return bool True if card is ready, false otherwise.
@@ -120,7 +134,11 @@ static bool isCardReady(void) {
 
     if (res == 0xFF) return true;
 
+#ifdef NO_FREERTOS
+    delayBaremetalms(1);
+#else
     vTaskDelay(SDC_DELAY_1MS);
+#endif
   }
 
   return false;
@@ -186,7 +204,11 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
   for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
     LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &token));
     if (token != 0xFF) break;
+#ifdef NO_FREERTOS
+    delayBaremetalms(1);
+#else
     vTaskDelay(SDC_DELAY_1MS);
+#endif
   }
 
   /* If not valid data token, return with error */
@@ -285,7 +307,11 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
   for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
     LOG_IF_ERROR_CODE(spiTransmitAndReceiveByte(SDC_SPI_REG, &sdcSpiConfig, SDC_MOSI_HIGH, &res));
     if (!(res & SDC_CMD_RESP_MASK)) break;
+#ifdef NO_FREERTOS
+    delayBaremetalms(1);
+#else
     vTaskDelay(SDC_DELAY_1MS);
+#endif
   }
 
   return res;
@@ -365,7 +391,11 @@ DSTATUS disk_initialize(uint8_t drv) {
   for (uint8_t i = 0; i < SDC_ACTION_NUM_ATTEMPTS_DEFAULT; i++) {
     // Reset the card and put it into SPI mode; response should be 0x01 if successful
     if (sendCMD(SDC_CMD0, 0) == 1U) break;
+#ifdef NO_FREERTOS
+    delayBaremetalms(1);
+#else
     vTaskDelay(SDC_DELAY_1MS);
+#endif
   }
   // Even if SDC_CMD0 fails, we'll try to continue.
 
@@ -396,7 +426,11 @@ DSTATUS disk_initialize(uint8_t drv) {
                                                    : (CARD_TYPE_SDC_MASK);
           }
         }
+#ifdef NO_FREERTOS
+        delayBaremetalms(1);
+#else
         vTaskDelay(SDC_DELAY_1MS);
+#endif
       }
     } else {
       LOG_ERROR_CODE(OBC_ERR_CODE_SD_CARD_INVALID_VOLTAGE);
@@ -416,7 +450,11 @@ DSTATUS disk_initialize(uint8_t drv) {
       }
 
       if (initSuccess) break;
+#ifdef NO_FREERTOS
+      delayBaremetalms(1);
+#else
       vTaskDelay(SDC_DELAY_1MS);
+#endif
     }
 
     if (!initSuccess) {

@@ -53,10 +53,10 @@
 #include <redcore.h>
 #include <redmditer.h>
 
-#define SWAP16(val) ((((val)&0xFF00U) >> 8U) | (((val)&0x00FFU) << 8U))
-#define SWAP32(val)                                                                           \
-  ((((val)&0x000000FFU) << 24U) | (((val)&0x0000FF00U) << 8U) | (((val)&0x00FF0000U) >> 8U) | \
-   (((val)&0xFF000000U) >> 24U))
+#define SWAP16(val) ((((val) & 0xFF00U) >> 8U) | (((val) & 0x00FFU) << 8U))
+#define SWAP32(val)                                                                                 \
+  ((((val) & 0x000000FFU) << 24U) | (((val) & 0x0000FF00U) << 8U) | (((val) & 0x00FF0000U) >> 8U) | \
+   (((val) & 0xFF000000U) >> 24U))
 
 /** @brief Metadata iterator context structure.
  */

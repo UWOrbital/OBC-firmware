@@ -39,6 +39,7 @@ add_subdirectory(shared/sdcard)
 add_subdirectory(shared/obc_spi_io)
 add_subdirectory(shared/obc_errors)
 add_subdirectory(shared/utils)
+add_subdirectory(shared/reliance_edge)
 
 # Application
 target_link_options(OBC-firmware.out PRIVATE
@@ -71,7 +72,6 @@ add_subdirectory(app/modules)
 add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
-add_subdirectory(app/reliance_edge)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes
