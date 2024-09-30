@@ -1,8 +1,59 @@
+import { MouseEvent, useEffect, useState } from "react";
+import RequestItem from "./request_item";
+import { RequestItemData } from "./request_item_data";
+import { getRequestItems } from "./requests_api";
+
 const Requests = () => {
+	// TODO: Switch to using react-query
+	const [data, setData] = useState<RequestItemData[]>([]);
+	useEffect(() => {
+		const getRequestItemsRegular = async () => {
+			const response = await getRequestItems();
+			setData(response);
+		};
+		getRequestItemsRegular();
+	}, []);
+
+	// Removes the request with the given id from the list of data
+	// TODO: Cancel request on the backend
+	const cancelRequest = (id: number) => {
+		return async (_: MouseEvent) => {
+			setData((prev) => prev.filter((item) => item.id != id));
+		};
+	};
+
+	if (data.length === 0) {
+		return <div>You do not have any request created.</div>;
+	}
+
 	return (
-		<div>
-			<h1>Requests</h1>
-		</div>
+		<table>
+			<thead>
+				<tr>
+					<td>ID</td>
+					<td>Latitude</td>
+					<td>Longitude</td>
+					<td>Status</td>
+					<td>Created On</td>
+					<td>Request Sent to OBC On</td>
+					<td>Picture Taken On</td>
+					<td>Picture transmitted On</td>
+					<td>Download Packet</td>
+					<td>Cancel Request</td>
+				</tr>
+			</thead>
+			<tbody>
+				{data.map((item, key) => {
+					console.log(item);
+					return (
+						<tr key={key}>
+							{" "}
+							<RequestItem {...item} cancelRequest={cancelRequest(item.id)} />
+						</tr>
+					);
+				})}
+			</tbody>
+		</table>
 	);
 };
 
