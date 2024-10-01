@@ -82,7 +82,8 @@ static obc_error_code_t adcGetGroupReadings(adc_module_t adc, adc_group_t group,
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t convertToAnalog(uint16_t reading, float *buffer) {
+obc_error_code_t adcDigitalToAnalog(uint16_t reading, float *buffer) {
+
   if (buffer == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
