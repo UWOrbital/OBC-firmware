@@ -77,4 +77,4 @@ obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, uint16_t *
  * @param buffer Pointer to buffer to store the converted analog value
  * @return obc_error_code_t
  */
-obc_error_code_t convertToAnalog(uint16_t reading, float *buffer);
+obc_error_code_t adcDigitalToAnalog(uint16_t reading, float *buffer);
