@@ -33,7 +33,7 @@ void vTask1(void *pvParameters) {
     } else {
       // Loop through the readings (example for 2 channels)
       for (int i = 0; i < 8; i++) {
-        errCode = convertToAnalog(readings[i], (analogVal + i));
+        errCode = adcDigitalToAnalog(readings[i], (analogVal + i));
         if (errCode != OBC_ERR_CODE_SUCCESS) {
           sciPrintf("Error converting voltage for Channel %d: %d\r\n", i, errCode);
         } else {
