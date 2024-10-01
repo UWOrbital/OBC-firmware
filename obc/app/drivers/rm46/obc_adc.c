@@ -84,7 +84,6 @@ static obc_error_code_t adcGetGroupReadings(adc_module_t adc, adc_group_t group,
 
 obc_error_code_t adcDigitalToAnalog(uint16_t reading, float *buffer) {
   if (buffer == NULL) {
-
     return OBC_ERR_CODE_INVALID_ARG;
   }
   *buffer = (float)(reading) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / ((float)(1 << RESOLUTION) + REF_VOLTAGE_LOW);
