@@ -12,9 +12,9 @@
 
 #include <stdint.h>
 
-typedef enum { ADC1 = 0U, ADC2 } adc_module_t;
+typedef enum { ADC_MODULE_1 = 0U, ADC_MODULE_2 = 1U } adc_module_t;
 
-typedef enum { EVENT = 0U, GROUP1, GROUP2 } adc_group_t;
+typedef enum { ADC_GROUP_EVENT = 0U, ADC_GROUP_1 = 1U, ADC_GROUP_2 = 2U } adc_group_t;
 
 typedef enum {
   ADC_CHANNEL_0 = 0U,
@@ -46,7 +46,7 @@ typedef enum {
 /**
  * @brief Initialize the ADC bus mutex
  */
-void initADCMutex(void);
+void initADC(void);
 
 /**
  * @note Get data from a single ADC channel. ADC conversion mode channel ID should be ENABLED for all groups this is
@@ -56,13 +56,9 @@ void initADCMutex(void);
  * @param group Group number (0-2)
  * @param reading The float to receive the analog reading
  * @param blockTime The HAL ticks to wait for mutex
- * @return OBC_ERR_CODE_INVALID_ARG if reading or adc parameters are null,
- * OBC_ERR_CODE_INVALID_STATE if ADC mutex not init,
- * OBC_ERR_CODE_MUTEX_TIMEOUT if unable to obtain ADC mutex,
- * OBC_ERR_CODE_SUCCESS if conversion completed and analog data is obtained,
- * OBC_ERR_CODE_ADC_INVALID_CHANNEL if conversion completed but channel number is not found
+ * @return obc_error_code_t
  */
-obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_group_t group, float *reading,
+obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_group_t group, uint16_t *reading,
                                   TickType_t blockTime);
 
 /**
@@ -71,9 +67,14 @@ obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_g
  * @param group Group number (0-2)
  * @param readings Array of floats equal to number of channels in the group
  * @param blockTime The HAL ticks to wait for mutex
- * @return OBC_ERR_CODE_INVALID_ARG if data or adc parameters are null,
- * OBC_ERR_CODE_INVALID_STATE if ADC mutex not init,
- * OBC_ERR_CODE_MUTEX_TIMEOUT if unable to obtain ADC mutex,
- * OBC_ERR_CODE_SUCCESS if conversions completed and analog data is obtained
+ * @return obc_error_code_t
  */
-obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, float *readings, TickType_t blockTime);
+obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, uint16_t *readings, TickType_t blockTime);
+
+/**
+ * @note Convert digital value from ADC into analog value (e.g. for voltage)
+ * @param reading Digital value from ADC
+ * @param buffer Pointer to buffer to store the converted analog value
+ * @return obc_error_code_t
+ */
+obc_error_code_t convertToAnalog(uint16_t reading, float *buffer);

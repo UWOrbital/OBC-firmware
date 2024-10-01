@@ -23,7 +23,9 @@ static StaticSemaphore_t adcConversionMutexBuffer;
 #define REF_VOLTAGE_LOW 0.0f
 
 // Arbitrary
-#define ADC_MAX_WAIT_CYCLES 5
+#define ADC_MAX_WAIT_CYCLES 1000
+
+#define ADC_NUM_GROUPS 3
 
 typedef enum {
   ADC1_GROUP0_NUM_CHANNELS = 16U,
@@ -34,9 +36,10 @@ typedef enum {
   ADC2_GROUP2_NUM_CHANNELS = 16U
 } adc_group_channels_t;
 
-const uint32_t adcGroupLengths[2U][3U] = {
-    {ADC1_GROUP0_NUM_CHANNELS, ADC1_GROUP1_NUM_CHANNELS, ADC1_GROUP2_NUM_CHANNELS},
-    {ADC2_GROUP0_NUM_CHANNELS, ADC2_GROUP1_NUM_CHANNELS, ADC2_GROUP2_NUM_CHANNELS}};
+#define ADC_INDEX(module, group) ((module) * ADC_NUM_GROUPS + (group))
+
+const uint32_t adcGroupLengths[6] = {ADC1_GROUP0_NUM_CHANNELS, ADC1_GROUP1_NUM_CHANNELS, ADC1_GROUP2_NUM_CHANNELS,
+                                     ADC2_GROUP0_NUM_CHANNELS, ADC2_GROUP1_NUM_CHANNELS, ADC2_GROUP2_NUM_CHANNELS};
 
 void initADC(void) {
   adcInit();
@@ -56,18 +59,18 @@ static obc_error_code_t adcGetGroupReadings(adc_module_t adc, adc_group_t group,
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
-  adcBASE_t *adcReg = (adc == ADC1) ? adcREG1 : adcREG2;
+  adcBASE_t *adcReg = (adc == ADC_MODULE_1) ? adcREG1 : adcREG2;
 
   adcStartConversion(adcReg, group);
 
-  uint8_t totalAttempts = 0;
-  while (!adcIsConversionComplete(adcReg, group)) {
-    if (totalAttempts >= ADC_MAX_WAIT_CYCLES) {
-      adcStopConversion(adcReg, group);
-      xSemaphoreGive(adcConversionMutex);
-      return OBC_ERR_CODE_ADC_FAILURE;
-    }
+  uint16_t totalAttempts = 0;
+  while (!adcIsConversionComplete(adcReg, group) && totalAttempts < ADC_MAX_WAIT_CYCLES) {
     totalAttempts++;
+  }
+
+  if (totalAttempts >= ADC_MAX_WAIT_CYCLES) {
+    xSemaphoreGive(adcConversionMutex);
+    return OBC_ERR_CODE_ADC_FAILURE;
   }
 
   adcStopConversion(adcReg, group);
@@ -79,7 +82,15 @@ static obc_error_code_t adcGetGroupReadings(adc_module_t adc, adc_group_t group,
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_group_t group, float *reading,
+obc_error_code_t convertToAnalog(uint16_t reading, float *buffer) {
+  if (buffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  *buffer = (float)(reading) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / ((float)(1 << RESOLUTION) + REF_VOLTAGE_LOW);
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_group_t group, uint16_t *reading,
                                   TickType_t blockTime) {
   if (reading == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -94,12 +105,12 @@ obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_g
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
 
-  uint32_t groupSize = adcGroupLengths[(adc == ADC1) ? 0U : 1U][group];
+  uint8_t index = ADC_INDEX(adc, group);
+  uint32_t groupSize = adcGroupLengths[index];
 
   for (uint32_t i = 0; i < groupSize; i++) {
     if (adcData[i].id == channel) {
-      *reading = (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) /
-                 ((float)(1 << RESOLUTION) + REF_VOLTAGE_LOW);
+      *reading = adcData[i].value;
       return OBC_ERR_CODE_SUCCESS;
     }
   }
@@ -107,7 +118,7 @@ obc_error_code_t adcGetSingleData(adc_module_t adc, adc_channel_t channel, adc_g
   return OBC_ERR_CODE_ADC_INVALID_CHANNEL;
 }
 
-obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, float *readings, TickType_t blockTime) {
+obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, uint16_t *readings, TickType_t blockTime) {
   if (readings == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -121,11 +132,11 @@ obc_error_code_t adcGetGroupData(adc_module_t adc, adc_group_t group, float *rea
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(adcGetGroupReadings(adc, group, adcData, blockTime));
 
-  uint32_t groupSize = adcGroupLengths[(adc == ADC1) ? 0U : 1U][group];
+  uint8_t index = ADC_INDEX(adc, group);
+  uint32_t groupSize = adcGroupLengths[index];
 
   for (uint32_t i = 0; i < groupSize; i++) {
-    readings[i] =
-        (float)(adcData[i].value) * (REF_VOLTAGE_HIGH - REF_VOLTAGE_LOW) / ((float)(1 << RESOLUTION)) + REF_VOLTAGE_LOW;
+    readings[i] = adcData[i].value;
   }
 
   return OBC_ERR_CODE_SUCCESS;
