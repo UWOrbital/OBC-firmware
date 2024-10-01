@@ -1,5 +1,3 @@
-#include "runtime_stats.h"
-
 #include <rti.h>
 #include <stdint.h>
 

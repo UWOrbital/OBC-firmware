@@ -5,8 +5,6 @@
 #include "obc_privilege.h"
 #include "obc_logging.h"
 
-#include <runtime_stats.h>
-
 #define TASK_STATS_BUFFER_SIZE 1000U
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
