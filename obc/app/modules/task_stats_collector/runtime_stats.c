@@ -3,17 +3,9 @@
 #include <rti.h>
 #include <stdint.h>
 
-/**
- * @brief Helper function to configure the stats collecter.
- * @return Returns void
- */
 void vConfigureRuntimeStats(void) {
   rtiInit();
   rtiStartCounter(rtiCOUNTER_BLOCK1);
 }
 
-/**
- * @brief Returns the tick count.
- * @return Returns the configured timer tick.
- */
 uint32_t ulSystemTickGet(void) { return rtiGetCounterOneTick(); }

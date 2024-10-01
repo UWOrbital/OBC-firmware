@@ -105,14 +105,16 @@
 #define configTOTAL_HEAP_SIZE		  ( ( size_t ) 24576 )
 #define configMAX_TASK_NAME_LEN		  ( 16 )
 #define configIDLE_SHOULD_YIELD		  1
-#define configGENERATE_RUN_TIME_STATS ENABLE_TASK_STATS_COLLECTOR
+#define configGENERATE_RUN_TIME_STATS 0
 #define configUSE_MALLOC_FAILED_HOOK  0
 
 /* USER CODE BEGIN (1) */
+#undef configGENERATE_RUN_TIME_STATS
+#define configGENERATE_RUN_TIME_STATS ENABLE_TASK_STATS_COLLECTOR
 #if (configGENERATE_RUN_TIME_STATS == 1)
     #include <stdint.h>
-    extern void vConfigureRuntimeStats();
-    extern uint32_t ulSystemTickGet();
+    void vConfigureRuntimeStats(void);
+    uint32_t ulSystemTickGet(void);
     
     #ifndef portCONFIGURE_TIMER_FOR_RUN_TIME_STATS
         #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS vConfigureRuntimeStats

@@ -11,6 +11,9 @@ static volatile rtiBASE_t* const rtiBase = rtiREG1;
 #define RTI_RTOS_TICK_COMPARE_CNT (configCPU_CLOCK_HZ / configTICK_RATE_HZ)
 #define RTI_RUNTIME_STATS_COMPARE_CNT (RTI_RTOS_TICK_COMPARE_CNT / 50)
 
+__attribute__((weak)) void vConfigureRuntimeStats(void) {}
+__attribute__((weak)) uint32_t ulSystemTickGet(void) {return 0;}
+
 uint32_t rtiGetCounterOneTick() { 
   return rtiBase->CNT[1].FRCx; 
 }
