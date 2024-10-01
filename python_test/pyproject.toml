@@ -1,0 +1,3 @@
+[tool.ruff]
+extend = "../pyproject.toml"
+lint.ignore = ["E", "F", "N", "UP", "SIM", "B", "ANN", "A", "D"]
