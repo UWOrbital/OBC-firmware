@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * File: onboad_env_modelling.h
+ * File: onboard_env_modelling.h
  *
- * Code generated for Simulink model 'onboad_env_modelling'.
+ * Code generated for Simulink model 'onboard_env_modelling'.
  *
  * Model version                  : 3.78
  * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
@@ -19,14 +19,14 @@
  * Validation result: Not run
  */
 
-#ifndef RTW_HEADER_onboad_env_modelling_h_
-#define RTW_HEADER_onboad_env_modelling_h_
-#ifndef onboad_env_modelling_COMMON_INCLUDES_
-#define onboad_env_modelling_COMMON_INCLUDES_
+#ifndef RTW_HEADER_onboard_env_modelling_h_
+#define RTW_HEADER_onboard_env_modelling_h_
+#ifndef onboard_env_modelling_COMMON_INCLUDES_
+#define onboard_env_modelling_COMMON_INCLUDES_
 #include "rtwtypes.h"
 #include "rtw_continuous.h"
 #include "rtw_solver.h"
-#endif                               /* onboad_env_modelling_COMMON_INCLUDES_ */
+#endif                               /* onboard_env_modelling_COMMON_INCLUDES_ */
 
 /* Macros for accessing real-time model data structure */
 #ifndef rtmGetErrorStatus
@@ -67,8 +67,8 @@ extern onboard_env_model_ext_intputs_t onboard_env_model_ext_intputs;
 extern onboard_env_model_ext_outputs_t onboard_env_model_ext_outputs;
 
 /* Model entry point functions */
-extern void onboad_env_modelling_initialize(void);
-extern void onboad_env_modelling_step(void);
+extern void onboard_env_modelling_initialize(void);
+extern void onboard_env_modelling_step(void);
 
 /* Real-time Model object */
 extern RT_MODEL_onboard_model *const onboard_env_model_rt_object;
@@ -85,18 +85,18 @@ extern RT_MODEL_onboard_model *const onboard_env_model_rt_object;
  * MATLAB hilite_system command to trace the generated code back
  * to the parent model.  For example,
  *
- * hilite_system('cubesat_alg_dev_env_v2_main/onboad_env_modelling')    - opens subsystem cubesat_alg_dev_env_v2_main/onboad_env_modelling
- * hilite_system('cubesat_alg_dev_env_v2_main/onboad_env_modelling/Kp') - opens and selects block Kp
+ * hilite_system('cubesat_alg_dev_env_v2_main/onboard_env_modelling')    - opens subsystem cubesat_alg_dev_env_v2_main/onboard_env_modelling
+ * hilite_system('cubesat_alg_dev_env_v2_main/onboard_env_modelling/Kp') - opens and selects block Kp
  *
  * Here is the system hierarchy for this model
  *
  * '<Root>' : 'cubesat_alg_dev_env_v2_main'
- * '<S1>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling'
- * '<S2>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling/Cross Product'
- * '<S3>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling/MATLAB Function6'
- * '<S4>'   : 'cubesat_alg_dev_env_v2_main/onboad_env_modelling/Regenerates from UV Values'
+ * '<S1>'   : 'cubesat_alg_dev_env_v2_main/onboard_env_modelling'
+ * '<S2>'   : 'cubesat_alg_dev_env_v2_main/onboard_env_modelling/Cross Product'
+ * '<S3>'   : 'cubesat_alg_dev_env_v2_main/onboard_env_modelling/MATLAB Function6'
+ * '<S4>'   : 'cubesat_alg_dev_env_v2_main/onboard_env_modelling/Regenerates from UV Values'
  */
-#endif                                 /* RTW_HEADER_onboad_env_modelling_h_ */
+#endif                                 /* RTW_HEADER_onboard_env_modelling_h_ */
 
 /*
  * File trailer for generated code.

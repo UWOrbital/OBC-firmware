@@ -5,7 +5,7 @@
  *
  * File: rtwtypes.h
  *
- * Code generated for Simulink model 'onboad_env_modelling'.
+ * Code generated for Simulink model 'onboard_env_modelling'.
  *
  * Model version                  : 3.78
  * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022

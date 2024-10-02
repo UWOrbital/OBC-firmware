@@ -3,9 +3,9 @@
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
  *
- * File: onboad_env_modelling.c
+ * File: onboard_env_modelling.c
  *
- * Code generated for Simulink model 'onboad_env_modelling'.
+ * Code generated for Simulink model 'onboard_env_modelling'.
  *
  * Model version                  : 3.78
  * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
@@ -34,7 +34,7 @@ static RT_MODEL_onboard_model rtM_;
 RT_MODEL_onboard_model *const onboard_env_model_rt_object = &rtM_;
 
 /* Model step function */
-void onboad_env_modelling_step(void)
+void onboard_env_modelling_step(void)
 {
   real_T b;
 
@@ -100,7 +100,7 @@ void onboad_env_modelling_step(void)
 }
 
 /* Model initialize function */
-void onboad_env_modelling_initialize(void)
+void onboard_env_modelling_initialize(void)
 {
   /* (no initialization code required) */
 }

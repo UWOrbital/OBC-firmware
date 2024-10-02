@@ -69,7 +69,7 @@ void rtOnboardModelStep(void) {
   onboard_env_model_ext_intputs.steve_values[1] = 0.0;
 
   /* Step the model */
-  onboad_env_modelling_step();
+  onboard_env_modelling_step();
 
   /* Get model outputs here */
   real_T angularBodyX = onboard_env_model_ext_outputs.estimated_expect_ang_acc_body[0];
@@ -257,7 +257,7 @@ obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
 
 void obcTaskInitGncMgr(void) {
   /* Initialize the onboard modelling environment */
-  onboad_env_modelling_initialize();
+  onboard_env_modelling_initialize();
 
   /* Initialize the attitude determination algorithms */
   attitude_determination_and_vehi_initialize();

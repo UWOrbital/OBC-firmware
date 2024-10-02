@@ -36,7 +36,7 @@ void readVn100(void* pvParameters) {
 
     /* Set the input parameters for the first block */
 
-    onboad_env_modelling_step();
+    onboard_env_modelling_step();
 
     attitude_determination_and_vehi_step();
 
@@ -50,11 +50,11 @@ void readVn100(void* pvParameters) {
   }
 }
 
-void setOnBoardEnvInputs(ExtU_onboad_env_modelling_T* inputParams) { onboad_env_modelling_U = }
+void setOnBoardEnvInputs(ExtU_onboard_env_modelling_T* inputParams) { onboard_env_modelling_U = }
 
 int main(void) {
   /* Initialize the entry point of the onboard modelling environment */
-  onboad_env_modelling_initialize();
+  onboard_env_modelling_initialize();
 
   /* Initialize the entry point of the attitude determination model */
   attitude_determination_and_vehi_initialize();
