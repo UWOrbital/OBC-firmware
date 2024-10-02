@@ -5,7 +5,6 @@
 #include "obc_print.h"
 #include "obc_logging.h"
 #include "obc_general_util.h"
-
 #include "gnc_manager.h"
 #include "attitude_control.h"
 #include "attitude_determination_and_vehi.h"
@@ -19,6 +18,7 @@
 #include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
+
 #include <math.h>
 
 #define DEFAULT_GNC_TASK_PERIOD_MS 50 /* 50ms period or 20Hz */
@@ -165,7 +165,7 @@ void rtAttitudeDeterminationModelStep(void) {
   UNUSED(measuredAngularVelocityX);
   UNUSED(measuredAngularVelocityY);
   UNUSED(measuredAngularVelocityZ);
-  
+
   UNUSED(quaterionX);
   UNUSED(quaterionY);
   UNUSED(quaterionZ);
@@ -291,13 +291,13 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     /* Place GNC Tasks here */
 
     obc_error_code_t errCode;
-    
+
     /* Read from sensors */
     vn100_binary_packet_t vn100CurrentPacket;
     LOG_IF_ERROR_CODE(vn100ReadBinaryOutputs(&vn100CurrentPacket));
 
     if (errCode == OBC_ERR_CODE_SUCCESS) {
-      /* TODO: Double check with GNC what to do if any sensor read fails 
+      /* TODO: Double check with GNC what to do if any sensor read fails
          i.e should we not adjust our actuators at all or run the step with previous values.
          I have a feeling that the best thing would be to use the last valid value though */
       memcpy(&vn100LastValidPacket, &vn100CurrentPacket, sizeof(vn100CurrentPacket));
