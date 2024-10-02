@@ -21,28 +21,12 @@
 #define MAX_FNAME_LINENUM_SIZE 128U
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
-// static void log_error(const char *file, uint32_t line, uint32_t errCode) {
-//   char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
-//   snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", "ERROR", file, line);
-
-//   char logBuf[MAX_LOG_SIZE] = {0};
-
-//   // Prepare entire output
-//   snprintf(logBuf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, errCode);
-
-//   sciPrintf(logBuf);
-// }
-
-static void logResult(obc_error_code_t retErrorCode, const char *peripheral, const char *protocol) {
+static void logResult(bool success, const char *peripheral, const char *protocol, bool *pass) {
   char strBuf[60 + strlen(peripheral) +
               strlen(protocol)];  // Approx 50 for fail text plus some wiggle room if message changes
-  if (retErrorCode != OBC_ERR_CODE_SUCCESS) {
+  if (!success) {
     snprintf(strBuf, sizeof(strBuf), "POWER ON TEST FAIL: Bad connection with %s (via %s)\r\n", peripheral, protocol);
-
-    // This occurs prior to FreeRTOS taking over, cannot send errors to logger queue via typical means
-    // log_error(__FILE__, __LINE__, retErrorCode);
-
-    LOG_ERROR_CODE(retErrorCode);
+    *pass = false;
   } else {
     snprintf(strBuf, sizeof(strBuf), "Good connection with %s (via %s)\r\n", peripheral, protocol);
   }
@@ -54,73 +38,63 @@ void runTest() {
   obc_error_code_t errCode;
   bool pass = true;
 
-  float placeholder_float;
-  // uint8_t placeholder_byte;
-  uint32_t placeholder_uint32;
-  size_t placeholder_size;
+  float placeholderFloat;
+  uint32_t placeholderUint32;
+  size_t placeholderSize;
 
   // Test connection with LM75BD
-  errCode = readTempLM75BD(LM75BD_OBC_I2C_ADDR, &placeholder_float);
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "LM75BD", "I2C");
+  errCode = readTempLM75BD(LM75BD_OBC_I2C_ADDR, &placeholderFloat);
+  logResult(errCode == OBC_ERR_CODE_SUCCESS && placeholderFloat != 0.0, "LM75BD", "I2C", &pass);
 
   // Test connection with CC1120
   errCode = cc1120StrobeSpi(CC1120_STROBE_SRES);
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "CC1120", "SPI");
+  logResult(errCode == OBC_ERR_CODE_SUCCESS, "CC1120", "SPI", &pass);
 
   // Test connection with fram
   testing_persist_data_t data = {.testData = 0x1818};
   errCode = setPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &data, sizeof(testing_persist_data_t));
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    pass = false;
+    logResult(false, "FRAM", "SPI", &pass);
   } else {
     testing_persist_data_t readData;
     errCode = getPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &readData, sizeof(testing_persist_data_t));
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-      pass = false;
+      logResult(false, "FRAM", "SPI", &pass);
     } else {
       if (readData.testData != data.testData) {
         errCode = OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-        pass = false;
+        logResult(false, "FRAM", "SPI", &pass);
+      } else {
+        logResult(true, "FRAM", "SPI", &pass);
       }
     }
   }
-  logResult(errCode, "FRAM", "SPI");  // errCode logged indicates how far the test got
 
   // Test connection with rffm6404
   errCode = rffm6404ActivateRx();
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "RFFM6404", "GIO");
+  logResult(errCode == OBC_ERR_CODE_SUCCESS, "RFFM6404", "GIO", &pass);
   rffm6404PowerOff();  // Return to starting condition
 
-  // Test connection with arducam - part 1
-  errCode = flushFifo(PRIMARY);  // Init does a lot of writing to registers over I2C
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "Arducam", "SPI");
-
-  // Test connection with arducam - part 2
-  // TODO: Read from SPI test reg when driver is finished
-
+  // Test connection with arducam
+  // TODO: Read from test reg when driver is finished
   // errCode = arducamReadTestReg(&placeholder_byte);  // Now testing SPI interface
-  // pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  // logResult(errCode, "Arducam", "SPI");
+  // logResult(errCode == OBC_ERR_CODE_SUCCESS, "Arducam", "SPI", &pass); // Maybe some other validation
 
   // Test connection with DS3232
-  errCode = getTemperatureRTC(&placeholder_float);
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "DS3232", "I2C");
+  rtc_status_t status;
+  errCode = getStatusRTC(&status);
+  logResult(errCode == OBC_ERR_CODE_SUCCESS && status.EN32KHZ, "DS3232", "I2C",
+            &pass);  // 32khz output enabled by default, will be on power up
 
   // Test connection with VN100
-  errCode = vn100ReadBaudrate(&placeholder_uint32);  // Handles check that response is a valid baudrate
-  pass &= (errCode != OBC_ERR_CODE_SUCCESS);
-  logResult(errCode, "VN100", "SCI");
+  errCode = vn100ReadBaudrate(&placeholderUint32);  // Handles check that response is a valid baudrate
+  logResult(errCode == OBC_ERR_CODE_SUCCESS, "VN100", "SCI", &pass);
 
   // Test connection with SD Card
   int32_t fileId;
-  const char writeData[] = "UW Orbital";
+  const char writeData[] = "Orbital\r\n";
   const char filePath[] = "/power_on_test.txt";
   char readBuf[strlen(writeData)];
 
@@ -128,25 +102,26 @@ void runTest() {
   errCode = createFile(filePath, &fileId);
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    pass = false;
+    logResult(false, "SD Card", "SPI", &pass);
   } else {
     red_open(filePath, RED_O_RDWR | RED_O_APPEND);
     errCode = writeFile(fileId, writeData, strlen(writeData));
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-      pass = false;
+      logResult(false, "SD Card", "SPI", &pass);
     } else {
-      readFile(fileId, readBuf, strlen(writeData), &placeholder_size);
+      readFile(fileId, readBuf, strlen(writeData), &placeholderSize);
 
       if (strcmp(writeData, readBuf) != 0) {
         errCode = OBC_ERR_CODE_FAILED_FILE_READ;
-        pass = false;
+        logResult(false, "SD Card", "SPI", &pass);
+      } else {
+        logResult(true, "SD Card", "SPI", &pass);
       }
 
       deleteFile(filePath);
     }
   }
-  logResult(errCode, "SD Card", "SPI");  // errCode logged indicated how far the test got
 
   if (pass) {
     sciPrintf("POWER ON TEST COMPLETE: PASS\r\n");
