@@ -247,13 +247,11 @@ void rtAttitudeControlModelStep(void) {
 obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
   /* If the period exceeds 50ms, set to block for another interval (e.g 100ms is one blocked cycle for 50ms and then
    * running the full GNC code for the other 50ms)*/
-  if (periodMs > DEFAULT_GNC_TASK_PERIOD_MS) {
-    taskRateDivisor = periodMs / DEFAULT_GNC_TASK_PERIOD_MS;
-    return OBC_ERR_CODE_SUCCESS;
-  } else if (periodMs <= 0) {
+  if ((periodMs > MAX_GNC_TASK_PERIOD_MS) || (periodMs < DEFAULT_GNC_TASK_PERIOD_MS)) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
+  taskRateDivisor = periodMs / DEFAULT_GNC_TASK_PERIOD_MS;
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -278,7 +276,7 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   while (1) {
     /* Check in with the watchdog */
     digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
-    if (cycleNum != taskRateDivisor) {
+    if (cycleNum <= taskRateDivisor) {
       cycleNum++;
       vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(DEFAULT_GNC_TASK_PERIOD_MS));
       continue;
