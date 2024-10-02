@@ -39,10 +39,15 @@ static const char *LEVEL_STRINGS[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR",
 static log_level_t logLevel;
 static log_output_location_t outputLocation;
 
-#define LOGGER_QUEUE_LENGTH 10U
+#define LOGGER_QUEUE_LENGTH 1U
 #define LOGGER_QUEUE_ITEM_SIZE sizeof(logger_event_t)
 #define LOGGER_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
+
+#ifdef ENABLE_BLOCKING_LOGS
+#define LOGGER_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#else
 #define LOGGER_QUEUE_TX_WAIT_PERIOD 0
+#endif
 
 static QueueHandle_t loggerQueueHandle = NULL;
 static StaticQueue_t loggerQueue;

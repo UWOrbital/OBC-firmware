@@ -2,7 +2,7 @@
 #include "obc_errors.h"
 #include "obc_scheduler_config.h"
 #include "digital_watchdog_mgr.h"
-
+#include "obc_logging.h"
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_task.h>
@@ -23,7 +23,9 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   /* Run GNC tasks periodically at 20 Hz */
   while (1) {
     digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
-
+    for (int i = 0; i < 10; i++) {
+      LOG_ERROR_CODE(i);
+    }
     /* This will automatically update the xLastWakeTime variable to be the last unblocked time */
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(GNC_TASK_PERIOD_MS));
   }
