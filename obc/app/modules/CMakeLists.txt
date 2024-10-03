@@ -45,8 +45,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_mgr/telemetry_fs_utils.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper/timekeeper.c
-
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/task_stats_collector.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/runtime_stats.c
     ${CMAKE_CURRENT_SOURCE_DIR}/logger/logger.c
 
 )
