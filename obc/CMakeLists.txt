@@ -29,6 +29,7 @@ endif()
 add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 
 # Select main for build
+# NOTE: -Werror is still defined
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     set(OUT_FILE_NAME OBC-firmware.out)
     set(BIN_FILE_NAME OBC-firmware.bin)

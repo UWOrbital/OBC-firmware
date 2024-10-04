@@ -40,7 +40,11 @@ jobs:
 
             # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
           ]
-        board:  [RM46_LAUNCHPAD]
+        board:  [
+          RM46_LAUNCHPAD,
+          OBC_REVISION_1,
+          OBC_REVISION_2,
+          ]
 
     steps:
       - uses: actions/checkout@v3
