@@ -9,9 +9,7 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   uint8_t key[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
-  // // Initialize GCM context
-  // initializeAesCtx(key);
-
+  // Initialize GCM context
   obc_gs_error_code_t initResult = initializeAesCtx(key);
   ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
@@ -44,9 +42,7 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
       gcmEncrypt(&aesDataEncrypt, reinterpret_cast<const uint8_t *>(plaintext), plaintextLen,
                  reinterpret_cast<const uint8_t *>(additionalData), additionalDataLen, ciphertext);
 
-  // // Encrypt the plaintext
-  // obc_gs_error_code_t encResult =
-  //     gcmEncrypt(&aesDataEncrypt, plaintext, plaintextLen, additionalData, additionalDataLen, ciphertext);
+  // Encrypt the plaintext
   ASSERT_EQ(encResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare aes_data_t structure for decryption
@@ -56,10 +52,6 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   aesDataDecrypt.ciphertextLen = plaintextLen;
   memcpy(aesDataDecrypt.tag, aesDataEncrypt.tag, tagLen);
   aesDataDecrypt.tagLen = tagLen;
-
-  // Decrypt the ciphertext
-  // obc_gs_error_code_t decResult =
-  //     aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen, additionalData, additionalDataLen);
 
   // Decrypt the ciphertext
   obc_gs_error_code_t decResult = aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen,
@@ -77,8 +69,6 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
   // Initialize GCM context
-  // initializeAesCtx(key);
-
   obc_gs_error_code_t initResult = initializeAesCtx(key);
   ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
@@ -108,9 +98,6 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   aesDataEncrypt.tagLen = tagLen;
 
   // Encrypt the plaintext
-  // obc_gs_error_code_t encResult =
-  //     gcmEncrypt(&aesDataEncrypt, plaintext, plaintextLen, additionalData, additionalDataLen, ciphertext);
-
   obc_gs_error_code_t encResult =
       gcmEncrypt(&aesDataEncrypt, reinterpret_cast<const uint8_t *>(plaintext), plaintextLen,
                  reinterpret_cast<const uint8_t *>(additionalData), additionalDataLen, ciphertext);
@@ -127,11 +114,7 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   aesDataDecrypt.tag[0] ^= 0xFF;  // Flip all bits in the first byte of the tag
   aesDataDecrypt.tagLen = tagLen;
 
-  // // Attempt to decrypt with invalid tag
-  // obc_gs_error_code_t decResult =
-  //     aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen, additionalData, additionalDataLen);
-
-  // Decrypt the ciphertext
+  // Attempt to decrypt with invalid tag
   obc_gs_error_code_t decResult = aes128Decrypt(&aesDataDecrypt, decrypted, plaintextLen,
                                                 reinterpret_cast<const uint8_t *>(additionalData), additionalDataLen);
 
