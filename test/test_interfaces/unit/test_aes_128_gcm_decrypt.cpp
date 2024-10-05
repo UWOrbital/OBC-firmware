@@ -13,7 +13,7 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   // initializeAesCtx(key);
 
   obc_gs_error_code_t initResult = initializeAesCtx(key);
-  ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS)
+  ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare plaintext
   const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
@@ -72,7 +72,7 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   // initializeAesCtx(key);
 
   obc_gs_error_code_t initResult = initializeAesCtx(key);
-  ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS)
+  ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare plaintext
   const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
