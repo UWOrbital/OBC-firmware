@@ -37,6 +37,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 add_compile_options(-mcpu=cortex-r4 -march=armv7-r -mtune=cortex-r4 -marm -mfpu=vfpv3-d16)
 
 # Common flags
+# NOTE: -Werror is defined in obc/CMakeLists.txt
 add_compile_options(-Wall -Wextra -Wno-unused-parameter -fstack-protector-strong -fstack-usage -fdump-ipa-cgraph -MMD)
 
 # Conditional flag for C code
