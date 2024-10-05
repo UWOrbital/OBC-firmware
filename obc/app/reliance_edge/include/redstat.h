@@ -117,17 +117,17 @@
 #if REDCONF_API_POSIX == 1
 /** @brief Test for a directory.
  */
-#define RED_S_ISDIR(m) (((m)&RED_S_IFMT) == RED_S_IFDIR)
+#define RED_S_ISDIR(m) (((m) & RED_S_IFMT) == RED_S_IFDIR)
 #endif
 
 /** @brief Test for a regular file.
  */
-#define RED_S_ISREG(m) (((m)&RED_S_IFMT) == RED_S_IFREG)
+#define RED_S_ISREG(m) (((m) & RED_S_IFMT) == RED_S_IFREG)
 
 #if (REDCONF_API_POSIX == 1) && (REDCONF_API_POSIX_SYMLINK == 1)
 /** @brief Test for a symbolic link.
  */
-#define RED_S_ISLNK(m) (((m)&RED_S_IFMT) == RED_S_IFLNK)
+#define RED_S_ISLNK(m) (((m) & RED_S_IFMT) == RED_S_IFLNK)
 #endif
 
 /** File system is read-only. */

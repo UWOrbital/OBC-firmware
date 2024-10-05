@@ -18,6 +18,7 @@ SET(INCLUDES
 )
 
 SET(SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_adc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_digital_watchdog.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_i2c_io.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_reset.c
