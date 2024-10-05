@@ -16,7 +16,9 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare plaintext
-  const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+  // const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+  const char* plaintext = "Hello World!";
+
   size_t plaintextLen = sizeof(plaintext);
 
   // Prepare IV
@@ -28,7 +30,9 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   uint8_t decrypted[plaintextLen] = {0};
 
   // Prepare additional authenticated data (AAD)
-  const uint8_t additionalData[] = {'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', 'a', 'l', 'D', 'a', 't', 'a'};
+  // const uint8_t additionalData[] = {'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', 'a', 'l', 'D', 'a', 't', 'a'};
+  const char* additionalData = "AdditionalData";
+
   size_t additionalDataLen = sizeof(additionalData);
 
   // Prepare tag
@@ -75,7 +79,8 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare plaintext
-  const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+  // const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+  const char* plaintext = "Hello World!";
   size_t plaintextLen = sizeof(plaintext);
 
   // Prepare IV
@@ -87,7 +92,9 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   uint8_t decrypted[plaintextLen];
 
   // Prepare additional authenticated data (AAD)
-  const uint8_t additionalData[] = {'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', 'a', 'l', 'D', 'a', 't', 'a'};
+  // const uint8_t additionalData[] = {'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', 'a', 'l', 'D', 'a', 't', 'a'};
+  const char* additionalData = "AdditionalData";
+
   size_t additionalDataLen = sizeof(additionalData);
 
   // Prepare tag
