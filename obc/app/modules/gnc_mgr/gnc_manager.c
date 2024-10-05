@@ -69,7 +69,6 @@ static void rtOnboardModelStep(void) {
   UNUSED(referenceEstimateX);
   UNUSED(referenceEstimateY);
   UNUSED(referenceEstimateZ);
-
 }
 
 static void rtAttitudeDeterminationModelStep(void) {
@@ -132,11 +131,9 @@ static void rtAttitudeDeterminationModelStep(void) {
   UNUSED(quaterionY);
   UNUSED(quaterionZ);
   UNUSED(quaterionW);
-
 }
 
 static void rtAttitudeControlModelStep(void) {
-
   /* Set model inputs here - Arbitrary for now */
   attitude_control_model_ext_inputs.com_quat_body[0] = sin(DEGREES_TO_RADIANS(25));
   attitude_control_model_ext_inputs.com_quat_body[1] = cos(DEGREES_TO_RADIANS(25) / sqrt(2));
