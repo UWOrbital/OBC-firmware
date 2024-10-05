@@ -83,8 +83,8 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
                              0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
   // Prepare output buffers
-  uint8_t ciphertext[plaintextLen];
-  uint8_t decrypted[plaintextLen];
+  uint8_t ciphertext[plaintextLen] = {0};
+  uint8_t decrypted[plaintextLen] = {0};
 
   // Prepare additional authenticated data (AAD)
   const char *additionalData = "AdditionalData";
