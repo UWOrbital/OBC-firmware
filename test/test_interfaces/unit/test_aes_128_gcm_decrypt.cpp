@@ -16,10 +16,8 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare plaintext
-  // const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
-  const char* plaintext = "Hello World!";
-
-  size_t plaintextLen = sizeof(plaintext);
+  const char *plaintext = "Hello, World!";
+  size_t plaintextLen = strlen(plaintext);
 
   // Prepare IV
   uint8_t iv[AES_IV_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -30,10 +28,8 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   uint8_t decrypted[plaintextLen] = {0};
 
   // Prepare additional authenticated data (AAD)
-  // const uint8_t additionalData[] = {'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', 'a', 'l', 'D', 'a', 't', 'a'};
-  const char* additionalData = "AdditionalData";
-
-  size_t additionalDataLen = sizeof(additionalData);
+  const char *additionalData = "AdditionalData";
+  size_t additionalDataLen = strlen(additionalData);
 
   // Prepare tag
   uint8_t tag[16];
@@ -79,9 +75,8 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Prepare plaintext
-  // const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
-  const char* plaintext = "Hello World!";
-  size_t plaintextLen = sizeof(plaintext);
+  const char *plaintext = "Hello, World!";
+  size_t plaintextLen = strlen(plaintext);
 
   // Prepare IV
   uint8_t iv[AES_IV_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -92,10 +87,8 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   uint8_t decrypted[plaintextLen];
 
   // Prepare additional authenticated data (AAD)
-  // const uint8_t additionalData[] = {'A', 'd', 'd', 'i', 't', 'i', 'o', 'n', 'a', 'l', 'D', 'a', 't', 'a'};
-  const char* additionalData = "AdditionalData";
-
-  size_t additionalDataLen = sizeof(additionalData);
+  const char *additionalData = "AdditionalData";
+  size_t additionalDataLen = strlen(additionalData);
 
   // Prepare tag
   uint8_t tag[16];
