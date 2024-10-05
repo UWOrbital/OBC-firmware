@@ -9,8 +9,11 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   uint8_t key[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
-  // Initialize GCM context
-  initializeAesCtx(key);
+  // // Initialize GCM context
+  // initializeAesCtx(key);
+
+  obc_gs_error_code_t initResult = initializeAesCtx(key);
+  ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS)
 
   // Prepare plaintext
   const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
@@ -66,7 +69,10 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
                                0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
   // Initialize GCM context
-  initializeAesCtx(key);
+  // initializeAesCtx(key);
+
+  obc_gs_error_code_t initResult = initializeAesCtx(key);
+  ASSERT_EQ(initResult, OBC_GS_ERR_CODE_SUCCESS)
 
   // Prepare plaintext
   const uint8_t plaintext[] = {'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};

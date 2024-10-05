@@ -16,7 +16,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-// #include <malloc.h>
 #include <time.h>
 
 const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,

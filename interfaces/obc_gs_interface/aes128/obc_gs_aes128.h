@@ -27,7 +27,7 @@ typedef struct {
  *
  * * @param key - The key to decrypt the AES blocks with (128 bit?)
  */
-void initializeAesCtx(const uint8_t *key);
+obc_gs_error_code_t initializeAesCtx(const uint8_t *key);
 
 /**
  * @brief  Decrypts the AES blocks in GCM mode.
