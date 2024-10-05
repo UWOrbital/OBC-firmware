@@ -484,15 +484,12 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
     unsigned char check_tag[16];
     size_t i;
     int diff;
-    printf("Entering mbedtls_gcm_auth_decrypt\n");
-    printf("Length: %zu, IV length: %zu, Add length: %zu, Tag length: %zu\n", length, iv_len, add_len, tag_len);
 
 
     if( ( ret = mbedtls_gcm_crypt_and_tag( ctx, MBEDTLS_GCM_DECRYPT, length,
                                    iv, iv_len, add, add_len,
                                    input, output, tag_len, check_tag ) ) != 0 )
     {
-        printf("mbedtls_gcm_crypt_and_tag failed here 1");
 
         return( ret );
     }

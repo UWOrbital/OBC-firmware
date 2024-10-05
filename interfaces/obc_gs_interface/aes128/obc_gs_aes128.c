@@ -16,16 +16,13 @@ obc_gs_error_code_t initializeAesCtx(const uint8_t *key) {
   mbedtls_gcm_init(&gcm_ctx);
 
   int ret = mbedtls_gcm_setkey(&gcm_ctx, MBEDTLS_CIPHER_ID_AES, key, AES_KEY_BITS);
-  if (ret != 0) {
-    switch (ret) {
-      case MBEDTLS_ERR_GCM_BAD_INPUT:
-        return OBC_GS_ERR_CODE_INVALID_ARG;
-      default:
-        return OBC_GS_ERR_CODE_INIT_FAIL;
-    }
+  if (ret == 0) {
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (ret == MBEDTLS_ERR_GCM_BAD_INPUT) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  } else {
+    return OBC_GS_ERR_CODE_INIT_FAIL;
   }
-
-  return OBC_GS_ERR_CODE_SUCCESS;
 }
 // void initializeAesCtx(const uint8_t *key) {
 //   mbedtls_gcm_init(&gcm_ctx);
@@ -66,14 +63,13 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
   int result = mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE, additionalData,
                                         additionalDataLen, aesData->tag, aesData->tagLen, aesData->ciphertext, output);
 
-  switch (result) {
-    case 0:
-      return OBC_GS_ERR_CODE_SUCCESS;
-    case MBEDTLS_ERR_GCM_AUTH_FAILED:
-      return OBC_GS_ERR_CODE_AUTH_FAILED;
-    case MBEDTLS_ERR_GCM_BAD_INPUT:
-      return OBC_GS_ERR_CODE_INVALID_ARG;
-    default:
-      return OBC_GS_ERR_CODE_DEC_FAIL;
+  if (result == 0) {
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (result == MBEDTLS_ERR_GCM_AUTH_FAILED) {
+    return OBC_GS_ERR_CODE_AUTH_FAILED;
+  } else if (result == MBEDTLS_ERR_GCM_BAD_INPUT) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  } else {
+    return OBC_GS_ERR_CODE_DEC_FAIL;
   }
 }
