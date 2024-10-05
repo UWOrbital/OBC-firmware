@@ -1,0 +1,8 @@
+{
+  "name": "obc-firmware",
+  "version": "1.0.0",
+  "description": "This repository holds all the code written by UW Orbital's firmware team. This includes: OBC firmware/embedded software, ground station software, and all testing infrastructure.",
+  "devDependencies": {
+    "@biomejs/biome": "1.8.3"
+  }
+}
