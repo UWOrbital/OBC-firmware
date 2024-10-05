@@ -69,4 +69,3 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
     return OBC_GS_ERR_CODE_DEC_FAIL;
   }
 }
-.
