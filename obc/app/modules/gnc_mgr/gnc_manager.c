@@ -15,7 +15,6 @@
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_task.h>
-#include <os_semphr.h>
 #include <sys_common.h>
 #include <gio.h>
 
@@ -30,28 +29,11 @@ uint32_t taskRateDivisor = 1;
 
 vn100_binary_packet_t vn100LastValidPacket;
 
-void rtOnboardModelStep(void);
-void rtAttitudeDeterminationModelStep(void);
-void rtAttitudeControlModelStep(void);
+static void rtOnboardModelStep(void);
+static void rtAttitudeDeterminationModelStep(void);
+static void rtAttitudeControlModelStep(void);
 
-void rtOnboardModelStep(void) {
-  static boolean_T OverrunFlag = false;
-
-  /* Disable interrupts here */
-
-  /* Check for overrun */
-  if (OverrunFlag) {
-    rtmSetErrorStatus(onboard_env_model_rt_object, "Overrun");
-    return;
-  }
-
-  OverrunFlag = true;
-
-  /* Save FPU context here (if necessary) */
-
-  /* Re-enable timer or interrupt here */
-  /* Idea: Setup the semaphore timeout here*/
-
+static void rtOnboardModelStep(void) {
   /* Set model inputs here | Currently setting mock values for inputs */
   onboard_env_model_ext_intputs.commanded_mag_dipole_body[0] = 5.83;
   onboard_env_model_ext_intputs.commanded_mag_dipole_body[1] = 2.12;
@@ -88,30 +70,10 @@ void rtOnboardModelStep(void) {
   UNUSED(referenceEstimateY);
   UNUSED(referenceEstimateZ);
 
-  /* Indicate task complete */
-  OverrunFlag = false;
-
-  /* Disable interrupts here | Reset semaphore timeoeut */
-  /* Restore FPU context here (if necessary) */
-  /* Enable interrupts here */
 }
 
-void rtAttitudeDeterminationModelStep(void) {
-  static boolean_T OverrunFlag = false;
-
-  /* Disable interrupts here */
-
-  /* Check for overrun */
-  if (OverrunFlag) {
-    rtmSetErrorStatus(attitude_determinataion_model_rt_object, "Overrun");
-    return;
-  }
-
-  OverrunFlag = true;
-
-  /* Save FPU context here (if necessary) */
-  /* Re-enable timer or interrupt here */
-  /* Set model inputs here */
+static void rtAttitudeDeterminationModelStep(void) {
+  /* Set model inputs here - Arbitrary for now */
 
   attitude_determination_model_ext_inputs.earth_mag_field_ref[0] = -300;
   attitude_determination_model_ext_inputs.earth_mag_field_ref[1] = 500;
@@ -171,31 +133,11 @@ void rtAttitudeDeterminationModelStep(void) {
   UNUSED(quaterionZ);
   UNUSED(quaterionW);
 
-  /* Indicate task complete */
-  OverrunFlag = false;
-
-  /* Disable interrupts here */
-  /* Restore FPU context here (if necessary) */
-  /* Enable interrupts here */
 }
 
-void rtAttitudeControlModelStep(void) {
-  static boolean_T OverrunFlag = false;
+static void rtAttitudeControlModelStep(void) {
 
-  /* Disable interrupts here */
-
-  /* Check for overrun */
-  if (OverrunFlag) {
-    rtmSetErrorStatus(attitude_control_model_rt_object, "Overrun");
-    return;
-  }
-
-  OverrunFlag = true;
-
-  /* Save FPU context here (if necessary) */
-  /* Re-enable timer or interrupt here */
-
-  /* Set model inputs here */
+  /* Set model inputs here - Arbitrary for now */
   attitude_control_model_ext_inputs.com_quat_body[0] = sin(DEGREES_TO_RADIANS(25));
   attitude_control_model_ext_inputs.com_quat_body[1] = cos(DEGREES_TO_RADIANS(25) / sqrt(2));
   attitude_control_model_ext_inputs.com_quat_body[2] = cos(DEGREES_TO_RADIANS(24) / sqrt(2));
@@ -235,13 +177,6 @@ void rtAttitudeControlModelStep(void) {
   UNUSED(commandedWheelTorqueX);
   UNUSED(commandedWheelTorqueY);
   UNUSED(commandedWheelTorqueZ);
-
-  /* Indicate task complete */
-  OverrunFlag = false;
-
-  /* Disable interrupts here */
-  /* Restore FPU context here (if necessary) */
-  /* Enable interrupts here */
 }
 
 obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
