@@ -36,6 +36,6 @@ add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
 target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
 
 target_link_libraries(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE
-    tiny-aes
+    mbed
     lib-correct
 )
