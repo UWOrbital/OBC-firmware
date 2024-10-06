@@ -44,17 +44,17 @@ obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, si
 }
 
 obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData) {
-  if (aesData == NULL || aesData->decryptedOuput == NULL) {
+  if (aesData == NULL || aesData->decryptedOutput == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (aesData->decryptedOuputLen < aesData->ciphertextLen) {
+  if (aesData->decryptedOutputLen < aesData->ciphertextLen) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
   int result = mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE,
                                         aesData->additionalData, aesData->additionalDataLen, aesData->tag,
-                                        aesData->tagLen, aesData->ciphertext, aesData->decryptedOuput);
+                                        aesData->tagLen, aesData->ciphertext, aesData->decryptedOutput);
 
   if (result == 0) {
     return OBC_GS_ERR_CODE_SUCCESS;
