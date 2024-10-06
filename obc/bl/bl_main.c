@@ -15,8 +15,8 @@ extern uint32_t __ramFuncsRunEnd__;
 /* DEFINES */
 // These values were chosen so that the UART transfers and flash writes are quick, but don't
 // use too much RAM
-#define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
-#define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
+#define BL_BIN_RX_CHUNK_SIZE 512U   // Bytes
+#define BL_ECC_FIX_CHUNK_SIZE 512U  // Bytes
 #define BL_MAX_MSG_SIZE 64U
 
 /* TYPEDEFS */
@@ -70,7 +70,7 @@ int main(void) {
         blUartWriteBytes(BL_UART_SCIREG, strlen("Downloading application\r\n"),
                          (uint8_t *)"Downloading application\r\n");
 
-        uint8_t recvBuffer[sizeof(app_header_t)] = {0U};
+        static uint8_t recvBuffer[sizeof(app_header_t)] = {0U};
 
         blUartReadBytes(BL_UART_SCIREG, recvBuffer, sizeof(app_header_t));
 

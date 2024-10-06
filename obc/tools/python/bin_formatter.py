@@ -100,7 +100,7 @@ def send_bin(file_path: str, com_port: str) -> None:
         total_bytes_to_write = len(data) - BootloaderHeader.get_header_size()
         num_bytes_written = 0
         while num_bytes_written < total_bytes_to_write:
-            chunk_size = 128
+            chunk_size = 512
 
             if total_bytes_to_write - num_bytes_written >= chunk_size:
                 ser.write(data[8 + num_bytes_written : 8 + num_bytes_written + chunk_size])
