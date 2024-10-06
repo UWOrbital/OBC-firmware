@@ -5,6 +5,9 @@
 #include "obc_privilege.h"
 #include "obc_logging.h"
 
+#include <FreeRTOSConfig.h>
+#include <FreeRTOS.h>
+
 #define TASK_STATS_BUFFER_SIZE 1000U
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
@@ -20,12 +23,7 @@ void obcTaskFunctionStatsCollector(void *pvParameters) {
   while (1) {
     vTaskDelay(pdMS_TO_TICKS(15000));
     char taskStatsString[TASK_STATS_BUFFER_SIZE] = {0};
-    char taskStatsBuffer[TASK_STATS_BUFFER_SIZE] = {0};
-
     vTaskList(taskStatsString);
-
-    vTaskGetRunTimeStats(taskStatsBuffer);
-    LOG_IF_ERROR_CODE(sciPrintText((unsigned char *)taskStatsBuffer, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME));
     LOG_IF_ERROR_CODE(
         sciPrintText((unsigned char *)taskTableHeaderStr, strlen(taskTableHeaderStr), UART_MUTEX_BLOCK_TIME));
     LOG_IF_ERROR_CODE(sciPrintText((unsigned char *)taskStatsString, TASK_STATS_BUFFER_SIZE, UART_MUTEX_BLOCK_TIME));
