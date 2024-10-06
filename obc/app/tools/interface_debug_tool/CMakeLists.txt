@@ -17,5 +17,5 @@ SET(DEBUG_INCLUDES
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_sources(debug-tool-interface.out PUBLIC ${DEBUG_SOURCES})
-target_include_directories(debug-tool-interface.out PUBLIC ${DEBUG_INCLUDES})
+target_sources(debug-tool.out PUBLIC ${DEBUG_SOURCES})
+target_include_directories(debug-tool.out PUBLIC ${DEBUG_INCLUDES})
