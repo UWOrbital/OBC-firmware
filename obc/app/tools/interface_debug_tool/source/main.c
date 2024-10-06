@@ -23,6 +23,7 @@
 #include <i2c.h>
 
 #include <string.h>
+#include <test_rtc.h>
 
 #define TASK_STACK_SIZE 1024
 
@@ -71,6 +72,8 @@ int main(void) {
   initSciPrint();
   initSpiMutex();
   initI2CMutex();
+
+  testRTC();
 
   xTaskCreateStatic(utilityCLI, "Bringup Utility", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 
