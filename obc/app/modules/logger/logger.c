@@ -18,7 +18,7 @@
 #define LOG_FILE_NAME "log.log"
 
 #define MAX_MSG_SIZE 128U
-#define MAX_FNAME_LINENUM_SIZE 150U
+#define MAX_FNAME_LINENUM_SIZE 128U
 // Extra 10 for the small extra pieces in "%s - %s\r\n"
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
