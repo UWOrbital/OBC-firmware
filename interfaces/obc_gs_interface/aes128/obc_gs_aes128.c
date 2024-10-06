@@ -25,19 +25,16 @@ obc_gs_error_code_t initializeAesCtx(const uint8_t *key) {
   }
 }
 
-obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen,
-                               const uint8_t *additionalData, size_t additionalDataLen, uint8_t *output) {
-  if (aesData == NULL || plaintext == NULL || output == NULL) {
+obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen) {
+  if (aesData == NULL || plaintext == NULL || aesData->ciphertext == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  int result =
-      mbedtls_gcm_crypt_and_tag(&gcm_ctx, MBEDTLS_GCM_ENCRYPT, plaintextLen, aesData->iv, AES_IV_SIZE, additionalData,
-                                additionalDataLen, plaintext, output, aesData->tagLen, aesData->tag);
+  int result = mbedtls_gcm_crypt_and_tag(&gcm_ctx, MBEDTLS_GCM_ENCRYPT, plaintextLen, aesData->iv, AES_IV_SIZE,
+                                         aesData->additionalData, aesData->additionalDataLen, plaintext,
+                                         aesData->ciphertext, aesData->tagLen, aesData->tag);
 
   if (result == 0) {
-    aesData->ciphertext = output;
-    aesData->ciphertextLen = plaintextLen;
     return OBC_GS_ERR_CODE_SUCCESS;
   } else if (result == MBEDTLS_ERR_GCM_BAD_INPUT) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
@@ -46,18 +43,18 @@ obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, si
   }
 }
 
-obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen,
-                                  const uint8_t *additionalData, size_t additionalDataLen) {
-  if (aesData == NULL || output == NULL) {
+obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData) {
+  if (aesData == NULL || aesData->decryptedOuput == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  if (outputBufferLen < aesData->ciphertextLen) {
+  if (aesData->decryptedOuputLen < aesData->ciphertextLen) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  int result = mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE, additionalData,
-                                        additionalDataLen, aesData->tag, aesData->tagLen, aesData->ciphertext, output);
+  int result = mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE,
+                                        aesData->additionalData, aesData->additionalDataLen, aesData->tag,
+                                        aesData->tagLen, aesData->ciphertext, aesData->decryptedOuput);
 
   if (result == 0) {
     return OBC_GS_ERR_CODE_SUCCESS;
