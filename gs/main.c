@@ -164,12 +164,18 @@ int main(void) {
   uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
   aes_data_t aesData = {0};
   memcpy(aesData.iv, iv, AES_IV_SIZE);
+  aesData.ciphertext = encryptedCmd + AES_IV_SIZE;
+  aesData.ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
+  aesData.tagLen = AES_TAG_SIZE;
+  aesData.additionalData = NULL;
+  aesData.additionalDataLen = 0;
 
-  if (gcmEncrypt(&aesData, packedSingleCmd, packedSingleCmdSize, NULL, 0, encryptedCmd + AES_IV_SIZE) !=
-      OBC_GS_ERR_CODE_SUCCESS) {
+  if (gcmEncrypt(&aesData, packedSingleCmd, packedSingleCmdSize) != OBC_GS_ERR_CODE_SUCCESS) {
     printf("Failed to encrypt command message!");
     exit(1);
   }
+
+  memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
   memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
