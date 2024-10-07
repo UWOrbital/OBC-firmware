@@ -86,6 +86,16 @@ uint8_t getBit(uint8_t addr, uint8_t bit, camera_t cam) {
   return 0;
 }
 
+obc_error_code_t findBrightestPixelInPacket(image_t* packet, uint16_t* x, uint16_t* y, uint8_t* brightness,
+                                            uint16_t packetStartY) {
+  UNUSED(packet);
+  UNUSED(x);
+  UNUSED(y);
+  UNUSED(brightness);
+  UNUSED(packetStartY);
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 sensor_reg_t* getCamConfig(cam_config_t config) {
   UNUSED(config);
   return NULL;

@@ -19,6 +19,16 @@ obc_error_code_t readConfigLM75BD(lm75bd_config_t *config) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t writeConfigLM75BD(uint8_t devAddr, uint8_t osFaultQueueSize, uint8_t osPolarity,
+                                   uint8_t osOperationMode, uint8_t devOperationMode) {
+  UNUSED(devAddr);
+  UNUSED(osFaultQueueSize);
+  UNUSED(osPolarity);
+  UNUSED(osOperationMode);
+  UNUSED(devOperationMode);
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
   UNUSED(devAddr);
   UNUSED(hysteresisThresholdCelsius);

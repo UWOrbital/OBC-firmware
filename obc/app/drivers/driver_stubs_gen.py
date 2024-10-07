@@ -14,8 +14,17 @@ def parse_functions_from_header(header_file: str) -> list[tuple[str, str, list[s
     try:
         with open(header_file, encoding="utf-8", errors="ignore") as file:
             content = file.read()
-            # Regex to find function declarations, improved to account for spaces
-            matches = re.findall(r"(\w[\w\s\*]+)\s+(\w+)\s*\((.*?)\)\s*;", content)
+
+            # Remove comments and preprocessor directives to avoid interference
+            content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
+            content = re.sub(r"^\s*#.*$", "", content, flags=re.MULTILINE)
+
+            # Regex to find function declarations, improved to account for multi-line and spaces
+            matches = re.findall(
+                r"([a-zA-Z_][\w\s\*]+)\s+([a-zA-Z_]\w*)\s*\((.*?)\)\s*;",
+                content.replace("\n", " "),  # Merge lines for multi-line declarations
+            )
+
             for ret_type, func_name, params in matches:
                 param_list = params.split(",") if params else []
                 # Strip spaces from parameter types and names
