@@ -15,4 +15,4 @@
  * @return An error code - If any register does not have the expected value,
  *                 or status byte is invalid.
  */
-obc_error_code_t cc1120_test_spi_read(void);
+obc_error_code_t cc1120TestSpiRead(void);

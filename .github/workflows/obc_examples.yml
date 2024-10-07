@@ -1,0 +1,61 @@
+name: OBC Examples
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install build-essential cmake
+
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    strategy:
+      matrix:
+        example:
+          [
+            DMA_SPI,
+            FRAM_PERSIST,
+            FRAM_SPI,
+            LM75BD,
+            # MPU6050,
+            RE_SD,
+            # RTC,
+            UART_RX,
+            UART_TX,
+            VN100,
+            # CC1120_SPI,
+            RS,
+            ADC,
+
+            # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
+          ]
+        board:  [
+          RM46_LAUNCHPAD,
+          OBC_REVISION_1,
+          OBC_REVISION_2,
+          ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create binary directory
+        run: |
+          mkdir build
+
+      - name: Build (Examples-${{ matrix.board }} ${{ matrix.example }})
+        run: |
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=${{matrix.example}} -DBOARD_TYPE=${{matrix.board}} -G"Unix Makefiles" -DDEBUG=1
+          make

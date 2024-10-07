@@ -8,5 +8,5 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/app_intvecs.s
 )
 
-target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})
-target_sources(OBC-firmware.out PUBLIC ${SOURCES})
+target_include_directories(${OUT_FILE_NAME} PUBLIC ${INCLUDES})
+target_sources(${OUT_FILE_NAME} PUBLIC ${SOURCES})
