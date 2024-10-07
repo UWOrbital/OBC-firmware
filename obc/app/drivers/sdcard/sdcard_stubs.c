@@ -33,6 +33,7 @@ DRESULT disk_write(uint8_t pdrv, const uint8_t* buff, uint32_t sector, uint32_t 
 DRESULT disk_ioctl(uint8_t pdrv, uint8_t cmd, void* buff) {
   UNUSED(pdrv);
   UNUSED(cmd);
+  UNUSED(buff);
   return 0;
 }
 

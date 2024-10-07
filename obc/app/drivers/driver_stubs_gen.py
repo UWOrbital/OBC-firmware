@@ -43,6 +43,12 @@ def get_return_value(ret_type: str) -> str:
         raise MissingReturnTypeError(f"Missing return type case for: {ret_type}")
 
 
+def clean_param(param: str) -> str:
+    """Removes pointer indicators (*) and array indicators ([]) from a parameter."""
+    # Extract the actual variable name, ignoring * and []
+    return param.replace("*", "").replace("[]", "").split()[-1]
+
+
 def write_no_op_functions(folder: str, functions: list[tuple[str, str, list[str]]], header_files: list[str]) -> None:
     """Writes no-op functions to a file for each driver, including UNUSED for each parameter."""
     folder_name = os.path.basename(folder).upper()
@@ -61,14 +67,12 @@ def write_no_op_functions(folder: str, functions: list[tuple[str, str, list[str]
         for ret_type, func_name, params in functions:
             param_list = ", ".join(params)
             """ Generate unused variable statements with just the variable names
-                (ignore "void" and array brackets) """
-            unused_params = "\n".join(
-                [f"    UNUSED({param.split()[-1].replace('[]', '')});" for param in params if param != "void"]
-            )
+                (ignore "void", "*" and array brackets "[]") """
+            unused_params = "\n".join([f"    UNUSED({clean_param(param)});" for param in params if param != "void"])
             try:
                 return_value = get_return_value(ret_type)  # Determine the return value
                 f.write(f"{ret_type} {func_name}({param_list}) {{\n")
-                f.write(unused_params + "\n")
+                f.write(unused_params + "\n" if unused_params else "")
                 f.write(return_value + "\n")
                 f.write("}\n\n")
             except MissingReturnTypeError as e:

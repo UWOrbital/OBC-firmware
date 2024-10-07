@@ -69,6 +69,7 @@ obc_error_code_t camReadSensorReg16_8(uint8_t regID, uint8_t* regDat) {
 }
 
 obc_error_code_t camWriteSensorRegs16_8(const sensor_reg_t reglist[], uint16_t reglistLen) {
+  UNUSED(reglist);
   UNUSED(reglistLen);
   return OBC_ERR_CODE_SUCCESS;
 }

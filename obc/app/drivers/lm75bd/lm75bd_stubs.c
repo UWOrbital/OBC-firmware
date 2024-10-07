@@ -4,24 +4,24 @@
 #include "lm75bd.h"
 
 obc_error_code_t lm75bdInit(lm75bd_config_t *config) {
-  UNUSED(*config);
+  UNUSED(config);
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t readTempLM75BD(uint8_t devAddr, float *temp) {
   UNUSED(devAddr);
-  UNUSED(*temp);
+  UNUSED(temp);
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t readConfigLM75BD(lm75bd_config_t *config) {
-  UNUSED(*config);
+  UNUSED(config);
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t readThystLM75BD(uint8_t devAddr, float *hysteresisThresholdCelsius) {
   UNUSED(devAddr);
-  UNUSED(*hysteresisThresholdCelsius);
+  UNUSED(hysteresisThresholdCelsius);
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -33,7 +33,7 @@ obc_error_code_t writeThystLM75BD(uint8_t devAddr, float hysteresisThresholdCels
 
 obc_error_code_t readTosLM75BD(uint8_t devAddr, float *overTempThresholdCelsius) {
   UNUSED(devAddr);
-  UNUSED(*overTempThresholdCelsius);
+  UNUSED(overTempThresholdCelsius);
   return OBC_ERR_CODE_SUCCESS;
 }
 
