@@ -37,6 +37,7 @@ jobs:
             VN100,
             # CC1120_SPI,
             RS,
+            ADC,
 
             # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
           ]
