@@ -54,6 +54,19 @@ SET(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary_parsing.c
+
+# Add stubs as sources
+    ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/ds3232/ds3232_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/fram/fram_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/lm75bd/lm75bd_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/max5360/max5360_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/rffm6404/rffm6404_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sdcard/sdcard_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010/tpl5010_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bd621x/bd621x_stubs.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_stubs.c
 )
 
 target_include_directories(OBC-firmware.out PUBLIC ${INCLUDES})

@@ -1,3 +1,4 @@
+#ifdef CONFIG_CC1120
 #include "cc1120_mcu.h"
 #include "obc_spi_io.h"
 
@@ -37,3 +38,5 @@ obc_error_code_t mcuCC1120CSDeassert(void) {
   RETURN_IF_ERROR_CODE(deassertChipSelect(CC1120_SPI_PORT, CC1120_SPI_CS));
   return OBC_ERR_CODE_SUCCESS;
 }
+
+#endif  // CONFIG_CC1120

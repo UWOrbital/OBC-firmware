@@ -1,3 +1,5 @@
+#ifdef CONFIG_CC1120
+
 #include "cc1120.h"
 #include "cc1120_defs.h"
 #include "cc1120_mcu.h"
@@ -445,3 +447,5 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
   RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1));
   return OBC_ERR_CODE_SUCCESS;
 }
+
+#endif  // CONFIG_CC1120

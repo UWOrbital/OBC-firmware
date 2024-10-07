@@ -1,3 +1,4 @@
+#ifdef CONFIG_RFFM6404
 #include "obc_errors.h"
 #include "obc_logging.h"
 #include "gio.h"
@@ -61,3 +62,5 @@ obc_error_code_t rffm6404PowerOff(void) {
   gioSetBit(RFFM6404_EN_PIN_PORT, RFFM6404_EN_PIN_NUM, 0);
   return OBC_ERR_CODE_SUCCESS;
 }
+
+#endif  // CONFIG_RFFM6404

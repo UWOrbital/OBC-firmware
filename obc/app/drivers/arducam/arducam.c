@@ -1,3 +1,5 @@
+#ifdef CONFIG_ARDUCAM
+
 #include "arducam.h"
 #include "ov5642_reg.h"
 #include "obc_spi_io.h"
@@ -202,3 +204,5 @@ obc_error_code_t readFifoBurst(camera_t cam) {
 
   return errCode;
 }
+
+#endif  // CONFIG_ARDUCAM

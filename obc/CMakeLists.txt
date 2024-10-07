@@ -137,6 +137,23 @@ target_compile_definitions(OBC-bl.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
 
+# Add Peripheral Configs
+
+# Add setup specific periperal configs globally here
+# Ex: if you connected vn100, add -DCONFIG_VN100 inside add_definitions
+add_definitions()
+
+# Define your board macros globally based on BOARD_TYPE
+if(BOARD_TYPE STREQUAL "RM46_LAUNCHPAD")
+    # No macros defined for RM46_LAUNCHPAD
+elseif(BOARD_TYPE STREQUAL "OBC_REVISION_1")
+    add_definitions(-DCONFIG_DS3232 -DCONFIG_SD_CARD -DCONFIG_FRAM -DCONFIG_LM75BD)
+elseif(BOARD_TYPE STREQUAL "OBC_REVISION_2")
+    add_definitions(-DCONFIG_DS3232 -DCONFIG_SD_CARD -DCONFIG_FRAM -DCONFIG_LM75BD -DCONFIG_TPL5010)
+else()
+    message(FATAL_ERROR "Invalid BOARD_TYPE: ${BOARD_TYPE}. Board config not defined")
+endif()
+
 add_subdirectory(bl)
 
 target_link_libraries(OBC-bl.out PRIVATE

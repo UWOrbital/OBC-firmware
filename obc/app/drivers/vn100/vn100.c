@@ -1,3 +1,4 @@
+#ifdef CONFIG_VN100
 #include "obc_errors.h"
 #include "obc_board_config.h"
 #include "obc_logging.h"
@@ -174,3 +175,5 @@ obc_error_code_t vn100ResumeAsync(void) {
   RETURN_IF_ERROR_CODE(sciSendBytes(command, (sizeof(command) - 1), MUTEX_TIMEOUT, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
+
+#endif  // CONFIG_VN100

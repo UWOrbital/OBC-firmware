@@ -1,3 +1,5 @@
+#ifdef CONFIG_ARDUCAM
+
 #include "image_processing.h"
 
 /**
@@ -26,3 +28,5 @@ obc_error_code_t findBrightestPixelInPacket(image_t *packet, uint16_t *x, uint16
   }
   return OBC_ERR_CODE_SUCCESS;
 }
+
+#endif  // CONFIG_ARDUCAM

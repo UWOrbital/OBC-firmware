@@ -219,7 +219,6 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     }
 
     /* Place GNC Tasks here */
-
     obc_error_code_t errCode;
 
     /* Read from sensors */
