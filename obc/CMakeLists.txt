@@ -5,6 +5,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/cmake/board_lib_defs.cmake)
 
+# Load setup-specific definitions
+include(${CMAKE_SOURCE_DIR}/obc/shared/config/peripheral_config_definitions.cmake)
+
 set(LD_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld")
 set(APP_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/app_link.ld")
 set(BL_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/bl_link.ld")
@@ -57,6 +60,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ${PERIPHERAL_CONFIG}
 )
 
 # Determine the root of the repository
@@ -135,6 +139,7 @@ target_compile_definitions(OBC-bl.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ${PERIPHERAL_CONFIG}
 )
 
 # Add Peripheral Configs
@@ -142,17 +147,6 @@ target_compile_definitions(OBC-bl.out PRIVATE
 # Add setup specific periperal configs globally here
 # Ex: if you connected vn100, add -DCONFIG_VN100 inside add_definitions
 add_definitions()
-
-# Define your board macros globally based on BOARD_TYPE
-if(BOARD_TYPE STREQUAL "RM46_LAUNCHPAD")
-    # No macros defined for RM46_LAUNCHPAD
-elseif(BOARD_TYPE STREQUAL "OBC_REVISION_1")
-    add_definitions(-DCONFIG_DS3232 -DCONFIG_SD_CARD -DCONFIG_FRAM -DCONFIG_LM75BD)
-elseif(BOARD_TYPE STREQUAL "OBC_REVISION_2")
-    add_definitions(-DCONFIG_DS3232 -DCONFIG_SD_CARD -DCONFIG_FRAM -DCONFIG_LM75BD -DCONFIG_TPL5010)
-else()
-    message(FATAL_ERROR "Invalid BOARD_TYPE: ${BOARD_TYPE}. Board config not defined")
-endif()
 
 add_subdirectory(bl)
 
@@ -182,6 +176,7 @@ target_compile_definitions(debug-tool.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ${PERIPHERAL_CONFIG}
 )
 
 add_subdirectory(app/tools/interface_debug_tool)
