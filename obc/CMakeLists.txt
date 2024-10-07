@@ -142,12 +142,6 @@ target_compile_definitions(OBC-bl.out PRIVATE
     ${PERIPHERAL_CONFIG}
 )
 
-# Add Peripheral Configs
-
-# Add setup specific periperal configs globally here
-# Ex: if you connected vn100, add -DCONFIG_VN100 inside add_definitions
-add_definitions()
-
 add_subdirectory(bl)
 
 target_link_libraries(OBC-bl.out PRIVATE
