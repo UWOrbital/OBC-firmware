@@ -4,6 +4,9 @@
 
 # Add setup specific periperal configs globally here
 # Ex: if you connected vn100, add -DCONFIG_VN100 inside set
+set(COMMON_PERIPHERAL_CONFIG)
+
+# Board specifc configs - these should generally be kept as is unless the board is missing a component
 if(BOARD_TYPE STREQUAL "RM46_LAUNCHPAD")
     # No macros defined for RM46_LAUNCHPAD
 elseif(BOARD_TYPE STREQUAL "OBC_REVISION_1")
