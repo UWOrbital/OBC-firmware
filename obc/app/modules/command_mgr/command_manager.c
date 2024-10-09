@@ -41,12 +41,15 @@ static const cmd_info_t cmdsConfig[] = {
 
 STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
+static int8_t armedCommandId = -1;  // no command is armed
+
 void obcTaskInitCommandMgr(void) {
   ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
   if (commandQueueHandle == NULL) {
     commandQueueHandle =
         xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, commandQueueStack, &commandQueue);
   }
+  armedCommandId = -1;  // no command is armed on reset
 }
 
 obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
@@ -98,15 +101,34 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
       // Check if the command is safety-critical
       if (currCmdInfo.opts & CMD_TYPE_CRITICAL) {
         // TODO: Make this persistent across resets
-        if (!cmdProgressTracker[cmd.id]) {
-          // Begin the two-step process of executing a safety-critical command
-          LOG_DEBUG("Process started to execute safety-critical command");
-          cmdProgressTracker[cmd.id] = true;
+
+        // Arm
+        if (armedCommandId == -1) {
+          armedCommandId = cmd.id;
+          LOG_DEBUG("Safety-critical command armed: %d", cmd.id);
           continue;
         }
 
-        // Reset the progress tracker
-        cmdProgressTracker[cmd.id] = false;
+        // Execute
+        if (armedCommandId == cmd.id) {
+          if (!cmdProgressTracker[cmd.id]) {
+            LOG_DEBUG("Starting execution of safety-critical command: %d", cmd.id);
+            cmdProgressTracker[cmd.id] = true;
+            continue;
+          }
+
+          // Reset armed state and progress tracker
+          cmdProgressTracker[cmd.id] = false;
+          armedCommandId = -1;
+
+          LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
+          continue;
+        }
+
+        // If different command is sent, treat as new arm attempt
+        armedCommandId = cmd.id;
+        LOG_DEBUG("Safety-critical command re-armed: %d", cmd.id);
+        continue;
       }
 
       // If the command is not time-tagged, execute it immediately
