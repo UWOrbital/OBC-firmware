@@ -45,6 +45,10 @@
 /* USER CODE BEGIN (0) */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#include "gio.h"
+
+__attribute__((weak))
+void _custom_dabort(void) {}
 /* USER CODE END */
 
 #include "sys_selftest.h"
@@ -1120,6 +1124,7 @@ void custom_dabort(void)
      * This data abort is not caused due to diagnostic checks of flash and TCRAM ECC logic.
      */
 /* USER CODE BEGIN (42) */
+    _custom_dabort();
 /* USER CODE END */
 }
 

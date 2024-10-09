@@ -7,6 +7,7 @@
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
+#include "obc_print.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -128,9 +129,15 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   while (1) {
     state_mgr_event_t inMsg;
-
+    uint8_t cycle = 0;
     if (xQueueReceive(stateMgrQueueHandle, &inMsg, STATE_MGR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
+      cycle++;
+      vTaskDelay(5000);
+      sciPrintf("before dabort\r\n");
+      volatile uint32_t *ptr = NULL;
+      *ptr = 5;
+      sciPrintf("HELLO\r\n");
       vTaskDelay(pdMS_TO_TICKS(1000));
       gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 #endif
