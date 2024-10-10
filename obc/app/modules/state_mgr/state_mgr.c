@@ -63,13 +63,13 @@ static void sendStartupMessages(void) {}
 void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
-  // Run power on test - checks connections with peripherals, logs errors
-  runTest();
-
   ASSERT(stateMgrQueueHandle != NULL);
 
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
+
+  // Run power on test - checks connections with peripherals, logs errors
+  runTest();
 
   /* Initialize critical peripherals */
 

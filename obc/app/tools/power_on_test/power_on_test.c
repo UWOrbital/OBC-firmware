@@ -102,18 +102,21 @@ void runTest() {
   errCode = createFile(filePath, &fileId);
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
     logResult(false, "SD Card", "SPI", &pass);
   } else {
     red_open(filePath, RED_O_RDWR | RED_O_APPEND);
     errCode = writeFile(fileId, writeData, strlen(writeData));
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
+      LOG_ERROR_CODE(errCode);
       logResult(false, "SD Card", "SPI", &pass);
     } else {
       readFile(fileId, readBuf, strlen(writeData), &placeholderSize);
 
       if (strcmp(writeData, readBuf) != 0) {
         errCode = OBC_ERR_CODE_FAILED_FILE_READ;
+        LOG_ERROR_CODE(errCode);
         logResult(false, "SD Card", "SPI", &pass);
       } else {
         logResult(true, "SD Card", "SPI", &pass);
