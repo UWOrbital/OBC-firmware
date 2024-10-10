@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: OBC-GS
+Version: 0.0.0
+Summary: A package for the University of Waterloo Orbital Design Team's Ground Station and On-Board Computer
+Author: University of Waterloo Orbital Design Team
+Classifier: Programming Language :: Python :: 3.10 :: Only
+Requires-Python: ~=3.10
+Requires-Dist: requests>=2.31
+Requires-Dist: pyserial>=3
+Provides-Extra: testing
+Requires-Dist: pytest>=7.4; extra == "testing"
+Requires-Dist: pytest-cov>=4.1; extra == "testing"
+Requires-Dist: mypy>=1.8; extra == "testing"
+Requires-Dist: ruff>=0.2; extra == "testing"

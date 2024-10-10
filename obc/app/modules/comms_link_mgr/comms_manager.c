@@ -16,6 +16,10 @@
 #include "cc1120.h"
 #include "rffm6404.h"
 #include "obc_privilege.h"
+#include "obc_i2c_io.h"
+
+#include "ina230.h"
+#include "tca6424.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
@@ -290,42 +294,78 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
 }
 
 void obcTaskFunctionCommsMgr(void *pvParameters) {
+  initINA230();
+
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
   initAllCc1120TxRxSemaphores();
   LOG_IF_ERROR_CODE(cc1120Init());
+  // create int and init to 0
+  uint8_t intFlag = 0;
 
-  while (1) {
-    comms_event_t queueMsg;
+  while (intFlag == 0) {
+    sciPrintf("Entered while loop\n");
 
-    if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-      continue;
+    for (uint8_t addr = 0; addr < 0x80; addr++) {
+      uint8_t data[1] = {0};
+      errCode = i2cReceiveFrom(addr, 1, data, 50, 50);
+      if (errCode == OBC_ERR_CODE_SUCCESS) {
+        sciPrintf("Read from address 0x%02X: 0x%02X\n", addr, data[0]);
+      } else {
+        // print error code
+        sciPrintf("Error code: %d\n", errCode);
+        // sciPrintf("Error reading from address 0x%02X\n", addr);
+      }
     }
 
-    LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      continue;
+    // init ina230 devices
+    initINA230();
+    float shuntVoltage = 0;
+    // Call the function for INA230 device 1 (index 0)
+    obc_error_code_t errCode = getINA230ShuntVoltageForDevice(0, &shuntVoltage);
+    // print shunt volatge
+    sciPrintf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
+
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      sciPrintf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
+    } else {
+      sciPrintf("Error reading shunt voltage for INA230 Device 1\n");
+      // print error code
+      sciPrintf("Error code: %d\n", errCode);
     }
 
-    if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-      commsState = COMMS_STATE_DISCONNECTED;
-      continue;
-    }
+    intFlag = intFlag + 1;
 
-    if (commsStateFns[commsState] == NULL) {
-      LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-      commsState = COMMS_STATE_DISCONNECTED;
-      continue;
-    }
+    //   comms_event_t queueMsg;
 
-    LOG_IF_ERROR_CODE(commsStateFns[commsState]());
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      rffm6404PowerOff();
-      comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
-      sendToCommsManagerQueue(&event);
-    }
+    //   if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+    //     continue;
+    //   }
+
+    //   LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
+    //   if (errCode != OBC_ERR_CODE_SUCCESS) {
+    //     continue;
+    //   }
+
+    //   if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
+    //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+    //     commsState = COMMS_STATE_DISCONNECTED;
+    //     continue;
+    //   }
+
+    //   if (commsStateFns[commsState] == NULL) {
+    //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+    //     commsState = COMMS_STATE_DISCONNECTED;
+    //     continue;
+    //   }
+
+    //   LOG_IF_ERROR_CODE(commsStateFns[commsState]());
+    //   if (errCode != OBC_ERR_CODE_SUCCESS) {
+    //     rffm6404PowerOff();
+    //     comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
+    //     sendToCommsManagerQueue(&event);
+    //   }
   }
 }
 
