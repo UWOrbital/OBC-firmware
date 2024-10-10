@@ -1,4 +1,3 @@
-#ifdef CONFIG_SDCARD
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -663,4 +662,3 @@ DRESULT disk_ioctl(uint8_t pdrv, uint8_t ctrl, void *buff) {
 
   return res;
 }
-#endif  // CONFIG_SDCARD

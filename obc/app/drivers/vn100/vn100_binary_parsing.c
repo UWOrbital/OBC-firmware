@@ -1,4 +1,3 @@
-#ifdef CONFIG_VN100
 #include "obc_errors.h"
 #include "obc_gs_crc.h"
 
@@ -127,4 +126,3 @@ obc_error_code_t vn100ParsePacket(const unsigned char* packet, size_t packetLen,
 
   return OBC_ERR_CODE_VN100_INVALID_CHECKSUM;
 }
-#endif  // CONFIG_VN100

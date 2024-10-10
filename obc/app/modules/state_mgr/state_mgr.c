@@ -69,10 +69,12 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   /* Initialize critical peripherals */
 
-#ifdef CONFIG_SD_CARD
+#ifdef CONFIG_SDCARD
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card (commented out due to bug)
-#endif                                   // CONFIG_SD_CARD
-  LOG_IF_ERROR_CODE(initTime());         // RTC
+#endif                                   // CONFIG_SDCARD
+#ifdef CONFIG_DS3232
+  LOG_IF_ERROR_CODE(initTime());  // RTC
+#endif                            // CONFIG_DS3232
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,

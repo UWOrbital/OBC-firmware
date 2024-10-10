@@ -1,4 +1,3 @@
-#ifdef CONFIG_SDCARD
 #include "obc_reliance_fs.h"
 #include "obc_logging.h"
 #include "obc_errors.h"
@@ -161,12 +160,10 @@ obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize) {
 }
 
 obc_error_code_t openFile(const char *filePath, uint32_t openMode, int32_t *fileId) {
-  int32_t fileId = red_open(filePath, openMode);
-  if (fileId < 0) {
+  *fileId = red_open(filePath, openMode);
+  if (*fileId < 0) {
     return OBC_ERR_CODE_FAILED_FILE_OPEN;
   }
 
   return OBC_ERR_CODE_SUCCESS;
 }
-
-#endif  // CONFIG_SDCARD

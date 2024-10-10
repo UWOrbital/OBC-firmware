@@ -1,5 +1,3 @@
-#ifdef CONFIG_ARDUCAM
-
 #include <stdlib.h>
 #include "ov5642_reg.h"
 
@@ -192,5 +190,3 @@ sensor_reg_t* getCamConfig(cam_config_t config) {
       return NULL;  // Invalid Config
   }
 }
-
-#endif  // CONFIG_ARDUCAM

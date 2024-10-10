@@ -1,5 +1,3 @@
-#ifdef CONFIG_FRAM
-
 #include <stdlib.h>
 #include "fm25v20a.h"
 #include <FreeRTOS.h>
@@ -429,5 +427,3 @@ obc_error_code_t framReadID(uint8_t *id, size_t nBytes) {
   errCode = prev_errCode;
   return errCode;
 }
-
-#endif  // CONFIG_FRAM

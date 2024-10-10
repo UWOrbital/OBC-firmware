@@ -1,5 +1,3 @@
-#ifdef CONFIG_DS3232
-
 #include "ds3232_mz.h"
 #include "obc_i2c_io.h"
 #include "obc_errors.h"
@@ -629,5 +627,3 @@ obc_error_code_t clearAlarm1RTC(void) {
 
   return OBC_ERR_CODE_SUCCESS;
 }
-
-#endif  // CONFIG_DS3232

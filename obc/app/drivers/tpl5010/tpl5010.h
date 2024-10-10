@@ -1,3 +1,4 @@
+#ifdef OBC_REVISION_2
 
 #pragma once
 
@@ -12,3 +13,5 @@ void tpl5010Init(void);
  * @brief Reset the done signal on interrupt
  */
 void feedHardwareWatchdog(void);
+
+#endif

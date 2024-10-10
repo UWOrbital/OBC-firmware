@@ -28,11 +28,13 @@
 
 #define STARTING_TELEMETRY_BATCH_ID 0UL
 
+#ifdef CONFIG_SDCARD
 /**
  * @brief Check if it's time to downlink telemetry.
  * @return bool True if it's time to downlink telemetry, false otherwise
  */
 static bool checkDownlinkAlarm(void);
+#endif  // CONFIG_SDCARD
 
 // Telemetry Data Queue
 static QueueHandle_t telemetryDataQueueHandle = NULL;
@@ -55,6 +57,7 @@ void obcTaskInitTelemetryMgr(void) {
 }
 
 void obcTaskFunctionTelemetryMgr(void *pvParameters) {
+#ifdef CONFIG_SDCARD
   obc_error_code_t errCode;
 
   // TODO: Get batch ID from the FRAM
@@ -104,6 +107,9 @@ void obcTaskFunctionTelemetryMgr(void *pvParameters) {
       // TODO: Deal with errors
     }
   }
+#else
+  vTaskSuspend(NULL);
+#endif  // CONFIG_SDCARD
 }
 
 obc_error_code_t addTelemetryData(telemetry_data_t *data) {
@@ -122,7 +128,9 @@ obc_error_code_t addTelemetryData(telemetry_data_t *data) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
+#ifdef CONFIG_SDCARD
 static bool checkDownlinkAlarm(void) { return xSemaphoreTake(downlinkReady, 0) == pdPASS; }
+#endif  // CONFIG_SDCARD
 
 obc_error_code_t setTelemetryManagerDownlinkReady(void) {
   if (xSemaphoreGive(downlinkReady) != pdPASS) {

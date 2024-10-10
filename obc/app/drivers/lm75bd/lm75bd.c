@@ -1,5 +1,3 @@
-#ifdef CONFIG_LM75BD
-
 #include "lm75bd.h"
 #include "obc_i2c_io.h"
 #include "obc_logging.h"
@@ -209,5 +207,3 @@ void osHandlerLM75BD(uint8_t devAddr) {
     // TODO: Implement OS interrupt handler
   }
 }
-
-#endif  // CONFIG_LM75BD

@@ -1,5 +1,3 @@
-#ifdef CONFIG_BD621X
-
 #include "het.h"
 
 #include "bd621x.h"
@@ -138,5 +136,3 @@ static bool isValidHetBase(hetRAMBASE_t* hetRam) { return (hetRam == hetRAM1 || 
 static bool isValidMotorParameters(const DC_motor_t* motor) {
   return (isValidPwm(motor->finPwm) && isValidPwm(motor->rinPwm) && isValidHetBase(motor->hetBase));
 }
-
-#endif  // CONFIG_BD621X

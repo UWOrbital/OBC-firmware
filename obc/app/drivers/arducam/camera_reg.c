@@ -1,5 +1,3 @@
-#ifdef CONFIG_ARDUCAM
-
 #include <spi.h>
 #include <gio.h>
 #include "obc_i2c_io.h"
@@ -99,5 +97,3 @@ uint8_t getBit(uint8_t addr, uint8_t bit, camera_t cam) {
   temp = temp & (1 << bit);
   return temp;
 }
-
-#endif  // CONFIG_ARDUCAM

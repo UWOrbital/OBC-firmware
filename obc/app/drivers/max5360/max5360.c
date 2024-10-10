@@ -1,5 +1,3 @@
-#ifdef CONFIG_MAX5360
-
 #include "max5360.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -59,5 +57,3 @@ obc_error_code_t max5360PowerOff(void) {
   }
   return OBC_ERR_CODE_SUCCESS;
 }
-
-#endif  // CONFIG_MAX5360

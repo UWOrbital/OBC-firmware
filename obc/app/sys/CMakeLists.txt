@@ -12,7 +12,6 @@ SET(INCLUDES
 
 SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/fs_wrapper/obc_reliance_fs.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/fs_wrapper/obc_reliance_fs_stubs.c
     ${CMAKE_CURRENT_SOURCE_DIR}/persistent/obc_persistent.c
     ${CMAKE_CURRENT_SOURCE_DIR}/print/obc_print.c
     ${CMAKE_CURRENT_SOURCE_DIR}/time/obc_time.c
