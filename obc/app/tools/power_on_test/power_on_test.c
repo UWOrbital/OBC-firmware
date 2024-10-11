@@ -21,12 +21,25 @@
 #define MAX_FNAME_LINENUM_SIZE 128U
 #define MAX_LOG_SIZE (MAX_MSG_SIZE + MAX_FNAME_LINENUM_SIZE + 10U)
 
-static void logResult(bool success, const char *peripheral, const char *protocol, bool *pass) {
+static void log_error(const char *file, uint32_t line, uint32_t errCode) {
+  char infobuf[MAX_FNAME_LINENUM_SIZE] = {0};
+  snprintf(infobuf, MAX_FNAME_LINENUM_SIZE, "%-5s -> %s:%lu", "ERROR", file, line);
+
+  char logBuf[MAX_LOG_SIZE] = {0};
+
+  // Prepare entire output
+  snprintf(logBuf, MAX_LOG_SIZE, "%s - %lu\r\n", infobuf, errCode);
+
+  sciPrintf(logBuf);
+}
+
+static void logResult(bool success, const char *peripheral, const char *protocol, bool *pass, uint32_t retErr) {
   char strBuf[60 + strlen(peripheral) +
               strlen(protocol)];  // Approx 50 for fail text plus some wiggle room if message changes
   if (!success) {
     snprintf(strBuf, sizeof(strBuf), "POWER ON TEST FAIL: Bad connection with %s (via %s)\r\n", peripheral, protocol);
     *pass = false;
+    log_error(__FILE__, __LINE__, retErr);
   } else {
     snprintf(strBuf, sizeof(strBuf), "Good connection with %s (via %s)\r\n", peripheral, protocol);
   }
@@ -42,60 +55,75 @@ void runTest() {
   uint32_t placeholderUint32;
   size_t placeholderSize;
 
-  // Test connection with LM75BD
+// Test connection with LM75BD
+#ifdef CONFIG_LM75BD
   errCode = readTempLM75BD(LM75BD_OBC_I2C_ADDR, &placeholderFloat);
-  logResult(errCode == OBC_ERR_CODE_SUCCESS && placeholderFloat != 0.0, "LM75BD", "I2C", &pass);
+  logResult(errCode == OBC_ERR_CODE_SUCCESS && placeholderFloat != 0.0, "LM75BD", "I2C", &pass, errCode);
+#endif
 
-  // Test connection with CC1120
+// Test connection with CC1120
+#ifdef CONFIG_CC1120
   errCode = cc1120StrobeSpi(CC1120_STROBE_SRES);
-  logResult(errCode == OBC_ERR_CODE_SUCCESS, "CC1120", "SPI", &pass);
+  logResult(errCode == OBC_ERR_CODE_SUCCESS, "CC1120", "SPI", &pass, errCode);
+#endif
 
-  // Test connection with fram
+// Test connection with fram
+#ifdef CONFIG_FRAM
   testing_persist_data_t data = {.testData = 0x1818};
   errCode = setPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &data, sizeof(testing_persist_data_t));
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    logResult(false, "FRAM", "SPI", &pass);
+    logResult(false, "FRAM", "SPI", &pass, errCode);
   } else {
     testing_persist_data_t readData;
     errCode = getPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &readData, sizeof(testing_persist_data_t));
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-      logResult(false, "FRAM", "SPI", &pass);
+      logResult(false, "FRAM", "SPI", &pass, errCode);
     } else {
       if (readData.testData != data.testData) {
         errCode = OBC_ERR_CODE_PERSISTENT_CORRUPTED;
-        logResult(false, "FRAM", "SPI", &pass);
+        logResult(false, "FRAM", "SPI", &pass, errCode);
       } else {
-        logResult(true, "FRAM", "SPI", &pass);
+        logResult(true, "FRAM", "SPI", &pass), errCode;
       }
     }
   }
+#endif
 
-  // Test connection with rffm6404
+// Test connection with rffm6404
+#ifdef CONFIG_RFFM6404
   errCode = rffm6404ActivateRx();
-  logResult(errCode == OBC_ERR_CODE_SUCCESS, "RFFM6404", "GIO", &pass);
+  logResult(errCode == OBC_ERR_CODE_SUCCESS, "RFFM6404", "GIO", &pass, errCode);
   rffm6404PowerOff();  // Return to starting condition
+#endif
 
-  // Test connection with arducam
-  // TODO: Read from test reg when driver is finished
-  // errCode = arducamReadTestReg(&placeholder_byte);  // Now testing SPI interface
-  // logResult(errCode == OBC_ERR_CODE_SUCCESS, "Arducam", "SPI", &pass); // Maybe some other validation
+// Test connection with arducam
+#ifdef CONFIG_ARDUCAM
+// TODO: Read from test reg when driver is finished
+// errCode = arducamReadTestReg(&placeholder_byte);  // Now testing SPI interface
+// logResult(errCode == OBC_ERR_CODE_SUCCESS, "Arducam", "SPI", &pass, errCode); // probably some other validation
+#endif
 
-  // Test connection with DS3232
+// Test connection with DS3232
+#ifdef CONFIG_DS3232
   rtc_status_t status;
   errCode = getStatusRTC(&status);
-  logResult(errCode == OBC_ERR_CODE_SUCCESS && status.EN32KHZ, "DS3232", "I2C",
-            &pass);  // 32khz output enabled by default, will be on power up
+  logResult(errCode == OBC_ERR_CODE_SUCCESS && status.EN32KHZ, "DS3232", "I2C", &pass,
+            errCode);  // 32khz output enabled by default, will be on power up
+#endif
 
-  // Test connection with VN100
+// Test connection with VN100
+#ifdef CONFIG_VN100
   errCode = vn100ReadBaudrate(&placeholderUint32);  // Handles check that response is a valid baudrate
-  logResult(errCode == OBC_ERR_CODE_SUCCESS, "VN100", "SCI", &pass);
+  logResult(errCode == OBC_ERR_CODE_SUCCESS, "VN100", "SCI", &pass, errCode);
+#endif
 
-  // Test connection with SD Card
+// Test connection with SD Card
+#ifdef CONFIG_SD_CARD
   int32_t fileId;
   const char writeData[] = "Orbital\r\n";
-  const char filePath[] = "/power_on_test.txt";
+  const char filePath[] = "/poweron.txt";
   char readBuf[strlen(writeData)];
 
   setupFileSystem();
@@ -103,28 +131,29 @@ void runTest() {
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     LOG_ERROR_CODE(errCode);
-    logResult(false, "SD Card", "SPI", &pass);
+    logResult(false, "SD Card", "SPI", &pass, errCode);
   } else {
     red_open(filePath, RED_O_RDWR | RED_O_APPEND);
     errCode = writeFile(fileId, writeData, strlen(writeData));
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       LOG_ERROR_CODE(errCode);
-      logResult(false, "SD Card", "SPI", &pass);
+      logResult(false, "SD Card", "SPI", &pass, errCode);
     } else {
       readFile(fileId, readBuf, strlen(writeData), &placeholderSize);
 
-      if (strcmp(writeData, readBuf) != 0) {
+      if (strtstr(readBuf, writeData)) {
+        logResult(true, "SD Card", "SPI", &pass, errCode);
+      } else {
         errCode = OBC_ERR_CODE_FAILED_FILE_READ;
         LOG_ERROR_CODE(errCode);
-        logResult(false, "SD Card", "SPI", &pass);
-      } else {
-        logResult(true, "SD Card", "SPI", &pass);
+        logResult(false, "SD Card", "SPI", &pass, errCode);
       }
 
       deleteFile(filePath);
     }
   }
+#endif
 
   if (pass) {
     sciPrintf("POWER ON TEST COMPLETE: PASS\r\n");
