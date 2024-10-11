@@ -92,7 +92,7 @@ void runTest() {
         errCode = OBC_ERR_CODE_PERSISTENT_CORRUPTED;
         logResult(false, "FRAM", "SPI", &pass, errCode);
       } else {
-        logResult(true, "FRAM", "SPI", &pass), errCode;
+        logResult(true, "FRAM", "SPI", &pass, errCode);
       }
     }
   }
@@ -149,7 +149,7 @@ void runTest() {
     } else {
       readFile(fileId, readBuf, strlen(writeData), &placeholderSize);
 
-      if (strtstr(readBuf, writeData)) {
+      if (strstr(readBuf, writeData)) {
         logResult(true, "SD Card", "SPI", &pass, errCode);
       } else {
         errCode = OBC_ERR_CODE_FAILED_FILE_READ;
