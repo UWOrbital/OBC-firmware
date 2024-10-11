@@ -8,7 +8,7 @@
 #include "lm75bd.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"
-#include "rffm6404.h"
+#include "max5360.h"
 #include "arducam.h"
 #include "ds3232_mz.h"
 #include "vn100.h"
@@ -96,13 +96,6 @@ void runTest() {
       }
     }
   }
-#endif
-
-// Test connection with rffm6404
-#ifdef CONFIG_RFFM6404
-  errCode = rffm6404ActivateRx();
-  logResult(errCode == OBC_ERR_CODE_SUCCESS, "RFFM6404", "GIO", &pass, errCode);
-  rffm6404PowerOff();  // Return to starting condition
 #endif
 
 // Test connection with arducam
