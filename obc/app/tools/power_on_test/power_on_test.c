@@ -3,6 +3,7 @@
 #include "obc_print.h"
 #include "obc_persistent.h"
 #include "obc_reliance_fs.h"
+#include "obc_general_util.h"
 #include "telemetry_fs_utils.h"
 #include "lm75bd.h"
 #include "cc1120.h"
@@ -54,6 +55,12 @@ void runTest() {
   float placeholderFloat;
   uint32_t placeholderUint32;
   size_t placeholderSize;
+
+  UNUSED(placeholderSize);
+  UNUSED(placeholderUint32);
+  UNUSED(placeholderFloat);
+  UNUSED(errCode);
+  UNUSED(logResult);
 
 // Test connection with LM75BD
 #ifdef CONFIG_LM75BD
