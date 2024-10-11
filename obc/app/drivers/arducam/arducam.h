@@ -68,10 +68,3 @@ obc_error_code_t readFifoBurst(camera_t cam);
  * @return Returns true if capture is complete
  */
 bool isCaptureDone(camera_t cam);
-
-/**
- * @brief Flush fifo stream
- * @param cam The camera to check
- * @return OBC_ERR_CODE_SUCCESS if successful, an error code otherwise
- */
-obc_error_code_t flushFifo(camera_t cam);
