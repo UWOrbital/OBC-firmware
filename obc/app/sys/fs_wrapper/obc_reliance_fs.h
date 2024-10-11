@@ -74,3 +74,13 @@ obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize, size_
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
  */
 obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize);
+
+/**
+ * @brief Open a file.
+ *
+ * @param filePath Path to the file
+ * @param openMode Mode to open the file in
+ * @param fileId Buffer to store the file descriptor
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
+obc_error_code_t openFile(const char *filePath, uint32_t openMode, int32_t *fileId);

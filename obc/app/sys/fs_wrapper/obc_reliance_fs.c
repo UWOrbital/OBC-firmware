@@ -158,3 +158,12 @@ obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize) {
 
   return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t openFile(const char *filePath, uint32_t openMode, int32_t *fileId) {
+  *fileId = red_open(filePath, openMode);
+  if (*fileId < 0) {
+    return OBC_ERR_CODE_FAILED_FILE_OPEN;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}

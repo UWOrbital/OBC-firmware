@@ -219,12 +219,14 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
     }
 
     /* Place GNC Tasks here */
-
-    obc_error_code_t errCode;
+    obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
     /* Read from sensors */
-    vn100_binary_packet_t vn100CurrentPacket;
+    vn100_binary_packet_t vn100CurrentPacket = {0};
+
+#ifdef CONFIG_VN100
     LOG_IF_ERROR_CODE(vn100ReadBinaryOutputs(&vn100CurrentPacket));
+#endif
 
     if (errCode == OBC_ERR_CODE_SUCCESS) {
       /* TODO: Double check with GNC what to do if any sensor read fails
