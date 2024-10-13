@@ -39,6 +39,10 @@
     if ($input == Py_None) {
         $1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+        if (!PyDict_Check($input)) {
+            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+        }
+
         $1 = (aes_data_t *)malloc(sizeof(aes_data_t));
         if (!$1) {
             SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
