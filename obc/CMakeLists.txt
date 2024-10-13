@@ -5,6 +5,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/cmake/board_lib_defs.cmake)
 
+# Load setup-specific definitions
+include(${CMAKE_SOURCE_DIR}/obc/shared/config/peripheral_config_definitions.cmake)
+
 set(LD_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld")
 set(APP_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/app_link.ld")
 set(BL_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/bl_link.ld")
@@ -102,6 +105,7 @@ target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ${PERIPHERAL_CONFIG}
 )
 
 # Determine the root of the repository
@@ -129,6 +133,9 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
+    attitude-control
+    attitude-determination
+    onboard-env-modelling
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
@@ -178,6 +185,7 @@ target_compile_definitions(OBC-bl.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ${PERIPHERAL_CONFIG}
 )
 
 add_subdirectory(bl)
@@ -208,6 +216,7 @@ target_compile_definitions(debug-tool.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ${PERIPHERAL_CONFIG}
 )
 
 add_subdirectory(app/tools/interface_debug_tool)
@@ -216,6 +225,9 @@ target_link_libraries(debug-tool.out PRIVATE
     tiny-aes
     lib-correct
     obc-gs-interface
+    attitude-control
+    attitude-determination
+    onboard-env-modelling
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
