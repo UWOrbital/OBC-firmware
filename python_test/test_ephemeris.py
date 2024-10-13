@@ -4,9 +4,9 @@ import os
 import struct
 
 import pytest
-from gs.sun import ephemeris
-from gs.sun import ephemeris_parser as ep
-from gs.sun.ephemeris import DataPoint, ErrorCode
+from gs.backend.sun import ephemeris
+from gs.backend.sun import ephemeris_parser as ep
+from gs.backend.sun.ephemeris import DataPoint, ErrorCode
 
 
 @pytest.mark.parametrize(
