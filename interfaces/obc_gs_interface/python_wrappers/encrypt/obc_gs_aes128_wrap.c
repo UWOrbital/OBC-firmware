@@ -2995,6 +2995,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_set(PyObject *SWIGUNUSEDPARM(self), PyO
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3087,6 +3091,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_get(PyObject *SWIGUNUSEDPARM(self), PyO
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3166,6 +3174,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_set(PyObject *SWIGUNUSEDPARM(se
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3255,6 +3267,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_get(PyObject *SWIGUNUSEDPARM(se
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3336,6 +3352,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_set(PyObject *SWIGUNUSEDPARM
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3421,6 +3441,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_get(PyObject *SWIGUNUSEDPARM
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3513,6 +3537,10 @@ SWIGINTERN PyObject *_wrap_delete_aes_data_t(PyObject *SWIGUNUSEDPARM(self), PyO
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
@@ -3607,6 +3635,10 @@ SWIGINTERN PyObject *_wrap_aes128Decrypt(PyObject *SWIGUNUSEDPARM(self), PyObjec
     if (swig_obj[0] == Py_None) {
       arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
     } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
       arg1 = (aes_data_t *)malloc(sizeof(aes_data_t));
       if (!arg1) {
         SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for aes_data_t");
