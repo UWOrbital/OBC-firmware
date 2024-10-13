@@ -38,6 +38,14 @@ obc_error_code_t createFile(const char *filePath, int32_t *fileId);
 obc_error_code_t closeFile(int32_t fileId);
 
 /**
+ * @brief Create a file.
+ *
+ * @param filePath Path to the file
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
+obc_error_code_t deleteFile(const char *filePath);
+
+/**
  * @brief Write to a file.
  *
  * @param fileId File descriptor given by Reliance Edge

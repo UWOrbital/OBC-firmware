@@ -14,15 +14,18 @@
 #define MUTEX_TIMEOUT portMAX_DELAY
 #define MAX_BAUDRATE_LENGTH 7U
 #define MAX_OUTPUT_RATE_LENGTH 3U
-#define DEFAULT_OUTPUT_RATE_HZ 20U
+#define DEFAULT_OUTPUT_RATE_HZ 10U
 #define SCI_SEMAPHORE_TIMEOUT_MS \
-  50U /* Time between successive sensor outputs (period): 1/output rate = 1/20Hz = 0.05s = 50ms */
+  100U /* Time between successive sensor outputs (period): 1/output rate = 1/10Hz = 0.1s = 100ms */
+#define BAUD_READ_RESPONSE_SIZE \
+  22U  // Comes from 6 header bytes, 2 commas, 2 for reg id, 6 for the value, 3 for checksum, 2 for newline, 1 for null
+       // term
 
 /* Building start and stop binary output comands */
 #define BINARY_OUTPUT_START_PREFIX "$VNWRG,75,2,"  // Configure write command to output on register 75 and serial port 2
 #define BINARY_OUTPUT_STOP_PREFIX "$VNWRG,75,0,"   // Configure write command to stop outputs on register 75
 #define BINARY_OUTPUT_RATE_DIVISOR \
-  "40"  // Calculated by taking the IMU rate = 800Hz and dividing by the desired Output rate = 20Hz (800/20 = 40)
+  "80"  // Calculated by taking the IMU rate = 800Hz and dividing by the desired Output rate = 10Hz (800/10 = 80)
 #define BINARY_OUTPUT_POSTFIX \
   ",01,0528*XX\r\n"  // Configure to use output group 1 and enable the aforemore mentioned outputs, see section 4.2.4
                      // for more details.
@@ -104,6 +107,67 @@ obc_error_code_t vn100SetBaudrate(uint32_t baudrate) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t vn100ReadBaudrate(uint32_t *baudrate) {
+  obc_error_code_t errCode;
+
+  if (baudrate == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  /* For documentation on how these commands are formed, refer to section 5.2.6 of the user manual */
+  const char checksum[] = "*XX\r\n";  // Checksum set to "XX", which means to ignore the checksum
+  const char header[] = "$VNRRG,05";  // Header set to read from register 5
+  unsigned char buf[MAX_SEND_SIZE] = {'\0'};
+
+  size_t headerLength = strlen(header);
+  size_t checksumLength = strlen(checksum);
+
+  // Begin appending the command
+  memcpy(buf, header, headerLength);
+  memcpy(buf + headerLength, checksum, checksumLength);
+
+  size_t numBytes = headerLength + checksumLength;
+
+  // Send command
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
+
+  // Read and parse response
+  char readBuf[BAUD_READ_RESPONSE_SIZE] = {'\0'};
+  RETURN_IF_ERROR_CODE(sciReadBytes((unsigned char *)readBuf, BAUD_READ_RESPONSE_SIZE, portMAX_DELAY,
+                                    pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS), UART_VN100_REG));
+
+  // Find first comma
+  char *baudStart = strchr(readBuf, ',');
+  if (baudStart == NULL) {
+    return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
+  }
+
+  // Move to second comma
+  baudStart = strchr(baudStart + 1, ',');
+  if (baudStart == NULL) {
+    return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
+  }
+  baudStart++;  // Move forward one to first character of baudrate
+
+  // Find asterisk (end of baudrate)
+  char *baudEnd = strchr(readBuf, '*');
+  if (baudEnd == NULL) {
+    return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
+  }
+
+  char baudStr[7] = {};  // Max 6 chars for baudrate, 1 for null termination
+  strncpy(baudStr, baudStart, baudEnd - baudStart);
+  baudStr[baudEnd - baudStart] = '\0';
+
+  *baudrate = (uint32_t)atoi(baudStr);  // Convert to an integer
+
+  if (!isValidBaudRate(*baudrate)) {
+    return OBC_ERR_CODE_UART_FAILURE;  // Received malformed message
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(isValidOutputRate(outputRateHz));
@@ -135,19 +199,19 @@ obc_error_code_t vn100StartBinaryOutputs(void) {
   /* Outputs: Yaw Pitch Roll, Angular rates, Accelerometer data, Magnetometer, Temp and Pressure.
      Initialized to start with an output rate of 10Hz */
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), (sizeof(START_BINARY_OUTPUTS) - 1),
+  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char *)(START_BINARY_OUTPUTS), (sizeof(START_BINARY_OUTPUTS) - 1),
                                     portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t vn100StopBinaryOutputs(void) {
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), (sizeof(STOP_BINARY_OUTPUTS) - 1),
+  RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char *)(STOP_BINARY_OUTPUTS), (sizeof(STOP_BINARY_OUTPUTS) - 1),
                                     portMAX_DELAY, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t* parsedPacket) {
+obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t *parsedPacket) {
   if (parsedPacket == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

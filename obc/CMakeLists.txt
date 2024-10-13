@@ -128,6 +128,7 @@ add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
+add_subdirectory(app/tools)
 
 target_link_libraries(${OUT_FILE_NAME} PRIVATE
     tiny-aes
@@ -218,8 +219,6 @@ target_compile_definitions(debug-tool.out PRIVATE
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
     ${PERIPHERAL_CONFIG}
 )
-
-add_subdirectory(app/tools/interface_debug_tool)
 
 target_link_libraries(debug-tool.out PRIVATE
     tiny-aes
