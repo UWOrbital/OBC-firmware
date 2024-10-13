@@ -14,7 +14,7 @@ exclude = [
   "build*",
   "python_test/*",
   "test/*"]
-mypy_path = "gs:obc/tools/python"
+mypy_path = "gs:obc/tools/python:interfaces/obc_gs_interface/python_wrappers"
 strict = true
 
 [[tool.mypy.overrides]]
@@ -22,7 +22,7 @@ module = "skyfield.*"
 ignore_missing_imports = true
 
 [tool.ruff]
-include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py"]
+include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py", "interfaces/obc_gs_interface/python_wrappers/**/*.py"]
 exclude = [
   "libs/*",
   "cmake/*",
