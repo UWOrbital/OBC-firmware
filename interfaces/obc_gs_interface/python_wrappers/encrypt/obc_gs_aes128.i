@@ -1,7 +1,6 @@
 %module obc_gs_aes128
 %{
     #include "../../aes128/obc_gs_aes128.h"
-    #include "../../../../libs/tiny_aes/include/aes.h"
 %}
 
 %include <stdint.i>
