@@ -212,6 +212,7 @@ Options for `EXAMPLE_TYPE` include:
 - `UART_TX` - for `test_app_uart_tx`
 - `VN100` - for `vn100_demo`
 - `CC1120_SPI` - for `test_app_cc1120_spi`
+- `ADC` - for `test_app_adc`
 
 Instructions on how to add examples:
 
