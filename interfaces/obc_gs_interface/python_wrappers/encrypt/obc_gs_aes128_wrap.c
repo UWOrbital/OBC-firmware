@@ -2708,7 +2708,6 @@ static swig_module_info swig_module = {swig_types, 10, 0, 0, 0, 0};
 
 
     #include "../../aes128/obc_gs_aes128.h"
-    #include "../../../../libs/tiny_aes/include/aes.h"
 
 
 #include <stdint.h>		// Use the C99 official header
