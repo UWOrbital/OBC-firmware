@@ -114,6 +114,36 @@ CMD_MICRO_SD_FORMAT = _obc_gs_pack_unpack.CMD_MICRO_SD_FORMAT
 CMD_PING = _obc_gs_pack_unpack.CMD_PING
 CMD_DOWNLINK_TELEM = _obc_gs_pack_unpack.CMD_DOWNLINK_TELEM
 NUM_CMD_CALLBACKS = _obc_gs_pack_unpack.NUM_CMD_CALLBACKS
+CMD_RESPONSE_SUCCESS_MASK = _obc_gs_pack_unpack.CMD_RESPONSE_SUCCESS_MASK
+class obc_cmd_reset_response_t(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+    data1 = property(_obc_gs_pack_unpack.obc_cmd_reset_response_t_data1_get, _obc_gs_pack_unpack.obc_cmd_reset_response_t_data1_set)
+    data2 = property(_obc_gs_pack_unpack.obc_cmd_reset_response_t_data2_get, _obc_gs_pack_unpack.obc_cmd_reset_response_t_data2_set)
+
+    def __init__(self):
+        _obc_gs_pack_unpack.obc_cmd_reset_response_t_swiginit(self, _obc_gs_pack_unpack.new_obc_cmd_reset_response_t())
+    __swig_destroy__ = _obc_gs_pack_unpack.delete_obc_cmd_reset_response_t
+
+# Register obc_cmd_reset_response_t in _obc_gs_pack_unpack:
+_obc_gs_pack_unpack.obc_cmd_reset_response_t_swigregister(obc_cmd_reset_response_t)
+
+CMD_RESPONSE_SUCCESS = _obc_gs_pack_unpack.CMD_RESPONSE_SUCCESS
+CMD_RESPONSE_ERROR = _obc_gs_pack_unpack.CMD_RESPONSE_ERROR
+class cmd_unpacked_response_t(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+    errCode = property(_obc_gs_pack_unpack.cmd_unpacked_response_t_errCode_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_errCode_set)
+    cmdId = property(_obc_gs_pack_unpack.cmd_unpacked_response_t_cmdId_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_cmdId_set)
+    obcResetResponse = property(_obc_gs_pack_unpack.cmd_unpacked_response_t_obcResetResponse_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_obcResetResponse_set)
+
+    def __init__(self):
+        _obc_gs_pack_unpack.cmd_unpacked_response_t_swiginit(self, _obc_gs_pack_unpack.new_cmd_unpacked_response_t())
+    __swig_destroy__ = _obc_gs_pack_unpack.delete_cmd_unpacked_response_t
+
+# Register cmd_unpacked_response_t in _obc_gs_pack_unpack:
+_obc_gs_pack_unpack.cmd_unpacked_response_t_swigregister(cmd_unpacked_response_t)
+
 class telemetry_data_t(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr

@@ -48,16 +48,17 @@ def test_unpack_cmd_valid_data(valid_command_data, create_command_buffer):
 
     packCmdMsg(buffer, offset, cmd_data, num_packed)
     immutable_buffer = bytes(buffer)
-    # reset cmd_data to be overwritten
-    cmd_data = {"id": CMD_END_OF_FRAME, "timestamp": 0, "isTimeTagged": False}
 
-    result = unpackCmdMsg(immutable_buffer, offset, cmd_data)
+    # reset cmd_data to be overwritten
+    unpacked_cmd_data = {"id": CMD_END_OF_FRAME, "timestamp": 0, "isTimeTagged": False}
+
+    result = unpackCmdMsg(immutable_buffer, offset, unpacked_cmd_data)
 
     assert result == obc_gs_errors.OBC_GS_ERR_CODE_SUCCESS, "Unpacking command data failed with valid buffer"
-    assert cmd_data["id"] == valid_command_data["id"]
-    assert cmd_data["timestamp"] == valid_command_data["timestamp"]
-    assert cmd_data["isTimeTagged"] == valid_command_data["isTimeTagged"]
-    assert cmd_data["rtcSync"]["unixTime"] == valid_command_data["rtcSync"]["unixTime"]
+    assert unpacked_cmd_data["id"] == cmd_data["id"]
+    assert unpacked_cmd_data["timestamp"] == cmd_data["timestamp"]
+    assert unpacked_cmd_data["isTimeTagged"] == cmd_data["isTimeTagged"]
+    assert unpacked_cmd_data["rtcSync"]["unixTime"] == cmd_data["rtcSync"]["unixTime"]
 
 
 @pytest.mark.parametrize("buffer, offset, cmd_data, expected_error", [

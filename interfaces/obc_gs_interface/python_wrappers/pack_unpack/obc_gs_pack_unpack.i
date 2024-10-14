@@ -3,6 +3,7 @@
     /* type definitions */
     #include "../../commands/obc_gs_command_data.h"
     #include "../../commands/obc_gs_command_id.h"
+    #include "../../commands/obc_gs_commands_response.h"
     #include "../../telemetry/obc_gs_telemetry_data.h"
     #include "../../telemetry/obc_gs_telemetry_id.h"
 
@@ -288,6 +289,41 @@
     }
 }
 
+%typemap(argout) cmd_unpacked_response_t * {
+    if ($1) {
+        // Update Python dictionary 'errCode'
+        PyObject* errCode_obj = PyLong_FromLong((long)$1->errCode);
+        PyDict_SetItemString($input, "errCode", errCode_obj);
+        Py_DECREF(errCode_obj);
+
+        // Update Python dictionary 'cmdId'
+        PyObject* cmdId_obj = PyLong_FromLong((long)$1->cmdId);
+        PyDict_SetItemString($input, "cmdId", cmdId_obj);
+        Py_DECREF(cmdId_obj);
+
+        // Update 'obcResetResponse' if needed
+        if ($1->cmdId == CMD_EXEC_OBC_RESET) {
+            PyObject* obcResetResponse_dict = PyDict_GetItemString($input, "obcResetResponse");
+            if (!obcResetResponse_dict) {
+                obcResetResponse_dict = PyDict_New();
+                PyDict_SetItemString($input, "obcResetResponse", obcResetResponse_dict);
+                Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+            }
+
+            // Update 'data1' (float) in 'obcResetResponse'
+            PyObject* data1_obj = PyFloat_FromDouble((double)$1->obcResetResponse.data1);
+            PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+            Py_DECREF(data1_obj);
+
+            // Update 'data2' (uint32_t) in 'obcResetResponse'
+            PyObject* data2_obj = PyLong_FromUnsignedLong($1->obcResetResponse.data2);
+            PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+            Py_DECREF(data2_obj);
+        }
+    }
+}
+
+
 %typemap(in) telemetry_data_t * {
     if ($input == Py_None) {
         $1 = NULL;  // Pass a NULL pointer to the C function if input is None
@@ -478,6 +514,7 @@
 // type definitions
 %include "../../commands/obc_gs_command_data.h"
 %include "../../commands/obc_gs_command_id.h"
+%include "../../commands/obc_gs_commands_response.h"
 %include "../../telemetry/obc_gs_telemetry_data.h"
 %include "../../telemetry/obc_gs_telemetry_id.h"
 
