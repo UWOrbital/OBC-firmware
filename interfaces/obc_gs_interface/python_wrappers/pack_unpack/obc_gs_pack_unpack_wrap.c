@@ -3382,27 +3382,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -3412,11 +3408,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -3424,7 +3418,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -3432,12 +3425,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -3446,7 +3437,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -3454,12 +3444,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -3472,6 +3460,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
   arg2 = (rtc_sync_cmd_data_t *)(argp2);
   if (arg1) (arg1)->rtcSync = *arg2;
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -3515,27 +3548,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -3545,11 +3574,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -3557,7 +3584,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -3565,12 +3591,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -3579,7 +3603,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -3587,12 +3610,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -3600,6 +3621,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
   }
   result = (rtc_sync_cmd_data_t *)& ((arg1)->rtcSync);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_rtc_sync_cmd_data_t, 0 |  0 );
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -3644,27 +3710,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -3674,11 +3736,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -3686,7 +3746,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -3694,12 +3753,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -3708,7 +3765,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -3716,12 +3772,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -3734,6 +3788,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
   arg2 = (downlink_logs_next_pass_cmd_data_t *)(argp2);
   if (arg1) (arg1)->downlinkLogsNextPass = *arg2;
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -3777,27 +3876,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -3807,11 +3902,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -3819,7 +3912,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -3827,12 +3919,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -3841,7 +3931,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -3849,12 +3938,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -3862,6 +3949,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
   }
   result = (downlink_logs_next_pass_cmd_data_t *)& ((arg1)->downlinkLogsNextPass);
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_downlink_logs_next_pass_cmd_data_t, 0 |  0 );
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -3906,27 +4038,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -3936,11 +4064,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -3948,7 +4074,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -3956,12 +4081,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -3970,7 +4093,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -3978,12 +4100,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -3996,6 +4116,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
   arg2 = (uint32_t)(val2);
   if (arg1) (arg1)->timestamp = arg2;
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4039,27 +4204,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -4069,11 +4230,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -4081,7 +4240,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -4089,12 +4247,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -4103,7 +4259,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -4111,12 +4266,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -4124,6 +4277,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
   }
   result = (uint32_t) ((arg1)->timestamp);
   resultobj = SWIG_From_unsigned_SS_int((unsigned int)(result));
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4168,27 +4366,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -4198,11 +4392,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -4210,7 +4402,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -4218,12 +4409,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -4232,7 +4421,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -4240,12 +4428,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -4258,6 +4444,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
   arg2 = (bool)(val2);
   if (arg1) (arg1)->isTimeTagged = arg2;
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4301,27 +4532,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -4331,11 +4558,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -4343,7 +4568,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -4351,12 +4575,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -4365,7 +4587,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -4373,12 +4594,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -4386,6 +4605,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
   }
   result = (bool) ((arg1)->isTimeTagged);
   resultobj = SWIG_From_bool((bool)(result));
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4430,27 +4694,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -4460,11 +4720,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -4472,7 +4730,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -4480,12 +4737,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -4494,7 +4749,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -4502,12 +4756,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -4520,6 +4772,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
   arg2 = (cmd_callback_id_t)(val2);
   if (arg1) (arg1)->id = arg2;
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4563,27 +4860,23 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -4593,11 +4886,9 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -4605,7 +4896,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -4613,12 +4903,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -4627,7 +4915,6 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -4635,12 +4922,10 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -4648,6 +4933,51 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
   }
   result = (cmd_callback_id_t) ((arg1)->id);
   resultobj = SWIG_From_int((int)(result));
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4703,27 +5033,23 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[0], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg1);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg1->timestamp = (uint32_t)long_val;
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg1->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -4733,11 +5059,9 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg1->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -4745,7 +5069,6 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -4753,12 +5076,10 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg1->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -4767,7 +5088,6 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -4775,12 +5095,10 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg1->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -4788,6 +5106,51 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
   }
   free((char *) arg1);
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg1->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg1->id);
+      
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[0], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg1->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[0], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg1->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg1->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[0], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg1->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -4941,6 +5304,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_cc1120Temp_set(PyObject *SWIGUNUSEDP
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -5073,6 +5503,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_cc1120Temp_get(PyObject *SWIGUNUSEDP
   }
   result = (float) ((arg1)->cc1120Temp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -5215,6 +5712,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_commsCustomTransceiverTemp_set(PyObj
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -5347,6 +5911,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_commsCustomTransceiverTemp_get(PyObj
   }
   result = (float) ((arg1)->commsCustomTransceiverTemp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -5489,6 +6120,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcTemp_set(PyObject *SWIGUNUSEDPARM
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -5621,6 +6319,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcTemp_get(PyObject *SWIGUNUSEDPARM
   }
   result = (float) ((arg1)->obcTemp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -5763,6 +6528,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsMagBoardTemp_set(PyObject *SWIGU
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -5895,6 +6727,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsMagBoardTemp_get(PyObject *SWIGU
   }
   result = (float) ((arg1)->adcsMagBoardTemp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -6037,6 +6936,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsSensorBoardTemp_set(PyObject *SW
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -6169,6 +7135,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsSensorBoardTemp_get(PyObject *SW
   }
   result = (float) ((arg1)->adcsSensorBoardTemp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -6311,6 +7344,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsBoardTemp_set(PyObject *SWIGUNUSE
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -6443,6 +7543,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsBoardTemp_get(PyObject *SWIGUNUSE
   }
   result = (float) ((arg1)->epsBoardTemp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -6585,6 +7752,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel1Temp_set(PyObject *SWIGUN
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -6717,6 +7951,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel1Temp_get(PyObject *SWIGUN
   }
   result = (float) ((arg1)->solarPanel1Temp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -6859,6 +8160,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel2Temp_set(PyObject *SWIGUN
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -6991,6 +8359,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel2Temp_get(PyObject *SWIGUN
   }
   result = (float) ((arg1)->solarPanel2Temp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -7133,6 +8568,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel3Temp_set(PyObject *SWIGUN
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -7265,6 +8767,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel3Temp_get(PyObject *SWIGUN
   }
   result = (float) ((arg1)->solarPanel3Temp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -7407,6 +8976,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel4Temp_set(PyObject *SWIGUN
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -7539,6 +9175,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel4Temp_get(PyObject *SWIGUN
   }
   result = (float) ((arg1)->solarPanel4Temp);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -7681,6 +9384,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vCurrent_set(PyObject *SWIG
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -7813,6 +9583,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vCurrent_get(PyObject *SWIG
   }
   result = (float) ((arg1)->epsComms5vCurrent);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -7955,6 +9792,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Current_set(PyObject *SWI
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -8087,6 +9991,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Current_get(PyObject *SWI
   }
   result = (float) ((arg1)->epsComms3v3Current);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -8229,6 +10200,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vCurrent_set(PyObjec
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -8361,6 +10399,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vCurrent_get(PyObjec
   }
   result = (float) ((arg1)->epsMagnetorquer8vCurrent);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -8503,6 +10608,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vCurrent_set(PyObject *SWIGU
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -8635,6 +10807,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vCurrent_get(PyObject *SWIGU
   }
   result = (float) ((arg1)->epsAdcs5vCurrent);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -8777,6 +11016,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Current_set(PyObject *SWIG
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -8909,6 +11215,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Current_get(PyObject *SWIG
   }
   result = (float) ((arg1)->epsAdcs3v3Current);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -9051,6 +11424,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Current_set(PyObject *SWIGU
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -9183,6 +11623,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Current_get(PyObject *SWIGU
   }
   result = (float) ((arg1)->epsObc3v3Current);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -9325,6 +11832,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vVoltage_set(PyObject *SWIG
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -9457,6 +12031,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vVoltage_get(PyObject *SWIG
   }
   result = (float) ((arg1)->epsComms5vVoltage);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -9599,6 +12240,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Voltage_set(PyObject *SWI
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -9731,6 +12439,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Voltage_get(PyObject *SWI
   }
   result = (float) ((arg1)->epsComms3v3Voltage);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -9873,6 +12648,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vVoltage_set(PyObjec
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -10005,6 +12847,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vVoltage_get(PyObjec
   }
   result = (float) ((arg1)->epsMagnetorquer8vVoltage);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -10147,6 +13056,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vVoltage_set(PyObject *SWIGU
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -10279,6 +13255,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vVoltage_get(PyObject *SWIGU
   }
   result = (float) ((arg1)->epsAdcs5vVoltage);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -10421,6 +13464,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Voltage_set(PyObject *SWIG
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -10553,6 +13663,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Voltage_get(PyObject *SWIG
   }
   result = (float) ((arg1)->epsAdcs3v3Voltage);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -10695,6 +13872,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Voltage_set(PyObject *SWIGU
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -10827,6 +14071,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Voltage_get(PyObject *SWIGU
   }
   result = (float) ((arg1)->epsObc3v3Voltage);
   resultobj = SWIG_From_float((float)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -10969,6 +14280,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcState_set(PyObject *SWIGUNUSEDPAR
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -11101,6 +14479,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcState_get(PyObject *SWIGUNUSEDPAR
   }
   result = (uint8_t) ((arg1)->obcState);
   resultobj = SWIG_From_unsigned_SS_char((unsigned char)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -11243,6 +14688,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsState_set(PyObject *SWIGUNUSEDPAR
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -11375,6 +14887,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsState_get(PyObject *SWIGUNUSEDPAR
   }
   result = (uint8_t) ((arg1)->epsState);
   resultobj = SWIG_From_unsigned_SS_char((unsigned char)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -11517,6 +15096,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_numCspPacketsRcvd_set(PyObject *SWIG
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -11649,6 +15295,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_numCspPacketsRcvd_get(PyObject *SWIG
   }
   result = (uint32_t) ((arg1)->numCspPacketsRcvd);
   resultobj = SWIG_From_unsigned_SS_int((unsigned int)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -11791,6 +15504,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_id_set(PyObject *SWIGUNUSEDPARM(self
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -11923,6 +15703,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_id_get(PyObject *SWIGUNUSEDPARM(self
   }
   result = (telemetry_data_id_t) ((arg1)->id);
   resultobj = SWIG_From_int((int)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -12065,6 +15912,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_timestamp_set(PyObject *SWIGUNUSEDPA
   resultobj = SWIG_Py_Void();
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -12197,6 +16111,73 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_timestamp_get(PyObject *SWIGUNUSEDPA
   }
   result = (uint32_t) ((arg1)->timestamp);
   resultobj = SWIG_From_unsigned_SS_int((unsigned int)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -12343,6 +16324,73 @@ SWIGINTERN PyObject *_wrap_delete_telemetry_data_t(PyObject *SWIGUNUSEDPARM(self
   }
   free((char *) arg1);
   resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
   {
     if (arg1) {
       free(arg1);
@@ -12525,6 +16573,73 @@ SWIGINTERN PyObject *_wrap_packTelemetry(PyObject *SWIGUNUSEDPARM(self), PyObjec
   }
   {
     if (arg1) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg1->id);
+      PyDict_SetItemString(swig_obj[0], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg1->timestamp);
+      PyDict_SetItemString(swig_obj[0], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg1->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[0], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg1->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg1->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg1->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -12592,27 +16707,23 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[2], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[2], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg3);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg3->timestamp = (uint32_t)long_val;
       } else {
-        free(arg3);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg3->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg3);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -12622,11 +16733,9 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg3->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg3);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg3);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -12634,7 +16743,6 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -12642,12 +16750,10 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg3);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg3->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -12656,7 +16762,6 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -12664,12 +16769,10 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg3);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg3->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -12687,6 +16790,51 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
   result = packCmdMsg(arg1,arg2,(cmd_msg_t const *)arg3,arg4);
   {
     resultobj = PyLong_FromLong((long)result);
+  }
+  {
+    if (arg3) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg3->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg3->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg3->id);
+      
+      PyDict_SetItemString(swig_obj[2], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[2], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[2], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg3->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[2], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[2], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg3->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg3->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[2], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[2], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg3->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
   }
   {
     if (arg3) {
@@ -12730,7 +16878,6 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
       PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
       
       if (!errCode_obj || !cmdId_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
       }
       
@@ -12740,11 +16887,9 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
         if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
           arg1->errCode = (cmd_response_error_code_t)errCode_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
       }
       
@@ -12754,11 +16899,9 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
         if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
           arg1->cmdId = (cmd_callback_id_t)cmdId_value;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
       }
       
@@ -12768,7 +16911,6 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
         PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
         
         if (!data1_obj || !data2_obj) {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
         }
         
@@ -12776,7 +16918,6 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
         if (PyFloat_Check(data1_obj)) {
           arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
         }
         
@@ -12784,12 +16925,10 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
         if (PyLong_Check(data2_obj)) {
           long data2_val = PyLong_AsLong(data2_obj);
           if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
-            free(arg1);
             SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
           }
           arg1->obcResetResponse.data2 = (uint32_t)data2_val;
         } else {
-          free(arg1);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
         }
       }
@@ -12975,6 +17114,73 @@ SWIGINTERN PyObject *_wrap_unpackTelemetry(PyObject *SWIGUNUSEDPARM(self), PyObj
   }
   {
     if (arg3) {
+      // Update Python dictionary 'id'
+      PyObject* id_obj = PyLong_FromLong((long)arg3->id);
+      PyDict_SetItemString(swig_obj[2], "id", id_obj);
+      Py_DECREF(id_obj);
+      
+      // Update Python dictionary 'timestamp'
+      PyObject* timestamp_obj = PyLong_FromUnsignedLong(arg3->timestamp);
+      PyDict_SetItemString(swig_obj[2], "timestamp", timestamp_obj);
+      Py_DECREF(timestamp_obj);
+      
+      const char *camelCaseKey = NULL;
+      switch (arg3->id) {
+        case TELEM_CC1120_TEMP: camelCaseKey = "cc1120Temp"; break;
+        case TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP: camelCaseKey = "commsCustomTransceiverTemp"; break;
+        case TELEM_OBC_TEMP: camelCaseKey = "obcTemp"; break;
+        case TELEM_ADCS_MAG_BOARD_TEMP: camelCaseKey = "adcsMagBoardTemp"; break;
+        case TELEM_ADCS_SENSOR_BOARD_TEMP: camelCaseKey = "adcsSensorBoardTemp"; break;
+        case TELEM_EPS_BOARD_TEMP: camelCaseKey = "epsBoardTemp"; break;
+        case TELEM_SOLAR_PANEL_1_TEMP: camelCaseKey = "solarPanel1Temp"; break;
+        case TELEM_SOLAR_PANEL_2_TEMP: camelCaseKey = "solarPanel2Temp"; break;
+        case TELEM_SOLAR_PANEL_3_TEMP: camelCaseKey = "solarPanel3Temp"; break;
+        case TELEM_SOLAR_PANEL_4_TEMP: camelCaseKey = "solarPanel4Temp"; break;
+        case TELEM_EPS_COMMS_5V_CURRENT: camelCaseKey = "epsComms5vCurrent"; break;
+        case TELEM_EPS_COMMS_3V3_CURRENT: camelCaseKey = "epsComms3v3Current"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_CURRENT: camelCaseKey = "epsMagnetorquer8vCurrent"; break;
+        case TELEM_EPS_ADCS_5V_CURRENT: camelCaseKey = "epsAdcs5vCurrent"; break;
+        case TELEM_EPS_ADCS_3V3_CURRENT: camelCaseKey = "epsAdcs3v3Current"; break;
+        case TELEM_EPS_OBC_3V3_CURRENT: camelCaseKey = "epsObc3v3Current"; break;
+        case TELEM_EPS_COMMS_5V_VOLTAGE: camelCaseKey = "epsComms5vVoltage"; break;
+        case TELEM_EPS_COMMS_3V3_VOLTAGE: camelCaseKey = "epsComms3v3Voltage"; break;
+        case TELEM_EPS_MAGNETORQUER_8V_VOLTAGE: camelCaseKey = "epsMagnetorquer8vVoltage"; break;
+        case TELEM_EPS_ADCS_5V_VOLTAGE: camelCaseKey = "epsAdcs5vVoltage"; break;
+        case TELEM_EPS_ADCS_3V3_VOLTAGE: camelCaseKey = "epsAdcs3v3Voltage"; break;
+        case TELEM_EPS_OBC_3V3_VOLTAGE: camelCaseKey = "epsObc3v3Voltage"; break;
+        case TELEM_OBC_STATE: camelCaseKey = "obcState"; break;
+        case TELEM_EPS_STATE: camelCaseKey = "epsState"; break;
+        case TELEM_NUM_CSP_PACKETS_RCVD: camelCaseKey = "numCspPacketsRcvd"; break;
+        default: camelCaseKey = NULL; break;
+      }
+      
+      // Update the correct field in the 'data' dictionary based on the telemetry id
+      if (camelCaseKey) {
+        PyObject* data_dict = PyDict_GetItemString(swig_obj[2], "data");
+        if (!data_dict) {
+          data_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[2], "data", data_dict);
+          Py_DECREF(data_dict); // Decrease reference after adding to the dictionary
+        }
+        // Update the specific field in the 'data' dictionary based on the telemetry id
+        if (strcmp(camelCaseKey, "obcState") == 0 || strcmp(camelCaseKey, "epsState") == 0) {
+          PyObject *state_obj = PyLong_FromLong((long)arg3->obcState); // obcState and epsState are union members
+          PyDict_SetItemString(data_dict, camelCaseKey, state_obj);
+          Py_DECREF(state_obj);
+        } else if (strcmp(camelCaseKey, "numCspPacketsRcvd") == 0) {
+          PyObject *packets_obj = PyLong_FromUnsignedLong(arg3->numCspPacketsRcvd);
+          PyDict_SetItemString(data_dict, camelCaseKey, packets_obj);
+          Py_DECREF(packets_obj);
+        } else {
+          PyObject *value_obj = PyFloat_FromDouble((double)arg3->cc1120Temp); // Example for float data
+          PyDict_SetItemString(data_dict, camelCaseKey, value_obj);
+          Py_DECREF(value_obj);
+        }
+      }
+    }
+  }
+  {
+    if (arg3) {
       free(arg3);
     }
   }
@@ -13045,27 +17251,23 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
       PyObject *rtcSync_obj = PyDict_GetItemString(swig_obj[2], "rtcSync");
       PyObject *downlinkLogsNextPass_obj = PyDict_GetItemString(swig_obj[2], "downlinkLogsNextPass");
       
-      if (!timestamp_obj || !isTimeTagged_obj || !id_obj || (!rtcSync_obj && !downlinkLogsNextPass_obj)) {
-        free(arg3);
-        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged', 'id' and either 'rtcSync' or 'downlinkLogsNextPass'");
+      if (!timestamp_obj || !isTimeTagged_obj || !id_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'timestamp', 'isTimeTagged' and 'id'");
       }
       
       // Check if the timestamp value is within range for uint32_t and not negative
       if (PyLong_Check(timestamp_obj)) {
         long long_val = PyLong_AsLong(timestamp_obj);
         if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "'timestamp' value out of range for uint32_t");
         }
         arg3->timestamp = (uint32_t)long_val;
       } else {
-        free(arg3);
         SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'timestamp'");
       }
       
       arg3->isTimeTagged = (bool)PyObject_IsTrue(isTimeTagged_obj);
       if (PyErr_Occurred()) {
-        free(arg3);
         SWIG_exception_fail(SWIG_TypeError, "Failed to convert 'isTimeTagged' to boolean");
       }
       
@@ -13075,11 +17277,9 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
         if (id_value >= CMD_END_OF_FRAME && id_value < NUM_CMD_CALLBACKS) {
           arg3->id = (cmd_callback_id_t)id_value;
         } else {
-          free(arg3);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg3);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'id'");
       }
       
@@ -13087,7 +17287,6 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
       if (rtcSync_obj) {
         PyObject *unixTime_obj = PyDict_GetItemString(rtcSync_obj, "unixTime");
         if (!unixTime_obj) {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'unixTime' inside 'rtcSync'");
         }
         
@@ -13095,12 +17294,10 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
         if (PyLong_Check(unixTime_obj)) {
           long long_val = PyLong_AsLong(unixTime_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT32_MAX) {
-            free(arg3);
             SWIG_exception_fail(SWIG_TypeError, "'unixTime' value out of range for uint32_t");
           }
           arg3->rtcSync.unixTime = (uint32_t)long_val;
         } else {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'unixTime'");
         }
       }
@@ -13109,7 +17306,6 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
       if (downlinkLogsNextPass_obj) {
         PyObject *logLevel_obj = PyDict_GetItemString(downlinkLogsNextPass_obj, "logLevel");
         if (!logLevel_obj) {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'logLevel' inside 'downlinkLogsNextPass'");
         }
         
@@ -13117,12 +17313,10 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
         if (PyLong_Check(logLevel_obj)) {
           long long_val = PyLong_AsLong(logLevel_obj);
           if (long_val < 0 || (unsigned long)long_val > UINT8_MAX) {
-            free(arg3);
             SWIG_exception_fail(SWIG_TypeError, "'logLevel' value out of range for uint8_t");
           }
           arg3->downlinkLogsNextPass.logLevel = (uint8_t)long_val;
         } else {
-          free(arg3);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'logLevel'");
         }
       }
@@ -13131,6 +17325,51 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
   result = unpackCmdMsg((unsigned char const *)arg1,arg2,arg3);
   {
     resultobj = PyLong_FromLong((long)result);
+  }
+  {
+    if (arg3) {
+      PyObject *timestamp_obj = PyLong_FromUnsignedLong(arg3->timestamp);
+      PyObject *isTimeTagged_obj = PyBool_FromLong(arg3->isTimeTagged);
+      PyObject *id_obj = PyLong_FromLong(arg3->id);
+      
+      PyDict_SetItemString(swig_obj[2], "timestamp", timestamp_obj);
+      PyDict_SetItemString(swig_obj[2], "isTimeTagged", isTimeTagged_obj);
+      PyDict_SetItemString(swig_obj[2], "id", id_obj);
+      
+      Py_DECREF(timestamp_obj);
+      Py_DECREF(isTimeTagged_obj);
+      Py_DECREF(id_obj);
+      
+      // Check command ID to determine which part of the union is active
+      if (arg3->id == CMD_RTC_SYNC) {
+        // Retrieve the existing 'rtcSync' dictionary or create one if it doesn't exist
+        PyObject *rtcSync_dict = PyDict_GetItemString(swig_obj[2], "rtcSync");
+        if (!rtcSync_dict) {
+          rtcSync_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[2], "rtcSync", rtcSync_dict);
+          Py_DECREF(rtcSync_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'unixTime' in the 'rtcSync' dictionary
+        PyObject *unixTime_obj = PyLong_FromUnsignedLong(arg3->rtcSync.unixTime);
+        PyDict_SetItemString(rtcSync_dict, "unixTime", unixTime_obj);
+        Py_DECREF(unixTime_obj);
+        
+      } else if (arg3->id == CMD_DOWNLINK_LOGS_NEXT_PASS) {
+        // Retrieve the existing 'downlinkLogsNextPass' dictionary or create one if it doesn't exist
+        PyObject *downlinkLogsNextPass_dict = PyDict_GetItemString(swig_obj[2], "downlinkLogsNextPass");
+        if (!downlinkLogsNextPass_dict) {
+          downlinkLogsNextPass_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[2], "downlinkLogsNextPass", downlinkLogsNextPass_dict);
+          Py_DECREF(downlinkLogsNextPass_dict); // Decrease reference after adding to the dictionary
+        }
+        
+        // Set 'logLevel' in the 'downlinkLogsNextPass' dictionary
+        PyObject *logLevel_obj = PyLong_FromUnsignedLong(arg3->downlinkLogsNextPass.logLevel);
+        PyDict_SetItemString(downlinkLogsNextPass_dict, "logLevel", logLevel_obj);
+        Py_DECREF(logLevel_obj);
+      }
+    }
   }
   {
     if (arg3) {
@@ -13183,7 +17422,6 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
       PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[1], "obcResetResponse");
       
       if (!errCode_obj || !cmdId_obj) {
-        free(arg2);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
       }
       
@@ -13193,11 +17431,9 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
         if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
           arg2->errCode = (cmd_response_error_code_t)errCode_value;
         } else {
-          free(arg2);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
         }
       } else {
-        free(arg2);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
       }
       
@@ -13207,11 +17443,9 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
         if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
           arg2->cmdId = (cmd_callback_id_t)cmdId_value;
         } else {
-          free(arg2);
           SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
         }
       } else {
-        free(arg2);
         SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
       }
       
@@ -13221,7 +17455,6 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
         PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
         
         if (!data1_obj || !data2_obj) {
-          free(arg2);
           SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
         }
         
@@ -13229,7 +17462,6 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
         if (PyFloat_Check(data1_obj)) {
           arg2->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
         } else {
-          free(arg2);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
         }
         
@@ -13237,12 +17469,10 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
         if (PyLong_Check(data2_obj)) {
           long data2_val = PyLong_AsLong(data2_obj);
           if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
-            free(arg2);
             SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
           }
           arg2->obcResetResponse.data2 = (uint32_t)data2_val;
         } else {
-          free(arg2);
           SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
         }
       }
