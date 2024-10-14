@@ -2003,7 +2003,7 @@ SWIGRUNTIME int SWIG_Python_ConvertPtrAndOwn(PyObject *obj, void **ptr, swig_typ
             *ptr = SWIG_TypeCast(tc, vptr, &newmemory);
             if (newmemory == SWIG_CAST_NEW_MEMORY) {
               assert(own); /* badly formed typemap which will lead to a memory leak - it must set and use own to delete
-                              *ptr */
+                            *ptr */
               if (own) *own = *own | SWIG_CAST_NEW_MEMORY;
             }
           }
