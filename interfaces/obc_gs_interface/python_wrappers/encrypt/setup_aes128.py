@@ -6,7 +6,6 @@ module = Extension(
     sources=[
         'obc_gs_aes128_wrap.c',
         '../../aes128/obc_gs_aes128.c',
-        '../../../../libs/tiny_aes/source/aes.c'
     ],
     include_dirs=[
         '../../aes128',                         # AES128 implementation headers
@@ -15,6 +14,7 @@ module = Extension(
         '../../../../libs/tiny_aes/include/',   # includes aes.h
         '../../../../libs/libcorrect/include',  # includes correct.h
     ],
+    extra_objects=['../../libs/tiny_aes/source/aes.o'],
     define_macros=[],
     undef_macros=[],
     library_dirs=[],

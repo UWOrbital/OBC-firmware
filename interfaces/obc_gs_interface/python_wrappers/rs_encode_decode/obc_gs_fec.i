@@ -92,6 +92,7 @@
 %typemap(freearg) packed_rs_packet_t * {
     if ($1) {
         free($1);
+        $1 = NULL;
     }
 }
 
