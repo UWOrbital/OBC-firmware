@@ -2670,21 +2670,23 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 #define SWIGTYPE_p_cmd_msg_t swig_types[2]
 #define SWIGTYPE_p_cmd_opt_t swig_types[3]
 #define SWIGTYPE_p_cmd_policy_t swig_types[4]
-#define SWIGTYPE_p_cmd_unpacked_response_t swig_types[5]
-#define SWIGTYPE_p_downlink_logs_next_pass_cmd_data_t swig_types[6]
-#define SWIGTYPE_p_int swig_types[7]
-#define SWIGTYPE_p_long_long swig_types[8]
-#define SWIGTYPE_p_rtc_sync_cmd_data_t swig_types[9]
-#define SWIGTYPE_p_short swig_types[10]
-#define SWIGTYPE_p_signed_char swig_types[11]
-#define SWIGTYPE_p_telemetry_data_id_t swig_types[12]
-#define SWIGTYPE_p_telemetry_data_t swig_types[13]
-#define SWIGTYPE_p_unsigned_char swig_types[14]
-#define SWIGTYPE_p_unsigned_int swig_types[15]
-#define SWIGTYPE_p_unsigned_long_long swig_types[16]
-#define SWIGTYPE_p_unsigned_short swig_types[17]
-static swig_type_info *swig_types[19];
-static swig_module_info swig_module = {swig_types, 18, 0, 0, 0, 0};
+#define SWIGTYPE_p_cmd_response_error_code_t swig_types[5]
+#define SWIGTYPE_p_cmd_unpacked_response_t swig_types[6]
+#define SWIGTYPE_p_downlink_logs_next_pass_cmd_data_t swig_types[7]
+#define SWIGTYPE_p_int swig_types[8]
+#define SWIGTYPE_p_long_long swig_types[9]
+#define SWIGTYPE_p_obc_cmd_reset_response_t swig_types[10]
+#define SWIGTYPE_p_rtc_sync_cmd_data_t swig_types[11]
+#define SWIGTYPE_p_short swig_types[12]
+#define SWIGTYPE_p_signed_char swig_types[13]
+#define SWIGTYPE_p_telemetry_data_id_t swig_types[14]
+#define SWIGTYPE_p_telemetry_data_t swig_types[15]
+#define SWIGTYPE_p_unsigned_char swig_types[16]
+#define SWIGTYPE_p_unsigned_int swig_types[17]
+#define SWIGTYPE_p_unsigned_long_long swig_types[18]
+#define SWIGTYPE_p_unsigned_short swig_types[19]
+static swig_type_info *swig_types[21];
+static swig_module_info swig_module = {swig_types, 20, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2718,6 +2720,7 @@ static swig_module_info swig_module = {swig_types, 18, 0, 0, 0, 0};
     /* type definitions */
     #include "../../commands/obc_gs_command_data.h"
     #include "../../commands/obc_gs_command_id.h"
+    #include "../../commands/obc_gs_commands_response.h"
     #include "../../telemetry/obc_gs_telemetry_data.h"
     #include "../../telemetry/obc_gs_telemetry_id.h"
 
@@ -5175,6 +5178,1128 @@ SWIGINTERN PyObject *cmd_msg_t_swigregister(PyObject *SWIGUNUSEDPARM(self), PyOb
 }
 
 SWIGINTERN PyObject *cmd_msg_t_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_obc_cmd_reset_response_t_data1_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  obc_cmd_reset_response_t *arg1 = (obc_cmd_reset_response_t *) 0 ;
+  float arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  float val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "obc_cmd_reset_response_t_data1_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_obc_cmd_reset_response_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "obc_cmd_reset_response_t_data1_set" "', argument " "1"" of type '" "obc_cmd_reset_response_t *""'"); 
+  }
+  arg1 = (obc_cmd_reset_response_t *)(argp1);
+  ecode2 = SWIG_AsVal_float(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "obc_cmd_reset_response_t_data1_set" "', argument " "2"" of type '" "float""'");
+  } 
+  arg2 = (float)(val2);
+  if (arg1) (arg1)->data1 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_obc_cmd_reset_response_t_data1_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  obc_cmd_reset_response_t *arg1 = (obc_cmd_reset_response_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  float result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_obc_cmd_reset_response_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "obc_cmd_reset_response_t_data1_get" "', argument " "1"" of type '" "obc_cmd_reset_response_t *""'"); 
+  }
+  arg1 = (obc_cmd_reset_response_t *)(argp1);
+  result = (float) ((arg1)->data1);
+  resultobj = SWIG_From_float((float)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_obc_cmd_reset_response_t_data2_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  obc_cmd_reset_response_t *arg1 = (obc_cmd_reset_response_t *) 0 ;
+  uint32_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "obc_cmd_reset_response_t_data2_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_obc_cmd_reset_response_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "obc_cmd_reset_response_t_data2_set" "', argument " "1"" of type '" "obc_cmd_reset_response_t *""'"); 
+  }
+  arg1 = (obc_cmd_reset_response_t *)(argp1);
+  ecode2 = SWIG_AsVal_unsigned_SS_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "obc_cmd_reset_response_t_data2_set" "', argument " "2"" of type '" "uint32_t""'");
+  } 
+  arg2 = (uint32_t)(val2);
+  if (arg1) (arg1)->data2 = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_obc_cmd_reset_response_t_data2_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  obc_cmd_reset_response_t *arg1 = (obc_cmd_reset_response_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  uint32_t result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_obc_cmd_reset_response_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "obc_cmd_reset_response_t_data2_get" "', argument " "1"" of type '" "obc_cmd_reset_response_t *""'"); 
+  }
+  arg1 = (obc_cmd_reset_response_t *)(argp1);
+  result = (uint32_t) ((arg1)->data2);
+  resultobj = SWIG_From_unsigned_SS_int((unsigned int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_obc_cmd_reset_response_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  obc_cmd_reset_response_t *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_obc_cmd_reset_response_t", 0, 0, 0)) SWIG_fail;
+  result = (obc_cmd_reset_response_t *)calloc(1, sizeof(obc_cmd_reset_response_t));
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_obc_cmd_reset_response_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_obc_cmd_reset_response_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  obc_cmd_reset_response_t *arg1 = (obc_cmd_reset_response_t *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_obc_cmd_reset_response_t, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_obc_cmd_reset_response_t" "', argument " "1"" of type '" "obc_cmd_reset_response_t *""'"); 
+  }
+  arg1 = (obc_cmd_reset_response_t *)(argp1);
+  free((char *) arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *obc_cmd_reset_response_t_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_obc_cmd_reset_response_t, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *obc_cmd_reset_response_t_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_errCode_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  cmd_response_error_code_t arg2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "cmd_unpacked_response_t_errCode_set", 2, 2, swig_obj)) SWIG_fail;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cmd_unpacked_response_t_errCode_set" "', argument " "2"" of type '" "cmd_response_error_code_t""'");
+  } 
+  arg2 = (cmd_response_error_code_t)(val2);
+  if (arg1) (arg1)->errCode = arg2;
+  resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_errCode_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  PyObject *swig_obj[1] ;
+  cmd_response_error_code_t result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  result = (cmd_response_error_code_t) ((arg1)->errCode);
+  resultobj = SWIG_From_int((int)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_cmdId_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  cmd_callback_id_t arg2 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "cmd_unpacked_response_t_cmdId_set", 2, 2, swig_obj)) SWIG_fail;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "cmd_unpacked_response_t_cmdId_set" "', argument " "2"" of type '" "cmd_callback_id_t""'");
+  } 
+  arg2 = (cmd_callback_id_t)(val2);
+  if (arg1) (arg1)->cmdId = arg2;
+  resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_cmdId_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  PyObject *swig_obj[1] ;
+  cmd_callback_id_t result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  result = (cmd_callback_id_t) ((arg1)->cmdId);
+  resultobj = SWIG_From_int((int)(result));
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_obcResetResponse_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  obc_cmd_reset_response_t *arg2 = (obc_cmd_reset_response_t *) 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "cmd_unpacked_response_t_obcResetResponse_set", 2, 2, swig_obj)) SWIG_fail;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_obc_cmd_reset_response_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "cmd_unpacked_response_t_obcResetResponse_set" "', argument " "2"" of type '" "obc_cmd_reset_response_t *""'"); 
+  }
+  arg2 = (obc_cmd_reset_response_t *)(argp2);
+  if (arg1) (arg1)->obcResetResponse = *arg2;
+  resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_obcResetResponse_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  PyObject *swig_obj[1] ;
+  obc_cmd_reset_response_t *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  result = (obc_cmd_reset_response_t *)& ((arg1)->obcResetResponse);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_obc_cmd_reset_response_t, 0 |  0 );
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_cmd_unpacked_response_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_cmd_unpacked_response_t", 0, 0, 0)) SWIG_fail;
+  result = (cmd_unpacked_response_t *)calloc(1, sizeof(cmd_unpacked_response_t));
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_cmd_unpacked_response_t, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_cmd_unpacked_response_t(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cmd_unpacked_response_t *arg1 = (cmd_unpacked_response_t *) 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    if (swig_obj[0] == Py_None) {
+      arg1 = NULL;  // Pass a NULL pointer to the C function if input is None
+    } else {
+      if (!PyDict_Check(swig_obj[0])) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
+      }
+      
+      arg1 = (cmd_unpacked_response_t *)malloc(sizeof(cmd_unpacked_response_t));
+      if (!arg1) {
+        SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for cmd_unpacked_response_t");
+      }
+      
+      PyObject *errCode_obj = PyDict_GetItemString(swig_obj[0], "errCode");
+      PyObject *cmdId_obj = PyDict_GetItemString(swig_obj[0], "cmdId");
+      PyObject *obcResetResponse_obj = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+      
+      if (!errCode_obj || !cmdId_obj) {
+        SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'errCode' and 'cmdId'");
+      }
+      
+      // Validate and set errCode
+      if (PyLong_Check(errCode_obj)) {
+        long errCode_value = PyLong_AsLong(errCode_obj);
+        if (errCode_value >= CMD_RESPONSE_SUCCESS && errCode_value <= CMD_RESPONSE_ERROR) {
+          arg1->errCode = (cmd_response_error_code_t)errCode_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_response_error_code_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'errCode'");
+      }
+      
+      // Validate and set cmdId
+      if (PyLong_Check(cmdId_obj)) {
+        long cmdId_value = PyLong_AsLong(cmdId_obj);
+        if (cmdId_value >= CMD_END_OF_FRAME && cmdId_value < NUM_CMD_CALLBACKS) {
+          arg1->cmdId = (cmd_callback_id_t)cmdId_value;
+        } else {
+          SWIG_exception_fail(SWIG_ValueError, "Invalid cmd_callback_id_t value");
+        }
+      } else {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid type for 'cmdId'");
+      }
+      
+      // Process obcResetResponse if provided
+      if (obcResetResponse_obj) {
+        PyObject *data1_obj = PyDict_GetItemString(obcResetResponse_obj, "data1");
+        PyObject *data2_obj = PyDict_GetItemString(obcResetResponse_obj, "data2");
+        
+        if (!data1_obj || !data2_obj) {
+          SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'data1' and 'data2' inside 'obcResetResponse'");
+        }
+        
+        // Set data1 (float)
+        if (PyFloat_Check(data1_obj)) {
+          arg1->obcResetResponse.data1 = (float)PyFloat_AsDouble(data1_obj);
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data1'");
+        }
+        
+        // Set data2 (uint32_t)
+        if (PyLong_Check(data2_obj)) {
+          long data2_val = PyLong_AsLong(data2_obj);
+          if (data2_val < 0 || (unsigned long)data2_val > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_TypeError, "'data2' value out of range for uint32_t");
+          }
+          arg1->obcResetResponse.data2 = (uint32_t)data2_val;
+        } else {
+          SWIG_exception_fail(SWIG_TypeError, "Invalid type for 'data2'");
+        }
+      }
+    }
+  }
+  free((char *) arg1);
+  resultobj = SWIG_Py_Void();
+  {
+    if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (arg1) {
+      free(arg1);
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *cmd_unpacked_response_t_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_cmd_unpacked_response_t, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *cmd_unpacked_response_t_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   return SWIG_Python_InitShadowInstance(args);
 }
 
@@ -16949,6 +18074,39 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
   }
   {
     if (arg1) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg1->errCode);
+      PyDict_SetItemString(swig_obj[0], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg1->cmdId);
+      PyDict_SetItemString(swig_obj[0], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg1->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[0], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[0], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg1->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg1->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg1) {
       free(arg1);
     }
   }
@@ -17484,6 +18642,39 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
   }
   {
     if (arg2) {
+      // Update Python dictionary 'errCode'
+      PyObject* errCode_obj = PyLong_FromLong((long)arg2->errCode);
+      PyDict_SetItemString(swig_obj[1], "errCode", errCode_obj);
+      Py_DECREF(errCode_obj);
+      
+      // Update Python dictionary 'cmdId'
+      PyObject* cmdId_obj = PyLong_FromLong((long)arg2->cmdId);
+      PyDict_SetItemString(swig_obj[1], "cmdId", cmdId_obj);
+      Py_DECREF(cmdId_obj);
+      
+      // Update 'obcResetResponse' if needed
+      if (arg2->cmdId == CMD_EXEC_OBC_RESET) {
+        PyObject* obcResetResponse_dict = PyDict_GetItemString(swig_obj[1], "obcResetResponse");
+        if (!obcResetResponse_dict) {
+          obcResetResponse_dict = PyDict_New();
+          PyDict_SetItemString(swig_obj[1], "obcResetResponse", obcResetResponse_dict);
+          Py_DECREF(obcResetResponse_dict);  // Decrease reference after adding
+        }
+        
+        // Update 'data1' (float) in 'obcResetResponse'
+        PyObject* data1_obj = PyFloat_FromDouble((double)arg2->obcResetResponse.data1);
+        PyDict_SetItemString(obcResetResponse_dict, "data1", data1_obj);
+        Py_DECREF(data1_obj);
+        
+        // Update 'data2' (uint32_t) in 'obcResetResponse'
+        PyObject* data2_obj = PyLong_FromUnsignedLong(arg2->obcResetResponse.data2);
+        PyDict_SetItemString(obcResetResponse_dict, "data2", data2_obj);
+        Py_DECREF(data2_obj);
+      }
+    }
+  }
+  {
+    if (arg2) {
       free(arg2);
     }
   }
@@ -17526,6 +18717,24 @@ static PyMethodDef SwigMethods[] = {
 	 { "delete_cmd_msg_t", _wrap_delete_cmd_msg_t, METH_O, NULL},
 	 { "cmd_msg_t_swigregister", cmd_msg_t_swigregister, METH_O, NULL},
 	 { "cmd_msg_t_swiginit", cmd_msg_t_swiginit, METH_VARARGS, NULL},
+	 { "obc_cmd_reset_response_t_data1_set", _wrap_obc_cmd_reset_response_t_data1_set, METH_VARARGS, NULL},
+	 { "obc_cmd_reset_response_t_data1_get", _wrap_obc_cmd_reset_response_t_data1_get, METH_O, NULL},
+	 { "obc_cmd_reset_response_t_data2_set", _wrap_obc_cmd_reset_response_t_data2_set, METH_VARARGS, NULL},
+	 { "obc_cmd_reset_response_t_data2_get", _wrap_obc_cmd_reset_response_t_data2_get, METH_O, NULL},
+	 { "new_obc_cmd_reset_response_t", _wrap_new_obc_cmd_reset_response_t, METH_NOARGS, NULL},
+	 { "delete_obc_cmd_reset_response_t", _wrap_delete_obc_cmd_reset_response_t, METH_O, NULL},
+	 { "obc_cmd_reset_response_t_swigregister", obc_cmd_reset_response_t_swigregister, METH_O, NULL},
+	 { "obc_cmd_reset_response_t_swiginit", obc_cmd_reset_response_t_swiginit, METH_VARARGS, NULL},
+	 { "cmd_unpacked_response_t_errCode_set", _wrap_cmd_unpacked_response_t_errCode_set, METH_VARARGS, NULL},
+	 { "cmd_unpacked_response_t_errCode_get", _wrap_cmd_unpacked_response_t_errCode_get, METH_O, NULL},
+	 { "cmd_unpacked_response_t_cmdId_set", _wrap_cmd_unpacked_response_t_cmdId_set, METH_VARARGS, NULL},
+	 { "cmd_unpacked_response_t_cmdId_get", _wrap_cmd_unpacked_response_t_cmdId_get, METH_O, NULL},
+	 { "cmd_unpacked_response_t_obcResetResponse_set", _wrap_cmd_unpacked_response_t_obcResetResponse_set, METH_VARARGS, NULL},
+	 { "cmd_unpacked_response_t_obcResetResponse_get", _wrap_cmd_unpacked_response_t_obcResetResponse_get, METH_O, NULL},
+	 { "new_cmd_unpacked_response_t", _wrap_new_cmd_unpacked_response_t, METH_NOARGS, NULL},
+	 { "delete_cmd_unpacked_response_t", _wrap_delete_cmd_unpacked_response_t, METH_O, NULL},
+	 { "cmd_unpacked_response_t_swigregister", cmd_unpacked_response_t_swigregister, METH_O, NULL},
+	 { "cmd_unpacked_response_t_swiginit", cmd_unpacked_response_t_swiginit, METH_VARARGS, NULL},
 	 { "telemetry_data_t_cc1120Temp_set", _wrap_telemetry_data_t_cc1120Temp_set, METH_VARARGS, NULL},
 	 { "telemetry_data_t_cc1120Temp_get", _wrap_telemetry_data_t_cc1120Temp_get, METH_O, NULL},
 	 { "telemetry_data_t_commsCustomTransceiverTemp_set", _wrap_telemetry_data_t_commsCustomTransceiverTemp_set, METH_VARARGS, NULL},
@@ -17605,10 +18814,12 @@ static swig_type_info _swigt__p_cmd_callback_id_t = {"_p_cmd_callback_id_t", "en
 static swig_type_info _swigt__p_cmd_msg_t = {"_p_cmd_msg_t", "cmd_msg_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_cmd_opt_t = {"_p_cmd_opt_t", "enum cmd_opt_t *|cmd_opt_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_cmd_policy_t = {"_p_cmd_policy_t", "enum cmd_policy_t *|cmd_policy_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_cmd_response_error_code_t = {"_p_cmd_response_error_code_t", "enum cmd_response_error_code_t *|cmd_response_error_code_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_cmd_unpacked_response_t = {"_p_cmd_unpacked_response_t", "cmd_unpacked_response_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_downlink_logs_next_pass_cmd_data_t = {"_p_downlink_logs_next_pass_cmd_data_t", "downlink_logs_next_pass_cmd_data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "intptr_t *|int *|int_least32_t *|int_fast32_t *|int32_t *|int_fast16_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_long_long = {"_p_long_long", "int_least64_t *|int_fast64_t *|int64_t *|long long *|intmax_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_obc_cmd_reset_response_t = {"_p_obc_cmd_reset_response_t", "obc_cmd_reset_response_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_rtc_sync_cmd_data_t = {"_p_rtc_sync_cmd_data_t", "rtc_sync_cmd_data_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_short = {"_p_short", "short *|int_least16_t *|int16_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_signed_char = {"_p_signed_char", "signed char *|int_least8_t *|int_fast8_t *|int8_t *", 0, 0, (void*)0, 0};
@@ -17625,10 +18836,12 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_cmd_msg_t,
   &_swigt__p_cmd_opt_t,
   &_swigt__p_cmd_policy_t,
+  &_swigt__p_cmd_response_error_code_t,
   &_swigt__p_cmd_unpacked_response_t,
   &_swigt__p_downlink_logs_next_pass_cmd_data_t,
   &_swigt__p_int,
   &_swigt__p_long_long,
+  &_swigt__p_obc_cmd_reset_response_t,
   &_swigt__p_rtc_sync_cmd_data_t,
   &_swigt__p_short,
   &_swigt__p_signed_char,
@@ -17645,10 +18858,12 @@ static swig_cast_info _swigc__p_cmd_callback_id_t[] = {  {&_swigt__p_cmd_callbac
 static swig_cast_info _swigc__p_cmd_msg_t[] = {  {&_swigt__p_cmd_msg_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_cmd_opt_t[] = {  {&_swigt__p_cmd_opt_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_cmd_policy_t[] = {  {&_swigt__p_cmd_policy_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_cmd_response_error_code_t[] = {  {&_swigt__p_cmd_response_error_code_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_cmd_unpacked_response_t[] = {  {&_swigt__p_cmd_unpacked_response_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_downlink_logs_next_pass_cmd_data_t[] = {  {&_swigt__p_downlink_logs_next_pass_cmd_data_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_long_long[] = {  {&_swigt__p_long_long, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_obc_cmd_reset_response_t[] = {  {&_swigt__p_obc_cmd_reset_response_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_rtc_sync_cmd_data_t[] = {  {&_swigt__p_rtc_sync_cmd_data_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_short[] = {  {&_swigt__p_short, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_signed_char[] = {  {&_swigt__p_signed_char, 0, 0, 0},{0, 0, 0, 0}};
@@ -17665,10 +18880,12 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_cmd_msg_t,
   _swigc__p_cmd_opt_t,
   _swigc__p_cmd_policy_t,
+  _swigc__p_cmd_response_error_code_t,
   _swigc__p_cmd_unpacked_response_t,
   _swigc__p_downlink_logs_next_pass_cmd_data_t,
   _swigc__p_int,
   _swigc__p_long_long,
+  _swigc__p_obc_cmd_reset_response_t,
   _swigc__p_rtc_sync_cmd_data_t,
   _swigc__p_short,
   _swigc__p_signed_char,
@@ -18426,6 +19643,9 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "CMD_PING",SWIG_From_int((int)(CMD_PING)));
   SWIG_Python_SetConstant(d, "CMD_DOWNLINK_TELEM",SWIG_From_int((int)(CMD_DOWNLINK_TELEM)));
   SWIG_Python_SetConstant(d, "NUM_CMD_CALLBACKS",SWIG_From_int((int)(NUM_CMD_CALLBACKS)));
+  SWIG_Python_SetConstant(d, "CMD_RESPONSE_SUCCESS_MASK",SWIG_From_int((int)(0x01)));
+  SWIG_Python_SetConstant(d, "CMD_RESPONSE_SUCCESS",SWIG_From_int((int)(CMD_RESPONSE_SUCCESS)));
+  SWIG_Python_SetConstant(d, "CMD_RESPONSE_ERROR",SWIG_From_int((int)(CMD_RESPONSE_ERROR)));
   SWIG_Python_SetConstant(d, "TELEM_NONE",SWIG_From_int((int)(TELEM_NONE)));
   SWIG_Python_SetConstant(d, "TELEM_CC1120_TEMP",SWIG_From_int((int)(TELEM_CC1120_TEMP)));
   SWIG_Python_SetConstant(d, "TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP",SWIG_From_int((int)(TELEM_COMMS_CUSTOM_TRANSCEIVER_TEMP)));

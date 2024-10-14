@@ -51,14 +51,14 @@ def test_unpack_telemetry_valid_data(valid_telemetry_data, create_telemetry_buff
     offset = 0
 
     # reset telemetry data to be overwritten
-    telemetry_data = {"id": 0, "timestamp": 0}
+    unpacked_telemetry_data = {"id": 0, "timestamp": 0}
 
-    result = unpackTelemetry(immutable_buffer, offset, telemetry_data)
+    result = unpackTelemetry(immutable_buffer, offset, unpacked_telemetry_data)
 
     assert result == obc_gs_errors.OBC_GS_ERR_CODE_SUCCESS, "Unpacking telemetry data failed with valid buffer"
-    assert telemetry_data["id"] == valid_telemetry_data["id"]
-    assert telemetry_data["timestamp"] == valid_telemetry_data["timestamp"]
-    assert telemetry_data["data"]["obcTemp"] == valid_telemetry_data["data"]["obcTemp"]
+    assert unpacked_telemetry_data["id"] == telemetry_data["id"]
+    assert unpacked_telemetry_data["timestamp"] == telemetry_data["timestamp"]
+    assert unpacked_telemetry_data["data"]["obcTemp"] == telemetry_data["data"]["obcTemp"]
 
 # Test unpacking telemetry data with invalid arguments
 @pytest.mark.parametrize("buffer, offset, telemetry_data, expected_error", [
