@@ -39,6 +39,8 @@ def test_aes128_decrypt_valid_data(aes_ctx, create_aes_data):
 
     result = aes128Decrypt(aes_data, output, output_buffer_len)
 
+    assert output, "Output buffer should not be empty"
+    assert all(b != 0 for b in output), "Output contains unexpected null bytes"
     assert result == obc_gs_errors.OBC_GS_ERR_CODE_SUCCESS, "AES decryption failed with valid data"
     assert len(output) == output_buffer_len, "Output buffer length mismatch"
 

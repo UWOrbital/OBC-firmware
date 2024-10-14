@@ -3009,13 +3009,11 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_set(PyObject *SWIGUNUSEDPARM(self), PyO
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3025,20 +3023,16 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_set(PyObject *SWIGUNUSEDPARM(self), PyO
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3105,13 +3099,11 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_get(PyObject *SWIGUNUSEDPARM(self), PyO
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3121,20 +3113,16 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_get(PyObject *SWIGUNUSEDPARM(self), PyO
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3188,13 +3176,11 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_set(PyObject *SWIGUNUSEDPARM(se
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3204,20 +3190,16 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_set(PyObject *SWIGUNUSEDPARM(se
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3281,13 +3263,11 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_get(PyObject *SWIGUNUSEDPARM(se
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3297,20 +3277,16 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_get(PyObject *SWIGUNUSEDPARM(se
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3366,13 +3342,11 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_set(PyObject *SWIGUNUSEDPARM
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3382,20 +3356,16 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_set(PyObject *SWIGUNUSEDPARM
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3455,13 +3425,11 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_get(PyObject *SWIGUNUSEDPARM
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3471,20 +3439,16 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_get(PyObject *SWIGUNUSEDPARM
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3551,13 +3515,11 @@ SWIGINTERN PyObject *_wrap_delete_aes_data_t(PyObject *SWIGUNUSEDPARM(self), PyO
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3567,20 +3529,16 @@ SWIGINTERN PyObject *_wrap_delete_aes_data_t(PyObject *SWIGUNUSEDPARM(self), PyO
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3649,13 +3607,11 @@ SWIGINTERN PyObject *_wrap_aes128Decrypt(PyObject *SWIGUNUSEDPARM(self), PyObjec
       PyObject *ciphertextLen_obj = PyDict_GetItemString(swig_obj[0], "ciphertextLen");
       
       if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
       }
       
       // Fill the iv field (must be of length AES_IV_SIZE)
       if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
       }
       memcpy(arg1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -3665,20 +3621,16 @@ SWIGINTERN PyObject *_wrap_aes128Decrypt(PyObject *SWIGUNUSEDPARM(self), PyObjec
         arg1->ciphertextLen = PyBytes_Size(ciphertext_obj);
         arg1->ciphertext = (uint8_t *)malloc(arg1->ciphertextLen);
         if (!arg1->ciphertext) {
-          free(arg1);
           SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
         }
         memcpy(arg1->ciphertext, PyBytes_AsString(ciphertext_obj), arg1->ciphertextLen);
       } else {
-        free(arg1);
         SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
       }
       
       // Fill the ciphertextLen field
       arg1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
       if (PyErr_Occurred()) {
-        free(arg1->ciphertext);
-        free(arg1);
         SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
       }
     }
@@ -3738,12 +3690,13 @@ SWIGINTERN PyObject *_wrap_initializeAesCtx(PyObject *SWIGUNUSEDPARM(self), PyOb
     if (PyBytes_Size(swig_obj[0]) != AES_KEY_SIZE) {
       // Ensure the key is the correct size
       SWIG_exception_fail(SWIG_ValueError, "Key size must be exactly AES_KEY_SIZE");
+    } else {
+      const char *buffer = PyBytes_AsString(swig_obj[0]);  // Get the buffer as const char *
+      if (!buffer) {
+        SWIG_exception_fail(SWIG_ValueError, "Invalid bytes object");
+      }
+      arg1 = (const uint8_t *)buffer;  // Cast to const uint8_t *
     }
-    const char *buffer = PyBytes_AsString(swig_obj[0]);  // Get the buffer as const char *
-    if (!buffer) {
-      SWIG_exception_fail(SWIG_ValueError, "Invalid bytes object");
-    }
-    arg1 = (const uint8_t *)buffer;  // Cast to const uint8_t *
   }
   result = initializeAesCtx((unsigned char const *)arg1);
   {
