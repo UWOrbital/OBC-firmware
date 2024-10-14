@@ -60,6 +60,6 @@ void initRs(void) {
 void destroyRs(void) {
   if (rs != NULL) {
     correct_reed_solomon_destroy(rs);
-	rs = NULL; // remove dangling pointer
+    rs = NULL;  // remove dangling pointer
   }
 }

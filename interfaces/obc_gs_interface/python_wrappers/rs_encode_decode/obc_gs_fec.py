@@ -5,6 +5,7 @@
 # the SWIG interface file instead.
 
 from sys import version_info as _swig_python_version_info
+
 if _swig_python_version_info < (2, 7, 0):
     raise RuntimeError("Python 2.7 or later required")
 
@@ -19,24 +20,28 @@ try:
 except ImportError:
     import __builtin__
 
+
 def _swig_repr(self):
     try:
         strthis = "proxy of " + self.this.__repr__()
     except __builtin__.Exception:
         strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+    return "<%s.%s; %s >" % (
+        self.__class__.__module__,
+        self.__class__.__name__,
+        strthis,
+    )
 
 
 def _swig_setattr_nondynamic_instance_variable(set):
     def set_instance_attr(self, name, value):
         if name == "thisown":
             self.this.own(value)
-        elif name == "this":
-            set(self, name, value)
-        elif hasattr(self, name) and isinstance(getattr(type(self), name), property):
+        elif name == "this" or hasattr(self, name) and isinstance(getattr(type(self), name), property):
             set(self, name, value)
         else:
             raise AttributeError("You cannot add instance attributes to %s" % self)
+
     return set_instance_attr
 
 
@@ -46,44 +51,55 @@ def _swig_setattr_nondynamic_class_variable(set):
             set(cls, name, value)
         else:
             raise AttributeError("You cannot add class attributes to %s" % cls)
+
     return set_class_attr
 
 
 def _swig_add_metaclass(metaclass):
     """Class decorator for adding a metaclass to a SWIG wrapped class - a slimmed down version of six.add_metaclass"""
+
     def wrapper(cls):
         return metaclass(cls.__name__, cls.__bases__, cls.__dict__.copy())
+
     return wrapper
 
 
 class _SwigNonDynamicMeta(type):
     """Meta class to enforce nondynamic attributes (no new attributes) for a class"""
+
     __setattr__ = _swig_setattr_nondynamic_class_variable(type.__setattr__)
 
 
 RS_DECODED_SIZE = _obc_gs_fec.RS_DECODED_SIZE
 RS_ENCODED_SIZE = _obc_gs_fec.RS_ENCODED_SIZE
 PACKED_TELEM_PACKET_SIZE = _obc_gs_fec.PACKED_TELEM_PACKET_SIZE
-class packed_rs_packet_t(object):
+
+
+class packed_rs_packet_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
     data = property(_obc_gs_fec.packed_rs_packet_t_data_get, _obc_gs_fec.packed_rs_packet_t_data_set)
 
     def __init__(self):
         _obc_gs_fec.packed_rs_packet_t_swiginit(self, _obc_gs_fec.new_packed_rs_packet_t())
+
     __swig_destroy__ = _obc_gs_fec.delete_packed_rs_packet_t
+
 
 # Register packed_rs_packet_t in _obc_gs_fec:
 _obc_gs_fec.packed_rs_packet_t_swigregister(packed_rs_packet_t)
 
-class packed_telem_packet_t(object):
+
+class packed_telem_packet_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
     data = property(_obc_gs_fec.packed_telem_packet_t_data_get, _obc_gs_fec.packed_telem_packet_t_data_set)
 
     def __init__(self):
         _obc_gs_fec.packed_telem_packet_t_swiginit(self, _obc_gs_fec.new_packed_telem_packet_t())
+
     __swig_destroy__ = _obc_gs_fec.delete_packed_telem_packet_t
+
 
 # Register packed_telem_packet_t in _obc_gs_fec:
 _obc_gs_fec.packed_telem_packet_t_swigregister(packed_telem_packet_t)
@@ -92,13 +108,14 @@ _obc_gs_fec.packed_telem_packet_t_swigregister(packed_telem_packet_t)
 def rsEncode(telemData, rsData):
     return _obc_gs_fec.rsEncode(telemData, rsData)
 
+
 def rsDecode(rsData, decodedData, decodedDataLen):
     return _obc_gs_fec.rsDecode(rsData, decodedData, decodedDataLen)
+
 
 def initRs():
     return _obc_gs_fec.initRs()
 
+
 def destroyRs():
     return _obc_gs_fec.destroyRs()
-
-
