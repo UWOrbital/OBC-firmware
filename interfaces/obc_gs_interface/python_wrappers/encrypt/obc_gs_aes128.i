@@ -11,12 +11,13 @@
     }
     if (PyBytes_Size($input) != AES_KEY_SIZE) {  // Ensure the key is the correct size
         SWIG_exception_fail(SWIG_ValueError, "Key size must be exactly AES_KEY_SIZE");
+    } else {
+        const char *buffer = PyBytes_AsString($input);  // Get the buffer as const char *
+        if (!buffer) {
+            SWIG_exception_fail(SWIG_ValueError, "Invalid bytes object");
+        }
+        $1 = (const uint8_t *)buffer;  // Cast to const uint8_t *
     }
-    const char *buffer = PyBytes_AsString($input);  // Get the buffer as const char *
-    if (!buffer) {
-        SWIG_exception_fail(SWIG_ValueError, "Invalid bytes object");
-    }
-    $1 = (const uint8_t *)buffer;  // Cast to const uint8_t *
 }
 
 
@@ -53,13 +54,11 @@
         PyObject *ciphertextLen_obj = PyDict_GetItemString($input, "ciphertextLen");
 
         if (!iv_obj || !ciphertext_obj || !ciphertextLen_obj) {
-            free($1);
             SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with keys 'iv', 'ciphertext', and 'ciphertextLen'");
         }
 
         // Fill the iv field (must be of length AES_IV_SIZE)
         if (!PyBytes_Check(iv_obj) || PyBytes_Size(iv_obj) != AES_IV_SIZE) {
-            free($1);
             SWIG_exception_fail(SWIG_ValueError, "iv must be a bytes object of size AES_IV_SIZE");
         }
         memcpy($1->iv, PyBytes_AsString(iv_obj), AES_IV_SIZE);
@@ -69,20 +68,16 @@
             $1->ciphertextLen = PyBytes_Size(ciphertext_obj);
             $1->ciphertext = (uint8_t *)malloc($1->ciphertextLen);
             if (!$1->ciphertext) {
-                free($1);
                 SWIG_exception_fail(SWIG_MemoryError, "Failed to allocate memory for ciphertext");
             }
             memcpy($1->ciphertext, PyBytes_AsString(ciphertext_obj), $1->ciphertextLen);
         } else {
-            free($1);
             SWIG_exception_fail(SWIG_TypeError, "ciphertext must be a bytes object");
         }
 
         // Fill the ciphertextLen field
         $1->ciphertextLen = PyLong_AsSize_t(ciphertextLen_obj);
         if (PyErr_Occurred()) {
-            free($1->ciphertext);
-            free($1);
             SWIG_exception_fail(SWIG_ValueError, "Invalid value for ciphertextLen");
         }
     }
