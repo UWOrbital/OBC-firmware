@@ -3511,6 +3511,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_set(PyObject *SWIGUNUSEDPARM(self),
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3518,6 +3519,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3672,6 +3674,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_rtcSync_get(PyObject *SWIGUNUSEDPARM(self),
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3679,6 +3682,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3839,6 +3843,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_set(PyObject *SWIGUNUS
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3846,6 +3851,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4000,6 +4006,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_downlinkLogsNextPass_get(PyObject *SWIGUNUS
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4007,6 +4014,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4167,6 +4175,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_set(PyObject *SWIGUNUSEDPARM(self
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4174,6 +4183,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4328,6 +4338,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_timestamp_get(PyObject *SWIGUNUSEDPARM(self
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4335,6 +4346,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4495,6 +4507,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_set(PyObject *SWIGUNUSEDPARM(s
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4502,6 +4515,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4656,6 +4670,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_isTimeTagged_get(PyObject *SWIGUNUSEDPARM(s
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4663,6 +4678,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4823,6 +4839,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_set(PyObject *SWIGUNUSEDPARM(self), PyOb
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4830,6 +4847,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -4984,6 +5002,7 @@ SWIGINTERN PyObject *_wrap_cmd_msg_t_id_get(PyObject *SWIGUNUSEDPARM(self), PyOb
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -4991,6 +5010,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -5157,6 +5177,7 @@ SWIGINTERN PyObject *_wrap_delete_cmd_msg_t(PyObject *SWIGUNUSEDPARM(self), PyOb
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -5164,6 +5185,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -5457,6 +5479,7 @@ SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_errCode_set(PyObject *SWIGUNU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -5464,6 +5487,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -5590,6 +5614,7 @@ SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_errCode_get(PyObject *SWIGUNU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -5597,6 +5622,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -5729,6 +5755,7 @@ SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_cmdId_set(PyObject *SWIGUNUSE
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -5736,6 +5763,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -5862,6 +5890,7 @@ SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_cmdId_get(PyObject *SWIGUNUSE
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -5869,6 +5898,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -6001,6 +6031,7 @@ SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_obcResetResponse_set(PyObject
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -6008,6 +6039,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -6134,6 +6166,7 @@ SWIGINTERN PyObject *_wrap_cmd_unpacked_response_t_obcResetResponse_get(PyObject
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -6141,6 +6174,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -6279,6 +6313,7 @@ SWIGINTERN PyObject *_wrap_delete_cmd_unpacked_response_t(PyObject *SWIGUNUSEDPA
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -6286,6 +6321,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -6497,6 +6533,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_cc1120Temp_set(PyObject *SWIGUNUSEDP
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -6504,6 +6541,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -6698,6 +6736,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_cc1120Temp_get(PyObject *SWIGUNUSEDP
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -6705,6 +6744,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -6905,6 +6945,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_commsCustomTransceiverTemp_set(PyObj
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -6912,6 +6953,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -7106,6 +7148,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_commsCustomTransceiverTemp_get(PyObj
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -7113,6 +7156,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -7313,6 +7357,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcTemp_set(PyObject *SWIGUNUSEDPARM
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -7320,6 +7365,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -7514,6 +7560,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcTemp_get(PyObject *SWIGUNUSEDPARM
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -7521,6 +7568,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -7721,6 +7769,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsMagBoardTemp_set(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -7728,6 +7777,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -7922,6 +7972,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsMagBoardTemp_get(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -7929,6 +7980,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -8129,6 +8181,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsSensorBoardTemp_set(PyObject *SW
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -8136,6 +8189,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -8330,6 +8384,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_adcsSensorBoardTemp_get(PyObject *SW
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -8337,6 +8392,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -8537,6 +8593,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsBoardTemp_set(PyObject *SWIGUNUSE
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -8544,6 +8601,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -8738,6 +8796,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsBoardTemp_get(PyObject *SWIGUNUSE
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -8745,6 +8804,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -8945,6 +9005,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel1Temp_set(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -8952,6 +9013,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -9146,6 +9208,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel1Temp_get(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -9153,6 +9216,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -9353,6 +9417,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel2Temp_set(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -9360,6 +9425,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -9554,6 +9620,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel2Temp_get(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -9561,6 +9628,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -9761,6 +9829,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel3Temp_set(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -9768,6 +9837,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -9962,6 +10032,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel3Temp_get(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -9969,6 +10040,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -10169,6 +10241,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel4Temp_set(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -10176,6 +10249,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -10370,6 +10444,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_solarPanel4Temp_get(PyObject *SWIGUN
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -10377,6 +10452,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -10577,6 +10653,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vCurrent_set(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -10584,6 +10661,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -10778,6 +10856,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vCurrent_get(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -10785,6 +10864,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -10985,6 +11065,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Current_set(PyObject *SWI
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -10992,6 +11073,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -11186,6 +11268,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Current_get(PyObject *SWI
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -11193,6 +11276,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -11393,6 +11477,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vCurrent_set(PyObjec
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -11400,6 +11485,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -11594,6 +11680,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vCurrent_get(PyObjec
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -11601,6 +11688,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -11801,6 +11889,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vCurrent_set(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -11808,6 +11897,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -12002,6 +12092,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vCurrent_get(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -12009,6 +12100,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -12209,6 +12301,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Current_set(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -12216,6 +12309,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -12410,6 +12504,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Current_get(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -12417,6 +12512,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -12617,6 +12713,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Current_set(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -12624,6 +12721,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -12818,6 +12916,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Current_get(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -12825,6 +12924,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -13025,6 +13125,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vVoltage_set(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -13032,6 +13133,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -13226,6 +13328,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms5vVoltage_get(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -13233,6 +13336,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -13433,6 +13537,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Voltage_set(PyObject *SWI
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -13440,6 +13545,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -13634,6 +13740,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsComms3v3Voltage_get(PyObject *SWI
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -13641,6 +13748,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -13841,6 +13949,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vVoltage_set(PyObjec
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -13848,6 +13957,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -14042,6 +14152,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsMagnetorquer8vVoltage_get(PyObjec
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -14049,6 +14160,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -14249,6 +14361,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vVoltage_set(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -14256,6 +14369,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -14450,6 +14564,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs5vVoltage_get(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -14457,6 +14572,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -14657,6 +14773,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Voltage_set(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -14664,6 +14781,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -14858,6 +14976,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsAdcs3v3Voltage_get(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -14865,6 +14984,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -15065,6 +15185,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Voltage_set(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -15072,6 +15193,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -15266,6 +15388,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsObc3v3Voltage_get(PyObject *SWIGU
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -15273,6 +15396,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -15473,6 +15597,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcState_set(PyObject *SWIGUNUSEDPAR
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -15480,6 +15605,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -15674,6 +15800,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_obcState_get(PyObject *SWIGUNUSEDPAR
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -15681,6 +15808,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -15881,6 +16009,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsState_set(PyObject *SWIGUNUSEDPAR
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -15888,6 +16017,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -16082,6 +16212,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_epsState_get(PyObject *SWIGUNUSEDPAR
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -16089,6 +16220,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -16289,6 +16421,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_numCspPacketsRcvd_set(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -16296,6 +16429,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -16490,6 +16624,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_numCspPacketsRcvd_get(PyObject *SWIG
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -16497,6 +16632,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -16697,6 +16833,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_id_set(PyObject *SWIGUNUSEDPARM(self
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -16704,6 +16841,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -16898,6 +17036,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_id_get(PyObject *SWIGUNUSEDPARM(self
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -16905,6 +17044,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -17105,6 +17245,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_timestamp_set(PyObject *SWIGUNUSEDPA
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -17112,6 +17253,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -17306,6 +17448,7 @@ SWIGINTERN PyObject *_wrap_telemetry_data_t_timestamp_get(PyObject *SWIGUNUSEDPA
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -17313,6 +17456,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -17519,6 +17663,7 @@ SWIGINTERN PyObject *_wrap_delete_telemetry_data_t(PyObject *SWIGUNUSEDPARM(self
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -17526,6 +17671,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -17766,6 +17912,7 @@ SWIGINTERN PyObject *_wrap_packTelemetry(PyObject *SWIGUNUSEDPARM(self), PyObjec
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -17773,6 +17920,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -17964,6 +18112,7 @@ SWIGINTERN PyObject *_wrap_packCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject *
   {
     if (arg3) {
       free(arg3);
+      arg3 = NULL;
     }
   }
   return resultobj;
@@ -17971,6 +18120,7 @@ fail:
   {
     if (arg3) {
       free(arg3);
+      arg3 = NULL;
     }
   }
   return NULL;
@@ -18108,6 +18258,7 @@ SWIGINTERN PyObject *_wrap_packCommandResponse(PyObject *SWIGUNUSEDPARM(self), P
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -18115,6 +18266,7 @@ fail:
   {
     if (arg1) {
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -18340,6 +18492,7 @@ SWIGINTERN PyObject *_wrap_unpackTelemetry(PyObject *SWIGUNUSEDPARM(self), PyObj
   {
     if (arg3) {
       free(arg3);
+      arg3 = NULL;
     }
   }
   return resultobj;
@@ -18347,6 +18500,7 @@ fail:
   {
     if (arg3) {
       free(arg3);
+      arg3 = NULL;
     }
   }
   return NULL;
@@ -18532,6 +18686,7 @@ SWIGINTERN PyObject *_wrap_unpackCmdMsg(PyObject *SWIGUNUSEDPARM(self), PyObject
   {
     if (arg3) {
       free(arg3);
+      arg3 = NULL;
     }
   }
   return resultobj;
@@ -18539,6 +18694,7 @@ fail:
   {
     if (arg3) {
       free(arg3);
+      arg3 = NULL;
     }
   }
   return NULL;
@@ -18676,6 +18832,7 @@ SWIGINTERN PyObject *_wrap_unpackCommandResponse(PyObject *SWIGUNUSEDPARM(self),
   {
     if (arg2) {
       free(arg2);
+      arg2 = NULL;
     }
   }
   return resultobj;
@@ -18683,6 +18840,7 @@ fail:
   {
     if (arg2) {
       free(arg2);
+      arg2 = NULL;
     }
   }
   return NULL;

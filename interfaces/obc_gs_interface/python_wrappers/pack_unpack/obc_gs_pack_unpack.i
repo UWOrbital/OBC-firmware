@@ -158,6 +158,7 @@
 %typemap(freearg) cmd_msg_t * {
     if ($1) {
         free($1);
+        $1 = NULL;
     }
 }
 
@@ -286,6 +287,7 @@
 %typemap(freearg) cmd_unpacked_response_t * {
     if ($1) {
         free($1);
+        $1 = NULL;
     }
 }
 
@@ -436,6 +438,7 @@
 %typemap(freearg) telemetry_data_t * {
     if ($1) {
         free($1);
+        $1 = NULL;
     }
 }
 

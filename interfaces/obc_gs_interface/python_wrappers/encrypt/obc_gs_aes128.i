@@ -87,8 +87,10 @@
     if ($1) {
         if ($1->ciphertext) {
             free($1->ciphertext);
+            $1->ciphertext = NULL;
         }
         free($1);
+        $1 = NULL;
     }
 }
 
