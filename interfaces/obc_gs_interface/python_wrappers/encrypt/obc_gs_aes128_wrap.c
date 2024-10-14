@@ -3055,8 +3055,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_set(PyObject *SWIGUNUSEDPARM(self), PyO
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3065,8 +3067,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3133,8 +3137,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_iv_get(PyObject *SWIGUNUSEDPARM(self), PyO
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3143,8 +3149,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3219,8 +3227,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_set(PyObject *SWIGUNUSEDPARM(se
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3229,8 +3239,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3297,8 +3309,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertext_get(PyObject *SWIGUNUSEDPARM(se
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3307,8 +3321,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3381,8 +3397,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_set(PyObject *SWIGUNUSEDPARM
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3391,8 +3409,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3459,8 +3479,10 @@ SWIGINTERN PyObject *_wrap_aes_data_t_ciphertextLen_get(PyObject *SWIGUNUSEDPARM
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3469,8 +3491,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3549,8 +3573,10 @@ SWIGINTERN PyObject *_wrap_delete_aes_data_t(PyObject *SWIGUNUSEDPARM(self), PyO
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3559,8 +3585,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
@@ -3657,8 +3685,10 @@ SWIGINTERN PyObject *_wrap_aes128Decrypt(PyObject *SWIGUNUSEDPARM(self), PyObjec
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return resultobj;
@@ -3667,8 +3697,10 @@ fail:
     if (arg1) {
       if (arg1->ciphertext) {
         free(arg1->ciphertext);
+        arg1->ciphertext = NULL;
       }
       free(arg1);
+      arg1 = NULL;
     }
   }
   return NULL;
