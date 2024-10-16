@@ -40,6 +40,9 @@
         if (PyErr_Occurred()) {
             SWIG_exception_fail(SWIG_TypeError, "Integer value too large or invalid for uint32_t.");
         }
+		if (value > UINT32_MAX) {
+            SWIG_exception_fail(SWIG_OverflowError, "Integer value too large for uint32_t.");
+        }
         temp = (uint32_t) value;
         $1 = &temp;
     }
