@@ -5,6 +5,7 @@
 # the SWIG interface file instead.
 
 from sys import version_info as _swig_python_version_info
+
 if _swig_python_version_info < (2, 7, 0):
     raise RuntimeError("Python 2.7 or later required")
 
@@ -19,24 +20,28 @@ try:
 except ImportError:
     import __builtin__
 
+
 def _swig_repr(self):
     try:
         strthis = "proxy of " + self.this.__repr__()
     except __builtin__.Exception:
         strthis = ""
-    return "<%s.%s; %s >" % (self.__class__.__module__, self.__class__.__name__, strthis,)
+    return "<%s.%s; %s >" % (
+        self.__class__.__module__,
+        self.__class__.__name__,
+        strthis,
+    )
 
 
 def _swig_setattr_nondynamic_instance_variable(set):
     def set_instance_attr(self, name, value):
         if name == "thisown":
             self.this.own(value)
-        elif name == "this":
-            set(self, name, value)
-        elif hasattr(self, name) and isinstance(getattr(type(self), name), property):
+        elif name == "this" or hasattr(self, name) and isinstance(getattr(type(self), name), property):
             set(self, name, value)
         else:
             raise AttributeError("You cannot add instance attributes to %s" % self)
+
     return set_instance_attr
 
 
@@ -46,57 +51,80 @@ def _swig_setattr_nondynamic_class_variable(set):
             set(cls, name, value)
         else:
             raise AttributeError("You cannot add class attributes to %s" % cls)
+
     return set_class_attr
 
 
 def _swig_add_metaclass(metaclass):
     """Class decorator for adding a metaclass to a SWIG wrapped class - a slimmed down version of six.add_metaclass"""
+
     def wrapper(cls):
         return metaclass(cls.__name__, cls.__bases__, cls.__dict__.copy())
+
     return wrapper
 
 
 class _SwigNonDynamicMeta(type):
     """Meta class to enforce nondynamic attributes (no new attributes) for a class"""
+
     __setattr__ = _swig_setattr_nondynamic_class_variable(type.__setattr__)
 
 
-class rtc_sync_cmd_data_t(object):
+class rtc_sync_cmd_data_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    unixTime = property(_obc_gs_pack_unpack.rtc_sync_cmd_data_t_unixTime_get, _obc_gs_pack_unpack.rtc_sync_cmd_data_t_unixTime_set)
+    unixTime = property(
+        _obc_gs_pack_unpack.rtc_sync_cmd_data_t_unixTime_get, _obc_gs_pack_unpack.rtc_sync_cmd_data_t_unixTime_set
+    )
 
     def __init__(self):
         _obc_gs_pack_unpack.rtc_sync_cmd_data_t_swiginit(self, _obc_gs_pack_unpack.new_rtc_sync_cmd_data_t())
+
     __swig_destroy__ = _obc_gs_pack_unpack.delete_rtc_sync_cmd_data_t
+
 
 # Register rtc_sync_cmd_data_t in _obc_gs_pack_unpack:
 _obc_gs_pack_unpack.rtc_sync_cmd_data_t_swigregister(rtc_sync_cmd_data_t)
 
-class downlink_logs_next_pass_cmd_data_t(object):
+
+class downlink_logs_next_pass_cmd_data_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    logLevel = property(_obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_logLevel_get, _obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_logLevel_set)
+    logLevel = property(
+        _obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_logLevel_get,
+        _obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_logLevel_set,
+    )
 
     def __init__(self):
-        _obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_swiginit(self, _obc_gs_pack_unpack.new_downlink_logs_next_pass_cmd_data_t())
+        _obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_swiginit(
+            self, _obc_gs_pack_unpack.new_downlink_logs_next_pass_cmd_data_t()
+        )
+
     __swig_destroy__ = _obc_gs_pack_unpack.delete_downlink_logs_next_pass_cmd_data_t
+
 
 # Register downlink_logs_next_pass_cmd_data_t in _obc_gs_pack_unpack:
 _obc_gs_pack_unpack.downlink_logs_next_pass_cmd_data_t_swigregister(downlink_logs_next_pass_cmd_data_t)
 
-class cmd_msg_t(object):
+
+class cmd_msg_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
     rtcSync = property(_obc_gs_pack_unpack.cmd_msg_t_rtcSync_get, _obc_gs_pack_unpack.cmd_msg_t_rtcSync_set)
-    downlinkLogsNextPass = property(_obc_gs_pack_unpack.cmd_msg_t_downlinkLogsNextPass_get, _obc_gs_pack_unpack.cmd_msg_t_downlinkLogsNextPass_set)
+    downlinkLogsNextPass = property(
+        _obc_gs_pack_unpack.cmd_msg_t_downlinkLogsNextPass_get, _obc_gs_pack_unpack.cmd_msg_t_downlinkLogsNextPass_set
+    )
     timestamp = property(_obc_gs_pack_unpack.cmd_msg_t_timestamp_get, _obc_gs_pack_unpack.cmd_msg_t_timestamp_set)
-    isTimeTagged = property(_obc_gs_pack_unpack.cmd_msg_t_isTimeTagged_get, _obc_gs_pack_unpack.cmd_msg_t_isTimeTagged_set)
+    isTimeTagged = property(
+        _obc_gs_pack_unpack.cmd_msg_t_isTimeTagged_get, _obc_gs_pack_unpack.cmd_msg_t_isTimeTagged_set
+    )
     id = property(_obc_gs_pack_unpack.cmd_msg_t_id_get, _obc_gs_pack_unpack.cmd_msg_t_id_set)
 
     def __init__(self):
         _obc_gs_pack_unpack.cmd_msg_t_swiginit(self, _obc_gs_pack_unpack.new_cmd_msg_t())
+
     __swig_destroy__ = _obc_gs_pack_unpack.delete_cmd_msg_t
+
 
 # Register cmd_msg_t in _obc_gs_pack_unpack:
 _obc_gs_pack_unpack.cmd_msg_t_swigregister(cmd_msg_t)
@@ -115,69 +143,163 @@ CMD_PING = _obc_gs_pack_unpack.CMD_PING
 CMD_DOWNLINK_TELEM = _obc_gs_pack_unpack.CMD_DOWNLINK_TELEM
 NUM_CMD_CALLBACKS = _obc_gs_pack_unpack.NUM_CMD_CALLBACKS
 CMD_RESPONSE_SUCCESS_MASK = _obc_gs_pack_unpack.CMD_RESPONSE_SUCCESS_MASK
-class obc_cmd_reset_response_t(object):
+
+
+class obc_cmd_reset_response_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    data1 = property(_obc_gs_pack_unpack.obc_cmd_reset_response_t_data1_get, _obc_gs_pack_unpack.obc_cmd_reset_response_t_data1_set)
-    data2 = property(_obc_gs_pack_unpack.obc_cmd_reset_response_t_data2_get, _obc_gs_pack_unpack.obc_cmd_reset_response_t_data2_set)
+    data1 = property(
+        _obc_gs_pack_unpack.obc_cmd_reset_response_t_data1_get, _obc_gs_pack_unpack.obc_cmd_reset_response_t_data1_set
+    )
+    data2 = property(
+        _obc_gs_pack_unpack.obc_cmd_reset_response_t_data2_get, _obc_gs_pack_unpack.obc_cmd_reset_response_t_data2_set
+    )
 
     def __init__(self):
         _obc_gs_pack_unpack.obc_cmd_reset_response_t_swiginit(self, _obc_gs_pack_unpack.new_obc_cmd_reset_response_t())
+
     __swig_destroy__ = _obc_gs_pack_unpack.delete_obc_cmd_reset_response_t
+
 
 # Register obc_cmd_reset_response_t in _obc_gs_pack_unpack:
 _obc_gs_pack_unpack.obc_cmd_reset_response_t_swigregister(obc_cmd_reset_response_t)
 
 CMD_RESPONSE_SUCCESS = _obc_gs_pack_unpack.CMD_RESPONSE_SUCCESS
 CMD_RESPONSE_ERROR = _obc_gs_pack_unpack.CMD_RESPONSE_ERROR
-class cmd_unpacked_response_t(object):
+
+
+class cmd_unpacked_response_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    errCode = property(_obc_gs_pack_unpack.cmd_unpacked_response_t_errCode_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_errCode_set)
-    cmdId = property(_obc_gs_pack_unpack.cmd_unpacked_response_t_cmdId_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_cmdId_set)
-    obcResetResponse = property(_obc_gs_pack_unpack.cmd_unpacked_response_t_obcResetResponse_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_obcResetResponse_set)
+    errCode = property(
+        _obc_gs_pack_unpack.cmd_unpacked_response_t_errCode_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_errCode_set
+    )
+    cmdId = property(
+        _obc_gs_pack_unpack.cmd_unpacked_response_t_cmdId_get, _obc_gs_pack_unpack.cmd_unpacked_response_t_cmdId_set
+    )
+    obcResetResponse = property(
+        _obc_gs_pack_unpack.cmd_unpacked_response_t_obcResetResponse_get,
+        _obc_gs_pack_unpack.cmd_unpacked_response_t_obcResetResponse_set,
+    )
 
     def __init__(self):
         _obc_gs_pack_unpack.cmd_unpacked_response_t_swiginit(self, _obc_gs_pack_unpack.new_cmd_unpacked_response_t())
+
     __swig_destroy__ = _obc_gs_pack_unpack.delete_cmd_unpacked_response_t
+
 
 # Register cmd_unpacked_response_t in _obc_gs_pack_unpack:
 _obc_gs_pack_unpack.cmd_unpacked_response_t_swigregister(cmd_unpacked_response_t)
 
-class telemetry_data_t(object):
+
+class telemetry_data_t:
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    cc1120Temp = property(_obc_gs_pack_unpack.telemetry_data_t_cc1120Temp_get, _obc_gs_pack_unpack.telemetry_data_t_cc1120Temp_set)
-    commsCustomTransceiverTemp = property(_obc_gs_pack_unpack.telemetry_data_t_commsCustomTransceiverTemp_get, _obc_gs_pack_unpack.telemetry_data_t_commsCustomTransceiverTemp_set)
-    obcTemp = property(_obc_gs_pack_unpack.telemetry_data_t_obcTemp_get, _obc_gs_pack_unpack.telemetry_data_t_obcTemp_set)
-    adcsMagBoardTemp = property(_obc_gs_pack_unpack.telemetry_data_t_adcsMagBoardTemp_get, _obc_gs_pack_unpack.telemetry_data_t_adcsMagBoardTemp_set)
-    adcsSensorBoardTemp = property(_obc_gs_pack_unpack.telemetry_data_t_adcsSensorBoardTemp_get, _obc_gs_pack_unpack.telemetry_data_t_adcsSensorBoardTemp_set)
-    epsBoardTemp = property(_obc_gs_pack_unpack.telemetry_data_t_epsBoardTemp_get, _obc_gs_pack_unpack.telemetry_data_t_epsBoardTemp_set)
-    solarPanel1Temp = property(_obc_gs_pack_unpack.telemetry_data_t_solarPanel1Temp_get, _obc_gs_pack_unpack.telemetry_data_t_solarPanel1Temp_set)
-    solarPanel2Temp = property(_obc_gs_pack_unpack.telemetry_data_t_solarPanel2Temp_get, _obc_gs_pack_unpack.telemetry_data_t_solarPanel2Temp_set)
-    solarPanel3Temp = property(_obc_gs_pack_unpack.telemetry_data_t_solarPanel3Temp_get, _obc_gs_pack_unpack.telemetry_data_t_solarPanel3Temp_set)
-    solarPanel4Temp = property(_obc_gs_pack_unpack.telemetry_data_t_solarPanel4Temp_get, _obc_gs_pack_unpack.telemetry_data_t_solarPanel4Temp_set)
-    epsComms5vCurrent = property(_obc_gs_pack_unpack.telemetry_data_t_epsComms5vCurrent_get, _obc_gs_pack_unpack.telemetry_data_t_epsComms5vCurrent_set)
-    epsComms3v3Current = property(_obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Current_get, _obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Current_set)
-    epsMagnetorquer8vCurrent = property(_obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vCurrent_get, _obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vCurrent_set)
-    epsAdcs5vCurrent = property(_obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vCurrent_get, _obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vCurrent_set)
-    epsAdcs3v3Current = property(_obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Current_get, _obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Current_set)
-    epsObc3v3Current = property(_obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Current_get, _obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Current_set)
-    epsComms5vVoltage = property(_obc_gs_pack_unpack.telemetry_data_t_epsComms5vVoltage_get, _obc_gs_pack_unpack.telemetry_data_t_epsComms5vVoltage_set)
-    epsComms3v3Voltage = property(_obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Voltage_get, _obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Voltage_set)
-    epsMagnetorquer8vVoltage = property(_obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vVoltage_get, _obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vVoltage_set)
-    epsAdcs5vVoltage = property(_obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vVoltage_get, _obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vVoltage_set)
-    epsAdcs3v3Voltage = property(_obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Voltage_get, _obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Voltage_set)
-    epsObc3v3Voltage = property(_obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Voltage_get, _obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Voltage_set)
-    obcState = property(_obc_gs_pack_unpack.telemetry_data_t_obcState_get, _obc_gs_pack_unpack.telemetry_data_t_obcState_set)
-    epsState = property(_obc_gs_pack_unpack.telemetry_data_t_epsState_get, _obc_gs_pack_unpack.telemetry_data_t_epsState_set)
-    numCspPacketsRcvd = property(_obc_gs_pack_unpack.telemetry_data_t_numCspPacketsRcvd_get, _obc_gs_pack_unpack.telemetry_data_t_numCspPacketsRcvd_set)
+    cc1120Temp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_cc1120Temp_get, _obc_gs_pack_unpack.telemetry_data_t_cc1120Temp_set
+    )
+    commsCustomTransceiverTemp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_commsCustomTransceiverTemp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_commsCustomTransceiverTemp_set,
+    )
+    obcTemp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_obcTemp_get, _obc_gs_pack_unpack.telemetry_data_t_obcTemp_set
+    )
+    adcsMagBoardTemp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_adcsMagBoardTemp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_adcsMagBoardTemp_set,
+    )
+    adcsSensorBoardTemp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_adcsSensorBoardTemp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_adcsSensorBoardTemp_set,
+    )
+    epsBoardTemp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsBoardTemp_get, _obc_gs_pack_unpack.telemetry_data_t_epsBoardTemp_set
+    )
+    solarPanel1Temp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel1Temp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel1Temp_set,
+    )
+    solarPanel2Temp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel2Temp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel2Temp_set,
+    )
+    solarPanel3Temp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel3Temp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel3Temp_set,
+    )
+    solarPanel4Temp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel4Temp_get,
+        _obc_gs_pack_unpack.telemetry_data_t_solarPanel4Temp_set,
+    )
+    epsComms5vCurrent = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms5vCurrent_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms5vCurrent_set,
+    )
+    epsComms3v3Current = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Current_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Current_set,
+    )
+    epsMagnetorquer8vCurrent = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vCurrent_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vCurrent_set,
+    )
+    epsAdcs5vCurrent = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vCurrent_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vCurrent_set,
+    )
+    epsAdcs3v3Current = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Current_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Current_set,
+    )
+    epsObc3v3Current = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Current_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Current_set,
+    )
+    epsComms5vVoltage = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms5vVoltage_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms5vVoltage_set,
+    )
+    epsComms3v3Voltage = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Voltage_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsComms3v3Voltage_set,
+    )
+    epsMagnetorquer8vVoltage = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vVoltage_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsMagnetorquer8vVoltage_set,
+    )
+    epsAdcs5vVoltage = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vVoltage_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs5vVoltage_set,
+    )
+    epsAdcs3v3Voltage = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Voltage_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsAdcs3v3Voltage_set,
+    )
+    epsObc3v3Voltage = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Voltage_get,
+        _obc_gs_pack_unpack.telemetry_data_t_epsObc3v3Voltage_set,
+    )
+    obcState = property(
+        _obc_gs_pack_unpack.telemetry_data_t_obcState_get, _obc_gs_pack_unpack.telemetry_data_t_obcState_set
+    )
+    epsState = property(
+        _obc_gs_pack_unpack.telemetry_data_t_epsState_get, _obc_gs_pack_unpack.telemetry_data_t_epsState_set
+    )
+    numCspPacketsRcvd = property(
+        _obc_gs_pack_unpack.telemetry_data_t_numCspPacketsRcvd_get,
+        _obc_gs_pack_unpack.telemetry_data_t_numCspPacketsRcvd_set,
+    )
     id = property(_obc_gs_pack_unpack.telemetry_data_t_id_get, _obc_gs_pack_unpack.telemetry_data_t_id_set)
-    timestamp = property(_obc_gs_pack_unpack.telemetry_data_t_timestamp_get, _obc_gs_pack_unpack.telemetry_data_t_timestamp_set)
+    timestamp = property(
+        _obc_gs_pack_unpack.telemetry_data_t_timestamp_get, _obc_gs_pack_unpack.telemetry_data_t_timestamp_set
+    )
 
     def __init__(self):
         _obc_gs_pack_unpack.telemetry_data_t_swiginit(self, _obc_gs_pack_unpack.new_telemetry_data_t())
+
     __swig_destroy__ = _obc_gs_pack_unpack.delete_telemetry_data_t
+
 
 # Register telemetry_data_t in _obc_gs_pack_unpack:
 _obc_gs_pack_unpack.telemetry_data_t_swigregister(telemetry_data_t)
@@ -210,22 +332,26 @@ TELEM_EPS_STATE = _obc_gs_pack_unpack.TELEM_EPS_STATE
 TELEM_NUM_CSP_PACKETS_RCVD = _obc_gs_pack_unpack.TELEM_NUM_CSP_PACKETS_RCVD
 TELEM_PONG = _obc_gs_pack_unpack.TELEM_PONG
 
+
 def packTelemetry(data, buffer, buffLen, numPacked):
     return _obc_gs_pack_unpack.packTelemetry(data, buffer, buffLen, numPacked)
+
 
 def packCmdMsg(buffer, offset, cmdMsg, numPacked):
     return _obc_gs_pack_unpack.packCmdMsg(buffer, offset, cmdMsg, numPacked)
 
+
 def packCommandResponse(unpackedResponse, buffer):
     return _obc_gs_pack_unpack.packCommandResponse(unpackedResponse, buffer)
+
 
 def unpackTelemetry(buffer, offset, data):
     return _obc_gs_pack_unpack.unpackTelemetry(buffer, offset, data)
 
+
 def unpackCmdMsg(buffer, offset, cmdMsg):
     return _obc_gs_pack_unpack.unpackCmdMsg(buffer, offset, cmdMsg)
 
+
 def unpackCommandResponse(buffer, unpackedResponsePtr):
     return _obc_gs_pack_unpack.unpackCommandResponse(buffer, unpackedResponsePtr)
-
-
