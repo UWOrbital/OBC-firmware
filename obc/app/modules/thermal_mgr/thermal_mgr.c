@@ -24,6 +24,11 @@
 
 void obcTaskInitThermalMgr() {}
 static obc_error_code_t collectObcLm75bdTemp(void);
+static obc_error_code_t collectObcDs3232Temp(void);
+
+static obc_error_code_t collectObcCC1120Temp(void);
+static obc_error_code_t setObcCC1120TempReading(void);
+static obc_error_code_t resetObcCC120TempConfig(void);
 
 void obcTaskFunctionThermalMgr(void* pvParameters) {
   obc_error_code_t errCode;
@@ -54,6 +59,32 @@ static obc_error_code_t collectObcLm75bdTemp(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t collectObcCC1120Temp(void) {
+  obc_error_code_t errCode;
+
+  float temp = 0.0f;
+  RETURN_IF_ERROR_CODE(setObcCC1120TempReading());
+
+  uint8_t tempData = 0;
+  // read output voltage on GPIO1
+  RETURN_IF_ERROR_CODE(
+      cc1120ReadSpi(CC1120_REGS_IOCFG1, &tempData,
+                    sizeof(tempData)));  // this voltage represents the PTAT voltage but has an error of +/- 10C
+
+  // Use Single Point Calibration to get a more accurate temperature reading (within +/- 1C for limited temperature
+  // range or +/- 2C across -40C to 85C) Can also use Two Point Calibtration for better accuracy
+  //  See sections 1.4 and 1.5 of https://www.ti.com/lit/an/swra415d/swra415d.pdf?ts=1730233031162 (CC112x datasheet)
+  //  for more information
+
+  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+
+  RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
+
+  RETURN_IF_ERROR_CODE(resetObcCC120TempConfig());
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 static obc_error_code_t setObcCC1120TempReading(void) {
   obc_error_code_t errCode;
 
@@ -69,6 +100,8 @@ static obc_error_code_t setObcCC1120TempReading(void) {
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST_MODE, &data, sizeof(data)));
   data = 0x2A;
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST, &data, sizeof(data)));
+
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t resetObcCC120TempConfig(void) {
@@ -85,30 +118,6 @@ static obc_error_code_t resetObcCC120TempConfig(void) {
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST_MODE, &data, sizeof(data)));
   data = CC1120_EXT_DEFAULTS_ATEST;
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST, &data, sizeof(data)));
-}
-
-static obc_error_code_t collectObcCC1120Temp(void) {
-  obc_error_code_t errCode;
-
-  float temp = 0.0f;
-  RETURN_IF_ERROR_CODE(setObcCC1120TempReading());
-
-  uint16_t tempData = 0;
-  // read output voltage on GPIO1
-  RETURN_IF_ERROR_CODE(
-      cc1120ReadSpi(CC1120_REGS_IOCFG1, &tempData,
-                    sizeof(tempData)));  // this voltage represents the PTAT voltage but has an error of +/- 10C
-
-  // Use Single Point Calibration to get a more accurate temperature reading (within +/- 1C for limited temperature
-  // range or +/- 2C across -40C to 85C) Can also use Two Point Calibtration for better accuracy
-  //  See sections 1.4 and 1.5 of https://www.ti.com/lit/an/swra415d/swra415d.pdf?ts=1730233031162 (CC112x datasheet)
-  //  for more information
-
-  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
-
-  RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
-
-  RETURN_IF_ERROR_CODE(resetObcCC120TempConfig());
 
   return OBC_ERR_CODE_SUCCESS;
 }
