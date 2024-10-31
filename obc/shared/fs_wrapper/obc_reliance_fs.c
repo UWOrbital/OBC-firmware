@@ -1,6 +1,11 @@
 #include "obc_reliance_fs.h"
-#include "obc_logging.h"
 #include "obc_errors.h"
+
+#ifndef NO_FREERTOS
+#include "obc_logging.h"
+#else
+#include "bl_logging.h"
+#endif
 
 #include <redposix.h>
 
@@ -59,6 +64,16 @@ obc_error_code_t createFile(const char *filePath, int32_t *fileId) {
   *fileId = file;
 
   RETURN_IF_ERROR_CODE(closeFile(file));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t openFile(char *fname, int32_t *fileId, uint32_t ulOpenMode) {
+  *fileId = red_open(fname, ulOpenMode);
+  if (*fileId < 0) {
+    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    return OBC_ERR_CODE_FAILED_FILE_OPEN;
+  }
 
   return OBC_ERR_CODE_SUCCESS;
 }

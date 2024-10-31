@@ -40,6 +40,7 @@ add_subdirectory(shared/obc_spi_io)
 add_subdirectory(shared/obc_errors)
 add_subdirectory(shared/utils)
 add_subdirectory(shared/reliance_edge)
+add_subdirectory(shared/fs_wrapper)
 
 # Application
 target_link_options(OBC-firmware.out PRIVATE

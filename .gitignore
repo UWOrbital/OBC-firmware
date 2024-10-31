@@ -56,6 +56,9 @@ dkms.conf
 .idea/
 compile_commands.json
 .cache/
+.metadata/
+.jxbrowser*/
+RemoteSystemsTempFiles/
 
 .env
 

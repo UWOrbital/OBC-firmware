@@ -10,6 +10,7 @@ set(BL_SOURCES
 set(BL_INCLUDES
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bl_logging
 )
 
 target_include_directories(OBC-bl.out PUBLIC ${BL_INCLUDES})

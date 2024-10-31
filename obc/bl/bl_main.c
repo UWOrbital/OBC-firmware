@@ -1,6 +1,8 @@
 #include "bl_config.h"
 #include "bl_flash.h"
 #include "bl_uart.h"
+#include "obc_errors.h"
+#include "obc_reliance_fs.h"
 
 #include <redposix.h>
 #include <stdio.h>
@@ -37,6 +39,8 @@ typedef enum {
 } bl_state_t;
 
 /* PRIVATE FUNCTIONS */
+// TODO: Replace this with fs wrapper functions once we have a way to
+// write to SD card from the app (current setupFileSystem fs wrapper function formats SD card)
 void blSdcInit() {
   int32_t ret;
 
@@ -59,20 +63,24 @@ void blSdcInit() {
 
 void blSdcDonwloadImage() {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
-  const char *fname = "/app.out";
-  int32_t ret;
+  char *fname = "/app.out";
+  obc_error_code_t ret;
 
   /* Open file */
-  int32_t file = red_open(fname, RED_O_RDONLY);
-  if (file < 0) {
+  int32_t fileID = -1;
+  ret = openFile(fname, &fileID, RED_O_RDONLY);
+
+  if (ret != OBC_ERR_CODE_SUCCESS) {
     blUartWriteBytes(BL_UART_SCIREG_1, strlen("File /app.out NO FOUND.\r\n"), (uint8_t *)"File /app.out NO FOUND.\r\n");
     while (1)
       ;
   }
+
   /* Read app and write to FLASH */
   uint8_t readBuf[sizeof(app_header_t)] = {0U};
-  ret = red_read(file, readBuf, sizeof(app_header_t));
-  if (ret < 0) {
+  size_t bytesRead;
+  ret = readFile(fileID, readBuf, sizeof(app_header_t), &bytesRead);
+  if (ret != OBC_ERR_CODE_SUCCESS) {
     blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to read app header.\r\n"),
                      (uint8_t *)"Failed to read app header.\r\n");
     while (1)
@@ -122,14 +130,20 @@ void blSdcDonwloadImage() {
     uint8_t readBuf[BL_BIN_RX_CHUNK_SIZE] = {0U};
 
     uint32_t numBytesToRead = (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
-    red_read(file, readBuf, numBytesToRead);
+
+    ret = readFile(fileID, readBuf, numBytesToRead, &bytesRead);
+    if (ret != OBC_ERR_CODE_SUCCESS) {
+      blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to read app chunk.\r\n"),
+                       (uint8_t *)"Failed to read app chunk.\r\n");
+      while (1)
+        ;
+    }
 
     blFlashFapiBlockWrite(APP_START_ADDRESS + (appHeader.size - numAppBytesToFlash), (uint32_t)readBuf, numBytesToRead);
-
     numAppBytesToFlash -= numBytesToRead;
   }
 
-  red_close(file);
+  ret = closeFile(fileID);
 
   blUartWriteBytes(BL_UART_SCIREG_1, strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
 

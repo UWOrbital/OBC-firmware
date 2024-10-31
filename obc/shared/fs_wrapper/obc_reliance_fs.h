@@ -30,6 +30,15 @@ obc_error_code_t mkDir(const char *dirPath);
 obc_error_code_t createFile(const char *filePath, int32_t *fileId);
 
 /**
+ * @brief Open a file.
+ * @param fname File Name
+ * @param fileId Ptr to int32 to store file descriptor given by Reliance Edge
+ * @param ulOpenMode Mode to open file (see redposix.h)
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
+obc_error_code_t openFile(char *fname, int32_t *fileId, uint32_t ulOpenMode);
+
+/**
  * @brief Close a file.
  *
  * @param fileId File descriptor given by Reliance Edge
