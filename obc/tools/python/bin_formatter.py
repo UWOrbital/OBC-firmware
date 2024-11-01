@@ -96,7 +96,7 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.write("D".encode("ascii"))
         time.sleep(0.1)
 
-        # Send app in chunks of 128 bytes
+        # Send app in chunks of 512 bytes
         total_bytes_to_write = len(data) - BootloaderHeader.get_header_size()
         num_bytes_written = 0
         while num_bytes_written < total_bytes_to_write:

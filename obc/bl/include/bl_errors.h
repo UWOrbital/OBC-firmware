@@ -6,6 +6,7 @@ typedef enum {
   // General errors
   BL_ERR_CODE_INVALID_ARG = 1,
   BL_ERR_CODE_UNKNOWN = 2,
+  // TODO: add more in depth error codes
 
   // F021 Flash API errors
   BL_ERR_CODE_FAPI_INIT = 100,
