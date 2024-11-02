@@ -66,7 +66,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   ASSERT(stateMgrQueueHandle != NULL);
 
   // Run power on test - checks connections with peripherals, logs errors
-  runTest();
+  runPowerOnTests();
 
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);

@@ -94,12 +94,12 @@ typedef struct {
 
 typedef struct {
   uint16_t testData;
-} testing_persist_data_t;
+} FRAM_persist_testing_data_t;
 
 typedef struct {
   obc_persist_section_header_t header;
-  testing_persist_data_t data;
-} testing_persist_t;
+  FRAM_persist_testing_data_t data;
+} FRAM_persist_testing_t;
 
 /*---------------------------------------------------------------------------*/
 
@@ -110,7 +110,7 @@ typedef struct {
 typedef struct {
   obc_time_persist_t obcTime;
   alarm_mgr_persist_t alarmMgr[OBC_PERSISTENT_MAX_SUBINDEX_ALARM];
-  testing_persist_t testing;
+  FRAM_persist_testing_t testing;
 } obc_persist_t;
 
 #define OBC_PERSIST_ADDR_OF(data) (0x0 + offsetof(obc_persist_t, data))

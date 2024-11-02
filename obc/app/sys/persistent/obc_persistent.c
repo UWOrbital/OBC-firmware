@@ -19,8 +19,8 @@ static const obc_persist_config_t obcPersistConfig[] = {
                                           .dataSize = sizeof(alarm_mgr_persist_data_t),
                                           .sectionCount = OBC_PERSISTENT_MAX_SUBINDEX_ALARM},
     [OBC_PERSIST_SECTION_ID_TESTING] = {.sectionStartAddr = OBC_PERSIST_ADDR_OF(testing),
-                                        .sectionSize = sizeof(testing_persist_t),
-                                        .dataSize = sizeof(testing_persist_data_t),
+                                        .sectionSize = sizeof(FRAM_persist_testing_t),
+                                        .dataSize = sizeof(FRAM_persist_testing_data_t),
                                         .sectionCount = OBC_PERSISTENT_MIN_SUBINDEX},
 };
 

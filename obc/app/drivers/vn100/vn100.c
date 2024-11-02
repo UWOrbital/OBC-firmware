@@ -95,6 +95,10 @@ obc_error_code_t vn100SetBaudrate(uint32_t baudrate) {
   size_t baudrateLength = strlen(baud);
   size_t checksumLength = strlen(checksum);
 
+  if(MAX_SEND_SIZE < headerLength + checksumLength + baudrateLength) {
+    return OBC_ERR_CODE_BUFF_TOO_SMALL;
+  }
+
   // Begin appending the command
   memcpy(buf, header, headerLength);
   memcpy(buf + headerLength, baud, baudrateLength);
