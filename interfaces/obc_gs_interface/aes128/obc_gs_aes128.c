@@ -25,7 +25,7 @@ obc_gs_error_code_t initializeAesCtx(const uint8_t *key) {
   }
 }
 
-obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen) {
+obc_gs_error_code_t aes128Encrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen) {
   if (aesData == NULL || plaintext == NULL || aesData->ciphertext == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }

@@ -45,7 +45,7 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   aesData.tagLen = AES_TAG_SIZE;
 
   // Encrypt the plaintext
-  obc_gs_error_code_t encResult = gcmEncrypt(&aesData, reinterpret_cast<const uint8_t *>(plaintext), plaintextLen);
+  obc_gs_error_code_t encResult = aes128Encrypt(&aesData, reinterpret_cast<const uint8_t *>(plaintext), plaintextLen);
   ASSERT_EQ(encResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // The tag has now been filled by the encryption function
@@ -99,7 +99,7 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   aesData.tagLen = AES_TAG_SIZE;
 
   // Encrypt the plaintext
-  obc_gs_error_code_t encResult = gcmEncrypt(&aesData, reinterpret_cast<const uint8_t *>(plaintext), plaintextLen);
+  obc_gs_error_code_t encResult = aes128Encrypt(&aesData, reinterpret_cast<const uint8_t *>(plaintext), plaintextLen);
   ASSERT_EQ(encResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // The tag has now been filled by the encryption function

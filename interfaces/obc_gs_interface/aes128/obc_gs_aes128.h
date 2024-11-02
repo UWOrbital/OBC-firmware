@@ -82,7 +82,7 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData);
  *         OBC_GS_ERR_CODE_INVALID_ARG for invalid input parameters, and OBC_GS_ERR_CODE_ENC_FAIL for encryption
  * failures.
  */
-obc_gs_error_code_t gcmEncrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen);
+obc_gs_error_code_t aes128Encrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen);
 
 #ifdef __cplusplus
 }

@@ -170,7 +170,7 @@ int main(void) {
   aesData.additionalData = NULL;
   aesData.additionalDataLen = 0;
 
-  if (gcmEncrypt(&aesData, packedSingleCmd, packedSingleCmdSize) != OBC_GS_ERR_CODE_SUCCESS) {
+  if (aes128Encrypt(&aesData, packedSingleCmd, packedSingleCmdSize) != OBC_GS_ERR_CODE_SUCCESS) {
     printf("Failed to encrypt command message!");
     exit(1);
   }
