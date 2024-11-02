@@ -129,7 +129,7 @@ add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
 
-target_link_libraries(OBC-firmware.out PRIVATE
+target_link_libraries(${OUT_FILE_NAME} PRIVATE
     mbed
     lib-correct
     obc-gs-interface
