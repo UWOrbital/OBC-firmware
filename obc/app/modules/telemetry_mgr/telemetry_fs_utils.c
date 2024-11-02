@@ -49,10 +49,8 @@ obc_error_code_t openTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId
   // TODO: If we overflowed the batch ID, we should delete the duplicate file
   // However, don't delete the file if an overflow hasn't occurred (like if a system reset occurred).
 
-  int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDWR | RED_O_APPEND);
-  if (telFile < 0) {
-    return OBC_ERR_CODE_FAILED_FILE_OPEN;
-  }
+  int32_t telFile = 0;
+  RETURN_IF_ERROR_CODE(openFile((const char *)telemFilePathBuffer, RED_O_RDWR | RED_O_APPEND, &telFile));
 
   *telemFileId = telFile;
 
@@ -70,10 +68,8 @@ obc_error_code_t openTelemetryFileRO(uint32_t telemBatchId, int32_t *telemFileId
   RETURN_IF_ERROR_CODE(
       constructTelemetryFilePath(telemBatchId, (char *)telemFilePathBuffer, TELEMETRY_FILE_PATH_MAX_LENGTH));
 
-  int32_t telFile = red_open((const char *)telemFilePathBuffer, RED_O_RDONLY);
-  if (telFile < 0) {
-    return OBC_ERR_CODE_FAILED_FILE_OPEN;
-  }
+  int32_t telFile = 0;
+  RETURN_IF_ERROR_CODE(openFile((const char *)telemFilePathBuffer, RED_O_RDONLY, &telFile));
 
   *telemFileId = telFile;
 
