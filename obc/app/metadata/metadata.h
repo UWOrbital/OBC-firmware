@@ -12,6 +12,7 @@ flash
     4. Update bin_formatter class to include new metadata, find a way to make the struct with the bin_formatter before
 sending with serial
     5. Update bl_main.c struct to read the proper amount of bytes
+    6. Update bl_config.h to represent correct origin (METADATA_START_ADDRESS, METADATA_SIZE_BYTES)
  */
 
 typedef struct {
