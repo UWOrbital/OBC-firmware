@@ -57,6 +57,7 @@ target_compile_definitions(OBC-firmware.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ENABLE_BL_BYPASS=${ENABLE_BL_BYPASS}
 )
 
 # Determine the root of the repository
@@ -79,6 +80,7 @@ add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
+add_subdirectory(app/metadata)
 
 target_link_libraries(OBC-firmware.out PRIVATE
     tiny-aes

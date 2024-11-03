@@ -118,6 +118,7 @@ typedef enum {
 
   /** I/O error. */
   OBC_ERR_CODE_RED_EIO = 1005,
+  OBC_ERR_CODE_NO_METADATA_APP_NOT_OVER_SERIAL = 1006,
 
   /** Bad file number. */
   OBC_ERR_CODE_RED_EBADF = 1009,

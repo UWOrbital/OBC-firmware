@@ -121,7 +121,9 @@ int main(void) {
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Erased flash\r\n"), (uint8_t *)"Erased flash\r\n");
 
-        errCode = blFlashFapiBlockErase(METADATA_START_ADDRESS, METADATA_SIZE_BYTES);
+        blFlashFapiInitBank(0U);
+
+        errCode = blFlashFapiBlockErase(METADATA_START_ADDRESS, METADATA_SIZE_BYTES - 1);
         if (errCode != BL_ERR_CODE_SUCCESS) {
           char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
           int32_t blUartWriteBufferLen = snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE,
@@ -162,6 +164,8 @@ int main(void) {
         }
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Wrote metadata \r\n"), ((uint8_t *)"Wrote metadata \r\n"));
+
+        blFlashFapiInitBank(0U);
 
         // Receive image in chunks and write to flash
         uint32_t numAppBytesToFlash = appHeader.size;
