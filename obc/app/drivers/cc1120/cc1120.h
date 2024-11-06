@@ -171,3 +171,5 @@ obc_error_code_t cc1120GetState(cc1120_state_t *stateNum);
  * @return obc_error_code_t - Whether or not the setup was a success
  */
 obc_error_code_t cc1120Init(void);
+
+obc_error_code_t readTempCC1120(float *temp);
