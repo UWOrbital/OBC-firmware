@@ -62,8 +62,9 @@ camera_id_t getSelectedCamera(void) { return selectedCamera; }
 
 // CS assumed to be asserted
 static obc_error_code_t arducamTransmitOpcode(opcode_t opcode) {
+  obc_error_code_t errCode;
   LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, opcode));
-  return OBC_ERR_CODE_SUCCESS;
+  return errCode;
 }
 
 obc_error_code_t arducamReadTestReg(uint8_t *buffer) {
