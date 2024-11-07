@@ -36,6 +36,8 @@ typedef enum {
   BL_STATE_DOWNLOAD_IMAGE,
   BL_STATE_ERASE_IMAGE,
   BL_STATE_RUN_APP,
+  BL_STATE_WRITE_APP_TO_SD,
+  BL_STATE_FLASH_FROM_SD,
 } bl_state_t;
 
 /* PRIVATE FUNCTIONS */
@@ -63,7 +65,7 @@ void blSdcInit() {
 
 void blSdcDonwloadImage() {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
-  char *fname = "/app.out";
+  char *fname = "boot/app.out";  // Find
   obc_error_code_t ret;
 
   /* Open file */
@@ -171,6 +173,108 @@ void blSdcDonwloadImage() {
                    (uint8_t *)"Finished writing to flash\r\n");
 }
 
+/* TMP function to receive app through UART and write to SD card */
+/* TODO: Remove this function and all calls to it once we have a more concrete way of writing app to SD card */
+static void writeAppToSD() {
+  uint16_t ret = BL_ERR_CODE_UNKNOWN;
+
+  ret = setupFileSystem();
+  if (ret != OBC_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to init file system.\r\n"),
+                     (uint8_t *)"Failed to init file system.\r\n");
+    return;
+  }
+
+  // Create 'images' folder if not exists
+  char *imageDir = "boot";
+  ret = mkDir(imageDir);
+  if (ret != OBC_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to create images diretory.\r\n"),
+                     (uint8_t *)"Failed to create images diretory.\r\n");
+    return;
+  }
+
+  // TODO: Dynamic file names based on app version
+  char *imageName = "app.out";
+  char filePath[64] = "";
+  strcat(filePath, imageDir);
+  strcat(filePath, "/");
+  strcat(filePath, imageName);
+  int32_t fileID = -1;
+  ret = createFile(filePath, &fileID);
+  if (ret != OBC_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to file in SD.\r\n"), (uint8_t *)"Failed to file in SD.\r\n");
+    return;
+  }
+
+  ret = openFile(filePath, &fileID, RED_O_WRONLY);
+  if (ret != OBC_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to open file.\r\n"), (uint8_t *)"Failed to open file.\r\n");
+    return;
+  }
+
+  // Read app from UART and write to SD
+  blUartWriteBytes(BL_UART_SCIREG_1, strlen("Downloading application\r\n"), (uint8_t *)"Downloading application\r\n");
+
+  uint8_t recvBuffer[sizeof(app_header_t)] = {0U};
+
+  blUartReadBytes(BL_UART_SCIREG_2, recvBuffer, sizeof(app_header_t));
+
+  app_header_t appHeader = {0};
+  memcpy((void *)&appHeader, (void *)recvBuffer, sizeof(app_header_t));
+
+  if (appHeader.size == 0U) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Invalid image size\r\n"), (uint8_t *)"Invalid image size\r\n");
+    return;
+  }
+
+  if (!blFlashIsStartAddrValid(APP_START_ADDRESS, appHeader.size)) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Invalid start address\r\n"), (uint8_t *)"Invalid start address\r\n");
+    return;
+  }
+
+  blUartWriteBytes(BL_UART_SCIREG_1, strlen("Received header. Writting header to SD...\r\n"),
+                   (uint8_t *)"Received header. Writting header to SD...\r\n");
+
+  ret = writeFile(fileID, recvBuffer, sizeof(app_header_t));
+  if (ret != OBC_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to write app header to SD.\r\n"),
+                     (uint8_t *)"Failed to write app header to SD.\r\n");
+    return;
+  }
+
+  blUartWriteBytes(BL_UART_SCIREG_1, strlen("Send D char before sending app.\r\n"),
+                   (uint8_t *)"Send D char before sending app.\r\n");
+  // Host will send a 'D' before sending the image
+  while (1) {
+    char waitChar = '\0';
+
+    blUartReadBytes(BL_UART_SCIREG_2, (uint8_t *)&waitChar, 1U);
+
+    if (waitChar == 'D') {
+      break;
+    }
+  }
+
+  // Receive image in chunks and write to SD
+  uint32_t numAppBytesToFlash = appHeader.size;
+  while (numAppBytesToFlash > 0) {
+    uint8_t recvBuffer[BL_BIN_RX_CHUNK_SIZE] = {0U};
+
+    uint32_t numBytesToRead = (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
+
+    blUartReadBytes(BL_UART_SCIREG_2, recvBuffer, numBytesToRead);
+
+    writeFile(fileID, recvBuffer, numBytesToRead);  // Write app chunk to SD
+
+    numAppBytesToFlash -= numBytesToRead;
+  }
+
+  blUartWriteBytes(BL_UART_SCIREG_1, strlen("Wrote application to SD.\r\n"), (uint8_t *)"Wrote application to SD.\r\n");
+
+  closeFile(fileID);
+}
+
 /* PUBLIC FUNCTIONS */
 int main(void) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
@@ -183,6 +287,8 @@ int main(void) {
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
 
   if (SDC_APP_LOAD) {
+    // This build flag should be set for SD app loads as UART is not going to be
+    // used if bl is operating in this mode
     blSdcDonwloadImage();
 
     // Go to the application's entry point
@@ -209,7 +315,34 @@ int main(void) {
           state = BL_STATE_ERASE_IMAGE;
         } else if (c == 'r') {
           state = BL_STATE_RUN_APP;
+        } else if (c == 's') {
+          state = BL_STATE_WRITE_APP_TO_SD;
+        } else if (c == 'f') {
+          state = BL_STATE_FLASH_FROM_SD;
         }
+
+        break;
+      }
+      case BL_STATE_FLASH_FROM_SD: {
+        // call flashing from SD
+        blSdcDonwloadImage();
+
+        // Go to the application's entry point
+        uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
+        ((appStartFunc_t)appStartAddress)();
+
+        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Failed to run application. Going into UART app load mode.\r\n"),
+                         (uint8_t *)"Failed to run application. Going into UART app load mode.\r\n");
+        break;
+      }
+
+      case BL_STATE_WRITE_APP_TO_SD: {
+        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Downloading application to SD card...\r\n"),
+                         (uint8_t *)"Downloading application to SD card...\r\n");
+        writeAppToSD();
+
+        blUartWriteBytes(BL_UART_SCIREG_1, strlen("Downloaded app to SD. Send 'f' to flash app from SD.\r\n"),
+                         (uint8_t *)"Downloaded app to SD. Send 'f' to flash app from SD.\r\n");
 
         break;
       }
