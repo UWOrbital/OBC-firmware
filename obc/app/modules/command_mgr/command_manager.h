@@ -1,8 +1,8 @@
 #pragma once
 
+// #include "obc_errors.h"
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
-
 /**
  * @brief Sends a command to the command queue
  *
