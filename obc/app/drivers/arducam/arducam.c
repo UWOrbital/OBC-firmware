@@ -20,7 +20,6 @@
 // Arduchip masks
 #define ARDUCAM_RESET_CPLD_MASK 0x80
 
-
 // Camera Img Sensor (I2C) defines
 #define CAM_I2C_ADDR 0x3C
 #define I2C_MUTEX_TIMEOUT portMAX_DELAY
@@ -37,7 +36,7 @@ static const uint8_t cameraCS[CAMERA_COUNT] = {
 static camera_id_t selectedCamera = PRIMARY;
 
 typedef enum opcode {
-  ARDUCAM_READ_TEST_REG =  0x00,
+  ARDUCAM_READ_TEST_REG = 0x00,
   ARDUCAM_WRITE_TEST_REG = (0x00 | 0x80),
   ARDUCAM_READ_CAPTURE_CONTROL_REG = 0x01,
   ARDUCAM_WRITE_CAPTURE_CONTROL_REG = (0x01 | 0x80),
@@ -46,7 +45,7 @@ typedef enum opcode {
   ARDUCAM_READ_FIFO_CONTROL_REG = 0x04,
   ARDUCAM_WRITE_FIFO_CONTROL_REG = (0x04 | 0x80),
   ARDUCAM_READ_SENSOR_POWER_CONTROL_REG = 0x06,
-  ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG = (0x06| 0x80),
+  ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG = (0x06 | 0x80),
   ARDUCAM_FIFO_BURST_READ = 0x3C,
   ARDUCAM_FIFO_READ = 0x3D,
   ARDUCAM_READ_FW_VERSION = 0x40,
@@ -63,8 +62,8 @@ camera_id_t getSelectedCamera(void) { return selectedCamera; }
 
 // CS assumed to be asserted
 static obc_error_code_t arducamTransmitOpcode(opcode_t opcode) {
-  obc_error_code_t errCode;
-  return LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, opcode));
+  LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, opcode));
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t arducamReadTestReg(uint8_t *buffer) {
@@ -407,8 +406,7 @@ obc_error_code_t resetCPLD(void) {
     RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[selectedCamera]));
     LOG_IF_ERROR_CODE(arducamTransmitOpcode(ARDUCAM_RESET_CPLD));
     if (errCode == OBC_ERR_CODE_SUCCESS) {
-      LOG_IF_ERROR_CODE(
-          spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, 0));
+      LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, 0));
     }
     // Reset overwritten error code
     prevCode = errCode;
@@ -434,7 +432,7 @@ obc_error_code_t camReadSensorReg16_8(uint32_t regID, uint8_t *regDat) {
 obc_error_code_t camWriteSensorRegs16_8(const sensor_config_t reglist[], size_t reglistLen) {
   obc_error_code_t errCode;
 
-  for (int i = 0; i < reglistLen; i++) {
+  for (size_t i = 0; i < reglistLen; i++) {
     RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(reglist[i].reg, reglist[i].val));
   }
 
