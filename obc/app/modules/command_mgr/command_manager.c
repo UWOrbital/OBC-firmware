@@ -17,9 +17,14 @@
 #define COMMAND_QUEUE_LENGTH 25UL
 #define COMMAND_QUEUE_ITEM_SIZE sizeof(cmd_msg_t)
 
-static QueueHandle_t commandQueueHandle;
-static StaticQueue_t commandQueue;
-static uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
+typedef struct {
+  QueueHandle_t commandQueueHandle;
+  StaticQueue_t commandQueue;
+  uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
+  int8_t armedCommandId;
+} command_manager_private_data_t;
+
+static command_manager_private_data_t command_manager_privateData;
 
 typedef struct {
   cmd_callback_t callback;
@@ -41,19 +46,18 @@ static const cmd_info_t cmdsConfig[] = {
 
 STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
-static int8_t armedCommandId = -1;  // no command is armed
-
 void obcTaskInitCommandMgr(void) {
   ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
-  if (commandQueueHandle == NULL) {
-    commandQueueHandle =
-        xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, commandQueueStack, &commandQueue);
+  if (command_manager_privateData.commandQueueHandle == NULL) {
+    command_manager_privateData.commandQueueHandle =
+        xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, command_manager_privateData.commandQueueStack,
+                           &command_manager_privateData.commandQueue);
   }
-  armedCommandId = -1;  // no command is armed on reset
+  command_manager_privateData.armedCommandId = -1;  // no command is armed on reset
 }
 
 obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
-  if (commandQueueHandle == NULL) {
+  if (command_manager_privateData.commandQueueHandle == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
 
@@ -61,7 +65,7 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(commandQueueHandle, (void *)cmd, portMAX_DELAY) == pdPASS) {
+  if (xQueueSend(command_manager_privateData.commandQueueHandle, (void *)cmd, portMAX_DELAY) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
@@ -71,13 +75,9 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
 void obcTaskFunctionCommandMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
-  // Used to track whether a safety-critical command is currently being executed
-  // This is inefficient space-wise, but simplifies the code. We can optimize later if needed.
-  static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {false};
-
   while (1) {
     cmd_msg_t cmd;
-    if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
+    if (xQueueReceive(command_manager_privateData.commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
       // Check if the ID is a valid index
       if (cmd.id >= CMDS_CONFIG_SIZE) {
         LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
@@ -100,30 +100,12 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
 
       // Check if the command is safety-critical
       if (currCmdInfo.opts & CMD_TYPE_CRITICAL) {
-        // TODO: Make this persistent across resets
-
-        // Arm
-        if (armedCommandId == -1) {
-          armedCommandId = cmd.id;
-          continue;
+        if (command_manager_privateData.armedCommandId == cmd.id) {
+          command_manager_privateData.armedCommandId = -1;  // reset
+          LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));    // run
+        } else if (command_manager_privateData.armedCommandId == -1) {
+          command_manager_privateData.armedCommandId = cmd.id;  // arm
         }
-
-        // Execute
-        if (armedCommandId == cmd.id) {
-          if (!cmdProgressTracker[cmd.id]) {
-            cmdProgressTracker[cmd.id] = true;
-            continue;
-          }
-          // Reset armed state and progress tracker
-          cmdProgressTracker[cmd.id] = false;
-          armedCommandId = -1;
-
-          LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
-          continue;
-        }
-
-        // If a different command is sent, treat it as a new arm attempt
-        armedCommandId = cmd.id;
         continue;
       }
 
@@ -142,10 +124,7 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
       alarm_handler_event_t alarm = {.id = ALARM_HANDLER_NEW_ALARM,
                                      .alarmInfo = {
                                          .unixTime = cmd.timestamp,
-                                         .callbackDef =
-                                             {
-                                                 .cmdCallback = currCmdInfo.callback,
-                                             },
+                                         .callbackDef = {.cmdCallback = currCmdInfo.callback},
                                          .type = ALARM_TYPE_TIME_TAGGED_CMD,
                                          .cmdMsg = cmd,
                                      }};
