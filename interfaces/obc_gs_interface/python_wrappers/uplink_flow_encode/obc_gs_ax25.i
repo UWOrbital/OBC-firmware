@@ -30,6 +30,20 @@
     }
 }
 
+%typemap(argout) uint8_t * {
+    if ($1) {
+        // Convert C uint8_t* back to Python bytearray
+        PyObject *result = PyByteArray_FromStringAndSize((char *)$1, sizeof($1));
+        if (!result) {
+            SWIG_exception_fail(SWIG_MemoryError, "Failed to create Python bytearray from C uint8_t*.");
+        }
+        $input = result;
+    } else {
+        $input = Py_None;
+        Py_INCREF(Py_None);
+    }
+}
+
 %typemap(in) uint16_t * (uint16_t temp) {
     if ($input == Py_None) {
         $1 = NULL;  // Pass a NULL pointer to the C function if input is None
@@ -48,6 +62,20 @@
     }
 }
 
+%typemap(argout) uint16_t * {
+    if ($1) {
+        // Convert C uint16_t* back to Python integer
+        PyObject *result = PyLong_FromUnsignedLong((unsigned long)(*$1));
+        if (!result) {
+            SWIG_exception_fail(SWIG_MemoryError, "Failed to create Python integer from C uint16_t*.");
+        }
+        $input = result;
+    } else {
+        $input = Py_None;
+        Py_INCREF(Py_None);
+    }
+}
+
 %typemap(in) uint32_t * (uint32_t temp) {
     if ($input == Py_None) {
         $1 = NULL;  // Pass a NULL pointer to the C function if input is None
@@ -63,6 +91,80 @@
         }
         temp = (uint32_t) value;
         $1 = &temp;
+    }
+}
+
+// Create Python objects from the structs
+
+%extend unstuffed_ax25_i_frame_t {
+    void set_data(PyObject *bytes_obj) {
+        if (!PyByteArray_Check(bytes_obj)) {
+            PyErr_SetString(PyExc_TypeError, "Expected bytearray");
+            return;
+        }
+        if (PyByteArray_Size(bytes_obj) != AX25_MINIMUM_I_FRAME_LEN) {
+            PyErr_SetString(PyExc_ValueError, "Bytearray must be exactly AX25_MINIMUM_I_FRAME_LEN bytes");
+            return;
+        }
+        memcpy(self->data, PyByteArray_AsString(bytes_obj), AX25_MINIMUM_I_FRAME_LEN);
+    }
+
+    PyObject* get_data() {
+        return PyByteArray_FromStringAndSize((char *)self->data, AX25_MINIMUM_I_FRAME_LEN);
+    }
+}
+
+%extend packed_ax25_i_frame_t {
+    void set_data(PyObject *bytes_obj) {
+        if (!PyByteArray_Check(bytes_obj)) {
+            PyErr_SetString(PyExc_TypeError, "Expected bytearray");
+            return;
+        }
+        if (PyByteArray_Size(bytes_obj) != AX25_MAXIMUM_PKT_LEN) {
+            PyErr_SetString(PyExc_ValueError, "Bytearray must be exactly AX25_MAXIMUM_PKT_LEN bytes");
+            return;
+        }
+        memcpy(self->data, PyByteArray_AsString(bytes_obj), AX25_MAXIMUM_PKT_LEN);
+    }
+
+    PyObject* get_data() {
+        return PyByteArray_FromStringAndSize((char *)self->data, AX25_MAXIMUM_PKT_LEN);
+    }
+}
+
+%extend packed_ax25_u_frame_t {
+    void set_data(PyObject *bytes_obj) {
+        if (!PyByteArray_Check(bytes_obj)) {
+            PyErr_SetString(PyExc_TypeError, "Expected bytearray");
+            return;
+        }
+        if (PyByteArray_Size(bytes_obj) != AX25_MAXIMUM_U_FRAME_CMD_LENGTH) {
+            PyErr_SetString(PyExc_ValueError, "Bytearray must be exactly AX25_MAXIMUM_U_FRAME_CMD_LENGTH bytes");
+            return;
+        }
+        memcpy(self->data, PyByteArray_AsString(bytes_obj), AX25_MAXIMUM_U_FRAME_CMD_LENGTH);
+    }
+
+    PyObject* get_data() {
+        return PyByteArray_FromStringAndSize((char *)self->data, AX25_MAXIMUM_U_FRAME_CMD_LENGTH);
+    }
+}
+
+%extend ax25_addr_t {
+    void set_data(PyObject *bytes_obj) {
+        if (!PyByteArray_Check(bytes_obj)) {
+            PyErr_SetString(PyExc_TypeError, "Expected bytearray");
+            return;
+        }
+        if (PyByteArray_Size(bytes_obj) != AX25_DEST_ADDR_BYTES) {
+            PyErr_SetString(PyExc_ValueError, "Bytearray must be exactly AX25_DEST_ADDR_BYTES bytes");
+            return;
+        }
+        memcpy(self->data, PyByteArray_AsString(bytes_obj), AX25_DEST_ADDR_BYTES);
+    }
+
+    PyObject* get_data() {
+        return PyByteArray_FromStringAndSize((char *)self->data, AX25_DEST_ADDR_BYTES);
     }
 }
 
@@ -85,175 +187,12 @@
     }
 }
 
-%typemap(in) ax25_addr_t * {
-    if ($input == Py_None) {
-        $1 = NULL;
+%typemap(argout) u_frame_cmd_t * {
+    if ($1) {
+        $input = PyLong_FromLong((long)(*$1));
     } else {
-        if (!PyDict_Check($input)) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
-        }
-
-        $1 = (ax25_addr_t *)malloc(sizeof(ax25_addr_t));
-        if (!$1) {
-            SWIG_exception_fail(SWIG_TypeError, "Cannot allocate memory for ax25_addr_t");
-        }
-
-        PyObject *data_obj = PyDict_GetItemString($input, "data");
-        if (!data_obj) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'data'");
-        }
-
-        if (PyObject_CheckBuffer(data_obj)) {
-            Py_buffer view;
-            if (PyObject_GetBuffer(data_obj, &view, PyBUF_SIMPLE) != 0) {
-                SWIG_exception_fail(SWIG_TypeError, "'data' must be a bytes-like object");
-            }
-            if (view.len != AX25_DEST_ADDR_BYTES) {
-                PyBuffer_Release(&view);
-                SWIG_exception_fail(SWIG_ValueError, "'data' must have a length of AX25_DEST_ADDR_BYTES");
-            }
-
-            memcpy($1->data, view.buf, AX25_DEST_ADDR_BYTES);
-            PyBuffer_Release(&view);
-        } else {
-            SWIG_exception_fail(SWIG_TypeError, "'data' must be a bytes array");
-        }
-
-        PyObject *length_obj = PyDict_GetItemString($input, "length");
-        if (!length_obj || !PyLong_Check(length_obj)) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'length' and an integer value");
-        }
-
-        $1->length = (uint8_t)PyLong_AsUnsignedLong(length_obj);
-        if (PyErr_Occurred()) {
-            SWIG_exception_fail(SWIG_OverflowError, "Error converting 'length' to uint8_t");
-        }
-    }
-}
-
-%typemap(freearg) ax25_addr_t * {
-    if ($1) {
-        free($1);
-        $1 = NULL;
-    }
-}
-
-// to get the Python object modified in place by the wrapped C function
-%typemap(argout) ax25_addr_t * {
-    if ($1) {
-        PyObject *data_obj = PyBytes_FromStringAndSize((const char *)$1->data, AX25_DEST_ADDR_BYTES);
-        PyDict_SetItemString($input, "data", data_obj);
-        Py_DECREF(data_obj);
-
-        PyObject *length_obj = PyLong_FromUnsignedLong($1->length);
-        PyDict_SetItemString($input, "length", length_obj);
-        Py_DECREF(length_obj);
-    }
-}
-
-%typemap(in) unstuffed_ax25_i_frame_t * {
-    if ($input == Py_None) {
-        $1 = NULL;
-    } else {
-        if (!PyDict_Check($input)) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
-        }
-
-        $1 = (unstuffed_ax25_i_frame_t *)malloc(sizeof(unstuffed_ax25_i_frame_t));
-        if (!$1) {
-            SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for unstuffed_ax25_i_frame_t");
-        }
-
-        PyObject *data_obj = PyDict_GetItemString($input, "data");
-        if (!data_obj) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'data'");
-        }
-
-        if (PyObject_CheckBuffer(data_obj)) {
-            Py_buffer view;
-            if (PyObject_GetBuffer(data_obj, &view, PyBUF_SIMPLE) != 0) {
-                SWIG_exception_fail(SWIG_TypeError, "'data' must be a bytes-like object");
-            }
-            if (view.len != AX25_MINIMUM_I_FRAME_LEN) {
-                PyBuffer_Release(&view);
-                SWIG_exception_fail(SWIG_ValueError, "'data' must have a length of AX25_MINIMUM_I_FRAME_LEN");
-            }
-
-            memcpy($1->data, view.buf, AX25_MINIMUM_I_FRAME_LEN);
-            PyBuffer_Release(&view);
-        } else {
-            SWIG_exception_fail(SWIG_TypeError, "'data' must be a bytes array");
-        }
-
-        PyObject *length_obj = PyDict_GetItemString($input, "length");
-        if (!length_obj || !PyLong_Check(length_obj)) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'length' and an integer value");
-        }
-
-        $1->length = (uint16_t)PyLong_AsUnsignedLong(length_obj);
-        if (PyErr_Occurred()) {
-            SWIG_exception_fail(SWIG_OverflowError, "Error converting 'length' to uint16_t");
-        }
-    }
-}
-
-%typemap(freearg) unstuffed_ax25_i_frame_t * {
-    if ($1) {
-        free($1);
-        $1 = NULL;
-    }
-}
-
-%typemap(in) packed_ax25_u_frame_t * {
-    if ($input == Py_None) {
-        $1 = NULL;
-    } else {
-        if (!PyDict_Check($input)) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary");
-        }
-
-        $1 = (packed_ax25_u_frame_t *)malloc(sizeof(packed_ax25_u_frame_t));
-        if (!$1) {
-            SWIG_exception_fail(SWIG_MemoryError, "Cannot allocate memory for packed_ax25_u_frame_t");
-        }
-
-        PyObject *data_obj = PyDict_GetItemString($input, "data");
-        if (!data_obj) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'data'");
-        }
-
-        if (PyObject_CheckBuffer(data_obj)) {
-            Py_buffer view;
-            if (PyObject_GetBuffer(data_obj, &view, PyBUF_SIMPLE) != 0) {
-                SWIG_exception_fail(SWIG_TypeError, "'data' must be a bytes-like object");
-            }
-            if (view.len != AX25_MAXIMUM_U_FRAME_CMD_LENGTH) {
-                PyBuffer_Release(&view);
-                SWIG_exception_fail(SWIG_ValueError, "'data' must have a length of AX25_MAXIMUM_U_FRAME_CMD_LENGTH");
-            }
-
-            memcpy($1->data, view.buf, AX25_MAXIMUM_U_FRAME_CMD_LENGTH);
-            PyBuffer_Release(&view);
-        } else {
-            SWIG_exception_fail(SWIG_TypeError, "'data' must be a bytes array");
-        }
-
-        PyObject *length_obj = PyDict_GetItemString($input, "length");
-        if (!length_obj || !PyLong_Check(length_obj)) {
-            SWIG_exception_fail(SWIG_TypeError, "Expected a dictionary with key 'length' and an integer value");
-        }
-
-        $1->length = (uint8_t)PyLong_AsUnsignedLong(length_obj);
-        if (PyErr_Occurred()) {
-            SWIG_exception_fail(SWIG_OverflowError, "Error converting 'length' to uint8_t");
-        }
-    }
-}
-
-%typemap(freearg) packed_ax25_u_frame_t * {
-    if ($1) {
-        free($1);
-        $1 = NULL;
+        $input = Py_None;
+        Py_INCREF(Py_None);
     }
 }
 
