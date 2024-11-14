@@ -35,6 +35,9 @@
 #include <sys_common.h>
 #include <gio.h>
 
+#define INA230_I2C_ADDRESS_ONE 0b1000000U
+#define INA230_I2C_ADDRESS_TWO 0b1000001U
+
 #define COMMS_MAX_DOWNLINK_FRAMES 1000U
 #define RFFM6404_VAPC_REGULAR_POWER_VAL 1.9f
 
@@ -294,80 +297,170 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
 }
 
 void obcTaskFunctionCommsMgr(void *pvParameters) {
-  initINA230();
-
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
   initAllCc1120TxRxSemaphores();
   LOG_IF_ERROR_CODE(cc1120Init());
-  // create int and init to 0
-  uint8_t intFlag = 0;
 
-  while (intFlag == 0) {
-    sciPrintf("Entered while loop\n");
+  sciPrintf("\nTesting INA230 I2C communication...\r\n");
 
-    for (uint8_t addr = 0; addr < 0x80; addr++) {
-      uint8_t data[1] = {0};
-      errCode = i2cReceiveFrom(addr, 1, data, 50, 50);
-      if (errCode == OBC_ERR_CODE_SUCCESS) {
-        sciPrintf("Read from address 0x%02X: 0x%02X\n", addr, data[0]);
-      } else {
-        // print error code
-        sciPrintf("Error code: %d\n", errCode);
-        // sciPrintf("Error reading from address 0x%02X\n", addr);
-      }
-    }
+  // Test raw I2C communication first
+  uint8_t addresses[] = {INA230_I2C_ADDRESS_ONE, INA230_I2C_ADDRESS_TWO};
+  for (int i = 0; i < 2; i++) {
+    uint8_t data[1] = {0};
+    sciPrintf("Checking I2C device at 0x%02X: ", addresses[i]);
+    vTaskDelay(pdMS_TO_TICKS(10));  // Small delay for stable output
 
-    // init ina230 devices
-    initINA230();
-    float shuntVoltage = 0;
-    // Call the function for INA230 device 1 (index 0)
-    obc_error_code_t errCode = getINA230ShuntVoltageForDevice(0, &shuntVoltage);
-    // print shunt volatge
-    sciPrintf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
-
+    errCode = i2cReceiveFrom(addresses[i], 1, data, 50, 50);
     if (errCode == OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
+      sciPrintf("Hardware responded! Raw data: 0x%02X\r\n", data[0]);
     } else {
-      sciPrintf("Error reading shunt voltage for INA230 Device 1\n");
-      // print error code
-      sciPrintf("Error code: %d\n", errCode);
+      sciPrintf("No hardware response (Error: %d)\r\n", errCode);
     }
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
 
-    intFlag = intFlag + 1;
+  sciPrintf("\nInitializing INA230 devices...\n");
+  vTaskDelay(pdMS_TO_TICKS(10));
 
-    //   comms_event_t queueMsg;
+  // Now try initialization
+  errCode = initINA230();
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    sciPrintf("INA230 initialization failed (Error: %d)\n", errCode);
+    return;
+  }
 
-    //   if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
-    //     continue;
-    //   }
+  sciPrintf("INA230s initialized, testing voltage readings...\n");
+  vTaskDelay(pdMS_TO_TICKS(10));
 
-    //   LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
-    //   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    //     continue;
-    //   }
+  // Try reading voltages
+  for (int i = 0; i < 2; i++) {
+    sciPrintf("Reading INA230 #%d (0x%02X): ", i + 1, addresses[i]);
+    vTaskDelay(pdMS_TO_TICKS(50));
 
-    //   if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
-    //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-    //     commsState = COMMS_STATE_DISCONNECTED;
-    //     continue;
-    //   }
-
-    //   if (commsStateFns[commsState] == NULL) {
-    //     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
-    //     commsState = COMMS_STATE_DISCONNECTED;
-    //     continue;
-    //   }
-
-    //   LOG_IF_ERROR_CODE(commsStateFns[commsState]());
-    //   if (errCode != OBC_ERR_CODE_SUCCESS) {
-    //     rffm6404PowerOff();
-    //     comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
-    //     sendToCommsManagerQueue(&event);
-    //   }
+    float voltage;
+    errCode = getINA230ShuntVoltageForDevice(i, &voltage);
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      sciPrintf("Success! Shunt voltage: %f V\n", voltage);
+    } else {
+      sciPrintf("Error reading voltage (code: %d)\n", errCode);
+    }
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
+
+// void obcTaskFunctionCommsMgr(void *pvParameters) {
+//     obc_error_code_t errCode;
+//   comms_state_t commsState = *((comms_state_t *)pvParameters);
+
+//   initAllCc1120TxRxSemaphores();
+//   LOG_IF_ERROR_CODE(cc1120Init());
+
+//   sciPrintf("\nEnabling and testing INA230 devices...\n");
+
+//   // First init the INA230s which will enable them via TCA6424
+//   errCode = initINA230();
+//   if (errCode != OBC_ERR_CODE_SUCCESS) {
+//       sciPrintf("INA230 initialization failed (Error: %d)\n", errCode);
+//       return;
+//   }
+
+//   sciPrintf("INA230s initialized, now scanning I2C bus...\n");
+
+//   // Now scan for them
+//   uint8_t addresses[] = {INA230_I2C_ADDRESS_ONE, INA230_I2C_ADDRESS_TWO};
+//   for (int i = 0; i < 2; i++) {
+//       sciPrintf("Testing INA230 at address 0x%02X: ", addresses[i]);
+
+//       float voltage;
+//       errCode = getINA230ShuntVoltageForDevice(i, &voltage);
+//       if (errCode == OBC_ERR_CODE_SUCCESS) {
+//           sciPrintf("Found! Shunt voltage: %f V\n", voltage);
+//       } else {
+//           sciPrintf("Error reading (code: %d)\n", errCode);
+//       }
+
+// initINA230();
+
+// obc_error_code_t errCode;
+// comms_state_t commsState = *((comms_state_t *)pvParameters);
+
+// initAllCc1120TxRxSemaphores();
+// LOG_IF_ERROR_CODE(cc1120Init());
+// // create int and init to 0
+// uint8_t intFlag = 0;
+
+// while (intFlag == 0) {
+//   sciPrintf("Entered while loop\n");
+
+//   for (uint8_t addr = 0; addr < 0x80; addr++) {
+//     uint8_t data[1] = {0};
+//        // Print address first
+//     sciPrintf("\nScanning 0x%02X: ", addr);
+
+//     // Add small delay
+//     vTaskDelay(pdMS_TO_TICKS(5));
+
+//     errCode = i2cReceiveFrom(addr, 1, data, 50, 50);
+
+//     if (errCode == OBC_ERR_CODE_SUCCESS) {
+//         sciPrintf("Found device! Data: 0x%02X\n", data[0]);
+//     } else {
+//         sciPrintf("No response (Error: %d)\n", errCode);
+//     }
+//   }
+
+//   // init ina230 devices
+//   initINA230();
+//   float shuntVoltage = 0;
+//   // Call the function for INA230 device 1 (index 0)
+//   obc_error_code_t errCode = getINA230ShuntVoltageForDevice(0, &shuntVoltage);
+//   // print shunt volatge
+//   sciPrintf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
+
+//   if (errCode == OBC_ERR_CODE_SUCCESS) {
+//     sciPrintf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
+//   } else {
+//     sciPrintf("Error reading shunt voltage for INA230 Device 1\n");
+//     // print error code
+//     sciPrintf("Error code: %d\n", errCode);
+//   }
+
+//   intFlag = intFlag + 1;
+
+//------actual code
+//   comms_event_t queueMsg;
+
+//   if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+//     continue;
+//   }
+
+//   LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
+//   if (errCode != OBC_ERR_CODE_SUCCESS) {
+//     continue;
+//   }
+
+//   if (commsState >= sizeof(commsStateFns) / sizeof(comms_state_func_t)) {
+//     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+//     commsState = COMMS_STATE_DISCONNECTED;
+//     continue;
+//   }
+
+//   if (commsStateFns[commsState] == NULL) {
+//     LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+//     commsState = COMMS_STATE_DISCONNECTED;
+//     continue;
+//   }
+
+//   LOG_IF_ERROR_CODE(commsStateFns[commsState]());
+//   if (errCode != OBC_ERR_CODE_SUCCESS) {
+//     rffm6404PowerOff();
+//     comms_event_t event = {.eventID = COMMS_EVENT_ERROR};
+//     sendToCommsManagerQueue(&event);
+//   }
+//   }
+// }
 
 /**
  * @brief Sends an AX.25 packet to the CC1120 transmit queue
