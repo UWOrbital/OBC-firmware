@@ -14,16 +14,30 @@ extern "C" {
 #define AES_KEY_BITS 128U
 #define AES_TAG_SIZE 16
 
+/**
+ * @brief Structure containing data for AES-GCM encryption and decryption operations
+ */
 typedef struct {
+  /** Initialization vector used during encryption (16 bytes) */
   uint8_t iv[AES_IV_SIZE];
+
+  /** Pointer to the ciphertext to be decrypted or buffer to store encrypted data */
   uint8_t *ciphertext;
+
+  /** Length of the ciphertext data */
   size_t ciphertextLen;
+
+  /** Authentication tag generated during encryption (16 bytes) */
   uint8_t tag[AES_TAG_SIZE];
+
+  /** Length of the authentication tag (typically AES_TAG_SIZE) */
   size_t tagLen;
+
+  /** Pointer to additional authenticated data (AAD), if any */
   uint8_t *additionalData;
+
+  /** Length of the additional authenticated data */
   size_t additionalDataLen;
-  uint8_t *decryptedOutput;
-  size_t decryptedOutputLen;
 } aes_data_t;
 
 /**
@@ -42,22 +56,12 @@ obc_gs_error_code_t initializeAesCtx(const uint8_t *key);
  * authenticity. The authentication tag is verified to ensure the data has not been tampered with.
  *
  * @param aesData Pointer to an aes_data_t struct containing all necessary data for decryption.
- *                The struct must include:
- *                - iv: Initialization vector used during encryption
- *                - ciphertext: Pointer to the ciphertext to be decrypted
- *                - ciphertextLen: Length of the ciphertext
- *                - tag: Authentication tag generated during encryption
- *                - tagLen: Length of the authentication tag
- *                - additionalData: Pointer to additional authenticated data (AAD), if any
- *                - additionalDataLen: Length of the AAD
- *                - decryptedOutput: Pre-allocated buffer where the decrypted plaintext will be stored
- *                - decryptedOutputLen: Size of the decryptedOutput buffer (must be >= ciphertextLen)
  *
  * @return obc_gs_error_code_t Returns OBC_GS_ERR_CODE_SUCCESS on successful decryption and authentication,
  *         OBC_GS_ERR_CODE_AUTH_FAILED if the authentication fails, and OBC_GS_ERR_CODE_INVALID_ARG for invalid input
  * parameters.
  */
-obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData);
+obc_gs_error_code_t aes128Decrypt(const aes_data_t *aesData, uint8_t *output, size_t outputSize);
 
 /**
  * @brief Encrypts the AES blocks in GCM mode.
@@ -82,7 +86,7 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData);
  *         OBC_GS_ERR_CODE_INVALID_ARG for invalid input parameters, and OBC_GS_ERR_CODE_ENC_FAIL for encryption
  * failures.
  */
-obc_gs_error_code_t aes128Encrypt(aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen);
+obc_gs_error_code_t aes128Encrypt(const aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen);
 
 #ifdef __cplusplus
 }

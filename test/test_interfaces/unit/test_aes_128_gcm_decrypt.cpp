@@ -32,8 +32,6 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
 
   // Prepare decrypted output buffer
   uint8_t decryptedOutput[plaintextLen];
-  aesData.decryptedOutput = decryptedOutput;
-  aesData.decryptedOutputLen = plaintextLen;
 
   // Prepare additional authenticated data (AAD)
   const char *additionalData = "AdditionalData";
@@ -51,11 +49,11 @@ TEST(TestEncryptionDecryption, EncryptDecrypt) {
   // The tag has now been filled by the encryption function
 
   // Decrypt the ciphertext
-  obc_gs_error_code_t decResult = aes128Decrypt(&aesData);
+  obc_gs_error_code_t decResult = aes128Decrypt(&aesData, decryptedOutput, plaintextLen);
   ASSERT_EQ(decResult, OBC_GS_ERR_CODE_SUCCESS);
 
   // Verify the decrypted text matches the original plaintext
-  EXPECT_EQ(memcmp(plaintext, aesData.decryptedOutput, plaintextLen), 0);
+  EXPECT_EQ(memcmp(plaintext, decryptedOutput, plaintextLen), 0);
 }
 
 TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
@@ -86,8 +84,6 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
 
   // Prepare decrypted output buffer
   uint8_t decryptedOutput[plaintextLen];
-  aesData.decryptedOutput = decryptedOutput;
-  aesData.decryptedOutputLen = plaintextLen;
 
   // Prepare additional authenticated data (AAD)
   const char *additionalData = "AdditionalData";
@@ -108,7 +104,7 @@ TEST(TestEncryptionDecryption, DecryptWithInvalidTag) {
   aesData.tag[0] ^= 0xFF;  // Flip all bits in the first byte of the tag
 
   // Attempt to decrypt with invalid tag
-  obc_gs_error_code_t decResult = aes128Decrypt(&aesData);
+  obc_gs_error_code_t decResult = aes128Decrypt(&aesData, decryptedOutput, plaintextLen);
 
   // Check that the decryption failed due to authentication failure
   ASSERT_EQ(decResult, OBC_GS_ERR_CODE_AUTH_FAILED);
