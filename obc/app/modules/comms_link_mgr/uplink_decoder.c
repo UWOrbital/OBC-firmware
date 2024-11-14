@@ -218,7 +218,7 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   // Create decryption output buffer
   uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
 
-  interfaceErr = aes128Decrypt(aesData);
+  interfaceErr = aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
   }
