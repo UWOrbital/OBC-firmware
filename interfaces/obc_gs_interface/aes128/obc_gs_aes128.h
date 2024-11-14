@@ -56,6 +56,8 @@ obc_gs_error_code_t initializeAesCtx(const uint8_t *key);
  * authenticity. The authentication tag is verified to ensure the data has not been tampered with.
  *
  * @param aesData Pointer to an aes_data_t struct containing all necessary data for decryption.
+ * @param output Pointer to a buffer where the decrypted data will be stored.
+ * @param outputSize Size of the output buffer, indicating the maximum number of bytes that can be written.
  *
  * @return obc_gs_error_code_t Returns OBC_GS_ERR_CODE_SUCCESS on successful decryption and authentication,
  *         OBC_GS_ERR_CODE_AUTH_FAILED if the authentication fails, and OBC_GS_ERR_CODE_INVALID_ARG for invalid input
@@ -69,16 +71,6 @@ obc_gs_error_code_t aes128Decrypt(const aes_data_t *aesData, uint8_t *output, si
  * This function encrypts the provided plaintext using the AES-GCM mode. It generates an authentication tag.
  *
  * @param aesData Pointer to an aes_data_t struct containing encryption parameters and where results will be stored.
- *                The following fields must be set before calling:
- *                - iv: Initialization vector
- *                - ciphertext: Pre-allocated buffer where the ciphertext will be stored
- *                - ciphertextLen: Size of the ciphertext buffer (must be >= plaintextLen)
- *                - tagLen: Desired length of the authentication tag (typically AES_TAG_SIZE)
- *                - additionalData: Pointer to additional authenticated data (AAD), if any
- *                - additionalDataLen: Length of the AAD
- *                After the call, the following fields will be filled:
- *                - ciphertext: Will contain the encrypted data
- *                - tag: Will contain the generated authentication tag
  * @param plaintext Pointer to the plaintext data to be encrypted.
  * @param plaintextLen Length of the plaintext data.
  *
