@@ -87,7 +87,7 @@ static obc_error_code_t collectObcDs3232Temp(void) {
 }
 
 static obc_error_code_t collectBMSTemp(void) {
-  obc_error_code_t errCode;
+  // obc_error_code_t errCode;
 
   // BMS in pr https://github.com/UWOrbital/OBC-firmware/pull/187
   // float temp = 0.0f;
