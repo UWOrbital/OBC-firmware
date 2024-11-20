@@ -26,6 +26,7 @@ void obcTaskInitThermalMgr() {}
 static obc_error_code_t collectObcLm75bdTemp(void);
 static obc_error_code_t collectObcDs3232Temp(void);
 static obc_error_code_t collectObcCC1120Temp(void);
+static obc_error_code_t collectBMSTemp(void);
 
 void obcTaskFunctionThermalMgr(void* pvParameters) {
   obc_error_code_t errCode;
@@ -37,7 +38,7 @@ void obcTaskFunctionThermalMgr(void* pvParameters) {
     LOG_IF_ERROR_CODE(collectObcLm75bdTemp());
     LOG_IF_ERROR_CODE(collectObcCC1120Temp());
     LOG_IF_ERROR_CODE(collectObcDs3232Temp());  // RTC
-    // BMS in pr https://github.com/UWOrbital/OBC-firmware/pull/187
+    LOG_IF_ERROR_CODE(collectBMSTemp());
 
     digitalWatchdogTaskCheckIn(OBC_SCHEDULER_CONFIG_ID_THERMAL_MGR);
 
@@ -51,7 +52,7 @@ static obc_error_code_t collectObcLm75bdTemp(void) {
   float temp = 0.0f;
   RETURN_IF_ERROR_CODE(readTempLM75BD(LM75BD_OBC_I2C_ADDR, &temp));
 
-  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_LM75BD_TEMP, .timestamp = getCurrentUnixTime()};
 
   RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
 
@@ -65,7 +66,7 @@ static obc_error_code_t collectObcCC1120Temp(void) {
   // float temp = 0.0f;
   // RETURN_IF_ERROR_CODE(readTempCC1120(&temp));
 
-  // telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  // telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_CC1120_TEMP, .timestamp = getCurrentUnixTime()};
 
   // RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
 
@@ -78,9 +79,23 @@ static obc_error_code_t collectObcDs3232Temp(void) {
   float temp = 0.0f;
   RETURN_IF_ERROR_CODE(getTemperatureRTC(&temp));
 
-  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_DS3232_TEMP, .timestamp = getCurrentUnixTime()};
 
   RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t collectBMSTemp(void) {
+  obc_error_code_t errCode;
+
+  // BMS in pr https://github.com/UWOrbital/OBC-firmware/pull/187
+  // float temp = 0.0f;
+  // RETURN_IF_ERROR_CODE(getTempBMS(&temp)); //this function should get the temperature from the BMS/MAX17320
+
+  // telemetry_data_t obcTempVal = {.obcTemp = temp, .id = TELEM_BMS_TEMP, .timestamp = getCurrentUnixTime()};
+
+  // RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
 
   return OBC_ERR_CODE_SUCCESS;
 }
