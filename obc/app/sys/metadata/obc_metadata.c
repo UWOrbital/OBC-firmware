@@ -14,7 +14,7 @@ obc_error_code_t readAppMetadata(app_metadata_t* metadata) {
 #if ENABLE_BL_BYPASS
   return OBC_ERR_CODE_NO_METADATA;
 #else
-  const app_metadata_t* flash_metadata = (const app_metadata_t*)(&__metadata_start__);
+  volatile app_metadata_t* flash_metadata = (volatile app_metadata_t*)(&__metadata_start__);
 
   metadata->vers = flash_metadata->vers;
   metadata->binSize = flash_metadata->binSize;
