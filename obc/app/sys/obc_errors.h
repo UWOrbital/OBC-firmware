@@ -47,6 +47,7 @@ typedef enum {
   /* CDH errors 200 - 299 */
   OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
   OBC_ERR_CODE_CMD_NOT_ALLOWED = 201,
+  OBC_ERR_CODE_NO_METADATA = 202,
 
   /* ADCS errors 300 - 399 */
 
@@ -118,7 +119,6 @@ typedef enum {
 
   /** I/O error. */
   OBC_ERR_CODE_RED_EIO = 1005,
-  OBC_ERR_CODE_NO_METADATA_APP_NOT_OVER_SERIAL = 1006,
 
   /** Bad file number. */
   OBC_ERR_CODE_RED_EBADF = 1009,

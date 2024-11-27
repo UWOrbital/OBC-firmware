@@ -18,6 +18,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
 #define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
 #define BL_MAX_MSG_SIZE 64U
+#define RM46_FLASH_BANK 0U
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -26,6 +27,12 @@ typedef void (*appStartFunc_t)(void);
 typedef struct {
   uint32_t version;
   uint32_t size;
+  uint32_t boardType;
+  uint32_t buffer0;
+  uint32_t buffer1;
+  uint32_t buffer2;
+  uint32_t buffer3;
+  uint32_t buffer4;
 } app_header_t;
 
 typedef enum {
@@ -91,7 +98,7 @@ int main(void) {
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Received header\r\n"), (uint8_t *)"Received header\r\n");
 
-        errCode = blFlashFapiInitBank(0U);
+        errCode = blFlashFapiInitBank(RM46_FLASH_BANK);
         if (errCode != BL_ERR_CODE_SUCCESS) {
           char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
           int32_t blUartWriteBufferLen =
@@ -99,8 +106,9 @@ int main(void) {
           if (blUartWriteBufferLen < 0) {
             blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
                              (uint8_t *)"Error with processing message buffer length\r\n");
+          } else {
+            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           }
-          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
@@ -113,15 +121,16 @@ int main(void) {
           if (blUartWriteBufferLen < 0) {
             blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
                              (uint8_t *)"Error with processing message buffer length\r\n");
+          } else {
+            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           }
-          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Erased flash\r\n"), (uint8_t *)"Erased flash\r\n");
 
-        blFlashFapiInitBank(0U);
+        blFlashFapiInitBank(RM46_FLASH_BANK);
 
         errCode = blFlashFapiBlockErase(METADATA_START_ADDRESS, METADATA_SIZE_BYTES - 1);
         if (errCode != BL_ERR_CODE_SUCCESS) {
@@ -131,8 +140,9 @@ int main(void) {
           if (blUartWriteBufferLen < 0) {
             blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
                              (uint8_t *)"Error with processing message buffer length\r\n");
+          } else {
+            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           }
-          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
           state = BL_STATE_IDLE;
           break;
         }
@@ -150,7 +160,7 @@ int main(void) {
           }
         }
 
-        blFlashFapiInitBank(0U);
+        blFlashFapiInitBank(RM46_FLASH_BANK);
 
         // Write metadata to flash before receiving app
 
@@ -160,12 +170,19 @@ int main(void) {
           char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
           int32_t blUartWriteBufferLen = snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE,
                                                   "Failed to write metadata to flash, error code: %d \r\n", errCode);
-          blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+          if (blUartWriteBufferLen < 0) {
+            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                             (uint8_t *)"Error with processing message buffer length\r\n");
+          } else {
+            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+          }
+          state = BL_STATE_IDLE;
+          break;
         }
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Wrote metadata \r\n"), ((uint8_t *)"Wrote metadata \r\n"));
 
-        blFlashFapiInitBank(0U);
+        blFlashFapiInitBank(RM46_FLASH_BANK);
 
         // Receive image in chunks and write to flash
         uint32_t numAppBytesToFlash = appHeader.size;

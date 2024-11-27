@@ -4,7 +4,7 @@
 #include "obc_errors.h"
 #include "obc_print.h"
 #include "obc_scheduler_config.h"
-#include "metadata.h"
+#include "obc_metadata.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -21,16 +21,18 @@ extern uint32_t __metadata_start__;
 
 void vTask1(void *pvParameters) {
   while (1) {
-    metadata_struct_t metadata = {0};
+    app_metadata_t metadata = {0};
     obc_error_code_t errCode;
+
     errCode = readAppMetadata(&metadata);
 
-    if (errCode == OBC_ERR_CODE_NO_METADATA_APP_NOT_OVER_SERIAL) {
+    if (errCode == OBC_ERR_CODE_NO_METADATA) {
       sciPrintf("\r\nNO METADATA, APP NOT SENT TO BL OVER SERIAL\r\n");
     } else {
       sciPrintf("\r\nParsed values:\r\n");
       sciPrintf("Version: 0x%x\r\n", metadata.vers);
-      sciPrintf("Binary Size: 0x%x\r\n", metadata.bin_size);
+      sciPrintf("Binary Size: 0x%x\r\n", metadata.binSize);
+      sciPrintf("Board Type(0 = Launchpad, 1 = Rev1, 2 = Rev2): 0x%x\r\n", metadata.boardType);
       vTaskDelay(1000);
     }
   }

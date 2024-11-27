@@ -8,6 +8,7 @@ from typing import Final
 import serial
 
 OBC_UART_BAUD_RATE: Final = 115200
+APP_HEADER_SIZE: Final = 32
 
 
 @dataclasses.dataclass
@@ -16,21 +17,42 @@ class BootloaderHeader:
 
     version: int
     bin_size: int
+    board_type: int
 
-    HEADER_FMT: Final[str] = "<II"
+    HEADER_FMT: Final[str] = "<III"
 
     def serialize(self) -> bytes:
-        """Returns the serialized version of the object"""
-        return struct.pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size)
+        """Returns the serialized version of the object with extra padding to reach specified APP_HEADER_SIZE"""
+        header_data = struct.pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size, self.board_type)
+        unused_bytes = self.get_unused_bytes()
+        padding = bytes(unused_bytes)
+        header_full = header_data + padding
+        return header_full
 
     @staticmethod
     def get_header_size() -> int:
         """Returns the size of the header in bytes"""
         return struct.calcsize(BootloaderHeader.HEADER_FMT)
 
+    def get_unused_bytes(self) -> int:
+        """Returns how much of the 32 bytes are unused still"""
+        return APP_HEADER_SIZE - BootloaderHeader.get_header_size()
+
     def __str__(self) -> str:
         """Returns a string representation of the object"""
-        return f"Header Size: {BootloaderHeader.get_header_size()}, Version: {self.version}, Bin Size: {self.bin_size}"
+        return (
+            f"Header Size: {BootloaderHeader.get_header_size()}, Header Padding Size: "
+            f"{BootloaderHeader.get_unused_bytes(self)}, Version: {self.version}, "
+            f"Bin Size: {self.bin_size}, Board Type: {self.board_type}"
+        )
+
+
+# More fields will be added later
+@dataclasses.dataclass
+class CMakeData:
+    """Build variables from CMake"""
+
+    board_type: int
 
 
 def create_bin(input_path: str, input_version: int) -> str:
@@ -44,8 +66,15 @@ def create_bin(input_path: str, input_version: int) -> str:
     program_bin = Path(input_path).read_bytes()
     program_size_bytes = len(program_bin)
 
-    header = BootloaderHeader(version=input_version, bin_size=program_size_bytes)
+    # metadata.bin should be in the same directory as the OBC binary
+    metadata_file_path = input_path.replace("OBC-firmware.bin", "metadata.bin")
+    cmake_data = read_metadata_file(metadata_file_path)
+
+    header = BootloaderHeader(version=input_version, bin_size=program_size_bytes, board_type=cmake_data.board_type)
     header_bytes = header.serialize()
+
+    header_size_bytes = len(header_bytes)
+    print(header_size_bytes)
 
     print(header)  # TODO: Replace with logging
 
@@ -54,6 +83,26 @@ def create_bin(input_path: str, input_version: int) -> str:
     output_obj.write_bytes(header_bytes + program_bin)
 
     return output_path
+
+
+def read_metadata_file(file_path: str) -> CMakeData:
+    """
+    Creates CMakeData object from metadata file
+
+    :param file_path: Path to metadata.bin file to be parsed
+    :return: CMakeData object
+    """
+    file_obj = Path(file_path)
+    if not file_obj.exists():
+        raise FileNotFoundError(f"Metadata file not found: {file_path}")
+    data = file_obj.read_bytes()
+    cmake_variables = data.decode().split("\n")
+
+    board_type = int(cmake_variables[0])
+    # Extract other fields from cmake_variables if more data is written to metadata.bin in obc/CMakeLists.txt
+
+    cmake_data = CMakeData(board_type=board_type)
+    return cmake_data
 
 
 def send_bin(file_path: str, com_port: str) -> None:
@@ -85,7 +134,7 @@ def send_bin(file_path: str, com_port: str) -> None:
         time.sleep(0.1)
 
         # Send header
-        ser.write(data[0 : BootloaderHeader.get_header_size()])
+        ser.write(data[0:APP_HEADER_SIZE])
         time.sleep(0.1)
 
         # Wait for user to initiate transfer
@@ -96,18 +145,18 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.write("D".encode("ascii"))
         time.sleep(0.1)
 
-        # Send app in chunks of 512 bytes
-        total_bytes_to_write = len(data) - BootloaderHeader.get_header_size()
+        # Send app in chunks of 128 bytes
+        total_bytes_to_write = len(data) - APP_HEADER_SIZE
         num_bytes_written = 0
         while num_bytes_written < total_bytes_to_write:
             chunk_size = 128
 
             if total_bytes_to_write - num_bytes_written >= chunk_size:
-                ser.write(data[8 + num_bytes_written : 8 + num_bytes_written + chunk_size])
+                ser.write(data[APP_HEADER_SIZE + num_bytes_written : APP_HEADER_SIZE + num_bytes_written + chunk_size])
                 num_bytes_written += chunk_size
                 time.sleep(0.1)
             else:
-                ser.write(data[num_bytes_written + 8 :])
+                ser.write(data[num_bytes_written + APP_HEADER_SIZE :])
                 num_bytes_written += total_bytes_to_write - num_bytes_written
 
             print(f"{num_bytes_written}/{total_bytes_to_write} bytes sent")
