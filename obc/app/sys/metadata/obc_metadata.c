@@ -14,7 +14,7 @@ obc_error_code_t readAppMetadata(app_metadata_t* metadata) {
 #if ENABLE_BL_BYPASS
   return OBC_ERR_CODE_NO_METADATA;
 #else
-  memcpy(metadata, &__metadata_start__, sizeof(app_metadata_t));
+  *metadata = *(const app_metadata_t*)(&__metadata_start__);
   return OBC_ERR_CODE_SUCCESS;
 #endif
 }
