@@ -74,14 +74,14 @@ void runPowerOnTests() {
 
 // Test connection with fram
 #ifdef CONFIG_FRAM
-  FRAM_persist_testing_data_t data = {.testData = 0x1818};
-  errCode = setPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &data, sizeof(FRAM_persist_testing_data_t));
+  fram_persist_testing_data_t data = {.testData = 0x1818};
+  errCode = setPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &data, sizeof(fram_persist_testing_data_t));
 
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     logResult(false, "FRAM", "SPI", &pass, errCode);
   } else {
-    FRAM_persist_testing_data_t readData;
-    errCode = getPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &readData, sizeof(FRAM_persist_testing_data_t));
+    fram_persist_testing_data_t readData;
+    errCode = getPersistentData(OBC_PERSIST_SECTION_ID_TESTING, &readData, sizeof(fram_persist_testing_data_t));
 
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       logResult(false, "FRAM", "SPI", &pass, errCode);
