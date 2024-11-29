@@ -171,3 +171,13 @@ obc_error_code_t cc1120GetState(cc1120_state_t *stateNum);
  * @return obc_error_code_t - Whether or not the setup was a success
  */
 obc_error_code_t cc1120Init(void);
+
+/**
+ * @brief Read the temperature from the cc1120
+ *
+ * @param temp Pointer to float to store the temperature in degrees Celsius
+ * @return OBC_ERR_CODE_SUCCESS if successful, invalid-arg error code otherwise
+ */
+obc_error_code_t readTempCC1120(float *temp);
+
+
