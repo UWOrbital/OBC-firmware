@@ -445,3 +445,24 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
   RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1));
   return OBC_ERR_CODE_SUCCESS;
 }
+
+/**
+ * @brief Read the temperature from the cc1120
+ *
+ * @param temp Pointer to float to store the temperature in degrees Celsius
+ * @return OBC_ERR_CODE_SUCCESS if successful, invalid-arg error code otherwise
+ */
+obc_error_code_t readTempCC1120(float *temp){
+    if (temp == NULL) {
+        return OBC_ERR_CODE_INVALID_ARG; 
+    }
+
+    obc_error_code_t errCode;
+    uint8_t rawTemp = 0;
+    // The CC1120 device can be configured to provide a voltage proportional to temperature on GPIO1, not sure if it's the correct reg
+    RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_GPIO_STATUS, &rawTemp, 1));
+
+    *temp = ((float)rawTemp / 2.0f) - 40.0f;
+
+    return OBC_ERR_CODE_SUCCESS;
+}
