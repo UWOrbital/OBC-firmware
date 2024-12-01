@@ -120,7 +120,7 @@ obc_error_code_t readFile(int32_t fileId, void *buffer, size_t bufferSize, size_
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  int32_t ret = red_read(fileId, buffer, bufferSize);
+  int32_t ret = red_pread(fileId, buffer, bufferSize, 0); // pread with offset 0 forces to start at beginning of the file
   if (ret < 0) {
     LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_FAILED_FILE_READ;

@@ -65,15 +65,12 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   ASSERT(stateMgrQueueHandle != NULL);
 
-  // Run power on test - checks connections with peripherals, logs errors
-  runPowerOnTests();
-
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
   /* Initialize critical peripherals */
 
-#ifdef CONFIG_SDCARD
+#ifdef CONFIG_SD_CARD
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card (commented out due to bug)
 #endif                                   // CONFIG_SDCARD
 #ifdef CONFIG_DS3232
@@ -128,6 +125,9 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #endif
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR);
   taskEXIT_CRITICAL();
+
+  /* Run power on test - checks connections with peripherals, logs errors */
+  runPowerOnTests();
 
   /* Send initial messages to system queues */
   sendStartupMessages();

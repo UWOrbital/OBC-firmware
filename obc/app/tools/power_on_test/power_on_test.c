@@ -60,6 +60,42 @@ void runPowerOnTests() {
   UNUSED(errCode);
   UNUSED(logResult);
 
+// Test connection with SD Card
+#ifdef CONFIG_SD_CARD
+  int32_t fileId;
+  const char writeData[] = "Orbital\r\n";
+  const char filePath[] = "/poweron.txt";
+  char readBuf[strlen(writeData)];
+
+  setupFileSystem();
+  errCode = createFile(filePath, &fileId);
+
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    logResult(false, "SD Card", "SPI", &pass, errCode);
+  } else {
+    red_open(filePath, RED_O_RDWR | RED_O_APPEND);
+    errCode = writeFile(fileId, writeData, strlen(writeData));
+
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      LOG_ERROR_CODE(errCode);
+      logResult(false, "SD Card", "SPI", &pass, errCode);
+    } else {
+      readFile(fileId, readBuf, strlen(writeData), &placeholderSize);
+
+      if (strstr(readBuf, writeData)) {
+        logResult(true, "SD Card", "SPI", &pass, errCode);
+      } else {
+        errCode = OBC_ERR_CODE_FAILED_FILE_READ;
+        LOG_ERROR_CODE(errCode);
+        logResult(false, "SD Card", "SPI", &pass, errCode);
+      }
+
+      deleteFile(filePath);
+    }
+  }
+#endif
+
 // Test connection with LM75BD
 #ifdef CONFIG_LM75BD
   errCode = readTempLM75BD(LM75BD_OBC_I2C_ADDR, &placeholderFloat);
@@ -115,42 +151,6 @@ void runPowerOnTests() {
 #ifdef CONFIG_VN100
   errCode = vn100ReadBaudrate(&placeholderUint32);  // Handles check that response is a valid baudrate
   logResult(errCode == OBC_ERR_CODE_SUCCESS, "VN100", "SCI", &pass, errCode);
-#endif
-
-// Test connection with SD Card
-#ifdef CONFIG_SD_CARD
-  int32_t fileId;
-  const char writeData[] = "Orbital\r\n";
-  const char filePath[] = "/poweron.txt";
-  char readBuf[strlen(writeData)];
-
-  setupFileSystem();
-  errCode = createFile(filePath, &fileId);
-
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    LOG_ERROR_CODE(errCode);
-    logResult(false, "SD Card", "SPI", &pass, errCode);
-  } else {
-    red_open(filePath, RED_O_RDWR | RED_O_APPEND);
-    errCode = writeFile(fileId, writeData, strlen(writeData));
-
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      LOG_ERROR_CODE(errCode);
-      logResult(false, "SD Card", "SPI", &pass, errCode);
-    } else {
-      readFile(fileId, readBuf, strlen(writeData), &placeholderSize);
-
-      if (strstr(readBuf, writeData)) {
-        logResult(true, "SD Card", "SPI", &pass, errCode);
-      } else {
-        errCode = OBC_ERR_CODE_FAILED_FILE_READ;
-        LOG_ERROR_CODE(errCode);
-        logResult(false, "SD Card", "SPI", &pass, errCode);
-      }
-
-      deleteFile(filePath);
-    }
-  }
 #endif
 
   if (pass) {
