@@ -245,5 +245,5 @@ else()
 endif()
 
 # Generate file with CMake metadata
-file(WRITE ${CMAKE_BINARY_DIR}/metadata.bin
+file(WRITE ${CMAKE_BINARY_DIR}/OBC-metadata.bin
 ${BOARD_TYPE_TO_INT_MAP} "\n" )

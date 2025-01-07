@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-extern uint32_t __metadata_start__[sizeof(app_metadata_t)];
+extern uint32_t __metadata_start__[sizeof(app_metadata_t) / sizeof(uint32_t)];
 
 obc_error_code_t readAppMetadata(app_metadata_t* metadata) {
   if (metadata == NULL) {

@@ -21,11 +21,11 @@ typedef struct {
   uint32_t vers;
   uint32_t binSize;
   uint32_t boardType;
-  uint32_t buffer0;
-  uint32_t buffer1;
-  uint32_t buffer2;
-  uint32_t buffer3;
-  uint32_t buffer4;
+  uint32_t unused0;
+  uint32_t unused1;
+  uint32_t unused2;
+  uint32_t unused3;
+  uint32_t unused4;
 } app_metadata_t;
 
 /**

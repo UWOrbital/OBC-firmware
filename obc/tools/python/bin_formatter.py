@@ -8,6 +8,7 @@ from typing import Final
 import serial
 
 OBC_UART_BAUD_RATE: Final = 115200
+# Total app header size (includes unused bytes)
 APP_HEADER_SIZE: Final = 32
 
 
@@ -24,25 +25,26 @@ class BootloaderHeader:
     def serialize(self) -> bytes:
         """Returns the serialized version of the object with extra padding to reach specified APP_HEADER_SIZE"""
         header_data = struct.pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size, self.board_type)
-        unused_bytes = self.get_unused_bytes()
+        unused_bytes = self.get_unused_size()
+        # Add padding for the unused bytes
         padding = bytes(unused_bytes)
         header_full = header_data + padding
         return header_full
 
     @staticmethod
-    def get_header_size() -> int:
-        """Returns the size of the header in bytes"""
+    def get_used_size() -> int:
+        """Returns the total size of the used header (equal to size of all BootloaderHeader fields)"""
         return struct.calcsize(BootloaderHeader.HEADER_FMT)
 
-    def get_unused_bytes(self) -> int:
-        """Returns how much of the 32 bytes are unused still"""
-        return APP_HEADER_SIZE - BootloaderHeader.get_header_size()
+    def get_unused_size(self) -> int:
+        """Returns how much of the header size is unused"""
+        return APP_HEADER_SIZE - BootloaderHeader.get_used_size()
 
     def __str__(self) -> str:
         """Returns a string representation of the object"""
         return (
-            f"Header Size: {BootloaderHeader.get_header_size()}, Header Padding Size: "
-            f"{BootloaderHeader.get_unused_bytes(self)}, Version: {self.version}, "
+            f"Header Size: {BootloaderHeader.get_used_size()}, Header Padding Size: "
+            f"{BootloaderHeader.get_unused_size(self)}, Version: {self.version}, "
             f"Bin Size: {self.bin_size}, Board Type: {self.board_type}"
         )
 
@@ -66,15 +68,12 @@ def create_bin(input_path: str, input_version: int) -> str:
     program_bin = Path(input_path).read_bytes()
     program_size_bytes = len(program_bin)
 
-    # metadata.bin should be in the same directory as the OBC binary
-    metadata_file_path = input_path.replace("OBC-firmware.bin", "metadata.bin")
+    # metadata binary should be in the same directory as the OBC binary
+    metadata_file_path = input_path.replace("OBC-firmware.bin", "OBC-metadata.bin")
     cmake_data = read_metadata_file(metadata_file_path)
 
     header = BootloaderHeader(version=input_version, bin_size=program_size_bytes, board_type=cmake_data.board_type)
     header_bytes = header.serialize()
-
-    header_size_bytes = len(header_bytes)
-    print(header_size_bytes)
 
     print(header)  # TODO: Replace with logging
 
@@ -85,21 +84,22 @@ def create_bin(input_path: str, input_version: int) -> str:
     return output_path
 
 
-def read_metadata_file(file_path: str) -> CMakeData:
+def read_metadata_file(metadata_path: str) -> CMakeData:
     """
     Creates CMakeData object from metadata file
 
-    :param file_path: Path to metadata.bin file to be parsed
+    :param file_path: Path to metadata bin file to be parsed
     :return: CMakeData object
     """
-    file_obj = Path(file_path)
+    file_obj = Path(metadata_path)
     if not file_obj.exists():
-        raise FileNotFoundError(f"Metadata file not found: {file_path}")
+        raise FileNotFoundError(f"Metadata file not found: {metadata_path}")
     data = file_obj.read_bytes()
+    # The outputted CMake file will have the variables separated by \n
     cmake_variables = data.decode().split("\n")
 
     board_type = int(cmake_variables[0])
-    # Extract other fields from cmake_variables if more data is written to metadata.bin in obc/CMakeLists.txt
+    # Extract other fields from cmake_variables if more data is written to OBC-metadata.bin in obc/CMakeLists.txt
 
     cmake_data = CMakeData(board_type=board_type)
     return cmake_data
@@ -115,7 +115,7 @@ def send_bin(file_path: str, com_port: str) -> None:
 
     file_obj = Path(file_path)
     data = file_obj.read_bytes()
-    if len(data) < BootloaderHeader.get_header_size():
+    if len(data) < BootloaderHeader.get_used_size():
         print("File too small to contain header. Exiting...")
         return
 

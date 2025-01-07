@@ -19,6 +19,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
 #define BL_MAX_MSG_SIZE 64U
 #define RM46_FLASH_BANK 0U
+#define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -28,11 +29,11 @@ typedef struct {
   uint32_t version;
   uint32_t size;
   uint32_t boardType;
-  uint32_t buffer0;
-  uint32_t buffer1;
-  uint32_t buffer2;
-  uint32_t buffer3;
-  uint32_t buffer4;
+  uint32_t unused0;
+  uint32_t unused1;
+  uint32_t unused2;
+  uint32_t unused3;
+  uint32_t unused4;
 } app_header_t;
 
 typedef enum {
@@ -130,25 +131,6 @@ int main(void) {
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Erased flash\r\n"), (uint8_t *)"Erased flash\r\n");
 
-        blFlashFapiInitBank(RM46_FLASH_BANK);
-
-        errCode = blFlashFapiBlockErase(METADATA_START_ADDRESS, METADATA_SIZE_BYTES - 1);
-        if (errCode != BL_ERR_CODE_SUCCESS) {
-          char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
-          int32_t blUartWriteBufferLen = snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE,
-                                                  "Failed to erase metadata flash, error code: %d\r\n", errCode);
-          if (blUartWriteBufferLen < 0) {
-            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
-                             (uint8_t *)"Error with processing message buffer length\r\n");
-          } else {
-            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
-          }
-          state = BL_STATE_IDLE;
-          break;
-        }
-
-        blUartWriteBytes(BL_UART_SCIREG, strlen("Erased metadata flash\r\n"), (uint8_t *)"Erased metadata flash\r\n");
-
         // Host will send a 'D' before sending the image
         while (1) {
           char waitChar = '\0';
@@ -159,28 +141,6 @@ int main(void) {
             break;
           }
         }
-
-        blFlashFapiInitBank(RM46_FLASH_BANK);
-
-        // Write metadata to flash before receiving app
-
-        bl_error_code_t errCode =
-            blFlashFapiBlockWrite(METADATA_START_ADDRESS, (uint32_t)&appHeader, sizeof(app_header_t));
-        if (errCode != BL_ERR_CODE_SUCCESS) {
-          char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
-          int32_t blUartWriteBufferLen = snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE,
-                                                  "Failed to write metadata to flash, error code: %d \r\n", errCode);
-          if (blUartWriteBufferLen < 0) {
-            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
-                             (uint8_t *)"Error with processing message buffer length\r\n");
-          } else {
-            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
-          }
-          state = BL_STATE_IDLE;
-          break;
-        }
-
-        blUartWriteBytes(BL_UART_SCIREG, strlen("Wrote metadata \r\n"), ((uint8_t *)"Wrote metadata \r\n"));
 
         blFlashFapiInitBank(RM46_FLASH_BANK);
 
@@ -201,6 +161,48 @@ int main(void) {
         }
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
+
+        blFlashFapiInitBank(RM46_FLASH_BANK);
+
+        // Check if flash last sector (where metadata is located) was already erased when erasing sectors for the app
+        // bin, if not, erase it
+        if (APP_START_ADDRESS + appHeader.size < LAST_SECTOR_START_ADDR) {
+          errCode = blFlashFapiBlockErase(METADATA_START_ADDRESS, METADATA_SIZE_BYTES - 1);
+          if (errCode != BL_ERR_CODE_SUCCESS) {
+            char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+            int32_t blUartWriteBufferLen =
+                snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to erase flash, error code: %d\r\n", errCode);
+            if (blUartWriteBufferLen < 0) {
+              blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                               (uint8_t *)"Error with processing message buffer length\r\n");
+            } else {
+              blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+            }
+            state = BL_STATE_IDLE;
+            break;
+          }
+          blUartWriteBytes(BL_UART_SCIREG, strlen("Erased last flash sector\r\n"),
+                           (uint8_t *)"Erased last flash sector\r\n");
+        }
+
+        blFlashFapiInitBank(RM46_FLASH_BANK);
+
+        bl_error_code_t errCode =
+            blFlashFapiBlockWrite(METADATA_START_ADDRESS, (uint32_t)&appHeader, sizeof(app_header_t));
+        if (errCode != BL_ERR_CODE_SUCCESS) {
+          char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+          int32_t blUartWriteBufferLen = snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE,
+                                                  "Failed to write metadata to flash, error code: %d \r\n", errCode);
+          if (blUartWriteBufferLen < 0) {
+            blUartWriteBytes(BL_UART_SCIREG, strlen("Error with processing message buffer length\r\n"),
+                             (uint8_t *)"Error with processing message buffer length\r\n");
+          } else {
+            blUartWriteBytes(BL_UART_SCIREG, blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+          }
+          state = BL_STATE_IDLE;
+          break;
+        }
+        blUartWriteBytes(BL_UART_SCIREG, strlen("Wrote metadata \r\n"), ((uint8_t *)"Wrote metadata \r\n"));
 
         blUartWriteBytes(BL_UART_SCIREG, strlen("Fixing ECC\r\n"), (uint8_t *)"Fixing ECC\r\n");
 
