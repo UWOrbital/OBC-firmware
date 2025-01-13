@@ -50,7 +50,6 @@ endif()
 if(${CMAKE_BUILD_TYPE} MATCHES Test)
     enable_language(C CXX)
     enable_testing()
-
     add_subdirectory(test)
 endif()
 
