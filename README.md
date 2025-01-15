@@ -62,7 +62,7 @@ This command opens a terminal in VSCode: ```Ctrl + Shift + ` ```
 Enter these commands in your terminal:
 ```
 sudo apt-get update
-sudo apt-get install -y python3-pip build-essential cmake
+sudo apt-get install -y python3-pip build-essential cmake gcc-multilib g++-multilib
 pip3 install -r requirements.txt
 pre-commit install
 ```
@@ -83,7 +83,7 @@ Skip this section if you set up a Docker development environment.
 2. In WSL2, run the following:
     ```sh
     sudo apt-get update
-    sudo apt-get install build-essential
+    sudo apt-get install build-essential gcc-multilib g++-multilib
     ```
 3. Choose the environment where you'll be running `git commit` (either WSL2 or the host) and install Python 3.10 and pip. (Only required for Python devs)
    A. If using WSL, follow the instructions under the `Linux` section 2.
@@ -144,7 +144,7 @@ Skip this section if you set up a Docker development environment.
 1. Install required build tools (CMake, Make, gcc)
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential
+sudo apt-get install build-essential gcc-multilib g++-multilib
 ```
 
 2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
