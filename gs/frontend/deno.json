@@ -1,0 +1,13 @@
+{
+  "workspace": ["./aro", "./mcc"],
+  "dependencies": {
+    "@tanstack/react-query": "npm:@tanstack/react-query@^5.56.2",
+    "react": "npm:react@^18.3.1",
+    "react-dom": "npm:react-dom@^18.3.1",
+    "react-hook-form": "npm:react-hook-form@^7.53.0",
+    "react-router-dom": "npm:react-router-dom@^6.26.0"
+  },
+  "compilerOptions": {
+    "lib": ["dom", "deno.ns"]
+  }
+}
