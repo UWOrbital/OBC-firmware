@@ -21,6 +21,7 @@ This section will explain how to set up the repo, and how to build, flash, and d
 
 1. Check if you have Git installed on your system by running `git --version` in a terminal. If it returns some version number, then it's installed. If not, follow the installation steps listed [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). If you're on Windows, it's highly recommended that you also install Git Bash and use that instead of the command prompt or Powershell.
 2. To clone this project, run the following command in whatever directory you want to store the repository in:
+
 ```
 git clone git@github.com:UWOrbital/OBC-firmware.git
 ```
@@ -44,25 +45,28 @@ Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be
 It's **highly recommended** that you set up your development environment using Docker and VSCode, especially if you're new to software development. If you follow the instructions in this section, you can skip the **Windows/MacOS/Linux** sections. If you know what you're doing, feel free to set up your dev environment however you like using the instructions in the **Windows/MacOS/Linux** sections for reference. However, there may be a lack of support from other leads/members who don't use the same setup.
 
 ##### Docker Desktop Installation & Configuration
+
 1. Install Docker Desktop App from [this link](https://www.docker.com/products/docker-desktop/)
-    - You can choose to sign-up/create an account but it's not required. You can also skip the "Tell-us about what you do" section.
-2. Open Docker Desktop and click on ```Dev Environments``` from the side-panel
-    - Click on create on ```Create +``` in the top-right corner.
+   - You can choose to sign-up/create an account but it's not required. You can also skip the "Tell-us about what you do" section.
+2. Open Docker Desktop and click on `Dev Environments` from the side-panel
+   - Click on create on `Create +` in the top-right corner.
 3. Setting up the repo
-    - Name the Environment as desired
-    - For the ```Choose source``` option, select ```Local directory``` and then select the `OBC-firmware` repository folder that you cloned earlier.
-    - Click ```Continue```
-    - Once the container is created, you should be able to open the container in VSCode. If you have VSCode, you can press ```Open in VSCode```. If you don't have VSCode, you can get it here: https://code.visualstudio.com/download
+   - Name the Environment as desired
+   - For the `Choose source` option, select `Local directory` and then select the `OBC-firmware` repository folder that you cloned earlier.
+   - Click `Continue`
+   - Once the container is created, you should be able to open the container in VSCode. If you have VSCode, you can press `Open in VSCode`. If you don't have VSCode, you can get it here: https://code.visualstudio.com/download
 
 ##### Installing Dependencies
-Once you open the docker instance, open a terminal in VSCode and run the following commands. The dollar sign in your terminal should be prefaced by something like this: ```root ➜ /com.docker.devenvironments.code (main ✗)```.
 
-This command opens a terminal in VSCode: ```Ctrl + Shift + ` ```
+Once you open the docker instance, open a terminal in VSCode and run the following commands. The dollar sign in your terminal should be prefaced by something like this: `root ➜ /com.docker.devenvironments.code (main ✗)`.
+
+This command opens a terminal in VSCode: `` Ctrl + Shift + `  ``
 
 Enter these commands in your terminal:
+
 ```
 sudo apt-get update
-sudo apt-get install -y python3-pip build-essential cmake
+sudo apt-get install -y python3-pip build-essential cmake gcc-multilib g++-multilib
 pip3 install -r requirements.txt
 pre-commit install
 ```
@@ -73,24 +77,26 @@ To test whether your Dev environment has been set up correctly run the commands 
 
 **Note**: The docker container uses pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary.
 
-**Tip**: Use the ```git config --list``` command on the VsCode terminal to confirm your git info.
+**Tip**: Use the `git config --list` command on the VsCode terminal to confirm your git info.
 
 #### **Windows**
+
 Skip this section if you set up a Docker development environment.
 
 1. Download WSL2: https://learn.microsoft.com/en-us/windows/wsl/install
 
 2. In WSL2, run the following:
-    ```sh
-    sudo apt-get update
-    sudo apt-get install build-essential
-    ```
+   ```sh
+   sudo apt-get update
+   sudo apt-get install build-essential gcc-multilib g++-multilib
+   ```
 3. Choose the environment where you'll be running `git commit` (either WSL2 or the host) and install Python 3.10 and pip. (Only required for Python devs)
    A. If using WSL, follow the instructions under the `Linux` section 2.
 
    B. If you are using Windows. Run the following commands in the OBC-firmware directory:
 
    Install Python 3.10.12: https://www.python.org/downloads/release/python-31012/
+
    ```sh
    C:\path\to\python\executable -m venv .venv
    .\Scripts\bin\activate
@@ -99,22 +105,24 @@ Skip this section if you set up a Docker development environment.
    ```
 
 4. Setup pre-commit.
-    In the WSL, under the OBC-firmware directory, run the following commands:
-    ```sh
-    pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
-    pre-commit install
-    ```
-    - You may receive a message in yellow saying where pre-commit.exe was installed and that you need to add it to PATH
-        - To do this go to View advanced System settings -> Environment Variables -> Path -> Edit and click new to paste the path to where pre-commit.exe is                    installed into here. You may need to restart after doing this for the changes to take place.
-    - Once your PATH is set up and pre-commit is installed you can use `pre-commit run --all-files` to format all of your files before committing
-    **Note:** pre-commit is used to format your code whenever you make a commit.
+   In the WSL, under the OBC-firmware directory, run the following commands:
+   ```sh
+   pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
+   pre-commit install
+   ```
+   - You may receive a message in yellow saying where pre-commit.exe was installed and that you need to add it to PATH
+     - To do this go to View advanced System settings -> Environment Variables -> Path -> Edit and click new to paste the path to where pre-commit.exe is installed into here. You may need to restart after doing this for the changes to take place.
+   - Once your PATH is set up and pre-commit is installed you can use `pre-commit run --all-files` to format all of your files before committing
+     **Note:** pre-commit is used to format your code whenever you make a commit.
 
 You'll be using WSL2 primarily for building the firmware and running tests.
 
 #### **MacOS**
+
 Skip this section if you set up a Docker development environment.
 
 1. Install required build tools (CMake, Make, gcc)
+
 ```sh
 brew install cmake
 brew install make
@@ -124,6 +132,7 @@ brew install gcc
 2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
 
 Run the following commands in the OBC-firmware directory:
+
 ```sh
 brew install python@3.10
 python3 -m venv .venv
@@ -133,23 +142,27 @@ pip install -e .
 ```
 
 3. Setup pre-commit
+
 ```sh
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
 
 #### **Linux**
+
 Skip this section if you set up a Docker development environment.
 
 1. Install required build tools (CMake, Make, gcc)
+
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential
+sudo apt-get install build-essential gcc-multilib g++-multilib
 ```
 
 2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
 
 Run the following commands in the OBC-firmware directory:
+
 ```sh
 sudo apt-get install python3.10
 python3 -m venv .venv
@@ -159,6 +172,7 @@ pip install -e .
 ```
 
 3. Setup pre-commit
+
 ```sh
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
@@ -167,16 +181,21 @@ pre-commit install
 ### Building
 
 #### **OBC Firmware**
+
 From the top-level directory, run the following to build the OBC firmware.
+
 ```
 mkdir build_arm && cd build_arm
 cmake .. -DCMAKE_BUILD_TYPE=OBC
 cmake --build .
 ```
+
 Take a look at `cmake/fw_build_options.cmake` to see the available build options.
 
 #### **Ground Station**
+
 From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows.
+
 ```
 mkdir build_gs && cd build_gs
 cmake .. -DCMAKE_BUILD_TYPE=GS
@@ -184,7 +203,16 @@ cmake --build .
 ```
 
 #### **Tests**
+
+**Note**: GNU cross-compilation tools are required to build the tests. If you haven't already, run the following before building:
+
+```sh
+sudo apt-get update
+sudo apt-get install gcc-multilib g++-multilib
+```
+
 From the top-level directory, run the following to build and run the tests.
+
 ```
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Test
@@ -193,12 +221,15 @@ ctest --verbose
 ```
 
 #### **Example files**
+
 From the top-level directory, run the following to build the example source file.
+
 ```
 mkdir build_examples && cd build_examples
 cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=[EXAMPLE_TO_BE_COMPILED]
 cmake --build .
 ```
+
 Options for `EXAMPLE_TYPE` include:
 
 - `DMA_SPI` - for `dma_spi_demo`
@@ -219,36 +250,45 @@ Instructions on how to add examples:
 - Decide on a code for the example, the code must only contain uppercase letters, numbers and/or `_` referred to as `EXAMPLE_ID` from now on
 - Add the code and destination above to the list of examples in the form to the `README.md`: `EXAMPLE_ID` - for `example_name`
 - Add the following to the `OBC/CMakeLists.txt` above the comment that says `# ADD MORE EXAMPLES ABOVE THIS COMMENT`
+
 ```
 elseif(${EXAMPLE_TYPE} MATCHES EXAMPLE_ID)
 	add_executable(${OUT_FILE_NAME} path_to_main_file_in_example)
 ```
-  Where `path_to_main_file_in_example` is relative to the project root, see `OBC/CMakeLists.txt` for examples
+
+Where `path_to_main_file_in_example` is relative to the project root, see `OBC/CMakeLists.txt` for examples
+
 - Add the `EXAMPLE_ID` to the `.github/workflows/obc_examples.yml` above the comment that starts with `# ADD NEW EXAMPLES ABOVE THIS LINE`
 
 ### Flashing
+
 To flash the RM46 (our microcontroller), we use Uniflash. Open Uniflash and select the appropriate device and connection.
+
 #### **RM46 Launchpad:**
+
 - Device = LAUNCHXL2-RM46
 - Connection = Texas Instruments XDS110 USB Debug Probe
 
 #### **OBC Revision 1/2:**
+
 - Device = RM46L852
 - Connection = Texas Instruments XDS110 USB Debug Probe
 
 Then, click `Start` to begin a session. Select the `OBC-firmware.out` executable that you built (located in the `build_arm/` directory) and click `Load Image`. This will begin the flash process.
 
 ### Debugging
+
 We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutorial on how to use CCS.
 
 ## Contributing
+
 1. Make sure you're added as a member to the UW Orbital organization on GitHub.
 2. Create a feature branch for whatever task you're working on.
-    * Our branch naming scheme is `<developer_name>/<feature_description>`.
-      * Example: `danielg/implement-random-device-driver`
+   - Our branch naming scheme is `<developer_name>/<feature_description>`.
+     - Example: `danielg/implement-random-device-driver`
 3. Make a PR.
-    - For the PR description, make sure to fill in all the required details in the generated template.
-    - Add at least 3 PR reviewers, including 1 firmware lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR.
+   - For the PR description, make sure to fill in all the required details in the generated template.
+   - Add at least 3 PR reviewers, including 1 firmware lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR.
 4. Make any requested changes and merge your branch onto main once the PR is approved.
 
 **[Back to top](#table-of-contents)**
@@ -264,6 +304,7 @@ Variable and function names should be descriptive enough to understand even with
 #### Function Comments
 
 Function comments should exist in the .h file. For static functions, they should exist in the .c file. Function comments should follow the format shown below:
+
 ```c
 /**
  * @brief Adds two numbers together
@@ -283,32 +324,33 @@ uint8_t addNumbers(uint8_t num1, uint8_t num2);
 
 We use `#pragma once` instead of include guards.
 
-### ****Naming and typing conventions****
+### \***\*Naming and typing conventions\*\***
 
--   `variableNames` in camelCase
--   `functionNames()` in camelCase
--   `#define MACRO_NAME` in CAPITAL_SNAKE_CASE
--   `file_names` in snake_case
--   `type_defs` in snake_case with _t suffix
-    -   Ex:
-        ```c
-        typedef struct {
-          uint32_t a;
-          uint32_t b;
-        } struct_name_t
-        ```
--   Import statements should be grouped in the following order:
-    1.  Local imports (e.g. `#include "cc1120_driver.h`)
-    2.  External library imports (e.g. `#include <os_semphr.h>`)
-    3.  Standard library imports (e.g. `#include <stdint.h>`)
+- `variableNames` in camelCase
+- `functionNames()` in camelCase
+- `#define MACRO_NAME` in CAPITAL_SNAKE_CASE
+- `file_names` in snake_case
+- `type_defs` in snake_case with \_t suffix
+  - Ex:
+    ```c
+    typedef struct {
+      uint32_t a;
+      uint32_t b;
+    } struct_name_t
+    ```
+- Import statements should be grouped in the following order:
+  1.  Local imports (e.g. `#include "cc1120_driver.h`)
+  2.  External library imports (e.g. `#include <os_semphr.h>`)
+  3.  Standard library imports (e.g. `#include <stdint.h>`)
 
-### ****General Rules****
+### \***\*General Rules\*\***
+
 Some of these rules don't apply in certain cases. Use your better judgement. To learn more about these rules, research NASA's Power of 10.
 
-1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)).
+1. Avoid complex flow constructs, such as [goto](https://en.wikipedia.org/wiki/Goto) and [recursion](<https://en.wikipedia.org/wiki/Recursion_(computer_science)>).
 2. All loops must have fixed bounds. This prevents runaway code.
 3. Avoid [heap memory allocation](https://en.wikipedia.org/wiki/Memory_management#DYNAMIC).
-4. Use an average of two [runtime assertions](https://en.wikipedia.org/wiki/Assertion_(software_development)#Assertions_for_run-time_checking) per function.
+4. Use an average of two [runtime assertions](<https://en.wikipedia.org/wiki/Assertion_(software_development)#Assertions_for_run-time_checking>) per function.
 5. Restrict the scope of data to the smallest possible.
 6. Check the return value of all non-void functions, or cast to void to indicate the return value is useless.
 7. Limit pointer use to a single [dereference](https://en.wikipedia.org/wiki/Dereference_operator), and do not use [function pointers](https://en.wikipedia.org/wiki/Function_pointer).
@@ -405,17 +447,18 @@ class PointTwoDimension:
 	x: int
 	y: int
 ```
- ```python
+
+```python
 import enum
 
 # No comments required
 class ErrorCode(enum.Enum):
-    """
-    @brief Enum for the error codes
-    """
+   """
+   @brief Enum for the error codes
+   """
 
-    SUCCESS = 0
-    INVALID_ARG = 1
+   SUCCESS = 0
+   INVALID_ARG = 1
 ```
 
 ### Naming Conventions
@@ -426,35 +469,35 @@ class ErrorCode(enum.Enum):
 - `CONSTANT_NAMES: Final` and `ENUM_OPTIONS` in CAPITAL_SNAKE_CASE for module and class constants (not for local constant)
 - `file_names` in snake_case
 - `ClassName` in PascalCase
-    ```python
-    # For brevity, the class comments were removed but they should be in real code
-    import dataclasses
 
-    @dataclasses.dataclass
-    class PointTwoDimension:
-    	x: int
-    	y: int
+  ```python
+  # For brevity, the class comments were removed but they should be in real code
+  import dataclasses
 
-    class PointTwoDimension:
-    	def __init__(x: int, y: int):
-    		self.x = x
-    		self.y = y
-    ```
+  @dataclasses.dataclass
+  class PointTwoDimension:
+  	x: int
+  	y: int
 
+  class PointTwoDimension:
+  	def __init__(x: int, y: int):
+  		self.x = x
+  		self.y = y
+  ```
 
 - `EnumName` in PascalCase
 
-    ```python
-    import enum
+  ```python
+  import enum
 
-    class ErrorCode(enum.Enum):
-    	SUCCESS = 0
-    	INVALID_ARG = 1
+  class ErrorCode(enum.Enum):
+  	SUCCESS = 0
+  	INVALID_ARG = 1
 
-    # Accessing:
-    ErrorCode.SUCCESS  # <ErrorCode.SUCCESS: 0>
-    ErrorCode.INVALID_ARG  # <ErrorCode.INVALID_ARG: 1>
-    ```
+  # Accessing:
+  ErrorCode.SUCCESS  # <ErrorCode.SUCCESS: 0>
+  ErrorCode.INVALID_ARG  # <ErrorCode.INVALID_ARG: 1>
+  ```
 
 ### Imports
 
@@ -505,6 +548,7 @@ bar()
 **[Back to top](#table-of-contents)**
 
 ## Authors
+
 This codebase was developed by the members of UW Orbital, the University of Waterloo's CubeSat design team.
 
 **[Back to top](#table-of-contents)**
