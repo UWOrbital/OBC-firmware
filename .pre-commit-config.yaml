@@ -26,3 +26,4 @@ repos:
     rev: 0.1.0
     hooks:
     -   id: deno-fmt
+        include: 'gs/frontend/*'
