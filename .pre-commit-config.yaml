@@ -6,10 +6,10 @@ repos:
     hooks:
     - id: trailing-whitespace
       exclude: '(libs|hal)/.*'
-    # - id: end-of-file-fixer
-    #   exclude: '(libs|hal)/.*'
-    - id: check-added-large-files
+    - id: end-of-file-fixer
       exclude: '(libs|hal)/.*'
+    - id: check-added-large-files
+      exclude: '(libs|hal|gs/frontend)/.*'
 -   repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v17.0.6
     hooks:
