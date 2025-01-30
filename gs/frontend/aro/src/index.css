@@ -1,7 +1,17 @@
 body {
   margin: 0;
-  font-family: 'Comic Sans MS', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family:
+    "Comic Sans MS",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -13,7 +23,12 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family:
+    source-code-pro,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Courier New",
     monospace;
 }
 
@@ -58,8 +73,8 @@ label {
   font-size: 20px;
 }
 
-input[type=text],
-input[type=email],
+input[type="text"],
+input[type="email"],
 select {
   width: 100%;
   padding: 12px 20px;
@@ -69,21 +84,21 @@ select {
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 16px;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
-input[type=submit] {
+input[type="submit"] {
   margin: 20px 0;
   width: 125px;
   height: 50px;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
   font-size: 20px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-input[type=submit]:hover {
-  background-color: #CDCDCD;
+input[type="submit"]:hover {
+  background-color: #cdcdcd;
 }
 
 .pagediv {

@@ -5,5 +5,5 @@ import deno from "@deno/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [react(), tsconfigPaths(), deno()],
+  plugins: [react(), tsconfigPaths(), deno()],
 });

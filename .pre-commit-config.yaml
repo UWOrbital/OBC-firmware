@@ -6,8 +6,8 @@ repos:
     hooks:
     - id: trailing-whitespace
       exclude: '(libs|hal)/.*'
-    - id: end-of-file-fixer
-      exclude: '(libs|hal)/.*'
+    # - id: end-of-file-fixer
+    #   exclude: '(libs|hal)/.*'
     - id: check-added-large-files
       exclude: '(libs|hal)/.*'
 -   repo: https://github.com/pre-commit/mirrors-clang-format
@@ -22,3 +22,7 @@ repos:
     - id: ruff
       args: ["--fix"]
     - id: ruff-format
+-   repo: https://github.com/nozaq/pre-commit-deno
+    rev: 0.1.0
+    hooks:
+    -   id: deno-fmt
