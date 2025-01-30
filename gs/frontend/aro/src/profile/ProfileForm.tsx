@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ProfileData } from "./profile-data";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { updateProfile } from "./profile-api";
+import type { ProfileData } from "./profile-data.ts";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { updateProfile } from "./profile-api.ts";
 
 const ProfileForm = (props: ProfileData) => {
 	const [isEdit, setIsEdit] = useState(false);

@@ -1,7 +1,7 @@
-import { MouseEvent, useEffect, useState } from "react";
-import RequestItem from "./request_item";
-import { RequestItemData } from "./request_item_data";
-import { getRequestItems } from "./requests_api";
+import { type MouseEvent, useEffect, useState } from "react";
+import RequestItem from "./request_item.tsx";
+import type { RequestItemData } from "./request_item_data.ts";
+import { getRequestItems } from "./requests_api.ts";
 
 const Requests = () => {
 	// TODO: Switch to using react-query
@@ -18,7 +18,7 @@ const Requests = () => {
 	// TODO: Cancel request on the backend
 	const cancelRequest = (id: number) => {
 		return async (_: MouseEvent) => {
-			setData((prev) => prev.filter((item) => item.id != id));
+			setData((prev: RequestItemData[]) => prev.filter((item) => item.id != id));
 		};
 	};
 
@@ -43,7 +43,7 @@ const Requests = () => {
 				</tr>
 			</thead>
 			<tbody>
-				{data.map((item, key) => {
+				{data.map((item: RequestItemData, key: number) => {
 					console.log(item);
 					return (
 						<tr key={key}>

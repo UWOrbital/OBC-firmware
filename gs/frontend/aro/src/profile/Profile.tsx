@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProfile } from "./profile-api";
-import ProfileForm from "./ProfileForm";
+import { getProfile } from "./profile-api.ts";
+import ProfileForm from "./ProfileForm.tsx";
 
 const Profile = () => {
 	const { isPending, error, data } = useQuery({

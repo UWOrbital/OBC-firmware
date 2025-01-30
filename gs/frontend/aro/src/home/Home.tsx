@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import "./Home.css";
-import HomeStatus from "./HomeStatus";
+import HomeStatus from "./HomeStatus.tsx";
 
 function Home() {
 	return (

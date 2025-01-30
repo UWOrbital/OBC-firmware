@@ -1,5 +1,5 @@
-import { MouseEvent } from "react";
-import { RequestItemData } from "./request_item_data";
+import type { MouseEvent } from "react";
+import type { RequestItemData } from "./request_item_data.ts";
 
 export interface RequestItemProp extends RequestItemData {
 	cancelRequest: (_: MouseEvent) => Promise<void>;
