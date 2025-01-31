@@ -224,10 +224,8 @@ void alarmInterruptCallback(void) {
 
   alarm_handler_event_t event = {.id = ALARM_HANDLER_ALARM_TRIGGERED};
   xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event, &xHigherPriorityTaskWoken);
-  if (xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event, &xHigherPriorityTaskWoken) == pdTRUE) {
-    LOG_DEBUG_FROM_ISR("Alarm callback called; data sent to front of queue.");
-  } else {
-    LOG_ERROR_FROM_ISR("Alarm callback failed.");
+  if (xQueueSendToFrontFromISR(alarmHandlerQueueHandle, (void *)&event, &xHigherPriorityTaskWoken) != pdTRUE) {
+    LOG_ERROR_CODE("Alarm callback failed.");
   }
 
   if (xHigherPriorityTaskWoken) {

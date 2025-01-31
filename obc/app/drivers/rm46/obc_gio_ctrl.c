@@ -5,7 +5,6 @@
 #include "alarm_handler.h"
 #include "obc_board_config.h"
 #include "tpl5010.h"
-#include "obc_logging.h"
 
 void gioNotification(gioPORT_t *port, uint32 bit) {
   if (port == gioPORTA) {

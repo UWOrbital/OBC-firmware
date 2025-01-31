@@ -388,7 +388,7 @@ void txFifoReadyCallback(void) {
   // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
   // one
   if (xSemaphoreGiveFromISR(txSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
-    LOG_ERROR_FROM_ISR("TX FIFO below spec.");
+    LOG_ERROR_CODE("TX FIFO below spec.");
   }
   // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
   // been unblocked
@@ -400,7 +400,7 @@ void rxFifoReadyCallback(void) {
   // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
   // one
   if (xSemaphoreGiveFromISR(rxSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
-    LOG_ERROR_FROM_ISR("RX FIFO above threshold.");
+    LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_FULL);
   }
   // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
   // been unblocked
@@ -412,7 +412,7 @@ void txFifoEmptyCallback(void) {
   // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
   // one
   if (xSemaphoreGiveFromISR(txFifoEmptySemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
-    LOG_ERROR_FROM_ISR("TX FIFO is empty.");
+    LOG_ERROR_CODE(OBC_ERR_CODE_QUEUE_EMPTY);
   }
   // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
   // been unblocked
@@ -424,7 +424,7 @@ void syncEventCallback(void) {
   // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
   // one
   if (xSemaphoreGiveFromISR(syncReceivedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
-    LOG_ERROR_FROM_ISR("Sync word receieved.");
+    LOG_ERROR_CODE("Sync word receieved.");
   }
   // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
   // been unblocked
