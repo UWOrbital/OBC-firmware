@@ -103,7 +103,7 @@ obc_error_code_t i2cReceiveFrom(uint8_t sAddr, uint16_t size, uint8_t *buf, Tick
 
   if (xSemaphoreTake(i2cTransferComplete, transferTimeoutTicks) != pdTRUE) {
     errCode = OBC_ERR_CODE_I2C_TRANSFER_TIMEOUT;
-    LOG_ERROR_CODE("Semaphore cannot be given or was already given.");
+    LOG_ERROR_FROM_ISR("Semaphore cannot be given or was already given.");
     i2cSetStop(I2C_REG);
   } else {
     errCode = OBC_ERR_CODE_SUCCESS;
