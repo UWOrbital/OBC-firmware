@@ -34,13 +34,10 @@ uint32_t __stack_chk_guard_change(void) {
   uint32_t newStackGuard = 0;
   for (uint8_t i = 0; i < STACK_BYTES; i++) {
     uint8_t randomByte;
-    errCode = cc1120Rng(&randomByte);
+    LOG_IF_ERROR_CODE(cc1120Rng(&randomByte));
     if (errCode == OBC_ERR_CODE_SUCCESS) {
       (newStackGuard) = (newStackGuard << 8) | randomByte;
     } else {
-      LOG_ERROR_CODE(errCode);
-      errCode = OBC_ERR_CODE_FAILED_STACK_CANARY;
-      LOG_ERROR_CODE(errCode);
       return 0xDEADBEEF;
     }
   }
