@@ -316,6 +316,19 @@ void rtiGetConfigValue(rti_config_reg_t *config_reg, config_value_type_t type);
 void rtiNotification(uint32 notification);
 
 /* USER CODE BEGIN (6) */
+#ifdef ENABLE_TASK_STATS_COLLECTOR
+	#if (ENABLE_TASK_STATS_COLLECTOR == 1)
+
+	#include <stdint.h>
+
+	/**
+	 * @brief Returns the free counter tick for RTI 1
+	 *
+	 * @return A 32-bit tick value for the Free Counter RTI 1
+	 */
+	uint32_t rtiGetCounterOneTick();
+	#endif
+#endif
 /* USER CODE END */
 
 /**@}*/

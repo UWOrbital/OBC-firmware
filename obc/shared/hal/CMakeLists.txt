@@ -4,6 +4,8 @@ include(cmake/board_lib_defs.cmake)
 
 set(RM46_LAUNCHPAD_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/adc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/dabort.s
     ${CMAKE_CURRENT_SOURCE_DIR}/launchpad/source/errata_SSWF021_45.c
@@ -44,6 +46,8 @@ set(RM46_LAUNCHPAD_NO_OPTIMIZE_SOURCES
 
 set(OBC_REV1_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/adc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/dabort.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/source/errata_SSWF021_45.c
@@ -84,6 +88,8 @@ set(OBC_REV1_NO_OPTIMIZE_SOURCES
 
 set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/adc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/can.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/dabort.s
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/errata_SSWF021_45.c
@@ -153,6 +159,9 @@ endif()
 add_library(${HAL_LIB_NO_OPTIMIZE} OBJECT)
 target_include_directories(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 target_sources(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_SOURCES})
+target_compile_definitions(${HAL_LIB_NO_OPTIMIZE} PRIVATE 
+    ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+)
 
 if (DEBUG MATCHES 1)
     target_compile_options(${HAL_LIB_NO_OPTIMIZE} PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)
