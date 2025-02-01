@@ -48,6 +48,7 @@ static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_
 #define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(transmit_event_t)
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
+#define STACK_BYTES 4
 
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
@@ -295,8 +296,30 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
 
   initAllCc1120TxRxSemaphores();
 
+  uint32_t stack_chk_guard_change(void) {
+    obc_error_code_t errCode;
+    uint32_t newStackGuard = 0;
+    for (uint8_t i = 0; i < STACK_BYTES; i++) {
+      uint8_t randomByte;
+      LOG_IF_ERROR_CODE(cc1120Rng(&randomByte));
+      if (errCode == OBC_ERR_CODE_SUCCESS) {
+        (newStackGuard) = (newStackGuard << 8) | randomByte;
+      } else {
+        return 0xDEADBEEF;
+      }
+    }
+    return newStackGuard;
+  }
+
+  static void __attribute__((no_stack_protector)) __construct_stk_chk_guard() {
+    if (__stack_chk_guard == (void *)0xDEADBEEF) {
+      __stack_chk_guard = (void *)stack_chk_guard_change();
+    }
+  }
+
 #ifdef CONFIG_CC1120
   LOG_IF_ERROR_CODE(cc1120Init());
+  __construct_stk_chk_guard();
 #endif  // CONFIG_CC1120
   while (1) {
     comms_event_t queueMsg;
