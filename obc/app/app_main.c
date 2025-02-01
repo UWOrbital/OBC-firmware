@@ -1,52 +1,49 @@
 #include "obc_logging.h"
-#include "obc_adc.h"
 #include "obc_sci_io.h"
-#include "obc_errors.h"
-#include "obc_print.h"
+#include "obc_i2c_io.h"
+#include "obc_spi_io.h"
+#include "obc_reset.h"
 #include "obc_scheduler_config.h"
-#include "obc_metadata.h"
+#include "state_mgr.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
-#include <sci.h>
-#include <adc.h>
-#include <metadata_struct.h>
 
 #include <sys_common.h>
 #include <sys_core.h>
+#include <gio.h>
+#include <sci.h>
+#include <i2c.h>
+#include <spi.h>
+#include <can.h>
+#include <het.h>
 
-static StaticTask_t taskBuffer;
-static StackType_t taskStack[1024];
+// This is the stack canary. It should never be overwritten.
+// Ideally, it would be a random value, but we don't have a good source of entropy
+// that we can use.
+void *__stack_chk_guard = (void *)0xDEADBEEF;
 
-extern uint32_t __metadata_start__;
-
-void vTask1(void *pvParameters) {
-  while (1) {
-    app_metadata_t metadata = {0};
-    obc_error_code_t errCode;
-
-    errCode = readAppMetadata(&metadata);
-
-    if (errCode == OBC_ERR_CODE_NO_METADATA) {
-      sciPrintf("\r\nNO METADATA, APP NOT SENT TO BL OVER SERIAL\r\n");
-    } else {
-      sciPrintf("\r\nParsed values:\r\n");
-      sciPrintf("Version: 0x%x\r\n", metadata.vers);
-      sciPrintf("Binary Size: 0x%x\r\n", metadata.binSize);
-      sciPrintf("Board Type(0 = Launchpad, 1 = Rev1, 2 = Rev2): 0x%x\r\n", metadata.boardType);
-      vTaskDelay(2000);
-    }
-  }
-}
+void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
 int main(void) {
+  // Run hardware initialization code
+  gioInit();
   sciInit();
-  initSciPrint();
+  i2cInit();
+  spiInit();
+  canInit();
+  hetInit();
 
-  xTaskCreateStatic(vTask1, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);
+  _enable_interrupt_();
+
+  // Initialize bus mutexes
+  initSciMutex();
+  initI2CMutex();
+  initSpiMutex();
+
+  // The state_mgr is the only task running initially.
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATE_MGR);
 
   vTaskStartScheduler();
-
-  while (1)
-    ;
 }
