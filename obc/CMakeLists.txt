@@ -83,6 +83,7 @@ add_executable(debug-tool.out)
 # Shared
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
+add_subdirectory(shared/metadata)
 
 # Application
 target_link_options(${OUT_FILE_NAME} PRIVATE

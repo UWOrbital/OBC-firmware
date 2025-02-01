@@ -10,6 +10,7 @@
 #include <os_task.h>
 #include <sci.h>
 #include <adc.h>
+#include <metadata_struct.h>
 
 #include <sys_common.h>
 #include <sys_core.h>
@@ -33,7 +34,7 @@ void vTask1(void *pvParameters) {
       sciPrintf("Version: 0x%x\r\n", metadata.vers);
       sciPrintf("Binary Size: 0x%x\r\n", metadata.binSize);
       sciPrintf("Board Type(0 = Launchpad, 1 = Rev1, 2 = Rev2): 0x%x\r\n", metadata.boardType);
-      vTaskDelay(1000);
+      vTaskDelay(2000);
     }
   }
 }

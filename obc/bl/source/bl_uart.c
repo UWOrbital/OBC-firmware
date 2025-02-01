@@ -14,24 +14,17 @@ typedef struct {
   sciBASE_t *sciReg;
 } bl_uart_reg_config_t;
 
-/* PRIVATE VARIABLES */
-static const bl_uart_reg_config_t bl_uart_reg_config[] = {
-    [BL_UART_SCIREG] = {BL_UART_SCIREG_BAUD, UART_BL_REG},
-};
-
 /* PUBLIC FUNCTIONS */
 void blUartInit(void) {
   sciInit();
 
-  sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG].sciReg, bl_uart_reg_config[BL_UART_SCIREG].baud);
+  sciSetBaudrate(UART_BL_REG, BL_UART_SCIREG_BAUD);
 }
 
-void blUartReadBytes(bl_uart_reg_t reg, uint8_t *buf, uint32_t numBytes) {
+void blUartReadBytes(uint8_t *buf, uint32_t numBytes) {
   for (uint32_t i = 0U; i < numBytes; i++) {
-    buf[i] = (uint8_t)sciReceiveByte(bl_uart_reg_config[reg].sciReg);
+    buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
   }
 }
 
-void blUartWriteBytes(bl_uart_reg_t reg, uint32_t numBytes, uint8_t *buf) {
-  sciSend(bl_uart_reg_config[reg].sciReg, numBytes, buf);
-}
+void blUartWriteBytes(uint32_t numBytes, uint8_t *buf) { sciSend(UART_BL_REG, numBytes, buf); }
