@@ -1,3 +1,6 @@
+#include "obc_print.h"
+#include "obc_sci_io.h"
+#include <sci.h>
 #include "comms_manager.h"
 #include "obc_board_config.h"
 #include "uplink_decoder.h"
@@ -317,10 +320,10 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
     }
   }
 
-//#ifdef CONFIG_CC1120
+  // #ifdef CONFIG_CC1120
   LOG_IF_ERROR_CODE(cc1120Init());
   __construct_stk_chk_guard();
-//#endif  // CONFIG_CC1120
+  // #endif  // CONFIG_CC1120
   while (1) {
     comms_event_t queueMsg;
 
