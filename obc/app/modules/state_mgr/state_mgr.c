@@ -7,6 +7,7 @@
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
+#include "power_on_test.h"
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
@@ -69,7 +70,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
   /* Initialize critical peripherals */
 
-#ifdef CONFIG_SDCARD
+#ifdef CONFIG_SD_CARD
   LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card (commented out due to bug)
 #endif                                   // CONFIG_SDCARD
 #ifdef CONFIG_DS3232
@@ -124,6 +125,9 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #endif
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR);
   taskEXIT_CRITICAL();
+
+  /* Run power on test - checks connections with peripherals, logs errors */
+  runPowerOnTests();
 
   /* Send initial messages to system queues */
   sendStartupMessages();
