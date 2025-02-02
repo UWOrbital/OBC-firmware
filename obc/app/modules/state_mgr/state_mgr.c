@@ -67,12 +67,6 @@ obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
 
 static void sendStartupMessages(void) {}
 
-static inline void __attribute__((no_stack_protector)) construct_stk_chk_guard() {
-  if (__stack_chk_guard == (void *)0xDEADBEEF) {
-    __stack_chk_guard = (void *)stack_chk_guard_change();
-  }
-}
-
 uint32_t stack_chk_guard_change(void) {
   obc_error_code_t errCode;
   uint32_t newStackGuard = 0;
@@ -81,12 +75,17 @@ uint32_t stack_chk_guard_change(void) {
     LOG_IF_ERROR_CODE(cc1120Rng(&randomByte));
     if (errCode == OBC_ERR_CODE_SUCCESS) {
       (newStackGuard) = (newStackGuard << 8) | randomByte;
-
     } else {
       return 0xDEADBEEF;
     }
   }
   return newStackGuard;
+}
+
+static inline void __attribute__((no_stack_protector)) construct_stk_chk_guard() {
+  if (__stack_chk_guard == (void *)0xDEADBEEF) {
+    __stack_chk_guard = (void *)stack_chk_guard_change();
+  }
 }
 
 void obcTaskFunctionStateMgr(void *pvParameters) {
