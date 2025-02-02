@@ -51,7 +51,6 @@ static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_
 #define CC1120_TRANSMIT_QUEUE_ITEM_SIZE sizeof(transmit_event_t)
 #define CC1120_TRANSMIT_QUEUE_RX_WAIT_PERIOD portMAX_DELAY
 #define CC1120_TRANSMIT_QUEUE_TX_WAIT_PERIOD portMAX_DELAY
-#define STACK_BYTES 4
 
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
