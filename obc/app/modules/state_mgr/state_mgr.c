@@ -108,7 +108,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #ifdef CONFIG_CC1120
   LOG_IF_ERROR_CODE(cc1120Init());
   construct_stk_chk_guard();
-  sciPrintf("%x\r\n", (uint32_t)__stack_chk_guard);
 #endif
 
   // TODO add other peripherals
