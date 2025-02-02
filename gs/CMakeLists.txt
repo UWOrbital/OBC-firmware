@@ -16,14 +16,14 @@ target_compile_options(gs.out PUBLIC -Wall -g)
 
 if(UNIX)
     target_link_libraries(gs.out PUBLIC
-        tiny-aes
+        mbed
         lib-correct
         obc-gs-interface
         CSerialPort
 )
 elseif(WIN32)
     target_link_libraries(gs.out PUBLIC
-        tiny-aes
+        mbed
         lib-correct
         obc-gs-interface
         CSerialPort

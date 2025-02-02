@@ -208,11 +208,16 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   aesData->ciphertext = ciphertext;
 
   memcpy(aesData->iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
-  memcpy(aesData->ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
-         RS_DECODED_SIZE - AES_IV_SIZE);
+  aesData->ciphertext = unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE;
   aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
+  memcpy(aesData->iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
+  aesData->tagLen = AES_TAG_SIZE;
+  aesData->additionalData = NULL;
+  aesData->additionalDataLen = 0;
 
+  // Create decryption output buffer
   uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
+
   interfaceErr = aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AES_DECRYPT_FAILURE;

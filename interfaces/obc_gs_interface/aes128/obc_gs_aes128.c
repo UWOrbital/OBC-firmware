@@ -1,55 +1,67 @@
 #include "obc_gs_aes128.h"
 #include "obc_gs_errors.h"
 
-#include <aes.h>
-
+#include <gcm.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
-// Store the AES context
-static struct AES_ctx ctx;
+static mbedtls_gcm_context gcm_ctx;
 
-/**
- * @brief Decrypts the AES blocks
- *
- * @param aesData Pointer to an aes_data_t struct that includes a struct of the IV and data
- * @param output array to store the decrypted data
- * @param outputBufferLen length of the buffer to store the decrypted data
- *
- * @return obc_gs_error_code_t - whether or not the data was successfully decrypted
- */
-obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t outputBufferLen) {
-  if (aesData == NULL) {
-    return OBC_GS_ERR_CODE_INVALID_ARG;
-  }
-
-  if (output == NULL) {
-    return OBC_GS_ERR_CODE_INVALID_ARG;
-  }
-
-  if (outputBufferLen != aesData->ciphertextLen) {
-    return OBC_GS_ERR_CODE_INVALID_ARG;
-  }
-
-  memcpy(output, aesData->ciphertext, aesData->ciphertextLen);
-  AES_ctx_set_iv(&ctx, aesData->iv);
-  AES_CTR_xcrypt_buffer(&ctx, output, aesData->ciphertextLen);
-
-  return OBC_GS_ERR_CODE_SUCCESS;
-}
-
-/**
- * @brief Initializes the AES context
- *
- * @param key - The key to decrypt the AES blocks with
- * @return obc_gs_error_code_t - whether or not the context was successfully initialized
- */
 obc_gs_error_code_t initializeAesCtx(const uint8_t *key) {
   if (key == NULL) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  AES_init_ctx(&ctx, key);
+  mbedtls_gcm_init(&gcm_ctx);
 
-  return OBC_GS_ERR_CODE_SUCCESS;
+  int ret = mbedtls_gcm_setkey(&gcm_ctx, MBEDTLS_CIPHER_ID_AES, key, AES_KEY_BITS);
+  if (ret == 0) {
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (ret == MBEDTLS_ERR_GCM_BAD_INPUT) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  } else {
+    return OBC_GS_ERR_CODE_INIT_FAIL;
+  }
+}
+
+obc_gs_error_code_t aes128Encrypt(const aes_data_t *aesData, const uint8_t *plaintext, size_t plaintextLen) {
+  if (aesData == NULL || plaintext == NULL || aesData->ciphertext == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  int result = mbedtls_gcm_crypt_and_tag(&gcm_ctx, MBEDTLS_GCM_ENCRYPT, plaintextLen, aesData->iv, AES_IV_SIZE,
+                                         aesData->additionalData, aesData->additionalDataLen, plaintext,
+                                         aesData->ciphertext, aesData->tagLen, aesData->tag);
+
+  if (result == 0) {
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (result == MBEDTLS_ERR_GCM_BAD_INPUT) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  } else {
+    return OBC_GS_ERR_CODE_ENC_FAIL;
+  }
+}
+
+obc_gs_error_code_t aes128Decrypt(const aes_data_t *aesData, uint8_t *output, size_t outputSize) {
+  if (aesData == NULL || output == NULL) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+
+  if (outputSize < aesData->ciphertextLen) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  }
+  int result =
+      mbedtls_gcm_auth_decrypt(&gcm_ctx, aesData->ciphertextLen, aesData->iv, AES_IV_SIZE, aesData->additionalData,
+                               aesData->additionalDataLen, aesData->tag, aesData->tagLen, aesData->ciphertext, output);
+
+  if (result == 0) {
+    return OBC_GS_ERR_CODE_SUCCESS;
+  } else if (result == MBEDTLS_ERR_GCM_AUTH_FAILED) {
+    return OBC_GS_ERR_CODE_AUTH_FAILED;
+  } else if (result == MBEDTLS_ERR_GCM_BAD_INPUT) {
+    return OBC_GS_ERR_CODE_INVALID_ARG;
+  } else {
+    return OBC_GS_ERR_CODE_DEC_FAIL;
+  }
 }

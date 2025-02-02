@@ -59,7 +59,7 @@ if (${CMAKE_BUILD_TYPE} MATCHES Examples)
     add_subdirectory (obc)
 endif()
 
-# Build tiny-aes and lib-correct libs
+# Build mbed and lib-correct libs
 add_subdirectory(libs)
 
 # Build interface libs

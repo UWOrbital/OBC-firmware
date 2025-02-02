@@ -145,12 +145,10 @@ int main(void) {
       exit(1);
   }
 
-  struct AES_ctx ctx = {0};
-  AES_init_ctx(&ctx, TEMP_STATIC_KEY);
+  initializeAesCtx(TEMP_STATIC_KEY);
 
   uint8_t iv[AES_IV_SIZE] = {0};
   memset(iv, 1, AES_IV_SIZE);
-  AES_ctx_set_iv(&ctx, iv);
 
   rsGs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, 32);
 
@@ -164,10 +162,20 @@ int main(void) {
   }
 
   uint8_t encryptedCmd[RS_DECODED_SIZE] = {0};
+  aes_data_t aesData = {0};
+  memcpy(aesData.iv, iv, AES_IV_SIZE);
+  aesData.ciphertext = encryptedCmd + AES_IV_SIZE;
+  aesData.ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
+  aesData.tagLen = AES_TAG_SIZE;
+  aesData.additionalData = NULL;
+  aesData.additionalDataLen = 0;
 
-  memcpy(encryptedCmd + AES_IV_SIZE, packedSingleCmd, packedSingleCmdSize);
+  if (aes128Encrypt(&aesData, packedSingleCmd, packedSingleCmdSize) != OBC_GS_ERR_CODE_SUCCESS) {
+    printf("Failed to encrypt command message!");
+    exit(1);
+  }
 
-  AES_CTR_xcrypt_buffer(&ctx, encryptedCmd + AES_IV_SIZE, AES_DECRYPTED_SIZE);
+  memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
   memcpy(encryptedCmd, iv, AES_IV_SIZE);
 
