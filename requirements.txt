@@ -2,6 +2,8 @@
 requests==2.31.0
 pyserial==3.5
 skyfield==1.48
+fastapi[standard]==0.115.0
+sqlmodel==0.0.22
 
 # Typed packages
 types-requests==2.31.0
