@@ -2,9 +2,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from fastapi import FastAPI
 from sqlmodel import SQLModel, Session, select
-from backend.data.data_models import MainCommand
+from gs.backend.data.data_models import MainCommand
 from backend.data.engine import get_db
-from backend.data.mock_data import commands, main_commands
+from gs.backend.data.mock_data import commands, main_commands
 from backend.utils.logging import logger_setup
 from backend.utils.time import to_unix_time
 

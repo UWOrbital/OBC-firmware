@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from backend.api.lifespan import lifespan
-from backend.api.setup import setup_routes, setup_middlewares
+from gs.backend.api.v1.lifespan import lifespan
+from gs.backend.api.v1.setup import setup_routes, setup_middlewares
 
 
 app = FastAPI(lifespan=lifespan)
