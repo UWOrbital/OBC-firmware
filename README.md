@@ -9,6 +9,7 @@ This repository holds all the code written by UW Orbital's firmware team. This i
 - [C Style Guide](#c-style-guide)
 - [Python Style Guide](#python-style-guide)
 - [Pytest Style Guide](#pytest-style-guide)
+- [Typescript/React Style Guide](#typescript/react-style-guide)
 - [Authors](#authors)
 
 **[Back to top](#table-of-contents)**
@@ -22,7 +23,7 @@ This section will explain how to set up the repo, and how to build, flash, and d
 1. Check if you have Git installed on your system by running `git --version` in a terminal. If it returns some version number, then it's installed. If not, follow the installation steps listed [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). If you're on Windows, it's highly recommended that you also install Git Bash and use that instead of the command prompt or Powershell.
 2. To clone this project, run the following command in whatever directory you want to store the repository in:
 ```
-git clone git@github.com:UWOrbital/OBC-firmware.git
+git clone https://github.com/UWOrbital/OBC-firmware.git
 ```
 
 ### Dependencies
@@ -60,10 +61,11 @@ Once you open the docker instance, open a terminal in VSCode and run the followi
 This command opens a terminal in VSCode: ```Ctrl + Shift + ` ```
 
 Enter these commands in your terminal:
-```
+```sh
 sudo apt-get update
-sudo apt-get install -y python3-pip build-essential cmake
+sudo apt-get install -y python3-pip build-essential cmake curl
 pip3 install -r requirements.txt
+curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pre-commit install
 ```
 
@@ -83,9 +85,9 @@ Skip this section if you set up a Docker development environment.
 2. In WSL2, run the following:
     ```sh
     sudo apt-get update
-    sudo apt-get install build-essential
+    sudo apt-get install build-essential curl
     ```
-3. Choose the environment where you'll be running `git commit` (either WSL2 or the host) and install Python 3.10 and pip. (Only required for Python devs)
+3. Choose the environment where you'll be running `git commit` (either WSL2 or the host) and install Python 3.10 and pip. (Only required for Backend devs)
    A. If using WSL, follow the instructions under the `Linux` section 2.
 
    B. If you are using Windows. Run the following commands in the OBC-firmware directory:
@@ -101,6 +103,7 @@ Skip this section if you set up a Docker development environment.
 4. Setup pre-commit.
     In the WSL, under the OBC-firmware directory, run the following commands:
     ```sh
+    curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
     pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
     pre-commit install
     ```
@@ -121,7 +124,7 @@ brew install make
 brew install gcc
 ```
 
-2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
+2. Install Python 3.10 and setup Python virtual environment (Only required for Backend devs)
 
 Run the following commands in the OBC-firmware directory:
 ```sh
@@ -134,6 +137,7 @@ pip install -e .
 
 3. Setup pre-commit
 ```sh
+curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
@@ -144,10 +148,10 @@ Skip this section if you set up a Docker development environment.
 1. Install required build tools (CMake, Make, gcc)
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential
+sudo apt-get install build-essential curl
 ```
 
-2. Install Python 3.10 and setup Python virtual environment (Only required for Python devs)
+2. Install Python 3.10 and setup Python virtual environment (Only required for Backend devs)
 
 Run the following commands in the OBC-firmware directory:
 ```sh
@@ -160,6 +164,7 @@ pip install -e .
 
 3. Setup pre-commit
 ```sh
+curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
@@ -431,21 +436,21 @@ Handled by pre-commit
 #### Notes about imports
 
 - Imports should only be used at the top of the file (no function or scoped imports)
-- Only modules should be imported
+- Modules should not be imported
 
 ```python
 # module1 contains very_long_module_name and function foo and variable var.
 #   very_long_module_name contains bar
 
-# Yes:
-from module1 import very_long_module_name as module2  # Casting to shorter name
+# No:
+from module1 import very_long_module_name as module2
 import module1
 
 module1.foo()
 module1.var
 module2.bar()
 
-# No:
+# Yes:
 from module1.very_long_module_name import bar
 from module1 import foo, var
 
@@ -467,6 +472,44 @@ bar()
 - All functions that are to be tested should go into a Python file starting with `test_`
 - All functions that are to be tested **must** start with `test_` (This is a Pytest requirement)
 - Type hints are optional for Pytest functions (functions that start with `test_` in a Pytest file)
+
+**[Back to top](#table-of-contents)**
+
+## Typescript/React Style Guide
+
+### Comments
+
+#### Single Line Comments
+
+Variable and function names should be descriptive enough to understand even without comments. Comments are needed to describe any complicated logic. You may use `//` or `/* */` for single line comments.
+
+#### Function Comments
+
+Function comments should follow the format shown below:
+```typescript
+/**
+ * @brief Adds two numbers together
+ *
+ * @param num1 - The first number to add.
+ * @param num2 - The second number to add.
+ * @return Returns the sum of the two numbers.
+ */
+function addNumbers(num1: number, num2: number): number {
+  return num1 + num2;
+}
+```
+
+#### File Comments
+
+- File comments are not required
+
+### ****Naming and typing conventions****
+
+-   `variableNames` in camelCase
+-   `functionNames()` in camelCase
+-   `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
+-   `file_names` in snake_case
+-   `ClassName` and `ComponentName` in PascalCase
 
 **[Back to top](#table-of-contents)**
 
