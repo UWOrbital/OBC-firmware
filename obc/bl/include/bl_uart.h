@@ -1,10 +1,10 @@
 #pragma once
 
-#include "obc_board_config.h"
 #include <stdint.h>
 
 typedef enum {
-  BL_UART_SCIREG = 0,
+  BL_UART_SCIREG_1 = 0,
+  BL_UART_SCIREG_2 = 1,
 } bl_uart_reg_t;
 
 /**

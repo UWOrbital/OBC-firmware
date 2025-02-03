@@ -36,7 +36,9 @@ void obcTaskFunctionTimekeeper(void *pvParameters) {
     if (syncPeriodCounter == 0) {
       // Sync the local time with the RTC every LOCAL_TIME_SYNC_PERIOD_S seconds.
       // TODO: Deal with errors
+#ifdef CONFIG_DS3232
       LOG_IF_ERROR_CODE(syncUnixTime());
+#endif  // DCONFIG_DS3232
     } else {
       vPortEnterCritical();
       incrementCurrentUnixTime();

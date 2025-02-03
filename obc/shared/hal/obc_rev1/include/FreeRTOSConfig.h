@@ -109,6 +109,21 @@
 #define configUSE_MALLOC_FAILED_HOOK  0
 
 /* USER CODE BEGIN (1) */
+#undef configGENERATE_RUN_TIME_STATS
+#define configGENERATE_RUN_TIME_STATS ENABLE_TASK_STATS_COLLECTOR
+#if (configGENERATE_RUN_TIME_STATS == 1)
+    #include <stdint.h>
+    void vConfigureRuntimeStats(void);
+    uint32_t ulSystemTickGet(void);
+    
+    #ifndef portCONFIGURE_TIMER_FOR_RUN_TIME_STATS
+        #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS vConfigureRuntimeStats
+    #endif
+
+    #ifndef portGET_RUN_TIME_COUNTER_VALUE
+        #define portGET_RUN_TIME_COUNTER_VALUE ulSystemTickGet
+    #endif
+#endif /* configGENERATE_RUN_TIME_STATS */
 /* USER CODE END */
 
 #define configSUPPORT_STATIC_ALLOCATION			0

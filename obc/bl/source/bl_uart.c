@@ -1,12 +1,14 @@
 #include "bl_uart.h"
 
 #include <sci.h>
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 
 /* DEFINES */
-#define BL_UART_SCIREG_BAUD 115200U
+#define BL_UART_SCIREG_1_BAUD 115200U
+#define BL_UART_SCIREG_2_BAUD 115200U
 
 /* TYPEDEFS */
 typedef struct {
@@ -16,14 +18,16 @@ typedef struct {
 
 /* PRIVATE VARIABLES */
 static const bl_uart_reg_config_t bl_uart_reg_config[] = {
-    [BL_UART_SCIREG] = {BL_UART_SCIREG_BAUD, UART_BL_REG},
+    [BL_UART_SCIREG_1] = {BL_UART_SCIREG_1_BAUD, sciREG},
+    [BL_UART_SCIREG_2] = {BL_UART_SCIREG_2_BAUD, scilinREG},
 };
 
 /* PUBLIC FUNCTIONS */
 void blUartInit(void) {
   sciInit();
 
-  sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG].sciReg, bl_uart_reg_config[BL_UART_SCIREG].baud);
+  sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG_1].sciReg, bl_uart_reg_config[BL_UART_SCIREG_1].baud);
+  sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG_2].sciReg, bl_uart_reg_config[BL_UART_SCIREG_2].baud);
 }
 
 void blUartReadBytes(bl_uart_reg_t reg, uint8_t *buf, uint32_t numBytes) {
