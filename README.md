@@ -284,6 +284,24 @@ Then, click `Start` to begin a session. Select the `OBC-firmware.out` executable
 
 We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutorial on how to use CCS.
 
+### **Frontend Development**
+
+To run the frontend, you will need Deno 2 installed which was installed in the pre-commit setup instructions above.
+
+#### **Running the ARO Frontend**
+
+```sh
+cd gs/frontend/aro # Assuming you are in the top-level directory
+deno task dev # This will start the frontend on localhost:5173
+```
+
+#### **Running the MCC Frontend**
+
+```sh
+cd gs/frontend/mcc # Assuming you are in the top-level directory
+deno task dev # This will start the frontend on localhost:5173
+```
+
 ## Contributing
 
 1. Make sure you're added as a member to the UW Orbital organization on GitHub.
@@ -432,6 +450,7 @@ File comments are not required
 class PointTwoDimension:
 	"""
 	@brief Class for storing a 2D point
+
 	@attribute x (int) - x coordinate of the point
 	@attribute y (int) - y coordinate of the point
 	"""
@@ -440,7 +459,7 @@ class PointTwoDimension:
 		self.x = x
 		self.y = y
 
-@dataclasses.dataclass
+@dataclass
 class PointTwoDimension:
 	"""
 	@brief Class for storing a 2D point
@@ -453,10 +472,10 @@ class PointTwoDimension:
 ```
 
 ```python
-import enum
+from enum import Enum
 
 # No comments required
-class ErrorCode(enum.Enum):
+class ErrorCode(Enum):
    """
    @brief Enum for the error codes
    """
@@ -476,9 +495,9 @@ class ErrorCode(enum.Enum):
 
   ```python
   # For brevity, the class comments were removed but they should be in real code
-  import dataclasses
+  from dataclasses import dataclass
 
-  @dataclasses.dataclass
+  @dataclass
   class PointTwoDimension:
   	x: int
   	y: int
@@ -492,9 +511,9 @@ class ErrorCode(enum.Enum):
 - `EnumName` in PascalCase
 
   ```python
-  import enum
+  from enum import Enum
 
-  class ErrorCode(enum.Enum):
+  class ErrorCode(Enum):
   	SUCCESS = 0
   	INVALID_ARG = 1
 
