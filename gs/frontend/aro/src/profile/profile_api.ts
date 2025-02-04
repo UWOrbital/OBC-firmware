@@ -1,4 +1,4 @@
-import { ProfileData } from "./profile-data";
+import { ProfileData } from "./profile_data.ts";
 
 /**
  * @brief Gets the profile info of the current user

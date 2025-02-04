@@ -1,4 +1,4 @@
-import logo from "../assets/orbital-logo.png";
+import logo from "../assets/orbital_logo.png";
 import { Link } from "react-router-dom";
 import profile from "../assets/profile.png";
 

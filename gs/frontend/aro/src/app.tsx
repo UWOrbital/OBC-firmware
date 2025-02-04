@@ -1,11 +1,11 @@
-import "./App.css";
+import "./app.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./home/Home.tsx";
-import Navbar from "./common/Navbar.tsx";
-import NotFound from "./common/NotFound.tsx";
-import NewRequestForm from "./new-request/NewRequestForm.tsx";
-import Requests from "./requests/Requests.tsx";
-import Profile from "./profile/Profile.tsx";
+import Home from "./home/home.tsx";
+import Navbar from "./common/navbar.tsx";
+import NotFound from "./common/not_found.tsx";
+import NewRequestForm from "./new_request/new_request_form.tsx";
+import Requests from "./requests/requests.tsx";
+import Profile from "./profile/profile.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();

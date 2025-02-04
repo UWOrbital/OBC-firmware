@@ -1,4 +1,4 @@
-import { RequestItemData } from "./request_item_data";
+import type { RequestItemData } from "./request_item_data.ts";
 
 export const getRequestItems = async (): Promise<RequestItemData[]> => {
   return [
