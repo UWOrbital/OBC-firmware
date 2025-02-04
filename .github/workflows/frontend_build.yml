@@ -15,9 +15,9 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Install dependencies
+      - name: Install dependencies for ${{matrix.project}}
         run: |
-          cd ./gs/frontend/
+          cd ./gs/frontend/${{matrix.project}}
           deno install
       - name: Build ${{matrix.project}}
         run: |
