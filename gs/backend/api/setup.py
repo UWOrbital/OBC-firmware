@@ -2,7 +2,6 @@ from fastapi import FastAPI
 
 from gs.backend.api.middleware.auth_middleware import AuthMiddleware
 from gs.backend.api.middleware.cors_middleware import add_cors_middleware
-from gs.backend.api.middleware.exception_middleware import ExceptionMiddleware
 from gs.backend.api.middleware.logger_middleware import LoggerMiddleware
 from gs.backend.api.v1.aro.endpoints.picture_requests import picture_requests_router
 from gs.backend.api.v1.aro.endpoints.user import aro_user_router
@@ -32,4 +31,3 @@ def setup_middlewares(app: FastAPI) -> None:
     add_cors_middleware(app)  # Cors middleware should be added first
     app.add_middleware(AuthMiddleware)
     app.add_middleware(LoggerMiddleware)
-    app.add_middleware(ExceptionMiddleware)
