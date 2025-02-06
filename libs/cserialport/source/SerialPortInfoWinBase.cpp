@@ -1,4 +1,4 @@
-﻿#include <Windows.h>
+#include <Windows.h>
 #include <initguid.h> // GUID
 #include <Setupapi.h> // SetupDiGetClassDevs Setup*
 #include <tchar.h>    // _T
