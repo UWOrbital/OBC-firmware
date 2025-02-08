@@ -119,6 +119,11 @@ SECTIONS
     . = ALIGN(4);
     _kedata = .;        /* define a global symbol at data end */
   } >RAM AT> APP_FLASH
+  
+  .metadata_section :
+  {
+    __metadata_start__ = ORIGIN(METADATA_FLASH);
+  } >METADATA_FLASH
 
   .kernelHEAP : {} >RAM
 

@@ -83,6 +83,7 @@ add_executable(debug-tool.out)
 # Shared
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
+add_subdirectory(shared/metadata)
 
 # Application
 target_link_options(${OUT_FILE_NAME} PRIVATE
@@ -105,6 +106,7 @@ target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ENABLE_BL_BYPASS=${ENABLE_BL_BYPASS}
     ${PERIPHERAL_CONFIG}
 )
 
@@ -128,7 +130,6 @@ add_subdirectory(app/rtos)
 add_subdirectory(app/sys)
 add_subdirectory(app/drivers)
 add_subdirectory(app/reliance_edge)
-
 target_link_libraries(${OUT_FILE_NAME} PRIVATE
     tiny-aes
     lib-correct
@@ -231,3 +232,19 @@ target_link_libraries(debug-tool.out PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
+
+
+if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
+    set(BOARD_TYPE_TO_INT_MAP 0)
+elseif (${BOARD_TYPE} MATCHES OBC_REVISION_1)
+    set(BOARD_TYPE_TO_INT_MAP 1)
+elseif (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    set(BOARD_TYPE_TO_INT_MAP 2)
+# Add OBC_REVISION_3 or other boards above
+else()
+    message (FATAL_ERROR "BOARD NOT YET ADDED TO INT MAP FOR METADATA")
+endif()
+
+# Generate file with CMake metadata
+file(WRITE ${CMAKE_BINARY_DIR}/OBC-metadata.bin
+${BOARD_TYPE_TO_INT_MAP} "\n" )
