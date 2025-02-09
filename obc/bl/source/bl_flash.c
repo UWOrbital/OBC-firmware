@@ -112,8 +112,8 @@ bl_error_code_t blFlashFapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32
 }
 
 bool blFlashIsStartAddrValid(uint32_t addr, uint32_t binSize) {
-  const uint32_t lastFlashAddr =
-      (uint32_t)flashSectors[NUM_FLASH_SECTORS - 1].start + flashSectors[NUM_FLASH_SECTORS - 1].length;
+  const uint32_t lastFlashAddr = (uint32_t)flashSectors[NUM_FLASH_SECTORS - 1].start +
+                                 flashSectors[NUM_FLASH_SECTORS - 1].length - (METADATA_SIZE_BYTES);
 
   // Cannot write to the first sector (contains bootloader)
   if (addr <= (uint32_t)flashSectors[0].start) {
