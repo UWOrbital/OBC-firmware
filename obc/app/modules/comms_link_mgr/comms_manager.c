@@ -1,6 +1,3 @@
-#include "obc_print.h"
-#include "obc_sci_io.h"
-#include <sci.h>
 #include "comms_manager.h"
 #include "obc_board_config.h"
 #include "uplink_decoder.h"

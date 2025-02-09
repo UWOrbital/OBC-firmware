@@ -1,9 +1,5 @@
 #include "state_mgr.h"
 #include "comms_manager.h"  // for comms_state_t
-#include "obc_sci_io.h"
-#include "cc1120_txrx.h"
-#include "cc1120.h"
-#include "obc_print.h"
 #include "obc_board_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -13,6 +9,8 @@
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
+#include "cc1120_txrx.h"
+#include "cc1120.h"
 #include "arducam.h"
 
 #include <FreeRTOS.h>
@@ -20,14 +18,13 @@
 #include <os_queue.h>
 #include <os_task.h>
 #include <sys_common.h>
-#include <sci.h>
 
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
 #include <gio.h>
 #endif
 
 extern void *__stack_chk_guard;
-#define STACK_BYTES 4
+#define STACK_CANARY_BYTES 4
 
 /* Supervisor queue config */
 #define STATE_MGR_QUEUE_LENGTH 10U
@@ -70,7 +67,7 @@ static void sendStartupMessages(void) {}
 uint32_t stack_chk_guard_change(void) {
   obc_error_code_t errCode;
   uint32_t newStackGuard = 0;
-  for (uint8_t i = 0; i < STACK_BYTES; i++) {
+  for (uint8_t i = 0; i < STACK_CANARY_BYTES; i++) {
     uint8_t randomByte;
     LOG_IF_ERROR_CODE(cc1120Rng(&randomByte));
     if (errCode == OBC_ERR_CODE_SUCCESS) {
