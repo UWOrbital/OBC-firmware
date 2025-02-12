@@ -87,7 +87,6 @@ set(OBC_REV1_NO_OPTIMIZE_SOURCES
 )
 
 set(OBC_REV2_HAL_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
     ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/adc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/can.c
@@ -98,16 +97,6 @@ set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/het.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/i2c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/notification.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_assert.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_croutine.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_event_groups.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_heap.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_list.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_port.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_portasm.s
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_queue.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_tasks.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_timer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/pinmux.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sci.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/spi.c
@@ -122,10 +111,27 @@ set(OBC_REV2_HAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/system.c
 )
 
+set(OBC_REV2_FREERTOS_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_assert.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_croutine.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_event_groups.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_heap.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_list.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_port.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_portasm.s
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_queue.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_tasks.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_timer.c
+)
+
 set(OBC_REV2_NO_OPTIMIZE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_selftest.c
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_startup.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/os_mpu_wrappers.c
+)
+
+set(OBC_REV2_NO_OPTIMIZE_FREERTOS_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_mpu_wrappers.c
 )
 
 if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
@@ -138,30 +144,60 @@ elseif(${BOARD_TYPE} MATCHES OBC_REVISION_1)
     set(NO_OPTIMIZE_SOURCES ${OBC_REV1_NO_OPTIMIZE_SOURCES})
 elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
     set(HAL_SOURCES ${OBC_REV2_HAL_SOURCES})
+    set(FREERTOS_SOURCES ${OBC_REV2_FREERTOS_SOURCES})
     set(HAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/include)
+    set(FREERTOS_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/freertos/include)
     set(NO_OPTIMIZE_SOURCES ${OBC_REV2_NO_OPTIMIZE_SOURCES})
+    set(NO_OPTIMIZE_FREERTOS_SOURCES ${OBC_REV2_NO_OPTIMIZE_FREERTOS_SOURCES})
 else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
 
 add_library(${HAL_LIB_OPTIMIZE} STATIC)
 target_include_directories(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    add_library(${FREERTOS_LIB_OPTIMIZE} STATIC)
+    target_include_directories(${FREERTOS_LIB_OPTIMIZE} PUBLIC ${FREERTOS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+    target_link_libraries(${FREERTOS_LIB_OPTIMIZE} PUBLIC ${HAL_LIB_OPTIMIZE})
+endif()
+
 target_sources(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_SOURCES})
+if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    target_sources(${FREERTOS_LIB_OPTIMIZE} PUBLIC ${FREERTOS_SOURCES})
+endif()
 
 if (DEBUG MATCHES 1)
     target_compile_options(${HAL_LIB_OPTIMIZE} PRIVATE -O0)
+    if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+        target_compile_options(${FREERTOS_LIB_OPTIMIZE} PRIVATE -O0)
+    endif()
 else()
     target_compile_options(${HAL_LIB_OPTIMIZE} PRIVATE -O2)
+    if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+        target_compile_options(${FREERTOS_LIB_OPTIMIZE} PRIVATE -O2)
+    endif()
 endif()
 
 # Higher optimization levels on some hal files will break firmware for some reason
 # Compile them with no optimizations
 add_library(${HAL_LIB_NO_OPTIMIZE} OBJECT)
 target_include_directories(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    add_library(${FREERTOS_LIB_NO_OPTIMIZE} OBJECT)
+    target_include_directories(${FREERTOS_LIB_NO_OPTIMIZE} PUBLIC ${FREERTOS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+    # target_link_libraries(${FREERTOS_LIB_NO_OPTIMIZE} PUBLIC ${HAL_LIB_NO_OPTIMIZE})
+endif()
+
 target_sources(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_SOURCES})
 target_compile_definitions(${HAL_LIB_NO_OPTIMIZE} PRIVATE 
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
 )
+if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    target_sources(${FREERTOS_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_FREERTOS_SOURCES})
+    target_compile_definitions(${FREERTOS_LIB_NO_OPTIMIZE} PRIVATE 
+        ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    )
+endif()
 
 if (DEBUG MATCHES 1)
     target_compile_options(${HAL_LIB_NO_OPTIMIZE} PRIVATE -O0 -g -gdwarf-3 -gstrict-dwarf)

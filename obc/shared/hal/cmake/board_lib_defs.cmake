@@ -12,3 +12,5 @@ endif()
 
 set(HAL_LIB_OPTIMIZE ${HAL_LIB}-optimize)
 set(HAL_LIB_NO_OPTIMIZE ${HAL_LIB}-no-optimize)
+set(FREERTOS_LIB_OPTIMIZE ${HAL_LIB}-freertos-optimize)
+set(FREERTOS_LIB_NO_OPTIMIZE ${HAL_LIB}-freertos-no-optimize)

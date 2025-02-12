@@ -140,6 +140,12 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
+if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    target_link_libraries(${OUT_FILE_NAME} PRIVATE
+        ${FREERTOS_LIB_OPTIMIZE}
+        $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
+    )
+endif()
 
 # Generate .bin for the app
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
@@ -196,6 +202,12 @@ target_link_libraries(OBC-bl.out PRIVATE
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
     f021_api_archive
 )
+# if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+#     target_link_libraries(OBC-bl.out PRIVATE
+#         ${FREERTOS_LIB_OPTIMIZE}
+#         $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
+#     )
+# endif()
 
 # Tools
 target_link_options(debug-tool.out PRIVATE
@@ -232,6 +244,12 @@ target_link_libraries(debug-tool.out PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
+if (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    target_link_libraries(debug-tool.out PRIVATE
+        ${FREERTOS_LIB_OPTIMIZE}
+        $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
+    )
+endif()
 
 
 if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
