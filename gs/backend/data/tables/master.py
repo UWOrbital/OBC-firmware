@@ -1,5 +1,5 @@
 from typing import Final
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlmodel import Field
 
@@ -17,7 +17,7 @@ class MainCommand(BaseSQLModel, table=True):
     List of commands: https://docs.google.com/spreadsheets/d/1XWXgp3--NHZ4XlxOyBYPS-M_LOU_ai-I6TcvotKhR1s/edit?gid=564815068#gid=564815068
     """
 
-    id: UUID = Field(primary_key=True, index=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     name: str
     params: str | None = None
     format: str | None = None
@@ -34,7 +34,7 @@ class MainTelemetry(BaseSQLModel, table=True):
     List of telemetry: https://docs.google.com/spreadsheets/d/1XWXgp3--NHZ4XlxOyBYPS-M_LOU_ai-I6TcvotKhR1s/edit?gid=0#gid=0
     """
 
-    id: UUID = Field(primary_key=True, index=True)
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     name: str
     format: str | None = None
     data_size: int
