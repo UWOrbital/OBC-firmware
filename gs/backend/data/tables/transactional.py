@@ -16,7 +16,7 @@ from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.enums.transactional import CommandStatus, MainPacketType, SessionStatus
 from gs.backend.data.tables.aro_user import ARO_USER_TABLE_NAME
 from gs.backend.data.tables.base_model import BaseSQLModel
-from gs.backend.data.tables.master import MAIN_COMMAND_TABLE_NAME, MAIN_TELEMETRY_TABLE_NAME
+from gs.backend.data.tables.master import MAIN_COMMAND_TABLE_NAME, MAIN_TELEMETRY_TABLE_NAME, MainTableID
 
 ARO_REQUEST_TABLE_NAME: Final[str] = "aro_requests"
 COMMS_SESSION_TABLE_NAME: Final[str] = "comms_session_table_name"
@@ -81,7 +81,7 @@ class Commands(BaseSQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     status: CommandStatus = Field(default=CommandStatus.PENDING)
-    type_: UUID = Field(foreign_key=f"{MAIN_COMMAND_TABLE_NAME}.id")
+    type_: MainTableID = Field(foreign_key=f"{MAIN_COMMAND_TABLE_NAME}.id")
     params: str
     __tablename__ = COMMANDS_TABLE_NAME
 
@@ -93,7 +93,7 @@ class Telemetry(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    type_: UUID = Field(foreign_key=f"{MAIN_TELEMETRY_TABLE_NAME}.id")
+    type_: MainTableID = Field(foreign_key=f"{MAIN_TELEMETRY_TABLE_NAME}.id")
     value: str
     __tablename__ = TELEMETRY_TABLE_NAME
 
