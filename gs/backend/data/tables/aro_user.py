@@ -12,7 +12,14 @@ ARO_USER_TABLE_NAME: Final[str] = "aro_users"
 
 class AROUsers(BaseSQLModel, table=True):
     """
-    Stores all the information about an ARO user
+    @brief Stores all the information about an ARO user
+
+    @attribute id (UUID) - ARO User ID. Auto generated on insert
+    @attribute call_sign (str) - ARO User's call sign that we will use to communicate with them
+    @attribute email (EmailStr) - Valid email
+    @attribute first_name (str) -  First name of ARO user
+    @attribute last_name (str | None) -  Optional last name
+    @attribute phone_number (str) - Valid phone number
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
