@@ -23,8 +23,8 @@ class MainCommand(BaseSQLModel, table=True):
     name: str
     params: str | None = None
     format: str | None = None
-    data_size: int
-    total_size: int
+    data_size: int = Field(gt=0)
+    total_size: int = Field(gt=0)
     __tablename__ = MAIN_COMMAND_TABLE_NAME
 
 
@@ -39,6 +39,6 @@ class MainTelemetry(BaseSQLModel, table=True):
     id: MainTableID = Field(primary_key=True, index=True)  # NOTE: Must be synced with obc_gs_telemetry_id
     name: str
     format: str | None = None
-    data_size: int
-    total_size: int
+    data_size: int = Field(gt=0)
+    total_size: int = Field(gt=0)
     __tablename__ = MAIN_TELEMETRY_TABLE_NAME
