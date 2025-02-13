@@ -1,4 +1,4 @@
-from enum import StrEnum, auto
+from enum import Enum, StrEnum, auto
 
 
 class CommandStatus(StrEnum):
@@ -27,7 +27,7 @@ class SessionStatus(StrEnum):
     COMPLETED = auto()  # Session is complete. GS has received all the data for the session. Final state of session
 
 
-class MainPacketType:
+class MainPacketType(Enum):
     """
     Represents the type of packets that can be transmited/received
     """
