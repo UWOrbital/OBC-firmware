@@ -23,7 +23,7 @@ This section will explain how to set up the repo, and how to build, flash, and d
 1. Check if you have Git installed on your system by running `git --version` in a terminal. If it returns some version number, then it's installed. If not, follow the installation steps listed [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). If you're on Windows, it's highly recommended that you also install Git Bash and use that instead of the command prompt or Powershell.
 2. To clone this project, run the following command in whatever directory you want to store the repository in:
 
-```
+```sh
 git clone https://github.com/UWOrbital/OBC-firmware.git
 ```
 
@@ -188,7 +188,7 @@ pre-commit install
 
 From the top-level directory, run the following to build the OBC firmware.
 
-```
+```sh
 mkdir build_arm && cd build_arm
 cmake .. -DCMAKE_BUILD_TYPE=OBC
 cmake --build .
@@ -200,7 +200,7 @@ Take a look at `cmake/fw_build_options.cmake` to see the available build options
 
 From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows.
 
-```
+```sh
 mkdir build_gs && cd build_gs
 cmake .. -DCMAKE_BUILD_TYPE=GS
 cmake --build .
@@ -217,7 +217,7 @@ sudo apt-get install gcc-multilib g++-multilib
 
 From the top-level directory, run the following to build and run the tests.
 
-```
+```sh
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Test
 cmake --build .
@@ -228,7 +228,7 @@ ctest --verbose
 
 From the top-level directory, run the following to build the example source file.
 
-```
+```sh
 mkdir build_examples && cd build_examples
 cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=[EXAMPLE_TO_BE_COMPILED]
 cmake --build .
@@ -255,7 +255,7 @@ Instructions on how to add examples:
 - Add the code and destination above to the list of examples in the form to the `README.md`: `EXAMPLE_ID` - for `example_name`
 - Add the following to the `OBC/CMakeLists.txt` above the comment that says `# ADD MORE EXAMPLES ABOVE THIS COMMENT`
 
-```
+```cmake
 elseif(${EXAMPLE_TYPE} MATCHES EXAMPLE_ID)
 	add_executable(${OUT_FILE_NAME} path_to_main_file_in_example)
 ```
