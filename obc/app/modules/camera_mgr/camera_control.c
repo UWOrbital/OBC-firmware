@@ -39,9 +39,9 @@ obc_error_code_t startImageCapture(void) {
   camera_id_t selectedCamera = getSelectedCamera();
   // Make sure output is jpeg and set resolution is 320x240
   RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamCaptureConfig(), JPEG_CONFIG_LEN));
-  // Switch to lowest JPEG resolution
   RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamResolutionConfig(), RES_320_240_CONFIG_LEN));
 
+  // Start capture
   RETURN_IF_ERROR_CODE(arducamWriteFIFOControlReg(FIFO_CLEAR_CAPTURE_DONE_FLAG | FIFO_START_CAPTURE));
   totalBytesToRead[selectedCamera] = 0;
   FIFOReadPtr[selectedCamera] = 0;

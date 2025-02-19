@@ -107,6 +107,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #endif
 
   // TODO add other peripherals
+  // - Add Init for camera
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
@@ -121,8 +122,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
   initFRAM();  // FRAM storage (OBC)
-  // init camera
-  
+
   // Initialize the state of each module. This will not start any tasks.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);

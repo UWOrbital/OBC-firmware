@@ -48,7 +48,7 @@ void vTask1(void *pvParameters) {
   // Camera Configuration
   sciPrintf("Configuring Camera\r\n");
   camConfigureSensor();
-  while(1){
+  while (1) {
     // Capture
     sciPrintf("Starting Image Capture\r\n");
     startImageCapture();
