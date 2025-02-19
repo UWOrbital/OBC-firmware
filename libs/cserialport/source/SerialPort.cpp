@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 
 #include "CSerialPort/SerialPort.h"
 #include "CSerialPort/SerialPort_version.h"

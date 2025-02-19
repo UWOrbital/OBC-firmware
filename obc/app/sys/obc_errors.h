@@ -24,6 +24,7 @@ typedef enum {
   OBC_ERR_CODE_FAILED_PACK = 16,
   OBC_ERR_CODE_INVALID_STATE_TRANSITION = 17,
   OBC_ERR_CODE_FREERTOS_ASSERT_FAIL = 18,
+  OBC_ERR_CODE_FAILED_STACK_CANARY = 19,
 
   /* Driver Errors 100 - 199*/
   OBC_ERR_CODE_SPI_FAILURE = 100,
@@ -47,6 +48,7 @@ typedef enum {
   /* CDH errors 200 - 299 */
   OBC_ERR_CODE_UNSUPPORTED_CMD = 200,
   OBC_ERR_CODE_CMD_NOT_ALLOWED = 201,
+  OBC_ERR_CODE_NO_METADATA = 202,
 
   /* ADCS errors 300 - 399 */
 
@@ -193,4 +195,5 @@ typedef enum {
 
   /** Operation is not supported. */
   OBC_ERR_CODE_RED_ENOTSUPP = 1524,
+
 } obc_error_code_t;

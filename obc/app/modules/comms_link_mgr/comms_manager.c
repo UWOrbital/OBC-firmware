@@ -295,9 +295,6 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
 
   initAllCc1120TxRxSemaphores();
 
-#ifdef CONFIG_CC1120
-  LOG_IF_ERROR_CODE(cc1120Init());
-#endif  // CONFIG_CC1120
   while (1) {
     comms_event_t queueMsg;
 
