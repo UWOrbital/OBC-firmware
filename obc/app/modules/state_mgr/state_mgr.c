@@ -89,7 +89,8 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(lm75bdInit(&config));  // LM75BD temperature sensor (OBC)
 
   initFRAM();  // FRAM storage (OBC)
-
+  // init camera
+  
   // Initialize the state of each module. This will not start any tasks.
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_TIMEKEEPER);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_ALARM_MGR);

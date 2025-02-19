@@ -37,6 +37,11 @@ obc_error_code_t isCaptureDone(void) {
 obc_error_code_t startImageCapture(void) {
   obc_error_code_t errCode;
   camera_id_t selectedCamera = getSelectedCamera();
+  // Make sure output is jpeg and set resolution is 320x240
+  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamCaptureConfig(), JPEG_CONFIG_LEN));
+  // Switch to lowest JPEG resolution
+  RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamResolutionConfig(), RES_320_240_CONFIG_LEN));
+
   RETURN_IF_ERROR_CODE(arducamWriteFIFOControlReg(FIFO_CLEAR_CAPTURE_DONE_FLAG | FIFO_START_CAPTURE));
   totalBytesToRead[selectedCamera] = 0;
   FIFOReadPtr[selectedCamera] = 0;
@@ -137,9 +142,8 @@ obc_error_code_t camConfigureSensor(void) {
   RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x3008, 0x80));
   // Setup Preview resolution
   RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamPreviewConfig(), PREVIEW_CONFIG_LEN));
-  vTaskDelay(pdMS_TO_TICKS(1));
+  vTaskDelay(pdMS_TO_TICKS(2));
 
-  vTaskDelay(pdMS_TO_TICKS(1));
   // Switch to JPEG capture
   RETURN_IF_ERROR_CODE(camWriteSensorRegs16_8(getCamCaptureConfig(), JPEG_CONFIG_LEN));
   // Switch to lowest JPEG resolution

@@ -48,30 +48,32 @@ void vTask1(void *pvParameters) {
   // Camera Configuration
   sciPrintf("Configuring Camera\r\n");
   camConfigureSensor();
+  while(1){
+    // Capture
+    sciPrintf("Starting Image Capture\r\n");
+    startImageCapture();
+    while (isCaptureDone() == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
+      ;
+    sciPrintf("Image Capture Done ^_^\r\n");
 
-  // Capture
-  sciPrintf("Starting Image Capture\r\n");
-  startImageCapture();
-  while (isCaptureDone() == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
-    ;
-  sciPrintf("Image Capture Done ^_^\r\n");
+    // Read image size
+    uint32_t img_len = 0;
+    arducamReadFIFOSize(&img_len);
+    sciPrintf("image len: %d \r\n", img_len);
 
-  // Read image size
-  uint32_t img_len = 0;
-  arducamReadFIFOSize(&img_len);
-  sciPrintf("image len: %d \r\n", img_len);
-
-  // Read image from FIFO
-  uint8_t imgBuffer[BUFFER_SIZE];
-  sciPrintf("FIFO Burst Read:\r\n");
-  size_t bytesRead = 0;
-  obc_error_code_t ret;
-  do {
-    ret = readImage(imgBuffer, BUFFER_SIZE, &bytesRead);
-    for (size_t index = 0; index < bytesRead; index++) {
-      sciPrintf("0x%X,", imgBuffer[index]);
-    }
-  } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
+    // Read image from FIFO
+    uint8_t imgBuffer[BUFFER_SIZE];
+    sciPrintf("FIFO Burst Read:\r\n");
+    size_t bytesRead = 0;
+    obc_error_code_t ret;
+    do {
+      ret = readImage(imgBuffer, BUFFER_SIZE, &bytesRead);
+      for (size_t index = 0; index < bytesRead; index++) {
+        sciPrintf("0x%X,", imgBuffer[index]);
+      }
+    } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
+    sciPrintf("\r\n");
+  }
 
   // Put Camera on standby (gets pretty hot if left powered on for too long)
   standbyCamera();
