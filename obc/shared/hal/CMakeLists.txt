@@ -129,7 +129,7 @@ else()
 endif()
 
 add_library(${HAL_LIB_OPTIMIZE} STATIC)
-target_include_directories(${HAL_LIB_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+target_include_directories(${HAL_LIB_OPTIMIZE} PUBLIC ${FREERTOS_INCLUDE_DIRS} ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 add_library(${FREERTOS_LIB_OPTIMIZE} STATIC)
 target_include_directories(${FREERTOS_LIB_OPTIMIZE} PUBLIC ${FREERTOS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 target_link_libraries(${FREERTOS_LIB_OPTIMIZE} PUBLIC ${HAL_LIB_OPTIMIZE})
@@ -148,10 +148,9 @@ endif()
 # Higher optimization levels on some hal files will break firmware for some reason
 # Compile them with no optimizations
 add_library(${HAL_LIB_NO_OPTIMIZE} OBJECT)
-target_include_directories(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
+target_include_directories(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${FREERTOS_INCLUDE_DIRS} ${HAL_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
 add_library(${FREERTOS_LIB_NO_OPTIMIZE} OBJECT)
 target_include_directories(${FREERTOS_LIB_NO_OPTIMIZE} PUBLIC ${FREERTOS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/common)
-# target_link_libraries(${FREERTOS_LIB_NO_OPTIMIZE} PUBLIC ${HAL_LIB_NO_OPTIMIZE})
 
 target_sources(${HAL_LIB_NO_OPTIMIZE} PUBLIC ${NO_OPTIMIZE_SOURCES})
 target_compile_definitions(${HAL_LIB_NO_OPTIMIZE} PRIVATE 
