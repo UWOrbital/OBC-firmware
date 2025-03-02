@@ -248,11 +248,10 @@ static void spiLogErrors(uint32_t spiErr) {
 }
 
 bool isSpiBusOwner(SemaphoreHandle_t spiMutex) {
-  portENTER_CRITICAL();
   TaskHandle_t owner = xSemaphoreGetMutexHolder(spiMutex);
-  portEXIT_CRITICAL();
+  TaskHandle_t currentTask = xTaskGetCurrentTaskHandle();
 
-  return xSemaphoreGetMutexHolder(spiMutex) == owner;
+  return currentTask == owner;
 }
 
 obc_error_code_t getSpiMutex(spiBASE_t *spi, SemaphoreHandle_t *mutex) {
