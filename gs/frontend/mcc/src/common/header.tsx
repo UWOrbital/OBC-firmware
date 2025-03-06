@@ -1,30 +1,21 @@
-import Nav from "react-bootstrap/Nav";
 import { Link } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 function Header() {
   return (
-    <Nav className="header">
-      <Nav.Item className="item">
-        <Nav.Link eventKey="link-1">
+    <div>
+      <div className="nav">
+        <Link to="/">
+          <img src={logo} alt="orbital logo"></img>
+        </Link>
+        <div className="navmenu">
           <Link to="/">Dashboard</Link>
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item className="item">
-        <Nav.Link eventKey="link-2">
           <Link to="/mission-commands">Mission Commands</Link>
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item className="item">
-        <Nav.Link eventKey="link-3">
           <Link to="/telemetry-data">Telemetry Data</Link>
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item className="item">
-        <Nav.Link eventKey="link-4">
           <Link to="/aro-requests">ARO Requests</Link>
-        </Nav.Link>
-      </Nav.Item>
-    </Nav>
+        </div>
+      </div>
+    </div>
   );
 }
 
