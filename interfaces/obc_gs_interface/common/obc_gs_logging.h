@@ -32,7 +32,7 @@ typedef enum { GS_LOG_TRACE, GS_LOG_DEBUG, GS_LOG_INFO, GS_LOG_WARN, GS_LOG_ERRO
 
 //Define a bit field structure for the log type and log level
 typedef struct {
-    unsigned int logType : 1; // 1 bit for log type (0 for GS_LOG_TYPE_ERROR_CODE, 1 for LOG_TYPE_MSG)
+    unsigned int logType : 1; // 1 bit for log type (0 for GS_LOG_TYPE_ERROR_CODE, 1 for GS_LOG_TYPE_MSG)
     unsigned int logLevel : 3; // 3 bits for log level 
 } gs_log_entry_t;
 
