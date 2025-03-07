@@ -70,13 +70,13 @@ typedef enum { GS_LOG_TYPE_ERROR_CODE = 0, GS_LOG_TYPE_MSG = 1 } gs_log_type_t;
   #define GS_LOG_ERROR_CODE(errCode)    LOG_ERROR_CODE(errCode)
   #define GS_LOG_ERROR_CODE_FROM_ISR(errCode) LOG_ERROR_CODE_FROM_ISR(errCode)
 
-#define GS_RETURN_IF_ERROR_CODE(_ret)          \
-    do {                                       \
-      obc_gs_error_code_t errCode = _ret;        \
-      if (errCode != OBC_GS_ERR_CODE_SUCCESS) {  \
-        GS_LOG_ERROR_CODE(errCode);            \
-        return errCode;                        \
-  }                                            \
+#define GS_RETURN_IF_ERROR_CODE(_ret)           \
+    do {                                        \
+      obc_gs_error_code_t errCode = _ret;       \
+      if (errCode != OBC_GS_ERR_CODE_SUCCESS) { \
+        GS_LOG_ERROR_CODE(errCode);             \
+        return errCode;                         \
+  }                                             \
 } while (0)
 
 #define GS_LOG_IF_ERROR_CODE(_ret)              \
