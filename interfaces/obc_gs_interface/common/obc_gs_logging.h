@@ -43,9 +43,14 @@ typedef enum { GS_LOG_TYPE_ERROR_CODE = 0, GS_LOG_TYPE_MSG = 1 } gs_log_type_t;
 #define GS_LOG_DEFAULT_LEVEL GS_LOG_TRACE
 #endif
 
+//To use the correct logging for OBC_FIRMWARE and OBC_GS builds, 
+//there needs to be a specific defintion for the build in the file that includes this header
+// #define BUILD_TYPE_OBC_FIRMWARE or #define BUILD_TYPE_OBC_GS or nothing if not defined
+
+
 //Logging condtionally, based on if the build type is OBC_FIRMWARE or OBC_GS
 #ifdef BUILD_TYPE_OBC_FIRMWARE
-  //Forward GS logging to the firmware logging module?
+  //Forward GS logging to the firmware logging module
   #include "obc_logging.h"
 
   #define GS_LOG_TRACE(msg)    LOG_TRACE(msg)
@@ -64,12 +69,11 @@ typedef enum { GS_LOG_TYPE_ERROR_CODE = 0, GS_LOG_TYPE_MSG = 1 } gs_log_type_t;
 
   #define GS_LOG_ERROR_CODE(errCode)    LOG_ERROR_CODE(errCode)
   #define GS_LOG_ERROR_CODE_FROM_ISR(errCode) LOG_ERROR_CODE_FROM_ISR(errCode)
-// this is all iffy for right now?
 
 #define GS_RETURN_IF_ERROR_CODE(_ret)          \
     do {                                       \
-    obc_gs_error_code_t errCode = _ret;        \
-    if (errCode != OBC_GS_ERR_CODE_SUCCESS) {  \
+      obc_gs_error_code_t errCode = _ret;        \
+      if (errCode != OBC_GS_ERR_CODE_SUCCESS) {  \
         GS_LOG_ERROR_CODE(errCode);            \
         return errCode;                        \
   }                                            \
@@ -83,23 +87,80 @@ typedef enum { GS_LOG_TYPE_ERROR_CODE = 0, GS_LOG_TYPE_MSG = 1 } gs_log_type_t;
       }                                         \
     } while (0)
 
-#elif defined(BUILD_TYPE_OBC_GS)
-//ground stattions functions declarions 
+#else 
+
+#ifdef BUILD_TYPE_OBC_GS
+//these functions are for when the buildtype is defined to be BUILD_TYPE_OBC_GS
 
 /**
  * @brief Set the logging level
  *
- * 
- * @param 
+ * @param newLogLevel The new logging level
  */
 void gsLogSetLevel(gs_log_level_t newLogLevel);
 
+/**
+ * @brief Log an error code
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param errCode               the error code that needs to be logged
+ * @return obc_gs_error_code_t	OBC_GS_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_GS_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_GS_ERR_CODE_INVALID_ARG		    if file or s are null or if there is an encoding error
+ * 								OBC_GS_ERR_CODE_SUCCESS			    if message is successfully logged
+ * 								OBC_GS_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
 obc_gs_error_code_t gsLogErrorCode(gs_log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
 
+/**
+ * @brief Log a message
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param msg                   the message that should be logged (MUST BE STATIC)
+ * @return obc_gs_error_code_t	OBC_GS_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_GS_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_GS_ERR_CODE_INVALID_ARG		    if file or s are null or if there is an encoding error
+ * 								OBC_GS_ERR_CODE_SUCCESS			    if message is successfully logged
+ * 								OBC_GS_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
 obc_gs_error_code_t gsLogMsg(gs_log_level_t msgLevel, const char *file, uint32_t line, const char *msg);
 
+/**
+ * @brief Log an error code from ISR
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param errCode               the error code that needs to be logged
+ * @return obc_gs_error_code_t	OBC_GS_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_GS_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_GS_ERR_CODE_INVALID_ARG		    if file or s are null or if there is an encoding error
+ * 								OBC_GS_ERR_CODE_SUCCESS			    if message is successfully logged
+ * 								OBC_GS_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
 obc_gs_error_code_t gsLogErrorCodeFromISR(gs_log_level_t msgLevel, const char *file, uint32_t line, uint32_t errCode);
 
+/**
+ * @brief Log a message from ISR
+ *
+ * @param msgLevel				Level of the message
+ * @param file					File of message
+ * @param line					Line of message
+ * @param msg                   the message that should be logged (MUST BE STATIC)
+ * @return obc_gs_error_code_t	OBC_GS_ERR_CODE_LOG_MSG_SILENCED 	if msgLevel is lower than logging level
+ * 								OBC_GS_ERR_CODE_BUFF_TOO_SMALL		if logged message is too long
+ * 								OBC_GS_ERR_CODE_INVALID_ARG		    if file or s are null or if there is an encoding error
+ * 								OBC_GS_ERR_CODE_SUCCESS			    if message is successfully logged
+ * 								OBC_GS_ERR_CODE_UNKNOWN 			otherwise
+ *
+ */
 obc_gs_error_code_t gsLogMsgFromISR(gs_log_level_t msgLevel, const char *file, uint32_t line, const char *msg);
 
 #define GS_LOG_TRACE(msg)    gsLogMsg(GS_LOG_TRACE, __FILE_FROM_REPO_ROOT__, __LINE__, msg)
@@ -136,22 +197,24 @@ do {                                         \
   }                                          \
 } while (0)
 
-
 #else
-  /* If no build type is defined, disable GS logging */
-  #define GS_LOG_TRACE(msg)            ((void)0)
-  #define GS_LOG_DEBUG(msg)            ((void)0)
-  #define GS_LOG_INFO(msg)             ((void)0)
-  #define GS_LOG_WARN(msg)             ((void)0)
-  #define GS_LOG_ERROR(msg)            ((void)0)
-  #define GS_LOG_FATAL(msg)            ((void)0)
-  #define GS_LOG_TRACE_FROM_ISR(msg)   ((void)0)
-  #define GS_LOG_DEBUG_FROM_ISR(msg)   ((void)0)
-  #define GS_LOG_INFO_FROM_ISR(msg)    ((void)0)
-  #define GS_LOG_WARN_FROM_ISR(msg)    ((void)0)
-  #define GS_LOG_ERROR_FROM_ISR(msg)   ((void)0)
-  #define GS_LOG_FATAL_FROM_ISR(msg)   ((void)0)
-  #define GS_LOG_ERROR_CODE(errCode)   ((void)0)
+  //when no build type is defined in the file
+
+  #define GS_LOG_TRACE(msg)                     ((void)0)
+  #define GS_LOG_DEBUG(msg)                     ((void)0)
+  #define GS_LOG_INFO(msg)                      ((void)0)
+  #define GS_LOG_WARN(msg)                      ((void)0)
+  #define GS_LOG_ERROR(msg)                     ((void)0)
+  #define GS_LOG_FATAL(msg)                     ((void)0)
+  #define GS_LOG_TRACE_FROM_ISR(msg)            ((void)0)
+  #define GS_LOG_DEBUG_FROM_ISR(msg)            ((void)0)
+  #define GS_LOG_INFO_FROM_ISR(msg)             ((void)0)
+  #define GS_LOG_WARN_FROM_ISR(msg)             ((void)0)
+  #define GS_LOG_ERROR_FROM_ISR(msg)            ((void)0)
+  #define GS_LOG_FATAL_FROM_ISR(msg)            ((void)0)
+  #define GS_LOG_ERROR_CODE(errCode)            ((void)0)
+  #define GS_LOG_ERROR_CODE_FROM_ISR(errCode)   ((void)0)
+
   #define GS_RETURN_IF_ERROR_CODE(_ret)          \
     do {                                         \
       obc_gs_error_code_t errCode = _ret;        \
@@ -165,4 +228,6 @@ do {                                         \
       if (errCode != OBC_GS_ERR_CODE_SUCCESS) {  \
       }                                          \
     } while (0)
+
+#endif
 #endif
