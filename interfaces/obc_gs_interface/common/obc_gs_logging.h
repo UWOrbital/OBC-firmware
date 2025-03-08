@@ -43,12 +43,7 @@ typedef enum { GS_LOG_TYPE_ERROR_CODE = 0, GS_LOG_TYPE_MSG = 1 } gs_log_type_t;
 #define GS_LOG_DEFAULT_LEVEL GS_LOG_TRACE
 #endif
 
-//To use the correct logging for OBC_FIRMWARE and OBC_GS builds, 
-//there needs to be a specific defintion for the build in the file that includes this header
-// #define BUILD_TYPE_OBC_FIRMWARE or #define BUILD_TYPE_OBC_GS or nothing if not defined
-
-
-//Logging condtionally, based on if the build type is OBC_FIRMWARE or OBC_GS
+//more on build types in CmakeLists.txt
 #ifdef BUILD_TYPE_OBC_FIRMWARE
   //Forward GS logging to the firmware logging module
   #include "obc_logging.h"
@@ -199,8 +194,6 @@ do {                                         \
 
 #else
   //when no build type is defined in the file
-
-  #define GS_LOG_TRACE(msg)                     ((void)0)
   #define GS_LOG_DEBUG(msg)                     ((void)0)
   #define GS_LOG_INFO(msg)                      ((void)0)
   #define GS_LOG_WARN(msg)                      ((void)0)
