@@ -3,9 +3,10 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from loguru import logger
 from time import time
 from sys import getsizeof
+from typing import List
 
 #add any endpoints we don't want logged here, e.g "/example/endpoint"
-excluded_endpoints = []
+excluded_endpoints: List[str] = []
 class LoggerMiddleware(BaseHTTPMiddleware):
     """Middleware that logs the request and response"""
 
@@ -32,7 +33,8 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         else:
             logger_severity = logger.info
         
-        response_body = b''.join([chunk async for chunk in response.body_iterator])
+        chunks = [chunk async for chunk in response.body_iterator]
+        response_body = b''.join(chunks)
         response_size = getsizeof(response_body)
 
         logger_severity(f"RESPONSE | Status: {response.status_code} | Response: {response_body.decode(errors='ignore')} | Size: {response_size} bytes | Time Elasped: {process_time:.3f}.")
@@ -41,5 +43,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             content=response_body, 
             status_code=response.status_code, 
             headers=dict(response.headers), 
-            media_type=response.media_type
+            media_type=response.media_type,
+            body_iterator=chunks
         )
