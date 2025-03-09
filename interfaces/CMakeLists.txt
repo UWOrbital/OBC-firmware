@@ -37,11 +37,11 @@ target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
 
 # setting the build type defintions for the library
 if(CMAKE_BUILD_TYPE STREQUAL "OBC")
-    target_compile_definitions(obc-gs-interface PUBLIC BUILD_TYPE_OBC_FIRMWARE)
+    target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_FIRMWARE)
 
 elseif(CMAKE_BUILD_TYPE STREQUAL "GS")
-    target_compile_definitions(obc-gs-interface PUBLIC BUILD_TYPE_OBC_GS)
-    
+    target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_GS)
+
 endif()
 
 target_link_libraries(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE
