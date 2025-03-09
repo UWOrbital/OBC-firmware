@@ -4,8 +4,9 @@
 
 ## Requirements
 <!-- Describe the requirements that this feature must meet. -->
-- [ ]
+- [ ] Requirement 1
 
 ## Important Info
+<!-- Additional important information such as links to resources. -->
 -
 
