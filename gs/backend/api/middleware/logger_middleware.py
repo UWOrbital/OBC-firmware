@@ -36,7 +36,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         response_body = b''.join([chunk async for chunk in response.body_iterator])
         response_size = getsizeof(response_body)
         
-
         logger_severity(f"RESPONSE | Status: {response.status_code} | Response: {response_body.decode(errors='ignore')} | Size: {response_size} bytes | Time Elasped: {process_time:.3f}.")
         
         return Response(
@@ -45,3 +44,4 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             headers=dict(response.headers), 
             media_type=response.media_type,
         )
+    
