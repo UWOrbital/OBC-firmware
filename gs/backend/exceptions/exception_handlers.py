@@ -1,11 +1,23 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from gs.backend.exceptions.exceptions import BaseOrbitalError, ServiceError, NotFoundError, InvalidArgumentError, InvalidStateError, DatabaseError, UnauthorizedError, UnknownError, SunPositionError
+
+from gs.backend.exceptions.exceptions import (
+    BaseOrbitalError,
+    DatabaseError,
+    InvalidArgumentError,
+    InvalidStateError,
+    NotFoundError,
+    ServiceError,
+    SunPositionError,
+    UnauthorizedError,
+    UnknownError,
+)
 
 app = FastAPI()
 
+
 @app.exception_handler(BaseOrbitalError)
-async def base_orbital_exception_handler(request: Request, exc: BaseOrbitalError)  -> JSONResponse:
+async def base_orbital_exception_handler(request: Request, exc: BaseOrbitalError) -> JSONResponse:
     """
     @brief handle all BaseOrbitalError exceptions
 
@@ -17,8 +29,9 @@ async def base_orbital_exception_handler(request: Request, exc: BaseOrbitalError
         content={"message": exc.message},
     )
 
+
 @app.exception_handler(ServiceError)
-async def service_exception_handler(request: Request, exc: ServiceError)  -> JSONResponse:
+async def service_exception_handler(request: Request, exc: ServiceError) -> JSONResponse:
     """
     @brief handle all ServiceError exceptions
 
@@ -30,8 +43,9 @@ async def service_exception_handler(request: Request, exc: ServiceError)  -> JSO
         content={"message": exc.message},
     )
 
+
 @app.exception_handler(NotFoundError)
-async def not_found_exception_handler(request: Request, exc: NotFoundError)  -> JSONResponse:
+async def not_found_exception_handler(request: Request, exc: NotFoundError) -> JSONResponse:
     """
     @brief handle all NotFoundError exceptions
 
@@ -43,8 +57,9 @@ async def not_found_exception_handler(request: Request, exc: NotFoundError)  -> 
         content={"message": exc.message},
     )
 
+
 @app.exception_handler(InvalidArgumentError)
-async def invalid_argument_exception_handler(request: Request, exc: InvalidArgumentError)  -> JSONResponse:
+async def invalid_argument_exception_handler(request: Request, exc: InvalidArgumentError) -> JSONResponse:
     """
     @brief handle all InvalidArgumentError exceptions
 
@@ -56,8 +71,9 @@ async def invalid_argument_exception_handler(request: Request, exc: InvalidArgum
         content={"message": exc.message},
     )
 
+
 @app.exception_handler(InvalidStateError)
-async def invalid_state_exception_handler(request: Request, exc: InvalidStateError)  -> JSONResponse:
+async def invalid_state_exception_handler(request: Request, exc: InvalidStateError) -> JSONResponse:
     """
     @brief handle all InvalidStateError exceptions
 
@@ -69,8 +85,9 @@ async def invalid_state_exception_handler(request: Request, exc: InvalidStateErr
         content={"message": exc.message},
     )
 
+
 @app.exception_handler(DatabaseError)
-async def data_base_exception_handler(request: Request, exc: DatabaseError)  -> JSONResponse:
+async def data_base_exception_handler(request: Request, exc: DatabaseError) -> JSONResponse:
     """
     @brief handle all DatabaseError exceptions
 
@@ -81,6 +98,7 @@ async def data_base_exception_handler(request: Request, exc: DatabaseError)  -> 
         status_code=400,
         content={"message": exc.message},
     )
+
 
 @app.exception_handler(UnauthorizedError)
 async def unauthorized_exception_handler(request: Request, exc: UnauthorizedError) -> JSONResponse:
@@ -95,8 +113,9 @@ async def unauthorized_exception_handler(request: Request, exc: UnauthorizedErro
         content={"message": exc.message},
     )
 
+
 @app.exception_handler(UnknownError)
-async def unknown_exception_handler(request: Request, exc: UnknownError)  -> HTTPException:
+async def unknown_exception_handler(request: Request, exc: UnknownError) -> HTTPException:
     """
     @brief handle all UnknownError exceptions with HTTPException
 
@@ -106,10 +125,11 @@ async def unknown_exception_handler(request: Request, exc: UnknownError)  -> HTT
     return HTTPException(
         status_code=400,
         detail=exc.message,
-    ) 
+    )
+
 
 @app.exception_handler(SunPositionError)
-async def sun_position_exception_handler(request: Request, exc: SunPositionError)  -> JSONResponse:
+async def sun_position_exception_handler(request: Request, exc: SunPositionError) -> JSONResponse:
     """
     @brief handle all SunPositionError exceptions
 
