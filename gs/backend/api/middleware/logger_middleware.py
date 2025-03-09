@@ -21,10 +21,10 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         request_body = await request.body()
         request_size = getsizeof(request_body)
         # TODO: update this based on userID header name
-        request_userID = request.headers.get("userID", "Anonymous")
+        request_user_id = request.headers.get("user_id", "Anonymous")
         request_params = dict(request.query_params)
 
-        logger.info(f"REQUEST | Method: {request.method} | URL: {request.url.path} | User id: {request_userID} | Params: {request_params} | Size: {request_size} bytes.")
+        logger.info(f"REQUEST | Method: {request.method} | URL: {request.url.path} | User id: {request_user_id} | Params: {request_params} | Size: {request_size} bytes.")
         
         if response.status_code >= 500:
             logger_severity = logger.critical
