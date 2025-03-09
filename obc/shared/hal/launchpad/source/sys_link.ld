@@ -1,7 +1,7 @@
 /*----------------------------------------------------------------------------*/
 /* sys_link.ld                                                              */
 /*                                                                            */
-/* (c) Texas Instruments 2009-2014, All rights reserved.                      */
+/* (c) Texas Instruments 2009-2013, All rights reserved.                      */
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 /* Entry Point */
@@ -17,11 +17,9 @@ _Min_Heap_Size = 0x400;      /* required amount of heap  */
 MEMORY
 {
   VECTORS(rx)     : ORIGIN = 0x00000000, LENGTH = 0x00000020
-  KERNEL (rx)     : ORIGIN = 0x00000020, LENGTH = 0x00008000
   FLASH  (rx)     : ORIGIN = 0x00008020, LENGTH = 0x00137FE0
   CPU_STACK (rw)  : ORIGIN = 0x08000000, LENGTH = 0x00000800 /* Stack is configured in sys_core.asm */
-  KRAM (xrw)      : ORIGIN = 0x08000800, LENGTH = 0x00000800
-  RAM (xrw)       : ORIGIN = (0x08000800 + 0x00000800), LENGTH = (0x0002f800 - 0x00000800)
+  RAM (xrw)       : ORIGIN = 0x08000800, LENGTH = 0x0002f800
   MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
 }
 
@@ -36,14 +34,6 @@ SECTIONS
     . = ALIGN(4);
   } >VECTORS
 
- /* FreeRTOS Kernel in protected region of Flash */
-  .kernelTEXT :
-  {
-    . = ALIGN(4);
-    KEEP(*(.kernelTEXT))
-    . = ALIGN(4);
-  } >KERNEL
-  
   /* The program code and other data goes into RAM */
   .text :
   {
@@ -113,35 +103,6 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
-  .kernelBSS :
-  {
-    . = ALIGN(4);
-    _kernel_bss = .;
-    *(.kernelBSS)
-    *(.kernelBSS*)
-
-    _ekernel_bss = .;         /* define a global symbol at bss end */
-    __kernel_bss_end__ = _ekernel_bss;
-  } >KRAM
-
-  /* FreeRTOS Kernel data in protected region of RAM */
-  /* used by the startup to initialize data */
-  _ksidata = LOADADDR(.kernelBSS);
- 
-  /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data :
-  {
-    . = ALIGN(4);
-    _ksdata = .;        /* create a global symbol at data start */
-    *(.data)           /* .data sections */
-    *(.data*)          /* .data* sections */
-
-    . = ALIGN(4);
-    _kedata = .;        /* define a global symbol at data end */
-  } >RAM AT> FLASH
-  
-  .kernelHEAP : {} >RAM
-  
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :

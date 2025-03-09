@@ -2,7 +2,7 @@
 <SETTINGS>
   <DEVICE>
     <family>RM46x</family>
-    <device>RM46L852PGE_FREERTOS</device>
+    <device>RM46L852PGE</device>
     <dilfile>obc_rev1_hal.dil</dilfile>
     <tools>gcc</tools>
   </DEVICE>
