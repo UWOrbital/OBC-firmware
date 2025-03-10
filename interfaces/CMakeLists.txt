@@ -35,9 +35,8 @@ set(SOURCES
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
 target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
 
-# setting the build type defintions for the library
 if(CMAKE_BUILD_TYPE MATCHES OBC)
-    target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_FIRMWARE)
+    target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_FW)
 
 elseif(CMAKE_BUILD_TYPE MATCHES GS)
     target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_GS)
