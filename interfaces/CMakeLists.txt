@@ -13,6 +13,7 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/data_pack_unpack
 
     ${CMAKE_CURRENT_SOURCE_DIR}/../obc/app/sys/logging
+    ${CMAKE_CURRENT_SOURCE_DIR}/../obc/app/sys
 )
 
 set(SOURCES
