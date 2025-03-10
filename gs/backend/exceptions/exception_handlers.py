@@ -1,12 +1,5 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from fastapi.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_404_NOT_FOUND,
-    HTTP_409_CONFLICT,
-    HTTP_422_UNPROCESSABLE_ENTITY,
-)
 
 from gs.backend.exceptions.exceptions import (
     BaseOrbitalError,
@@ -37,7 +30,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (BaseOrbitalError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": exc.message},
         )
 
@@ -50,7 +43,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (ServiceError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": exc.message},
         )
 
@@ -63,7 +56,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (NotFoundError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND,
             content={"message": exc.message},
         )
 
@@ -76,7 +69,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (InvalidArgumentError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"message": exc.message},
         )
 
@@ -89,7 +82,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (InvalidStateError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_409_CONFLICT,
+            status_code=status.HTTP_409_CONFLICT,
             content={"message": exc.message},
         )
 
@@ -102,7 +95,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (DatabaseError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": exc.message},
         )
 
@@ -115,7 +108,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (UnauthorizedError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             content={"message": exc.message},
         )
 
@@ -128,7 +121,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (UnknownError) - The exception that was raised
         """
         return HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.message,
         )
 
@@ -141,6 +134,6 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute exc (SunPositionError) - The exception that was raised
         """
         return JSONResponse(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={"message": exc.message},
         )
