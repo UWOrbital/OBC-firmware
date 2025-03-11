@@ -58,11 +58,6 @@ static StaticTask_t {{ t.buffer }};
 
 {% endif %}
 {% endfor %}
-#if ENABLE_TASK_STATS_COLLECTOR == 1
-static StackType_t obcTaskStackTaskStatsCollector[TASK_STATS_COLLECTOR_STACK_SIZE];
-static StaticTask_t obcTaskBufferTaskStatsCollector;
-#endif
-
 static obc_scheduler_config_t obcSchedulerConfig[] = {
 {% for t in tasks %}
 {% if t.stem == "stats_collector" %}

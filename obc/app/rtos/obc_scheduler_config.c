@@ -112,11 +112,6 @@ static StaticTask_t obcTaskBufferLogger;
 static StackType_t obcTaskStackGncMgr[1024U];
 static StaticTask_t obcTaskBufferGncMgr;
 
-#if ENABLE_TASK_STATS_COLLECTOR == 1
-static StackType_t obcTaskStackTaskStatsCollector[TASK_STATS_COLLECTOR_STACK_SIZE];
-static StaticTask_t obcTaskBufferTaskStatsCollector;
-#endif
-
 static obc_scheduler_config_t obcSchedulerConfig[] = {
     [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
         {
