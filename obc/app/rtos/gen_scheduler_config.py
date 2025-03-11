@@ -7,13 +7,13 @@ class Task:
         self.stem = stem
         self.stack_size = stack_size
         self.priority = priority
-        self.camel_case = self.stem_to_camel(self.stem)
-
-        self.name = "\"" + stem + "\""
         if self.stem == "digital_watchdog_mgr":
-            self.init = "NULL"
+            self.camel_case = "SwWatchdog"
+            self.init = "NULL" 
         else:
+            self.camel_case = self.stem_to_camel(self.stem)
             self.init = "obcTaskInit" + self.camel_case
+        self.name = "\"" + stem + "\""
         self.function = "obcTaskFunction" + self.camel_case
         self.stack = "obcTaskStack" + self.camel_case
         self.buffer = "obcTaskBuffer" + self.camel_case
