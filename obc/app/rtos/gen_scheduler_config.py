@@ -10,7 +10,10 @@ class Task:
         self.camel_case = self.stem_to_camel(self.stem)
 
         self.name = "\"" + stem + "\""
-        self.init = "obcTaskInit" + self.camel_case
+        if self.stem == "digital_watchdog_mgr":
+            self.init = "NULL"
+        else:
+            self.init = "obcTaskInit" + self.camel_case
         self.function = "obcTaskFunction" + self.camel_case
         self.stack = "obcTaskStack" + self.camel_case
         self.buffer = "obcTaskBuffer" + self.camel_case

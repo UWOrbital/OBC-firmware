@@ -31,7 +31,7 @@ typedef struct {
 
 /* TASK INIT PROTOTYPES - These run before their respective tasks are created */
 {% for t in tasks %}
-{% if t.stem != "digital_watchdog_mgr" %}
+{% if t.init != "NULL" %}
 extern void {{ t.init }}(void);
 {% endif %}
 {% endfor %}
@@ -65,18 +65,7 @@ static StaticTask_t obcTaskBufferTaskStatsCollector;
 
 static obc_scheduler_config_t obcSchedulerConfig[] = {
 {% for t in tasks %}
-{% if t.stem == "digital_watchdog_mgr" %}
-    [OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR] =
-        {
-            .taskName = {{ t.name }},
-            .taskStack = {{ t.stack }},
-            .taskBuffer = &{{ t.buffer }},
-            .stackSize = {{ t.stack_size }},
-            .priority = {{ t.priority }},
-            .taskFunc = {{ t.function }},
-            .taskInit = NULL,
-        },
-{% elif t.stem == "stats_collector" %}
+{% if t.stem == "stats_collector" %}
 #if ENABLE_TASK_STATS_COLLECTOR == 1
     [{{ t.config_id }}] =
         {
