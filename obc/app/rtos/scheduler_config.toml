@@ -1,0 +1,79 @@
+# All task priorities must be in [0, OBC_SCHEDULER_MAX_PRIORITY]
+# Macros
+# OBC_SCHEDULER_MAX_PRIORITY = configMAX_PRIORITIES - 1U
+# TASK_IDLE_PRIORITY = 0U
+# TASK_COMMS_PRIORITY = 2U | Comms tasks must have the same priority
+[[tasks]]
+stem = "state_mgr"
+stack_size = "1024U"
+priority = "5U"
+
+[[tasks]]
+stem = "telemetry_mgr"
+stack_size = "1024U"
+priority = "1U"
+
+[[tasks]]
+stem = "command_mgr"
+stack_size = "1024U"
+priority = "1U"
+
+[[tasks]]
+stem = "comms_mgr"
+stack_size = "1024U"
+priority = "TASK_COMMS_PRIORITY"
+
+[[tasks]]
+stem = "comms_downlink_encoder"
+stack_size = "512U"
+priority = "TASK_COMMS_PRIORITY"
+
+[[tasks]]
+stem = "comms_uplink_decoder"
+stack_size = "1024U"
+priority = "TASK_COMMS_PRIORITY"
+
+[[tasks]]
+stem = "eps_mgr"
+stack_size = "1024U"
+priority = "3U"
+
+[[tasks]]
+stem = "payload_mgr"
+stack_size = "1024U"
+priority = "1U"
+
+[[tasks]]
+stem = "timekeeper"
+stack_size = "1024U"
+priority = "6U"
+
+[[tasks]]
+stem = "digital_watchdog_mgr"
+stack_size = "128U"
+priority = "OBC_SCHEDULER_MAX_PRIORITY"
+
+[[tasks]]
+stem = "alarm_mgr"
+stack_size = "512U"
+priority = "4U"
+
+[[tasks]]
+stem = "health_collector"
+stack_size = "256U"
+priority = "1U"
+
+[[tasks]]
+stem = "stats_collector"
+stack_size = "1024U"
+priority = "1U"
+
+[[tasks]]
+stem = "logger"
+stack_size = "512U"
+priority = "5U"
+
+[[tasks]]
+stem = "gnc_mgr"
+stack_size = "1024U"
+priority = "3U"
