@@ -54,7 +54,7 @@ extern void obcTaskFunctionCommsUplinkDecoder(void *params);
 extern void obcTaskFunctionEpsMgr(void *params);
 extern void obcTaskFunctionPayloadMgr(void *params);
 extern void obcTaskFunctionTimekeeper(void *params);
-extern void obcTaskFunctionDigitalWatchdogMgr(void *params);
+extern void obcTaskFunctionSwWatchdog(void *params);
 extern void obcTaskFunctionAlarmMgr(void *params);
 extern void obcTaskFunctionHealthCollector(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
@@ -92,8 +92,8 @@ static StaticTask_t obcTaskBufferPayloadMgr;
 static StackType_t obcTaskStackTimekeeper[1024U];
 static StaticTask_t obcTaskBufferTimekeeper;
 
-static StackType_t obcTaskStackDigitalWatchdogMgr[128U];
-static StaticTask_t obcTaskBufferDigitalWatchdogMgr;
+static StackType_t obcTaskStackSwWatchdog[128U];
+static StaticTask_t obcTaskBufferSwWatchdog;
 
 static StackType_t obcTaskStackAlarmMgr[512U];
 static StaticTask_t obcTaskBufferAlarmMgr;
@@ -206,11 +206,11 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
     [OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR] =
         {
             .taskName = "digital_watchdog_mgr",
-            .taskStack = obcTaskStackDigitalWatchdogMgr,
-            .taskBuffer = &obcTaskBufferDigitalWatchdogMgr,
+            .taskStack = obcTaskStackSwWatchdog,
+            .taskBuffer = &obcTaskBufferSwWatchdog,
             .stackSize = 128U,
             .priority = OBC_SCHEDULER_MAX_PRIORITY,
-            .taskFunc = obcTaskFunctionDigitalWatchdogMgr,
+            .taskFunc = obcTaskFunctionSwWatchdog,
             .taskInit = NULL,
         },
     [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
