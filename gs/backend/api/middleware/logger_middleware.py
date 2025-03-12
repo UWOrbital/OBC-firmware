@@ -18,7 +18,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
     def add_excluded_endpoints(self, excluded_endpoints: Sequence[str]) -> None:
         """Adds an endpoint to the non-logging list"""
-        self.excluded_endpoints.add(excluded_endpoints)
+        self.excluded_endpoints.extend(excluded_endpoints)
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Logs the request and response"""
@@ -59,7 +59,9 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         else:
             logger_severity = logger.info
 
-        if getattr(response, "body_iterator", None):
+        is_a_streaming_response = hasattr(response, "body_iterator")
+
+        if is_a_streaming_response:
             response_body = b"".join([chunk async for chunk in response.body_iterator])
         else:
             response_body = await response.body()
