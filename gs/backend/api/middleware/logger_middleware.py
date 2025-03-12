@@ -16,6 +16,10 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.excluded_endpoints = excluded_endpoints
 
+    def add_excluded_endpoints(self, excluded_endpoints: Sequence[str]) -> None:
+        """Adds an endpoint to the non-logging list"""
+        self.excluded_endpoints.add(excluded_endpoints)
+
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Logs the request and response"""
         request_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -55,7 +59,11 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         else:
             logger_severity = logger.info
 
-        response_body = b"".join([chunk async for chunk in response.body_iterator])
+        if getattr(response, "body_iterator", None):
+            response_body = b"".join([chunk async for chunk in response.body_iterator])
+        else:
+            response_body = await response.body()
+
         response_size = getsizeof(response_body)
 
         logger_severity(
