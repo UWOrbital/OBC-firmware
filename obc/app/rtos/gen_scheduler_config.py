@@ -1,18 +1,27 @@
+from dataclasses import dataclass
 from jinja2 import Environment, FileSystemLoader
 from toml import load
 
 
+@dataclass
 class Task:
-    def __init__(self, task_name: str, stack_size: str, priority: str,
-                 function_stem: str, config_id_stem: str) -> None:
-        self.task_name = task_name
-        self.stack_size = stack_size
-        self.priority = priority
-        self.function_stem = function_stem
-        self.config_id_stem = config_id_stem
+    """
+    @brief Class for storing task data strings
+
+    @attribute task_name (str) - name of task; snake_case
+    @attribute stack_size (str) - stack size, stored as 32-bit unsigned int; xU 
+    @attribute priority (str) - task priority as 32-bit unsigned int; xU
+    @attribute function_stem (str) - base name for task functions; CamelCase
+    @attribute config_id_stem (str) - config id; SNAKE_CASE
+    """
+    task_name: str
+    stack_size: str
+    priority: str
+    function_stem: str
+    config_id_stem: str
 
 
-task_list = []
+task_list: list[Task] = []
 
 template_filename = "config_skeleton.c.jinja"
 config_filename = "scheduler_config.toml"
@@ -26,6 +35,7 @@ context = {
 
 
 def main() -> None:
+    """Entry point to script"""
     with open(config_filename, "r") as config:
         toml_data = load(config)
 
