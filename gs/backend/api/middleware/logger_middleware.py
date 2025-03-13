@@ -18,7 +18,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
     def add_excluded_endpoints(self, excluded_endpoints: Sequence[str]) -> None:
         """Adds an endpoint to the non-logging list"""
-        self.excluded_endpoints.extend(excluded_endpoints)
+        self.excluded_endpoints += excluded_endpoints
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Logs the request and response"""
@@ -63,21 +63,27 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
         if is_a_streaming_response:
             response_body = b"".join([chunk async for chunk in response.body_iterator])
-        else:
-            response_body = await response.body()
+            response_size = getsizeof(response_body)
 
-        response_size = getsizeof(response_body)
-
-        logger_severity(
-            " | ".join(
-                [
-                    f"RESPONSE | Status: {response.status_code}",
-                    f"Response: {response_body.decode(errors='ignore')}",
-                    f"Size: {response_size} bytes",
-                    f"Time Elasped: {process_time:.3f}.",
-                ]
+            logger_severity(
+                " | ".join(
+                    [
+                        f"RESPONSE | Status: {response.status_code}",
+                        f"Response: {response_body.decode(errors='ignore')}",
+                        f"Size: {response_size} bytes",
+                        f"Time Elasped: {process_time:.3f}.",
+                    ]
+                )
             )
-        )
+        else:
+            logger_severity(
+                " | ".join(
+                    [
+                        f"RESPONSE | Status: {response.status_code}",
+                        f"Time Elasped: {process_time:.3f}.",
+                    ]
+                )
+            )
 
         return Response(
             content=response_body,
