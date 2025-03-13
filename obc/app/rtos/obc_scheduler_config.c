@@ -102,8 +102,8 @@ static StackType_t obcTaskStackHealthCollector[256U];
 static StaticTask_t obcTaskBufferHealthCollector;
 
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-static StackType_t obcTaskStackStatsCollector[1024U];
-static StaticTask_t obcTaskBufferStatsCollector;
+static StackType_t obcTaskStackTaskStatsCollector[1024U];
+static StaticTask_t obcTaskBufferTaskStatsCollector;
 #endif
 
 static StackType_t obcTaskStackLogger[512U];
@@ -155,7 +155,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
     [OBC_SCHEDULER_CONFIG_ID_COMMS_DOWNLINK_ENCODER] =
         {
-            .taskName = "comms_downlink_encoder",
+            .taskName = "comms_encoder",
             .taskStack = obcTaskStackCommsDownlinkEncoder,
             .taskBuffer = &obcTaskBufferCommsDownlinkEncoder,
             .stackSize = 512U,
@@ -165,7 +165,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
     [OBC_SCHEDULER_CONFIG_ID_COMMS_UPLINK_DECODER] =
         {
-            .taskName = "comms_uplink_decoder",
+            .taskName = "comms_decoder",
             .taskStack = obcTaskStackCommsUplinkDecoder,
             .taskBuffer = &obcTaskBufferCommsUplinkDecoder,
             .stackSize = 1024U,
@@ -205,7 +205,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
     [OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR] =
         {
-            .taskName = "digital_watchdog_mgr",
+            .taskName = "digital_wdg_mgr",
             .taskStack = obcTaskStackSwWatchdog,
             .taskBuffer = &obcTaskBufferSwWatchdog,
             .stackSize = 128U,
@@ -215,7 +215,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
         },
     [OBC_SCHEDULER_CONFIG_ID_ALARM_MGR] =
         {
-            .taskName = "alarm_mgr",
+            .taskName = "alarm_handler",
             .taskStack = obcTaskStackAlarmMgr,
             .taskBuffer = &obcTaskBufferAlarmMgr,
             .stackSize = 512U,
@@ -237,8 +237,8 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
     [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
         {
             .taskName = "stats_collector",
-            .taskStack = obcTaskStackStatsCollector,
-            .taskBuffer = &obcTaskBufferStatsCollector,
+            .taskStack = obcTaskStackTaskStatsCollector,
+            .taskBuffer = &obcTaskBufferTaskStatsCollector,
             .stackSize = 1024U,
             .priority = 1U,
             .taskFunc = obcTaskFunctionStatsCollector,

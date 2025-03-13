@@ -31,14 +31,14 @@ typedef struct {
 
 /* TASK INIT PROTOTYPES - These run before their respective tasks are created */
 {% for t in tasks %}
-{% if t.init != "NULL" %}
-extern void {{ t.init }}(void);
+{% if t.task_name != "digital_wdg_mgr" %}
+extern void obcTaskInit{{ t.function_stem }}(void);
 {% endif %}
 {% endfor %}
 
 /* TASK FUNCTION PROTOTYPES */
 {% for t in tasks %}
-extern void {{ t.function }}(void *params);
+extern void obcTaskFunction{{ t.function_stem }}(void *params);
 {% endfor %}
 
 /* PRIVATE FUNCTION PROTOTYPES */
@@ -46,43 +46,47 @@ static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t t
 
 /* PRIVATE DATA */
 {% for t in tasks %}
-{% if t.stem == "stats_collector" %}
+{% if t.task_name == "stats_collector" %}
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-static StackType_t {{ t.stack }}[{{ t.stack_size }}];
-static StaticTask_t {{ t.buffer }};
+static StackType_t obcTaskStackTaskStatsCollector[{{ t.stack_size }}];
+static StaticTask_t obcTaskBufferTaskStatsCollector;
 #endif
 
 {% else %}
-static StackType_t {{ t.stack }}[{{ t.stack_size }}];
-static StaticTask_t {{ t.buffer }};
+static StackType_t obcTaskStack{{ t.function_stem }}[{{ t.stack_size }}];
+static StaticTask_t obcTaskBuffer{{ t.function_stem }};
 
 {% endif %}
 {% endfor %}
 static obc_scheduler_config_t obcSchedulerConfig[] = {
 {% for t in tasks %}
-{% if t.stem == "stats_collector" %}
+{% if t.task_name == "stats_collector" %}
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-    [{{ t.config_id }}] =
+    [OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}] =
         {
-            .taskName = {{ t.name }},
-            .taskStack = {{ t.stack }},
-            .taskBuffer = &{{ t.buffer }},
+            .taskName = "{{ t.task_name }}",
+            .taskStack = obcTaskStackTaskStatsCollector,
+            .taskBuffer = &obcTaskBufferTaskStatsCollector,
             .stackSize = {{ t.stack_size }},
             .priority = {{ t.priority }},
-            .taskFunc = {{ t.function }},
-            .taskInit = {{ t.init }},
+            .taskFunc = obcTaskFunction{{ t.function_stem }},
+            .taskInit = obcTaskInit{{ t.function_stem }},
         },
 #endif
 {% else %}
-    [{{ t.config_id }}] =
+    [OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}] =
         {
-            .taskName = {{ t.name }},
-            .taskStack = {{ t.stack }},
-            .taskBuffer = &{{ t.buffer }},
+            .taskName = "{{ t.task_name }}",
+            .taskStack = obcTaskStack{{ t.function_stem }},
+            .taskBuffer = &obcTaskBuffer{{ t.function_stem }},
             .stackSize = {{ t.stack_size }},
             .priority = {{ t.priority }},
-            .taskFunc = {{ t.function }},
-            .taskInit = {{ t.init }},
+            .taskFunc = obcTaskFunction{{ t.function_stem }},
+            {% if t.task_name == "digital_wdg_mgr" %}
+            .taskInit = NULL,
+            {% else %}
+            .taskInit = obcTaskInit{{ t.function_stem }},
+            {% endif %}
         },
 {% endif %}
 {% endfor %}

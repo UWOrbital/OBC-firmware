@@ -3,25 +3,13 @@ from toml import load
 
 
 class Task:
-    def __init__(self, stem: str, stack_size: str, priority: str):
-        self.stem = stem
+    def __init__(self, task_name: str, stack_size: str, priority: str,
+                 function_stem: str, config_id_stem: str) -> None:
+        self.task_name = task_name
         self.stack_size = stack_size
         self.priority = priority
-        if self.stem == "digital_watchdog_mgr":
-            self.camel_case = "SwWatchdog"
-            self.init = "NULL" 
-        else:
-            self.camel_case = self.stem_to_camel(self.stem)
-            self.init = "obcTaskInit" + self.camel_case
-        self.name = "\"" + stem + "\""
-        self.function = "obcTaskFunction" + self.camel_case
-        self.stack = "obcTaskStack" + self.camel_case
-        self.buffer = "obcTaskBuffer" + self.camel_case
-        self.config_id = "OBC_SCHEDULER_CONFIG_ID_" + self.stem.upper()
-
-    def stem_to_camel(self, stem: str) -> str:
-        lst = stem.split("_")
-        return "".join(word.capitalize() for word in lst)
+        self.function_stem = function_stem
+        self.config_id_stem = config_id_stem
 
 
 task_list = []
@@ -38,15 +26,16 @@ context = {
 
 
 def main() -> None:
-    with open(config_filename, "r") as file:
-        toml_data = load(file)
+    with open(config_filename, "r") as config:
+        toml_data = load(config)
 
     for t in toml_data["tasks"]:
-        task_list.append(Task(t["stem"], t["stack_size"], t["priority"])) 
+        task_list.append(Task(t["task_name"], t["stack_size"], t["priority"],
+                              t["function_stem"], t["config_id_stem"])) 
     
-    with open(output_filename, mode="w") as output:
+    with open(output_filename, "w") as output:
         output.write(template.render(context))
-        print("Generated", output_filename)
+        print(f"Generated new scheduler config at ./{output_filename}")
 
 
 if __name__ == "__main__":
