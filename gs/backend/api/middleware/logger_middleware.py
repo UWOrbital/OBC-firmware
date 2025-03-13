@@ -16,10 +16,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.excluded_endpoints = excluded_endpoints
 
-    def add_excluded_endpoints(self, excluded_endpoints: Sequence[str]) -> None:
-        """Adds an endpoint to the non-logging list"""
-        self.excluded_endpoints += excluded_endpoints
-
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         """Logs the request and response"""
         request_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -59,31 +55,23 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         else:
             logger_severity = logger.info
 
-        is_a_streaming_response = hasattr(response, "body_iterator")
-
-        if is_a_streaming_response:
+        if hasattr(response, "body_iterator"):
             response_body = b"".join([chunk async for chunk in response.body_iterator])
-            response_size = getsizeof(response_body)
-
-            logger_severity(
-                " | ".join(
-                    [
-                        f"RESPONSE | Status: {response.status_code}",
-                        f"Response: {response_body.decode(errors='ignore')}",
-                        f"Size: {response_size} bytes",
-                        f"Time Elasped: {process_time:.3f}.",
-                    ]
-                )
-            )
         else:
-            logger_severity(
-                " | ".join(
-                    [
-                        f"RESPONSE | Status: {response.status_code}",
-                        f"Time Elasped: {process_time:.3f}.",
-                    ]
-                )
+            response_body = await response.body()
+
+        response_size = getsizeof(response_body)
+
+        logger_severity(
+            " | ".join(
+                [
+                    f"RESPONSE | Status: {response.status_code}",
+                    f"Response: {response_body.decode(errors='ignore')}",
+                    f"Size: {response_size} bytes",
+                    f"Time Elasped: {process_time:.3f}.",
+                ]
             )
+        )
 
         return Response(
             content=response_body,
