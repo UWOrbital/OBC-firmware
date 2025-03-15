@@ -18,7 +18,7 @@ obc_error_code_t initCamera(void) {
   camera_id_t selectedCamera = getSelectedCamera();
   totalBytesToRead[selectedCamera] = 0;
   FIFOReadPtr[selectedCamera] = 0;
-  RETURN_IF_ERROR_CODE(resetCPLD());
+  RETURN_IF_ERROR_CODE(arducamResetCPLD());
   // Make sure sensor is powered and reset is not asserted (reset is active low).
   RETURN_IF_ERROR_CODE(arducamWriteSensorPowerControlReg(SENSOR_POWER_EN_MASK | SENSOR_RESET_MASK));
   // Make sure sensor vsync timing is set to active low

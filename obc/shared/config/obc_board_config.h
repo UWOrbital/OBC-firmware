@@ -30,7 +30,7 @@
 // SPI3 CS[2] and CS[3] are used as I2C pins
 // Reuse Some CS pins
 #define CAM_CS_1 1UL
-#define CAM_CS_2 1UL
+#define CAM_CS_2 2UL
 
 // State Manager DEBUG LED
 #define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTB

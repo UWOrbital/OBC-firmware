@@ -389,7 +389,7 @@ obc_error_code_t arducamReadFIFOSize(uint32_t *fifoSize) {
   return errCode;
 }
 
-obc_error_code_t resetCPLD(void) {
+obc_error_code_t arducamResetCPLD(void) {
   obc_error_code_t errCode;
   obc_error_code_t prevCode;
 

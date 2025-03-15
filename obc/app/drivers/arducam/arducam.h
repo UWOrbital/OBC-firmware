@@ -63,7 +63,7 @@ camera_id_t getSelectedCamera(void);
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 
-obc_error_code_t resetCPLD(void);
+obc_error_code_t arducamResetCPLD(void);
 
 /**
  * @brief Read Arducam's Test Register
