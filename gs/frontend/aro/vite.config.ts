@@ -6,4 +6,9 @@ import deno from "@deno/vite-plugin";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), deno()],
+  server: {
+    watch: {
+      usePolling: true,
+    },
+  },
 });
