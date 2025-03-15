@@ -55,10 +55,9 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         has_body_iterator = hasattr(response, "body_iterator")
 
         if has_body_iterator:
-            response_body = b"".join([chunk async for chunk in response.body_iterator])
-            # type: ignore[attr-defined]
+            response_body = b"".join([chunk async for chunk in response.body_iterator])  # type: ignore[attr-defined]
+            response_size = getsizeof(response_body)
             response_body = response_body.decode(errors="ignore")
-            response_size = str(getsizeof(response_body)) + " bytes"
         else:
             response_body = "Error logging response body"
             response_size = "Error logging response size"
@@ -68,7 +67,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 [
                     f"RESPONSE | Status: {response.status_code}",
                     f"Response: {response_body}",
-                    f"Size: {response_size}",
+                    f"Size (bytes): {response_size}",
                     f"Time Elasped: {process_time:.3f} seconds.",
                 ]
             )
