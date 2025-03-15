@@ -3,9 +3,10 @@ from datetime import datetime
 from sys import getsizeof
 from time import time
 
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI, Request, Response
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
 
 class LoggerMiddleware(BaseHTTPMiddleware):
@@ -44,30 +45,41 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             )
         )
 
-        if response.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
+        if response.status_code >= HTTP_500_INTERNAL_SERVER_ERROR:
             logger_severity = logger.critical
-        elif response.status_code >= status.HTTP_400_BAD_REQUEST:
+        elif response.status_code >= HTTP_400_BAD_REQUEST:
             logger_severity = logger.error
         else:
             logger_severity = logger.info
 
-        response_body = b"".join([chunk async for chunk in response.body_iterator])
-        response_size = getsizeof(response_body)
+        has_body_iterator = hasattr(response, "body_iterator")
+
+        if has_body_iterator:
+            response_body = b"".join([chunk async for chunk in response.body_iterator])
+            # type: ignore[attr-defined]
+            response_body = response_body.decode(errors="ignore")
+            response_size = str(getsizeof(response_body)) + " bytes"
+        else:
+            response_body = "Error logging response body"
+            response_size = "Error logging response size"
 
         logger_severity(
             " | ".join(
                 [
                     f"RESPONSE | Status: {response.status_code}",
-                    f"Response: {response_body.decode(errors='ignore')}",
-                    f"Size: {response_size} bytes",
+                    f"Response: {response_body}",
+                    f"Size: {response_size}",
                     f"Time Elasped: {process_time:.3f} seconds.",
                 ]
             )
         )
 
-        return Response(
-            content=response_body,
-            status_code=response.status_code,
-            headers=dict(response.headers),
-            media_type=response.media_type,
-        )
+        if has_body_iterator:
+            return Response(
+                content=response_body,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=response.media_type,
+            )
+        else:
+            return response
