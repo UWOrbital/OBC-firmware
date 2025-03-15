@@ -3,6 +3,7 @@
 #include "cc1120_mcu.h"
 #include "obc_logging.h"
 #include "obc_board_config.h"
+#include "adc.h"
 
 #define READ_BIT 1 << 7
 #define BURST_BIT 1 << 6
@@ -16,8 +17,8 @@
 static const register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 0 to RXFIFO_THR_PKT
     {CC1120_REGS_IOCFG0, 0x01U},
-    // Set GPIO 1 to HighZ
-    {CC1120_REGS_IOCFG1, 0x30U},
+    // // Set GPIO 1 to HighZ
+    // {CC1120_REGS_IOCFG1, 0x30U},
     // Set GPIO 2 to PKT_SYNC_RXTX
     {CC1120_REGS_IOCFG2, 0x06U},
     // Set GPIO 3 to TXFIFO_THR
@@ -52,7 +53,10 @@ static const register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_FS_CFG, 0x14U},
     {CC1120_REGS_PKT_CFG0, 0x00U},
     {CC1120_REGS_PA_CFG0, 0x7DU},
-    {CC1120_REGS_PKT_LEN, 0x0CU}};
+    {CC1120_REGS_PKT_LEN, 0x0CU},
+
+    // Set GPIO 1 to PTAT voltage for CC1120temp
+    {CC1120_REGS_IOCFG1, 0x20U}};
 
 static const register_setting_t cc1120SettingsExt[] = {{CC1120_REGS_EXT_IF_MIX_CFG, 0x00U},
                                                        {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U},
@@ -74,8 +78,11 @@ static const register_setting_t cc1120SettingsExt[] = {{CC1120_REGS_EXT_IF_MIX_C
                                                        {CC1120_REGS_EXT_XOSC5, 0x0EU},
                                                        {CC1120_REGS_EXT_XOSC1, 0x03U},
                                                        {CC1120_REGS_EXT_TOC_CFG, 0x89U},
-                                                       {CC1120_REGS_EXT_RNDGEN, CC1120_RND_CONFIG}};
+                                                       {CC1120_REGS_EXT_RNDGEN, CC1120_RND_CONFIG},
 
+                                                       {CC1120_REGS_EXT_ATEST, 0x2AU},
+                                                       {CC1120_REGS_EXT_ATEST_MODE, 0x0CU},
+                                                       {CC1120_REGS_EXT_GBIAS1, 0x07U}};
 /**
  * @brief - Reads from consecutive registers from the CC1120.
  *
@@ -472,5 +479,19 @@ obc_error_code_t cc1120Rng(uint8_t *randomValue) {
   RETURN_IF_ERROR_CODE(cc1120ReadFifo(&receivedData, 1));
   (*randomValue) &= ~(1 << 7);
   (*randomValue) ^= receivedData;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Read the temperature from the cc1120
+ *
+ * @param temp Pointer to float to store the temperature in degrees Celsius
+ * @return OBC_ERR_CODE_SUCCESS if successful, invalid-arg error code otherwise
+ */
+obc_error_code_t readTempCC1120(float *temp) {
+  obc_error_code_t errCode;
+  uint16_t voltage_reading = 0;
+  RETURN_IF_ERROR_CODE(adcGetSingleData(ADC_MODULE_1, ADC_CHANNEL_1, ADC_GROUP_1, &voltage_reading, 1));
+
   return OBC_ERR_CODE_SUCCESS;
 }

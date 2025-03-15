@@ -180,3 +180,11 @@ obc_error_code_t cc1120Init(void);
  * @return obc_error_code_t - Whether or not the register read was successful
  */
 obc_error_code_t cc1120Rng(uint8_t *randomValue);
+
+/**
+ * @brief Read the temperature from the cc1120
+ *
+ * @param temp Pointer to float to store the temperature in degrees Celsius
+ * @return OBC_ERR_CODE_SUCCESS if successful, invalid-arg error code otherwise
+ */
+obc_error_code_t readTempCC1120(float *temp);
