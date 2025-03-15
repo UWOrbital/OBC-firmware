@@ -1,12 +1,11 @@
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from sys import getsizeof
 from time import time
-from typing import Final
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, status
 from loguru import logger
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class LoggerMiddleware(BaseHTTPMiddleware):
@@ -16,9 +15,9 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.excluded_endpoints = excluded_endpoints
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """Logs the request and response"""
-        request_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        request_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         start_time = time()
         response = await call_next(request)
         process_time = time() - start_time
@@ -45,21 +44,14 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             )
         )
 
-        http_status_code_error_server: Final[int] = 500
-        http_status_code_error: Final[int] = 400
-
-        if response.status_code >= http_status_code_error_server:
+        if response.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
             logger_severity = logger.critical
-        elif response.status_code >= http_status_code_error:
+        elif response.status_code >= status.HTTP_400_BAD_REQUEST:
             logger_severity = logger.error
         else:
             logger_severity = logger.info
 
-        if hasattr(response, "body_iterator"):
-            response_body = b"".join([chunk async for chunk in response.body_iterator])
-        else:
-            response_body = await response.body()
-
+        response_body = b"".join([chunk async for chunk in response.body_iterator])
         response_size = getsizeof(response_body)
 
         logger_severity(
@@ -68,7 +60,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                     f"RESPONSE | Status: {response.status_code}",
                     f"Response: {response_body.decode(errors='ignore')}",
                     f"Size: {response_size} bytes",
-                    f"Time Elasped: {process_time:.3f}.",
+                    f"Time Elasped: {process_time:.3f} seconds.",
                 ]
             )
         )
