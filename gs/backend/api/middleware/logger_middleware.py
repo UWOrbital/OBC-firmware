@@ -59,7 +59,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
         if has_body_iterator:
             response_body_bytes = b"".join([chunk async for chunk in response.body_iterator])  # type: ignore[attr-defined]
-            response_size = getsizeof(response_body_bytes)
+            response_size = str(getsizeof(response_body_bytes))
             response_body = response_body_bytes.decode(errors="ignore")
         else:
             response_body = "Error logging response body"
