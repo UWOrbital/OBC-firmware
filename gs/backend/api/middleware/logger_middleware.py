@@ -10,7 +10,10 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 
 
 class LoggerMiddleware(BaseHTTPMiddleware):
-    """Middleware that logs the request and response"""
+    """
+    @breif Middleware that logs the request and response
+    @attribute excluded_endpoints (Sequence[str]) - endpoints that won't be logged
+    """
 
     def __init__(self, app: FastAPI, excluded_endpoints: Sequence[str] = ()) -> None:
         super().__init__(app)
@@ -55,9 +58,9 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         has_body_iterator = hasattr(response, "body_iterator")
 
         if has_body_iterator:
-            response_body = b"".join([chunk async for chunk in response.body_iterator])  # type: ignore[attr-defined]
-            response_size = getsizeof(response_body)
-            response_body = response_body.decode(errors="ignore")
+            response_body_bytes = b"".join([chunk async for chunk in response.body_iterator])  # type: ignore[attr-defined]
+            response_size = getsizeof(response_body_bytes)
+            response_body = response_body_bytes.decode(errors="ignore")
         else:
             response_body = "Error logging response body"
             response_size = "Error logging response size"
