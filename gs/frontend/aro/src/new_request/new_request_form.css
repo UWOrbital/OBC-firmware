@@ -7,3 +7,13 @@
   padding: 1rem;
   font-size: 25rem;
 }
+
+.input-form div {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.input-form .button {
+  width: 150px;
+}

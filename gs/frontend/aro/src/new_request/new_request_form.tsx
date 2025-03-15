@@ -36,23 +36,30 @@ const NewRequestForm = () => {
   // TODO: Add better error handling and switch to using react-hook-form
   return (
     <form className="input-form" onSubmit={handleSubmit} id="main-form">
-      <label>Latitude</label>
-      <input
-        required
-        type="number"
-        placeholder="Enter your coordinates"
-        value={latitude}
-        onChange={handleLatitudeChange}
-      />
-      <label>Longitude</label>
-      <input
-        required
-        type="number"
-        placeholder="Enter your coordinates"
-        value={longitude}
-        onChange={handleLongitudeChange}
-      />
-      <input type="submit" />
+      <div>
+        <label>Latitude:</label>
+        <input
+          required
+          type="number"
+          placeholder="Enter your coordinates"
+          value={latitude}
+          onChange={handleLatitudeChange}
+        />
+      </div>
+      <div>
+        <label>Longitude:</label>
+        <input
+          required
+          type="number"
+          placeholder="Enter your coordinates"
+          value={longitude}
+          onChange={handleLongitudeChange}
+        />
+      </div>
+      <div>
+        <input className="button" type="submit" />
+        <input className="button" type="submit" value="Update Map" />
+      </div>
     </form>
   );
 };
