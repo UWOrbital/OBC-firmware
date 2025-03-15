@@ -2,11 +2,15 @@
   "version": "4",
   "specifiers": {
     "jsr:@std/assert@1": "1.0.11",
+    "jsr:@std/dotenv@*": "0.225.3",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "npm:@deno/vite-plugin@1": "1.0.2_vite@5.4.14",
     "npm:@tanstack/react-query@^5.56.2": "5.65.1_react@18.3.1",
+    "npm:@types/node@*": "22.5.4",
     "npm:@types/react@^18.3.1": "18.3.18",
     "npm:@types/react@^18.3.3": "18.3.18",
+    "npm:@vis.gl/react-google-maps@*": "1.5.2_react@18.3.1_react-dom@18.3.1__react@18.3.1",
+    "npm:@vis.gl/react-google-maps@^1.5.2": "1.5.2_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:@vitejs/plugin-react@^4.3.3": "4.3.4_vite@5.4.14_@babel+core@7.26.7",
     "npm:bootstrap@^5.1.3": "5.3.3_@popperjs+core@2.11.8",
     "npm:react-bootstrap@^2.10.4": "2.10.8_@types+react@18.3.18_react@18.3.1_react-dom@18.3.1__react@18.3.1",
@@ -24,6 +28,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
     },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
@@ -423,6 +430,15 @@
     "@types/estree@1.0.6": {
       "integrity": "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw=="
     },
+    "@types/google.maps@3.58.1": {
+      "integrity": "sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ=="
+    },
+    "@types/node@22.5.4": {
+      "integrity": "sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
     "@types/prop-types@15.7.14": {
       "integrity": "sha512-gNMvNH49DJ7OJYv+KAKn0Xp45p8PLl6zo2YnvDIbTd4J6MER2BmWN49TG7n9LvkyihINxeKW8+3bfS2yDC9dzQ=="
     },
@@ -441,6 +457,15 @@
     },
     "@types/warning@3.0.3": {
       "integrity": "sha512-D1XC7WK8K+zZEveUPY+cf4+kgauk8N4eHr/XIHXGlGYkHLud6hK9lYfZk1ry1TNh798cZUCgb6MqGEG8DkJt6Q=="
+    },
+    "@vis.gl/react-google-maps@1.5.2_react@18.3.1_react-dom@18.3.1__react@18.3.1": {
+      "integrity": "sha512-0Ypmde7M73GgV4TgcaUTNKXsbcXWToPVuawMNrVg7htXmhpEfLARHwhtmP6N1da3od195ZKC8ShXzC6Vm+zYHQ==",
+      "dependencies": [
+        "@types/google.maps",
+        "fast-deep-equal",
+        "react",
+        "react-dom"
+      ]
     },
     "@vitejs/plugin-react@4.3.4_vite@5.4.14_@babel+core@7.26.7": {
       "integrity": "sha512-SCCPBJtYLdE8PX/7ZQAs1QAZ8Jqwih+0VBLum1EGqmCCQal+MIUqLCzj3ZUy8ufbC0cAM4LRlSTm7IQJwWT4ug==",
@@ -529,6 +554,9 @@
     },
     "escalade@3.2.0": {
       "integrity": "sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA=="
+    },
+    "fast-deep-equal@3.1.3": {
+      "integrity": "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q=="
     },
     "fsevents@2.3.3": {
       "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
@@ -748,6 +776,9 @@
         "react"
       ]
     },
+    "undici-types@6.19.8": {
+      "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
+    },
     "update-browserslist-db@1.1.2_browserslist@4.24.4": {
       "integrity": "sha512-PPypAm5qvlD7XMZC3BujecnaOxwhrtoFR+Dqkk5Aa/6DssiH0ibKoketaj9w8LP7Bont1rYeoV5plxD7RTEPRg==",
       "dependencies": [
@@ -784,12 +815,40 @@
       "integrity": "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="
     }
   },
+  "redirects": {
+    "https://esm.sh/@googlemaps/js-api-loader": "https://esm.sh/@googlemaps/js-api-loader@1.16.8",
+    "https://esm.sh/@types/prop-types@~15.7.14/index.d.ts": "https://esm.sh/@types/prop-types@15.7.14/index.d.ts",
+    "https://esm.sh/@types/react-dom@~19.0.3/index.d.ts": "https://esm.sh/@types/react-dom@19.0.4/index.d.ts",
+    "https://esm.sh/@types/react@~19.0.10/index.d.ts": "https://esm.sh/@types/react@19.0.10/index.d.ts",
+    "https://esm.sh/@types/react@~19.0.8/index.d.ts": "https://esm.sh/@types/react@19.0.10/index.d.ts",
+    "https://esm.sh/@vis.gl/react-google-maps": "https://esm.sh/@vis.gl/react-google-maps@1.5.2",
+    "https://esm.sh/fast-deep-equal@^3.1.3?target=denonext": "https://esm.sh/fast-deep-equal@3.1.3?target=denonext",
+    "https://esm.sh/prop-types": "https://esm.sh/prop-types@15.8.1",
+    "https://esm.sh/react-dom@^19.1.0-canary-ff628334-20250205?target=denonext": "https://esm.sh/react-dom@19.1.0-canary-ff628334-20250205?target=denonext",
+    "https://esm.sh/react@^19.1.0-canary-ff628334-20250205?target=denonext": "https://esm.sh/react@19.1.0-canary-ff628334-20250205?target=denonext"
+  },
+  "remote": {
+    "https://esm.sh/@googlemaps/js-api-loader@1.16.8": "176f005c6fdbb672b477434d7fca5cf90559f90ebe20c1fef5b545701c544116",
+    "https://esm.sh/@googlemaps/js-api-loader@1.16.8/denonext/js-api-loader.mjs": "b2e3cbd274c31c455c7dec3412ed50836725bca26756fc73438db5581eec0972",
+    "https://esm.sh/@vis.gl/react-google-maps@1.5.2": "2fd9ff83725edbca75649af65cada582bc59ab892643d589526efe9c3a938cfc",
+    "https://esm.sh/@vis.gl/react-google-maps@1.5.2/denonext/react-google-maps.mjs": "74cfd96acea036b951467ddaf6c058eab0cc2b8ef997dc0fd1622fdaea6c46a2",
+    "https://esm.sh/fast-deep-equal@3.1.3/denonext/fast-deep-equal.mjs": "66e5d717af5e6a08366cc6aa421af1838a773895070bfee46c45102adf7ddc5f",
+    "https://esm.sh/fast-deep-equal@3.1.3?target=denonext": "2d47696bbd2c43a836e333ae5035542a56eb76e4fd728204c75eaaeea86c3b5c",
+    "https://esm.sh/prop-types@15.8.1": "1165380d0a00a71fe5f09c2634849445cf47587de8e8dfec516081f953c503b6",
+    "https://esm.sh/prop-types@15.8.1/denonext/prop-types.mjs": "cf48d191a1f2bf5177d68576a117d2b3abff5a285c2890fae66797ff841e922f",
+    "https://esm.sh/react-dom@19.1.0-canary-ff628334-20250205/denonext/react-dom.mjs": "c8f8e70a7f3603d64a6ebd6140e0201bf1afe3f17ab9963d54af70ee229980bc",
+    "https://esm.sh/react-dom@19.1.0-canary-ff628334-20250205?target=denonext": "4117896c0f0af6beecce128145119ef63ac5d8c75f53d33cc2da44f33e93c703",
+    "https://esm.sh/react@19.1.0-canary-ff628334-20250205/denonext/react.mjs": "36387ba9687e755464f4990d8db2824d78e8aa8537f6e7742fe779bd3217f44a",
+    "https://esm.sh/react@19.1.0-canary-ff628334-20250205?target=denonext": "832b3e2a21a69d52f3aeac0b0ca22f7461da38d0a7f25f450a775cc8ca8a8164"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@1",
+      "jsr:@std/dotenv@~0.225.3",
       "npm:@deno/vite-plugin@1",
       "npm:@tanstack/react-query@^5.56.2",
       "npm:@types/react@^18.3.1",
+      "npm:@vis.gl/react-google-maps@^1.5.2",
       "npm:@vitejs/plugin-react@^4.3.3",
       "npm:react-dom@^18.3.1",
       "npm:react-hook-form@^7.53.0",

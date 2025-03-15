@@ -4,7 +4,6 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  padding: 1rem;
   font-size: 25rem;
 }
 
@@ -14,6 +13,13 @@
   gap: 2rem;
 }
 
-.input-form .button {
-  width: 150px;
+.new-request-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.map {
+  width: 400px;
+  height: 400px;
 }
