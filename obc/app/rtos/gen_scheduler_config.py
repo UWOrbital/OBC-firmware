@@ -23,12 +23,15 @@ class Task:
 
 task_list: list[Task] = []
 
-template_filename = "config_skeleton.c.jinja"
+c_template_filename = "config_skeleton.c.jinja"
+h_template_filename = "header_skeleton.h.jinja"
 config_filename = "scheduler_config.toml"
-output_filename = "obc_scheduler_config.c"
+c_filename = "obc_scheduler_config.c"
+h_filename = "obc_scheduler_config.h"
 
 env = Environment(loader=FileSystemLoader(""), trim_blocks=True, lstrip_blocks=True)
-template = env.get_template(template_filename)
+c_template = env.get_template(c_template_filename)
+h_template = env.get_template(h_template_filename)
 context = {
     "tasks": task_list,
 }
@@ -43,9 +46,13 @@ def main() -> None:
         task_list.append(Task(t["task_name"], t["stack_size"], t["priority"],
                               t["function_stem"], t["config_id_stem"])) 
     
-    with open(output_filename, "w") as output:
-        output.write(template.render(context))
-        print(f"Generated new scheduler config at ./{output_filename}")
+    with open(c_filename, "w") as c_output:
+        c_output.write(c_template.render(context))
+        print(f"Generated new scheduler config at ./{c_filename}")
+    
+    with open(h_filename, "w") as h_output:
+        h_output.write(h_template.render(context))
+        print(f"Generated new header file at ./{h_filename}")
 
 
 if __name__ == "__main__":
