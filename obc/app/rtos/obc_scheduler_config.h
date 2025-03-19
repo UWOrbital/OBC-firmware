@@ -1,3 +1,4 @@
+// This code is generated, do not modify directly!
 #pragma once
 
 #include <stdint.h>
