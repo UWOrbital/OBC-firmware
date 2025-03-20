@@ -8,6 +8,8 @@ import {
 
 const DEFAULT_ZOOM = 15;
 
+console.log(import.meta.env.VITE_MAPS_API_KEY);
+
 const NewRequestForm = () => {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
@@ -98,7 +100,7 @@ const NewRequestForm = () => {
       </form>
       <div className="map">
         <APIProvider
-          apiKey={"API_KEY"}
+          apiKey={import.meta.env.VITE_MAPS_API_KEY}
           onLoad={() => console.log("Maps API has loaded.")}
         >
           <Map
