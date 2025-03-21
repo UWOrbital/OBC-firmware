@@ -8,8 +8,6 @@ import {
 
 const DEFAULT_ZOOM = 15;
 
-console.log(import.meta.env.VITE_MAPS_API_KEY);
-
 const NewRequestForm = () => {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
@@ -68,35 +66,33 @@ const NewRequestForm = () => {
   return (
     <div className="new-request-page">
       <form className="input-form" onSubmit={handleSubmit} id="main-form">
-        <div>
-          <label>Latitude:</label>
-          <input
-            required
-            type="number"
-            placeholder="Enter your coordinates"
-            value={latitude}
-            onChange={handleLatitudeChange}
-          />
-        </div>
-        <div>
-          <label>Longitude:</label>
-          <input
-            required
-            type="number"
-            placeholder="Enter your coordinates"
-            value={longitude}
-            onChange={handleLongitudeChange}
-          />
-        </div>
-        <div>
-          <input className="button" type="submit" />
-          <input
-            className="button"
-            type="button"
-            value="Update Map"
-            onClick={updateMap}
-          />
-        </div>
+        <label htmlFor="latitude">Latitude:</label>
+        <input
+          id="latitude"
+          required
+          type="number"
+          placeholder="Enter your coordinates"
+          value={latitude}
+          onChange={handleLatitudeChange}
+        />
+
+        <label htmlFor="longitude">Longitude:</label>
+        <input
+          id="longitude"
+          required
+          type="number"
+          placeholder="Enter your coordinates"
+          value={longitude}
+          onChange={handleLongitudeChange}
+        />
+
+        <input className="button" type="submit" />
+        <input
+          className="button"
+          type="button"
+          value="Update Map"
+          onClick={updateMap}
+        />
       </form>
       <div className="map">
         <APIProvider
