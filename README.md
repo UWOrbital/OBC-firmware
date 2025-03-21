@@ -189,10 +189,12 @@ pre-commit install
 From the top-level directory, run the following to build the OBC firmware.
 
 ```sh
-mkdir build_arm && cd build_arm
+mkdir -p build_arm && cd build_arm
 cmake .. -DCMAKE_BUILD_TYPE=OBC
 cmake --build .
 ```
+
+OR you can just run `./scripts/obc-build.sh` from the top-level directory.
 
 Take a look at `cmake/fw_build_options.cmake` to see the available build options.
 
@@ -201,10 +203,12 @@ Take a look at `cmake/fw_build_options.cmake` to see the available build options
 From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows.
 
 ```sh
-mkdir build_gs && cd build_gs
+mkdir -p build_gs && cd build_gs
 cmake .. -DCMAKE_BUILD_TYPE=GS
 cmake --build .
 ```
+
+OR you can just run `./scripts/gs-build.sh` from the top-level directory.
 
 #### **Tests**
 
@@ -218,21 +222,25 @@ sudo apt-get install gcc-multilib g++-multilib
 From the top-level directory, run the following to build and run the tests.
 
 ```sh
-mkdir build && cd build
+mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Test
 cmake --build .
 ctest --verbose
 ```
+
+OR you can just run `./scripts/test.sh` from the top-level directory.
 
 #### **Example files**
 
 From the top-level directory, run the following to build the example source file.
 
 ```sh
-mkdir build_examples && cd build_examples
+mkdir -p build_examples && cd build_examples
 cmake .. -DCMAKE_BUILD_TYPE=Examples -DEXAMPLE_TYPE=[EXAMPLE_TO_BE_COMPILED]
 cmake --build .
 ```
+
+OR you can just run `./scripts/example-build.sh [EXAMPLE_TO_BE_COMPILED]` from the top-level directory.
 
 Options for `EXAMPLE_TYPE` include:
 

@@ -30,4 +30,4 @@ def setup_middlewares(app: FastAPI) -> None:
     """Adds the middlewares to the app"""
     add_cors_middleware(app)  # Cors middleware should be added first
     app.add_middleware(AuthMiddleware)
-    app.add_middleware(LoggerMiddleware)
+    app.add_middleware(LoggerMiddleware, excluded_endpoints=[])
