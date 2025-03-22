@@ -27,15 +27,15 @@ typedef struct {
   cmd_opt_t opts;  // Mask of command options
 } cmd_info_t;
 
+// CMD_POLICY_PROD is a subset of CMD_POLICY_RND. That is, if a command has PROD policy, it can also be run in RND.
 static const cmd_info_t cmdsConfig[] = {
-    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
-    [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD,
-                                     CMD_TYPE_CRITICAL},
-    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
-    [CMD_PING] = {pingCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_RND | CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
+    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
+    [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
 
 #define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))
 
@@ -90,7 +90,7 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
       }
 
       // Check if the command is allowed to be executed
-      if (!(currCmdInfo.policy & OBC_ACTIVE_POLICY)) {
+      if (currCmdInfo.policy == CMD_POLICY_RND && OBC_ACTIVE_POLICY == CMD_POLICY_PROD) {
         LOG_ERROR_CODE(OBC_ERR_CODE_CMD_NOT_ALLOWED);
         continue;
       }
