@@ -84,7 +84,7 @@ static obc_error_code_t arducamWriteRegister(opcode_t opcode, uint8_t value) {
   return errCode;
 }
 
-static obc_error_code_t arducamReadRegister(opcode_t opcode, uint8_t* buffer) {
+static obc_error_code_t arducamReadRegister(opcode_t opcode, uint8_t *buffer) {
   obc_error_code_t errCode;
   obc_error_code_t prevCode;
   if (buffer == NULL) {
@@ -104,13 +104,9 @@ static obc_error_code_t arducamReadRegister(opcode_t opcode, uint8_t* buffer) {
   return errCode;
 }
 
-obc_error_code_t arducamReadTestReg(uint8_t *buffer) {
-  return arducamReadRegister(ARDUCAM_READ_TEST_REG, buffer);
-}
+obc_error_code_t arducamReadTestReg(uint8_t *buffer) { return arducamReadRegister(ARDUCAM_READ_TEST_REG, buffer); }
 
-obc_error_code_t arducamWriteTestReg(uint8_t value) {
-  return arducamWriteRegister(ARDUCAM_WRITE_TEST_REG, value);
-}
+obc_error_code_t arducamWriteTestReg(uint8_t value) { return arducamWriteRegister(ARDUCAM_WRITE_TEST_REG, value); }
 
 obc_error_code_t arducamReadCaptureControlReg(uint8_t *buffer) {
   return arducamReadRegister(ARDUCAM_READ_CAPTURE_CONTROL_REG, buffer);
@@ -147,9 +143,7 @@ obc_error_code_t arducamWriteSensorPowerControlReg(uint8_t value) {
   return arducamWriteRegister(ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG, value);
 }
 
-obc_error_code_t arducamReadFIFO(uint8_t *buffer) {
-  return arducamReadRegister(ARDUCAM_FIFO_READ, buffer);
-}
+obc_error_code_t arducamReadFIFO(uint8_t *buffer) { return arducamReadRegister(ARDUCAM_FIFO_READ, buffer); }
 
 obc_error_code_t arducamBurstReadFIFO(uint8_t *buffer, size_t bufferSize) {
   obc_error_code_t errCode;
