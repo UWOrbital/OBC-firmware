@@ -25,16 +25,6 @@ code {
     monospace;
 }
 
-.header {
-  background-image: url("./assets/banner.png");
-  border-bottom: 1px solid darkblue;
-}
-
-.header a {
-  text-decoration: none;
-  color: white;
-}
-
 .layout {
   display: flex;
   flex-direction: column;
