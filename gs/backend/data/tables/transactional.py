@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Final
 from uuid import UUID, uuid4
 
+from sqlalchemy.schema import CreateSchema, MetaData
 from sqlmodel import Field
 
 from gs.backend.data.constants import (
@@ -13,18 +14,35 @@ from gs.backend.data.constants import (
     PACKET_RAW_LENGTH,
 )
 from gs.backend.data.enums.aro_requests import ARORequestStatus
-from gs.backend.data.enums.transactional import CommandStatus, MainPacketType, SessionStatus
+from gs.backend.data.enums.transactional import (
+    CommandStatus,
+    MainPacketType,
+    SessionStatus,
+)
 from gs.backend.data.tables.aro_user import ARO_USER_TABLE_NAME
 from gs.backend.data.tables.base_model import BaseSQLModel
-from gs.backend.data.tables.master import MAIN_COMMAND_TABLE_NAME, MAIN_TELEMETRY_TABLE_NAME, MainTableID
+from gs.backend.data.tables.main import (
+    MAIN_COMMAND_TABLE_NAME,
+    MAIN_SCHEMA_NAME,
+    MAIN_TELEMETRY_TABLE_NAME,
+    MainTableID,
+)
 
+# Transactional schema related items
+TRANSACTIONAL_SCHEMA_NAME: Final[str] = "transactional"
+TRANSACTIONAL_SCHEMA_METADATA: Final[MetaData] = MetaData(TRANSACTIONAL_SCHEMA_NAME)
+TRANSACTIONAL_SCHEMA_CREATE: Final[CreateSchema] = CreateSchema(TRANSACTIONAL_SCHEMA_NAME)
+
+# Table names in database
 ARO_REQUEST_TABLE_NAME: Final[str] = "aro_requests"
-COMMS_SESSION_TABLE_NAME: Final[str] = "comms_session_table_name"
+COMMS_SESSION_TABLE_NAME: Final[str] = "comms_session"
 PACKET_TABLE_NAME: Final[str] = "packet"
 TELEMETRY_TABLE_NAME: Final[str] = "telemetry"
 COMMANDS_TABLE_NAME: Final[str] = "commands"
 PACKET_TELEMETRY_TABLE_NAME: Final[str] = "packet_telemetry"
 PACKET_COMMANDS_TABLE_NAME: Final[str] = "packet_commands"
+
+# Transactional data tables
 
 
 class ARORequest(BaseSQLModel, table=True):
@@ -42,7 +60,44 @@ class ARORequest(BaseSQLModel, table=True):
     pic_transmitted_on: datetime | None = Field(default=None)
     packet_id: UUID | None = Field(foreign_key=f"{PACKET_COMMANDS_TABLE_NAME}.id", default=None)
     status: ARORequestStatus = Field(default=ARORequestStatus.PENDING)
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
     __tablename__ = ARO_REQUEST_TABLE_NAME
+
+
+class Commands(BaseSQLModel, table=True):
+    """
+    An instance of a MainCommand.
+    This table holds the data related to actual commands sent from the ground station up to the OBC.
+    """
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
+    status: CommandStatus = Field(default=CommandStatus.PENDING)
+    type_: MainTableID = Field(foreign_key=f"{MAIN_SCHEMA_NAME}.{MAIN_COMMAND_TABLE_NAME}.id")
+    params: str | None = None  # Must match the corresponding params in the main command table
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
+    __tablename__ = COMMANDS_TABLE_NAME
+
+
+class Telemetry(BaseSQLModel, table=True):
+    """
+    An instance of a MainTelemetry.
+    This table holds the data related to actual telemetry received from the OBC.
+    """
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
+    type_: MainTableID = Field(foreign_key=f"{MAIN_SCHEMA_NAME}.{MAIN_TELEMETRY_TABLE_NAME}.id")
+    value: str | None = None  # Must match the corresponding params in the main telemetry table
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
+    __tablename__ = TELEMETRY_TABLE_NAME
+
+
+# Communcation session information
 
 
 class CommsSession(BaseSQLModel, table=True):
@@ -54,7 +109,13 @@ class CommsSession(BaseSQLModel, table=True):
     start_time: datetime = Field(unique=True)
     end_time: datetime | None = Field(unique=True, default=None)
     status: SessionStatus = Field(default=SessionStatus.PENDING)
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
     __tablename__ = COMMS_SESSION_TABLE_NAME
+
+
+# Raw packet data
 
 
 class Packet(BaseSQLModel, table=True):
@@ -70,32 +131,10 @@ class Packet(BaseSQLModel, table=True):
     payload_data: str = Field(max_length=PACKET_DATA_LENGTH)
     created_on: datetime = Field(default_factory=datetime.now)
     offset: int
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
     __tablename__ = PACKET_TABLE_NAME
-
-
-class Commands(BaseSQLModel, table=True):
-    """
-    An instance of a MainCommand.
-    This table holds the data related to actual commands sent from the ground station up to the OBC.
-    """
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    status: CommandStatus = Field(default=CommandStatus.PENDING)
-    type_: MainTableID = Field(foreign_key=f"{MAIN_COMMAND_TABLE_NAME}.id")
-    params: str
-    __tablename__ = COMMANDS_TABLE_NAME
-
-
-class Telemetry(BaseSQLModel, table=True):
-    """
-    An instance of a MainTelemetry.
-    This table holds the data related to actual telemetry received from the OBC.
-    """
-
-    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    type_: MainTableID = Field(foreign_key=f"{MAIN_TELEMETRY_TABLE_NAME}.id")
-    value: str
-    __tablename__ = TELEMETRY_TABLE_NAME
 
 
 class PacketTelemetry(BaseSQLModel, table=True):
@@ -107,6 +146,9 @@ class PacketTelemetry(BaseSQLModel, table=True):
     packet_id: UUID = Field(foreign_key=f"{PACKET_TABLE_NAME}.id")
     telemetry_id: UUID = Field(foreign_key=f"{TELEMETRY_TABLE_NAME}.id")
     previous: UUID | None = Field(foreign_key=f"{PACKET_TELEMETRY_TABLE_NAME}.id", default=None)
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
     __tablename__ = PACKET_TELEMETRY_TABLE_NAME
 
 
@@ -119,4 +161,7 @@ class PacketCommands(BaseSQLModel, table=True):
     packet_id: UUID = Field(foreign_key=f"{PACKET_TABLE_NAME}.id")
     command_id: UUID = Field(foreign_key=f"{COMMANDS_TABLE_NAME}.id")
     previous: UUID | None = Field(foreign_key=f"{PACKET_COMMANDS_TABLE_NAME}.id", default=None)
+
+    # table information
+    metadata = TRANSACTIONAL_SCHEMA_METADATA
     __tablename__ = PACKET_COMMANDS_TABLE_NAME
