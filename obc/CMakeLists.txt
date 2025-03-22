@@ -200,10 +200,6 @@ target_link_libraries(OBC-bl.out PRIVATE
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
     f021_api_archive
 )
-# target_link_libraries(OBC-bl.out PRIVATE
-#     ${FREERTOS_LIB_OPTIMIZE}
-#     $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
-# )
 
 # Tools
 target_link_options(debug-tool.out PRIVATE
