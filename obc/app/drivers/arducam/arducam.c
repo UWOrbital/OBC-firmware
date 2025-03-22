@@ -182,7 +182,6 @@ obc_error_code_t arducamReadCaptureStatusReg(uint8_t *status) {
 
 obc_error_code_t arducamReadFIFOSize(uint32_t *fifoSize) {
   obc_error_code_t errCode;
-  obc_error_code_t prevCode;
   uint8_t upper = 0;
   uint8_t middle = 0;
   uint8_t lower = 0;
@@ -209,7 +208,7 @@ obc_error_code_t arducamReadFIFOSize(uint32_t *fifoSize) {
 obc_error_code_t arducamResetCPLD(void) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(arducamWriteRegister(ARDUCAM_RESET_CPLD, ARDUCAM_RESET_CPLD_MASK));
-  vTaskDelay(pdMS_TO_TICKS(2));
+  vTaskDelay(ARDUCAM_DELAY_2MS);
   RETURN_IF_ERROR_CODE(arducamWriteRegister(ARDUCAM_RESET_CPLD, 0));
   return errCode;
 }
