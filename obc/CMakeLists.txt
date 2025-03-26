@@ -140,6 +140,10 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
+target_link_libraries(${OUT_FILE_NAME} PRIVATE
+    ${FREERTOS_LIB_OPTIMIZE}
+    $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
+)
 
 # Generate .bin for the app
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
@@ -231,6 +235,10 @@ target_link_libraries(debug-tool.out PRIVATE
     onboard-env-modelling
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
+)
+target_link_libraries(debug-tool.out PRIVATE
+    ${FREERTOS_LIB_OPTIMIZE}
+    $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
 )
 
 
