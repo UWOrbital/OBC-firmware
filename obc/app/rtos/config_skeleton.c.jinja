@@ -31,7 +31,7 @@ typedef struct {
 
 /* TASK INIT PROTOTYPES - These run before their respective tasks are created */
 {% for t in tasks %}
-{% if t.task_name != "digital_wdg_mgr" %}
+{% if t.task_init %}
 extern void obcTaskInit{{ t.function_stem }}(void);
 {% endif %}
 {% endfor %}
@@ -46,8 +46,8 @@ static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t t
 
 /* PRIVATE DATA */
 {% for t in tasks %}
-{% if t.task_name == "stats_collector" %}
-#if ENABLE_TASK_STATS_COLLECTOR == 1
+{% if t.conditional_enable %}
+#if {{ t.conditional_enable }} == 1
 static StackType_t obcTaskStackTaskStatsCollector[{{ t.stack_size }}];
 static StaticTask_t obcTaskBufferTaskStatsCollector;
 #endif
@@ -60,8 +60,8 @@ static StaticTask_t obcTaskBuffer{{ t.function_stem }};
 {% endfor %}
 static obc_scheduler_config_t obcSchedulerConfig[] = {
 {% for t in tasks %}
-{% if t.task_name == "stats_collector" %}
-#if ENABLE_TASK_STATS_COLLECTOR == 1
+{% if t.conditional_enable %}
+#if {{ t.conditional_enable }} == 1
     [OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}] =
         {
             .taskName = "{{ t.task_name }}",
@@ -82,10 +82,10 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .stackSize = {{ t.stack_size }},
             .priority = {{ t.priority }},
             .taskFunc = obcTaskFunction{{ t.function_stem }},
-            {% if t.task_name == "digital_wdg_mgr" %}
-            .taskInit = NULL,
-            {% else %}
+            {% if t.task_init %}
             .taskInit = obcTaskInit{{ t.function_stem }},
+            {% else %}
+            .taskInit = NULL,
             {% endif %}
         },
 {% endif %}

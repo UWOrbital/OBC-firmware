@@ -72,6 +72,7 @@ stack_size = "128U"
 priority = "OBC_SCHEDULER_MAX_PRIORITY"
 function_stem = "SwWatchdog"
 config_id_stem = "DIGITAL_WATCHDOG_MGR"
+task_init = false
 
 [[tasks]]
 task_name = "alarm_handler"
@@ -93,6 +94,7 @@ stack_size = "1024U"
 priority = "1U"
 function_stem = "StatsCollector"
 config_id_stem = "STATS_COLLECTOR"
+conditional_enable = "ENABLE_TASK_STATS_COLLECTOR"
 
 [[tasks]]
 task_name = "logger"
