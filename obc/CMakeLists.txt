@@ -153,13 +153,6 @@ add_custom_command(
     COMMENT "Generating OBC scheduler configuration"
 )
 
-add_custom_target(
-    generate_scheduler_config
-    DEPENDS ${SCHEDULER_HEADER} ${SCHEDULER_SOURCE}
-)
-
-add_dependencies(${OUT_FILE_NAME} generate_scheduler_config)
-
 # Generate .bin for the app
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
 add_custom_command(
