@@ -48,38 +48,25 @@ static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t t
 {% for t in tasks %}
 {% if t.conditional_enable %}
 #if {{ t.conditional_enable }} == 1
-static StackType_t obcTaskStackTaskStatsCollector[{{ t.stack_size }}];
-static StaticTask_t obcTaskBufferTaskStatsCollector;
-#endif
-
-{% else %}
+{% endif %}
 static StackType_t obcTaskStack{{ t.function_stem }}[{{ t.stack_size }}];
 static StaticTask_t obcTaskBuffer{{ t.function_stem }};
-
+{% if t.conditional_enable %}
+#endif
 {% endif %}
 {% endfor %}
+
 static obc_scheduler_config_t obcSchedulerConfig[] = {
 {% for t in tasks %}
 {% if t.conditional_enable %}
 #if {{ t.conditional_enable }} == 1
-    [OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}] =
-        {
-            .taskName = "{{ t.task_name }}",
-            .taskStack = obcTaskStackTaskStatsCollector,
-            .taskBuffer = &obcTaskBufferTaskStatsCollector,
-            .stackSize = {{ t.stack_size }}U,
-            .priority = {{ t.priority }},
-            .taskFunc = obcTaskFunction{{ t.function_stem }},
-            .taskInit = obcTaskInit{{ t.function_stem }},
-        },
-#endif
-{% else %}
+{% endif %}
     [OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}] =
         {
             .taskName = "{{ t.task_name }}",
             .taskStack = obcTaskStack{{ t.function_stem }},
             .taskBuffer = &obcTaskBuffer{{ t.function_stem }},
-            .stackSize = {{ t.stack_size }},
+            .stackSize = {{ t.stack_size }}U,
             .priority = {{ t.priority }},
             .taskFunc = obcTaskFunction{{ t.function_stem }},
             {% if t.task_init %}
@@ -88,6 +75,8 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskInit = NULL,
             {% endif %}
         },
+{% if t.conditional_enable %}
+#endif
 {% endif %}
 {% endfor %}
 };
