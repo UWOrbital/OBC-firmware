@@ -141,6 +141,25 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
 
+# Generate scheduler config
+set(SCHEDULER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/gen_scheduler_config.py)
+set(SCHEDULER_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/obc_scheduler_config.c)
+set(SCHEDULER_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/obc_scheduler_config.h)
+add_custom_command(
+    OUTPUT ${SCHEDULER_SOURCE} ${SCHEDULER_HEADER}
+    COMMAND python3 ${SCHEDULER_SCRIPT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos
+    DEPENDS ${SCHEDULER_SCRIPT}
+    COMMENT "Generating OBC scheduler configuration"
+)
+
+add_custom_target(
+    generate_scheduler_config
+    DEPENDS ${SCHEDULER_HEADER} ${SCHEDULER_SOURCE}
+)
+
+add_dependencies(${OUT_FILE_NAME} generate_scheduler_config)
+
 # Generate .bin for the app
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
 add_custom_command(
