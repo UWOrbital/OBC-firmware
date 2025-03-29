@@ -6,7 +6,7 @@ from sqlmodel import Field
 from gs.backend.data.tables.base_model import BaseSQLModel
 
 # Schema information
-MAIN_SCHEMA_NAME: Final[str] = "aro_users"
+MAIN_SCHEMA_NAME: Final[str] = "main"
 MAIN_SCHEMA_METADATA: Final[MetaData] = MetaData(MAIN_SCHEMA_NAME)
 
 # Table names in database
