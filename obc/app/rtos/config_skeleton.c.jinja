@@ -49,7 +49,7 @@ static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t t
 {% if t.conditional_enable %}
 #if {{ t.conditional_enable }} == 1
 {% endif %}
-static StackType_t obcTaskStack{{ t.function_stem }}[{{ t.stack_size }}];
+static StackType_t obcTaskStack{{ t.function_stem }}[{{ t.stack_size }}U];
 static StaticTask_t obcTaskBuffer{{ t.function_stem }};
 {% if t.conditional_enable %}
 #endif

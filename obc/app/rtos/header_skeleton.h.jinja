@@ -6,15 +6,14 @@
 
 typedef enum {
 {% for t in tasks %}
-{% if t.task_name != "stats_collector" and t.task_name != "digital_wdg_mgr" %}
+{% if t.conditional_enable %}
+#if ENABLE_TASK_STATS_COLLECTOR == 1
+{% endif %}
   OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}{% if t.task_name == "state_mgr" %} = 0{% endif %},
+{% if t.conditional_enable %}
+#endif
 {% endif %}
 {% endfor %}
-
-#if ENABLE_TASK_STATS_COLLECTOR == 1
-  OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR,
-#endif
-  OBC_SCHEDULER_CONFIG_ID_DIGITAL_WATCHDOG_MGR,
   OBC_SCHEDULER_TASK_COUNT
 } obc_scheduler_config_id_t;
 

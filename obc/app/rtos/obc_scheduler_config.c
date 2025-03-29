@@ -67,48 +67,34 @@ static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t t
 /* PRIVATE DATA */
 static StackType_t obcTaskStackStateMgr[1024U];
 static StaticTask_t obcTaskBufferStateMgr;
-
 static StackType_t obcTaskStackTelemetryMgr[1024U];
 static StaticTask_t obcTaskBufferTelemetryMgr;
-
 static StackType_t obcTaskStackCommandMgr[1024U];
 static StaticTask_t obcTaskBufferCommandMgr;
-
 static StackType_t obcTaskStackCommsMgr[1024U];
 static StaticTask_t obcTaskBufferCommsMgr;
-
 static StackType_t obcTaskStackCommsDownlinkEncoder[512U];
 static StaticTask_t obcTaskBufferCommsDownlinkEncoder;
-
 static StackType_t obcTaskStackCommsUplinkDecoder[1024U];
 static StaticTask_t obcTaskBufferCommsUplinkDecoder;
-
 static StackType_t obcTaskStackEpsMgr[1024U];
 static StaticTask_t obcTaskBufferEpsMgr;
-
 static StackType_t obcTaskStackPayloadMgr[1024U];
 static StaticTask_t obcTaskBufferPayloadMgr;
-
 static StackType_t obcTaskStackTimekeeper[1024U];
 static StaticTask_t obcTaskBufferTimekeeper;
-
 static StackType_t obcTaskStackSwWatchdog[128U];
 static StaticTask_t obcTaskBufferSwWatchdog;
-
 static StackType_t obcTaskStackAlarmMgr[512U];
 static StaticTask_t obcTaskBufferAlarmMgr;
-
 static StackType_t obcTaskStackHealthCollector[256U];
 static StaticTask_t obcTaskBufferHealthCollector;
-
 #if ENABLE_TASK_STATS_COLLECTOR == 1
-static StackType_t obcTaskStackTaskStatsCollector[1024U];
-static StaticTask_t obcTaskBufferTaskStatsCollector;
+static StackType_t obcTaskStackStatsCollector[1024U];
+static StaticTask_t obcTaskBufferStatsCollector;
 #endif
-
 static StackType_t obcTaskStackLogger[512U];
 static StaticTask_t obcTaskBufferLogger;
-
 static StackType_t obcTaskStackGncMgr[1024U];
 static StaticTask_t obcTaskBufferGncMgr;
 
@@ -237,8 +223,8 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
     [OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR] =
         {
             .taskName = "stats_collector",
-            .taskStack = obcTaskStackTaskStatsCollector,
-            .taskBuffer = &obcTaskBufferTaskStatsCollector,
+            .taskStack = obcTaskStackStatsCollector,
+            .taskBuffer = &obcTaskBufferStatsCollector,
             .stackSize = 1024U,
             .priority = 1U,
             .taskFunc = obcTaskFunctionStatsCollector,
