@@ -3,6 +3,7 @@
 #include "obc_gs_command_id.h"
 #include "data_unpack_utils.h"
 #include "obc_gs_errors.h"
+#include "obc_logging.h"
 
 #include <stdbool.h>
 #include <stdint.h>

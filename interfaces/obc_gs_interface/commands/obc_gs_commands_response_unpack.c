@@ -1,6 +1,7 @@
 #include "data_unpack_utils.h"
 #include "obc_gs_commands_response_unpack.h"
 #include "obc_gs_command_id.h"
+#include "obc_logging.h"
 
 #include <stdint.h>
 #include <string.h>

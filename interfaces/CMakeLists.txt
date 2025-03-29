@@ -11,6 +11,9 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_gs_interface/fec
 
     ${CMAKE_CURRENT_SOURCE_DIR}/data_pack_unpack
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/../obc/app/sys/logging
+    ${CMAKE_CURRENT_SOURCE_DIR}/../obc/app/sys
 )
 
 set(SOURCES
@@ -34,6 +37,14 @@ set(SOURCES
 
 add_library(${OBC_GS_INTERFACE_LIB_NAME} STATIC ${SOURCES})
 target_include_directories(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC ${INCLUDE_DIRS})
+
+if(CMAKE_BUILD_TYPE MATCHES OBC)
+    target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_FW)
+
+elseif(CMAKE_BUILD_TYPE MATCHES GS)
+    target_compile_definitions(${OBC_GS_INTERFACE_LIB_NAME} PUBLIC BUILD_TYPE_OBC_GS)
+
+endif()
 
 target_link_libraries(${OBC_GS_INTERFACE_LIB_NAME} PRIVATE
     tiny-aes
