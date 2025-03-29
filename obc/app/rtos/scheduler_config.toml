@@ -5,70 +5,70 @@
 # TASK_COMMS_PRIORITY = 2U | Comms tasks must have the same priority
 [[tasks]]
 task_name = "state_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "5U"
 function_stem = "StateMgr"
 config_id_stem = "STATE_MGR"
 
 [[tasks]]
 task_name = "telemetry_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "1U"
 function_stem = "TelemetryMgr"
 config_id_stem = "TELEMETRY_MGR"
 
 [[tasks]]
 task_name = "command_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "1U"
 function_stem = "CommandMgr"
 config_id_stem = "COMMAND_MGR"
 
 [[tasks]]
 task_name = "comms_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "TASK_COMMS_PRIORITY"
 function_stem = "CommsMgr"
 config_id_stem = "COMMS_MGR"
 
 [[tasks]]
 task_name = "comms_encoder"
-stack_size = "512U"
+stack_size = 512
 priority = "TASK_COMMS_PRIORITY"
 function_stem = "CommsDownlinkEncoder"
 config_id_stem = "COMMS_DOWNLINK_ENCODER"
 
 [[tasks]]
 task_name = "comms_decoder"
-stack_size = "1024U"
+stack_size = 1024
 priority = "TASK_COMMS_PRIORITY"
 function_stem = "CommsUplinkDecoder"
 config_id_stem = "COMMS_UPLINK_DECODER"
 
 [[tasks]]
 task_name = "eps_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "3U"
 function_stem = "EpsMgr"
 config_id_stem = "EPS_MGR"
 
 [[tasks]]
 task_name = "payload_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "1U"
 function_stem = "PayloadMgr"
 config_id_stem = "PAYLOAD_MGR"
 
 [[tasks]]
 task_name = "timekeeper"
-stack_size = "1024U"
+stack_size = 1024
 priority = "6U"
 function_stem = "Timekeeper"
 config_id_stem = "TIMEKEEPER"
 
 [[tasks]]
 task_name = "digital_wdg_mgr"
-stack_size = "128U"
+stack_size = 128
 priority = "OBC_SCHEDULER_MAX_PRIORITY"
 function_stem = "SwWatchdog"
 config_id_stem = "DIGITAL_WATCHDOG_MGR"
@@ -76,21 +76,21 @@ task_init = false
 
 [[tasks]]
 task_name = "alarm_handler"
-stack_size = "512U"
+stack_size = 512
 priority = "4U"
 function_stem = "AlarmMgr"
 config_id_stem = "ALARM_MGR"
 
 [[tasks]]
 task_name = "health_collector"
-stack_size = "256U"
+stack_size = 256
 priority = "1U"
 function_stem = "HealthCollector"
 config_id_stem = "HEALTH_COLLECTOR"
 
 [[tasks]]
 task_name = "stats_collector"
-stack_size = "1024U"
+stack_size = 1024
 priority = "1U"
 function_stem = "StatsCollector"
 config_id_stem = "STATS_COLLECTOR"
@@ -98,14 +98,14 @@ conditional_enable = "ENABLE_TASK_STATS_COLLECTOR"
 
 [[tasks]]
 task_name = "logger"
-stack_size = "512U"
+stack_size = 512
 priority = "5U"
 function_stem = "Logger"
-config_id_stem = "LOGGER" 
+config_id_stem = "LOGGER"
 
 [[tasks]]
 task_name = "gnc_mgr"
-stack_size = "1024U"
+stack_size = 1024
 priority = "3U"
 function_stem = "GncMgr"
 config_id_stem = "GNC_MGR"
