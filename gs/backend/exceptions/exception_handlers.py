@@ -127,7 +127,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         @attribute request (Request) - The request that caused the exception
         @attribute exc (UnknownError) - The exception that was raised
         """
-        return HTTPException(
+        raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail=exc.message,
         )
