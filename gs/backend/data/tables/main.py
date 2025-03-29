@@ -1,6 +1,6 @@
 from typing import Final, TypeAlias
 
-from sqlalchemy.schema import CreateSchema, MetaData
+from sqlalchemy.schema import MetaData
 from sqlmodel import Field
 
 from gs.backend.data.tables.base_model import BaseSQLModel
@@ -8,7 +8,6 @@ from gs.backend.data.tables.base_model import BaseSQLModel
 # Schema information
 MAIN_SCHEMA_NAME: Final[str] = "aro_users"
 MAIN_SCHEMA_METADATA: Final[MetaData] = MetaData(MAIN_SCHEMA_NAME)
-MAIN_SCHEMA_CREATE: Final[CreateSchema] = CreateSchema(MAIN_SCHEMA_NAME)
 
 # Table names in database
 MAIN_COMMAND_TABLE_NAME: Final[str] = "commands"

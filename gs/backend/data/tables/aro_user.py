@@ -2,7 +2,7 @@ from typing import Final
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr
-from sqlalchemy.schema import CreateSchema, MetaData
+from sqlalchemy.schema import MetaData
 from sqlmodel import Field
 
 from gs.backend.data.constants import (
@@ -16,7 +16,6 @@ from gs.backend.data.tables.base_model import BaseSQLModel
 # Schema information
 ARO_USER_SCHEMA_NAME: Final[str] = "aro_users"
 ARO_USER_SCHEMA_METADATA: Final[MetaData] = MetaData(ARO_USER_SCHEMA_NAME)
-ARO_USER_SCHEMA_CREATE: Final[CreateSchema] = CreateSchema(ARO_USER_SCHEMA_NAME)
 
 # Table names in database
 ARO_USER_TABLE_NAME: Final[str] = "users_data"

@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Final
 from uuid import UUID, uuid4
 
-from sqlalchemy.schema import CreateSchema, MetaData
+from sqlalchemy.schema import MetaData
 from sqlmodel import Field
 
 from gs.backend.data.constants import (
@@ -31,7 +31,6 @@ from gs.backend.data.tables.main import (
 # Transactional schema related items
 TRANSACTIONAL_SCHEMA_NAME: Final[str] = "transactional"
 TRANSACTIONAL_SCHEMA_METADATA: Final[MetaData] = MetaData(TRANSACTIONAL_SCHEMA_NAME)
-TRANSACTIONAL_SCHEMA_CREATE: Final[CreateSchema] = CreateSchema(TRANSACTIONAL_SCHEMA_NAME)
 
 # Table names in database
 ARO_REQUEST_TABLE_NAME: Final[str] = "aro_requests"
