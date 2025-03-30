@@ -7,7 +7,7 @@
 typedef enum {
 {% for t in tasks %}
 {% if t.conditional_enable %}
-#if ENABLE_TASK_STATS_COLLECTOR == 1
+#if {{ t.conditional_enable }} == 1
 {% endif %}
   OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}{% if t.task_name == "state_mgr" %} = 0{% endif %},
 {% if t.conditional_enable %}

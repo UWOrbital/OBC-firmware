@@ -13,7 +13,7 @@ class Task(BaseModel):
     @attribute task_name (str) - name of task; snake_case
     @attribute stack_size (PositiveInt) - stack size as 32-bit unsigned int
     @attribute priority (str) - task priority as 32-bit unsigned int; #U or macro
-    @attribute function_stem (str) - base name for task functions; CamelCase
+    @attribute function_stem (str) - base name for task functions; PascalCase
     @attribute config_id_stem (str) - config id; SNAKE_CASE
     @attribute conditional_enable (Optional[str]) - conditional macro; SNAKE_CASE
     @attribute task_init (bool) - whether task has init function
@@ -49,13 +49,13 @@ class Task(BaseModel):
 
     @field_validator("function_stem", mode="after")
     @classmethod
-    def is_camel_case(cls, name: str) -> str:
+    def is_pascal_case(cls, name: str) -> str:
         """
-        Checks if the string name is a CamelCase string
+        Checks if the string name is a PascalCase string
         """
         if match(r"^([A-Z][a-z]*)+$", name):
             return name
-        raise ValueError(f"{name} must be upper CamelCase")
+        raise ValueError(f"{name} must be PascalCase")
 
     @field_validator("config_id_stem", "conditional_enable", mode="after")
     @classmethod
@@ -94,11 +94,17 @@ def main() -> None:
     with open(CONFIG_FILENAME) as config:
         toml_data = load(config)
 
+    is_error: bool = False
+
     for t in toml_data["tasks"]:
         try:
             tasks.append(Task(**t))
         except ValidationError as e:
             print(e)
+            is_error = True
+
+    if is_error:
+        exit(1)
 
     with open(C_FILENAME, "w") as c_output:
         c_output.write(c_template.render(context))

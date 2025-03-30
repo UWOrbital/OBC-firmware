@@ -145,13 +145,14 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
 set(SCHEDULER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/gen_scheduler_config.py)
 set(SCHEDULER_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/obc_scheduler_config.c)
 set(SCHEDULER_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/obc_scheduler_config.h)
-add_custom_command(
-    OUTPUT ${SCHEDULER_SOURCE} ${SCHEDULER_HEADER}
-    COMMAND python3 ${SCHEDULER_SCRIPT}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos
-    DEPENDS ${SCHEDULER_SCRIPT}
+add_custom_target(generate-scheduler-config ALL
+    COMMAND python3 ${SCHEDULER_SCRIPT}  # Command to run the Python script
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos  # Working directory
+    DEPENDS ${SCHEDULER_SCRIPT}  # Ensure the command runs if the script changes
     COMMENT "Generating OBC scheduler configuration"
 )
+
+add_dependencies(${OUT_FILE_NAME} generate-scheduler-config)
 
 # Generate .bin for the app
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
