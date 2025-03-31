@@ -5,7 +5,6 @@
 #include <stdbool.h>
 
 #include "obc_errors.h"
-#include "alarm_handler.h"
 
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW PERSISTENT SECTION:
@@ -67,7 +66,7 @@ typedef struct {
 
 /* SECTION AND DATA STRUCTS */
 
-// obc_time module
+/* obc_time module */
 typedef struct {
   uint32_t unixTime;
 } obc_time_persist_data_t;
@@ -77,13 +76,56 @@ typedef struct {
   obc_time_persist_data_t data;
 } obc_time_persist_t;
 
-// alarm_mgr module
+/* alarm_mgr module */
+
+// Command ID definition for persistent
+typedef enum {
+  CMD_END_OF_FRAME_PERSIST = 0x00,
+  CMD_EXEC_OBC_RESET_PERSIST,
+  CMD_RTC_SYNC_PERSIST,
+  CMD_DOWNLINK_LOGS_NEXT_PASS_PERSIST,
+  CMD_MICRO_SD_FORMAT_PERSIST,
+  CMD_PING_PERSIST,
+  CMD_DOWNLINK_TELEM_PERSIST,
+  NUM_CMD_CALLBACKS_PERSIST
+} cmd_callback_id_persist_t;
+
+// Command data structures for persistent
 typedef struct {
   uint32_t unixTime;
-  alarm_type_t type;
-  alarm_handler_callback_def_t callbackDef;
+} rtc_sync_cmd_data_persist_t;
+typedef struct {
+  uint8_t logLevel;
+} downlink_logs_next_pass_cmd_data_persist_t;
+
+// Command message definition for persistent
+typedef struct {
   union {
-    cmd_msg_t cmdMsg;
+    rtc_sync_cmd_data_persist_t rtcSync;
+    downlink_logs_next_pass_cmd_data_persist_t downlinkLogsNextPass;
+  };
+  uint32_t timestamp;
+  bool isTimeTagged;
+  cmd_callback_id_persist_t id;
+} cmd_msg_persist_t;
+
+// Alarm handler callback definition for persistent
+typedef union {
+  obc_error_code_t (*defaultCallback)(void);
+  obc_error_code_t (*cmdCallback)(cmd_msg_persist_t *);
+} alarm_handler_callback_def_persist_t;
+
+typedef enum {
+  ALARM_TYPE_DEFAULT_PERSIST,
+  ALARM_TYPE_TIME_TAGGED_CMD_PERSIST,
+} alarm_type_persist_t;
+
+typedef struct {
+  uint32_t unixTime;
+  alarm_type_persist_t type;
+  alarm_handler_callback_def_persist_t callbackDef;
+  union {
+    cmd_msg_persist_t cmdMsg;
   };
 } alarm_mgr_persist_data_t;
 
