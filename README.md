@@ -80,7 +80,7 @@ You'll be using WSL2 for all development.
 
 5. Setup the PostgreSQL database
 
-This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/backend/POSTGRESQL_SETUP.md)
+This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
 
 
 #### **MacOS**
@@ -114,7 +114,7 @@ pre-commit install
 ```
 4. Setup the PostgreSQL database
 
-This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/backend/POSTGRESQL_SETUP.md)
+This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
 
 
 #### **Linux**
@@ -148,7 +148,7 @@ pre-commit install
 
 4. Setup the PostgreSQL database
 
-This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/backend/POSTGRESQL_SETUP.md)
+This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
 
 ### Building
 
