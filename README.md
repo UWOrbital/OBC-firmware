@@ -41,48 +41,7 @@ Download Code Composer Studio (CCS): https://www.ti.com/tool/CCSTUDIO. This will
 
 Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be used for flashing the RM46.
 
-#### Docker Development Environment
-
-It's **highly recommended** that you set up your development environment using Docker and VSCode, especially if you're new to software development. If you follow the instructions in this section, you can skip the **Windows/MacOS/Linux** sections. If you know what you're doing, feel free to set up your dev environment however you like using the instructions in the **Windows/MacOS/Linux** sections for reference. However, there may be a lack of support from other leads/members who don't use the same setup.
-
-##### Docker Desktop Installation & Configuration
-
-1. Install Docker Desktop App from [this link](https://www.docker.com/products/docker-desktop/)
-   - You can choose to sign-up/create an account but it's not required. You can also skip the "Tell-us about what you do" section.
-2. Open Docker Desktop and click on `Dev Environments` from the side-panel
-   - Click on create on `Create +` in the top-right corner.
-3. Setting up the repo
-   - Name the Environment as desired
-   - For the `Choose source` option, select `Local directory` and then select the `OBC-firmware` repository folder that you cloned earlier.
-   - Click `Continue`
-   - Once the container is created, you should be able to open the container in VSCode. If you have VSCode, you can press `Open in VSCode`. If you don't have VSCode, you can get it here: https://code.visualstudio.com/download
-
-##### Installing Dependencies
-
-Once you open the docker instance, open a terminal in VSCode and run the following commands. The dollar sign in your terminal should be prefaced by something like this: `root ➜ /com.docker.devenvironments.code (main ✗)`.
-
-This command opens a terminal in VSCode: `` Ctrl + Shift + `  ``
-
-Enter these commands in your terminal:
-```sh
-sudo apt-get update
-sudo apt-get install -y python3-pip build-essential cmake gcc-multilib g++-multilib curl
-pip3 install -r requirements.txt
-curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
-pre-commit install
-```
-
-##### Testing The Container Build
-
-To test whether your Dev environment has been set up correctly run the commands in the **Building** section. The OBC firmware and test builds should pass. All tests should succeed.
-
-**Note**: The docker container uses pre-configured git (one added to the original OS path by the user). So you should be able to pull and push to the OBC repo as necessary.
-
-**Tip**: Use the `git config --list` command on the VsCode terminal to confirm your git info.
-
 #### **Windows**
-
-Skip this section if you set up a Docker development environment.
 
 1. Download WSL2: https://learn.microsoft.com/en-us/windows/wsl/install
 
@@ -126,8 +85,6 @@ This setup is only required for GS members. Please follow the instructions locat
 
 #### **MacOS**
 
-Skip this section if you set up a Docker development environment.
-
 1. Install required build tools (CMake, Make, gcc)
 
 ```sh
@@ -161,8 +118,6 @@ This setup is only required for GS members. Please follow the instructions locat
 
 
 #### **Linux**
-
-Skip this section if you set up a Docker development environment.
 
 1. Install required build tools (CMake, Make, gcc)
 
