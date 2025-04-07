@@ -24,6 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt update
         sudo apt install -y postgresql
         python -m pip install --upgrade pip
         pip install -r requirements.txt
