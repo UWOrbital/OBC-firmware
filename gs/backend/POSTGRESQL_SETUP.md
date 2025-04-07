@@ -1,5 +1,13 @@
 # PostgreSQL Setup
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Database Setup](#database-setup)
+- [Environment Variable Setup](#environment-variable-setup)
+
+**[Back to top](#table-of-contents)**
+
 ## Installation
 
 Run the following command dependant on your setup.
@@ -19,6 +27,8 @@ brew install postgresql@16
 brew services start postgresql
 ```
 
+**[Back to top](#table-of-contents)**
+
 ## Database Setup
 
 Run `sudo -u postgres psql --version` to check that it was installed properly. It should print that major version is 16.
@@ -35,6 +45,8 @@ Otherwise, you will need to run `psql -U username` and then enter the password c
 CREATE DATABASE gs; # gs database
 \c gs; # Connect to the gs database
 ```
+
+**[Back to top](#table-of-contents)**
 
 ## Environment Variable Setup
 
@@ -53,3 +65,5 @@ GS_DATABASE_NAME="gs"            # Name of the database. NOTE: Make sure to crea
 Note: You can choose to remove the first to lines of the `.env` that start with \# as those lines are comments.
 
 Now, you can start the backend as by running `fastapi dev gs/backend/main.py` from the top level directory to run in development mode.
+
+**[Back to top](#table-of-contents)**
