@@ -3,18 +3,26 @@ from typing import Final
 from sqlalchemy import Engine
 from sqlmodel import Session, create_engine, text
 
+from gs.backend.config.config import (
+    GS_DATABASE_LOCATION,
+    GS_DATABASE_NAME,
+    GS_DATABASE_PASSWORD,
+    GS_DATABASE_PORT,
+    GS_DATABASE_USER,
+)
 from gs.backend.data.tables.aro_user import ARO_USER_SCHEMA_METADATA, ARO_USER_SCHEMA_NAME
 from gs.backend.data.tables.main import MAIN_SCHEMA_METADATA, MAIN_SCHEMA_NAME
 from gs.backend.data.tables.transactional import TRANSACTIONAL_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_NAME
 
-DEFAULT_SQLITE_PATH: Final[str] = "sqlite:///sqlite.db"
-SQL_PATH: Final[str] = DEFAULT_SQLITE_PATH
+# TODO: Possibly create the database if it doesn't exist
+SQL_PATH: Final[
+    str
+] = f"postgresql+psycopg2://{GS_DATABASE_USER}:{GS_DATABASE_PASSWORD}@{GS_DATABASE_LOCATION}:{GS_DATABASE_PORT}/{GS_DATABASE_NAME}"
 
 
 def get_db_engine() -> Engine:
     """
-    Creates the database engine
-
+    @brief Creates the database engine
     @returns engine
     """
     return create_engine(SQL_PATH)
@@ -22,9 +30,8 @@ def get_db_engine() -> Engine:
 
 def get_db_session() -> Session:
     """
-    Creates the database session.
-    This function depends on the `get_db_engine`.
-
+    @brief Creates the database session.
+    @warning This function depends on the `get_db_engine`.
     @returns session
     """
     engine = get_db_engine()
@@ -34,36 +41,33 @@ def get_db_session() -> Session:
 
 def _create_schemas(session: Session) -> None:
     """
-    Creates the schemas in the database.
-
+    @brief Creates the schemas in the database.
     @param session: The session for which to create the schemas
     """
     connection = session.connection()
     schemas = [MAIN_SCHEMA_NAME, TRANSACTIONAL_SCHEMA_NAME, ARO_USER_SCHEMA_NAME]
     for schema in schemas:
         # sqlalchemy doesn't check if the schema exists before attempting to create one
-        connection.execute(text(f"CREATE SCHEMA IF NOT EXIST {schema}"))
+        connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
     connection.commit()
 
 
 def _create_tables(session: Session) -> None:
     """
-    Creates the tables.
-
+    @brief Creates the tables.
     @warning This assumes the relevant schemas were already created
-
     @param session: The session for which to create the schemas
     """
-    metadatas = [MAIN_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_METADATA, ARO_USER_SCHEMA_METADATA]
+    metadatas = [MAIN_SCHEMA_METADATA, ARO_USER_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_METADATA]
     connection = session.connection()
     for metadata in metadatas:
         metadata.create_all(connection)
+        connection.commit()
 
 
 def setup_database(session: Session) -> None:
     """
-    Creates the schemas and tables for the session.
-
+    @brief Creates the schemas and tables for the session.
     @param session: The session for which to create the schemas
     """
     _create_schemas(session)

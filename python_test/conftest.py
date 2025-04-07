@@ -10,7 +10,7 @@ def db_engine(postgresql) -> Engine:
     Creates a database engine fixture for the postgresql.
     This is a function level fixture.
     """
-    connection = f"postgresql+psycopg2://{postgresql.info.user}:@{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}"
+    connection = f"postgresql+psycopg://{postgresql.info.user}:@{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}"
     return create_engine(connection, echo=False, poolclass=NullPool)
 
 
