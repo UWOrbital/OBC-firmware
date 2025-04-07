@@ -93,7 +93,7 @@ brew install make
 brew install gcc
 ```
 
-2. Install Python 3.11 and setup Python virtual environment (Only required for Backend devs)
+2. Install Python 3.11 and setup Python virtual environment (Only required for GS devs)
 
 Run the following commands in the OBC-firmware directory:
 
@@ -126,7 +126,7 @@ sudo apt-get update
 sudo apt-get install build-essential gcc-multilib g++-multilib curl
 ```
 
-2. Install Python 3.11 and setup Python virtual environment (Only required for Backend devs)
+2. Install Python 3.11 and setup Python virtual environment (Only required for GS devs)
 
 Run the following commands in the OBC-firmware directory:
 
@@ -263,6 +263,12 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 ### **Frontend Development**
 
 To run the frontend, you will need Deno 2 installed which was installed in the pre-commit setup instructions above.
+
+#### **Setting up the Frontend **
+```sh
+cd gs/frontend
+deno install --frozen
+```
 
 #### **Running the ARO Frontend**
 
