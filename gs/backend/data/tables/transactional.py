@@ -13,6 +13,7 @@ from gs.backend.data.constants import (
     PACKET_DATA_LENGTH,
     PACKET_RAW_LENGTH,
 )
+from gs.backend.data.database.utils import foreign_key_column
 from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.enums.transactional import (
     CommandStatus,
@@ -27,7 +28,6 @@ from gs.backend.data.tables.main import (
     MAIN_TELEMETRY_TABLE_NAME,
     MainTableID,
 )
-from gs.backend.data.tables.utils import foreign_key_column
 
 # Transactional schema related items
 TRANSACTIONAL_SCHEMA_NAME: Final[str] = "transactional"

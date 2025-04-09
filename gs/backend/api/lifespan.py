@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from gs.backend.data.tables.database import get_db_session, setup_database
+from gs.backend.data.database.engine import get_db_session, setup_database
 
 
 @asynccontextmanager
