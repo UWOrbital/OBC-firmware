@@ -1,3 +1,4 @@
+from loguru import logger
 from sqlalchemy import Engine
 from sqlmodel import Session, create_engine, text
 
@@ -12,7 +13,8 @@ def get_db_engine() -> Engine:
     @brief Creates the database engine
     @returns engine
     """
-    return create_engine(DATABASE_CONNECTION_STRING)
+    # TODO: Add loguru to sqlalchemy.engine logger
+    return create_engine(DATABASE_CONNECTION_STRING, echo=True)
 
 
 def get_db_session() -> Session:
@@ -36,6 +38,7 @@ def _create_schemas(session: Session) -> None:
     for schema in schemas:
         # sqlalchemy doesn't check if the schema exists before attempting to create one
         connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
+        logger.info(f"Created schema {schema}")
     connection.commit()
 
 
@@ -50,6 +53,7 @@ def _create_tables(session: Session) -> None:
     for metadata in metadatas:
         metadata.create_all(connection)
         connection.commit()
+        logger.info(f"Created metadata for tables: {metadata.schema} with values: {metadata.info}")
 
 
 def setup_database(session: Session) -> None:
