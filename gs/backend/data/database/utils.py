@@ -23,4 +23,4 @@ def foreign_key_column(
     @return A Column object with the specified foreign key.
     """
     schema_portion = schema_name + "." if schema_name else ""
-    return Column(ForeignKey(f"{schema_portion}{referenced_table}.{referenced_column}"), **kwargs)
+    return Column(column_type, ForeignKey(f"{schema_portion}{referenced_table}.{referenced_column}"), **kwargs)

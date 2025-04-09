@@ -1,5 +1,5 @@
 import pytest
-from gs.backend.data.tables.database import setup_database
+from gs.backend.data.database.engine import setup_database
 from sqlalchemy import Engine, NullPool
 from sqlmodel import Session, create_engine
 

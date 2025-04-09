@@ -6,8 +6,6 @@ from gs.backend.data.tables.aro_user import ARO_USER_SCHEMA_METADATA, ARO_USER_S
 from gs.backend.data.tables.main import MAIN_SCHEMA_METADATA, MAIN_SCHEMA_NAME
 from gs.backend.data.tables.transactional import TRANSACTIONAL_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_NAME
 
-# TODO: Possibly create the database if it doesn't exist
-
 
 def get_db_engine() -> Engine:
     """

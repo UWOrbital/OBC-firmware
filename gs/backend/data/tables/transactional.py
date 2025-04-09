@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Final
 from uuid import UUID, uuid4
 
+from sqlalchemy import Uuid
 from sqlalchemy.schema import MetaData
 from sqlmodel import Field, Integer
 
@@ -52,7 +53,7 @@ class ARORequest(BaseSQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     aro_id: UUID = foreign_key_column(
-        schema_name=ARO_USER_SCHEMA_NAME, referenced_table=ARO_USER_TABLE_NAME, column_type=UUID
+        schema_name=ARO_USER_SCHEMA_NAME, referenced_table=ARO_USER_TABLE_NAME, column_type=Uuid
     )  # type: ignore
     latitude: Decimal = Field(max_digits=LATITUDE_MAX_DIGIT_NUMBER, decimal_places=COORDINATE_DECIMAL_NUMBER)
     longitude: Decimal = Field(max_digits=LONGITUDE_MAX_DIGIT_NUMBER, decimal_places=COORDINATE_DECIMAL_NUMBER)
@@ -61,7 +62,7 @@ class ARORequest(BaseSQLModel, table=True):
     pic_taken_on: datetime | None = Field(default=None)
     pic_transmitted_on: datetime | None = Field(default=None)
     packet_id: UUID | None = foreign_key_column(
-        referenced_table=PACKET_COMMANDS_TABLE_NAME, column_type=UUID, default=None
+        referenced_table=PACKET_COMMANDS_TABLE_NAME, column_type=Uuid, default=None
     )  # type: ignore
     status: ARORequestStatus = Field(default=ARORequestStatus.PENDING)
 
@@ -81,7 +82,7 @@ class Commands(BaseSQLModel, table=True):
     type_: MainTableID = foreign_key_column(
         referenced_table=MAIN_COMMAND_TABLE_NAME, column_type=Integer, schema_name=MAIN_SCHEMA_NAME
     )  # type: ignore
-    params: str | None = None  # Must match the corresponding params in the main command table
+    params: str | None = None  # TODO: Make sure this matches the corresponding params in the main command table
 
     # table information
     metadata = TRANSACTIONAL_SCHEMA_METADATA
@@ -98,7 +99,7 @@ class Telemetry(BaseSQLModel, table=True):
     type_: MainTableID = foreign_key_column(
         schema_name=MAIN_SCHEMA_NAME, referenced_table=MAIN_TELEMETRY_TABLE_NAME, column_type=Integer
     )  # type: ignore
-    value: str | None = None  # Must match the corresponding params in the main telemetry table
+    value: str | None = None  # TODO: Make sure this matches the corresponding params in the main command table
 
     # table information
     metadata = TRANSACTIONAL_SCHEMA_METADATA
@@ -132,7 +133,7 @@ class Packet(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    session_id: UUID = foreign_key_column(referenced_table=COMMS_SESSION_TABLE_NAME, column_type=UUID)  # type: ignore
+    session_id: UUID = foreign_key_column(referenced_table=COMMS_SESSION_TABLE_NAME, column_type=Uuid)  # type: ignore
     raw_data: str = Field(max_length=PACKET_RAW_LENGTH)
     type_: MainPacketType
     # subtype enum # CSDC requirement. TODO: Figure out what this means
@@ -151,10 +152,10 @@ class PacketTelemetry(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    packet_id: UUID = foreign_key_column(referenced_table=PACKET_TABLE_NAME, column_type=UUID)  # type: ignore
-    telemetry_id: UUID = foreign_key_column(referenced_table=TELEMETRY_TABLE_NAME, column_type=UUID)  # type: ignore
+    packet_id: UUID = foreign_key_column(referenced_table=PACKET_TABLE_NAME, column_type=Uuid)  # type: ignore
+    telemetry_id: UUID = foreign_key_column(referenced_table=TELEMETRY_TABLE_NAME, column_type=Uuid)  # type: ignore
     previous: UUID | None = foreign_key_column(
-        referenced_table=PACKET_TELEMETRY_TABLE_NAME, column_type=UUID, default=None
+        referenced_table=PACKET_TELEMETRY_TABLE_NAME, column_type=Uuid, default=None
     )  # type: ignore
 
     # table information
@@ -168,10 +169,10 @@ class PacketCommands(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    packet_id: UUID = foreign_key_column(referenced_table=PACKET_TABLE_NAME, column_type=UUID)  # type: ignore
-    command_id: UUID = foreign_key_column(referenced_table=COMMANDS_TABLE_NAME, column_type=UUID)  # type: ignore
+    packet_id: UUID = foreign_key_column(referenced_table=PACKET_TABLE_NAME, column_type=Uuid)  # type: ignore
+    command_id: UUID = foreign_key_column(referenced_table=COMMANDS_TABLE_NAME, column_type=Uuid)  # type: ignore
     previous: UUID | None = foreign_key_column(
-        referenced_table=PACKET_COMMANDS_TABLE_NAME, column_type=UUID, default=None
+        referenced_table=PACKET_COMMANDS_TABLE_NAME, column_type=Uuid, default=None
     )  # type: ignore
 
     # table information
