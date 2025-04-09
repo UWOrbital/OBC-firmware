@@ -1,23 +1,12 @@
-from typing import Final
-
 from sqlalchemy import Engine
 from sqlmodel import Session, create_engine, text
 
-from gs.backend.config.config import (
-    GS_DATABASE_LOCATION,
-    GS_DATABASE_NAME,
-    GS_DATABASE_PASSWORD,
-    GS_DATABASE_PORT,
-    GS_DATABASE_USER,
-)
+from gs.backend.config.config import DATABASE_CONNECTION_STRING
 from gs.backend.data.tables.aro_user import ARO_USER_SCHEMA_METADATA, ARO_USER_SCHEMA_NAME
 from gs.backend.data.tables.main import MAIN_SCHEMA_METADATA, MAIN_SCHEMA_NAME
 from gs.backend.data.tables.transactional import TRANSACTIONAL_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_NAME
 
 # TODO: Possibly create the database if it doesn't exist
-SQL_PATH: Final[
-    str
-] = f"postgresql+psycopg2://{GS_DATABASE_USER}:{GS_DATABASE_PASSWORD}@{GS_DATABASE_LOCATION}:{GS_DATABASE_PORT}/{GS_DATABASE_NAME}"
 
 
 def get_db_engine() -> Engine:
@@ -25,7 +14,7 @@ def get_db_engine() -> Engine:
     @brief Creates the database engine
     @returns engine
     """
-    return create_engine(SQL_PATH)
+    return create_engine(DATABASE_CONNECTION_STRING)
 
 
 def get_db_session() -> Session:
