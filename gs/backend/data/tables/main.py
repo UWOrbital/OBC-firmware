@@ -1,5 +1,6 @@
 from typing import Final, TypeAlias
 
+from sqlalchemy import Integer
 from sqlalchemy.schema import MetaData
 from sqlmodel import Field
 
@@ -15,6 +16,7 @@ MAIN_TELEMETRY_TABLE_NAME: Final[str] = "telemetry"
 
 
 MainTableID: TypeAlias = int
+MainTableIDDatabase: TypeAlias = Integer
 
 
 class MainCommand(BaseSQLModel, table=True):
