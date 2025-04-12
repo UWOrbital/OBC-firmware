@@ -152,10 +152,10 @@ class Packet(BaseSQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     session_id: UUID = Field(foreign_key=to_foreign_key_value(COMMS_SESSION_TABLE_NAME), ondelete="CASCADE")
-    raw_data: str = Field(max_length=PACKET_RAW_LENGTH)
+    raw_data: bytes = Field(max_length=PACKET_RAW_LENGTH)
     type_: MainPacketType
     # subtype enum # CSDC requirement. TODO: Figure out what this means
-    payload_data: str = Field(max_length=PACKET_DATA_LENGTH)
+    payload_data: bytes = Field(max_length=PACKET_DATA_LENGTH)
     created_on: datetime = Field(default_factory=datetime.now)
     offset: int
 
