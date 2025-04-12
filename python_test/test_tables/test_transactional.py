@@ -9,7 +9,7 @@ from gs.backend.data.tables.main import MainCommand, MainTelemetry
 from gs.backend.data.tables.transactional import ARORequest, Commands, CommsSession, Packet, Telemetry
 from sqlmodel import Session, select
 
-from python_test.conftest import default_comms_session, default_start_time
+from python_test.conftest import default_comms_session
 
 
 def test_commands_basic(db_session: Session):
@@ -142,3 +142,27 @@ def test_packet_basic(db_session: Session, default_comms_session: CommsSession):
 
     packet_items = db_session.exec(packet_query).all()
     assert len(packet_items) == 0
+
+
+def test_aro_requests_no_packet(db_session: Session):
+    # Setup the database
+    user_data = AROUsers(call_sign="123456", email="bob@test.com", first_name="Bob", phone_number="123456789")
+    db_session.add(user_data)
+    db_session.commit()
+    user_data_query = select(AROUsers)
+    user_data_items = db_session.exec(user_data_query).all()
+    assert len(user_data_items) == 1
+
+    # Insert the aro request
+    aro_request = ARORequest(aro_id=user_data.id, latitude=Decimal(30), longitude=Decimal(40))
+    db_session.add(aro_request)
+    db_session.commit()
+
+    aro_request_query = select(ARORequest)
+    aro_request_items = db_session.exec(aro_request_query).all()
+    assert len(aro_request_items) == 1
+    data_returned1 = aro_request_items[0]
+    assert data_returned1.aro_id == user_data.id
+    assert data_returned1.status == ARORequestStatus.PENDING
+    assert data_returned1.latitude == Decimal(30)
+    assert data_returned1.longitude == Decimal(40)
