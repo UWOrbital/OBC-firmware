@@ -1,8 +1,9 @@
+from datetime import datetime
 from uuid import uuid4
 
-from gs.backend.data.enums.transactional import CommandStatus
+from gs.backend.data.enums.transactional import CommandStatus, MainPacketType, SessionStatus
 from gs.backend.data.tables.main import MainCommand, MainTelemetry
-from gs.backend.data.tables.transactional import Commands, Telemetry
+from gs.backend.data.tables.transactional import Commands, CommsSession, Packet, Telemetry
 from sqlmodel import Session, select
 
 
@@ -77,3 +78,69 @@ def test_telemetry_basic(db_session: Session):
     # Make sure it cascades
     commands_items = db_session.exec(telemetry_query).all()
     assert len(commands_items) == 0
+
+
+def test_comms_session_basic(db_session: Session):
+    # Setup
+    start_time = datetime(2025, 1, 1, 12, 25, 38)
+    comms_session = CommsSession(start_time=start_time)
+    id = comms_session.id  # sqlmodel generates the uuid before it's sent to the db
+
+    # Db actions
+    db_session.add(comms_session)
+    db_session.commit()
+    comms_session_query = select(CommsSession)
+    comms_session_items = db_session.exec(comms_session_query).all()
+
+    # Assertions
+    assert len(comms_session_items) == 1
+    returned_item1 = comms_session_items[0]
+    assert returned_item1.id == id
+    assert returned_item1.start_time == start_time
+    assert returned_item1.end_time is None
+    assert returned_item1.status == SessionStatus.PENDING
+
+
+def test_packet_basic(db_session: Session):
+    # Setup the comms session table
+    start_time = datetime(2025, 1, 1, 12, 25, 38)
+    comms_session = CommsSession(start_time=start_time)
+
+    db_session.add(comms_session)
+    db_session.commit()
+    comms_session_query = select(CommsSession)
+    comms_session_items = db_session.exec(comms_session_query).all()
+    assert len(comms_session_items) == 1  # Make sure it was inserted into the db
+    id = comms_session_items[0].id
+
+    # Test the packet
+    packet = Packet(
+        session_id=id,
+        raw_data=b"Hello world",
+        type_=MainPacketType.UPLINK,
+        payload_data=b"Hello world. Extra info.",
+        offset=1,
+    )
+    db_session.add(packet)
+    db_session.commit()
+    packet_query = select(Packet)
+    packet_items = db_session.exec(packet_query).all()
+
+    assert len(packet_items) == 1
+    returned_items1 = packet_items[0]
+    assert returned_items1.type_ == MainPacketType.UPLINK
+    assert returned_items1.raw_data == b"Hello world"
+    assert returned_items1.payload_data == b"Hello world. Extra info."
+    assert returned_items1.offset == 1
+
+    # Test the delete cascading
+    db_session.delete(comms_session)
+    db_session.commit()
+    comms_session_items = db_session.exec(comms_session_query).all()
+    assert len(comms_session_items) == 0
+
+    packet_items = db_session.exec(packet_query).all()
+    assert len(packet_items) == 0
+
+
+# def test_aro_requests_no_packet(db_session: Session):
