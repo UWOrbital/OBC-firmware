@@ -7,41 +7,73 @@ from sqlmodel import Session, select
 
 
 def test_commands_basic(db_session: Session):
+    # Setup the MainCommand table
     main_command1 = MainCommand(id=1, name="Test 1", data_size=1, total_size=2, format="int 7 bytes", params="time")
     db_session.add(main_command1)
     db_session.commit()
 
+    # Make sure that the main command was successfully inserted into the db
+    main_commands_query = select(MainCommand)
+    main_commands_items = db_session.exec(main_commands_query).all()
+    assert len(main_commands_items) == 1
+
+    # Test the commands table
     id = uuid4()
     command1 = Commands(id=id, type_=main_command1.id, params="1234567")
     db_session.add(command1)
     db_session.commit()
 
-    query = select(Commands)
-    items = db_session.exec(query).all()
+    commands_query = select(Commands)
+    commands_items = db_session.exec(commands_query).all()
 
-    assert len(items) == 1
-    returned_item1 = items[0]
+    assert len(commands_items) == 1
+    returned_item1 = commands_items[0]
     assert returned_item1.id == id
     assert returned_item1.type_ == 1
     assert returned_item1.params == "1234567"
     assert returned_item1.status == CommandStatus.PENDING
 
+    # Start the delete portion of the test
+    db_session.delete(main_command1)
+    main_commands_items = db_session.exec(main_commands_query).all()
+    assert len(main_commands_items) == 0
+
+    # Make sure it cascades
+    commands_items = db_session.exec(commands_query).all()
+    assert len(commands_items) == 0
+
 
 def test_telemetry_basic(db_session: Session):
+    # Setup the MainTelemetry table
     main_telemetry = MainTelemetry(id=1, name="Test 1", data_size=1, total_size=2, format="int 7 bytes")
     db_session.add(main_telemetry)
     db_session.commit()
 
+    # Make sure that the main telemetry was successfully inserted into the db
+    main_telemetry_query = select(MainTelemetry)
+    main_telemetry_items = db_session.exec(main_telemetry_query).all()
+    assert len(main_telemetry_items) == 1
+
+    # Test the telemetry table
     id = uuid4()
     telemetry1 = Telemetry(id=id, type_=main_telemetry.id)
     db_session.add(telemetry1)
     db_session.commit()
 
-    query = select(Telemetry)
-    items = db_session.exec(query).all()
+    telemetry_query = select(Telemetry)
+    telemetry_items = db_session.exec(telemetry_query).all()
 
-    assert len(items) == 1
-    returned_item1 = items[0]
+    assert len(telemetry_items) == 1
+    returned_item1 = telemetry_items[0]
     assert returned_item1.id == id
     assert returned_item1.type_ == 1
     assert returned_item1.value is None
+
+    # Start the delete portion of the test
+    db_session.delete(main_telemetry)
+    main_telemetry_items = db_session.exec(main_telemetry_query).all()
+    assert len(main_telemetry_items) == 0
+
+    # Make sure it cascades
+    commands_items = db_session.exec(telemetry_query).all()
+    assert len(commands_items) == 0
