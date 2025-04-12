@@ -37,7 +37,7 @@ class AROUsers(BaseSQLModel, table=True):
     call_sign: str = Field(min_length=CALL_SIGN_MIN_LENGTH, max_length=CALL_SIGN_MAX_LENGTH)
     email: EmailStr = Field(min_length=EMAIL_MIN_LENGTH, max_length=DEFAULT_MAX_LENGTH, unique=True)
     first_name: str = Field(max_length=DEFAULT_MAX_LENGTH)
-    last_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True)
+    last_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
     phone_number: str
 
     # table information
