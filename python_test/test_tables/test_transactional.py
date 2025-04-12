@@ -1,10 +1,15 @@
 from datetime import datetime
+from decimal import Decimal
 from uuid import uuid4
 
+from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.enums.transactional import CommandStatus, MainPacketType, SessionStatus
+from gs.backend.data.tables.aro_user import AROUsers
 from gs.backend.data.tables.main import MainCommand, MainTelemetry
-from gs.backend.data.tables.transactional import Commands, CommsSession, Packet, Telemetry
+from gs.backend.data.tables.transactional import ARORequest, Commands, CommsSession, Packet, Telemetry
 from sqlmodel import Session, select
+
+from python_test.conftest import default_comms_session, default_start_time
 
 
 def test_commands_basic(db_session: Session):
@@ -80,14 +85,12 @@ def test_telemetry_basic(db_session: Session):
     assert len(commands_items) == 0
 
 
-def test_comms_session_basic(db_session: Session):
+def test_comms_session_basic(db_session: Session, default_start_time: datetime, default_comms_session: CommsSession):
     # Setup
-    start_time = datetime(2025, 1, 1, 12, 25, 38)
-    comms_session = CommsSession(start_time=start_time)
-    id = comms_session.id  # sqlmodel generates the uuid before it's sent to the db
+    id = default_comms_session.id  # sqlmodel generates the uuid before it's sent to the db
 
     # Db actions
-    db_session.add(comms_session)
+    db_session.add(default_comms_session)
     db_session.commit()
     comms_session_query = select(CommsSession)
     comms_session_items = db_session.exec(comms_session_query).all()
@@ -96,17 +99,14 @@ def test_comms_session_basic(db_session: Session):
     assert len(comms_session_items) == 1
     returned_item1 = comms_session_items[0]
     assert returned_item1.id == id
-    assert returned_item1.start_time == start_time
+    assert returned_item1.start_time == default_start_time
     assert returned_item1.end_time is None
     assert returned_item1.status == SessionStatus.PENDING
 
 
-def test_packet_basic(db_session: Session):
+def test_packet_basic(db_session: Session, default_comms_session: CommsSession):
     # Setup the comms session table
-    start_time = datetime(2025, 1, 1, 12, 25, 38)
-    comms_session = CommsSession(start_time=start_time)
-
-    db_session.add(comms_session)
+    db_session.add(default_comms_session)
     db_session.commit()
     comms_session_query = select(CommsSession)
     comms_session_items = db_session.exec(comms_session_query).all()
@@ -114,6 +114,7 @@ def test_packet_basic(db_session: Session):
     id = comms_session_items[0].id
 
     # Test the packet
+    # TODO: Move this data to a fixture
     packet = Packet(
         session_id=id,
         raw_data=b"Hello world",
@@ -134,13 +135,10 @@ def test_packet_basic(db_session: Session):
     assert returned_items1.offset == 1
 
     # Test the delete cascading
-    db_session.delete(comms_session)
+    db_session.delete(default_comms_session)
     db_session.commit()
     comms_session_items = db_session.exec(comms_session_query).all()
     assert len(comms_session_items) == 0
 
     packet_items = db_session.exec(packet_query).all()
     assert len(packet_items) == 0
-
-
-# def test_aro_requests_no_packet(db_session: Session):
