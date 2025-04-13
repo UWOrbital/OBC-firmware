@@ -6,10 +6,16 @@ from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.enums.transactional import CommandStatus, MainPacketType, SessionStatus
 from gs.backend.data.tables.aro_user import AROUsers
 from gs.backend.data.tables.main import MainCommand, MainTelemetry
-from gs.backend.data.tables.transactional import ARORequest, Commands, CommsSession, Packet, Telemetry
+from gs.backend.data.tables.transactional import (
+    ARORequest,
+    Commands,
+    CommsSession,
+    Packet,
+    PacketCommands,
+    PacketTelemetry,
+    Telemetry,
+)
 from sqlmodel import Session, select
-
-from python_test.conftest import default_comms_session
 
 
 def test_commands_basic(db_session: Session):
@@ -166,3 +172,127 @@ def test_aro_requests_no_packet(db_session: Session):
     assert data_returned1.status == ARORequestStatus.PENDING
     assert data_returned1.latitude == Decimal(30)
     assert data_returned1.longitude == Decimal(40)
+
+
+def test_packet_telemetry_basic(db_session: Session, default_comms_session: CommsSession):
+    # Setup the database
+    main_telemetry = MainTelemetry(id=1, name="Test 1", data_size=1, total_size=2, format="int 7 bytes")
+    db_session.add(main_telemetry)
+    db_session.commit()
+
+    # Make sure that the main telemetry was successfully inserted into the db
+    main_telemetry_query = select(MainTelemetry).where(MainTelemetry.id == 1)
+    main_telemetry_items = db_session.exec(main_telemetry_query).all()
+    assert len(main_telemetry_items) == 1
+
+    # Insert the telemetry item into the db
+    id = uuid4()
+    telemetry1 = Telemetry(id=id, type_=main_telemetry.id)
+    db_session.add(telemetry1)
+    db_session.commit()
+
+    # Make sure it was inserted into the db
+    telemetry_query = select(Telemetry).where(Telemetry.id == id)
+    telemetry_items = db_session.exec(telemetry_query).all()
+    assert len(telemetry_items) == 1
+
+    # Deal with the comms session
+    db_session.add(default_comms_session)
+    db_session.commit()
+
+    # Make sure it was inserted into the db
+    comms_session_query = select(CommsSession).where(CommsSession.id == default_comms_session.id)
+    comms_session_items = db_session.exec(comms_session_query).all()
+    assert len(comms_session_items) == 1
+
+    # Insert the packet
+    packet = Packet(
+        session_id=default_comms_session.id,
+        raw_data=b"Hello world",
+        type_=MainPacketType.DOWNLINK,
+        payload_data=b"Hello world. Extra info.",
+        offset=1,
+    )
+    db_session.add(packet)
+    db_session.commit()
+
+    # Make sure it was inserted into the db
+    packet_query = select(Packet).where(Packet.id == packet.id)
+    packet_items = db_session.exec(packet_query).all()
+    assert len(packet_items) == 1
+
+    # Now actually handle the telmetry packet
+    packet_telemetry = PacketTelemetry(telemetry_id=id, packet_id=packet.id)
+    db_session.add(packet_telemetry)
+    db_session.commit()
+
+    # Check that it was properly inserted
+    packet_telemetry_query = select(PacketTelemetry)
+    packet_telemetry_items = db_session.exec(packet_telemetry_query).all()
+    assert len(packet_telemetry_items) == 1
+    data1 = packet_telemetry_items[0]
+    assert data1.telemetry_id == id
+    assert data1.packet_id == packet.id
+    assert data1.previous is None
+
+
+def test_packet_commands_basic(db_session: Session, default_comms_session: CommsSession):
+    # Setup the database
+    main_command = MainCommand(id=1, name="Test 1", data_size=1, total_size=2, format="int 7 bytes", params="time")
+    db_session.add(main_command)
+    db_session.commit()
+
+    # Make sure that the main telemetry was successfully inserted into the db
+    main_telemetry_query = select(MainCommand).where(MainCommand.id == 1)
+    main_telemetry_items = db_session.exec(main_telemetry_query).all()
+    assert len(main_telemetry_items) == 1
+
+    # Insert the telemetry item into the db
+    id = uuid4()
+    commands1 = Commands(id=id, type_=main_command.id)
+    db_session.add(commands1)
+    db_session.commit()
+
+    # Make sure it was inserted into the db
+    commands_query = select(Commands).where(Commands.id == id)
+    commands_items = db_session.exec(commands_query).all()
+    assert len(commands_items) == 1
+
+    # Deal with the comms session
+    db_session.add(default_comms_session)
+    db_session.commit()
+
+    # Make sure it was inserted into the db
+    comms_session_query = select(CommsSession).where(CommsSession.id == default_comms_session.id)
+    comms_session_items = db_session.exec(comms_session_query).all()
+    assert len(comms_session_items) == 1
+
+    # Insert the packet
+    packet = Packet(
+        session_id=default_comms_session.id,
+        raw_data=b"Hello world",
+        type_=MainPacketType.UPLINK,
+        payload_data=b"Hello world. Extra info.",
+        offset=1,
+    )
+    db_session.add(packet)
+    db_session.commit()
+
+    # Make sure it was inserted into the db
+    packet_query = select(Packet).where(Packet.id == packet.id)
+    packet_items = db_session.exec(packet_query).all()
+    assert len(packet_items) == 1
+
+    # Now actually handle the telmetry packet
+    packet_command = PacketCommands(command_id=id, packet_id=packet.id)
+    db_session.add(packet_command)
+    db_session.commit()
+
+    # Check that it was properly inserted
+    packet_commands_query = select(PacketCommands)
+    packet_commands_items = db_session.exec(packet_commands_query).all()
+    assert len(packet_commands_items) == 1
+    data1 = packet_commands_items[0]
+    assert data1.command_id == id
+    assert data1.packet_id == packet.id
+    assert data1.previous is None
