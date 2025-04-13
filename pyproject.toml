@@ -16,6 +16,7 @@ exclude = [
   "test/*"]
 mypy_path = "gs/backend:obc/tools/python"
 strict = true
+plugins = "pydantic.mypy"
 
 [[tool.mypy.overrides]]
 module = "skyfield.*"
