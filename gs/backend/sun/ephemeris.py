@@ -211,7 +211,7 @@ def convert_date_to_jd(time: str) -> float:
 
     timescale = load.timescale()
 
-    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.timezone.utc)
+    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.UTC)
     sky_date = timescale.from_datetime(base_date)
 
     return float(sky_date.ut1)
