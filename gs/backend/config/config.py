@@ -36,7 +36,7 @@ class Container(containers.DeclarativeContainer):
     )
 
 
-class BackendConfigurator:  # to add:BackendConfiguration(metaclass=Singleton)
+class BackendConfigurator:  # to add: BackendConfigurator(metaclass=Singleton)
     """a class to configure backend middleware"""
 
     def __init__(self) -> None:
@@ -70,6 +70,5 @@ class BackendConfigurator:  # to add:BackendConfiguration(metaclass=Singleton)
         """load logging configuration from .env file"""
         load_dotenv()
 
-        excluded_endpoints = getenv("EXLCLUDED_ENDPOINTS", default="").split(",")
-        print(excluded_endpoints)
+        excluded_endpoints = getenv("EXCLUDED_ENDPOINTS", default="").split(",")
         self.container.config.excluded_endpoints.from_value(excluded_endpoints)
