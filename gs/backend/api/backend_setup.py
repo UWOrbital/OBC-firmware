@@ -8,6 +8,7 @@ from gs.backend.api.v1.aro.endpoints.user import aro_user_router
 from gs.backend.api.v1.mcc.endpoints.aro_requests import aro_requests_router
 from gs.backend.api.v1.mcc.endpoints.commands import commands_router
 from gs.backend.api.v1.mcc.endpoints.telemetry import telemetry_router
+from gs.backend.config.config import BackendConfigurator
 
 
 def setup_routes(app: FastAPI) -> None:
@@ -30,4 +31,7 @@ def setup_middlewares(app: FastAPI) -> None:
     """Adds the middlewares to the app"""
     add_cors_middleware(app)  # Cors middleware should be added first
     app.add_middleware(AuthMiddleware)
-    app.add_middleware(LoggerMiddleware, excluded_endpoints=[])
+
+    configurator = BackendConfigurator()
+    logging_config = configurator.get_logging_config()
+    app.add_middleware(LoggerMiddleware, excluded_endpoints=logging_config.excluded_endpoints)

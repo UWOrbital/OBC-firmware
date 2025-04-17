@@ -11,7 +11,7 @@ from gs.backend.config.config_models import CORSConfig, LoggingConfig
 
 #     _instances: dict = {}
 
-#     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
+#     def __call__(cls, *args, **kwargs):
 #         if cls not in cls._instances:
 #             cls._instances[cls] = super().__call__(*args, **kwargs)
 #         return cls._instances[cls]
@@ -36,7 +36,7 @@ class Container(containers.DeclarativeContainer):
     )
 
 
-class BackendConfiguration:  # to add:BackendConfiguration(metaclass=Singleton)
+class BackendConfigurator:  # to add:BackendConfiguration(metaclass=Singleton)
     """a class to configure backend middleware"""
 
     def __init__(self) -> None:
@@ -44,16 +44,16 @@ class BackendConfiguration:  # to add:BackendConfiguration(metaclass=Singleton)
         self.setup_cors_config()
         self.setup_logging_config()
 
-    def get_cors_config(self) -> Callable[[], CORSConfig]:
-        """return cors config model"""
-        return self.container.cors_config
+    def get_cors_config(self) -> CORSConfig:
+        """returns the cors config"""
+        return self.container.cors_config()
 
-    def get_logging_config(self) -> Callable[[], LoggingConfig]:
-        """return logging config model"""
-        return self.container.logging_config
+    def get_logging_config(self) -> LoggingConfig:
+        """returns the logging config"""
+        return self.container.logging_config()
 
     def setup_cors_config(self) -> None:
-        """cors configuration"""
+        """load cors configuration from .env file"""
         load_dotenv()
 
         origins = getenv("ALLOW_ORIGINS", default="http://localhost:5173").split(",")
@@ -67,7 +67,9 @@ class BackendConfiguration:  # to add:BackendConfiguration(metaclass=Singleton)
         self.container.config.allow_headers.from_value(headers)
 
     def setup_logging_config(self) -> None:
-        """logging configuration"""
+        """load logging configuration from .env file"""
         load_dotenv()
-        excluded_endpoints = getenv("EXCLUDED_ENDPOINTS", default="").split(",")
+
+        excluded_endpoints = getenv("EXLCLUDED_ENDPOINTS", default="").split(",")
+        print(excluded_endpoints)
         self.container.config.excluded_endpoints.from_value(excluded_endpoints)
