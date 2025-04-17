@@ -5,7 +5,7 @@ skyfield==1.48
 fastapi[standard]==0.115.0
 sqlmodel==0.0.22
 loguru==0.7.3
-dependancy-injector==4.46.0
+dependency-injector==4.46.0
 
 # Typed packages
 types-requests==2.31.0
