@@ -26,6 +26,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         start_time = perf_counter()
         response = await call_next(request)
         process_time = perf_counter() - start_time
+
         if request.url.path in self.excluded_endpoints:
             return response
 
