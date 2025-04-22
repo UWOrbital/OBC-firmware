@@ -1,26 +1,18 @@
 from collections.abc import Callable
 from os import getenv
 
+from dependancy_injector.providers import Configuration
 from dependency_injector import containers, providers
 from dotenv import load_dotenv
 
 from gs.backend.config.config_models import CORSConfig, LoggingConfig
-
-# class Singleton(type):
-#     """a singleton metaclass"""
-
-#     _instances: dict = {}
-
-#     def __call__(cls, *args, **kwargs):
-#         if cls not in cls._instances:
-#             cls._instances[cls] = super().__call__(*args, **kwargs)
-#         return cls._instances[cls]
+from gs.backend.config.utils import Singleton
 
 
-class Container(containers.DeclarativeContainer):
+class DeclarativeContainer(containers.DeclarativeContainer):
     """a dependancy injector class"""
 
-    config = providers.Configuration()
+    config = Configuration()
 
     cors_config: Callable[[], CORSConfig] = providers.Factory(
         CORSConfig,
@@ -36,39 +28,42 @@ class Container(containers.DeclarativeContainer):
     )
 
 
-class BackendConfigurator:  # to add: BackendConfigurator(metaclass=Singleton)
+class BackendConfigurator(metaclass=Singleton):
     """a class to configure backend middleware"""
 
+    DEFAULT_ORIGINS = "http://localhost:5173"
+
     def __init__(self) -> None:
-        self.container = Container()
+        self._container = DeclarativeContainer()
+        load_dotenv()
         self.setup_cors_config()
         self.setup_logging_config()
 
-    def get_cors_config(self) -> CORSConfig:
+    @property
+    def cors_config(self) -> CORSConfig:
         """returns the cors config"""
-        return self.container.cors_config()
+        return self._container.cors_config()
 
-    def get_logging_config(self) -> LoggingConfig:
+    @property
+    def logging_config(self) -> LoggingConfig:
         """returns the logging config"""
-        return self.container.logging_config()
+        return self._container.logging_config()
 
     def setup_cors_config(self) -> None:
         """load cors configuration from .env file"""
-        load_dotenv()
 
-        origins = getenv("ALLOW_ORIGINS", default="http://localhost:5173").split(",")
+        origins = getenv("ALLOW_ORIGINS", default=BackendConfigurator.DEFAULT_ORIGINSs).split(",")
         credentials = getenv("ALLOW_CREDENTIALS", default="true").lower() == "true"
         methods = getenv("ALLOW_METHODS", default="*").split(",")
         headers = getenv("ALLOW_HEADERS", default="*").split(",")
 
-        self.container.config.allow_origins.from_value(origins)
-        self.container.config.allow_credentials.from_value(credentials)
-        self.container.config.allow_methods.from_value(methods)
-        self.container.config.allow_headers.from_value(headers)
+        self._container.config.allow_origins.from_value(origins)
+        self._container.config.allow_credentials.from_value(credentials)
+        self._container.config.allow_methods.from_value(methods)
+        self._container.config.allow_headers.from_value(headers)
 
     def setup_logging_config(self) -> None:
         """load logging configuration from .env file"""
-        load_dotenv()
 
         excluded_endpoints = getenv("EXCLUDED_ENDPOINTS", default="").split(",")
-        self.container.config.excluded_endpoints.from_value(excluded_endpoints)
+        self._container.config.excluded_endpoints.from_value(excluded_endpoints)
