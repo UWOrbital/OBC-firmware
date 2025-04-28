@@ -12,7 +12,7 @@ class CORSConfig(BaseModel):
     allow_headers: Sequence[str]
 
 
-class LoggingConfig(BaseModel):
-    """model for logging configuration"""
+class LoggerConfig(BaseModel):
+    """model for logger configuration"""
 
     excluded_endpoints: Sequence[str]

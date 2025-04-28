@@ -1,11 +1,11 @@
 from collections.abc import Callable
 from os import getenv
 
-from dependancy_injector.providers import Configuration
 from dependency_injector import containers, providers
+from dependency_injector.providers import Configuration
 from dotenv import load_dotenv
 
-from gs.backend.config.config_models import CORSConfig, LoggingConfig
+from gs.backend.config.config_models import CORSConfig, LoggerConfig
 from gs.backend.config.utils import Singleton
 
 
@@ -22,8 +22,8 @@ class DeclarativeContainer(containers.DeclarativeContainer):
         allow_headers=config.allow_headers,
     )
 
-    logging_config: Callable[[], LoggingConfig] = providers.Factory(
-        LoggingConfig,
+    logger_config: Callable[[], LoggerConfig] = providers.Factory(
+        LoggerConfig,
         excluded_endpoints=config.excluded_endpoints,
     )
 
@@ -35,9 +35,15 @@ class BackendConfigurator(metaclass=Singleton):
 
     def __init__(self) -> None:
         self._container = DeclarativeContainer()
-        load_dotenv()
-        self.setup_cors_config()
-        self.setup_logging_config()
+
+    def setup_environment(self, env: str = "") -> None:
+        """load environment variables (regular/testing)"""
+        if env:  # for tests
+            load_dotenv(dotenv_path=env)
+        else:
+            load_dotenv()
+        self._setup_cors_config()
+        self._setup_logger_config()
 
     @property
     def cors_config(self) -> CORSConfig:
@@ -45,14 +51,14 @@ class BackendConfigurator(metaclass=Singleton):
         return self._container.cors_config()
 
     @property
-    def logging_config(self) -> LoggingConfig:
-        """returns the logging config"""
-        return self._container.logging_config()
+    def logger_config(self) -> LoggerConfig:
+        """returns the logger config"""
+        return self._container.logger_config()
 
-    def setup_cors_config(self) -> None:
+    def _setup_cors_config(self) -> None:
         """load cors configuration from .env file"""
 
-        origins = getenv("ALLOW_ORIGINS", default=BackendConfigurator.DEFAULT_ORIGINSs).split(",")
+        origins = getenv("ALLOW_ORIGINS", default=BackendConfigurator.DEFAULT_ORIGINS).split(",")
         credentials = getenv("ALLOW_CREDENTIALS", default="true").lower() == "true"
         methods = getenv("ALLOW_METHODS", default="*").split(",")
         headers = getenv("ALLOW_HEADERS", default="*").split(",")
@@ -62,8 +68,8 @@ class BackendConfigurator(metaclass=Singleton):
         self._container.config.allow_methods.from_value(methods)
         self._container.config.allow_headers.from_value(headers)
 
-    def setup_logging_config(self) -> None:
-        """load logging configuration from .env file"""
+    def _setup_logger_config(self) -> None:
+        """load logger configuration from .env file"""
 
         excluded_endpoints = getenv("EXCLUDED_ENDPOINTS", default="").split(",")
         self._container.config.excluded_endpoints.from_value(excluded_endpoints)
