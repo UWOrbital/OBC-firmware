@@ -36,7 +36,7 @@ static QueueHandle_t stateMgrQueueHandle = NULL;
 static StaticQueue_t stateMgrQueue;
 static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
 
-static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
+static comms_state_t commsManagerState = COMMS_STATE_AWAITING_CONN;
 
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.

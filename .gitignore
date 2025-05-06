@@ -55,6 +55,7 @@ dkms.conf
 .vscode/
 .idea/
 compile_commands.json
+*.clangd
 .cache/
 *.suo
 *.ntvs*
