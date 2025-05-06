@@ -4,9 +4,9 @@ from uuid import uuid4
 
 from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.enums.transactional import CommandStatus, MainPacketType, SessionStatus
-from gs.backend.data.tables.aro_user import AROUsers
-from gs.backend.data.tables.main import MainCommand, MainTelemetry
-from gs.backend.data.tables.transactional import (
+from gs.backend.data.tables.aro_user_tables import AROUsers
+from gs.backend.data.tables.main_tables import MainCommand, MainTelemetry
+from gs.backend.data.tables.transactional_tables import (
     ARORequest,
     Commands,
     CommsSession,

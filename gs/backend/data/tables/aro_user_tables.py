@@ -5,7 +5,7 @@ from pydantic import EmailStr
 from sqlalchemy.schema import MetaData
 from sqlmodel import Field
 
-from gs.backend.data.constants import (
+from gs.backend.config.data_config import (
     CALL_SIGN_MAX_LENGTH,
     CALL_SIGN_MIN_LENGTH,
     DEFAULT_MAX_LENGTH,

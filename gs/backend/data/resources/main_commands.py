@@ -1,4 +1,4 @@
-from gs.backend.data.tables.main import MainCommand
+from gs.backend.data.tables.main_tables import MainCommand
 
 
 # TODO: Pull this from a config file so that it's synced with the OBC

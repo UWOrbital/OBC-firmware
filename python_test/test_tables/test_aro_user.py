@@ -1,4 +1,4 @@
-from gs.backend.data.tables.aro_user import AROUsers
+from gs.backend.data.tables.aro_user_tables import AROUsers
 from sqlmodel import Session, select
 
 

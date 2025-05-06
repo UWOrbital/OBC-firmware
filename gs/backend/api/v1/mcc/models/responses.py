@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from gs.backend.data.tables.main import MainCommand
+from gs.backend.data.tables.main_tables import MainCommand
 
 
 class MainCommandsResponse(BaseModel):

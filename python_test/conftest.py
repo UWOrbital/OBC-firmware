@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 from gs.backend.data.database.engine import setup_database
-from gs.backend.data.tables.transactional import CommsSession
+from gs.backend.data.tables.transactional_tables import CommsSession
 from sqlalchemy import Engine, NullPool
 from sqlmodel import Session, create_engine
 

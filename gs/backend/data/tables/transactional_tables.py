@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID as DB_UUID
 from sqlalchemy.schema import Column, ForeignKey, ForeignKeyConstraint, MetaData
 from sqlmodel import Field
 
-from gs.backend.data.constants import (
+from gs.backend.config.data_config import (
     COORDINATE_DECIMAL_NUMBER,
     LATITUDE_MAX_DIGIT_NUMBER,
     LONGITUDE_MAX_DIGIT_NUMBER,
@@ -21,9 +21,9 @@ from gs.backend.data.enums.transactional import (
     MainPacketType,
     SessionStatus,
 )
-from gs.backend.data.tables.aro_user import AROUsers
+from gs.backend.data.tables.aro_user_tables import AROUsers
 from gs.backend.data.tables.base_model import BaseSQLModel
-from gs.backend.data.tables.main import (
+from gs.backend.data.tables.main_tables import (
     MainCommand,
     MainTableID,
     MainTableIDDatabase,

@@ -1,4 +1,4 @@
-from gs.backend.data.tables.main import MainCommand, MainTelemetry
+from gs.backend.data.tables.main_tables import MainCommand, MainTelemetry
 from sqlmodel import Session, select
 
 

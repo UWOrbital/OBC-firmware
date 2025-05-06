@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 
 from gs.backend.api.v1.mcc.models.responses import MainCommandsResponse
 from gs.backend.data.database.engine import get_db_session
-from gs.backend.data.tables.main import MainCommand
+from gs.backend.data.tables.main_tables import MainCommand
 
 main_commands_router = APIRouter(tags=["MCC", "Main Commands"])
 

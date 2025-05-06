@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from gs.backend.data.data.utils import add_main_commands
 from gs.backend.data.database.engine import get_db_session, setup_database
+from gs.backend.data.resources.utils import add_main_commands
 
 
 @asynccontextmanager

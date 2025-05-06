@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
-from gs.backend.data.data.main_commands import main_commands
-from gs.backend.data.tables.main import MainCommand
+from gs.backend.data.resources.main_commands import main_commands
+from gs.backend.data.tables.main_tables import MainCommand
 
 
 def add_main_commands(session: Session) -> None:
