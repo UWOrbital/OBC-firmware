@@ -5,6 +5,7 @@
 - [Installation](#installation)
 - [Database Setup](#database-setup)
 - [Environment Variable Setup](#environment-variable-setup)
+- [Sources](#sources)
 
 **[Back to top](#table-of-contents)**
 
@@ -65,5 +66,13 @@ GS_DATABASE_NAME="gs"            # Name of the database. NOTE: Make sure to crea
 Note: You can choose to remove the first to lines of the `.env` that start with \# as those lines are comments.
 
 Now, you can start the backend as by running `fastapi dev gs/backend/main.py` from the top level directory to run in development mode.
+
+**[Back to top](#table-of-contents)**
+
+## Sources
+
+- [How to Install and Setup PostgreSQL on Ubuntu 20.04 | Step-by-Step](https://www.cherryservers.com/blog/how-to-install-and-setup-postgresql-server-on-ubuntu-20-04)
+- [Install and configure PostgreSQL](https://documentation.ubuntu.com/server/how-to/databases/install-postgresql/index.html)
+- [How To Install PostgreSQL on Ubuntu 20.04 \[Quickstart\]](https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-20-04-quickstart)
 
 **[Back to top](#table-of-contents)**
