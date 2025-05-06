@@ -218,6 +218,9 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
         case COMMS_EVENT_UPLINK_FINISHED:
           *state = COMMS_STATE_DISCONNECTED;
           return OBC_ERR_CODE_SUCCESS;
+        case COMMS_EVENT_UPLINK_DISC:
+          *state = COMMS_STATE_SENDING_DISC;
+          return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_ERROR:
           *state = COMMS_STATE_DISCONNECTED;
           return OBC_ERR_CODE_SUCCESS;
@@ -227,7 +230,7 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
     case COMMS_STATE_DOWNLINKING:
       switch (event) {
         case COMMS_EVENT_DOWNLINK_FINISHED:
-          *state = COMMS_STATE_SENDING_DISC;
+          *state = COMMS_STATE_UPLINKING;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_ERROR:
           *state = COMMS_STATE_DISCONNECTED;
