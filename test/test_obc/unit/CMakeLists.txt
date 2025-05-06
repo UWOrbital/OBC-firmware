@@ -47,6 +47,9 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
 )
 
+# Add peripheral configs
+add_definitions(-DCONFIG_VN100 -DCONFIG_ARDUCAM)
+
 target_link_libraries(${TEST_BINARY}
     PRIVATE
     GTest::GTest

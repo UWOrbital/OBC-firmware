@@ -19,9 +19,10 @@
 #include <het.h>
 
 // This is the stack canary. It should never be overwritten.
-// Ideally, it would be a random value, but we don't have a good source of entropy
-// that we can use.
+
 void *__stack_chk_guard = (void *)0xDEADBEEF;
+
+uint32_t __stack_chk_guard_init(void);
 
 void __stack_chk_fail(void) { resetSystem(RESET_REASON_STACK_CHECK_FAIL); }
 
@@ -33,7 +34,6 @@ int main(void) {
   spiInit();
   canInit();
   hetInit();
-
   _enable_interrupt_();
 
   // Initialize bus mutexes

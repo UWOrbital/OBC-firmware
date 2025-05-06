@@ -1,4 +1,4 @@
-﻿#include "CSerialPort/SerialPortInfoBase.h"
+#include "CSerialPort/SerialPortInfoBase.h"
 
 CSerialPortInfoBase::CSerialPortInfoBase() {}
 

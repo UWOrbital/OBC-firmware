@@ -11,6 +11,8 @@
 #define CHIP_READY 0
 #define CHIP_STATE 0b1110000
 
+#define CC1120_RND_CONFIG 0x80
+
 static const register_setting_t cc1120SettingsStd[] = {
     // Set GPIO 0 to RXFIFO_THR_PKT
     {CC1120_REGS_IOCFG0, 0x01U},
@@ -52,14 +54,27 @@ static const register_setting_t cc1120SettingsStd[] = {
     {CC1120_REGS_PA_CFG0, 0x7DU},
     {CC1120_REGS_PKT_LEN, 0x0CU}};
 
-static const register_setting_t cc1120SettingsExt[] = {
-    {CC1120_REGS_EXT_IF_MIX_CFG, 0x00U}, {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U}, {CC1120_REGS_EXT_FREQ2, 0x6CU},
-    {CC1120_REGS_EXT_FREQ1, 0x7AU},      {CC1120_REGS_EXT_FREQ0, 0xE1U},       {CC1120_REGS_EXT_FS_DIG1, 0x00U},
-    {CC1120_REGS_EXT_FS_DIG0, 0x5FU},    {CC1120_REGS_EXT_FS_CAL1, 0x40U},     {CC1120_REGS_EXT_FS_CAL0, 0x0EU},
-    {CC1120_REGS_EXT_FS_DIVTWO, 0x03U},  {CC1120_REGS_EXT_FS_DSM0, 0x33U},     {CC1120_REGS_EXT_FS_DVC0, 0x17U},
-    {CC1120_REGS_EXT_FS_PFD, 0x50U},     {CC1120_REGS_EXT_FS_PRE, 0x6EU},      {CC1120_REGS_EXT_FS_REG_DIV_CML, 0x14U},
-    {CC1120_REGS_EXT_FS_SPARE, 0xACU},   {CC1120_REGS_EXT_FS_VCO0, 0xB4U},     {CC1120_REGS_EXT_XOSC5, 0x0EU},
-    {CC1120_REGS_EXT_XOSC1, 0x03U},      {CC1120_REGS_EXT_TOC_CFG, 0x89U}};
+static const register_setting_t cc1120SettingsExt[] = {{CC1120_REGS_EXT_IF_MIX_CFG, 0x00U},
+                                                       {CC1120_REGS_EXT_FREQOFF_CFG, 0x34U},
+                                                       {CC1120_REGS_EXT_FREQ2, 0x6CU},
+                                                       {CC1120_REGS_EXT_FREQ1, 0x7AU},
+                                                       {CC1120_REGS_EXT_FREQ0, 0xE1U},
+                                                       {CC1120_REGS_EXT_FS_DIG1, 0x00U},
+                                                       {CC1120_REGS_EXT_FS_DIG0, 0x5FU},
+                                                       {CC1120_REGS_EXT_FS_CAL1, 0x40U},
+                                                       {CC1120_REGS_EXT_FS_CAL0, 0x0EU},
+                                                       {CC1120_REGS_EXT_FS_DIVTWO, 0x03U},
+                                                       {CC1120_REGS_EXT_FS_DSM0, 0x33U},
+                                                       {CC1120_REGS_EXT_FS_DVC0, 0x17U},
+                                                       {CC1120_REGS_EXT_FS_PFD, 0x50U},
+                                                       {CC1120_REGS_EXT_FS_PRE, 0x6EU},
+                                                       {CC1120_REGS_EXT_FS_REG_DIV_CML, 0x14U},
+                                                       {CC1120_REGS_EXT_FS_SPARE, 0xACU},
+                                                       {CC1120_REGS_EXT_FS_VCO0, 0xB4U},
+                                                       {CC1120_REGS_EXT_XOSC5, 0x0EU},
+                                                       {CC1120_REGS_EXT_XOSC1, 0x03U},
+                                                       {CC1120_REGS_EXT_TOC_CFG, 0x89U},
+                                                       {CC1120_REGS_EXT_RNDGEN, CC1120_RND_CONFIG}};
 
 /**
  * @brief - Reads from consecutive registers from the CC1120.
@@ -443,5 +458,19 @@ obc_error_code_t cc1120GetBytesInRxFifo(uint8_t *numBytes) {
   }
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_NUM_RXBYTES, numBytes, 1));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t cc1120Rng(uint8_t *randomValue) {
+  obc_error_code_t errCode;
+  uint8_t receivedData;
+  if (randomValue == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SRX));
+  RETURN_IF_ERROR_CODE(cc1120ReadExtAddrSpi(CC1120_REGS_EXT_RNDGEN, randomValue, 1));
+  RETURN_IF_ERROR_CODE(cc1120ReadFifo(&receivedData, 1));
+  (*randomValue) &= ~(1 << 7);
+  (*randomValue) ^= receivedData;
   return OBC_ERR_CODE_SUCCESS;
 }
