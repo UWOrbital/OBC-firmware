@@ -218,7 +218,7 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
         case COMMS_EVENT_UPLINK_FINISHED:
           *state = COMMS_STATE_DISCONNECTED;
           return OBC_ERR_CODE_SUCCESS;
-        case COMMS_EVENT_UPLINK_DISC:
+        case COMMS_EVENT_START_DISC:
           *state = COMMS_STATE_SENDING_DISC;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_ERROR:

@@ -38,5 +38,6 @@ typedef enum {
   CMD_MICRO_SD_FORMAT,
   CMD_PING,
   CMD_DOWNLINK_TELEM,
-  NUM_CMD_CALLBACKS
+  NUM_CMD_CALLBACKS,
+  CMD_UPLINK_DISC,
 } cmd_callback_id_t;
