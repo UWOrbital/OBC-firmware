@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <sys/types.h>
 
 /* Pack functions for each command */
 
