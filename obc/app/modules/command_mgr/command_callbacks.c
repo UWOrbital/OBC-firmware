@@ -95,7 +95,7 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
 obc_error_code_t uplinkDisconnectCmdCallback(cmd_msg_t *cmd) {
   obc_error_code_t errCode;
 
-  comms_event_t disconnectSentEvent = {.eventID = COMMS_EVENT_UPLINK_DISC};
+  comms_event_t disconnectSentEvent = {.eventID = COMMS_EVENT_START_DISC};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&disconnectSentEvent));
 
   return OBC_ERR_CODE_SUCCESS;
