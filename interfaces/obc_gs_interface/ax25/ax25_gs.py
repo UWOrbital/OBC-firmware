@@ -12,8 +12,8 @@ class AX25:
 
     def __init__(self) -> None:
         pass
-
-    def ax25EncodeIFrame(self, data_to_send: str, src_callsign: str = GROUND_STATION_CALLSIGN, dst_callsign: str = CUBE_SAT_CALLSIGN, ns: int = 0) -> bytes:
+   
+    def ax25EncodeFrame(self, data_to_send: str, frame_type: ax25.FrameType, src_callsign: str = GROUND_STATION_CALLSIGN, dst_callsign: str = CUBE_SAT_CALLSIGN, ns: int = 0) -> bytes:
         """
         Encodes and Information Frame with the requested data using the ax25 library
 
@@ -21,11 +21,11 @@ class AX25:
         :param src_callsign: Call sign of the source
         :param dst_callsign: Calls sign of the destination
         :param ns: Send Sequence Number
-        :return: True if the frame is successfully made otherwise False
+        :return: Generated Frame
         """
         
         # Generate Frame Object as per Library Specfications
-        control_block = ax25.Control(frame_type=ax25.FrameType.I, poll_final=False, send_seqno=ns)
+        control_block = ax25.Control(frame_type, poll_final=False, send_seqno=ns)
         src_address = ax25.Address(call=src_callsign, ssid=self._DEFAULT_SSID)
         dst_address = ax25.Address(call=dst_callsign, ssid=self._DEFAULT_SSID)
         frame_bytes = bytearray(ax25.Frame(dst=dst_address, src=src_address, via=None, control=control_block, pid=0, data=data_to_send.encode('utf-8')).pack())
@@ -41,7 +41,7 @@ class AX25:
 
         return return_frame;
     
-    def ax25DecodeIFrame(self, data: bytes) -> ax25.Frame:
+    def ax25DecodeFrame(self, data: bytes) -> ax25.Frame:
         """
         Encodes and Information Frame with the requested data using the ax25 library
 
@@ -64,11 +64,11 @@ class AX25:
         if(fcs_original != fcs_data):
             print("Oh no")
 
-        return ax25.Frame.unpack(data)   
+        return ax25.Frame.unpack(data) 
 
 
 # Example Usage
 coder = AX25()
-frame = coder.ax25EncodeIFrame("A", AX25.CUBE_SAT_CALLSIGN, AX25.GROUND_STATION_CALLSIGN, 0)
+frame = coder.ax25EncodeFrame("A", ax25.FrameType.I, AX25.CUBE_SAT_CALLSIGN, AX25.GROUND_STATION_CALLSIGN, 0)
 print(frame)
-print(coder.ax25DecodeIFrame(frame).dst)
+print(coder.ax25DecodeFrame(frame).dst)
