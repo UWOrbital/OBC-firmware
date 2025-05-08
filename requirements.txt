@@ -5,6 +5,7 @@ skyfield==1.48
 fastapi[standard]==0.115.0
 sqlmodel==0.0.22
 loguru==0.7.3
+pyham_ax25==1.0.2
 
 # Typed packages
 types-requests==2.31.0
