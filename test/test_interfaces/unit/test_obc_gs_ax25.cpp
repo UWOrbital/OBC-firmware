@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <gtest/gtest.h>
+#include <cstdio>
 
 TEST(TestAx25SendRecv, iFrameLittleStuff) {
   uint8_t telemData[RS_ENCODED_SIZE] = {0};
@@ -41,6 +42,12 @@ TEST(TestAx25SendRecv, iFrameMaxStuff) {
   ASSERT_EQ(ax25Stuff(unstuffedAx25Data.data, unstuffedAx25Data.length, ax25Data.data, &ax25Data.length),
             OBC_GS_ERR_CODE_SUCCESS);
   EXPECT_TRUE(ax25Data.length > AX25_MINIMUM_I_FRAME_LEN && ax25Data.length < AX25_MAXIMUM_PKT_LEN);
+
+  printf("Begin| ");
+  for (int i = 0; i < ax25Data.length; i++) {
+    printf("0x%x ", ax25Data.data[i]);
+  }
+  printf("|End");
 
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
