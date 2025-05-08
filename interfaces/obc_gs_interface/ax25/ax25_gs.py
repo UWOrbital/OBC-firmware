@@ -17,7 +17,7 @@ class AX25:
 
     def encode_frame(
         self,
-        data_to_send: str,
+        data_to_send: bytes,
         frame_type: FrameType,
         src_callsign: str = GROUND_STATION_CALLSIGN,
         dst_callsign: str = CUBE_SAT_CALLSIGN,
