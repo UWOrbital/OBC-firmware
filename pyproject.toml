@@ -19,6 +19,7 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = "skyfield.*"
+module = "ax25.*"
 ignore_missing_imports = true
 
 [tool.ruff]
