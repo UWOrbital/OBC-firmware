@@ -5,7 +5,9 @@
 #include <string.h>
 
 #include <gtest/gtest.h>
+#include <cstdio>
 
+// TODO: Adapt tests to new changes and remove debug print statements
 TEST(TestAx25SendRecv, iFrameLittleStuff) {
   uint8_t telemData[RS_ENCODED_SIZE] = {0};
 
@@ -181,6 +183,10 @@ TEST(TestAx25SendRecv, uFrameSendRecvConn) {
   setCurrentLinkDestAddress(&cubesatCallsign);
   ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_CONN, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
 
+  for (int i = 0; i < ax25Data.length; i++) {
+    printf(" 0x%x", ax25Data.data[i]);
+  }
+
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
             OBC_GS_ERR_CODE_SUCCESS);
@@ -247,7 +253,6 @@ TEST(TestAx25SendRecV, Ax25DestAddressGenerator) {
   uint8_t callSign2[] = {'N', '7', 'L', 'E', 'M', '4', '2'};
 
   ASSERT_EQ(ax25GetDestAddress(&sourceAddress, callSign2, 7, 0, 0), 1);
-
   ax25GetDestAddress(&sourceAddress, callSign, 4, 0, 1);
   ASSERT_EQ(memcmp(&sourceAddress, &expectedAddress, 7), 0);
 }
