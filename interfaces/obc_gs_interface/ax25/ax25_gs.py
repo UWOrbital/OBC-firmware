@@ -16,7 +16,6 @@ class AX25:
             self.dst_callsign = dst
         else:
             raise Exception("Invalid call sign for source or destination")
-        pass
 
     def encode_frame(
         self,
