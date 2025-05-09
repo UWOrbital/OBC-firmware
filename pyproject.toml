@@ -25,6 +25,10 @@ ignore_missing_imports = true
 module = "ax25.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "tinyaes.*"
+ignore_missing_imports = true
+
 [tool.ruff]
 include = ["pyproject.toml", "gs/backend/**/*.py", "obc/tools/python/**/*.py"]
 exclude = [
