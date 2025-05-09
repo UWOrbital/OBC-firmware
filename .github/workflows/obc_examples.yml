@@ -17,6 +17,10 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install build-essential cmake
 
+    - name: Install requirements
+      run: |
+        python3 -m pip install -r requirements.txt
+
   build:
     runs-on: ubuntu-latest
     needs: setup
