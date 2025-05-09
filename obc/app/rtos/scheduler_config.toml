@@ -1,3 +1,4 @@
+# Note: After generating config, add task timeout to digital_watchdog_mgr.c
 # All task priorities must be in [0, OBC_SCHEDULER_MAX_PRIORITY]
 # Macros
 # OBC_SCHEDULER_MAX_PRIORITY = configMAX_PRIORITIES - 1U
