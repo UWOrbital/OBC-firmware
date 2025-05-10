@@ -210,6 +210,13 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
 void setCurrentLinkDestAddress(ax25_addr_t *destAddress);
 
 /**
+ * @brief sets the address via Call Sign for the TNC we are communicating with in the current link session
+ *
+ * @param destAdress address of the TNC for the current link session
+ */
+void setCurrentLinkDestCallSign(uint8_t *destCallSign, uint8_t destCallSignLenght, uint8_t ssid);
+
+/**
  * @brief clears the destination address for the current link once we have disconnected
  */
 void clearCurrentLinkDestAddress(void);
