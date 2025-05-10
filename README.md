@@ -154,6 +154,8 @@ This setup is only required for GS members. Please follow the instructions locat
 
 #### **OBC Firmware**
 
+Before building, ensure that the Python virtual environment is activated or that the packages are installed globally.
+
 From the top-level directory, run the following to build the OBC firmware.
 
 ```sh
@@ -199,6 +201,8 @@ ctest --verbose
 OR you can just run `./scripts/test.sh` from the top-level directory.
 
 #### **Example files**
+
+Before building, ensure that the Python virtual environment is activated or that the packages are installed globally.
 
 From the top-level directory, run the following to build the example source file.
 
