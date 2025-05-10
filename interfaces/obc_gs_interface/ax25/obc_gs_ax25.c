@@ -124,8 +124,9 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
 
     memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_DEST_ADDR_POSITION, destAddress->data,
            AX25_DEST_ADDR_BYTES);
-    uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
-    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_SRC_ADDR_POSITION, srcAddress,
+    ax25_addr_t srcAddr;
+    ax25GetSourceAddress(&srcAddr, "ATLAS", 5, 0, 0);
+    memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_SRC_ADDR_POSITION, srcAddr.data,
            AX25_SRC_ADDR_BYTES);
 
     ax25Data[(frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
@@ -174,10 +175,9 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
 
   ax25Data->data[0] = AX25_FLAG;
   // ax25Data->data[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
-  ax25_addr_t srcAddr, destAddr;
+  ax25_addr_t srcAddr;
   ax25GetSourceAddress(&srcAddr, "ATLAS", 5, 0, 0);
-  ax25GetDestAddress(&destAddr, "AKITO", 5, 0, 0);
-  memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES);
+  memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
   memcpy(ax25Data->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES);
   ax25Data->data[AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
   ax25Data->data[AX25_CONTROL_BYTES_POSITION + 1] = (pktSentNum << 1);
@@ -221,11 +221,10 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
 
   ax25PacketUnstuffed[0] = AX25_FLAG;
 
-  ax25_addr_t srcAddr, destAddr;
+  ax25_addr_t srcAddr;
   ax25GetSourceAddress(&srcAddr, "ATLAS", 5, 0, 0);
-  memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES);
+  memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
 
-  uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
   memcpy(ax25PacketUnstuffed + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES);
 
   ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] = pollFinalBit << POLL_FINAL_BIT_OFFSET;
@@ -266,14 +265,10 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_
 
   ax25_addr_t destAddr;
   ax25GetDestAddress(&destAddr, "AKITO", 5, 0, 0);
-  for (int i = 0; i < destAddr.length; i++) {
-    printf(" 0x%x", destAddr.data[i]);
-  }
-  for (int i = 1; i < 9; i++) {
-    printf(" 0x%x", unstuffedPacket->data[i]);
-  }
-  if (memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES) != 0) {
-    printf("HALLO");
+  ax25_addr_t destAddrAlternate;
+  ax25GetDestAddress(&destAddrAlternate, "ATLAS", 5, 0, 0);
+  if (memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES) != 0 &&
+      memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, destAddrAlternate.data, AX25_DEST_ADDR_BYTES) != 0) {
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
@@ -349,7 +344,9 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
 }
 
 static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
-  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+  ax25_addr_t srcAddr;
+  ax25GetSourceAddress(&srcAddr, "ATLAS", 5, 0, 0);
+  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
     return OBC_GS_ERR_CODE_INVALID_TNC;
   }
   if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
@@ -374,10 +371,12 @@ static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
 }
 
 static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
+  ax25_addr_t srcAddr;
+  ax25GetSourceAddress(&srcAddr, "ATLAS", 5, 0, 0);
   // first control byte will be the the after the flag and the address bytes
   // next control byte will be immediately after the previous one
   // See AX.25 standard
-  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+  if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
     return OBC_GS_ERR_CODE_INVALID_TNC;
   }
   if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
@@ -415,28 +414,31 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
   // clear the poll/final bit from controlByte
   controlByte &= ~POLL_FINAL_BIT_MASK;
 
-  ax25_addr_t destAddress = {.length = AX25_DEST_ADDR_BYTES};
+  ax25_addr_t destAddr;
+  ax25GetDestAddress(&destAddr, "AKITO", 5, 0, 0);
 
   // the destination address for the packet we send will be the src address of
   // the packet we just received
-  memcpy(destAddress.data, unstuffedPacket->data + AX25_SRC_ADDR_POSITION, AX25_DEST_ADDR_BYTES);
+  memcpy(destAddr.data, unstuffedPacket->data + AX25_SRC_ADDR_POSITION, AX25_DEST_ADDR_BYTES);
   if (controlByte == AX25_U_FRAME_SABME_CMD_CONTROL) {
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;
     if (currentLinkDestAddr.length != AX25_DEST_ADDR_BYTES) {
-      setCurrentLinkDestAddress(&destAddress);
+      setCurrentLinkDestAddress(&destAddr);
     }
     *command = U_FRAME_CMD_CONN;
     return OBC_GS_ERR_CODE_SUCCESS;
   } else if (controlByte == AX25_U_FRAME_DISC_CMD_CONTROL) {
-    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES - 1) !=
+        0) {
       return OBC_GS_ERR_CODE_INVALID_TNC;
     }
     *command = U_FRAME_CMD_DISC;
     return OBC_GS_ERR_CODE_SUCCESS;
   } else if (controlByte == AX25_U_FRAME_ACK_CMD_CONTROL) {
-    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
+    if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, currentLinkDestAddr.data, AX25_SRC_ADDR_BYTES - 1) !=
+        0) {
       return OBC_GS_ERR_CODE_INVALID_TNC;
     }
     // Reset the various numbering variables for the new link
@@ -586,6 +588,12 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
 
 void setCurrentLinkDestAddress(ax25_addr_t *destAddress) {
   memcpy(&currentLinkDestAddr, destAddress, sizeof(ax25_addr_t));
+}
+
+void setCurrentLinkDestCallSign(uint8_t *destCallSign, uint8_t destCallSignLenght, uint8_t ssid) {
+  ax25_addr_t destAddr;
+  ax25GetDestAddress(&destAddr, destCallSign, destCallSignLenght, ssid, 0);
+  memcpy(&currentLinkDestAddr, &destAddr, sizeof(ax25_addr_t));
 }
 
 void clearCurrentLinkDestAddress(void) { memset(&currentLinkDestAddr, 0, sizeof(ax25_addr_t)); }
