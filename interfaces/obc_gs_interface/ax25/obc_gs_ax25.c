@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
@@ -222,7 +223,6 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
 
   ax25_addr_t srcAddr, destAddr;
   ax25GetSourceAddress(&srcAddr, "ATLAS", 5, 0, 0);
-  ax25GetDestAddress(&destAddr, "AKITO", 5, 0, 0);
   memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES);
 
   uint8_t srcAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
@@ -264,8 +264,16 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  uint8_t recvAddress[AX25_SRC_ADDR_BYTES] = SRC_CALLSIGN;
-  if (memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, recvAddress, AX25_DEST_ADDR_BYTES) != 0) {
+  ax25_addr_t destAddr;
+  ax25GetDestAddress(&destAddr, "AKITO", 5, 0, 0);
+  for (int i = 0; i < destAddr.length; i++) {
+    printf(" 0x%x", destAddr.data[i]);
+  }
+  for (int i = 1; i < 9; i++) {
+    printf(" 0x%x", unstuffedPacket->data[i]);
+  }
+  if (memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES) != 0) {
+    printf("HALLO");
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
