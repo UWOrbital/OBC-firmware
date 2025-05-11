@@ -30,8 +30,10 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         if request.url.path in self.excluded_endpoints:
             return response
 
-        request_body = await request.body()
-        request_size = getsizeof(request_body)
+        # TODO: This causes a runtime error of `Stream Consumed` when making a request with a body
+        # request_body = await request.body()
+        # request_size = getsizeof(request_body)
+
         # TODO: update this based on userID header name
         request_user_id = request.headers.get("user_id", "Anonymous")
         request_params = dict(request.query_params)
@@ -46,7 +48,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                     f"User id: {request_user_id}",
                     f"Params: {request_params}",
                     f"Time: {request_time}",
-                    f"Bytes: {request_size}.",
+                    # f"Bytes: {request_size}.",
                 ]
             )
         )
