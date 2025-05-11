@@ -37,7 +37,8 @@ Run `sudo -u postgres psql --version` to check that it was installed properly. I
 Below are the commands to setup PostgreSQL for the ground station
 ```sh
 sudo -u postgres psql # Connect to the PostgreSQL CLI
-CREATE USER username WITH PASSWORD 'password' SUPERUSER;  # Change username to your user on the machine and password to a strong password
+CREATE USER username WITH PASSWORD 'password' SUPERUSER;  -- Change username to your user on the machine and password to a strong password
+CREATE DATABASE username; -- Change this to your username
 # Log out of this session by pressing Ctrl + D
 ```
 Log back in by running `psql` if username you created above matches the current user, you don't need to log in.
