@@ -1,44 +1,339 @@
 import ctypes
 
-# find the library. for osx this is .dylib, for linux .so, for windows .dll
-# path should be an absolute path to where the library was compiled and installed
+# The shared object file we are using the access the c functions via ctypes
 fec = ctypes.CDLL("../../../build_gs/interfaces/libobc-gs-interface.so")
 
 
-# Let's define some of the structs from fec here as well...
+# Let's define the packed_rs_packet_t structure here so that we can use it as a parameter in functions
 class PackedRsPacket(ctypes.Structure):
-    """ """
+    """
+    The python equivalent class for the packed_rs_packet_t structure in the C implementation
+    """
 
     _fields_ = [("data", ctypes.c_uint8 * 255)]
 
 
+# Below are the ctype definitions from all the functions needed for fec
+# initRs()
 fec.initRs.argtypes = ()
 fec.initRs.restype = None
-fec.initRs()  # TODO: Move this inside of a class that wraps fec
 
-# Let's define the functions from our fec file that we want to use here...
-# Arguments for rsEncode
-fec.rsEncode.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.POINTER(PackedRsPacket)]
-# Return for rsEncode
+# rsEncode()
+fec.rsEncode.argtypes = [ctypes.POINTER(ctypes.c_uint8 * 223), ctypes.POINTER(PackedRsPacket)]
 fec.rsEncode.restype = ctypes.c_uint
 
+# rsDecode()
+fec.rsDecode.argtypes = [ctypes.POINTER(PackedRsPacket), ctypes.POINTER(ctypes.c_uint8 * 223), ctypes.c_uint8]
+fec.rsDecode.restypes = ctypes.c_uint
 
-class Vars:
-    """ """
+# destroyRs()
+fec.destroyRs.argtypes = ()
+fec.destroyRs.restype = None
+
+
+class FEC:
+    """
+    Class for forward error correction using the reed solomon algorithm
+    """
 
     def __init__(self) -> None:
-        self._struct_pointer = ctypes.pointer(PackedRsPacket((ctypes.c_uint8 * 255)()))
-        self._int_pointer = ctypes.pointer(ctypes.c_uint8(255))
+        """
+        Constructor
+        """
+        fec.initRs()
 
-    def encode(self) -> None:
-        """ """
-        fec.rsEncode(self._int_pointer, self._struct_pointer)
+    def encode(self, telem_data: ctypes.POINTER(ctypes.c_uint8 * 223), rs_data: ctypes.POINTER(PackedRsPacket)) -> None:
+        """
+        A function that decodes data via reed solomon for forward error correction
+
+        :param telem_data: Telemetry data of type c_uint8 to pass in (must be a 223 in size to avoid issues)
+        :param rs_data: A pointer to a reed solomon packet (this usually stores encoded data). In the python the
+                        structure for this packet is called PackedRsPacket
+        :return: None
+        """
+        fec.rsEncode(telem_data, rs_data)
+
+    def decode(
+        self,
+        rs_data: ctypes.POINTER(PackedRsPacket),
+        decoded_data: ctypes.POINTER(ctypes.c_uint8 * 223),
+        decoded_data_length: ctypes.c_uint8,
+    ) -> None:
+        """
+        A function that decodes data via reed solomon for forward error correction
+
+        :param rs_data: A pointer to a reed solomon packet (this usually stores encoded data). In the python the
+                        structure for this packet is called PackedRsPacket
+        :param decoded_data: An array of type c_uint8 to store decoded data (must be a 223 in size to avoid issues)
+        :param decoded_data_length: How many elements are expected in the decoded_data
+        :return: None
+        """
+        fec.rsDecode(rs_data, decoded_data, decoded_data_length)
+
+    def __del__(self) -> None:
+        """
+        Destructor
+        """
+        fec.destroyRs()
 
 
 if __name__ == "__main__":
-    variables = Vars()
-    for i in range(len(variables._struct_pointer.contents.data)):
-        print(variables._struct_pointer.contents.data[i], end=" ")
-    print(variables.encode())
-    for i in range(len(variables._struct_pointer.contents.data)):
-        print(variables._struct_pointer.contents.data[i], end=" ")
+    fec_code = FEC()
+    rs_data = ctypes.pointer(PackedRsPacket((ctypes.c_uint8 * 255)()))
+
+    # Telem data from the C test case
+    telem_data = (ctypes.c_uint8 * 223)(
+        64,
+        121,
+        190,
+        31,
+        108,
+        53,
+        202,
+        59,
+        88,
+        177,
+        150,
+        23,
+        4,
+        237,
+        34,
+        179,
+        112,
+        233,
+        110,
+        15,
+        156,
+        165,
+        122,
+        43,
+        136,
+        33,
+        70,
+        7,
+        52,
+        93,
+        210,
+        163,
+        160,
+        89,
+        30,
+        255,
+        204,
+        21,
+        42,
+        27,
+        184,
+        145,
+        246,
+        247,
+        100,
+        205,
+        130,
+        147,
+        208,
+        201,
+        206,
+        239,
+        252,
+        133,
+        218,
+        11,
+        232,
+        1,
+        166,
+        231,
+        148,
+        61,
+        50,
+        131,
+        0,
+        57,
+        126,
+        223,
+        44,
+        245,
+        138,
+        251,
+        24,
+        113,
+        86,
+        215,
+        196,
+        173,
+        226,
+        115,
+        48,
+        169,
+        46,
+        207,
+        92,
+        101,
+        58,
+        235,
+        72,
+        225,
+        6,
+        199,
+        244,
+        29,
+        146,
+        99,
+        96,
+        25,
+        222,
+        191,
+        140,
+        213,
+        234,
+        219,
+        120,
+        81,
+        182,
+        183,
+        36,
+        141,
+        66,
+        83,
+        144,
+        137,
+        142,
+        175,
+        188,
+        69,
+        154,
+        203,
+        168,
+        193,
+        102,
+        167,
+        84,
+        253,
+        242,
+        67,
+        192,
+        249,
+        62,
+        159,
+        236,
+        181,
+        74,
+        187,
+        216,
+        49,
+        22,
+        151,
+        132,
+        109,
+        162,
+        51,
+        240,
+        105,
+        238,
+        143,
+        28,
+        37,
+        250,
+        171,
+        8,
+        161,
+        198,
+        135,
+        180,
+        221,
+        82,
+        35,
+        32,
+        217,
+        158,
+        127,
+        76,
+        149,
+        170,
+        155,
+        56,
+        17,
+        118,
+        119,
+        228,
+        77,
+        2,
+        19,
+        80,
+        73,
+        78,
+        111,
+        124,
+        5,
+        90,
+        139,
+        104,
+        129,
+        38,
+        103,
+        20,
+        189,
+        178,
+        3,
+        128,
+        185,
+        254,
+        95,
+        172,
+        117,
+        10,
+        123,
+        152,
+        241,
+        214,
+        87,
+        68,
+        45,
+        98,
+        243,
+        176,
+        41,
+        174,
+        79,
+        220,
+        229,
+        186,
+        107,
+        200,
+        97,
+        134,
+        71,
+        116,
+        157,
+        18,
+    )
+    decode_data = (ctypes.c_uint8 * 223)()
+    telem_pointer = ctypes.pointer(telem_data)
+    decode_pointer = ctypes.pointer(decode_data)
+
+    for i in range(len(rs_data.contents.data)):
+        print(rs_data.contents.data[i], end=" ")
+    print("--------------")
+
+    print(fec_code.encode(telem_pointer, rs_data))
+    for i in range(len(rs_data.contents.data)):
+        print(rs_data.contents.data[i], end=" ")
+    print("--------------")
+
+    # Flip some bits
+    rs_data.contents.data[0] = rs_data.contents.data[0] + 1
+    rs_data.contents.data[222] = rs_data.contents.data[222] + 1
+
+    print(fec_code.decode(rs_data, decode_pointer, 223))
+    for i in range(len(rs_data.contents.data)):
+        print(rs_data.contents.data[i], end=" ")
+    print("--------------")
+
+    # Check if the decoded data matches the original bits
+    matches = True
+    for i in range(len(telem_data)):
+        if decode_pointer.contents[i] != telem_data[i]:
+            matches = False
+            break
+
+    print(matches)
