@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session, or_, select
 
 from gs.backend.api.v1.aro.models.requests import UserCreateRequest
-from gs.backend.api.v1.aro.models.responses import UserCreateResponse
+from gs.backend.api.v1.aro.models.responses import AROUserResponse
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.aro_user_tables import AROUsers
-from gs.backend.exceptions.exceptions import InvalidArgumentError
+from gs.backend.exceptions.exceptions import InvalidArgumentError, InvalidStateError
 
 aro_user_router = APIRouter(tags=["ARO", "User Information"])
 
 
 @aro_user_router.post("/")
-def create_user(payload: UserCreateRequest, db_session: Session = Depends(get_db_session)) -> UserCreateResponse:
+def create_user(payload: UserCreateRequest, db_session: Session = Depends(get_db_session)) -> AROUserResponse:
     """
     Creates a user based on the data.
     Checks makes sure the email, phone number and callsign are unique before creating a user.
@@ -21,7 +23,6 @@ def create_user(payload: UserCreateRequest, db_session: Session = Depends(get_db
     """
     user_query = select(AROUsers).where(or_(AROUsers.email == payload.email, AROUsers.call_sign == payload.call_sign))
     user = db_session.exec(user_query).first()
-    print(f"{user = }")
     if user is not None:
         raise InvalidArgumentError(
             f"""
@@ -33,4 +34,29 @@ def create_user(payload: UserCreateRequest, db_session: Session = Depends(get_db
     db_session.add(user_model)
     db_session.commit()
     db_session.refresh(user_model)
-    return UserCreateResponse(data=user_model)
+    return AROUserResponse(data=user_model)
+
+
+@aro_user_router.get("/")
+def get_current_user(request: Request, db_session: Session = Depends(get_db_session)) -> AROUserResponse:
+    """
+    @brief Gets the current user information for the logged in user.
+
+    @return The current user's data
+    """
+    # TODO: Switch to a better way of storing the current user once we implement auth
+    user_id: UUID | None = request.app.state.user_id
+
+    if user_id is None or not isinstance(user_id, UUID):
+        raise InvalidStateError(f"No user logged in or {user_id=} is invalid")
+
+    user_query = select(AROUsers).where(AROUsers.id == user_id)
+    users = db_session.exec(user_query).all()
+
+    if len(users) == 0:
+        raise InvalidStateError(f"No users match the given id={user_id}")
+    if len(users) > 1:
+        raise InvalidStateError(f"Multiple users match the given id={user_id}")
+
+    current_user = users[0]
+    return AROUserResponse(data=current_user)

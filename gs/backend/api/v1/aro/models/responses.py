@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from gs.backend.data.tables.aro_user_tables import AROUsers
 
 
-class UserCreateResponse(BaseModel):
+class AROUserResponse(BaseModel):
     """
     User creation response model.
     """
