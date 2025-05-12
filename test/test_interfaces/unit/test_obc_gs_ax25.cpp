@@ -5,10 +5,7 @@
 #include <string.h>
 
 #include <gtest/gtest.h>
-#include <cstdint>
-#include <cstdio>
 
-// TODO: Get all tests passing with new code
 // NOTE: AKITO is the groundStationCallsign
 // NOTE: ATLAS is the cubeSatCallSign
 TEST(TestAx25SendRecv, iFrameLittleStuff) {
