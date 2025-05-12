@@ -14,14 +14,12 @@ class AX25:
         if Address.valid_call(src) and Address.valid_call(dst):
             self.src_callsign = src
             self.dst_callsign = dst
-        else:
-            raise Exception("Invalid call sign for source or destination")
 
     def encode_frame(
         self,
         data_to_send: bytes,
         frame_type: FrameType,
-        ns: int = 0,
+        sequence_number: int = 0,
     ) -> bytes:
         """
         Encodes and Information Frame with the requested data using the ax25 library
@@ -33,7 +31,7 @@ class AX25:
         """
 
         # Generate Frame Object as per Library Specfications
-        control_block = Control(frame_type, poll_final=False, send_seqno=ns)
+        control_block = Control(frame_type, poll_final=False, send_seqno=sequence_number)
         src_address = Address(call=self.src_callsign, ssid=self._DEFAULT_SSID)
         dst_address = Address(call=self.dst_callsign, ssid=self._DEFAULT_SSID)
         frame_bytes = bytearray(
@@ -77,7 +75,7 @@ class AX25:
         fcs_data = crc_hqx(data, 0)
 
         if fcs_original != fcs_data:
-            raise Exception("The data has been corrupted (FCS sequences do not match)")
+            raise ValueError(data)
 
         return Frame.unpack(data)
 
@@ -95,7 +93,7 @@ if __name__ == "__main__":
     print("Data: " + str(rcv_frame.data.decode("UTF-8")))
     print("")
 
-    comm_2 = AX25("LEAFS", "PLUTO")
+    comm_2 = AX25("LEAFS", "CANUCK")
     send_frame = comm_2.encode_frame(b"Leafs in four", FrameType.U, 0)
     print(send_frame)
 

@@ -65,6 +65,12 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 
 #define CALL_SIGN_BYTES 6
 
+#define CUBE_SAT_CALLSIGN (uint8_t *)"AKITO"
+#define GROUND_STATION_CALLSIGN (uint8_t *)"ATLAS"
+#define CALLSIGN_LENGTH 5
+#define DEFAULT_SSID 0
+#define DEFAULT_CONTROL_BIT 0
+
 typedef struct {
   uint8_t data[AX25_MINIMUM_I_FRAME_LEN];
   uint16_t length;
@@ -203,18 +209,11 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
                                          uint8_t controlBit);
 
 /**
- * @brief sets the address for the TNC we are communicating with in the current link session
- *
- * @param destAdress address of the TNC for the current link session
- */
-void setCurrentLinkDestAddress(ax25_addr_t *destAddress);
-
-/**
  * @brief sets the address via Call Sign for the TNC we are communicating with in the current link session
  *
  * @param destAdress address of the TNC for the current link session
  */
-void setCurrentLinkDestCallSign(uint8_t *destCallSign, uint8_t destCallSignLenght, uint8_t ssid);
+void setCurrentLinkDestCallSign(uint8_t *destCallSign, uint8_t destCallSignLength, uint8_t ssid);
 
 /**
  * @brief clears the destination address for the current link once we have disconnected
