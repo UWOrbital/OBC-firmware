@@ -1,16 +1,16 @@
-import ctypes
+from ctypes import CDLL, POINTER, Structure, c_uint, c_uint8, pointer
 
 # The shared object file we are using the access the c functions via ctypes
-fec = ctypes.CDLL("../../../build_gs/interfaces/libobc-gs-interface.so")
+fec = CDLL("../../../build_gs/interfaces/libobc-gs-interface.so")
 
 
 # Let's define the packed_rs_packet_t structure here so that we can use it as a parameter in functions
-class PackedRsPacket(ctypes.Structure):
+class PackedRsPacket(Structure):
     """
     The python equivalent class for the packed_rs_packet_t structure in the C implementation
     """
 
-    _fields_ = [("data", ctypes.c_uint8 * 255)]
+    _fields_ = [("data", c_uint8 * 255)]
 
 
 # Below are the ctype definitions from all the functions needed for fec
@@ -19,12 +19,12 @@ fec.initRs.argtypes = ()
 fec.initRs.restype = None
 
 # rsEncode()
-fec.rsEncode.argtypes = [ctypes.POINTER(ctypes.c_uint8 * 223), ctypes.POINTER(PackedRsPacket)]
-fec.rsEncode.restype = ctypes.c_uint
+fec.rsEncode.argtypes = [POINTER(c_uint8 * 223), POINTER(PackedRsPacket)]
+fec.rsEncode.restype = c_uint
 
 # rsDecode()
-fec.rsDecode.argtypes = [ctypes.POINTER(PackedRsPacket), ctypes.POINTER(ctypes.c_uint8 * 223), ctypes.c_uint8]
-fec.rsDecode.restypes = ctypes.c_uint
+fec.rsDecode.argtypes = [POINTER(PackedRsPacket), POINTER(c_uint8 * 223), c_uint8]
+fec.rsDecode.restypes = c_uint
 
 # destroyRs()
 fec.destroyRs.argtypes = ()
@@ -42,7 +42,7 @@ class FEC:
         """
         fec.initRs()
 
-    def encode(self, telem_data: ctypes.POINTER(ctypes.c_uint8 * 223), rs_data: ctypes.POINTER(PackedRsPacket)) -> None:
+    def encode(self, telem_data: POINTER(c_uint8 * 223), rs_data: POINTER(PackedRsPacket)) -> None:
         """
         A function that decodes data via reed solomon for forward error correction
 
@@ -55,9 +55,9 @@ class FEC:
 
     def decode(
         self,
-        rs_data: ctypes.POINTER(PackedRsPacket),
-        decoded_data: ctypes.POINTER(ctypes.c_uint8 * 223),
-        decoded_data_length: ctypes.c_uint8,
+        rs_data: POINTER(PackedRsPacket),
+        decoded_data: POINTER(c_uint8 * 223),
+        decoded_data_length: c_uint8,
     ) -> None:
         """
         A function that decodes data via reed solomon for forward error correction
@@ -79,10 +79,10 @@ class FEC:
 
 if __name__ == "__main__":
     fec_code = FEC()
-    rs_data = ctypes.pointer(PackedRsPacket((ctypes.c_uint8 * 255)()))
+    rs_data = pointer(PackedRsPacket((c_uint8 * 255)()))
 
     # Telem data from the C test case
-    telem_data = (ctypes.c_uint8 * 223)(
+    telem_data = (c_uint8 * 223)(
         64,
         121,
         190,
@@ -307,15 +307,15 @@ if __name__ == "__main__":
         157,
         18,
     )
-    decode_data = (ctypes.c_uint8 * 223)()
-    telem_pointer = ctypes.pointer(telem_data)
-    decode_pointer = ctypes.pointer(decode_data)
+    decode_data = (c_uint8 * 223)()
+    telem_pointer = pointer(telem_data)
+    decode_pointer = pointer(decode_data)
 
     for i in range(len(rs_data.contents.data)):
         print(rs_data.contents.data[i], end=" ")
     print("--------------")
 
-    print(fec_code.encode(telem_pointer, rs_data))
+    fec_code.encode(telem_pointer, rs_data)
     for i in range(len(rs_data.contents.data)):
         print(rs_data.contents.data[i], end=" ")
     print("--------------")
@@ -324,7 +324,7 @@ if __name__ == "__main__":
     rs_data.contents.data[0] = rs_data.contents.data[0] + 1
     rs_data.contents.data[222] = rs_data.contents.data[222] + 1
 
-    print(fec_code.decode(rs_data, decode_pointer, 223))
+    fec_code.decode(rs_data, decode_pointer, c_uint8(223))
     for i in range(len(rs_data.contents.data)):
         print(rs_data.contents.data[i], end=" ")
     print("--------------")
