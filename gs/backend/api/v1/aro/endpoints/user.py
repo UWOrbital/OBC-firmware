@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session, or_, select
 
-from gs.backend.api.v1.aro.models.requests import UserCreateRequest
+from gs.backend.api.v1.aro.models.requests import AROUserUpdateRequest, UserCreateRequest
 from gs.backend.api.v1.aro.models.responses import AROUserResponse
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.aro_user_tables import AROUsers
@@ -59,4 +59,40 @@ def get_current_user(request: Request, db_session: Session = Depends(get_db_sess
         raise InvalidStateError(f"Multiple users match the given id={user_id}")
 
     current_user = users[0]
+    return AROUserResponse(data=current_user)
+
+
+@aro_user_router.put("/")
+def update_current_user(
+    payload: AROUserUpdateRequest, request: Request, db_session: Session = Depends(get_db_session)
+) -> AROUserResponse:
+    """
+    @brief Updates the current user info based on the payload
+
+    @param payload (AROUserUpdateRequest) - The information to update for the user
+    @return Returns the updated information
+    """
+    # TODO: Switch to a better way of storing the current user once we implement auth
+    user_id: UUID | None = request.app.state.user_id
+
+    if user_id is None or not isinstance(user_id, UUID):
+        raise InvalidStateError(f"No user logged in or {user_id=} is invalid")
+
+    user_query = select(AROUsers).where(AROUsers.id == user_id)
+    users = db_session.exec(user_query).all()
+
+    if len(users) == 0:
+        raise InvalidStateError(f"No users match the given id={user_id}")
+    if len(users) > 1:
+        raise InvalidStateError(f"Multiple users match the given id={user_id}")
+
+    current_user = users[0]
+    current_user.call_sign = payload.call_sign
+    current_user.first_name = payload.first_name
+    current_user.last_name = payload.last_name
+    current_user.phone_number = payload.phone_number
+
+    db_session.add(current_user)
+    db_session.commit()
+    db_session.refresh(current_user)
     return AROUserResponse(data=current_user)
