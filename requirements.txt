@@ -4,11 +4,17 @@ pyserial==3.5
 skyfield==1.48
 fastapi[standard]==0.115.0
 sqlmodel==0.0.22
+jinja2==3.1.6
+toml==0.10.2
+loguru==0.7.3
+psycopg2-binary==2.9.10
+python-dotenv==1.1.0
 
 # Typed packages
 types-requests==2.31.0
 types-pyserial==3.5.0
 types-setuptools==69.1.0.20240217
+types-toml==0.10.8
 
 # Development dependencies
 pre-commit==3.3.3
@@ -16,3 +22,5 @@ pytest==7.4.0
 pytest-cov==4.1.0
 mypy==1.8.0
 ruff==0.2.0
+psycopg[binary]==3.2.6 # Must be installed before `pytest-postgresql`
+pytest-postgresql==7.0.1

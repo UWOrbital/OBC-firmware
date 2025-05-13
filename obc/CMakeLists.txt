@@ -101,7 +101,7 @@ target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
     LOG_DATE_TIME
     DEBUG=${DEBUG}
-    CMD_POLICY=${CMD_POLICY}
+    OBC_ACTIVE_POLICY=${OBC_ACTIVE_POLICY}
     COMMS_PHY=${COMMS_PHY}
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
@@ -140,6 +140,22 @@ target_link_libraries(${OUT_FILE_NAME} PRIVATE
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
 )
+target_link_libraries(${OUT_FILE_NAME} PRIVATE
+    ${FREERTOS_LIB_OPTIMIZE}
+    $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
+)
+
+# Generate scheduler config
+set(SCHEDULER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/gen_scheduler_config.py)
+set(SCHEDULER_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/obc_scheduler_config.c)
+set(SCHEDULER_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos/obc_scheduler_config.h)
+add_custom_target(generate-scheduler-config ALL
+    COMMAND python3 ${SCHEDULER_SCRIPT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/app/rtos
+    COMMENT "Generating OBC scheduler configuration"
+)
+
+add_dependencies(${OUT_FILE_NAME} generate-scheduler-config)
 
 # Generate .bin for the app
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
@@ -181,7 +197,7 @@ target_compile_definitions(OBC-bl.out PRIVATE
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
     DEBUG=${DEBUG}
-    CMD_POLICY=${CMD_POLICY}
+    OBC_ACTIVE_POLICY=${OBC_ACTIVE_POLICY}
     COMMS_PHY=${COMMS_PHY}
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
@@ -212,7 +228,7 @@ target_compile_definitions(debug-tool.out PRIVATE
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
     LOG_DATE_TIME
     DEBUG=${DEBUG}
-    CMD_POLICY=${CMD_POLICY}
+    OBC_ACTIVE_POLICY=${OBC_ACTIVE_POLICY}
     COMMS_PHY=${COMMS_PHY}
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
@@ -231,6 +247,10 @@ target_link_libraries(debug-tool.out PRIVATE
     onboard-env-modelling
     ${HAL_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${HAL_LIB_NO_OPTIMIZE}>
+)
+target_link_libraries(debug-tool.out PRIVATE
+    ${FREERTOS_LIB_OPTIMIZE}
+    $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
 )
 
 
