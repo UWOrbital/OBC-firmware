@@ -1,6 +1,7 @@
 from binascii import crc_hqx
 
 from ax25 import Address, Control, Frame, FrameType
+from pyStuffing import BitStuffing
 
 
 class AX25:
@@ -45,34 +46,80 @@ class AX25:
             ).pack()
         )
 
-        # Calculate fcs using CRC 16
-        fcs = bytearray(crc_hqx(frame_bytes, 0).to_bytes(2, "big"))
+        # Calculate fcs using CRC 16 and then reverse it
+        binary = bin(crc_hqx(frame_bytes, 0))
+        reverse = binary[-1:1:-1]
+        reverse = reverse + (16 - len(reverse)) * "0"
+        fcs = bytearray(int(reverse, 2).to_bytes(2, "big"))
+        print(fcs)
 
+        frame_bytes = frame_bytes + fcs
+
+        byte_list = []
+        for byte in frame_bytes:
+            bits = bin(byte).removeprefix("0b")
+            byte_list.append(("0" * (8 - len(bits))) + bits)
+        byte_string = "".join(byte_list)
+        bin_list = [int(s) for s in byte_string]
+
+        unstuff = BitStuffing(bin_list)
+        unstuff.startStuffing()
+        res = "".join([str(s) for s in unstuff.stuffed])
+        res = res + ("0" * (8 - len(res) % 8))
+        frame_bytes = bytearray(bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8)))
+
+        print(frame_bytes)
         # Define the flags
         start_end_flag = bytearray(bytes.fromhex("7E"))
 
         # Use the mutability of bytearrays to append everything into a huge bytearray that contains what we want to send
-        frame_bytes = start_end_flag + frame_bytes + fcs + start_end_flag
+        frame_bytes = start_end_flag + frame_bytes + start_end_flag
 
         # Convert the bytearray to bytes
         return_frame = bytes(frame_bytes)
 
         return return_frame
 
-    def decode_frame(self, data: bytes) -> Frame:
+    def decode_frame(self, input_data: bytes) -> Frame:
         """
         Decodes frames passed in as bytes using the ax25 library.
 
         :return: The decoded frame
         """
-        # Extract the original 2 fcs bytes (16 bits)
-        fcs_original = int.from_bytes(data[-3:-1], byteorder="big", signed=False)
+        data = input_data[1:-1]
 
-        # Use splicing to get rid of the start and end byte and 2 fcs bytes
-        data = data[1:-3]
+        byte_list = []
+        for byte in data:
+            bits = bin(byte).removeprefix("0b")
+            byte_list.append(("0" * (8 - len(bits))) + bits)
+        byte_string = "".join(byte_list)
+        bin_list = [int(s) for s in byte_string]
+        print(data)
+        print(byte_list)
 
-        # Calculate fcs of recieved frame
-        fcs_data = crc_hqx(data, 0)
+        unstuff = BitStuffing(bin_list)
+        unstuff.stuffed = bin_list
+        unstuff.startUnstuffing()
+        res = "".join([str(s) for s in unstuff.unStuffed])
+        res = res + ("0" * (8 - len(res) % 8))
+        data = bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8))
+
+        # Remove a 0 at the end of the string that might have been created as a result of adding in 0s
+        if data[-1] == 0:
+            data = data[:-1]
+
+        # Get the FCS flags from the original data transmission
+        fcs_original = int.from_bytes(data[-2:], byteorder="big", signed=False)
+        # Remove the fcs flags
+        data = data[:-2]
+
+        # Calculate fcs of recieved frame and then reversing it
+        binary = bin(crc_hqx(data, 0))
+        reverse = binary[-1:1:-1]
+        reverse = reverse + (16 - len(reverse)) * "0"
+        fcs_data = int(reverse, 2)
+        print(fcs_original)
+        print(fcs_data)
 
         if fcs_original != fcs_data:
             raise ValueError(data)

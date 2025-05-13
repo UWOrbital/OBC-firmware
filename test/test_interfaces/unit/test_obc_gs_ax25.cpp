@@ -206,10 +206,6 @@ TEST(TestAx25SendRecv, uFrameSendRecvDisc) {
   unstuffed_ax25_i_frame_t unstuffedPacket = {0};
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
             OBC_GS_ERR_CODE_SUCCESS);
-  for (int i = 0; i < ax25Data.length; i++) {
-    printf(" 0x%x", ax25Data.data[i]);
-  }
-  printf("===");
 
   u_frame_cmd_t command;
   ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);

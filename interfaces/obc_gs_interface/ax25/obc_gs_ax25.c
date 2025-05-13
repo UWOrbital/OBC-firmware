@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
@@ -162,6 +163,15 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
+  // The following checks stop the data from corrupting in the mod8
+  // implementation
+  if (pktSentNum >= 7) {
+    pktSentNum = 0;
+  }
+  if (pktReceiveNum >= 7) {
+    pktReceiveNum = 0;
+  }
+
   memset(ax25Data->data, 0, AX25_MINIMUM_I_FRAME_LEN);
   ax25Data->length = AX25_MINIMUM_I_FRAME_LEN;
 
@@ -171,13 +181,18 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   ax25GetSourceAddress(&srcAddr, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
   memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
   memcpy(ax25Data->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES);
-  ax25Data->data[AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 1);
-  ax25Data->data[AX25_CONTROL_BYTES_POSITION + 1] = (pktSentNum << 1);
-  ax25Data->data[AX25_MOD128_PID_POSITION] = AX25_PID;
+
+  // NOTE: We assume that the P bit is 0
+  ax25Data->data[AX25_CONTROL_BYTES_POSITION] = (pktReceiveNum << 5) | (pktSentNum << 1);
+  ax25Data->data[AX25_MOD8_PID_POSITION] = AX25_PID;
+
+  // NOTE: This is for the MOD128 Implementation
+  // ax25Data->data[AX25_CONTROL_BYTES_POSITION + 1] = (pktSentNum << 1);
+  // ax25Data->data[AX25_MOD128_PID_POSITION] = AX25_PID;
   memcpy(ax25Data->data + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
 
   uint16_t fcs;
-  fcsCalculate(ax25Data->data, AX25_MINIMUM_I_FRAME_LEN, &fcs);
+  fcsCalculate(ax25Data->data + 1, AX25_MINIMUM_I_FRAME_LEN, &fcs);
 
   ax25Data->data[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25Data->data[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
@@ -232,7 +247,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   ax25PacketUnstuffed[AX25_MOD8_PID_POSITION] = AX25_PID;
 
   uint16_t fcs;
-  fcsCalculate(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
+  fcsCalculate(ax25PacketUnstuffed + 1, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
 
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
@@ -269,7 +284,7 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_
   // Check FCS
   uint16_t fcs = unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES] << 8;
   fcs |= unstuffedPacket->data[unstuffedPacket->length - AX25_END_FLAG_BYTES - AX25_FCS_BYTES + 1];
-  errCode = fcsCheck(unstuffedPacket->data, unstuffedPacket->length, fcs);
+  errCode = fcsCheck(unstuffedPacket->data + 1, unstuffedPacket->length, fcs);
   if (errCode != OBC_GS_ERR_CODE_SUCCESS) {
     return errCode;
   }
@@ -341,11 +356,26 @@ static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
   if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
     return OBC_GS_ERR_CODE_INVALID_TNC;
   }
-  if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
+  if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
-  uint8_t controlBytes[AX25_MOD128_CONTROL_BYTES] = {unstuffedPacket->data[AX25_ADDRESS_BYTES + 1],
-                                                     unstuffedPacket->data[AX25_ADDRESS_BYTES + 2]};
+
+  // NOTE: This if for the mod128 implementation
+  // if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
+  //   return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
+  // }
+
+  // NOTE: this is for a mod128 implementation
+  // if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
+  //   return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
+  // }
+
+  uint8_t controlBytes[AX25_MOD8_CONTROL_BYTES] = {unstuffedPacket->data[AX25_ADDRESS_BYTES + 1]};
+
+  // NOTE: This is for the mod128 implementation
+  // uint8_t controlBytes[AX25_MOD128_CONTROL_BYTES] = {
+  //     unstuffedPacket->data[AX25_ADDRESS_BYTES + 1],
+  //     unstuffedPacket->data[AX25_ADDRESS_BYTES + 2]};
 
   if (controlBytes[0] == AX25_S_FRAME_RR_CONTROL) {
     /* TODO: implement response for receieve ready S frame*/
@@ -371,24 +401,34 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
   if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
     return OBC_GS_ERR_CODE_INVALID_TNC;
   }
-  if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
+
+  if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID && unstuffedPacket->data[AX25_MOD8_PID_POSITION] != 0) {
     return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
   }
-  uint8_t controlBytes[AX25_MOD128_CONTROL_BYTES] = {
-      unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES],
-      unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES + 1]};
+
+  // NOTE: This check if for mod 128 implementation
+  // if (unstuffedPacket->data[AX25_MOD128_PID_POSITION] != AX25_PID) {
+  //   return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
+  // }
+
+  uint8_t controlBytes[AX25_MOD8_CONTROL_BYTES] = {unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES]};
+
+  // NOTE: This is the mod 128 implementation
+  // uint8_t controlBytes[AX25_MOD128_CONTROL_BYTES] = {
+  //     unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES],
+  //     unstuffedPacket->data[AX25_ADDRESS_BYTES + AX25_START_FLAG_BYTES + 1]};
 
   if ((controlBytes[0] >> 1) != pktReceiveNum) {
     // TODO: implement retransmission requests
   }
 
-  if (controlBytes[1] & 0x01) {
-    // TODO: implement retransmissions
-  }
-
-  if ((controlBytes[1] >> 1) != pktSentNum) {
-    // TODO: implement retransmissions
-  }
+  // NOTE: This is for the mod 128 implementation
+  // if (controlBytes[1] & 0x01) {
+  //   // TODO: implement retransmissions
+  // }
+  // if ((controlBytes[1] >> 1) != pktSentNum) {
+  //   // TODO: implement retransmissions
+  // }
 
   pktReceiveNum++;
   return OBC_GS_ERR_CODE_SUCCESS;
@@ -446,7 +486,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
 }
 
 static void fcsCalculate(const uint8_t *data, uint16_t dataLen, uint16_t *calculatedFcs) {
-  *calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
+  *calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_TOTAL_FLAG_BYTES);
 
   // reverse order so that FCS can be transmitted with most significant bit
   // first as per AX25 standard
@@ -457,9 +497,11 @@ static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint1
   // reverse bit order of fcs to account for the fact that it was transmitted in
   // the reverse order as the other bytes
   fcs = reverseUint16(fcs);
+  printf("FCS: %d", fcs);
 
-  uint16_t calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_END_FLAG_BYTES);
+  uint16_t calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_TOTAL_FLAG_BYTES);
 
+  printf("Calculated FCS: %d", calculatedFcs);
   if (fcs != calculatedFcs) {
     return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
   }
