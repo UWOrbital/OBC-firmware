@@ -51,24 +51,9 @@ class AX25:
         reverse = binary[-1:1:-1]
         reverse = reverse + (16 - len(reverse)) * "0"
         fcs = bytearray(int(reverse, 2).to_bytes(2, "big"))
-        print(fcs)
 
         frame_bytes = frame_bytes + fcs
 
-        byte_list = []
-        for byte in frame_bytes:
-            bits = bin(byte).removeprefix("0b")
-            byte_list.append(("0" * (8 - len(bits))) + bits)
-        byte_string = "".join(byte_list)
-        bin_list = [int(s) for s in byte_string]
-
-        unstuff = BitStuffing(bin_list)
-        unstuff.startStuffing()
-        res = "".join([str(s) for s in unstuff.stuffed])
-        res = res + ("0" * (8 - len(res) % 8))
-        frame_bytes = bytearray(bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8)))
-
-        print(frame_bytes)
         # Define the flags
         start_end_flag = bytearray(bytes.fromhex("7E"))
 
@@ -84,7 +69,33 @@ class AX25:
         """
         Decodes frames passed in as bytes using the ax25 library.
 
+        :param input_data: Unstuffed frame in bytes
         :return: The decoded frame
+        """
+        data = input_data[1:-1]
+
+        # Get the FCS flags from the original data transmission
+        fcs_original = int.from_bytes(data[-2:], byteorder="big", signed=False)
+        # Remove the fcs flags
+        data = data[:-2]
+
+        # Calculate fcs of recieved frame and then reversing it
+        binary = bin(crc_hqx(data, 0))
+        reverse = binary[-1:1:-1]
+        reverse = reverse + (16 - len(reverse)) * "0"
+        fcs_data = int(reverse, 2)
+
+        if fcs_original != fcs_data:
+            raise ValueError("Check sums do not match")
+
+        return Frame.unpack(data)
+
+    def unstuff(self, input_data: bytes) -> bytes:
+        """
+        Unstuffs frames passed in as bytes using the pyStuffing library.
+
+        :param input_data: Stuffed frame to be unstuffed as bytes
+        :return: The unStuffed frame
         """
         data = input_data[1:-1]
 
@@ -94,8 +105,6 @@ class AX25:
             byte_list.append(("0" * (8 - len(bits))) + bits)
         byte_string = "".join(byte_list)
         bin_list = [int(s) for s in byte_string]
-        print(data)
-        print(byte_list)
 
         unstuff = BitStuffing(bin_list)
         unstuff.stuffed = bin_list
@@ -108,23 +117,35 @@ class AX25:
         if data[-1] == 0:
             data = data[:-1]
 
-        # Get the FCS flags from the original data transmission
-        fcs_original = int.from_bytes(data[-2:], byteorder="big", signed=False)
-        # Remove the fcs flags
-        data = data[:-2]
+        data_bytes = bytearray(data)
+        start_end_flag = bytearray(bytes.fromhex("7E"))
+        return bytes(start_end_flag + data_bytes + start_end_flag)
 
-        # Calculate fcs of recieved frame and then reversing it
-        binary = bin(crc_hqx(data, 0))
-        reverse = binary[-1:1:-1]
-        reverse = reverse + (16 - len(reverse)) * "0"
-        fcs_data = int(reverse, 2)
-        print(fcs_original)
-        print(fcs_data)
+    def stuff(self, input_data: bytes) -> bytes:
+        """
+        Stuffs frames passed in as bytes using the pyStuffing library.
 
-        if fcs_original != fcs_data:
-            raise ValueError(data)
+        :param input_data: Unstuffed frame to be stuffed as bytes
+        :return: The stuffed frame
+        """
+        data_stripped = input_data[1:-1]
+        byte_list = []
+        for byte in data_stripped:
+            bits = bin(byte).removeprefix("0b")
+            byte_list.append(("0" * (8 - len(bits))) + bits)
+        byte_string = "".join(byte_list)
+        bin_list = [int(s) for s in byte_string]
 
-        return Frame.unpack(data)
+        unstuff = BitStuffing(bin_list)
+        unstuff.startStuffing()
+        res = "".join([str(s) for s in unstuff.stuffed])
+        res = res + ("0" * (8 - len(res) % 8))
+        data_bytes = bytearray(bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8)))
+
+        # Define the flags
+        start_end_flag = bytearray(bytes.fromhex("7E"))
+
+        return bytes(start_end_flag + data_bytes + start_end_flag)
 
 
 # Example Usage

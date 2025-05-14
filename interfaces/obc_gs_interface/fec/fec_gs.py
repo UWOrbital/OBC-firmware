@@ -1,7 +1,9 @@
 from ctypes import CDLL, POINTER, Structure, c_uint, c_uint8, pointer
+from pathlib import Path
 
 # The shared object file we are using the access the c functions via ctypes
-fec = CDLL("../../../build_gs/interfaces/libobc-gs-interface.so")
+path = (Path(__file__).parent / "../../../build_gs/interfaces/libobc-gs-interface.so").resolve()
+fec = CDLL(path)
 
 
 # Let's define the packed_rs_packet_t structure here so that we can use it as a parameter in functions
@@ -42,35 +44,53 @@ class FEC:
         """
         fec.initRs()
 
-    def encode(self, telem_data: POINTER(c_uint8 * 223), rs_data: POINTER(PackedRsPacket)) -> None:
+    def encode(self, data_to_encode: bytes) -> bytes:
         """
         A function that decodes data via reed solomon for forward error correction
 
-        :param telem_data: Telemetry data of type c_uint8 to pass in (must be a 223 in size to avoid issues)
-        :param rs_data: A pointer to a reed solomon packet (this usually stores encoded data). In the python the
-                        structure for this packet is called PackedRsPacket
-        :return: None
+        :param telem_data: Telemetry data of type c_uint8 to pass in (must be a 223 bytes in size to avoid issues)
+        :return: 0 for success or a number representing the obc_gs error code
         """
-        fec.rsEncode(telem_data, rs_data)
+        if len(data_to_encode) > 223:
+            raise ValueError("Data to Encode is too long")
 
-    def decode(
-        self,
-        rs_data: POINTER(PackedRsPacket),
-        decoded_data: POINTER(c_uint8 * 223),
-        decoded_data_length: c_uint8,
-    ) -> None:
+        uint_list = []
+        for byte in data_to_encode:
+            uint_list.append(c_uint8(byte))
+        encode_data = pointer((c_uint8 * 223)(*uint_list))
+        rs_data = pointer(PackedRsPacket((c_uint8 * 255)()))
+        result = fec.rsEncode(encode_data, rs_data)
+
+        if result != 0:
+            raise ValueError("Could not encode object. OBC GS Error Code: " + str(result))
+
+        return bytes(rs_data.contents.data)
+
+    def decode(self, data_to_decode: bytes) -> bytes:
         """
         A function that decodes data via reed solomon for forward error correction
 
-        :param rs_data: A pointer to a reed solomon packet (this usually stores encoded data). In the python the
-                        structure for this packet is called PackedRsPacket
-        :param decoded_data: An array of type c_uint8 to store decoded data (must be a 223 in size to avoid issues)
-        :param decoded_data_length: How many elements are expected in the decoded_data
-        :return: None
+        :param data_to_decode: An array of type c_uint8 with the 255 of encoded information (must be a 255 in size to
+                               avoid issues)
+        :return: 0 for success or a number representing the obc_gs error code
         """
-        fec.rsDecode(rs_data, decoded_data, decoded_data_length)
+        if len(data_to_decode) > 255:
+            raise ValueError("Data to Decode is too long")
 
-    def __del__(self) -> None:
+        rs_info = data_to_decode[-32:]
+        uint_list = []
+        for byte in data_to_decode:
+            uint_list.append(c_uint8(byte))
+        rs_data = pointer(PackedRsPacket((c_uint8 * 255)(*uint_list)))
+        decoded_data = pointer((c_uint8 * 223)())
+        result = fec.rsDecode(rs_data, decoded_data, c_uint8(223))
+
+        if result != 0:
+            raise ValueError("Could not decode object. OBC GS Error Code: " + str(result))
+
+        return bytes(decoded_data.contents) + rs_info
+
+    def destroy(self) -> None:
         """
         Destructor
         """
@@ -79,7 +99,6 @@ class FEC:
 
 if __name__ == "__main__":
     fec_code = FEC()
-    rs_data = pointer(PackedRsPacket((c_uint8 * 255)()))
 
     # Telem data from the C test case
     telem_data = (c_uint8 * 223)(
@@ -307,32 +326,25 @@ if __name__ == "__main__":
         157,
         18,
     )
-    decode_data = (c_uint8 * 223)()
-    telem_pointer = pointer(telem_data)
-    decode_pointer = pointer(decode_data)
 
-    for i in range(len(rs_data.contents.data)):
-        print(rs_data.contents.data[i], end=" ")
-    print("--------------")
-
-    fec_code.encode(telem_pointer, rs_data)
-    for i in range(len(rs_data.contents.data)):
-        print(rs_data.contents.data[i], end=" ")
+    encode_result = bytearray(fec_code.encode(bytes(telem_data)))
+    for i in range(len(encode_result)):
+        print(encode_result[i], end=" ")
     print("--------------")
 
     # Flip some bits
-    rs_data.contents.data[0] = rs_data.contents.data[0] + 1
-    rs_data.contents.data[222] = rs_data.contents.data[222] + 1
+    encode_result[0] += 1
+    encode_result[222] += 1
 
-    fec_code.decode(rs_data, decode_pointer, c_uint8(223))
-    for i in range(len(rs_data.contents.data)):
-        print(rs_data.contents.data[i], end=" ")
+    decode_result = fec_code.decode(bytes(encode_result))
+    for i in range(len(decode_result)):
+        print(decode_result[i], end=" ")
     print("--------------")
 
     # Check if the decoded data matches the original bits
     matches = True
     for i in range(len(telem_data)):
-        if decode_pointer.contents[i] != telem_data[i]:
+        if decode_result[i] != telem_data[i]:
             matches = False
             break
 

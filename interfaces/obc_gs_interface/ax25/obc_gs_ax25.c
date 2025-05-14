@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
@@ -340,12 +339,25 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
       unstuffedBitLength++;
     }
   }
-  // Add last flag to end of the packet, rounding up
-  unstuffedPacket[(unstuffedBitLength + 7) / 8] = AX25_FLAG;
-  unstuffedBitLength += 8;
+
+  // Let these bits at the end that are 0 and are a result of the unstuffing
+  // process
+  uint8_t tailBytes = 0;
+
+  while (unstuffedPacket[(unstuffedBitLength / 8) - tailBytes] == 0x00) {
+    tailBytes++;
+  }
+  // Add last flag to end of the packet, rounding up and removing any 0
+  // bytes at the end as a result of unstuffing
+  if (tailBytes == 0) {
+    unstuffedPacket[(unstuffedBitLength + 7) / 8] = AX25_FLAG;
+    *unstuffedPacketLen = (unstuffedBitLength + 7) / 8;
+  } else {
+    unstuffedPacket[(unstuffedBitLength / 8) - tailBytes + 1] = AX25_FLAG;
+    *unstuffedPacketLen = unstuffedBitLength / 8 - tailBytes + 2;
+  }
 
   // convert bits to bytes
-  *unstuffedPacketLen = unstuffedBitLength / 8;
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
@@ -497,11 +509,9 @@ static obc_gs_error_code_t fcsCheck(const uint8_t *data, uint16_t dataLen, uint1
   // reverse bit order of fcs to account for the fact that it was transmitted in
   // the reverse order as the other bytes
   fcs = reverseUint16(fcs);
-  printf("FCS: %d", fcs);
 
   uint16_t calculatedFcs = calculateCrc16Ccitt(data, dataLen - AX25_FCS_BYTES - AX25_TOTAL_FLAG_BYTES);
 
-  printf("Calculated FCS: %d", calculatedFcs);
   if (fcs != calculatedFcs) {
     return OBC_GS_ERR_CODE_CORRUPTED_AX25_MSG;
   }
