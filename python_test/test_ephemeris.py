@@ -687,7 +687,7 @@ def test_get_lines_from_api():
     assert ephemeris.get_lines_from_api(1, 2, 8, "sun") == lines
 
 
-@pytest.mark.skip(reason="Taking too long")
+# @pytest.mark.skip(reason="Taking too long")
 def test_100k_request():
     filename = "test_100k_request.bin"
     length = 110_000
