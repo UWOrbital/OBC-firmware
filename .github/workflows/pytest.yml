@@ -8,11 +8,10 @@ on:
 
 jobs:
   pytest:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
         python-version: ['3.11']
 
     steps:
@@ -25,6 +24,8 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt update
+        sudo apt install -y postgresql
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
