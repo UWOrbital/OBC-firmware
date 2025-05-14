@@ -64,6 +64,9 @@ compile_commands.json
 *.sw?
 
 .env
+
+.*.env
+
 *.db
 
 /build*
