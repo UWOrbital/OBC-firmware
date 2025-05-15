@@ -61,7 +61,7 @@ jobs:
       - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: out-files
+          name: bin-files
           path: build/**/*.bin
 
   crc:
