@@ -65,6 +65,7 @@ jobs:
           path: build/**/*.bin
 
   crc:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Download binaries
@@ -72,7 +73,7 @@ jobs:
         with:
           name: bin-files
           path: binaries
-  
+
       - name: Display CRCs
         run: |
           echo "CRC checksums:"
