@@ -3,9 +3,9 @@ from ctypes import POINTER, Structure, c_uint, c_uint8, pointer
 
 import pytest
 from ax25 import FrameType
-from interfaces.obc_gs_interface.aes128 import aes128_gs as aes
-from interfaces.obc_gs_interface.ax25 import ax25_gs as ax25
-from interfaces.obc_gs_interface.fec import fec_gs as fec
+from interfaces.obc_gs_interface.aes128 import AES128
+from interfaces.obc_gs_interface.ax25 import AX25
+from interfaces.obc_gs_interface.fec import FEC
 
 
 # TEST: A simulated receive with the entire pipline
@@ -296,11 +296,11 @@ def test_receive():
     bin = bytearray(c_data)
 
     # Instantiate the ax25 class to unstuff
-    ax25_proto = ax25.AX25("ATLAS", "AKITO")
+    ax25_proto = AX25("ATLAS", "AKITO")
     bin = ax25_proto.unstuff(bytes(bin))
 
     # Instantiate FEC class to error correct
-    fec_coder = fec.FEC()
+    fec_coder = FEC()
     # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
     data_to_decode = fec_coder.decode(bin[17:272])
     # With the data decoded we need to add the rest of the data back to get a full frame
@@ -314,7 +314,7 @@ def test_receive():
     frame_data = rcv_frame.data
 
     # Instantiate the aes class with defaults from the c implementation and decrypt the data
-    aes_cipher = aes.AES128(
+    aes_cipher = AES128(
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
     )
@@ -332,9 +332,9 @@ def test_receive():
 # TEST: A simulated send with the entire pipline (some bits are also flipped before sending to test fec)
 def test_send():
     # Instantiate our ax25 class to get ready to create frame
-    ax25_proto = ax25.AX25("ATLAS", "AKITO")
+    ax25_proto = AX25("ATLAS", "AKITO")
     # Instantiate the fec class for forward error correction
-    fec_coder = fec.FEC()
+    fec_coder = FEC()
 
     # Generating pseudo-random data
     data = []
@@ -343,7 +343,7 @@ def test_send():
         data.append(random.randint(0, 255))
 
     # Instantaite the aes cipher with the same defaults from the c implementation
-    aes_cipher = aes.AES128(
+    aes_cipher = AES128(
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
     )
