@@ -1,6 +1,5 @@
 name: OBC Build
-on: workflow_dispatch
-# on: [push, pull_request]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -67,7 +66,6 @@ jobs:
 
   crc:
   runs-on: ubuntu-latest
-  # if: ${{ github.event.workflow_run.conclusion == 'success' }}
   steps:
     - name: Download binaries
       uses: actions/download-artifact@v4
