@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install build-essential cmake
+      - name: Setup
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential cmake
 
   build:
     runs-on: ubuntu-latest
@@ -23,8 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        example:
-          [
+        example: [
             DMA_SPI,
             FRAM_PERSIST,
             FRAM_SPI,
@@ -38,14 +37,9 @@ jobs:
             # CC1120_SPI,
             RS,
             ADC,
-
             # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
           ]
-        board:  [
-          RM46_LAUNCHPAD,
-          OBC_REVISION_1,
-          OBC_REVISION_2,
-          ]
+        board: [RM46_LAUNCHPAD, OBC_REVISION_1, OBC_REVISION_2]
 
     steps:
       - uses: actions/checkout@v3

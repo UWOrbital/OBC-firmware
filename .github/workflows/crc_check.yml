@@ -1,0 +1,21 @@
+name: CRC Check
+on:
+  workflow_run:
+    workflows: ['OBC Build']
+    types: [completed]
+
+jobs:
+  crc:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: out-files
+          path: binaries
+
+      - name: Display CRCs
+        run: |
+          echo "CRC checksums:"
+          find binaries -name "*.out" -exec cksum {} \;

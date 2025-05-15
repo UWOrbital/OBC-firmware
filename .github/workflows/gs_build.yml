@@ -8,15 +8,15 @@ jobs:
       run:
         shell: bash
     steps:
-    - uses: actions/checkout@v3
-    - name: Create binary directory
-      run: |
-        mkdir build
-    - name: Build
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
-        make
+      - uses: actions/checkout@v3
+      - name: Create binary directory
+        run: |
+          mkdir build
+      - name: Build
+        run: |
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
+          make
 
   build-windows:
     runs-on: windows-latest
@@ -24,12 +24,12 @@ jobs:
       run:
         shell: bash
     steps:
-    - uses: actions/checkout@v3
-    - name: Create binary directory
-      run: |
-        mkdir build
-    - name: Build
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
-        make
+      - uses: actions/checkout@v3
+      - name: Create binary directory
+        run: |
+          mkdir build
+      - name: Build
+        run: |
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=GS -G"Unix Makefiles"
+          make
