@@ -3,7 +3,7 @@ from pathlib import Path
 
 # The shared object file we are using the access the c functions via ctypes
 path = (Path(__file__).parent / "../../../build_gs/interfaces/libobc-gs-interface.so").resolve()
-fec = CDLL(path)
+fec = CDLL(str(path))
 
 
 # Let's define the packed_rs_packet_t structure here so that we can use it as a parameter in functions
@@ -26,7 +26,7 @@ fec.rsEncode.restype = c_uint
 
 # rsDecode()
 fec.rsDecode.argtypes = [POINTER(PackedRsPacket), POINTER(c_uint8 * 223), c_uint8]
-fec.rsDecode.restypes = c_uint
+fec.rsDecode.restype = c_uint
 
 # destroyRs()
 fec.destroyRs.argtypes = ()

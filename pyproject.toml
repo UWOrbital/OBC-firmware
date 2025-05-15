@@ -29,6 +29,10 @@ ignore_missing_imports = true
 module = "tinyaes.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "pyStuffing.*"
+ignore_missing_imports = true
+
 [tool.ruff]
 include = ["pyproject.toml", "gs/backend/**/*.py", "obc/tools/python/**/*.py"]
 exclude = [

@@ -9,7 +9,6 @@ class AES128:
     def __init__(self, key: bytes, iv: bytes) -> None:
         self._key = key
         self._iv = iv
-        self._cipher = AES(self._key, self._iv)
 
     def encrypt(self, data: bytes) -> bytes:
         """
@@ -20,7 +19,9 @@ class AES128:
         :return: Encrypted data
         """
 
-        return self._cipher.CTR_xcrypt_buffer(data)
+        aes_encode = AES(self._key, self._iv)
+
+        return bytes(aes_encode.CTR_xcrypt_buffer(data))
 
     def decrypt(self, data: bytes) -> bytes:
         """
@@ -30,12 +31,13 @@ class AES128:
         :param iv: The initialization vector passed as bytes
         :return: Decrypted data
         """
+        aes_encode = AES(self._key, self._iv)
 
-        return self._cipher.CTR_xcrypt_buffer(data)
+        return bytes(aes_encode.CTR_xcrypt_buffer(data))
 
 
 # Example
 if __name__ == "__main__":
     codec = AES128(bytes.fromhex("11223344556677889900AABBCCDDEEFF"), bytes.fromhex("11223344556677889900AABBCCDDEEFF"))
-    data = codec.encrypt(b"Hallo")
+    data = codec.decrypt(b"Hallo")
     print(codec.decrypt(data))
