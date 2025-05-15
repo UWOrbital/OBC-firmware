@@ -28,9 +28,9 @@
    AX25_INFO_BYTES)
 
 // NOTE: This is for the mod128 implementation
-// #define AX25_MINIMUM_I_FRAME_LEN                                                                            \
-//   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
-//    AX25_INFO_BYTES)
+/* #define AX25_MINIMUM_I_FRAME_LEN                                                                            \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
+   AX25_INFO_BYTES) */
 /*
 AX.25 bit stuffing will add a bit after every 5 consecutive 1s. The maximum number of added bits for a buffer of x bytes
 is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x)/5] / 8 = x * 6/5
