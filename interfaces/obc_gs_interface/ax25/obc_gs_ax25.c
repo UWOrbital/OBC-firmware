@@ -116,7 +116,7 @@ obc_gs_error_code_t ax25SendIFrameWithFlagSharing(uint8_t *telemData, uint32_t t
 
     memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_DEST_ADDR_POSITION, destAddress->data,
            AX25_DEST_ADDR_BYTES);
-    ax25_addr_t srcAddr;
+    ax25_addr_t srcAddr = {0};
     ax25GetSourceAddress(&srcAddr, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
     memcpy(ax25Data + (frameStart * AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG) + AX25_SRC_ADDR_POSITION, srcAddr.data,
            AX25_SRC_ADDR_BYTES);
@@ -164,10 +164,10 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
 
   // The following checks stop the data from corrupting in the mod8
   // implementation
-  if (pktSentNum >= 7) {
+  if (pktSentNum >= MAX_CONTINUOUS_PACKETS_ALLOWED) {
     pktSentNum = 0;
   }
-  if (pktReceiveNum >= 7) {
+  if (pktReceiveNum >= MAX_CONTINUOUS_PACKETS_ALLOWED) {
     pktReceiveNum = 0;
   }
 
@@ -176,7 +176,7 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
 
   ax25Data->data[0] = AX25_FLAG;
   // ax25Data->data[AX25_MINIMUM_I_FRAME_LEN - 1] = AX25_FLAG;
-  ax25_addr_t srcAddr;
+  ax25_addr_t srcAddr = {0};
   ax25GetSourceAddress(&srcAddr, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
   memcpy(ax25Data->data + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
   memcpy(ax25Data->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES);
@@ -191,7 +191,7 @@ obc_gs_error_code_t ax25SendIFrame(uint8_t *telemData, uint8_t telemDataLen, uns
   memcpy(ax25Data->data + AX25_INFO_FIELD_POSITION, telemData, telemDataLen);
 
   uint16_t fcs;
-  fcsCalculate(ax25Data->data + 1, AX25_MINIMUM_I_FRAME_LEN, &fcs);
+  fcsCalculate(ax25Data->data + AX25_START_FLAG_BYTES, AX25_MINIMUM_I_FRAME_LEN, &fcs);
 
   ax25Data->data[AX25_I_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25Data->data[AX25_I_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
@@ -227,7 +227,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
 
   ax25PacketUnstuffed[0] = AX25_FLAG;
 
-  ax25_addr_t srcAddr;
+  ax25_addr_t srcAddr = {0};
   ax25GetSourceAddress(&srcAddr, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
   memcpy(ax25PacketUnstuffed + AX25_DEST_ADDR_POSITION, currentLinkDestAddr.data, AX25_DEST_ADDR_BYTES);
 
@@ -269,9 +269,9 @@ obc_gs_error_code_t ax25Recv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_
     return OBC_GS_ERR_CODE_INVALID_ARG;
   }
 
-  ax25_addr_t destAddr;
+  ax25_addr_t destAddr = {0};
   ax25GetDestAddress(&destAddr, CUBE_SAT_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
-  ax25_addr_t destAddrAlternate;
+  ax25_addr_t destAddrAlternate = {0};
   ax25GetDestAddress(&destAddrAlternate, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
   if (memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, destAddr.data, AX25_DEST_ADDR_BYTES) != 0 &&
       memcmp(unstuffedPacket->data + AX25_DEST_ADDR_POSITION, destAddrAlternate.data, AX25_DEST_ADDR_BYTES) != 0) {
@@ -344,7 +344,7 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
   // process
   uint8_t tailBytes = 0;
 
-  while (unstuffedPacket[(unstuffedBitLength / 8) - tailBytes] == 0x00) {
+  while (unstuffedPacket[(unstuffedBitLength / 8) - tailBytes] == 0x00 && tailBytes < AX25_INFO_BYTES) {
     tailBytes++;
   }
   // Add last flag to end of the packet, rounding up and removing any 0
@@ -363,7 +363,7 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
 }
 
 static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
-  ax25_addr_t srcAddr;
+  ax25_addr_t srcAddr = {0};
   ax25GetSourceAddress(&srcAddr, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
   if (memcmp(unstuffedPacket->data + AX25_SRC_ADDR_POSITION, srcAddr.data, AX25_SRC_ADDR_BYTES) != 0) {
     return OBC_GS_ERR_CODE_INVALID_TNC;
@@ -405,7 +405,7 @@ static obc_gs_error_code_t sFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
 }
 
 static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket) {
-  ax25_addr_t srcAddr;
+  ax25_addr_t srcAddr = {0};
   ax25GetSourceAddress(&srcAddr, GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
   // first control byte will be the the after the flag and the address bytes
   // next control byte will be immediately after the previous one
@@ -458,7 +458,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
   // clear the poll/final bit from controlByte
   controlByte &= ~POLL_FINAL_BIT_MASK;
 
-  ax25_addr_t destAddr;
+  ax25_addr_t destAddr = {0};
   ax25GetDestAddress(&destAddr, CUBE_SAT_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID, DEFAULT_CONTROL_BIT);
 
   // the destination address for the packet we send will be the src address of
@@ -546,7 +546,8 @@ obc_gs_error_code_t ax25Stuff(uint8_t *rawData, uint16_t rawDataLen, uint8_t *st
   }
 
   *stuffedDataLen = ((stuffedOffset + 7) / 8) + 1;
-  stuffedData[0] = stuffedData[*stuffedDataLen - 1] = AX25_FLAG;
+  stuffedData[0] = AX25_FLAG;
+  stuffedData[*stuffedDataLen - 1] = AX25_FLAG;
   return OBC_GS_ERR_CODE_SUCCESS;
 }
 
@@ -631,7 +632,7 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
 }
 
 void setCurrentLinkDestCallSign(uint8_t *destCallSign, uint8_t destCallSignLength, uint8_t ssid) {
-  ax25_addr_t destAddr;
+  ax25_addr_t destAddr = {0};
   ax25GetDestAddress(&destAddr, destCallSign, destCallSignLength, ssid, 0);
   memcpy(&currentLinkDestAddr, &destAddr, sizeof(ax25_addr_t));
 }

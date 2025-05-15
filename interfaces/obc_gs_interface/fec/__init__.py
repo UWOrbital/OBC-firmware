@@ -38,6 +38,9 @@ class FEC:
     Class for forward error correction using the reed solomon algorithm
     """
 
+    _MAX_DECODED_DATA_LEN = 223
+    _MAX_ENCODED_DATA_LEN = 255
+
     def __init__(self) -> None:
         """
         Constructor
@@ -51,14 +54,14 @@ class FEC:
         :param telem_data: Telemetry data of type c_uint8 to pass in (must be a 223 bytes in size to avoid issues)
         :return: 0 for success or a number representing the obc_gs error code
         """
-        if len(data_to_encode) > 223:
+        if len(data_to_encode) > self._MAX_DECODED_DATA_LEN:
             raise ValueError("Data to Encode is too long")
 
         uint_list = []
         for byte in data_to_encode:
             uint_list.append(c_uint8(byte))
-        encode_data = pointer((c_uint8 * 223)(*uint_list))
-        rs_data = pointer(PackedRsPacket((c_uint8 * 255)()))
+        encode_data = pointer((c_uint8 * self._MAX_DECODED_DATA_LEN)(*uint_list))
+        rs_data = pointer(PackedRsPacket((c_uint8 * self._MAX_ENCODED_DATA_LEN)()))
         result = fec.rsEncode(encode_data, rs_data)
 
         if result != 0:
@@ -74,16 +77,16 @@ class FEC:
                                avoid issues)
         :return: 0 for success or a number representing the obc_gs error code
         """
-        if len(data_to_decode) > 255:
+        if len(data_to_decode) > self._MAX_ENCODED_DATA_LEN:
             raise ValueError("Data to Decode is too long")
 
         rs_info = data_to_decode[-32:]
         uint_list = []
         for byte in data_to_decode:
             uint_list.append(c_uint8(byte))
-        rs_data = pointer(PackedRsPacket((c_uint8 * 255)(*uint_list)))
-        decoded_data = pointer((c_uint8 * 223)())
-        result = fec.rsDecode(rs_data, decoded_data, c_uint8(223))
+        rs_data = pointer(PackedRsPacket((c_uint8 * self._MAX_ENCODED_DATA_LEN)(*uint_list)))
+        decoded_data = pointer((c_uint8 * self._MAX_DECODED_DATA_LEN)())
+        result = fec.rsDecode(rs_data, decoded_data, c_uint8(self._MAX_DECODED_DATA_LEN))
 
         if result != 0:
             raise ValueError("Could not decode object. OBC GS Error Code: " + str(result))

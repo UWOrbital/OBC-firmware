@@ -111,12 +111,19 @@ class AX25:
         """
         data = input_data[1:-1]
 
-        int_list = self._bytes_to_int_list(data)
+        byte_list = []
+        for byte in data:
+            bits = bin(byte).removeprefix("0b")
+            byte_list.append(("0" * (8 - len(bits))) + bits)
+        byte_string = "".join(byte_list)
+        bin_list = [int(s) for s in byte_string]
 
-        unstuff = BitStuffing(int_list)
-        unstuff.stuffed = int_list
+        unstuff = BitStuffing(bin_list)
+        unstuff.stuffed = bin_list
         unstuff.startUnstuffing()
-        data = self._int_list_to_bytes(unstuff.unStuffed)
+        res = "".join([str(s) for s in unstuff.unStuffed])
+        res = res + ("0" * (8 - len(res) % 8))
+        data = bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8))
 
         # Remove a 0 at the end of the string that might have been created as a result of adding in 0s
         if data[-1] == 0:
@@ -134,10 +141,18 @@ class AX25:
         :return: The stuffed frame
         """
         data_stripped = input_data[1:-1]
+        byte_list = []
+        for byte in data_stripped:
+            bits = bin(byte).removeprefix("0b")
+            byte_list.append(("0" * (8 - len(bits))) + bits)
+        byte_string = "".join(byte_list)
+        bin_list = [int(s) for s in byte_string]
 
-        unstuff = BitStuffing(self._bytes_to_int_list(data_stripped))
+        unstuff = BitStuffing(bin_list)
         unstuff.startStuffing()
-        data_bytes = bytearray(self._int_list_to_bytes(unstuff.stuffed))
+        res = "".join([str(s) for s in unstuff.stuffed])
+        res = res + ("0" * (8 - len(res) % 8))
+        data_bytes = bytearray(bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8)))
 
         # Define the flags
         start_end_flag = bytearray(bytes.fromhex("7E"))
@@ -149,31 +164,17 @@ class AX25:
         A Function that converts bytes to a list of integers representing bits
 
         :param data: The data that needs to be converted
-        :return: A list of integers representing bits of the data parameter
+        :return: A list of integers representing bits
         """
-        byte_list = []
-        for byte in data:
-            bits = bin(byte).removeprefix("0b")
-            byte_list.append(("0" * (8 - len(bits))) + bits)
-        byte_string = "".join(byte_list)
-        int_list = [int(s) for s in byte_string]
-        return int_list
+        return []
 
-    def _int_list_to_bytes(self, data: list[int]) -> bytes:
+    def _int_list_to_bytes(self, data: list[int]):
         """
         A Function that converts a list of integers to bytes
 
-        :param data: A list of integers representing bits that need to be converted to bytes
-        :return: The bytes that the data parameter was converted to
+        :param data: The list of integers that needs to be converted
+        :return: The converted bytes
         """
-        # Join all the integers into a string
-        res = "".join([str(s) for s in data])
-        # Make sure that this string is a multiple of 8 by adding 0s at the end (this makes sure that the last byte was
-        # not cut off)
-        res = res + ("0" * (8 - len(res) % 8))
-        # Loop through every 8 characters and convert the bits to an integer which we can then convert to a byte
-        data_bytes = bytes(int(res[i : i + 8], 2) for i in range(0, len(res), 8))
-        return data_bytes
 
 
 # Example Usage
