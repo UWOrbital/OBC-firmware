@@ -65,15 +65,15 @@ jobs:
           path: build/**/*.bin
 
   crc:
-  runs-on: ubuntu-latest
-  steps:
-    - name: Download binaries
-      uses: actions/download-artifact@v4
-      with:
-        name: bin-files
-        path: binaries
-
-    - name: Display CRCs
-      run: |
-        echo "CRC checksums:"
-        find binaries -name "*.bin" -exec cksum {} \;
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-files
+          path: binaries
+  
+      - name: Display CRCs
+        run: |
+          echo "CRC checksums:"
+          find binaries -name "*.bin" -exec cksum {} \;
