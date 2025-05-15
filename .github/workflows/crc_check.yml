@@ -1,13 +1,13 @@
 name: CRC Check
-on:
-  workflow_run:
-    workflows: ['OBC Build']
-    types: [completed]
+on: workflow_dispatch
+  # workflow_run:
+  #   workflows: ['OBC Build']
+  #   types: [completed]
 
 jobs:
   crc:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Download binaries
         uses: actions/download-artifact@v4
