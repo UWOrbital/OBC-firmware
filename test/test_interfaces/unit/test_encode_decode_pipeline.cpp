@@ -27,7 +27,7 @@ TEST(TestEncodeDecode, sendData) {
   aes_data_t aesData = {.iv = {0}, .ciphertext = data, .ciphertextLen = RS_DECODED_SIZE};
   memset(aesData.iv, 1, AES_IV_SIZE);
   uint8_t output[RS_DECODED_SIZE];
-  aes128Decrypt(&aesData, output, RS_DECODED_SIZE);
+  ASSERT_EQ(aes128Decrypt(&aesData, output, RS_DECODED_SIZE), 0);
 
   setCurrentLinkDestCallSign((uint8_t *)"AKITO", CALLSIGN_LENGTH, DEFAULT_SSID);
 
@@ -50,11 +50,11 @@ TEST(TestEncodeDecode, sendData) {
 
   // Print out the ax25 data in hex to use in python testing
   // NOTE: Uncomment to see output when running c tests
-  std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  for (int i = 0; i < ax25Data.length; i++) {
-    printf(" 0x%x", ax25Data.data[i]);
-  }
-  std::cout << std::endl << "End of Frame Hex Data" << std::endl;
+  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
+  // for (int i = 0; i < ax25Data.length; i++) {
+  //   printf(" 0x%x", ax25Data.data[i]);
+  // }
+  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 }
 
 // TEST: A simulated receive with the entire pipline
@@ -120,7 +120,7 @@ TEST(TestEncodeDecode, receiveData) {
       67,  93,  216, 228, 189, 144, 60,  252, 30,  247, 70,  166, 231, 242, 183, 191, 106, 236, 5,   72,  253, 72,  117,
       122, 35,  159, 250, 160, 38,  141, 53,  156, 103, 45,  194, 0,   8,   234, 229};
   for (int i = 0; i < RS_DECODED_SIZE; i++) {
-    ASSERT_EQ(output[i], expected_data[i]);
+    EXPECT_EQ(output[i], expected_data[i]);
   }
 
   // NOTE: This should only be called after everything with fec is done (thus why its not called in the first test)

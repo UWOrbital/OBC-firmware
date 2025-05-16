@@ -39,5 +39,5 @@ class AES128:
 # Example
 if __name__ == "__main__":
     codec = AES128(bytes.fromhex("11223344556677889900AABBCCDDEEFF"), bytes.fromhex("11223344556677889900AABBCCDDEEFF"))
-    data = codec.decrypt(b"Hallo")
+    data = codec.encrypt(b"UW Orbital")
     print(codec.decrypt(data))
