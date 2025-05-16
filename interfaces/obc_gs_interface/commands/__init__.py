@@ -1,6 +1,7 @@
 from ctypes import CDLL, POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint32, pointer
 from enum import IntEnum
 from pathlib import Path
+from typing import Final
 
 # The shared object file we are using the access the c functions via ctypes
 path = (Path(__file__).parent / "../../../build_gs/interfaces/libobc-gs-interface.so").resolve()
@@ -124,178 +125,126 @@ class CmdResponseErrorCode(IntEnum):
 ## Class Implementation for CommandPackUnpack
 
 
-class CommandPackUnpack:
+_MAX_CMD_MSG_SIZE: Final[int] = 16
+_PACK_OFFSET_INITIAL: Final[int] = 0
+_UNPACK_OFFSET_INITIAL: Final[int] = 0
+_NUM_PACKED_INITIAL: Final[int] = 0
+
+
+def pack_command(cmd_msg: CmdMsg) -> bytes:
     """
-    A class that defines methods to pack and unpack commands. This class uses python wrappers for C functions to
-    implement it's functionality
+    This takes in a command message to be packed (see the C implementation for more on how that's exactly done)
+    NOTE: When the class is initialized, it will use internal variables to keep a running count of the packOffset
+    and numPacked parameters from the C implementation.
+
+    :param cmd_msg: A c-style structure that hold the command message
+    :return: Bytes of the packed message
     """
+    buffer = (c_uint8 * _MAX_CMD_MSG_SIZE)(*([0] * 16))
+    res = pack_unpack.packCmdMsg(
+        pointer(buffer),
+        pointer(c_uint32(_PACK_OFFSET_INITIAL)),
+        pointer(cmd_msg),
+        pointer(c_uint8(_NUM_PACKED_INITIAL)),
+    )
 
-    _MAX_CMD_MSG_SIZE = 16
+    if res != 0:
+        raise ValueError("Could not pack command. OBC Error Code: " + str(res))
 
-    def __init__(self, pack_offset: int, unpack_offset: int, num_packed: int) -> None:
-        """
-        When initialized pass in the starting values you want for the offsets and number of commands packed
+    return bytes(buffer)
 
-        :param pack_offset: The offset when packing (see C implementation)
-        :param unpack_offset: The offset when unpacking (see C implementation)
-        :param num_packed: The number of commands packed (see C implementation)
-        """
-        self._pack_offset = c_uint32(pack_offset)
-        self._unpack_offset = c_uint32(unpack_offset)
-        self._num_packed = c_uint8(num_packed)
 
-    def pack(self, cmd_msg: CmdMsg) -> bytes:
-        """
-        This takes in a command message to be packed (see the C implementation for more on how that's exactly done)
-        NOTE: When the class is initialized, it will use internal variables to keep a running count of the packOffset
-        and numPacked parameters from the C implementation.
+def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
+    """
+    This takes in a data bytes to be unpacked into a command message (see the C implementation for more on how
+    that's exactly done)
+    NOTE: When the class is initialized, it will use internal variables to keep a running count of the unpackOffset
+    parameter from the C implementation.
 
-        :param cmd_msg: A c-style structure that hold the command message
-        :return: Bytes of the packed message
-        """
-        buffer = (c_uint8 * self._MAX_CMD_MSG_SIZE)(*([0] * 16))
-        res = pack_unpack.packCmdMsg(
-            pointer(buffer), pointer(self._pack_offset), pointer(cmd_msg), pointer(self._num_packed)
-        )
+    :param cmd_msg_packed: Bytes of an already encoded message
+    :return: An unpacked command message in the form of a structure
+    """
+    if len(cmd_msg_packed) > _MAX_CMD_MSG_SIZE:
+        raise ValueError("The encoded command data to unpack is too long")
 
-        if res != 0:
-            raise ValueError("Could not pack command. OBC Error Code: " + str(res))
+    buffer_elements = list(cmd_msg_packed)
+    buff = (c_uint8 * _MAX_CMD_MSG_SIZE)(*buffer_elements)
+    cmd_msg = CmdMsg()
 
-        return bytes(buffer)
+    res = pack_unpack.unpackCmdMsg(pointer(buff), pointer(c_uint32(_UNPACK_OFFSET_INITIAL)), pointer(cmd_msg))
 
-    def unpack(self, cmd_msg_packed: bytes) -> CmdMsg:
-        """
-        This takes in a data bytes to be unpacked into a command message (see the C implementation for more on how
-        that's exactly done)
-        NOTE: When the class is initialized, it will use internal variables to keep a running count of the unpackOffset
-        parameter from the C implementation.
+    if res != 0:
+        raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
 
-        :param cmd_msg_packed: Bytes of an already encoded message
-        :return: An unpacked command message in the form of a structure
-        """
-        if len(cmd_msg_packed) > self._MAX_CMD_MSG_SIZE:
-            raise ValueError("The encoded command data to unpack is too long")
-
-        buffer_elements = list(cmd_msg_packed)
-        buff = (c_uint8 * self._MAX_CMD_MSG_SIZE)(*buffer_elements)
-        cmd_msg = CmdMsg()
-
-        res = pack_unpack.unpackCmdMsg(pointer(buff), pointer(self._unpack_offset), pointer(cmd_msg))
-
-        if res != 0:
-            raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
-
-        return cmd_msg
-
-    def set_pack_offset(self, num: int) -> None:
-        """
-        A method to set the pack offset of the class if needed
-
-        :param num: The number to set the pack offset to
-        :return: None
-        """
-
-        self._pack_offset = c_uint32(num)
-
-    def set_unpack_offset(self, num: int) -> None:
-        """
-        A method to set the unppack offset of the class if needed
-
-        :param num: The number to set the unpack offset to
-        :return: None
-        """
-
-        self._unpack_offset = c_uint32(num)
-
-    def set_num_packed(self, num: int) -> None:
-        """
-        A method to set the num_packed variable of the class if needed
-
-        :param num: The number to set the num_packed variable to
-        :return: None
-        """
-
-        self._num_packed = c_uint8(num)
+    return cmd_msg
 
 
 ## Class implementation for CommandReponsePackUnpack
 
 
-class CommandResponsePackUnpack:
+_MAX_REPONSE_PACKED_SIZE: Final[int] = 16
+
+
+def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
     """
-    A class that defines methods to pack and unpack command responses. This class uses python wrappers for C functions
-    to implement it's functionality
+    This takes a command message reponse to pack it (see the C implementation for more on how that's exactly done)
+
+    :param cmd_msg_response: A c-style structure that hold the unpacked command message response
+    :return: Bytes of the packed commmand response
     """
+    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*([0] * 16))
+    res = pack_unpack.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
 
-    _MAX_REPONSE_PACKED_SIZE = 16
+    if res != 0:
+        raise ValueError("Could not pack command response. OBC Error Code: " + str(res))
 
-    def __init__(self) -> None:
-        """
-        There are no parameters that can be initialized for this class
-        """
-        pass
+    return bytes(buffer)
 
-    def pack(self, cmd_msg_response: CmdUnpackedReponse) -> bytes:
-        """
-        This takes a command message reponse to pack it (see the C implementation for more on how that's exactly done)
 
-        :param cmd_msg_response: A c-style structure that hold the unpacked command message response
-        :return: Bytes of the packed commmand response
-        """
-        buffer = (c_uint8 * self._MAX_REPONSE_PACKED_SIZE)(*([0] * 16))
-        res = pack_unpack.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
+def unpack_command_response(cmd_msg_packed: bytes) -> CmdUnpackedReponse:
+    """
+    This takes in a bytes of data to be unpacked into a command response (see the C implementation for more on how
+    that's exactly done)
 
-        if res != 0:
-            raise ValueError("Could not pack command response. OBC Error Code: " + str(res))
+    :param cmd_msg_packed: Bytes of an already encoded message
+    :return: An unpacked command message in the form of a structure
+    """
+    if len(cmd_msg_packed) > _MAX_REPONSE_PACKED_SIZE:
+        raise ValueError("The encoded command reponse data to unpack is too long")
 
-        return bytes(buffer)
+    buffer_elements = list(cmd_msg_packed)
+    buff = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*buffer_elements)
+    cmd_msg_response = CmdUnpackedReponse()
 
-    def unpack(self, cmd_msg_packed: bytes) -> CmdUnpackedReponse:
-        """
-        This takes in a bytes of data to be unpacked into a command response (see the C implementation for more on how
-        that's exactly done)
+    res = pack_unpack.unpackCommandResponse(pointer(buff), pointer(cmd_msg_response))
 
-        :param cmd_msg_packed: Bytes of an already encoded message
-        :return: An unpacked command message in the form of a structure
-        """
-        if len(cmd_msg_packed) > self._MAX_REPONSE_PACKED_SIZE:
-            raise ValueError("The encoded command reponse data to unpack is too long")
+    if res != 0:
+        raise ValueError("Could not unpack command response. OBC Error Code: " + str(res))
 
-        buffer_elements = list(cmd_msg_packed)
-        buff = (c_uint8 * self._MAX_REPONSE_PACKED_SIZE)(*buffer_elements)
-        cmd_msg_response = CmdUnpackedReponse()
-
-        res = pack_unpack.unpackCommandResponse(pointer(buff), pointer(cmd_msg_response))
-
-        if res != 0:
-            raise ValueError("Could not unpack command response. OBC Error Code: " + str(res))
-
-        return cmd_msg_response
+    return cmd_msg_response
 
 
 if __name__ == "__main__":
-    packer = CommandPackUnpack(0, 0, 0)
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
     cmd_msg.rtcSync.unixTime = c_uint32(0x12345678)
     cmd_msg_unpacked = CmdMsg()
 
-    packed_msg = packer.pack(cmd_msg)
+    packed_msg = pack_command(cmd_msg)
     print([hex(element) for element in packed_msg])
-    cmd_msg_unpacked = packer.unpack(packed_msg)
+    cmd_msg_unpacked = unpack_command(packed_msg)
     print(cmd_msg_unpacked.id)
     print(cmd_msg_unpacked.rtcSync.unixTime)
 
-    response_packer = CommandResponsePackUnpack()
     cmd_response = CmdUnpackedReponse()
     cmd_response.errCode = 1
     cmd_response.cmdId = 1
     cmd_response.obcResetResponse = ObcCmdResetResponse(0.02, 2)
     buffer = (c_uint8 * 16)()
 
-    packed_response = response_packer.pack(cmd_response)
+    packed_response = pack_command_response(cmd_response)
     print([hex(element) for element in packed_response])
-    cmd_response_unpack = response_packer.unpack(packed_response)
+    cmd_response_unpack = unpack_command_response(packed_response)
     print(cmd_response_unpack.cmdId)
     print(cmd_response_unpack.errCode)
     print(cmd_response_unpack.obcResetResponse.data1)
