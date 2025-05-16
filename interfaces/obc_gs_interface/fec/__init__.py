@@ -1,9 +1,6 @@
-from ctypes import CDLL, POINTER, Structure, c_uint, c_uint8, pointer
-from pathlib import Path
+from ctypes import POINTER, Structure, c_uint, c_uint8, pointer
 
-# The shared object file we are using the access the c functions via ctypes
-path = (Path(__file__).parent / "../../../build_gs/interfaces/libobc-gs-interface.so").resolve()
-fec = CDLL(str(path))
+from interfaces.obc_gs_interface import interface
 
 
 # Let's define the packed_rs_packet_t structure here so that we can use it as a parameter in functions
@@ -17,20 +14,20 @@ class PackedRsPacket(Structure):
 
 # Below are the ctype definitions from all the functions needed for fec
 # initRs()
-fec.initRs.argtypes = ()
-fec.initRs.restype = None
+interface.initRs.argtypes = ()
+interface.initRs.restype = None
 
 # rsEncode()
-fec.rsEncode.argtypes = [POINTER(c_uint8 * 223), POINTER(PackedRsPacket)]
-fec.rsEncode.restype = c_uint
+interface.rsEncode.argtypes = [POINTER(c_uint8 * 223), POINTER(PackedRsPacket)]
+interface.rsEncode.restype = c_uint
 
 # rsDecode()
-fec.rsDecode.argtypes = [POINTER(PackedRsPacket), POINTER(c_uint8 * 223), c_uint8]
-fec.rsDecode.restype = c_uint
+interface.rsDecode.argtypes = [POINTER(PackedRsPacket), POINTER(c_uint8 * 223), c_uint8]
+interface.rsDecode.restype = c_uint
 
 # destroyRs()
-fec.destroyRs.argtypes = ()
-fec.destroyRs.restype = None
+interface.destroyRs.argtypes = ()
+interface.destroyRs.restype = None
 
 
 class FEC:
@@ -45,7 +42,7 @@ class FEC:
         """
         Constructor
         """
-        fec.initRs()
+        interface.initRs()
 
     def encode(self, data_to_encode: bytes) -> bytes:
         """
@@ -62,7 +59,7 @@ class FEC:
             uint_list.append(c_uint8(byte))
         encode_data = pointer((c_uint8 * self._MAX_DECODED_DATA_LEN)(*uint_list))
         rs_data = pointer(PackedRsPacket((c_uint8 * self._MAX_ENCODED_DATA_LEN)()))
-        result = fec.rsEncode(encode_data, rs_data)
+        result = interface.rsEncode(encode_data, rs_data)
 
         if result != 0:
             raise ValueError("Could not encode object. OBC GS Error Code: " + str(result))
@@ -86,7 +83,7 @@ class FEC:
             uint_list.append(c_uint8(byte))
         rs_data = pointer(PackedRsPacket((c_uint8 * self._MAX_ENCODED_DATA_LEN)(*uint_list)))
         decoded_data = pointer((c_uint8 * self._MAX_DECODED_DATA_LEN)())
-        result = fec.rsDecode(rs_data, decoded_data, c_uint8(self._MAX_DECODED_DATA_LEN))
+        result = interface.rsDecode(rs_data, decoded_data, c_uint8(self._MAX_DECODED_DATA_LEN))
 
         if result != 0:
             raise ValueError("Could not decode object. OBC GS Error Code: " + str(result))
@@ -97,7 +94,7 @@ class FEC:
         """
         Destructor
         """
-        fec.destroyRs()
+        interface.destroyRs()
 
 
 if __name__ == "__main__":

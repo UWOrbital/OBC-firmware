@@ -1,0 +1,351 @@
+from ctypes import POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint32, pointer
+from enum import IntEnum
+from typing import Final
+
+from interfaces.obc_gs_interface import interface
+
+## Ctypes Declerations for CommandPackUnpack
+
+
+class RtcSyncCmdData(Structure):
+    """
+    The python equivalent class for the rtc_sync_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("unixTime", c_uint32)]
+
+
+class DownlinkLogsNextPassCmdData(Structure):
+    """
+    The python equivalent class for the downlink_logs_next_pass_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("logLevel", c_uint8)]
+
+
+class _U(Union):
+    """
+    Union class needed to create the CmdMsgType Class
+    """
+
+    _fields_ = [("rtcSync", RtcSyncCmdData), ("downlinkLogsNextPass", DownlinkLogsNextPassCmdData)]
+
+
+class CmdMsg(Structure):
+    """
+    The python equivalent class for the cmd_msg_t structure in the C implementation
+    NOTE: This class has a union so initialize accordingly
+    """
+
+    _anonymous_ = ("u",)
+    _fields_ = [("u", _U), ("timestamp", c_uint32), ("isTimeTagged", c_bool), ("id", c_uint)]
+
+
+_MAX_CMD_MSG_SIZE: Final[int] = 16
+
+interface.unpackCmdMsg.argtypes = (POINTER(c_uint8 * _MAX_CMD_MSG_SIZE), POINTER(c_uint32), POINTER(CmdMsg))
+interface.unpackCmdMsg.restype = c_uint
+
+interface.packCmdMsg.argtypes = (
+    POINTER(c_uint8 * _MAX_CMD_MSG_SIZE),
+    POINTER(c_uint32),
+    POINTER(CmdMsg),
+    POINTER(c_uint8),
+)
+interface.packCmdMsg.restype = c_uint
+
+
+## Ctypes Declerations for CommandResponsePackUnpack
+
+
+# NOTE: Just like the C implementation, this is a sample implementation. Add implemetnations as command responses are
+# made
+class ObcCmdResetResponse(Structure):
+    """
+    The python equivalent class for the obc_cmd_reset_response_t structure in the C implementation
+    NOTE: This is a sample
+    NOTE: This class uses floats which means it has floating point precision. This should not be a problem in most cases
+    """
+
+    _fields_ = [("data1", c_float), ("data2", c_uint32)]
+
+
+# NOTE: This only has the sample response so add more response structures as they get implemented to this union
+class _UR(Union):
+    """
+    The union needed to create the cmd_unpacked_response_t type in python
+    NOTE: Add response structures as they get implemented to this union
+    """
+
+    _fields_ = [("obcResetResponse", ObcCmdResetResponse)]
+
+
+# NOTE: No modifications to this class are necessary when adding new responses
+class CmdUnpackedReponse(Structure):
+    """
+    The python equivalent class for the cmd_unpacked_response_t structure in the C implementation
+    """
+
+    _anonymous_ = ("u",)
+    _fields_ = [("errCode", c_uint), ("cmdId", c_uint), ("u", _UR)]
+
+
+_MAX_REPONSE_PACKED_SIZE: Final[int] = 16
+
+interface.packCommandResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * _MAX_REPONSE_PACKED_SIZE))
+interface.packCommandResponse.restype = c_uint
+
+interface.unpackCommandResponse.argtypes = (POINTER(c_uint8 * _MAX_REPONSE_PACKED_SIZE), POINTER(CmdUnpackedReponse))
+interface.unpackCommandResponse.restype = c_uint
+
+
+## Enum Declerations
+# NOTE: Update these files accordingly when the C Enums are updated
+
+
+# Path to File: interfaces/obc_gs_interface/commands/obc_gs_command_id.h
+class CmdCallbackId(IntEnum):
+    """
+    Enums corresponding to the C implementation of cmd_callback_id_t
+    """
+
+    CMD_END_OF_FRAME = 0
+    CMD_EXEC_OBC_RESET = 1
+    CMD_RTC_SYNC = 2
+    CMD_DOWNLINK_LOGS_NEXT_PASS = 3
+    CMD_MICRO_SD_FORMAT = 4
+    CMD_PING = 5
+    CMD_DOWNLINK_TELEM = 6
+    CMD_UPLINK_DISC = 7
+    NUM_CMD_CALLBACKS = 8
+
+
+# Path to File: interfaces/obc_gs_interface/commands/obc_gs_commands_response.h
+class CmdResponseErrorCode(IntEnum):
+    """
+    Enums corresponding to the C implementation of the cmd_response_error_code_t
+    """
+
+    CMD_RESPONSE_SUCCESS = 0
+    CMD_RESPONSE_ERROR = 1
+
+
+## Command Factorys
+# NOTE: Update these when adding in new commands
+
+
+def create_cmd_end_of_frame() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_END_OF_FRAME
+
+    :return: CmdMsg structure for CMD_END_OF_FRAME
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_END_OF_FRAME
+    return cmd_msg
+
+
+def create_cmd_exec_obc_reset() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_EXEC_OBC_RESET
+
+    :return: CmdMsg structure for CMD_EXEC_OBC_RESET
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_EXEC_OBC_RESET
+    return cmd_msg
+
+
+def create_cmd_rtc_sync(time: int) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_RTC_SYNC
+
+    :param time: Unixtime as an integer
+    :return: CmdMsg structure for CMD_RTC_SYNC
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
+    cmd_msg.rtcSync.unixTime = c_uint32(time)
+    return cmd_msg
+
+
+def create_cmd_downlink_logs_next_pass(log_level: int) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
+
+    :return: CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
+    """
+    if log_level > 255:
+        raise ValueError("Log level passed is too large (cannot be encoded into a c_uint8)")
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS
+    cmd_msg.downlinkLogsNextPass.logLevel = log_level
+    return cmd_msg
+
+
+def create_cmd_mirco_sd_format() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_MICRO_SD_FORMAT
+
+    :return: CmdMsg structure for CMD_MICRO_SD_FORMAT
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_MICRO_SD_FORMAT
+    return cmd_msg
+
+
+def create_cmd_ping() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_PING
+
+    :return: CmdMsg structure for CMD_PING
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_PING
+    return cmd_msg
+
+
+def create_cmd_downlink_telem() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_DOWNLINK_TELEM
+
+    :return: CmdMsg structure for CMD_DOWNLINK_TELEM
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_TELEM
+    return cmd_msg
+
+
+def create_cmd_uplink_disc() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_UPLINK_DISC
+
+    :return: CmdMsg structure for CMD_UPLINK_DISC
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_UPLINK_DISC
+    return cmd_msg
+
+
+## Class Implementation for CommandPackUnpack
+
+
+_PACK_OFFSET_INITIAL: Final[int] = 0
+_UNPACK_OFFSET_INITIAL: Final[int] = 0
+_NUM_PACKED_INITIAL: Final[int] = 0
+
+
+def pack_command(cmd_msg: CmdMsg) -> bytes:
+    """
+    This takes in a command message to be packed (see the C implementation for more on how that's exactly done)
+    NOTE: When the class is initialized, it will use internal variables to keep a running count of the packOffset
+    and numPacked parameters from the C implementation.
+
+    :param cmd_msg: A c-style structure that hold the command message
+    :return: Bytes of the packed message
+    """
+    buffer = (c_uint8 * _MAX_CMD_MSG_SIZE)(*([0] * 16))
+    res = interface.packCmdMsg(
+        pointer(buffer),
+        pointer(c_uint32(_PACK_OFFSET_INITIAL)),
+        pointer(cmd_msg),
+        pointer(c_uint8(_NUM_PACKED_INITIAL)),
+    )
+
+    if res != 0:
+        raise ValueError("Could not pack command. OBC Error Code: " + str(res))
+
+    return bytes(buffer)
+
+
+def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
+    """
+    This takes in a data bytes to be unpacked into a command message (see the C implementation for more on how
+    that's exactly done)
+    NOTE: When the class is initialized, it will use internal variables to keep a running count of the unpackOffset
+    parameter from the C implementation.
+
+    :param cmd_msg_packed: Bytes of an already encoded message
+    :return: An unpacked command message in the form of a structure
+    """
+    if len(cmd_msg_packed) > _MAX_CMD_MSG_SIZE:
+        raise ValueError("The encoded command data to unpack is too long")
+
+    buffer_elements = list(cmd_msg_packed)
+    buff = (c_uint8 * _MAX_CMD_MSG_SIZE)(*buffer_elements)
+    cmd_msg = CmdMsg()
+
+    res = interface.unpackCmdMsg(pointer(buff), pointer(c_uint32(_UNPACK_OFFSET_INITIAL)), pointer(cmd_msg))
+
+    if res != 0:
+        raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
+
+    return cmd_msg
+
+
+## Class implementation for CommandReponsePackUnpack
+
+
+def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
+    """
+    This takes a command message reponse to pack it (see the C implementation for more on how that's exactly done)
+
+    :param cmd_msg_response: A c-style structure that hold the unpacked command message response
+    :return: Bytes of the packed commmand response
+    """
+    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*([0] * 16))
+    res = interface.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
+
+    if res != 0:
+        raise ValueError("Could not pack command response. OBC Error Code: " + str(res))
+
+    return bytes(buffer)
+
+
+def unpack_command_response(cmd_msg_packed: bytes) -> CmdUnpackedReponse:
+    """
+    This takes in a bytes of data to be unpacked into a command response (see the C implementation for more on how
+    that's exactly done)
+
+    :param cmd_msg_packed: Bytes of an already encoded message
+    :return: An unpacked command message in the form of a structure
+    """
+    if len(cmd_msg_packed) > _MAX_REPONSE_PACKED_SIZE:
+        raise ValueError("The encoded command reponse data to unpack is too long")
+
+    buffer_elements = list(cmd_msg_packed)
+    buff = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*buffer_elements)
+    cmd_msg_response = CmdUnpackedReponse()
+
+    res = interface.unpackCommandResponse(pointer(buff), pointer(cmd_msg_response))
+
+    if res != 0:
+        raise ValueError("Could not unpack command response. OBC Error Code: " + str(res))
+
+    return cmd_msg_response
+
+
+if __name__ == "__main__":
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
+    cmd_msg.rtcSync.unixTime = c_uint32(0x12345678)
+    cmd_msg_unpacked = CmdMsg()
+
+    packed_msg = pack_command(cmd_msg)
+    print([hex(element) for element in packed_msg])
+    cmd_msg_unpacked = unpack_command(packed_msg)
+    print(cmd_msg_unpacked.id)
+    print(cmd_msg_unpacked.rtcSync.unixTime)
+
+    cmd_response = CmdUnpackedReponse()
+    cmd_response.errCode = 1
+    cmd_response.cmdId = 1
+    cmd_response.obcResetResponse = ObcCmdResetResponse(0.02, 2)
+    buffer = (c_uint8 * 16)()
+
+    packed_response = pack_command_response(cmd_response)
+    print([hex(element) for element in packed_response])
+    cmd_response_unpack = unpack_command_response(packed_response)
+    print(cmd_response_unpack.cmdId)
+    print(cmd_response_unpack.errCode)
+    print(cmd_response_unpack.obcResetResponse.data1)
