@@ -8,6 +8,8 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <iostream>
 
 TEST(pack_unpack_command_responses, packResponse) {
   cmd_unpacked_response_t unpackedResponse = {
@@ -35,6 +37,11 @@ TEST(pack_unpack_command_responses, unpackCommandResponse) {
 
   uint8_t buffer[CMD_RESPONSE_MAX_PACKED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCommandResponse(&unpackedResponse, buffer);
+  std::cout << std::endl << "Max reponse size: " << CMD_RESPONSE_MAX_PACKED_SIZE << std::endl;
+  for (int i = 0; i < CMD_RESPONSE_MAX_PACKED_SIZE; i++) {
+    printf(" 0x%x", buffer[i]);
+  }
+  std::cout << std::endl;
 
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
