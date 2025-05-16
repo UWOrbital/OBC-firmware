@@ -1,21 +1,20 @@
 #include "comms_manager.h"
-#include "obc_board_config.h"
-#include "uplink_decoder.h"
+#include "cc1120.h"
+#include "cc1120_txrx.h"
 #include "downlink_encoder.h"
+#include "obc_board_config.h"
+#include "obc_errors.h"
 #include "obc_gs_aes128.h"
 #include "obc_gs_fec.h"
-#include "obc_errors.h"
-#include "obc_logging.h"
-#include "obc_scheduler_config.h"
-#include "telemetry_manager.h"
-#include "telemetry_fs_utils.h"
 #include "obc_gs_telemetry_pack.h"
-#include "obc_reliance_fs.h"
-#include "telemetry_manager.h"
-#include "cc1120_txrx.h"
-#include "cc1120.h"
-#include "rffm6404.h"
+#include "obc_logging.h"
 #include "obc_privilege.h"
+#include "obc_reliance_fs.h"
+#include "obc_scheduler_config.h"
+#include "rffm6404.h"
+#include "telemetry_fs_utils.h"
+#include "telemetry_manager.h"
+#include "uplink_decoder.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
@@ -28,8 +27,8 @@
 
 #include <redposix.h>
 
-#include <sys_common.h>
 #include <gio.h>
+#include <sys_common.h>
 
 #define COMMS_MAX_DOWNLINK_FRAMES 1000U
 #define RFFM6404_VAPC_REGULAR_POWER_VAL 1.9f
@@ -57,7 +56,8 @@ static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x
                                                       0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
 /**
- * @brief determines what the next Comms Manager state should be and sets it to that state
+ * @brief determines what the next Comms Manager state should be and sets it to
+ * that state
  *
  * @param event the comms manager event triggering a state transition
  * @param state pointer to comms state variable
@@ -120,7 +120,8 @@ void obcTaskInitCommsMgr(void) {
                                                    cc1120TransmitQueueStack, &cc1120TransmitQueue);
   }
 
-  // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static key
+  // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static
+  // key
   initializeAesCtx(TEMP_STATIC_KEY);
   initRs();
 }
@@ -335,7 +336,8 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
  * @brief Sends an AX.25 packet to the CC1120 transmit queue
  *
  * @param ax25Pkt - Pointer to the AX.25 packet to send
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the
+ * queue
  */
 obc_error_code_t sendToCC1120TransmitQueue(transmit_event_t *event) {
   ASSERT(cc1120TransmitQueueHandle != NULL);
@@ -359,14 +361,15 @@ static obc_error_code_t handleDisconnectedState(void) {
 }
 
 static obc_error_code_t handleAwaitingConnState(void) {
-  /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
-   * bypass decode task to allow for retries */
+  /* Once cc1120Recv is decoupled from decode task this function should be
+   * changed to handle this in comms manager and bypass decode task to allow for
+   * retries */
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
@@ -377,7 +380,8 @@ static obc_error_code_t handleAwaitingConnState(void) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
 #else
-  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  // switch cc1120 to receive mode and start receiving all the bytes for one
+  // continuous transmission
   RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
@@ -442,8 +446,9 @@ static obc_error_code_t handleSendingAckState(void) {
 }
 
 static obc_error_code_t handleAwaitingAckDiscState(void) {
-  /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
-   * bypass decode task to allow for retries */
+  /* Once cc1120Recv is decoupled from decode task this function should be
+   * changed to handle this in comms manager and bypass decode task to allow for
+   * retries */
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
@@ -460,7 +465,8 @@ static obc_error_code_t handleAwaitingAckDiscState(void) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
 #else
-  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  // switch cc1120 to receive mode and start receiving all the bytes for one
+  // continuous transmission
   RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
@@ -469,8 +475,9 @@ static obc_error_code_t handleAwaitingAckDiscState(void) {
 }
 
 static obc_error_code_t handleAwaitingAckConnState(void) {
-  /* Once cc1120Recv is decoupled from decode task this function should be changed to handle this in comms manager and
-   * bypass decode task to allow for retries */
+  /* Once cc1120Recv is decoupled from decode task this function should be
+   * changed to handle this in comms manager and bypass decode task to allow for
+   * retries */
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
@@ -487,7 +494,8 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
 #else
-  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  // switch cc1120 to receive mode and start receiving all the bytes for one
+  // continuous transmission
   RETURN_IF_ERROR_CODE(rffm6404ActivateRx());
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
@@ -495,13 +503,15 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+// TODO: Define COMMS_PHY_UART
+// TODO:
 static obc_error_code_t handleUplinkingState(void) {
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
 
   // Read first byte
-  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(1000), UART_READ_REG));
+  RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
 
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
@@ -512,7 +522,8 @@ static obc_error_code_t handleUplinkingState(void) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   }
 #else
-  // switch cc1120 to receive mode and start receiving all the bytes for one continuous transmission
+  // switch cc1120 to receive mode and start receiving all the bytes for one
+  // continuous transmission
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif

@@ -130,6 +130,103 @@ class CmdResponseErrorCode(IntEnum):
     CMD_RESPONSE_ERROR = 1
 
 
+## Command Factorys
+# NOTE: Update these when adding in new commands
+
+
+def create_cmd_end_of_frame() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_END_OF_FRAME
+
+    :return: CmdMsg structure for CMD_END_OF_FRAME
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_END_OF_FRAME
+    return cmd_msg
+
+
+def create_cmd_exec_obc_reset() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_EXEC_OBC_RESET
+
+    :return: CmdMsg structure for CMD_EXEC_OBC_RESET
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_EXEC_OBC_RESET
+    return cmd_msg
+
+
+def create_cmd_rtc_sync(time: int) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_RTC_SYNC
+
+    :param time: Unixtime as an integer
+    :return: CmdMsg structure for CMD_RTC_SYNC
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
+    cmd_msg.rtcSync.unixTime = c_uint32(time)
+    return cmd_msg
+
+
+def create_cmd_downlink_logs_next_pass(log_level: int) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
+
+    :return: CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
+    """
+    if log_level > 255:
+        raise ValueError("Log level passed is too large (cannot be encoded into a c_uint8)")
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS
+    cmd_msg.downlinkLogsNextPass.logLevel = log_level
+    return cmd_msg
+
+
+def create_cmd_mirco_sd_format() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_MICRO_SD_FORMAT
+
+    :return: CmdMsg structure for CMD_MICRO_SD_FORMAT
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_MICRO_SD_FORMAT
+    return cmd_msg
+
+
+def create_cmd_ping() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_PING
+
+    :return: CmdMsg structure for CMD_PING
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_PING
+    return cmd_msg
+
+
+def create_cmd_downlink_telem() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_DOWNLINK_TELEM
+
+    :return: CmdMsg structure for CMD_DOWNLINK_TELEM
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_TELEM
+    return cmd_msg
+
+
+def create_cmd_uplink_disc() -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_UPLINK_DISC
+
+    :return: CmdMsg structure for CMD_UPLINK_DISC
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_UPLINK_DISC
+    return cmd_msg
+
+
 ## Class Implementation for CommandPackUnpack
 
 
