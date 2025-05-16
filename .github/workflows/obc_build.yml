@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bin-files
-          path: build/**/*.bin
+          path: build/*.bin
 
   crc:
     needs: build
@@ -72,9 +72,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: bin-files
-          path: binaries
+          path: .
 
       - name: Display CRCs
         run: |
           echo "CRC checksums:"
-          find binaries -name "*.bin" -exec cksum {} \;
+          find . -name "*.bin" -exec cksum {} \;
