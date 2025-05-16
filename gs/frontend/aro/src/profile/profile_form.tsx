@@ -1,18 +1,20 @@
 import { useState } from "react";
-import type { ProfileData } from "./profile_data.ts";
+import type { ProfileDataResponse } from "./profile_data.ts";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { updateProfile } from "./profile_api.ts";
 
-const ProfileForm = (props: ProfileData) => {
+const ProfileForm = (props: ProfileDataResponse) => {
   const [isEdit, setIsEdit] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ProfileData>();
+  } = useForm<ProfileDataResponse>();
 
   // TODO: Submit form to backend
-  const onSubmit: SubmitHandler<ProfileData> = (data: ProfileData) => {
+  const onSubmit: SubmitHandler<ProfileDataResponse> = (
+    data: ProfileDataResponse,
+  ) => {
     console.log(data);
     setIsEdit(false);
     try {
@@ -26,44 +28,50 @@ const ProfileForm = (props: ProfileData) => {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <label>Name:</label>
+        <label>First Name:</label>
         <input
           type="text"
-          defaultValue={props.name}
-          {...register("name", { required: true })}
+          defaultValue={props.data.first_name}
+          {...register("data.first_name", { required: true })}
           readOnly={!isEdit}
         />
-        {errors.name && <span>Name is required</span>}
+        {errors.data?.first_name && <span>Name is required</span>}
+
+        <label>Last Name:</label>
+        <input
+          type="text"
+          defaultValue={props.data.last_name}
+          {...register("data.last_name")}
+          readOnly={!isEdit}
+        />
 
         <label>Email:</label>
         <input
           type="text"
-          defaultValue={props.email}
-          {...register("email", { required: true })}
-          readOnly={!isEdit}
+          defaultValue={props.data.email}
+          readOnly={true}
         />
-        {errors.email && <span>Email is required</span>}
-
         <label>Phone:</label>
+
         <input
           type="text"
-          defaultValue={props.phone}
-          {...register("phone", { required: true, maxLength: 10 })}
+          defaultValue={props.data.phone_number}
+          {...register("data.phone_number", { required: true, maxLength: 10 })}
           readOnly={!isEdit}
         />
-        {errors.phone && <span>Phone is required</span>}
+        {errors.data?.phone_number && <span>Phone is required</span>}
 
         <label>Call Sign:</label>
         <input
           type="text"
-          defaultValue={props.call_sign}
-          {...register("call_sign", {
+          defaultValue={props.data.call_sign}
+          {...register("data.call_sign", {
             required: true,
             pattern: /^[A-Za-z0-9]{5,6}$/,
           })}
           readOnly={!isEdit}
         />
-        {errors.call_sign && (
+        {errors.data?.call_sign && (
           <span>
             Call sign must be 5-6 characters long and contain only letters and
             numbers
@@ -74,7 +82,7 @@ const ProfileForm = (props: ProfileData) => {
           Submit
         </button>
       </form>
-      <button hidden={isEdit} onClick={() => setIsEdit(true)}>
+      <button type="button" hidden={isEdit} onClick={() => setIsEdit(true)}>
         {"Edit"}
       </button>
     </>
