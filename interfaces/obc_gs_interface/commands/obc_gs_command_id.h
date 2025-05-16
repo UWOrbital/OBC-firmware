@@ -29,7 +29,7 @@ typedef enum {
 
 /* Used to indicate that the command is invalid.
    It should not have an unpack function. */
-
+// NOTE: Update the python versions as well when commands are added
 typedef enum {
   CMD_END_OF_FRAME = 0x00,
   CMD_EXEC_OBC_RESET,

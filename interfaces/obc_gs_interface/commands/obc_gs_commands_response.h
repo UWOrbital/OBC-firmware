@@ -28,6 +28,7 @@ typedef struct {
   uint32_t data2;
 } obc_cmd_reset_response_t;  // This is only a sample response. Implement an actual one
 
+// NOTE: Update python error codes as well when these are updated
 typedef enum { CMD_RESPONSE_SUCCESS = 0x0, CMD_RESPONSE_ERROR } cmd_response_error_code_t;
 
 typedef struct {

@@ -1,12 +1,8 @@
-from ctypes import CDLL, POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint32, pointer
+from ctypes import POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint32, pointer
 from enum import IntEnum
-from pathlib import Path
 from typing import Final
 
-# The shared object file we are using the access the c functions via ctypes
-path = (Path(__file__).parent / "../../../build_gs/interfaces/libobc-gs-interface.so").resolve()
-pack_unpack = CDLL(str(path))
-
+from interfaces.obc_gs_interface import interface
 
 ## Ctypes Declerations for CommandPackUnpack
 
@@ -45,11 +41,18 @@ class CmdMsg(Structure):
     _fields_ = [("u", _U), ("timestamp", c_uint32), ("isTimeTagged", c_bool), ("id", c_uint)]
 
 
-pack_unpack.unpackCmdMsg.argtypes = (POINTER(c_uint8 * 16), POINTER(c_uint32), POINTER(CmdMsg))
-pack_unpack.unpackCmdMsg.restype = c_uint
+_MAX_CMD_MSG_SIZE: Final[int] = 16
 
-pack_unpack.packCmdMsg.argtypes = (POINTER(c_uint8 * 16), POINTER(c_uint32), POINTER(CmdMsg), POINTER(c_uint8))
-pack_unpack.packCmdMsg.restype = c_uint
+interface.unpackCmdMsg.argtypes = (POINTER(c_uint8 * _MAX_CMD_MSG_SIZE), POINTER(c_uint32), POINTER(CmdMsg))
+interface.unpackCmdMsg.restype = c_uint
+
+interface.packCmdMsg.argtypes = (
+    POINTER(c_uint8 * _MAX_CMD_MSG_SIZE),
+    POINTER(c_uint32),
+    POINTER(CmdMsg),
+    POINTER(c_uint8),
+)
+interface.packCmdMsg.restype = c_uint
 
 
 ## Ctypes Declerations for CommandResponsePackUnpack
@@ -87,16 +90,20 @@ class CmdUnpackedReponse(Structure):
     _fields_ = [("errCode", c_uint), ("cmdId", c_uint), ("u", _UR)]
 
 
-pack_unpack.packCommandResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * 16))
-pack_unpack.packCommandResponse.restype = c_uint
+_MAX_REPONSE_PACKED_SIZE: Final[int] = 16
 
-pack_unpack.unpackCommandResponse.argtypes = (POINTER(c_uint8 * 16), POINTER(CmdUnpackedReponse))
-pack_unpack.unpackCommandResponse.restype = c_uint
+interface.packCommandResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * _MAX_REPONSE_PACKED_SIZE))
+interface.packCommandResponse.restype = c_uint
+
+interface.unpackCommandResponse.argtypes = (POINTER(c_uint8 * _MAX_REPONSE_PACKED_SIZE), POINTER(CmdUnpackedReponse))
+interface.unpackCommandResponse.restype = c_uint
 
 
 ## Enum Declerations
+# NOTE: Update these files accordingly when the C Enums are updated
 
 
+# Path to File: interfaces/obc_gs_interface/commands/obc_gs_command_id.h
 class CmdCallbackId(IntEnum):
     """
     Enums corresponding to the C implementation of cmd_callback_id_t
@@ -113,6 +120,7 @@ class CmdCallbackId(IntEnum):
     NUM_CMD_CALLBACKS = 8
 
 
+# Path to File: interfaces/obc_gs_interface/commands/obc_gs_commands_response.h
 class CmdResponseErrorCode(IntEnum):
     """
     Enums corresponding to the C implementation of the cmd_response_error_code_t
@@ -125,7 +133,6 @@ class CmdResponseErrorCode(IntEnum):
 ## Class Implementation for CommandPackUnpack
 
 
-_MAX_CMD_MSG_SIZE: Final[int] = 16
 _PACK_OFFSET_INITIAL: Final[int] = 0
 _UNPACK_OFFSET_INITIAL: Final[int] = 0
 _NUM_PACKED_INITIAL: Final[int] = 0
@@ -141,7 +148,7 @@ def pack_command(cmd_msg: CmdMsg) -> bytes:
     :return: Bytes of the packed message
     """
     buffer = (c_uint8 * _MAX_CMD_MSG_SIZE)(*([0] * 16))
-    res = pack_unpack.packCmdMsg(
+    res = interface.packCmdMsg(
         pointer(buffer),
         pointer(c_uint32(_PACK_OFFSET_INITIAL)),
         pointer(cmd_msg),
@@ -171,7 +178,7 @@ def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
     buff = (c_uint8 * _MAX_CMD_MSG_SIZE)(*buffer_elements)
     cmd_msg = CmdMsg()
 
-    res = pack_unpack.unpackCmdMsg(pointer(buff), pointer(c_uint32(_UNPACK_OFFSET_INITIAL)), pointer(cmd_msg))
+    res = interface.unpackCmdMsg(pointer(buff), pointer(c_uint32(_UNPACK_OFFSET_INITIAL)), pointer(cmd_msg))
 
     if res != 0:
         raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
@@ -182,9 +189,6 @@ def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
 ## Class implementation for CommandReponsePackUnpack
 
 
-_MAX_REPONSE_PACKED_SIZE: Final[int] = 16
-
-
 def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
     """
     This takes a command message reponse to pack it (see the C implementation for more on how that's exactly done)
@@ -193,7 +197,7 @@ def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
     :return: Bytes of the packed commmand response
     """
     buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*([0] * 16))
-    res = pack_unpack.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
+    res = interface.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
 
     if res != 0:
         raise ValueError("Could not pack command response. OBC Error Code: " + str(res))
@@ -216,7 +220,7 @@ def unpack_command_response(cmd_msg_packed: bytes) -> CmdUnpackedReponse:
     buff = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*buffer_elements)
     cmd_msg_response = CmdUnpackedReponse()
 
-    res = pack_unpack.unpackCommandResponse(pointer(buff), pointer(cmd_msg_response))
+    res = interface.unpackCommandResponse(pointer(buff), pointer(cmd_msg_response))
 
     if res != 0:
         raise ValueError("Could not unpack command response. OBC Error Code: " + str(res))
