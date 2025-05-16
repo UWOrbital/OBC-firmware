@@ -58,23 +58,23 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=1
           make
 
-      - name: Upload binaries
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: bin-files
-          path: build/*.bin
+          name: bin-file
+          path: build/OBC-firmware.bin
 
   crc:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download binaries
+      - name: Download binary
         uses: actions/download-artifact@v4
         with:
-          name: bin-files
+          name: bin-file
           path: .
 
-      - name: Display CRCs
+      - name: Display CRC
         run: |
-          echo "CRC checksums:"
-          find . -name "*.bin" -exec cksum {} \;
+          echo "CRC checksum:"
+          cksum OBC-firmware.bin
