@@ -9,3 +9,4 @@ class AROUserResponse(BaseModel):
     """
 
     data: AROUsers
+    editable_fields: list[str]

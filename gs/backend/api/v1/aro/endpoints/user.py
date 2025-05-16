@@ -12,8 +12,20 @@ from gs.backend.exceptions.exceptions import InvalidArgumentError, InvalidStateE
 aro_user_router = APIRouter(tags=["ARO", "User Information"])
 
 
+def get_aro_user_editable_fields() -> list[str]:
+    """
+    @brief Used to determine which field can be edited by the update endpoint
+    @return the list of fields of the AROUsers table
+    """
+    return ["first_name", "last_name", "call_sign", "phone_number"]
+
+
 @aro_user_router.post("/")
-def create_user(payload: UserCreateRequest, db_session: Session = Depends(get_db_session)) -> AROUserResponse:
+def create_user(
+    payload: UserCreateRequest,
+    editable_fields: list[str] = Depends(get_aro_user_editable_fields),
+    db_session: Session = Depends(get_db_session),
+) -> AROUserResponse:
     """
     Creates a user based on the data.
     Checks makes sure the email, phone number and callsign are unique before creating a user.
@@ -34,11 +46,15 @@ def create_user(payload: UserCreateRequest, db_session: Session = Depends(get_db
     db_session.add(user_model)
     db_session.commit()
     db_session.refresh(user_model)
-    return AROUserResponse(data=user_model)
+    return AROUserResponse(data=user_model, editable_fields=editable_fields)
 
 
 @aro_user_router.get("/")
-def get_current_user(request: Request, db_session: Session = Depends(get_db_session)) -> AROUserResponse:
+def get_current_user(
+    request: Request,
+    editable_fields: list[str] = Depends(get_aro_user_editable_fields),
+    db_session: Session = Depends(get_db_session),
+) -> AROUserResponse:
     """
     @brief Gets the current user information for the logged in user.
 
@@ -59,12 +75,15 @@ def get_current_user(request: Request, db_session: Session = Depends(get_db_sess
         raise InvalidStateError(f"Multiple users match the given id={user_id}")
 
     current_user = users[0]
-    return AROUserResponse(data=current_user)
+    return AROUserResponse(data=current_user, editable_fields=editable_fields)
 
 
 @aro_user_router.put("/")
 def update_current_user(
-    payload: AROUserUpdateRequest, request: Request, db_session: Session = Depends(get_db_session)
+    payload: AROUserUpdateRequest,
+    request: Request,
+    editable_fields: list[str] = Depends(get_aro_user_editable_fields),
+    db_session: Session = Depends(get_db_session),
 ) -> AROUserResponse:
     """
     @brief Updates the current user info based on the payload
@@ -95,4 +114,4 @@ def update_current_user(
     db_session.add(current_user)
     db_session.commit()
     db_session.refresh(current_user)
-    return AROUserResponse(data=current_user)
+    return AROUserResponse(data=current_user, editable_fields=editable_fields)
