@@ -108,8 +108,7 @@ def define_parser() -> argparse.ArgumentParser:
         "--step-size",
         type=str,
         default=DEFAULT_STEP_SIZE,
-        help=f"Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 100). "
-        f"Default: {DEFAULT_STEP_SIZE}",
+        help=f"Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 100). Default: {DEFAULT_STEP_SIZE}",
     )
     parser.add_argument(
         "-t",
@@ -140,8 +139,7 @@ def define_parser() -> argparse.ArgumentParser:
         "--exclude",
         choices=["first", "last", "both", "none"],
         default=DEFAULT_EXCLUDE,
-        help=f"Exclude the first, last, both or none of the values from the output file. "
-        f"Default: {DEFAULT_EXCLUDE}",
+        help=f"Exclude the first, last, both or none of the values from the output file. Default: {DEFAULT_EXCLUDE}",
     )
     parser.add_argument(
         "-l",
@@ -211,7 +209,7 @@ def convert_date_to_jd(time: str) -> float:
 
     timescale = load.timescale()
 
-    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.timezone.utc)
+    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.UTC)
     sky_date = timescale.from_datetime(base_date)
 
     return float(sky_date.ut1)
