@@ -10,21 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Install GNU cross compilation
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc-multilib g++-multilib
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Test
-    - name: Build
-      run: |
-        cd build
-        cmake --build .
-    - name: Run Tests
-      run: |
-        cd build
-        ctest --verbose
+      - uses: actions/checkout@v3
+      - name: Install GNU cross compilation
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc-multilib g++-multilib
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Test
+      - name: Build
+        run: |
+          cd build
+          cmake --build .
+      - name: Run Tests
+        run: |
+          cd build
+          ctest --verbose
