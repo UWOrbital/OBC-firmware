@@ -30,6 +30,8 @@
 #include <redcoreapi.h>
 #include <redcore.h>
 #include <redbdev.h>
+#include "obc_print.h"
+#include <stdio.h>
 
 #if (REDCONF_READ_ONLY == 0) && (REDCONF_API_POSIX == 1)
 static REDSTATUS CoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, uint32_t *pulInode);
@@ -605,6 +607,7 @@ REDSTATUS RedCoreTransMaskGet(uint32_t *pulEventMask) {
 */
 REDSTATUS RedCoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, uint32_t *pulInode) {
   REDSTATUS ret;
+  char printBuff[128];
 
   if (!gpRedVolume->fMounted) {
     ret = -RED_EINVAL;
@@ -612,17 +615,25 @@ REDSTATUS RedCoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, 
     ret = -RED_EROFS;
   } else {
     ret = CoreCreate(ulPInode, pszName, uMode, pulInode);
+    sprintf(printBuff, "CoreCreate #1 ret: %ld\n\r", ret);
+    sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
     if (ret == -RED_ENOSPC) {
       ret = CoreFull();
+      sprintf(printBuff, "CoreFull ret: %ld\n\r", ret);
+      sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
       if (ret == 0) {
         ret = CoreCreate(ulPInode, pszName, uMode, pulInode);
+        sprintf(printBuff, "CoreCreate #2 ret: %ld\n\r", ret);
+        sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
       }
     }
 
     if (ret == 0) {
       ret = CoreAutoTransact(RED_S_ISDIR(uMode) ? RED_TRANSACT_MKDIR : RED_TRANSACT_CREAT);
+      sprintf(printBuff, "CoreAutoTransact ret: %ld\n\r", ret);
+      sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
     }
   }
 
@@ -662,6 +673,7 @@ REDSTATUS RedCoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, 
 */
 static REDSTATUS CoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, uint32_t *pulInode) {
   REDSTATUS ret;
+  char printBuff[128];
 
   if (pulInode == NULL) {
     ret = -RED_EINVAL;
@@ -674,12 +686,16 @@ static REDSTATUS CoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMo
 
     pino.ulInode = ulPInode;
     ret = RedInodeMount(&pino, FTYPE_DIR, false);
+    sprintf(printBuff, "RedInodeMount ret: %ld\n\r", ret);
+    sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
     if (ret == 0) {
       CINODE ino;
 
       ino.ulInode = INODE_INVALID;
       ret = RedInodeCreate(&ino, &pino, uMode);
+      sprintf(printBuff, "RedInodeCreate ret: %ld\n\r", ret);
+      sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
       if (ret == 0) {
         ret = RedInodeBranch(&pino);

@@ -110,3 +110,10 @@ stack_size = 1024
 priority = "3U"
 function_stem = "GncMgr"
 config_id_stem = "GNC_MGR"
+
+[[tasks]]
+task_name = "framsdc_test"
+stack_size = 512
+priority = "1U"
+function_stem = "SdcFramIntegTest"
+config_id_stem = "SDC_FRAM_TEST"

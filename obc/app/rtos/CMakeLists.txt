@@ -6,6 +6,7 @@ set(INCLUDES
 
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_scheduler_config.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/framSdcIntegTest.c
 )
 
 target_include_directories(${OUT_FILE_NAME} PUBLIC ${INCLUDES})

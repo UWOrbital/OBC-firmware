@@ -1,0 +1,359 @@
+diff --git a/obc/app/drivers/sdcard/sdc_bdev.c b/obc/app/drivers/sdcard/sdc_bdev.c
+index 787e00c9..52ab4561 100644
+--- a/obc/app/drivers/sdcard/sdc_bdev.c
++++ b/obc/app/drivers/sdcard/sdc_bdev.c
+@@ -15,6 +15,9 @@
+ #include "obc_assert.h"
+ #include "obc_board_config.h"
+
++#include "obc_print.h"
++#include <stdio.h>
++
+ /* This driver logs errors. If the logging output is set to the
+    microSD card, this driver will log errors to itself, which
+    will cause an infinite loop. We can just disable logging from
+@@ -183,6 +186,8 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
+   }
+
+   /* If not valid data token, return with error */
++  if (token != SDC_CMD17_DATA_TOKEN) sciPrintText((unsigned char*)"Invalid token in rcvDataBlock\n\r", strlen("Invalid token in rcvDataBlock\n\r"), 0xFFFF);
++
+   if (token != SDC_CMD17_DATA_TOKEN) return false;
+
+   /* Receive the data block into buffer */
+@@ -280,7 +285,7 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
+     if (!(res & SDC_CMD_RESP_MASK)) break;
+     vTaskDelay(SDC_DELAY_1MS);
+   }
+-
++  // if (!(res & SDC_CMD_RESP_MASK)) sciPrintText((unsigned char*)"Failed to receive cmd response from SD in sendCMD\n\r", strlen("Failed to receive cmd response from SD in sendCMD\n\r"), 0xFFFF);
+   return res;
+ }
+
+@@ -432,7 +437,9 @@ DSTATUS disk_initialize(uint8_t drv) {
+
+   if (ty) {
+     stat &= ~STA_NOINIT;  // Clear STA_NOINIT
++    sciPrintText((unsigned char*)"DISK INITIALIZED!\n\r", strlen("DISK INITIALIZED!\n\r"), 0xFFFF);
+   } else {
++    sciPrintText((unsigned char*)"DISK INITIALIZATION FAILED!\n\r", strlen("DISK INITIALIZATION FAILED\n\r"), 0xFFFF);
+     turnOffSDC();  // Initialization failed
+   }
+
+@@ -459,6 +466,7 @@ DSTATUS disk_status(uint8_t pdrv) {
+  */
+ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) {
+   obc_error_code_t errCode;
++  char printBuff[128];
+
+   if (pdrv || !count) return RES_PARERR;
+   if (stat & STA_NOINIT) return RES_NOTRDY;
+@@ -478,12 +486,18 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count)
+
+   if (count == 1) {
+     /* Single block read */
++    sciPrintText((unsigned char*)"Single block read\n\r", strlen("Single block read\n\r"), 0xFFFF);
+     if ((sendCMD(SDC_CMD17, sector) == 0) && rcvDataBlock(buff, SD_SECTOR_SIZE)) count = 0;
+   } else {
+     /* Multiple block read */
++    sciPrintText((unsigned char*)"Multiple block read\n\r", strlen("Single block read\n\r"), 0xFFFF);
+     if (sendCMD(SDC_CMD18, sector) == 0) {
++      uint32_t blksRead = 0;
+       do {
+         if (!rcvDataBlock(buff, SD_SECTOR_SIZE)) break;
++        blksRead++;
++        sprintf(printBuff, "blks read: %ld\n\r", blksRead);
++        sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+         buff += SD_SECTOR_SIZE;
+       } while (--count);
+       stopTransmission();
+@@ -497,6 +511,9 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count)
+   }
+   LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_REG));
+
++  sprintf(printBuff, "blocks left to read: %ld (Should be 0 if successful)\n\r", count);
++  sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
++
+   return count ? RES_ERROR : RES_OK;
+ }
+
+diff --git a/obc/app/modules/state_mgr/state_mgr.c b/obc/app/modules/state_mgr/state_mgr.c
+index c2667d9b..3a5296ce 100644
+--- a/obc/app/modules/state_mgr/state_mgr.c
++++ b/obc/app/modules/state_mgr/state_mgr.c
+@@ -25,6 +25,7 @@
+
+ extern void *__stack_chk_guard;
+ #define STACK_CANARY_BYTES 4
++#define CONFIG_SDCARD
+
+ /* Supervisor queue config */
+ #define STATE_MGR_QUEUE_LENGTH 10U
+diff --git a/obc/app/modules/telemetry_mgr/telemetry_manager.c b/obc/app/modules/telemetry_mgr/telemetry_manager.c
+index b23350ea..2a1c6bf3 100644
+--- a/obc/app/modules/telemetry_mgr/telemetry_manager.c
++++ b/obc/app/modules/telemetry_mgr/telemetry_manager.c
+@@ -27,6 +27,7 @@
+ #define TELEMETRY_DATA_QUEUE_WAIT_PERIOD pdMS_TO_TICKS(1000)
+
+ #define STARTING_TELEMETRY_BATCH_ID 0UL
++#define CONFIG_SDCARD
+
+ #ifdef CONFIG_SDCARD
+ /**
+diff --git a/obc/app/reliance_edge/core/driver/blockio.c b/obc/app/reliance_edge/core/driver/blockio.c
+index 66d32b75..28fde15f 100644
+--- a/obc/app/reliance_edge/core/driver/blockio.c
++++ b/obc/app/reliance_edge/core/driver/blockio.c
+@@ -39,6 +39,8 @@
+ #include <redfs.h>
+ #include <redcore.h>
+ #include <redbdev.h>
++#include "obc_print.h"
++#include <stdio.h>
+
+ /** @brief Read a range of logical blocks.
+
+diff --git a/obc/app/reliance_edge/core/driver/buffer.c b/obc/app/reliance_edge/core/driver/buffer.c
+index 85516f59..0a0aa8f2 100644
+--- a/obc/app/reliance_edge/core/driver/buffer.c
++++ b/obc/app/reliance_edge/core/driver/buffer.c
+@@ -36,6 +36,8 @@
+ #include <redfs.h>
+ #include <redcore.h>
+ #include "redbufferpriv.h"
++#include "obc_print.h"
++#include <stdio.h>
+
+ #if BUFFER_MODULE == BM_SIMPLE
+
+@@ -141,6 +143,7 @@ void RedBufferInit(void) {
+ */
+ REDSTATUS RedBufferGet(uint32_t ulBlock, uint16_t uFlags, void **ppBuffer) {
+   REDSTATUS ret = 0;
++  char printBuff[128];
+   uint8_t bIdx;
+
+   if ((ulBlock >= gpRedVolume->ulBlockCount) || ((uFlags & BFLAG_MASK) != uFlags) ||
+@@ -194,6 +197,8 @@ REDSTATUS RedBufferGet(uint32_t ulBlock, uint16_t uFlags, void **ppBuffer) {
+           ret = -RED_EFUBAR;
+ #else
+           ret = BufferWrite(bIdx);
++          sprintf(printBuff, "BufferWrite ret: %ld\n\r", ret);
++          sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+ #endif
+         }
+       } else {
+@@ -220,6 +225,8 @@ REDSTATUS RedBufferGet(uint32_t ulBlock, uint16_t uFlags, void **ppBuffer) {
+           pHead->ulBlock = BBLK_INVALID;
+
+           ret = RedIoRead(gbRedVolNum, ulBlock, 1U, pbBuffer);
++          sprintf(printBuff, "RedIoRead ret: %ld\n\r", ret);
++          sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+
+           if ((ret == 0) && ((uFlags & BFLAG_META) != 0U)) {
+             if (!RedBufferIsValid(pbBuffer, uFlags)) {
+diff --git a/obc/app/reliance_edge/core/driver/core.c b/obc/app/reliance_edge/core/driver/core.c
+index 7b19e953..540f9255 100644
+--- a/obc/app/reliance_edge/core/driver/core.c
++++ b/obc/app/reliance_edge/core/driver/core.c
+@@ -30,6 +30,8 @@
+ #include <redcoreapi.h>
+ #include <redcore.h>
+ #include <redbdev.h>
++#include "obc_print.h"
++#include <stdio.h>
+
+ #if (REDCONF_READ_ONLY == 0) && (REDCONF_API_POSIX == 1)
+ static REDSTATUS CoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, uint32_t *pulInode);
+@@ -605,6 +607,8 @@ REDSTATUS RedCoreTransMaskGet(uint32_t *pulEventMask) {
+ */
+ REDSTATUS RedCoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, uint32_t *pulInode) {
+   REDSTATUS ret;
++  char printBuff[128];
++
+
+   if (!gpRedVolume->fMounted) {
+     ret = -RED_EINVAL;
+@@ -612,17 +616,25 @@ REDSTATUS RedCoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode,
+     ret = -RED_EROFS;
+   } else {
+     ret = CoreCreate(ulPInode, pszName, uMode, pulInode);
++    sprintf(printBuff, "CoreCreate #1 ret: %ld\n\r", ret);
++    sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+
+     if (ret == -RED_ENOSPC) {
+       ret = CoreFull();
++      sprintf(printBuff, "CoreFull ret: %ld\n\r", ret);
++      sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+
+       if (ret == 0) {
+         ret = CoreCreate(ulPInode, pszName, uMode, pulInode);
++        sprintf(printBuff, "CoreCreate #2 ret: %ld\n\r", ret);
++        sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+       }
+     }
+
+     if (ret == 0) {
+       ret = CoreAutoTransact(RED_S_ISDIR(uMode) ? RED_TRANSACT_MKDIR : RED_TRANSACT_CREAT);
++      sprintf(printBuff, "CoreAutoTransact ret: %ld\n\r", ret);
++      sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+     }
+   }
+
+@@ -662,6 +674,7 @@ REDSTATUS RedCoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode,
+ */
+ static REDSTATUS CoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMode, uint32_t *pulInode) {
+   REDSTATUS ret;
++  char printBuff[128];
+
+   if (pulInode == NULL) {
+     ret = -RED_EINVAL;
+@@ -674,12 +687,16 @@ static REDSTATUS CoreCreate(uint32_t ulPInode, const char *pszName, uint16_t uMo
+
+     pino.ulInode = ulPInode;
+     ret = RedInodeMount(&pino, FTYPE_DIR, false);
++    sprintf(printBuff, "RedInodeMount ret: %ld\n\r", ret);
++    sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+
+     if (ret == 0) {
+       CINODE ino;
+
+       ino.ulInode = INODE_INVALID;
+       ret = RedInodeCreate(&ino, &pino, uMode);
++      sprintf(printBuff, "RedInodeCreate ret: %ld\n\r", ret);
++      sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+
+       if (ret == 0) {
+         ret = RedInodeBranch(&pino);
+diff --git a/obc/app/reliance_edge/core/driver/inode.c b/obc/app/reliance_edge/core/driver/inode.c
+index 543181a6..e94dc47e 100644
+--- a/obc/app/reliance_edge/core/driver/inode.c
++++ b/obc/app/reliance_edge/core/driver/inode.c
+@@ -28,6 +28,8 @@
+ */
+ #include <redfs.h>
+ #include <redcore.h>
++#include "obc_print.h"
++#include <stdio.h>
+
+ #if DELETE_SUPPORTED
+ static REDSTATUS InodeDelete(CINODE *pInode);
+@@ -82,6 +84,7 @@ static REDSTATUS RedInodeBitGet(uint8_t bMR, uint32_t ulInode, uint8_t bWhich, b
+ */
+ REDSTATUS RedInodeMount(CINODE *pInode, FTYPE type, bool fBranch) {
+   REDSTATUS ret = 0;
++  char printBuff[128];
+
+   if (pInode == NULL) {
+     ret = -RED_EINVAL;
+@@ -108,9 +111,13 @@ REDSTATUS RedInodeMount(CINODE *pInode, FTYPE type, bool fBranch) {
+     pInode->ulInode = ulInode;
+
+     ret = InodeGetCurrentCopy(pInode->ulInode, &bWhich);
++    sprintf(printBuff, "InodeGetCurrentCopy ret: %ld\n\r", ret);
++    sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+
+     if (ret == 0) {
+       ret = RedBufferGet(InodeBlock(pInode->ulInode, bWhich), BFLAG_META_INODE, (void **)&pInode->pInodeBuf);
++      sprintf(printBuff, "RedBufferGets ret: %ld\n\r", ret);
++      sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+     }
+
+ #if REDCONF_READ_ONLY == 0
+diff --git a/obc/app/reliance_edge/os/freertos/services/osbdev_fatfs.h b/obc/app/reliance_edge/os/freertos/services/osbdev_fatfs.h
+index eec0f59a..18757bf4 100644
+--- a/obc/app/reliance_edge/os/freertos/services/osbdev_fatfs.h
++++ b/obc/app/reliance_edge/os/freertos/services/osbdev_fatfs.h
+@@ -31,6 +31,8 @@
+
+ #include <os_task.h>
+ #include <sdc_diskio.h>
++#include "obc_print.h"
++#include <stdio.h>
+
+ /*  disk_read() and disk_write() use an unsigned 8-bit value to specify the
+     sector count, so no transfer can be larger than 255 sectors.
+@@ -155,6 +157,7 @@ static REDSTATUS DiskRead(uint8_t bVolNum, uint64_t ullSectorStart, uint32_t ulS
+                        (uint8_t)ulTransfer);
+     if (result != RES_OK) {
+       ret = -RED_EIO;
++      sciPrintText((unsigned char*)"disk_read failed!\n\r", strlen("disk_read failed!\n\r"), 0xFFFF);
+       break;
+     }
+
+diff --git a/obc/app/reliance_edge/posix/posix.c b/obc/app/reliance_edge/posix/posix.c
+index e6a79169..d82320cb 100644
+--- a/obc/app/reliance_edge/posix/posix.c
++++ b/obc/app/reliance_edge/posix/posix.c
+@@ -27,6 +27,8 @@
+     @brief Implementation of the Reliance Edge POSIX-like API.
+ */
+ #include <redfs.h>
++#include "obc_print.h"
++#include <stdio.h>
+
+ #if REDCONF_API_POSIX == 1
+
+@@ -2546,18 +2548,27 @@ int32_t red_mkdir2(const char *pszPath, uint16_t uMode) { return red_mkdirat(RED
+ */
+ int32_t red_mkdirat(int32_t iDirFildes, const char *pszPath, uint16_t uMode) {
+   REDSTATUS ret;
++  char printBuff[128];
+
+   ret = PosixEnter();
++  if (ret == -RED_EINVAL){
++    sciPrintText((unsigned char*)"Invalid Argument\n\r", strlen("Invalid Argument\n\r"), 0xFFFF);
++  }
+   if (ret == 0) {
+     uint32_t ulDirInode;
+     const char *pszLocalPath;
+
+     ret = PathStartingPoint(iDirFildes, pszPath, NULL, &ulDirInode, &pszLocalPath);
++    sprintf(printBuff, "PathStartingPoint ret: %ld\n\r", ret);
++    sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
++
+     if (ret == 0) {
+       const char *pszName;
+       uint32_t ulPInode;
+
+       ret = RedPathToName(ulDirInode, pszLocalPath, -RED_EEXIST, &ulPInode, &pszName);
++      sprintf(printBuff, "RedPathToName ret: %ld\n\r", ret);
++      sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+       if (ret == 0) {
+         uint32_t ulInode;
+         uint16_t uMkdirMode;
+@@ -2579,6 +2590,8 @@ int32_t red_mkdirat(int32_t iDirFildes, const char *pszPath, uint16_t uMode) {
+         } else
+ #endif
+         { ret = RedCoreCreate(ulPInode, pszName, RED_S_IFDIR | uMkdirMode, &ulInode); }
++          sprintf(printBuff, "RedCoreCreate ret: %ld\n\r", ret);
++          sciPrintText((unsigned char*)printBuff, strlen(printBuff), 0xFFFF);
+       }
+     }
+
+diff --git a/obc/app/sys/fs_wrapper/obc_reliance_fs.c b/obc/app/sys/fs_wrapper/obc_reliance_fs.c
+index 0eeb53bb..c52efd23 100644
+--- a/obc/app/sys/fs_wrapper/obc_reliance_fs.c
++++ b/obc/app/sys/fs_wrapper/obc_reliance_fs.c
+@@ -35,7 +35,7 @@ obc_error_code_t mkDir(const char *dirPath) {
+       return OBC_ERR_CODE_SUCCESS;
+     }
+
+-    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
++    LOG_ERROR_CODE(red_errno);
+     return OBC_ERR_CODE_MKDIR_FAILED;
+   }
+
+diff --git a/scripts/example-build.sh b/scripts/example-build.sh
+old mode 100755
+new mode 100644
+diff --git a/scripts/gs-build.sh b/scripts/gs-build.sh
+old mode 100755
+new mode 100644
+diff --git a/scripts/obc-build.sh b/scripts/obc-build.sh
+old mode 100755
+new mode 100644
+diff --git a/scripts/test.sh b/scripts/test.sh
+old mode 100755
+new mode 100644

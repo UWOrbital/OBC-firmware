@@ -28,6 +28,8 @@
 */
 #include <redfs.h>
 #include <redcore.h>
+#include "obc_print.h"
+#include <stdio.h>
 
 #if DELETE_SUPPORTED
 static REDSTATUS InodeDelete(CINODE *pInode);
@@ -82,6 +84,7 @@ static REDSTATUS RedInodeBitGet(uint8_t bMR, uint32_t ulInode, uint8_t bWhich, b
 */
 REDSTATUS RedInodeMount(CINODE *pInode, FTYPE type, bool fBranch) {
   REDSTATUS ret = 0;
+  char printBuff[128];
 
   if (pInode == NULL) {
     ret = -RED_EINVAL;
@@ -108,9 +111,13 @@ REDSTATUS RedInodeMount(CINODE *pInode, FTYPE type, bool fBranch) {
     pInode->ulInode = ulInode;
 
     ret = InodeGetCurrentCopy(pInode->ulInode, &bWhich);
+    sprintf(printBuff, "InodeGetCurrentCopy ret: %ld\n\r", ret);
+    sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
     if (ret == 0) {
       ret = RedBufferGet(InodeBlock(pInode->ulInode, bWhich), BFLAG_META_INODE, (void **)&pInode->pInodeBuf);
+      sprintf(printBuff, "RedBufferGets ret: %ld\n\r", ret);
+      sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
     }
 
 #if REDCONF_READ_ONLY == 0

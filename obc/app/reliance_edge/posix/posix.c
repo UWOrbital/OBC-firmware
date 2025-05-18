@@ -27,6 +27,8 @@
     @brief Implementation of the Reliance Edge POSIX-like API.
 */
 #include <redfs.h>
+#include "obc_print.h"
+#include <stdio.h>
 
 #if REDCONF_API_POSIX == 1
 
@@ -2546,18 +2548,27 @@ int32_t red_mkdir2(const char *pszPath, uint16_t uMode) { return red_mkdirat(RED
 */
 int32_t red_mkdirat(int32_t iDirFildes, const char *pszPath, uint16_t uMode) {
   REDSTATUS ret;
+  char printBuff[128];
 
   ret = PosixEnter();
+  if (ret == -RED_EINVAL) {
+    sciPrintText((unsigned char *)"Invalid Argument\n\r", strlen("Invalid Argument\n\r"), 0xFFFF);
+  }
   if (ret == 0) {
     uint32_t ulDirInode;
     const char *pszLocalPath;
 
     ret = PathStartingPoint(iDirFildes, pszPath, NULL, &ulDirInode, &pszLocalPath);
+    sprintf(printBuff, "PathStartingPoint ret: %ld\n\r", ret);
+    sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
+
     if (ret == 0) {
       const char *pszName;
       uint32_t ulPInode;
 
       ret = RedPathToName(ulDirInode, pszLocalPath, -RED_EEXIST, &ulPInode, &pszName);
+      sprintf(printBuff, "RedPathToName ret: %ld\n\r", ret);
+      sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
       if (ret == 0) {
         uint32_t ulInode;
         uint16_t uMkdirMode;
@@ -2579,6 +2590,8 @@ int32_t red_mkdirat(int32_t iDirFildes, const char *pszPath, uint16_t uMode) {
         } else
 #endif
         { ret = RedCoreCreate(ulPInode, pszName, RED_S_IFDIR | uMkdirMode, &ulInode); }
+        sprintf(printBuff, "RedCoreCreate ret: %ld\n\r", ret);
+        sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
       }
     }
 

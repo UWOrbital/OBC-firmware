@@ -25,6 +25,9 @@
 
 extern void *__stack_chk_guard;
 #define STACK_CANARY_BYTES 4
+#define CONFIG_SDCARD
+#include "obc_print.h"
+#include <stdio.h>
 
 /* Supervisor queue config */
 #define STATE_MGR_QUEUE_LENGTH 10U
@@ -87,6 +90,7 @@ static inline void __attribute__((no_stack_protector)) construct_stk_chk_guard()
 
 void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
+  // char testDir[] = "/testDir/";
 
   ASSERT(stateMgrQueueHandle != NULL);
 
@@ -134,6 +138,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
+  obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_SDC_FRAM_TEST);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerInitTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif
@@ -151,6 +156,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_PAYLOAD_MGR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_HEALTH_COLLECTOR);
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_GNC_MGR);
+  obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_SDC_FRAM_TEST);
 #if ENABLE_TASK_STATS_COLLECTOR == 1
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_STATS_COLLECTOR);
 #endif

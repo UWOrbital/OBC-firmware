@@ -43,6 +43,7 @@ extern void obcTaskInitHealthCollector(void);
 extern void obcTaskInitStatsCollector(void);
 extern void obcTaskInitLogger(void);
 extern void obcTaskInitGncMgr(void);
+extern void obcTaskInitSdcFramIntegTest(void);
 
 /* TASK FUNCTION PROTOTYPES */
 extern void obcTaskFunctionStateMgr(void *params);
@@ -60,6 +61,7 @@ extern void obcTaskFunctionHealthCollector(void *params);
 extern void obcTaskFunctionStatsCollector(void *params);
 extern void obcTaskFunctionLogger(void *params);
 extern void obcTaskFunctionGncMgr(void *params);
+extern void obcTaskFunctionSdcFramIntegTest(void *params);
 
 /* PRIVATE FUNCTION PROTOTYPES */
 static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID);
@@ -97,6 +99,8 @@ static StackType_t obcTaskStackLogger[512U];
 static StaticTask_t obcTaskBufferLogger;
 static StackType_t obcTaskStackGncMgr[1024U];
 static StaticTask_t obcTaskBufferGncMgr;
+static StackType_t obcTaskStackSdcFramIntegTest[512U];
+static StaticTask_t obcTaskBufferSdcFramIntegTest;
 
 static obc_scheduler_config_t obcSchedulerConfig[] = {
     [OBC_SCHEDULER_CONFIG_ID_STATE_MGR] =
@@ -250,6 +254,16 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .priority = 3U,
             .taskFunc = obcTaskFunctionGncMgr,
             .taskInit = obcTaskInitGncMgr,
+        },
+    [OBC_SCHEDULER_CONFIG_ID_SDC_FRAM_TEST] =
+        {
+            .taskName = "framsdc_test",
+            .taskStack = obcTaskStackSdcFramIntegTest,
+            .taskBuffer = &obcTaskBufferSdcFramIntegTest,
+            .stackSize = 512U,
+            .priority = 1U,
+            .taskFunc = obcTaskFunctionSdcFramIntegTest,
+            .taskInit = obcTaskInitSdcFramIntegTest,
         },
 };
 
