@@ -198,6 +198,7 @@ add_custom_command(
 		VERBATIM
 )
 
+
 add_custom_target(
 		OBC-firmware_crc_bin
 		ALL
