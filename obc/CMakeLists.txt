@@ -206,6 +206,7 @@ add_custom_target(
 
 
 
+
 # Bootloader
 target_link_options(OBC-bl.out PRIVATE
     -specs=nosys.specs
