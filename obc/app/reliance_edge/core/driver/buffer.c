@@ -36,8 +36,6 @@
 #include <redfs.h>
 #include <redcore.h>
 #include "redbufferpriv.h"
-#include "obc_print.h"
-#include <stdio.h>
 
 #if BUFFER_MODULE == BM_SIMPLE
 
@@ -143,7 +141,6 @@ void RedBufferInit(void) {
 */
 REDSTATUS RedBufferGet(uint32_t ulBlock, uint16_t uFlags, void **ppBuffer) {
   REDSTATUS ret = 0;
-  char printBuff[128];
   uint8_t bIdx;
 
   if ((ulBlock >= gpRedVolume->ulBlockCount) || ((uFlags & BFLAG_MASK) != uFlags) ||
@@ -197,8 +194,6 @@ REDSTATUS RedBufferGet(uint32_t ulBlock, uint16_t uFlags, void **ppBuffer) {
           ret = -RED_EFUBAR;
 #else
           ret = BufferWrite(bIdx);
-          sprintf(printBuff, "BufferWrite ret: %ld\n\r", ret);
-          sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 #endif
         }
       } else {
@@ -225,8 +220,6 @@ REDSTATUS RedBufferGet(uint32_t ulBlock, uint16_t uFlags, void **ppBuffer) {
           pHead->ulBlock = BBLK_INVALID;
 
           ret = RedIoRead(gbRedVolNum, ulBlock, 1U, pbBuffer);
-          sprintf(printBuff, "RedIoRead ret: %ld\n\r", ret);
-          sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
           if ((ret == 0) && ((uFlags & BFLAG_META) != 0U)) {
             if (!RedBufferIsValid(pbBuffer, uFlags)) {

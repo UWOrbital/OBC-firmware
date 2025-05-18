@@ -31,8 +31,6 @@
 
 #include <os_task.h>
 #include <sdc_diskio.h>
-#include "obc_print.h"
-#include <stdio.h>
 
 /*  disk_read() and disk_write() use an unsigned 8-bit value to specify the
     sector count, so no transfer can be larger than 255 sectors.
@@ -157,7 +155,6 @@ static REDSTATUS DiskRead(uint8_t bVolNum, uint64_t ullSectorStart, uint32_t ulS
                        (uint8_t)ulTransfer);
     if (result != RES_OK) {
       ret = -RED_EIO;
-      sciPrintText((unsigned char *)"disk_read failed!\n\r", strlen("disk_read failed!\n\r"), 0xFFFF);
       break;
     }
 

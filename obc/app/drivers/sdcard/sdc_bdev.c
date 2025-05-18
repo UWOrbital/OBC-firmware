@@ -15,9 +15,6 @@
 #include "obc_assert.h"
 #include "obc_board_config.h"
 
-#include "obc_print.h"
-#include <stdio.h>
-
 /* This driver logs errors. If the logging output is set to the
    microSD card, this driver will log errors to itself, which
    will cause an infinite loop. We can just disable logging from
@@ -186,10 +183,6 @@ static bool rcvDataBlock(uint8_t *buff, uint32_t btr) {
   }
 
   /* If not valid data token, return with error */
-  if (token != SDC_CMD17_DATA_TOKEN)
-    sciPrintText((unsigned char *)"Invalid token in rcvDataBlock\n\r", strlen("Invalid token in rcvDataBlock\n\r"),
-                 0xFFFF);
-
   if (token != SDC_CMD17_DATA_TOKEN) return false;
 
   /* Receive the data block into buffer */
@@ -287,8 +280,7 @@ static uint8_t sendCMD(uint8_t cmd, uint32_t arg) {
     if (!(res & SDC_CMD_RESP_MASK)) break;
     vTaskDelay(SDC_DELAY_1MS);
   }
-  // if (!(res & SDC_CMD_RESP_MASK)) sciPrintText((unsigned char*)"Failed to receive cmd response from SD in
-  // sendCMD\n\r", strlen("Failed to receive cmd response from SD in sendCMD\n\r"), 0xFFFF);
+
   return res;
 }
 
@@ -440,9 +432,7 @@ DSTATUS disk_initialize(uint8_t drv) {
 
   if (ty) {
     stat &= ~STA_NOINIT;  // Clear STA_NOINIT
-    sciPrintText((unsigned char *)"DISK INITIALIZED!\n\r", strlen("DISK INITIALIZED!\n\r"), 0xFFFF);
   } else {
-    sciPrintText((unsigned char *)"DISK INITIALIZATION FAILED!\n\r", strlen("DISK INITIALIZATION FAILED\n\r"), 0xFFFF);
     turnOffSDC();  // Initialization failed
   }
 
@@ -469,7 +459,6 @@ DSTATUS disk_status(uint8_t pdrv) {
  */
 DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) {
   obc_error_code_t errCode;
-  char printBuff[128];
 
   if (pdrv || !count) return RES_PARERR;
   if (stat & STA_NOINIT) return RES_NOTRDY;
@@ -483,26 +472,20 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
   }
 
   LOG_IF_ERROR_CODE(assertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-  sciPrintText((unsigned char *)"disk_write asserted CS on spiPort3\n\r",
-               strlen("disk_write asserted CS on spiPort3\n\r"), 0xFFFF);
   if (errCode != OBC_ERR_CODE_SUCCESS) {
     return stat;
   }
 
   if (count == 1) {
     /* Single block read */
-    sciPrintText((unsigned char *)"Single block read\n\r", strlen("Single block read\n\r"), 0xFFFF);
     if ((sendCMD(SDC_CMD17, sector) == 0) && rcvDataBlock(buff, SD_SECTOR_SIZE)) count = 0;
   } else {
     /* Multiple block read */
-    sciPrintText((unsigned char *)"Multiple block read\n\r", strlen("Single block read\n\r"), 0xFFFF);
     if (sendCMD(SDC_CMD18, sector) == 0) {
       uint32_t blksRead = 0;
       do {
         if (!rcvDataBlock(buff, SD_SECTOR_SIZE)) break;
         blksRead++;
-        sprintf(printBuff, "blks read: %ld\n\r", blksRead);
-        sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
         buff += SD_SECTOR_SIZE;
       } while (--count);
       stopTransmission();
@@ -510,16 +493,11 @@ DRESULT disk_read(uint8_t pdrv, uint8_t *buff, uint32_t sector, uint32_t count) 
   }
 
   LOG_IF_ERROR_CODE(deassertChipSelect(SDC_SPI_PORT, SDC_SPI_CS));
-  sciPrintText((unsigned char *)"disk_write de-asserted CS on spiPort3\n\r",
-               strlen("disk_write de-asserted CS on spiPort3\n\r"), 0xFFFF);
   if (errCode == OBC_ERR_CODE_SUCCESS) {
     // Ensure SDC releases MISO line by sending a dummy uint8_t
     LOG_IF_ERROR_CODE(spiTransmitByte(SDC_SPI_REG, &sdcSpiConfig, 0xFF));
   }
   LOG_IF_ERROR_CODE(spiReleaseBusMutex(SDC_SPI_REG));
-
-  sprintf(printBuff, "blocks left to read: %ld (Should be 0 if successful)\n\r", count);
-  sciPrintText((unsigned char *)printBuff, strlen(printBuff), 0xFFFF);
 
   return count ? RES_ERROR : RES_OK;
 }

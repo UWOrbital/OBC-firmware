@@ -39,8 +39,6 @@
 #include <redfs.h>
 #include <redcore.h>
 #include <redbdev.h>
-#include "obc_print.h"
-#include <stdio.h>
 
 /** @brief Read a range of logical blocks.
 
