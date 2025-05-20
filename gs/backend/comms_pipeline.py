@@ -10,9 +10,9 @@ from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
     CmdMsg,
-    CmdUnpackedReponse,
+    create_cmd_ping,
     pack_command,
-    unpack_command_response,
+    unpack_command,
 )
 from interfaces.obc_gs_interface.fec import FEC
 
@@ -58,37 +58,20 @@ def send_command(command: CmdMsg, com_port: str) -> None:
         time.sleep(0.1)
         print("Frame Sent")
 
-
-def receive_reponse(wait_time: int, com_port: str) -> CmdUnpackedReponse:
-    """
-    A function to wait for a response given a timeout
-    """
-    with serial.Serial(
-        com_port,
-        baudrate=_OBC_UART_BAUD_RATE,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
-        timeout=wait_time,
-    ) as ser:
+        time.sleep(0.1)
         read_bytes = bytearray(b"")
         start_end_flag = bytearray(bytes.fromhex("7E"))
-        while read_bytes[0] != start_end_flag:
-            if ser.read() == start_end_flag:
+        while bytes(read_bytes[0]) != bytes(start_end_flag):
+            if ser.read() == bytes(start_end_flag):
                 read_bytes += start_end_flag
 
-        while read_bytes[-1] != start_end_flag:
+        while bytes(read_bytes[-1]) != bytes(start_end_flag):
             read_bytes += ser.read()
 
         read_bytes += start_end_flag
 
     stuffed_frame = bytes(read_bytes)
-
-    # Instantiate the ax25 class to unstuff
-    ax25_proto = AX25("ATLAS", "AKITO")
     data = ax25_proto.unstuff(stuffed_frame)
-
-    # Instantiate FEC class to error correct
-    fec_coder = FEC()
     # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
     data_to_decode = fec_coder.decode(data[17:272])
     # With the data decoded we need to add the rest of the data back to get a full frame
@@ -98,16 +81,9 @@ def receive_reponse(wait_time: int, com_port: str) -> CmdUnpackedReponse:
     rcv_frame = ax25_proto.decode_frame(decoded_data)
     frame_data = rcv_frame.data
 
-    # Instantiate the aes class with defaults from the c implementation and decrypt the data
-    aes_cipher = AES128(
-        b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
-        b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
-    )
     decrypted_data = aes_cipher.decrypt(frame_data)[:16]
 
-    command = unpack_command_response(decrypted_data)
-
-    return command
+    command = unpack_command(decrypted_data)
 
 
 def arg_parse() -> ArgumentParser:
@@ -131,5 +107,17 @@ def arg_parse() -> ArgumentParser:
 
 
 if __name__ == "__main__":
-    arg_parser = arg_parse()
-    args = arg_parser.parse_args()
+    with serial.Serial(
+        "COM10",
+        baudrate=_OBC_UART_BAUD_RATE,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_TWO,
+        timeout=1,
+    ) as ser:
+        ax25_proto = AX25("ATLAS", "AKITO")
+        ser.write(ax25_proto.encode_frame(None, FrameType.SABM))
+        time.sleep(0.1)
+        print("Frame Sent")
+
+    cmd_msg = create_cmd_ping()
+    send_command(cmd_msg, "COM10")

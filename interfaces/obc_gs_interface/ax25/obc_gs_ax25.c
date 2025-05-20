@@ -6,6 +6,9 @@
 #include <string.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
+// NOTE: This is defined and used since we are using mod 8 control fields (8 bit
+// fields)
+#define AX25_U_FRAME_SABM_CMD_CONTROL 0b00101111
 #define AX25_U_FRAME_DISC_CMD_CONTROL 0b01000011
 #define AX25_U_FRAME_ACK_CMD_CONTROL 0b01100011
 #define POLL_FINAL_BIT_OFFSET 4
@@ -240,7 +243,7 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   } else if (cmd == U_FRAME_CMD_DISC) {
     ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] |= AX25_U_FRAME_DISC_CMD_CONTROL;
   } else {
-    ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] |= AX25_U_FRAME_SABME_CMD_CONTROL;
+    ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] |= AX25_U_FRAME_SABM_CMD_CONTROL;
   }
 
   ax25PacketUnstuffed[AX25_MOD8_PID_POSITION] = AX25_PID;
@@ -464,7 +467,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
   // the destination address for the packet we send will be the src address of
   // the packet we just received
   memcpy(destAddr.data, unstuffedPacket->data + AX25_SRC_ADDR_POSITION, AX25_DEST_ADDR_BYTES);
-  if (controlByte == AX25_U_FRAME_SABME_CMD_CONTROL) {
+  if (controlByte == AX25_U_FRAME_SABM_CMD_CONTROL) {
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;

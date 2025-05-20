@@ -29,7 +29,7 @@ class AX25:
 
     def encode_frame(
         self,
-        data_to_send: bytes,
+        data_to_send: bytes | None,
         frame_type: FrameType,
         sequence_number: int = 0,
     ) -> bytes:

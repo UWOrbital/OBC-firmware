@@ -1,6 +1,6 @@
 from cmd import Cmd
 
-from comms_pipeline import arg_parse
+from gs.backend.comms_pipeline import arg_parse
 
 
 class GroundStationShell(Cmd):
