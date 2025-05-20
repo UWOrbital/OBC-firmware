@@ -130,49 +130,70 @@ class CmdResponseErrorCode(IntEnum):
     CMD_RESPONSE_ERROR = 1
 
 
-## Command Factorys
+## Command Factories
 # NOTE: Update these when adding in new commands
 
 
-def create_cmd_end_of_frame() -> CmdMsg:
+def create_cmd_end_of_frame(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_END_OF_FRAME
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_END_OF_FRAME
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_END_OF_FRAME
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_exec_obc_reset() -> CmdMsg:
+def create_cmd_exec_obc_reset(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_EXEC_OBC_RESET
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_EXEC_OBC_RESET
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_EXEC_OBC_RESET
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_rtc_sync(time: int) -> CmdMsg:
+def create_cmd_rtc_sync(time: int, unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_RTC_SYNC
 
     :param time: Unixtime as an integer
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_RTC_SYNC
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
     cmd_msg.rtcSync.unixTime = c_uint32(time)
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_downlink_logs_next_pass(log_level: int) -> CmdMsg:
+def create_cmd_downlink_logs_next_pass(log_level: int, unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
     """
     if log_level > 255:
@@ -180,50 +201,77 @@ def create_cmd_downlink_logs_next_pass(log_level: int) -> CmdMsg:
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS
     cmd_msg.downlinkLogsNextPass.logLevel = log_level
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_mirco_sd_format() -> CmdMsg:
+def create_cmd_mirco_sd_format(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_MICRO_SD_FORMAT
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_MICRO_SD_FORMAT
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_MICRO_SD_FORMAT
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_ping() -> CmdMsg:
+def create_cmd_ping(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_PING
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_PING
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_PING
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_downlink_telem() -> CmdMsg:
+def create_cmd_downlink_telem(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_DOWNLINK_TELEM
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_DOWNLINK_TELEM
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_TELEM
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
-def create_cmd_uplink_disc() -> CmdMsg:
+def create_cmd_uplink_disc(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_UPLINK_DISC
 
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
     :return: CmdMsg structure for CMD_UPLINK_DISC
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_UPLINK_DISC
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -244,10 +292,11 @@ def pack_command(cmd_msg: CmdMsg) -> bytes:
     :param cmd_msg: A c-style structure that hold the command message
     :return: Bytes of the packed message
     """
-    buffer = (c_uint8 * _MAX_CMD_MSG_SIZE)(*([0] * 16))
+    buffer = (c_uint8 * _MAX_CMD_MSG_SIZE)(*([0] * _MAX_CMD_MSG_SIZE))
+    offset = c_uint32(_PACK_OFFSET_INITIAL)
     res = interface.packCmdMsg(
         pointer(buffer),
-        pointer(c_uint32(_PACK_OFFSET_INITIAL)),
+        pointer(offset),
         pointer(cmd_msg),
         pointer(c_uint8(_NUM_PACKED_INITIAL)),
     )
@@ -255,7 +304,9 @@ def pack_command(cmd_msg: CmdMsg) -> bytes:
     if res != 0:
         raise ValueError("Could not pack command. OBC Error Code: " + str(res))
 
-    return bytes(buffer)
+    buffer_bytes = bytes(buffer)
+
+    return buffer_bytes[: (-1 * offset.value)]
 
 
 def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
@@ -293,13 +344,13 @@ def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
     :param cmd_msg_response: A c-style structure that hold the unpacked command message response
     :return: Bytes of the packed commmand response
     """
-    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*([0] * 16))
+    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*([0] * _MAX_REPONSE_PACKED_SIZE))
     res = interface.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
 
     if res != 0:
         raise ValueError("Could not pack command response. OBC Error Code: " + str(res))
 
-    return bytes(buffer)
+    return bytes(buffer).rstrip(b"\x00")
 
 
 def unpack_command_response(cmd_msg_packed: bytes) -> CmdUnpackedReponse:
@@ -341,7 +392,7 @@ if __name__ == "__main__":
     cmd_response.errCode = 1
     cmd_response.cmdId = 1
     cmd_response.obcResetResponse = ObcCmdResetResponse(0.02, 2)
-    buffer = (c_uint8 * 16)()
+    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)()
 
     packed_response = pack_command_response(cmd_response)
     print([hex(element) for element in packed_response])

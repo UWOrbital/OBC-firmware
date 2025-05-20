@@ -25,6 +25,8 @@ typedef enum {
  *
  * - The command IDs are used to identify the command in the command message.
  * - All command IDs must be unique and fit in a uint8_t.
+ * - Updated the corresponding python implemtation by defining a new enum in
+ *   the CmdCallbackId class and creating the respective factory function
  */
 
 /* Used to indicate that the command is invalid.
