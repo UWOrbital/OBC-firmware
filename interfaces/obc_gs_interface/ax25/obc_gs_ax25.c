@@ -1,5 +1,6 @@
 #include "obc_gs_ax25.h"
 #include "obc_gs_crc.h"
+#include "obc_logging.h"
 
 #include <stdint.h>
 #include <string.h>

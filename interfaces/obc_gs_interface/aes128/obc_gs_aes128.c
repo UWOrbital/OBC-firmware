@@ -1,5 +1,6 @@
 #include "obc_gs_aes128.h"
 #include "obc_gs_errors.h"
+#include "obc_logging.h"
 
 #include <aes.h>
 
