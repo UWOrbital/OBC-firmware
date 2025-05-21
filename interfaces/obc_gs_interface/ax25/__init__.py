@@ -28,10 +28,7 @@ class AX25:
             raise ValueError("Destination Address is not valid")
 
     def encode_frame(
-        self,
-        data_to_send: bytes | None,
-        frame_type: FrameType,
-        sequence_number: int = 0,
+        self, data_to_send: bytes | None, frame_type: FrameType, sequence_number: int = 0, poll: bool = False
     ) -> bytes:
         """
         Encodes and Information Frame with the requested data using the ax25 library
@@ -43,7 +40,7 @@ class AX25:
         """
 
         # Generate Frame Object as per Library Specfications
-        control_block = Control(frame_type, poll_final=False, send_seqno=sequence_number)
+        control_block = Control(frame_type, poll_final=poll, send_seqno=sequence_number)
         src_address = Address(call=self.src_callsign, ssid=self._DEFAULT_SSID)
         dst_address = Address(call=self.dst_callsign, ssid=self._DEFAULT_SSID)
         frame_bytes = bytearray(

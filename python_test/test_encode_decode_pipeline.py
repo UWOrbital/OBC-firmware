@@ -3,6 +3,7 @@ from ctypes import POINTER, Structure, c_uint, c_uint8, pointer
 
 import pytest
 from ax25 import FrameType
+from interfaces.obc_gs_interface import ax25
 from interfaces.obc_gs_interface.aes128 import AES128
 from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.fec import FEC
@@ -373,3 +374,46 @@ def test_send():
     fec_coder.destroy()
     # If it gets here that means all went well!
     assert True
+
+
+def test_uFrame_send():
+    # Instantiate our ax25 class to get ready to create frame
+    ax25_proto = AX25("ATLAS", "AKITO")
+    # Create the frame
+    send_frame = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
+    send_frame = ax25_proto.stuff(send_frame)
+    # NOTE: To see this output use the -s flag with pytest (pytest -s)
+    print([hex(byte) for byte in send_frame])
+
+
+def test_uFrame_receive():
+    output_from_c = [
+        "0x7e",
+        "0x82",
+        "0x96",
+        "0x92",
+        "0xa8",
+        "0x9e",
+        "0x40",
+        "0x60",
+        "0x82",
+        "0xa8",
+        "0x98",
+        "0x82",
+        "0xa6",
+        "0x40",
+        "0x61",
+        "0x3e",
+        "0xcd",
+        "0x3d",
+        "0x80",
+        "0x7e",
+    ]
+    receive_bytes = bytes([int(x, 0) for x in output_from_c])
+    ax25_proto = AX25("ATLAS", "AKITO")
+    # Unstuff frame
+    rcv_frame = ax25_proto.unstuff(receive_bytes)
+    # Create the frame
+    rcv_frame = ax25_proto.decode_frame(rcv_frame)
+
+    assert rcv_frame.control.frame_type == FrameType.SABM

@@ -95,7 +95,6 @@ TEST(TestEncodeDecode, receiveData) {
   // Now actually breakdown the frame and see if it's valid
   u_frame_cmd_t command;
   ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
-  std::cout << std::endl;
 
   // Use AES to decrypt
   uint8_t key[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -125,4 +124,41 @@ TEST(TestEncodeDecode, receiveData) {
 
   // NOTE: This should only be called after everything with fec is done (thus why its not called in the first test)
   destroyRs();
+}
+
+TEST(TestEncodeDecode, uFrameReceive) {
+  uint8_t pythonData[20] = {0x7e, 0x82, 0x96, 0x92, 0xa8, 0x9e, 0x40, 0x60, 0x82, 0xa8,
+                            0x98, 0x82, 0xa6, 0x40, 0x61, 0x3e, 0xcd, 0x3d, 0x80, 0x7e};
+  packed_ax25_i_frame_t ax25Data = {.length = 20};
+  memcpy(ax25Data.data, pythonData, 20);
+
+  // Unstuff the frame
+  unstuffed_ax25_i_frame_t unstuffedPacket = {0};
+  ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
+            OBC_GS_ERR_CODE_SUCCESS);
+
+  // NOTE: Uncomment to see frame data
+  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
+  // for (int i = 0; i < unstuffedPacket.length; i++) {
+  //   printf(" 0x%x", unstuffedPacket.data[i]);
+  // }
+  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
+
+  u_frame_cmd_t command;
+  ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
+}
+
+TEST(TestEncodeDecode, uFrameSend) {
+  packed_ax25_u_frame_t ax25Data = {0};
+  uint8_t pollFinalBit = 1;
+
+  setCurrentLinkDestCallSign(CUBE_SAT_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
+  ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_CONN, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
+
+  // NOTE: Uncomment to see frame data
+  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
+  // for (int i = 0; i < ax25Data.length; i++) {
+  //   printf(" 0x%x", ax25Data.data[i]);
+  // }
+  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 }
