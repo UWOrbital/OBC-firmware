@@ -35,7 +35,7 @@
  *       OBC_PERSIST_ADDR_OF macro with the section name (e.g. OBC_PERSIST_ADDR_OF(obcTime))
  *     - The sectionSize should be the size of the section in FRAM, use the sizeof() macro
  *       with the section struct name (e.g. sizeof(obc_time_persist_t))
- *     - The sectionVersion should be the current version number of obc_persist, defined by 
+ *     - The sectionVersion should be the current version number of obc_persist, defined by
  *       the macro OBC_PERSISTENT_VERSION
  *     - The dataSize should be the size of the data in the section, use the sizeof() macro
  *       with the data struct name (e.g. sizeof(obc_time_persist_data_t)). This is used to
@@ -57,6 +57,9 @@ extern "C" {
 /* Current version of obc_persistent to store in section headers */
 #define OBC_PERSISTENT_VERSION 1
 
+/* Current version of obc_persistent to store in section headers */
+#define OBC_PERSISTENT_VERSION 1
+
 /*---------------------------------------------------------------------------*/
 /**
  * @brief Header struct to be placed at the start of each persistent section
@@ -64,6 +67,7 @@ extern "C" {
  */
 typedef struct {
   uint32_t sectionSize;
+  uint32_t sectionVersion;
   uint32_t sectionVersion;
   uint32_t crc32;
 } obc_persist_section_header_t;
@@ -167,7 +171,7 @@ typedef struct {
   size_t sectionStartAddr;  // Includes the header
   size_t sectionSize;       // Includes the header
   uint32_t sectionVersion;
-  size_t dataSize;          // Size of the data in the section (Does not include the header)
+  size_t dataSize;  // Size of the data in the section (Does not include the header)
   size_t sectionCount;
 } obc_persist_config_t;
 
