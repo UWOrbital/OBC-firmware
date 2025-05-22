@@ -134,7 +134,7 @@ class AX25:
 
         unstuff = BitStuffing(self._bytes_to_int_list(data_stripped))
         unstuff.startStuffing()
-        data_bytes = bytearray(self._int_list_to_bytes(unstuff.stuffed))
+        data_bytes = bytearray(self._int_list_to_bytes(unstuff.stuffed)).rstrip(b"\x00")
 
         # Define the flags
         start_end_flag = bytearray(bytes.fromhex("7E"))

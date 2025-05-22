@@ -5,6 +5,7 @@
 #include "obc_board_config.h"
 #include "obc_errors.h"
 #include "obc_gs_aes128.h"
+#include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
 #include "obc_gs_telemetry_pack.h"
 #include "obc_logging.h"
@@ -15,6 +16,7 @@
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
 #include "uplink_decoder.h"
+#include <stdint.h>
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
@@ -293,14 +295,23 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
+// NOTE: This is created on startup
 void obcTaskFunctionCommsMgr(void *pvParameters) {
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
   initAllCc1120TxRxSemaphores();
 
+  uint8_t isInitial = 1;
+
   while (1) {
     comms_event_t queueMsg;
+
+    if (isInitial) {
+      LOG_IF_ERROR_CODE(getNextCommsState(COMMS_EVENT_BEGIN_UPLINK, &commsState));
+      LOG_IF_ERROR_CODE(commsStateFns[commsState]());
+      isInitial = 0;
+    }
 
     if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
@@ -364,6 +375,7 @@ static obc_error_code_t handleAwaitingConnState(void) {
   /* Once cc1120Recv is decoupled from decode task this function should be
    * changed to handle this in comms manager and bypass decode task to allow for
    * retries */
+  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 0);
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
@@ -374,11 +386,10 @@ static obc_error_code_t handleAwaitingConnState(void) {
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
-  for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
-
+  do {
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  }
+  } while (rxByte != AX25_FLAG);
 #else
   // switch cc1120 to receive mode and start receiving all the bytes for one
   // continuous transmission

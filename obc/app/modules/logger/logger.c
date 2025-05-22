@@ -3,6 +3,7 @@
 #include "obc_logging.h"
 #include "obc_print.h"
 #include "obc_time.h"
+#include "os_mpu_wrappers.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -80,6 +81,7 @@ void obcTaskInitLogger(void) {
 }
 
 void obcTaskFunctionLogger(void *pvParameters) {
+  vTaskSuspend(NULL);
   char *fname = LOG_FILE_NAME;
   while (1) {
     logger_event_t queueMsg;

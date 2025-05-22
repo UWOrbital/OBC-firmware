@@ -1,22 +1,23 @@
 #include "cc1120_txrx.h"
-#include "obc_logging.h"
-#include "cc1120_mcu.h"
 #include "cc1120.h"
 #include "cc1120_defs.h"
-#include "obc_math.h"
+#include "cc1120_mcu.h"
 #include "obc_board_config.h"
+#include "obc_logging.h"
+#include "obc_math.h"
 
 #include "uplink_decoder.h"
 
 #include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
 #include <os_semphr.h>
 #include <sys_common.h>
-#include <FreeRTOSConfig.h>
 
 #include <stdbool.h>
 
 #define COMMS_MAX_UPLINK_BYTES \
-  1000U  // Maximum amount of bytes we will currently be uplinking at a time (should be updated in the future)
+  1000U  // Maximum amount of bytes we will currently be uplinking at a time
+         // (should be updated in the future)
 
 #define TIME_FOR_SINGLE_CHUNK_MS \
   (((TXRX_INTERRUPT_THRESHOLD - 1) * 8) / 9600)  // number of bits divided by cc1120 baudrate
@@ -64,7 +65,8 @@ void initAllCc1120TxRxSemaphores(void) {
  *
  * @param data - The packet to transmit
  * @param len - The size of the provided packet in bytes
- * @param txFifoEmptyTimeoutTicks - The amount of time to wait for the txFifoEmptySemaphore to become available
+ * @param txFifoEmptyTimeoutTicks - The amount of time to wait for the
+ * txFifoEmptySemaphore to become available
  * @return obc_error_code_t
  */
 obc_error_code_t cc1120Send(uint8_t *data, uint32_t len, TickType_t txFifoEmptyTimeoutTicks) {
@@ -126,8 +128,9 @@ static obc_error_code_t cc1120SendVariablePktMode(uint8_t *data, uint32_t len) {
   RETURN_IF_ERROR_CODE(writeFifoBlocking(data, uint32Min(len, (uint32_t)TXRX_INTERRUPT_THRESHOLD)));
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
-  // Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing
-  // TXRX_INTERRUPT_THRESHOLD more bytes
+  // Continously wait for the tx fifo to drop below (128 -
+  // TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD
+  // more bytes
   uint32_t groupsOfBytesWritten;
   for (groupsOfBytesWritten = 1; groupsOfBytesWritten < len / TXRX_INTERRUPT_THRESHOLD; groupsOfBytesWritten++) {
     RETURN_IF_ERROR_CODE(
@@ -166,18 +169,20 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len) 
   RETURN_IF_ERROR_CODE(writeFifoBlocking(data, TXRX_INTERRUPT_THRESHOLD));
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_STX));
 
-  // Continously wait for the tx fifo to drop below (128 - TXRX_INTERRUPT_THRESHOLD) bytes before writing
-  // TXRX_INTERRUPT_THRESHOLD more bytes need to also make sure that we do not send all of the remaining bytes if len is
-  // a multiple of TXRX_INTERRUPT_THRESHOLD to ensure this, we subtract 1 from len in the loop bounds so there is always
-  // 1 to TXRX_INTERRUPT_THRESHOLD Bytes left after the loop
+  // Continously wait for the tx fifo to drop below (128 -
+  // TXRX_INTERRUPT_THRESHOLD) bytes before writing TXRX_INTERRUPT_THRESHOLD
+  // more bytes need to also make sure that we do not send all of the remaining
+  // bytes if len is a multiple of TXRX_INTERRUPT_THRESHOLD to ensure this, we
+  // subtract 1 from len in the loop bounds so there is always 1 to
+  // TXRX_INTERRUPT_THRESHOLD Bytes left after the loop
   uint32_t groupsOfBytesWritten;
   for (groupsOfBytesWritten = 1; groupsOfBytesWritten < (len - 1) / TXRX_INTERRUPT_THRESHOLD; groupsOfBytesWritten++) {
     RETURN_IF_ERROR_CODE(
         writeFifoBlocking(data + groupsOfBytesWritten * TXRX_INTERRUPT_THRESHOLD, TXRX_INTERRUPT_THRESHOLD));
   }
 
-  // switch back to fixed packet length mode so that transmission is able to properly end once the remaining bytes are
-  // sent
+  // switch back to fixed packet length mode so that transmission is able to
+  // properly end once the remaining bytes are sent
   spiTransferData = FIXED_PACKET_LENGTH_MODE;
   RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_PKT_CFG0, &spiTransferData, 1));
 
@@ -189,7 +194,8 @@ static obc_error_code_t cc1120SendInifinitePktMode(uint8_t *data, uint32_t len) 
 }
 
 /**
- * @brief helper function for the cc1120Send functions to take the txSemaphore and then write data to TX FIFO
+ * @brief helper function for the cc1120Send functions to take the txSemaphore
+ * and then write data to TX FIFO
  *
  * @param data - The packet to transmit
  * @param len - The size of the provided packet in bytes
@@ -211,8 +217,10 @@ static obc_error_code_t writeFifoBlocking(uint8_t *data, uint32_t len) {
 }
 
 /**
- * @brief Switches the cc1120 to RX mode to continuously receive bytes and send them to the decode task
- * @param syncWordTimeoutTicks - The amount of time to wait for the syncReceivedSemaphore to become available
+ * @brief Switches the cc1120 to RX mode to continuously receive bytes and send
+ * them to the decode task
+ * @param syncWordTimeoutTicks - The amount of time to wait for the
+ * syncReceivedSemaphore to become available
  * @return obc_error_code_t
  */
 obc_error_code_t cc1120ReceiveToDecodeTask(TickType_t syncWordTimeoutTicks) {
@@ -221,11 +229,13 @@ obc_error_code_t cc1120ReceiveToDecodeTask(TickType_t syncWordTimeoutTicks) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
 
-  // poll the semaphore to clear whatever value it has (do not block and wait on it)
+  // poll the semaphore to clear whatever value it has (do not block and wait on
+  // it)
   xSemaphoreTake(syncReceivedSemaphore, (TickType_t)0);
 
-  // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
-  // see chapter 3.4 in the datasheet for more info
+  // When changing which signals are sent by each gpio, the output will be
+  // unstable so interrupts should be disabled see chapter 3.4 in the datasheet
+  // for more info
   gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
 
   // switch gpio 2 to be a SYNC_EVENT signal instead of CC1120_PKT_SYNC_RXTX_PIN
@@ -250,14 +260,17 @@ obc_error_code_t cc1120ReceiveToDecodeTask(TickType_t syncWordTimeoutTicks) {
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
   // See chapters 8.1, 8.4, 8.5
-  // If we do not stop receiving data, continue looping until COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple
-  // of TXRX_INTERRUPT_THRESHOLD bytes are received
-  uint8_t rxFifoReadCycles;  // number of times we receive TXRX_INTERRUPT_THRESHOLD bytes and read them out
+  // If we do not stop receiving data, continue looping until
+  // COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple of
+  // TXRX_INTERRUPT_THRESHOLD bytes are received
+  uint8_t rxFifoReadCycles;  // number of times we receive
+                             // TXRX_INTERRUPT_THRESHOLD bytes and read them out
   for (rxFifoReadCycles = 0;
        rxFifoReadCycles < (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD;
        ++rxFifoReadCycles) {
-    // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than rxTimeout
-    // before exiting this loop since that means we are no longer transmitting
+    // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes
+    // for more than rxTimeout before exiting this loop since that means we are
+    // no longer transmitting
     if (xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS) {
       break;
     }
@@ -283,7 +296,8 @@ obc_error_code_t cc1120ReceiveToDecodeTask(TickType_t syncWordTimeoutTicks) {
   }
 
   if (rxFifoReadCycles == (COMMS_MAX_UPLINK_BYTES + TXRX_INTERRUPT_THRESHOLD - 1) / TXRX_INTERRUPT_THRESHOLD) {
-    // if recv was terminated by the cubesat due to us receiving the max number of bytes return an error
+    // if recv was terminated by the cubesat due to us receiving the max number
+    // of bytes return an error
     return OBC_ERR_CODE_CC1120_RECEIVE_TERMINATED;
   }
 
@@ -291,8 +305,10 @@ obc_error_code_t cc1120ReceiveToDecodeTask(TickType_t syncWordTimeoutTicks) {
 }
 
 /**
- * @brief Switches the cc1120 to RX mode to continuously receive bytes and send them to the decode task
- * @param syncWordTimeoutTicks - The amount of time to wait for the syncReceivedSemaphore to become available
+ * @brief Switches the cc1120 to RX mode to continuously receive bytes and send
+ * them to the decode task
+ * @param syncWordTimeoutTicks - The amount of time to wait for the
+ * syncReceivedSemaphore to become available
  * @param recvBuf: the buffer to store the received bytes
  * @param recvBufLen: length of recvBuf
  * @return obc_error_code_t
@@ -307,11 +323,13 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
 
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
-  // poll the semaphore to clear whatever value it has (do not block and wait on it)
+  // poll the semaphore to clear whatever value it has (do not block and wait on
+  // it)
   xSemaphoreTake(syncReceivedSemaphore, (TickType_t)0);
 
-  // When changing which signals are sent by each gpio, the output will be unstable so interrupts should be disabled
-  // see chapter 3.4 in the datasheet for more info
+  // When changing which signals are sent by each gpio, the output will be
+  // unstable so interrupts should be disabled see chapter 3.4 in the datasheet
+  // for more info
   gioDisableNotification(gioPORTA, CC1120_PKT_SYNC_RXTX_gioPORTA_PIN);
 
   // switch gpio 2 to be a SYNC_EVENT signal instead of CC1120_PKT_SYNC_RXTX_PIN
@@ -334,12 +352,15 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
     return OBC_ERR_CODE_SEMAPHORE_TIMEOUT;
   }
   // See chapters 8.1, 8.4, 8.5
-  // If we do not stop receiving data, continue looping until COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple
-  // of TXRX_INTERRUPT_THRESHOLD bytes are received
-  uint8_t rxFifoReadCycles;  // number of times we receive TXRX_INTERRUPT_THRESHOLD bytes and read them out
+  // If we do not stop receiving data, continue looping until
+  // COMMS_MAX_UPLINK_BYTES rounded up to the nearest multiple of
+  // TXRX_INTERRUPT_THRESHOLD bytes are received
+  uint8_t rxFifoReadCycles;  // number of times we receive
+                             // TXRX_INTERRUPT_THRESHOLD bytes and read them out
   for (rxFifoReadCycles = 0; rxFifoReadCycles < recvBufLen / TXRX_INTERRUPT_THRESHOLD; ++rxFifoReadCycles) {
-    // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes for more than rxTimeout
-    // before exiting this loop since that means we are no longer transmitting
+    // wait until we have not received more than TXRX_INTERRUPT_THRESHOLD bytes
+    // for more than rxTimeout before exiting this loop since that means we are
+    // no longer transmitting
     if (xSemaphoreTake(rxSemaphore, RX_SEMAPHORE_TIMEOUT) != pdPASS) {
       break;
     }
@@ -348,8 +369,9 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
   }
 
   if (rxFifoReadCycles == 0) {
-    // if we never entered the for loop due to recvLen < TXRX_INTERRUPT_THRESHOLD, then block to allow cc1120 to receive
-    // up to 99 bytes before we check the number of bytes
+    // if we never entered the for loop due to recvLen <
+    // TXRX_INTERRUPT_THRESHOLD, then block to allow cc1120 to receive up to 99
+    // bytes before we check the number of bytes
     vTaskDelay(pdMS_TO_TICKS(TIME_FOR_SINGLE_CHUNK_MS));
   }
 
@@ -373,7 +395,8 @@ obc_error_code_t cc1120Receive(uint8_t *recvBuf, uint16_t recvBufLen, TickType_t
 /**
  * @brief block until the tx fifo is empty without decrementing the semaphore
  *
- * @return obc_error_code_t - whether the tx fifo empty semaphore became available without timing out or not
+ * @return obc_error_code_t - whether the tx fifo empty semaphore became
+ * available without timing out or not
  */
 obc_error_code_t txFifoEmptyCheckBlocking(void) {
   if (xSemaphoreTake(txFifoEmptySemaphore, TX_FIFO_EMPTY_SEMAPHORE_TIMEOUT) != pdPASS) {
@@ -385,48 +408,48 @@ obc_error_code_t txFifoEmptyCheckBlocking(void) {
 
 void txFifoReadyCallback(void) {
   BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
-  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
-  // one
+  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks
+  // a higher priority task than the current one
   if (xSemaphoreGiveFromISR(txSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
     /* TODO: figure out how to log from ISR */
   }
-  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
-  // been unblocked
+  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since
+  // this means a higher priority task has been unblocked
   portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
 void rxFifoReadyCallback(void) {
   BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
-  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
-  // one
+  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks
+  // a higher priority task than the current one
   if (xSemaphoreGiveFromISR(rxSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
     /* TODO: figure out how to log from ISR */
   }
-  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
-  // been unblocked
+  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since
+  // this means a higher priority task has been unblocked
   portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
 void txFifoEmptyCallback(void) {
   BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
-  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
-  // one
+  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks
+  // a higher priority task than the current one
   if (xSemaphoreGiveFromISR(txFifoEmptySemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
     /* TODO: figure out how to log from ISR */
   }
-  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
-  // been unblocked
+  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since
+  // this means a higher priority task has been unblocked
   portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }
 
 void syncEventCallback(void) {
   BaseType_t xHigherPriorityTaskAwoken = pdFALSE;
-  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks a higher priority task than the current
-  // one
+  // give semaphore and set xHigherPriorityTaskAwoken to pdTRUE if this unblocks
+  // a higher priority task than the current one
   if (xSemaphoreGiveFromISR(syncReceivedSemaphore, &xHigherPriorityTaskAwoken) != pdPASS) {
     /* TODO: figure out how to log from ISR */
   }
-  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since this means a higher priority task has
-  // been unblocked
+  // if xHigherPriorityTaskAwoken == pdTRUE then request a context switch since
+  // this means a higher priority task has been unblocked
   portYIELD_FROM_ISR(xHigherPriorityTaskAwoken);
 }

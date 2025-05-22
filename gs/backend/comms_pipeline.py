@@ -10,7 +10,6 @@ from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
     CmdMsg,
-    create_cmd_ping,
     pack_command,
     unpack_command,
 )
@@ -108,16 +107,22 @@ def arg_parse() -> ArgumentParser:
 
 if __name__ == "__main__":
     with serial.Serial(
-        "COM10",
+        "/dev/ttyUSB0",
         baudrate=_OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=1,
+        timeout=5,
     ) as ser:
         ax25_proto = AX25("ATLAS", "AKITO")
-        ser.write(ax25_proto.encode_frame(None, FrameType.SABM))
-        time.sleep(0.1)
+        send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
+        send_bytes = ax25_proto.stuff(send_bytes)
+        print([hex(byte) for byte in send_bytes])
+        print(hex(send_bytes[0]))
+        print([hex(byte) for byte in send_bytes[1:]])
+        ser.write(send_bytes)
         print("Frame Sent")
-
-    cmd_msg = create_cmd_ping()
-    send_command(cmd_msg, "COM10")
+        rcv_frame = ser.read(300)
+        print([hex(byte) for byte in rcv_frame])
+        rcv_frame = ax25_proto.unstuff(rcv_frame)
+        rcv_frame = ax25_proto.decode_frame(rcv_frame)
+        print(rcv_frame.control.frame_type)
