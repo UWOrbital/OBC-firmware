@@ -188,21 +188,23 @@ add_custom_target(
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # generate OBC-firmware-crc.bin with crc
-add_custom_command(
-		OUTPUT OBC-firmware-crc.bin
-		COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/obc/tools/CRC/append_crc.py
-		${CMAKE_BINARY_DIR}/OBC-firmware.bin
-		${CMAKE_BINARY_DIR}/OBC-firmware-crc.bin
-		DEPENDS OBC-firmware_bin
-		COMMENT "Appending CRC32 to OBC-firmware.bin"
-		VERBATIM
-)
+if(CMAKE_BUILD_TYPE STREQUAL "OBC")
+	add_custom_command(
+			OUTPUT ${CMAKE_BINARY_DIR}/OBC-firmware-crc.bin
+			COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/obc/tools/CRC/append_crc.py
+			${CMAKE_BINARY_DIR}/OBC-firmware.bin
+			${CMAKE_BINARY_DIR}/OBC-firmware-crc.bin
+			DEPENDS OBC-firmware_bin
+			COMMENT "Appending CRC32 to OBC-firmware.bin"
+			VERBATIM
+	)
 
-add_custom_target(
-		OBC-firmware_crc_bin
-		ALL
-		DEPENDS OBC-firmware-crc.bin
-)
+	add_custom_target(
+			OBC-firmware_crc_bin
+			ALL
+			DEPENDS ${CMAKE_BINARY_DIR}/OBC-firmware-crc.bin
+	)
+endif()
 
 # Bootloader
 target_link_options(OBC-bl.out PRIVATE
