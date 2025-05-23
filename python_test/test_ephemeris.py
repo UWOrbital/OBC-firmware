@@ -49,7 +49,7 @@ def test_is_valid_julian_true(arg):
     assert ephemeris.is_valid_julian_date(arg)
 
 
-# @pytest.mark.parametrize("arg", [("2020-01-02 12:00:00"), ("JD0"), ("JD-1"), ("24")])
+@pytest.mark.parametrize("arg", [("2020-01-02 12:00:00"), ("JD0"), ("JD-1"), ("24")])
 def test_is_valid_julian_false(arg):
     assert not ephemeris.is_valid_julian_date(arg)
 
