@@ -82,7 +82,7 @@ def send_command(command: CmdMsg, com_port: str) -> None:
 
     decrypted_data = aes_cipher.decrypt(frame_data)[:16]
 
-    command = unpack_command(decrypted_data)
+    print(unpack_command(decrypted_data))
 
 
 def arg_parse() -> ArgumentParser:
@@ -121,8 +121,8 @@ if __name__ == "__main__":
         print([hex(byte) for byte in send_bytes[1:]])
         ser.write(send_bytes)
         print("Frame Sent")
-        rcv_frame = ser.read(300)
-        print([hex(byte) for byte in rcv_frame])
-        rcv_frame = ax25_proto.unstuff(rcv_frame)
-        rcv_frame = ax25_proto.decode_frame(rcv_frame)
+        rcv_frame_bytes = ser.read(300)
+        print([hex(byte) for byte in rcv_frame_bytes])
+        rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
+        rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
         print(rcv_frame.control.frame_type)

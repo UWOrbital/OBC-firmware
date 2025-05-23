@@ -389,29 +389,3 @@ def unpack_command_response(cmd_msg_packed: bytes) -> CmdUnpackedReponse:
         raise ValueError("Could not unpack command response. OBC Error Code: " + str(res))
 
     return cmd_msg_response
-
-
-if __name__ == "__main__":
-    cmd_msg = CmdMsg()
-    cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
-    cmd_msg.rtcSync.unixTime = c_uint32(0x12345678)
-    cmd_msg_unpacked = CmdMsg()
-
-    packed_msg = pack_command(cmd_msg)
-    print([hex(element) for element in packed_msg])
-    cmd_msg_unpacked = unpack_command(packed_msg)
-    print(cmd_msg_unpacked.id)
-    print(cmd_msg_unpacked.rtcSync.unixTime)
-
-    cmd_response = CmdUnpackedReponse()
-    cmd_response.errCode = 1
-    cmd_response.cmdId = 1
-    cmd_response.obcResetResponse = ObcCmdResetResponse(0.02, 2)
-    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)()
-
-    packed_response = pack_command_response(cmd_response)
-    print([hex(element) for element in packed_response])
-    cmd_response_unpack = unpack_command_response(packed_response)
-    print(cmd_response_unpack.cmdId)
-    print(cmd_response_unpack.errCode)
-    print(cmd_response_unpack.obcResetResponse.data1)
