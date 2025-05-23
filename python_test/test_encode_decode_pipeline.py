@@ -6,6 +6,13 @@ from ax25 import FrameType
 from interfaces.obc_gs_interface import ax25
 from interfaces.obc_gs_interface.aes128 import AES128
 from interfaces.obc_gs_interface.ax25 import AX25
+from interfaces.obc_gs_interface.commands import (
+    CmdCallbackId,
+    create_cmd_ping,
+    create_cmd_rtc_sync,
+    pack_command,
+    unpack_command,
+)
 from interfaces.obc_gs_interface.fec import FEC
 
 
@@ -370,8 +377,6 @@ def test_send():
     print([hex(byte) for byte in send_frame])
     print(len(send_frame))
 
-    # NOTE: This must be called after everything with fec is done running (thus, it is not in the first test)
-    fec_coder.destroy()
     # If it gets here that means all went well!
     assert True
 
@@ -417,3 +422,361 @@ def test_uFrame_receive():
     rcv_frame = ax25_proto.decode_frame(rcv_frame)
 
     assert rcv_frame.control.frame_type == FrameType.SABM
+
+
+def test_command_send():
+    # Instantiate our ax25 class to get ready to create frame
+    ax25_proto = AX25("ATLAS", "AKITO")
+    # Instantiate the fec class for forward error correction
+    fec_coder = FEC()
+
+    # Let's generate some packed commands here: A ping command and a RTC Sync Command
+    cmd_ping = create_cmd_ping()
+    cmd_rtc_sync = create_cmd_rtc_sync(1234567)
+    cmd_ping_packed = bytearray(pack_command(cmd_ping))
+    cmd_rtc_sync_packed = bytearray(pack_command(cmd_rtc_sync))
+
+    data = bytes(cmd_ping_packed + cmd_rtc_sync_packed).ljust(223, b"\x00")
+    print(data)
+    # Instantaite the aes cipher with the same defaults from the c implementation
+    aes_cipher = AES128(
+        b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
+        b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
+    )
+    # Encrypt data
+    encrypted_data = aes_cipher.encrypt(data)
+    # Encode data for error correction
+    encode_data = fec_coder.encode(bytes(encrypted_data))
+    # Create the frame
+    send_frame = ax25_proto.encode_frame(encode_data, FrameType.I, 0)
+    # Stuff the frame as per the standard
+    send_frame_stuffed = ax25_proto.stuff(send_frame)
+    # Convert to byte array so we can change data
+    frame_array = bytearray(send_frame_stuffed)
+
+    # Convert back to bytes
+    send_frame = bytes(frame_array)
+
+    # Print this out to console so they can be copied to the C tests
+    # NOTE: To see this output use the -s flag with pytest (pytest -s)
+    print([hex(byte) for byte in send_frame])
+    print(len(send_frame))
+
+    # If it gets here that means all went well!
+    assert True
+
+
+def test_receive_command():
+    # Data from the c tests
+    c_data = [
+        0x7E,
+        0x82,
+        0x96,
+        0x92,
+        0xA8,
+        0x9E,
+        0x40,
+        0x60,
+        0x82,
+        0xA8,
+        0x98,
+        0x82,
+        0xA6,
+        0x40,
+        0x61,
+        0x20,
+        0xF0,
+        0x1,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x5,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x81,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0xA3,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x3C,
+        0xE7,
+        0x73,
+        0x4A,
+        0xC4,
+        0xF9,
+        0x4,
+        0xD,
+        0xD0,
+        0xE,
+        0xEE,
+        0xCA,
+        0xE,
+        0x46,
+        0x8E,
+        0xF9,
+        0x62,
+        0xFA,
+        0xA9,
+        0xC9,
+        0xAE,
+        0x82,
+        0x6D,
+        0xA,
+        0x25,
+        0x2F,
+        0x4C,
+        0xA3,
+        0x6A,
+        0x22,
+        0x13,
+        0x1,
+        0x40,
+        0xF0,
+        0xA0,
+        0x7E,
+    ]
+
+    bin = bytearray(c_data)
+
+    # Instantiate the ax25 class to unstuff
+    ax25_proto = AX25("ATLAS", "AKITO")
+    bin = ax25_proto.unstuff(bytes(bin))
+
+    # Instantiate FEC class to error correct
+    fec_coder = FEC()
+    # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
+    data_to_decode = fec_coder.decode(bin[17:272])
+    # With the data decoded we need to add the rest of the data back to get a full frame
+    decoded_data = bytes(bin[:17] + data_to_decode + bin[272:])
+
+    # Now we can finally decode the frame and extract information
+    rcv_frame = ax25_proto.decode_frame(decoded_data)
+    assert str(rcv_frame.src) == "ATLAS"
+    assert str(rcv_frame.dst) == "AKITO"
+    assert str(rcv_frame.control.frame_type) == "FrameType.I"
+    frame_data = rcv_frame.data
+
+    cmd_list = []
+
+    if frame_data is not None:
+        cmd_list = unpack_command(bytes(frame_data[:223]))
+
+    match_cmd = [CmdCallbackId.CMD_EXEC_OBC_RESET.value, CmdCallbackId.CMD_PING.value]
+
+    # See if the cmds we got back match
+    for i in range(2):
+        assert cmd_list[i].id == match_cmd[i]
+
+    # NOTE: This must be called after every test is ran to avoid Segfaulting (Thus, it is not called in the first few tests)
+    fec_coder.destroy()

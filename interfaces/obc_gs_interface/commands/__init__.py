@@ -306,10 +306,13 @@ def pack_command(cmd_msg: CmdMsg) -> bytes:
 
     buffer_bytes = bytes(buffer)
 
-    return buffer_bytes[: (-1 * offset.value)]
+    return buffer_bytes[: offset.value]
 
 
-def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
+_RS_DECODED_DATA_SIZE: Final[int] = 223
+
+
+def unpack_command(cmd_msg_packed: bytes) -> list[CmdMsg]:
     """
     This takes in a data bytes to be unpacked into a command message (see the C implementation for more on how
     that's exactly done)
@@ -319,19 +322,31 @@ def unpack_command(cmd_msg_packed: bytes) -> CmdMsg:
     :param cmd_msg_packed: Bytes of an already encoded message
     :return: An unpacked command message in the form of a structure
     """
-    if len(cmd_msg_packed) > _MAX_CMD_MSG_SIZE:
+    if len(cmd_msg_packed) > _RS_DECODED_DATA_SIZE:
         raise ValueError("The encoded command data to unpack is too long")
 
-    buffer_elements = list(cmd_msg_packed)
-    buff = (c_uint8 * _MAX_CMD_MSG_SIZE)(*buffer_elements)
-    cmd_msg = CmdMsg()
+    bytes_unpacked = c_uint32(0)
+    cmd_msg_list = []
+    total_bytes_unpacked = 0
 
-    res = interface.unpackCmdMsg(pointer(buff), pointer(c_uint32(_UNPACK_OFFSET_INITIAL)), pointer(cmd_msg))
+    while bytes_unpacked.value < _RS_DECODED_DATA_SIZE:
+        if cmd_msg_packed[total_bytes_unpacked] == CmdCallbackId.CMD_END_OF_FRAME.value:
+            break
 
-    if res != 0:
-        raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
+        cmd_msg = CmdMsg()
+        buffer_elements = list(cmd_msg_packed[total_bytes_unpacked : total_bytes_unpacked + 16])
+        buff = (c_uint8 * _MAX_CMD_MSG_SIZE)(*buffer_elements)
+        res = interface.unpackCmdMsg(pointer(buff), pointer(bytes_unpacked), pointer(cmd_msg))
+        total_bytes_unpacked += bytes_unpacked.value
+        bytes_unpacked = c_uint32(0)
+        print(cmd_msg.id)
+        print(bytes_unpacked.value)
+        print(buffer_elements)
+        if res != 0:
+            raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
+        cmd_msg_list.append(cmd_msg)
 
-    return cmd_msg
+    return cmd_msg_list
 
 
 ## Class implementation for CommandReponsePackUnpack

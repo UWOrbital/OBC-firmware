@@ -375,7 +375,6 @@ static obc_error_code_t handleAwaitingConnState(void) {
   /* Once cc1120Recv is decoupled from decode task this function should be
    * changed to handle this in comms manager and bypass decode task to allow for
    * retries */
-  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 0);
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
   uint8_t rxByte;
