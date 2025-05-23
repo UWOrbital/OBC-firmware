@@ -12,6 +12,7 @@
 #include "obc_privilege.h"
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
+#include "os_projdefs.h"
 #include "rffm6404.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
@@ -386,7 +387,7 @@ static obc_error_code_t handleAwaitingConnState(void) {
 
   // Read the rest of the bytes until we stop uplinking
   do {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   } while (rxByte != AX25_FLAG);
 #else
@@ -526,11 +527,10 @@ static obc_error_code_t handleUplinkingState(void) {
   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
 
   // Read the rest of the bytes until we stop uplinking
-  for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; ++i) {
+  do {
     RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
-
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  }
+  } while (rxByte != AX25_FLAG);
 #else
   // switch cc1120 to receive mode and start receiving all the bytes for one
   // continuous transmission

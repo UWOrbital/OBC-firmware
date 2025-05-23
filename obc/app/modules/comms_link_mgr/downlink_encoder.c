@@ -1,9 +1,11 @@
 #include "downlink_encoder.h"
 #include "cc1120_txrx.h"
+#include "obc_board_config.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
 
 #include "obc_gs_telemetry_pack.h"
+#include "obc_sci_io.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
 
@@ -19,6 +21,7 @@
 #include <os_task.h>
 
 #include <gio.h>
+#include <stdint.h>
 #include <sys_common.h>
 
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
@@ -326,17 +329,16 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET};
 
   obc_gs_error_code_t interfaceErr;
-
-  // Perform AX.25 framing
-  interfaceErr = ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt);
-  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
-  }
-
   // Apply Reed Solomon FEC
-  interfaceErr = rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &fecPkt);
+  interfaceErr = rsEncode(telemPacket->data + AX25_INFO_FIELD_POSITION, &fecPkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_FEC_ENCODE_FAILURE;
+  }
+
+  // Perform AX.25 framing
+  interfaceErr = ax25SendIFrame((uint8_t *)&fecPkt.data, RS_ENCODED_SIZE, &unstuffedAx25Pkt);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }
 
   memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
@@ -353,6 +355,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
+  sciSendBytes(transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY, UART_PRINT_REG);
 
   return OBC_ERR_CODE_SUCCESS;
 }

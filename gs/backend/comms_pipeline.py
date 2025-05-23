@@ -1,4 +1,3 @@
-import time
 from argparse import ArgumentParser
 from typing import Final
 
@@ -10,6 +9,7 @@ from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
     CmdMsg,
+    create_cmd_ping,
     pack_command,
     unpack_command,
 )
@@ -24,24 +24,23 @@ def send_command(command: CmdMsg, com_port: str) -> None:
     """
     A function to send a command up to the cube satellite
     """
-    # Pack and pad command to the decoded data length
-    packed_command = pack_command(command).ljust(_MAX_DECODED_DATA_LEN, b"\x00")
-
     # Instantiate our ax25 class to get ready to create frame
     ax25_proto = AX25("ATLAS", "AKITO")
     # Instantiate the fec class for forward error correction
     fec_coder = FEC()
+
+    data = pack_command(command).ljust(223, b"\x00")
+
     # Instantaite the aes cipher with the same defaults from the c implementation
     aes_cipher = AES128(
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
     )
-
-    # Encrypt command
-    encrypted_command = aes_cipher.encrypt(packed_command)
-    # Encode command for error correction
-    encode_data = fec_coder.encode(bytes(encrypted_command))
-    # Create the frame for the command
+    # Encrypt data
+    encrypted_data = aes_cipher.encrypt(data)
+    # Encode data for error correction
+    encode_data = fec_coder.encode(bytes(encrypted_data))
+    # Create the frame
     send_frame = ax25_proto.encode_frame(encode_data, FrameType.I, 0)
     # Stuff the frame as per the standard
     send_frame_stuffed = ax25_proto.stuff(send_frame)
@@ -51,26 +50,18 @@ def send_command(command: CmdMsg, com_port: str) -> None:
         baudrate=_OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=1,
+        timeout=5,
     ) as ser:
         ser.write(send_frame_stuffed)
-        time.sleep(0.1)
         print("Frame Sent")
 
-        time.sleep(0.1)
-        read_bytes = bytearray(b"")
-        start_end_flag = bytearray(bytes.fromhex("7E"))
-        while bytes(read_bytes[0]) != bytes(start_end_flag):
-            if ser.read() == bytes(start_end_flag):
-                read_bytes += start_end_flag
+        read_bytes = ser.read(300)
 
-        while bytes(read_bytes[-1]) != bytes(start_end_flag):
-            read_bytes += ser.read()
-
-        read_bytes += start_end_flag
-
+    print([hex(byte) for byte in read_bytes])
     stuffed_frame = bytes(read_bytes)
     data = ax25_proto.unstuff(stuffed_frame)
+    print([hex(byte) for byte in data])
+    print(len(data))
     # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
     data_to_decode = fec_coder.decode(data[17:272])
     # With the data decoded we need to add the rest of the data back to get a full frame
@@ -80,9 +71,10 @@ def send_command(command: CmdMsg, com_port: str) -> None:
     rcv_frame = ax25_proto.decode_frame(decoded_data)
     frame_data = rcv_frame.data
 
-    decrypted_data = aes_cipher.decrypt(frame_data)[:16]
+    cmd_list = unpack_command(frame_data[:223])
 
-    print(unpack_command(decrypted_data))
+    if len(cmd_list) != 0:
+        print(cmd_list[0].id)
 
 
 def arg_parse() -> ArgumentParser:
@@ -111,7 +103,7 @@ if __name__ == "__main__":
         baudrate=_OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=5,
+        timeout=1,
     ) as ser:
         ax25_proto = AX25("ATLAS", "AKITO")
         send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
@@ -126,3 +118,6 @@ if __name__ == "__main__":
         rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
         rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
         print(rcv_frame.control.frame_type)
+
+    cmd_ping = create_cmd_ping()
+    send_command(cmd_ping, "/dev/ttyUSB0")

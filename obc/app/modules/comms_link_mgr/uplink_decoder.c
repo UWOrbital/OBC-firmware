@@ -10,6 +10,7 @@
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 #include "obc_gs_command_unpack.h"
+#include "obc_gs_errors.h"
 #include "obc_gs_fec.h"
 #include "obc_logging.h"
 #include "obc_scheduler_config.h"
@@ -180,9 +181,8 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   if ((unstuffedPacket.data[AX25_CONTROL_BYTES_POSITION] & 0x01) == 0) {
     // If the second least significant bit was a 1 it is a U Frame
     // copy the unstuffed data into rsData
+    initRs();
     memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
-    // clear the info field of the unstuffed packet
-    memset(unstuffedPacket.data + AX25_INFO_FIELD_POSITION, 0, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
     interfaceErr = rsDecode(rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
     if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
@@ -197,7 +197,7 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_INVALID_AX25_PACKET;
   }
-  if (unstuffedPacket.length != AX25_MINIMUM_I_FRAME_LEN) {
+  if (unstuffedPacket.length < AX25_MINIMUM_I_FRAME_LEN) {
     if (recievedCmd == U_FRAME_CMD_CONN) {
       comms_event_t connEvent = {.eventID = COMMS_EVENT_CONN_RECEIVED};
       RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&connEvent));
@@ -213,21 +213,31 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
       return OBC_ERR_CODE_INVALID_AX25_PACKET;
     }
   }
-  uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
-  aesData->ciphertext = ciphertext;
+  // uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
+  // aesData->ciphertext = ciphertext;
+  //
+  // memcpy(aesData->iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION,
+  //        AES_IV_SIZE);
+  // memcpy(aesData->ciphertext,
+  //        unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
+  //        RS_DECODED_SIZE - AES_IV_SIZE);
+  // aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
 
-  memcpy(aesData->iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, AES_IV_SIZE);
-  memcpy(aesData->ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
-         RS_DECODED_SIZE - AES_IV_SIZE);
-  aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
+  // TODO: Implement aes so that the commented code above works
+  uint8_t key[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
+  initializeAesCtx((uint8_t *)key);
+  aes_data_t aesDataT = {
+      .iv = {0}, .ciphertext = unstuffedPacket.data + AX25_INFO_FIELD_POSITION, .ciphertextLen = RS_DECODED_SIZE};
+  memset(aesDataT.iv, 1, AES_IV_SIZE);
+  uint8_t output[RS_DECODED_SIZE];
+  aes128Decrypt(&aesDataT, output, RS_DECODED_SIZE);
 
-  uint8_t decryptedData[AES_DECRYPTED_SIZE] = {0};
-  interfaceErr = aes128Decrypt(aesData, decryptedData, AES_DECRYPTED_SIZE);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
   }
 
-  RETURN_IF_ERROR_CODE(handleCommands(decryptedData));
+  RETURN_IF_ERROR_CODE(handleCommands(output));
 
   return OBC_ERR_CODE_SUCCESS;
 }
