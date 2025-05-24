@@ -1,4 +1,4 @@
-#include "health_collector.h"
+#include "thermal_mgr.h"
 #include "lm75bd.h"
 #include "obc_time.h"
 #include "telemetry_manager.h"
@@ -14,9 +14,9 @@
 
 static obc_error_code_t collectObcLm75bdTemp(void);
 
-void obcTaskInitHealthCollector(void) {}
+void obcTaskInitThermalMgr(void) {}
 
-void obcTaskFunctionHealthCollector(void* pvParameters) {
+void obcTaskFunctionThermalMgr(void* pvParameters) {
   obc_error_code_t errCode;
 
   while (1) {
