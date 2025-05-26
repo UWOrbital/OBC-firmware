@@ -43,13 +43,6 @@ TEST(TestCommandPackUnpack, ValidCmdRtcSyncPackUnpack) {
   errCode = packCmdMsg(buff, &packOffset, &cmdMsg, &numPacked);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
 
-  printf(" 0x%x", CMD_RTC_SYNC);
-  std::cout << std::endl;
-  for (int i = 0; i < 16; i++) {
-    printf(" 0x%x", buff[i]);
-  }
-  std::cout << std::endl;
-
   cmd_msg_t unpackedCmdMsg = {0};
   uint32_t unpackOffset = 0;
   errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);

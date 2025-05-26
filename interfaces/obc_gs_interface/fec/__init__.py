@@ -1,5 +1,6 @@
 from ctypes import POINTER, Structure, c_uint, c_uint8, pointer
 
+from interfaces import RS_DECODED_DATA_SIZE, RS_ENCODED_DATA_SIZE
 from interfaces.obc_gs_interface import interface
 
 
@@ -35,8 +36,8 @@ class FEC:
     Class for forward error correction using the reed solomon algorithm
     """
 
-    _MAX_DECODED_DATA_LEN = 223
-    _MAX_ENCODED_DATA_LEN = 255
+    _MAX_DECODED_DATA_LEN = RS_DECODED_DATA_SIZE
+    _MAX_ENCODED_DATA_LEN = RS_ENCODED_DATA_SIZE
 
     def __init__(self) -> None:
         """

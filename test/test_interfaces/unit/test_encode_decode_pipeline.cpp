@@ -211,11 +211,11 @@ TEST(TestEncodeDecode, receiveCommandData) {
   uint8_t output[RS_DECODED_SIZE];
   aes128Decrypt(&aesData, output, RS_DECODED_SIZE);
   // NOTE: Uncomment to see frame data
-  std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  for (int i = 0; i < RS_DECODED_SIZE; i++) {
-    printf(" 0x%x", output[i]);
-  }
-  std::cout << std::endl << "End of Frame Hex Data" << std::endl;
+  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
+  // for (int i = 0; i < RS_DECODED_SIZE; i++) {
+  //   printf(" 0x%x", output[i]);
+  // }
+  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 
   uint32_t bytesUnpacked = 0;
   while (bytesUnpacked < AES_DECRYPTED_SIZE) {
@@ -225,10 +225,7 @@ TEST(TestEncodeDecode, receiveCommandData) {
     }
     cmd_msg_t command;
     EXPECT_EQ(unpackCmdMsg(output, &bytesUnpacked, &command), OBC_GS_ERR_CODE_SUCCESS);
-    printf(" Command id: %d", command.id);
-    printf(" Offset: %d", bytesUnpacked);
   }
-  std::cout << std::endl;
 }
 
 TEST(TestEncodeDecode, sendCommandData) {
@@ -265,11 +262,11 @@ TEST(TestEncodeDecode, sendCommandData) {
 
   // Print out the ax25 data in hex to use in python testing
   // NOTE: Uncomment to see output when running c tests
-  std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  for (int i = 0; i < ax25Data.length; i++) {
-    printf(" 0x%x", ax25Data.data[i]);
-  }
-  std::cout << std::endl << "End of Frame Hex Data" << std::endl;
+  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
+  // for (int i = 0; i < ax25Data.length; i++) {
+  //   printf(" 0x%x", ax25Data.data[i]);
+  // }
+  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 
   // NOTE: This should only be called after everything with fec is done (thus why its not called in the first test)
   destroyRs();

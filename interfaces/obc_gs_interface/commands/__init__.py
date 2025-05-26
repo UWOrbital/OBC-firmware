@@ -2,6 +2,7 @@ from ctypes import POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, 
 from enum import IntEnum
 from typing import Final
 
+from interfaces import MAX_CMD_MSG_SIZE, MAX_REPONSE_PACKED_SIZE, RS_DECODED_DATA_SIZE
 from interfaces.obc_gs_interface import interface
 
 ## Ctypes Declerations for CommandPackUnpack
@@ -41,13 +42,11 @@ class CmdMsg(Structure):
     _fields_ = [("u", _U), ("timestamp", c_uint32), ("isTimeTagged", c_bool), ("id", c_uint)]
 
 
-_MAX_CMD_MSG_SIZE: Final[int] = 16
-
-interface.unpackCmdMsg.argtypes = (POINTER(c_uint8 * _MAX_CMD_MSG_SIZE), POINTER(c_uint32), POINTER(CmdMsg))
+interface.unpackCmdMsg.argtypes = (POINTER(c_uint8 * MAX_CMD_MSG_SIZE), POINTER(c_uint32), POINTER(CmdMsg))
 interface.unpackCmdMsg.restype = c_uint
 
 interface.packCmdMsg.argtypes = (
-    POINTER(c_uint8 * _MAX_CMD_MSG_SIZE),
+    POINTER(c_uint8 * MAX_CMD_MSG_SIZE),
     POINTER(c_uint32),
     POINTER(CmdMsg),
     POINTER(c_uint8),
@@ -90,12 +89,10 @@ class CmdUnpackedReponse(Structure):
     _fields_ = [("errCode", c_uint), ("cmdId", c_uint), ("u", _UR)]
 
 
-_MAX_REPONSE_PACKED_SIZE: Final[int] = 16
-
-interface.packCommandResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * _MAX_REPONSE_PACKED_SIZE))
+interface.packCommandResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE))
 interface.packCommandResponse.restype = c_uint
 
-interface.unpackCommandResponse.argtypes = (POINTER(c_uint8 * _MAX_REPONSE_PACKED_SIZE), POINTER(CmdUnpackedReponse))
+interface.unpackCommandResponse.argtypes = (POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE), POINTER(CmdUnpackedReponse))
 interface.unpackCommandResponse.restype = c_uint
 
 
@@ -292,7 +289,7 @@ def pack_command(cmd_msg: CmdMsg) -> bytes:
     :param cmd_msg: A c-style structure that hold the command message
     :return: Bytes of the packed message
     """
-    buffer = (c_uint8 * _MAX_CMD_MSG_SIZE)(*([0] * _MAX_CMD_MSG_SIZE))
+    buffer = (c_uint8 * MAX_CMD_MSG_SIZE)(*([0] * MAX_CMD_MSG_SIZE))
     offset = c_uint32(_PACK_OFFSET_INITIAL)
     res = interface.packCmdMsg(
         pointer(buffer),
@@ -309,10 +306,7 @@ def pack_command(cmd_msg: CmdMsg) -> bytes:
     return buffer_bytes[: offset.value]
 
 
-_RS_DECODED_DATA_SIZE: Final[int] = 223
-
-
-def unpack_command(cmd_msg_packed: bytes) -> list[CmdMsg]:
+def unpack_command(cmd_msg_packed: bytes) -> tuple[list[CmdMsg], bytes]:
     """
     This takes in a data bytes to be unpacked into a command message (see the C implementation for more on how
     that's exactly done)
@@ -322,31 +316,30 @@ def unpack_command(cmd_msg_packed: bytes) -> list[CmdMsg]:
     :param cmd_msg_packed: Bytes of an already encoded message
     :return: An unpacked command message in the form of a structure
     """
-    if len(cmd_msg_packed) > _RS_DECODED_DATA_SIZE:
+    if len(cmd_msg_packed) > RS_DECODED_DATA_SIZE:
         raise ValueError("The encoded command data to unpack is too long")
 
     bytes_unpacked = c_uint32(0)
     cmd_msg_list = []
     total_bytes_unpacked = 0
 
-    while bytes_unpacked.value < _RS_DECODED_DATA_SIZE:
+    while bytes_unpacked.value < RS_DECODED_DATA_SIZE:
         if cmd_msg_packed[total_bytes_unpacked] == CmdCallbackId.CMD_END_OF_FRAME.value:
             break
 
         cmd_msg = CmdMsg()
         buffer_elements = list(cmd_msg_packed[total_bytes_unpacked : total_bytes_unpacked + 16])
-        buff = (c_uint8 * _MAX_CMD_MSG_SIZE)(*buffer_elements)
+        buff = (c_uint8 * MAX_CMD_MSG_SIZE)(*buffer_elements)
         res = interface.unpackCmdMsg(pointer(buff), pointer(bytes_unpacked), pointer(cmd_msg))
         total_bytes_unpacked += bytes_unpacked.value
         bytes_unpacked = c_uint32(0)
-        print(cmd_msg.id)
-        print(bytes_unpacked.value)
-        print(buffer_elements)
         if res != 0:
             raise ValueError("Could not unpack command. OBC Error Code: " + str(res))
         cmd_msg_list.append(cmd_msg)
 
-    return cmd_msg_list
+    bytes_not_unpacked = cmd_msg_packed[total_bytes_unpacked:]
+
+    return (cmd_msg_list, bytes_not_unpacked)
 
 
 ## Class implementation for CommandReponsePackUnpack
@@ -359,7 +352,7 @@ def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
     :param cmd_msg_response: A c-style structure that hold the unpacked command message response
     :return: Bytes of the packed commmand response
     """
-    buffer = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*([0] * _MAX_REPONSE_PACKED_SIZE))
+    buffer = (c_uint8 * MAX_REPONSE_PACKED_SIZE)(*([0] * MAX_REPONSE_PACKED_SIZE))
     res = interface.packCommandResponse(pointer(cmd_msg_response), pointer(buffer))
 
     if res != 0:
@@ -376,11 +369,11 @@ def unpack_command_response(cmd_msg_packed: bytes) -> CmdUnpackedReponse:
     :param cmd_msg_packed: Bytes of an already encoded message
     :return: An unpacked command message in the form of a structure
     """
-    if len(cmd_msg_packed) > _MAX_REPONSE_PACKED_SIZE:
+    if len(cmd_msg_packed) > MAX_REPONSE_PACKED_SIZE:
         raise ValueError("The encoded command reponse data to unpack is too long")
 
     buffer_elements = list(cmd_msg_packed)
-    buff = (c_uint8 * _MAX_REPONSE_PACKED_SIZE)(*buffer_elements)
+    buff = (c_uint8 * MAX_REPONSE_PACKED_SIZE)(*buffer_elements)
     cmd_msg_response = CmdUnpackedReponse()
 
     res = interface.unpackCommandResponse(pointer(buff), pointer(cmd_msg_response))
