@@ -1,3 +1,4 @@
+import time
 from argparse import ArgumentParser
 
 import serial
@@ -25,6 +26,9 @@ def send_command(command: CmdMsg, com_port: str) -> None:
     ax25_proto = AX25("ATLAS", "AKITO")
     # Instantiate the fec class for forward error correction
     fec_coder = FEC()
+    print("-----Send Frame Bytes-----")
+    print([hex(byte) for byte in send_bytes])
+    print("Length: " + str(len(send_bytes)))
 
     with serial.Serial(
         com_port,
@@ -33,14 +37,25 @@ def send_command(command: CmdMsg, com_port: str) -> None:
         stopbits=serial.STOPBITS_TWO,
         timeout=1,
     ) as ser:
+        ser.reset_output_buffer()
         ser.write(send_bytes)
         print("Frame Sent")
 
-        read_bytes = ser.read(300)
+        rcv_frame_bytes = ser.read(10000)
+        start_index = rcv_frame_bytes.find(b"\x7e")
+        end_index = rcv_frame_bytes.rfind(b"\x7e")
+        print(str(start_index) + " " + str(end_index))
+
+        if start_index != 0:
+            print(rcv_frame_bytes[:start_index].decode("utf-8"))
+            print(rcv_frame_bytes[end_index:].decode("utf-8"))
+
+        read_bytes = rcv_frame_bytes[start_index : end_index + 1]
 
     frame_data_bytes = b""
     print("---- Stuffed Frame -----")
     print([hex(byte) for byte in read_bytes])
+    print("Length: " + str(len(read_bytes)))
     stuffed_frame = bytes(read_bytes)
     frame_data_bytes = ax25_proto.unstuff(stuffed_frame)
     print("---- Unstuffed Frame -----")
@@ -84,7 +99,7 @@ if __name__ == "__main__":
         baudrate=OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=1,
+        timeout=3,
     ) as ser:
         ax25_proto = AX25("ATLAS", "AKITO")
         send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
@@ -94,11 +109,22 @@ if __name__ == "__main__":
         print([hex(byte) for byte in send_bytes[1:]])
         ser.write(send_bytes)
         print("Frame Sent")
-        rcv_frame_bytes = ser.read(300)
+        rcv_frame_bytes = ser.read(10000)
+        start_index = rcv_frame_bytes.find(b"\x7e")
+        end_index = rcv_frame_bytes.rfind(b"\x7e")
+        print(str(start_index) + " " + str(end_index))
+
+        if start_index != 0:
+            print(rcv_frame_bytes[:start_index].decode("utf-8"))
+
+        rcv_frame_bytes = rcv_frame_bytes[start_index : end_index + 1]
         print([hex(byte) for byte in rcv_frame_bytes])
         rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
         rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
         print(rcv_frame.control.frame_type)
 
+    time.sleep(1)
     cmd_ping = create_cmd_ping()
     send_command(cmd_ping, "/dev/ttyUSB0")
+    fec_coder = FEC()
+    fec_coder.destroy()

@@ -16,7 +16,6 @@ static char taskTableHeaderStr[] =
 void obcTaskInitStatsCollector(void) {}
 
 void obcTaskFunctionStatsCollector(void *pvParameters) {
-  vTaskSuspend(NULL);
   obc_error_code_t errCode;
   prvRaisePrivilege();
   while (1) {

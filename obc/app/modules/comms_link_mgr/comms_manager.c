@@ -12,6 +12,7 @@
 #include "obc_privilege.h"
 #include "obc_reliance_fs.h"
 #include "obc_scheduler_config.h"
+#include "os_mpu_wrappers.h"
 #include "os_projdefs.h"
 #include "rffm6404.h"
 #include "telemetry_fs_utils.h"
@@ -220,7 +221,7 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
     case COMMS_STATE_UPLINKING:
       switch (event) {
         case COMMS_EVENT_UPLINK_FINISHED:
-          *state = COMMS_STATE_DISCONNECTED;
+          *state = COMMS_STATE_UPLINKING;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_START_DISC:
           *state = COMMS_STATE_SENDING_DISC;
@@ -300,25 +301,23 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
 void obcTaskFunctionCommsMgr(void *pvParameters) {
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
+  LOG_IF_ERROR_CODE(commsStateFns[commsState]());
 
   initAllCc1120TxRxSemaphores();
 
-  uint8_t isInitial = 1;
-
   while (1) {
     comms_event_t queueMsg;
-
-    if (isInitial) {
-      LOG_IF_ERROR_CODE(getNextCommsState(COMMS_EVENT_BEGIN_UPLINK, &commsState));
-      LOG_IF_ERROR_CODE(commsStateFns[commsState]());
-      isInitial = 0;
-    }
 
     if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
     }
 
     LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
+    if (errCode == 17) {
+      uint8_t bytes[4] = {0x5A, queueMsg.eventID, commsState, 0x5A};
+      sciSendBytes(bytes, 4, portMAX_DELAY, UART_PRINT_REG);
+      gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
+    }
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       continue;
     }
@@ -528,7 +527,7 @@ static obc_error_code_t handleUplinkingState(void) {
 
   // Read the rest of the bytes until we stop uplinking
   do {
-    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, pdMS_TO_TICKS(10), UART_READ_REG));
+    RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
   } while (rxByte != AX25_FLAG);
 #else
@@ -537,6 +536,7 @@ static obc_error_code_t handleUplinkingState(void) {
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
+  vTaskDelay(100);
   comms_event_t uplinkFinishedEvent = {.eventID = COMMS_EVENT_UPLINK_FINISHED};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&uplinkFinishedEvent));
   return OBC_ERR_CODE_SUCCESS;

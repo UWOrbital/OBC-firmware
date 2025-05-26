@@ -81,7 +81,6 @@ void obcTaskInitLogger(void) {
 }
 
 void obcTaskFunctionLogger(void *pvParameters) {
-  vTaskSuspend(NULL);
   char *fname = LOG_FILE_NAME;
   while (1) {
     logger_event_t queueMsg;
