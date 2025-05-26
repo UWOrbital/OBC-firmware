@@ -11,7 +11,6 @@ from interfaces.obc_gs_interface.commands import (
     CmdMsg,
     create_cmd_ping,
     pack_command,
-    unpack_command,
 )
 from interfaces.obc_gs_interface.fec import FEC
 
@@ -50,16 +49,18 @@ def send_command(command: CmdMsg, com_port: str) -> None:
         baudrate=_OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=5,
+        timeout=1,
     ) as ser:
         ser.write(send_frame_stuffed)
         print("Frame Sent")
 
         read_bytes = ser.read(300)
 
+    print("---- Stuffed Frame -----")
     print([hex(byte) for byte in read_bytes])
     stuffed_frame = bytes(read_bytes)
     data = ax25_proto.unstuff(stuffed_frame)
+    print("---- Unstuffed Frame -----")
     print([hex(byte) for byte in data])
     print(len(data))
     # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
@@ -70,11 +71,8 @@ def send_command(command: CmdMsg, com_port: str) -> None:
     # Now we can finally decode the frame and extract information
     rcv_frame = ax25_proto.decode_frame(decoded_data)
     frame_data = rcv_frame.data
-
-    cmd_list = unpack_command(frame_data[:223])
-
-    if len(cmd_list) != 0:
-        print(cmd_list[0].id)
+    print("---- Frame Data (First 223 Bytes) -----")
+    print([hex(byte) for byte in frame_data[:223]])
 
 
 def arg_parse() -> ArgumentParser:

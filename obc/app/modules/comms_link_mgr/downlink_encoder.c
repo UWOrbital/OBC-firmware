@@ -330,7 +330,7 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
 
   obc_gs_error_code_t interfaceErr;
   // Apply Reed Solomon FEC
-  interfaceErr = rsEncode(telemPacket->data + AX25_INFO_FIELD_POSITION, &fecPkt);
+  interfaceErr = rsEncode(telemPacket->data, &fecPkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_FEC_ENCODE_FAILURE;
   }
@@ -341,16 +341,11 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
     return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
   }
 
-  memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
-
   interfaceErr = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, transmitEvent.ax25Pkt.data,
                            &transmitEvent.ax25Pkt.length);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_BIT_STUFF_FAILURE;
   }
-
-  transmitEvent.ax25Pkt.data[0] = AX25_FLAG;
-  transmitEvent.ax25Pkt.data[transmitEvent.ax25Pkt.length - 1] = AX25_FLAG;
 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
