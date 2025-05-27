@@ -3,6 +3,10 @@
 #include "obc_scheduler_config.h"
 #include "digital_watchdog_mgr.h"
 
+#include "obc_logging.h" //include logging for testing
+#include <stdio.h> //include for testing
+
+
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_task.h>
@@ -19,6 +23,13 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
 
   /* Initialize the last wake time to the current time */
   xLastWakeTime = xTaskGetTickCount();
+
+  //Spam logs at startup
+    for (int i = 0; i < 20; i++) {
+      LOG_DEBUG("BLOCK TEST LOG");
+      //LOG_ERROR_CODE(i);
+      printf("Finished log %d\n", i);
+    }
 
   /* Run GNC tasks periodically at 20 Hz */
   while (1) {
