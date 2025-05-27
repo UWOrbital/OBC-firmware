@@ -20,7 +20,7 @@ def send_command(command: CmdMsg, com_port: str) -> None:
     A function to send a command up to the cube satellite
     """
     data = [command]
-    send_bytes = command_frame(data)
+    send_bytes = command_frame(data).ljust(300, b"\x00")
 
     # Instantiate our ax25 class to get ready to create frame
     ax25_proto = AX25("ATLAS", "AKITO")
@@ -35,7 +35,7 @@ def send_command(command: CmdMsg, com_port: str) -> None:
         baudrate=OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=5,
+        timeout=1,
     ) as ser:
         ser.reset_output_buffer()
         ser.write(send_bytes)
@@ -99,15 +99,13 @@ if __name__ == "__main__":
         baudrate=OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=3,
+        timeout=1,
     ) as ser:
         ax25_proto = AX25("ATLAS", "AKITO")
         send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
         send_bytes = ax25_proto.stuff(send_bytes)
         print([hex(byte) for byte in send_bytes])
-        print(hex(send_bytes[0]))
-        print([hex(byte) for byte in send_bytes[1:]])
-        ser.write(send_bytes)
+        ser.write(send_bytes.ljust(30, b"\x00"))
         print("Frame Sent")
         rcv_frame_bytes = ser.read(10000)
         start_index = rcv_frame_bytes.find(b"\x7e")
@@ -126,7 +124,7 @@ if __name__ == "__main__":
     time.sleep(0.1)
     cmd_ping = create_cmd_ping()
     send_command(cmd_ping, "/dev/ttyUSB0")
-    # time.sleep(0.1)
-    # send_command(cmd_ping, "/dev/ttyUSB0")
+    time.sleep(0.1)
+    send_command(cmd_ping, "/dev/ttyUSB0")
     fec_coder = FEC()
     fec_coder.destroy()
