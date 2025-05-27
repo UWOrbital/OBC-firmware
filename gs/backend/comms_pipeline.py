@@ -35,7 +35,7 @@ def send_command(command: CmdMsg, com_port: str) -> None:
         baudrate=OBC_UART_BAUD_RATE,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_TWO,
-        timeout=1,
+        timeout=5,
     ) as ser:
         ser.reset_output_buffer()
         ser.write(send_bytes)
@@ -123,8 +123,10 @@ if __name__ == "__main__":
         rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
         print(rcv_frame.control.frame_type)
 
-    time.sleep(1)
+    time.sleep(0.1)
     cmd_ping = create_cmd_ping()
     send_command(cmd_ping, "/dev/ttyUSB0")
+    # time.sleep(0.1)
+    # send_command(cmd_ping, "/dev/ttyUSB0")
     fec_coder = FEC()
     fec_coder.destroy()

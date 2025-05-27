@@ -14,7 +14,9 @@
 #include "obc_scheduler_config.h"
 #include "os_mpu_wrappers.h"
 #include "os_projdefs.h"
+#include "reg_sci.h"
 #include "rffm6404.h"
+#include "sci.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
 #include "uplink_decoder.h"
@@ -221,7 +223,7 @@ static obc_error_code_t getNextCommsState(comms_event_id_t event, comms_state_t 
     case COMMS_STATE_UPLINKING:
       switch (event) {
         case COMMS_EVENT_UPLINK_FINISHED:
-          *state = COMMS_STATE_UPLINKING;
+          *state = COMMS_STATE_DOWNLINKING;
           return OBC_ERR_CODE_SUCCESS;
         case COMMS_EVENT_START_DISC:
           *state = COMMS_STATE_SENDING_DISC;
@@ -314,9 +316,6 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
 
     LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
     if (errCode == 17) {
-      uint8_t bytes[4] = {0x5A, queueMsg.eventID, commsState, 0x5A};
-      sciSendBytes(bytes, 4, portMAX_DELAY, UART_PRINT_REG);
-      gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
     }
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       continue;
@@ -536,7 +535,6 @@ static obc_error_code_t handleUplinkingState(void) {
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
-  vTaskDelay(100);
   comms_event_t uplinkFinishedEvent = {.eventID = COMMS_EVENT_UPLINK_FINISHED};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&uplinkFinishedEvent));
   return OBC_ERR_CODE_SUCCESS;

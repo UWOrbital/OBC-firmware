@@ -350,7 +350,6 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
-  sciSendBytes(transmitEvent.ax25Pkt.data, transmitEvent.ax25Pkt.length, portMAX_DELAY, UART_PRINT_REG);
 
   return OBC_ERR_CODE_SUCCESS;
 }

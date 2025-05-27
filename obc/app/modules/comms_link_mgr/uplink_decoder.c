@@ -186,9 +186,6 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
     memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
     interfaceErr = rsDecode(rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
-    if (interfaceErr == OBC_GS_ERR_CODE_REED_SOL_DEC_ERR) {
-      gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
-    }
     if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
       return OBC_ERR_CODE_FEC_DECODE_FAILURE;
     }
