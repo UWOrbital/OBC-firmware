@@ -315,8 +315,6 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
     }
 
     LOG_IF_ERROR_CODE(getNextCommsState(queueMsg.eventID, &commsState));
-    if (errCode == 17) {
-    }
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       continue;
     }
@@ -548,7 +546,8 @@ static obc_error_code_t handleUplinkingState(void) {
   // portMAX_DELAY, UART_READ_REG));
   uint8_t readBytes[AX25_MAXIMUM_PKT_LEN] = {0};
   RETURN_IF_ERROR_CODE(sciReadBytes(readBytes, 300, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
-  for (uint16_t i = 0; i < AX25_MAXIMUM_PKT_LEN; i++) {
+  uint16_t i;
+  for (i = 0; i < AX25_MAXIMUM_PKT_LEN; i++) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&readBytes[i]));
     if (readBytes[i] == AX25_FLAG && i > 0) {
       break;
@@ -560,6 +559,7 @@ static obc_error_code_t handleUplinkingState(void) {
   LOG_IF_ERROR_CODE(cc1120ReceiveToDecodeTask());
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 #endif
+  vTaskDelay(100);
   comms_event_t uplinkFinishedEvent = {.eventID = COMMS_EVENT_UPLINK_FINISHED};
   RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&uplinkFinishedEvent));
   return OBC_ERR_CODE_SUCCESS;
