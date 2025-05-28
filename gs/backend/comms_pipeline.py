@@ -71,7 +71,6 @@ def send_command(command: CmdMsg, com_port: str, print_data: bool = False) -> No
             print(rcv_frame_bytes[end_index + 1 :].decode("utf-8"))
 
         with open("logs.txt", "a") as file:
-            print("Writing to file")
             file.write(str(rcv_frame_bytes[:start_index].decode("utf-8")))
             file.write(str(rcv_frame_bytes[end_index + 1 :].decode("utf-8")))
 
