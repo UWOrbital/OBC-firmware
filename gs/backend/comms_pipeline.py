@@ -222,7 +222,6 @@ def poll(com_port: str) -> None:
         timeout=1,
     ) as ser:
         while True:
-            print("Hallo")
             with open("logs.txt", "a") as file:
                 file.write(ser.read(10000).decode("utf-8"))
 
