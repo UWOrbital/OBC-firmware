@@ -48,7 +48,10 @@ class GroundStationShell(Cmd):
             print("Connection Request has already been sent. Aborting...")
             return
 
-        send_conn_request(self._com_port)
+        try:
+            send_conn_request(self._com_port)
+        except IndexError:
+            print("Connection request was not successful. Try resetting the board")
         self._conn_request_sent = True
 
     def do_send_command(self, line: str) -> None:
