@@ -68,7 +68,6 @@ extern "C" {
 typedef struct {
   uint32_t sectionSize;
   uint32_t sectionVersion;
-  uint32_t sectionVersion;
   uint32_t crc32;
 } obc_persist_section_header_t;
 
