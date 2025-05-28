@@ -1,18 +1,18 @@
 #include "command_manager.h"
+#include "alarm_handler.h"
+#include "command_callbacks.h"
+#include "obc_assert.h"
+#include "obc_errors.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
-#include "command_callbacks.h"
-#include "obc_scheduler_config.h"
-#include "obc_errors.h"
-#include "obc_time.h"
 #include "obc_logging.h"
-#include "obc_assert.h"
-#include "alarm_handler.h"
+#include "obc_scheduler_config.h"
+#include "obc_time.h"
 
 #include <FreeRTOS.h>
-#include <sys_common.h>
-#include <os_task.h>
 #include <os_queue.h>
+#include <os_task.h>
+#include <sys_common.h>
 
 #define COMMAND_QUEUE_LENGTH 25UL
 #define COMMAND_QUEUE_ITEM_SIZE sizeof(cmd_msg_t)
@@ -27,7 +27,8 @@ typedef struct {
   cmd_opt_t opts;  // Mask of command options
 } cmd_info_t;
 
-// CMD_POLICY_PROD is a subset of CMD_POLICY_RND. That is, if a command has PROD policy, it can also be run in RND.
+// CMD_POLICY_PROD is a subset of CMD_POLICY_RND. That is, if a command has PROD
+// policy, it can also be run in RND.
 static const cmd_info_t cmdsConfig[] = {
     [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
@@ -71,7 +72,8 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
   // Used to track whether a safety-critical command is currently being executed
-  // This is inefficient space-wise, but simplifies the code. We can optimize later if needed.
+  // This is inefficient space-wise, but simplifies the code. We can optimize
+  // later if needed.
   static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {false};
 
   while (1) {
