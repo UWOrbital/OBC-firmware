@@ -25,6 +25,7 @@ class GroundStationShell(Cmd):
         self.parser = arg_parse()
         self._com_port: str = ""
         self._conn_request_sent: bool = False
+        self._verbose: bool = False
 
     intro = """
 
@@ -49,9 +50,10 @@ class GroundStationShell(Cmd):
             return
 
         try:
-            send_conn_request(self._com_port)
+            send_conn_request(self._com_port, self._verbose)
         except IndexError:
             print("Connection request was not successful. Try resetting the board")
+            return
         self._conn_request_sent = True
 
     def do_send_command(self, line: str) -> None:
@@ -99,7 +101,7 @@ class GroundStationShell(Cmd):
             case _:
                 print("Invalid Command to Send")
 
-        send_command(command, self._com_port)
+        send_command(command, self._com_port, self._verbose)
         print(parsed)
 
     def do_set_comm_port(self, line: str) -> None:
@@ -115,6 +117,30 @@ class GroundStationShell(Cmd):
             return
 
         self._com_port = line
+
+    def do_set_verbosity(self, line: str) -> None:
+        """
+        Sets the verbosity of the commands used
+        """
+        args = line.lower()
+        if args == "true":
+            self._verbose = True
+        elif args == "false":
+            self._verbose = False
+        else:
+            print("Invalid Verbsoity Passed In")
+
+    def do_set_conn(self, line: str) -> None:
+        """
+        Configures whether the connection request was already sent via a boolean
+        """
+        args = line.lower()
+        if args == "true":
+            self._conn_request_sent = True
+        elif args == "false":
+            self._conn_request_sent = False
+        else:
+            print("Invalid Bool Passed In")
 
     def help_send_command(self) -> None:
         """
