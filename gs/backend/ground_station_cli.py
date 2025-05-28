@@ -59,16 +59,17 @@ class GroundStationShell(Cmd):
             if self.background_logging is not None:
                 self.background_logging.kill()
             send_conn_request(self._com_port, self._verbose)
-            if self.background_logging is not None:
-                self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
-                self.background_logging.start()
         except IndexError:
             if self.background_logging is not None and not self.background_logging.is_alive():
                 self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
                 self.background_logging.start()
             print("Connection request was not successful. Try resetting the board")
             return
-        self._conn_request_sent = True
+        else:
+            if self.background_logging is not None and not self.background_logging.is_alive():
+                self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
+                self.background_logging.start()
+            self._conn_request_sent = True
 
     def do_send_command(self, line: str) -> None:
         """
