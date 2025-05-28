@@ -29,7 +29,7 @@ class GroundStationShell(Cmd):
         self._com_port: str = ""
         self._conn_request_sent: bool = False
         self._verbose: bool = False
-        self.background_logging = None
+        self.background_logging: Process | None = None
         with open("logs.txt", "w") as file:
             file.write("LOGS (Date: " + str(datetime.now()) + ")\n")
 
