@@ -68,7 +68,12 @@ def send_command(command: CmdMsg, com_port: str, print_data: bool = False) -> No
         if start_index != 0 and print_data:
             print("----- Data Received before and after Frame ----- ")
             print(rcv_frame_bytes[:start_index].decode("utf-8"))
-            print(rcv_frame_bytes[end_index:].decode("utf-8"))
+            print(rcv_frame_bytes[end_index + 1 :].decode("utf-8"))
+
+        with open("logs.txt", "a") as file:
+            print("Writing to file")
+            file.write(str(rcv_frame_bytes[:start_index].decode("utf-8")))
+            file.write(str(rcv_frame_bytes[end_index + 1 :].decode("utf-8")))
 
         # Isolate the frame
         read_bytes = rcv_frame_bytes[start_index : end_index + 1]
@@ -143,7 +148,11 @@ def send_conn_request(com_port: str, print_data: bool = False) -> None:
         if start_index != 0 and print_data:
             print("----- Data Received before and after Frame ----- ")
             print(rcv_frame_bytes[:start_index].decode("utf-8"))
-            print(rcv_frame_bytes[end_index:].decode("utf-8"))
+            print(rcv_frame_bytes[end_index + 1 :].decode("utf-8"))
+
+        with open("logs.txt", "a") as file:
+            file.write(str(rcv_frame_bytes[:start_index].decode("utf-8")))
+            file.write(str(rcv_frame_bytes[end_index + 1 :].decode("utf-8")))
 
         rcv_frame_bytes = rcv_frame_bytes[start_index : end_index + 1]
         rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
@@ -199,6 +208,23 @@ def arg_parse() -> ArgumentParser:
     )
 
     return parser
+
+
+def poll(com_port: str) -> None:
+    """
+    Sends the initial connection request to the board
+    """
+    with serial.Serial(
+        com_port,
+        baudrate=OBC_UART_BAUD_RATE,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_TWO,
+        timeout=1,
+    ) as ser:
+        while True:
+            print("Hallo")
+            with open("logs.txt", "a") as file:
+                file.write(ser.read(10000).decode("utf-8"))
 
 
 if __name__ == "__main__":

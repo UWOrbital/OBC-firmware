@@ -1,20 +1,19 @@
 #include "logger.h"
-#include "obc_errors.h"
 #include "obc_logging.h"
+#include "obc_errors.h"
 #include "obc_print.h"
 #include "obc_time.h"
-#include "os_mpu_wrappers.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
+#include <sys_common.h>
 #include <os_queue.h>
 #include <redposix.h>
-#include <sys_common.h>
 
+#include <string.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 #define LOG_FILE_NAME "log.log"
 
@@ -26,9 +25,8 @@
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 
 #if defined(LOG_DATE_TIME)
-// When logging over the air to ground station, we should timestamp using UNIX
-// and have a tool to convert unix to date time on the GS side for all the logs
-// but for development it's easier to log as date time
+// When logging over the air to ground station, we should timestamp using UNIX and have a tool to convert unix to date
+// time on the GS side for all the logs but for development it's easier to log as date time
 #define GET_TIMESTAMP getCurrentDateTime()
 #define GET_TIMESTAMP_FROM_ISR getCurrentDateTimeinISR()
 #elif defined(LOG_UNIX)
@@ -54,8 +52,7 @@ static uint8_t loggerQueueStack[LOGGER_QUEUE_LENGTH * LOGGER_QUEUE_ITEM_SIZE];
  * @brief Sends an event to the logger queue
  *
  * @param event Pointer to the event to send
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the
- * queue
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
 static obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTimeTicks);
 
@@ -63,8 +60,7 @@ static obc_error_code_t sendToLoggerQueue(logger_event_t *event, size_t blockTim
  * @brief Sends an event to the logger queue from an ISR
  *
  * @param event Pointer to the event to send
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the
- * queue
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
 static obc_error_code_t sendToLoggerQueueFromISR(logger_event_t *event);
 
@@ -223,8 +219,7 @@ obc_error_code_t logErrorCode(log_level_t msgLevel, const char *file, uint32_t l
   logEvent.timestamp = GET_TIMESTAMP;
 #endif
 
-  // send the event to the logger queue and don't try to log any error that
-  // occurs
+  // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueue(&logEvent, LOGGER_QUEUE_TX_WAIT_PERIOD);
 }
 
@@ -269,8 +264,7 @@ obc_error_code_t logErrorCodeFromISR(log_level_t msgLevel, const char *file, uin
   logEvent.timestamp = GET_TIMESTAMP_FROM_ISR;
 #endif
 
-  // send the event to the logger queue and don't try to log any error that
-  // occurs
+  // send the event to the logger queue and don't try to log any error that occurs
   return sendToLoggerQueueFromISR(&logEvent);
 }
 

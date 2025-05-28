@@ -7,11 +7,11 @@
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
 
-#include "arducam.h"
-#include "cc1120.h"
-#include "cc1120_txrx.h"
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
+#include "cc1120_txrx.h"
+#include "cc1120.h"
+#include "arducam.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -36,7 +36,7 @@ static QueueHandle_t stateMgrQueueHandle = NULL;
 static StaticQueue_t stateMgrQueue;
 static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
 
-static comms_state_t commsManagerState = COMMS_STATE_AWAITING_CONN;
+static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
 
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
@@ -165,9 +165,8 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
     if (xQueueReceive(stateMgrQueueHandle, &inMsg, STATE_MGR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
-      // vTaskDelay(pdMS_TO_TICKS(1000));
-      // gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT,
-      // STATE_MGR_DEBUG_LED_GIO_BIT);
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 #endif
       continue;
     }
