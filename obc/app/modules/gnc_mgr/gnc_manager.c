@@ -26,8 +26,8 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
 
   //Spam logs at startup
     for (int i = 0; i < 20; i++) {
-      LOG_DEBUG("BLOCK TEST LOG");
-      //LOG_ERROR_CODE(i);
+      //LOG_DEBUG("BLOCK TEST LOG");
+      LOG_ERROR_CODE(i);
       printf("Finished log %d\n", i);
     }
 
