@@ -1,6 +1,5 @@
-import pytest
 from ax25 import FrameType
-from hypothesis import example, given, settings
+from hypothesis import given
 from hypothesis.strategies import binary
 from interfaces import RS_ENCODED_DATA_SIZE
 from interfaces.obc_gs_interface.ax25 import AX25
