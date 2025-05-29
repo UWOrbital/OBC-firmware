@@ -1,4 +1,0 @@
-# file: /home/gaudium/Desktop/dev/OBC-firmware/obc/tools/python/bin_formatter.py
-# hypothesis_version: 6.131.30
-
-[0.1, 128, '-i', '-p', '-v', '.bin', '1', '<III', 'D', 'Done writing app', 'OBC-firmware.bin', 'OBC-metadata.bin', 'Serial port number', '__main__', '_formatted.bin', 'ascii', 'd', 'input_path', 'port', 'version']

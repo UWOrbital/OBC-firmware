@@ -1,4 +1,0 @@
-# file: /home/gaudium/Desktop/dev/OBC-firmware/gs/backend/sun/ephemeris.py
-# hypothesis_version: 6.131.30
-
-[1e-07, 130, 200, 400, 90000, '$$EOE', '$$SOE', '%m/%d/%Y %I:%M:%S %p', ', ', '-', '--exclude', '--log', '--output', '--print', '--step-size', '--target', '-e', '-l', '-o', '-p', '-s', '-t', '.bin', '1.2', '5m', 'I', 'JD', 'JD:', 'X:', 'Y:', 'Z:', '__main__', 'ab', 'both', 'd', 'error', 'f', 'first', 'h', 'last', 'm', 'message', 'none', 'output.bin', 'rb+', 'result', 's', 'signature', 'start_time', 'stop_time', 'sun', 'utf-8', 'version', 'wb']
