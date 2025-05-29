@@ -1,10 +1,7 @@
 import random
-from ctypes import POINTER, Structure, c_uint, c_uint8, pointer
 
-import pytest
 from ax25 import FrameType
 from interfaces import RS_DECODED_DATA_SIZE
-from interfaces.obc_gs_interface import ax25
 from interfaces.obc_gs_interface.aes128 import AES128
 from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (

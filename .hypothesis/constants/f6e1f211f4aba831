@@ -1,0 +1,4 @@
+# file: /home/gaudium/Desktop/dev/OBC-firmware/interfaces/obc_gs_interface/ax25/__init__.py
+# hypothesis_version: 6.131.30
+
+[b'\x00', b'Leafs in four', b'UW Orbital', '0', '0b', '7E', 'AKITO', 'ATLAS', 'CANUCK', 'Data: ', 'Destination: ', 'Frame Type: ', 'LEAFS', 'Source: ', 'UTF-8', '__main__', 'big']
