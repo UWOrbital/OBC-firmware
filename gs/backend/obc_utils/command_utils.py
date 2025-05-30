@@ -24,6 +24,8 @@ from interfaces.obc_gs_interface.commands import (
     create_cmd_uplink_disc,
 )
 
+# This is a constant value set in the python and OBC side as to what length of I Frame the OBC will be waiting to
+# receive. This must be followed or the obc will not function as expected
 _PADDING_REQUIRED: Final[int] = 300
 
 
@@ -31,12 +33,13 @@ def send_command(args: str, com_port: str) -> Frame | None:
     """
     A function to send a command up to the cube satellite and awaits a response
 
-    :param command: A command as a CmdMsg structure to be passed into a function
+    :param args: A string that contains all the arguments the user passed in
     :param com_port: The port that the board is connected to (i.e. which port the program should use)
-    :param print_data: Whether the function should print to console or not
     """
+    # Using generate commands, we generate a command based on the arguments passed in
     command = generate_command(args)
 
+    # We do a check to see if the arguments were properly passed in otherwise we return None
     if command is None:
         return None
 
@@ -90,6 +93,7 @@ def send_conn_request(com_port: str) -> Frame:
 
     :param com_port: The port which the function should use to send and receive on
     """
+    # Initialize pyserial with the correct parameters
     with serial.Serial(
         com_port,
         baudrate=OBC_UART_BAUD_RATE,
@@ -97,19 +101,24 @@ def send_conn_request(com_port: str) -> Frame:
         stopbits=serial.STOPBITS_TWO,
         timeout=1,
     ) as ser:
+        # Encode using AX25, remember these frames don't have data fields so there's no need for fec or aes128
         ax25_proto = AX25("ATLAS", "AKITO")
         send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
         send_bytes = ax25_proto.stuff(send_bytes)
         ser.write(send_bytes.ljust(30, b"\x00"))
 
+        # We wait for an acknowledge from the board
         rcv_frame_bytes = ser.read(10000)
         start_index = rcv_frame_bytes.find(b"\x7e")
         end_index = rcv_frame_bytes.rfind(b"\x7e")
+        # TODO: Handle invalid acknowledge frame
 
+        # Write out any logs that we received while receiving the connection
         with open("obc_utils/logs.txt", "a") as file:
             file.write(str(rcv_frame_bytes[:start_index].decode("utf-8")))
             file.write(str(rcv_frame_bytes[end_index + 1 :].decode("utf-8")))
 
+        # Decode the frame
         rcv_frame_bytes = rcv_frame_bytes[start_index : end_index + 1]
         rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
         rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
@@ -118,9 +127,13 @@ def send_conn_request(com_port: str) -> Frame:
 
 def arg_parse() -> ArgumentParser:
     """
-    Argument Parsing for the send and receive commands
+    This is a parent argument parser for all commands since all commands share the timestamp and command name in common
     """
+    # We set add_help False here to avoid the child parsers from raising errors.
+    # exit_on_error is also set to False to allow us to handle errors ourselves
     parser = ArgumentParser(add_help=False, exit_on_error=False)
+
+    # Command Argument
     parser.add_argument(
         "-c",
         "--command",
@@ -130,6 +143,8 @@ def arg_parse() -> ArgumentParser:
         choices=[x.name for x in CmdCallbackId],
         help="The command to send to the board",
     )
+
+    # Timestamp Argument
     parser.add_argument(
         "-t",
         "--timestamp",
@@ -148,8 +163,6 @@ def arg_parse() -> ArgumentParser:
 def parse_cmd_rtc_time_sync() -> ArgumentParser:
     """
     A function to parse the argument for the rtc_time_sync command
-
-    :param args: Arguments passed in (rtc_time_sync: unixTime)
     """
     parent_parser = arg_parse()
     parser = ArgumentParser(parents=[parent_parser], exit_on_error=False)
@@ -167,8 +180,6 @@ def parse_cmd_rtc_time_sync() -> ArgumentParser:
 def parse_cmd_downlink_logs_next_pass() -> ArgumentParser:
     """
     A function to parse the argument for the downlink_logs_next_pass command
-
-    :param args: Arguments passed in (log_level: int)
     """
     parent_parser = arg_parse()
     parser = ArgumentParser(parents=[parent_parser], exit_on_error=False)
@@ -213,6 +224,7 @@ def generate_command(args: str) -> CmdMsg | None:
         create_cmd_uplink_disc,
     ]
 
+    # Loop through each of the specific parses and see if we get a valid parse on any of them
     for func in child_parsers:
         try:
             parser = func()
@@ -220,14 +232,20 @@ def generate_command(args: str) -> CmdMsg | None:
         except ArgumentError:
             continue
         else:
+            # Once we do get a valid parse we try to see if the command is in the list of commands by converting it to
+            # the CmdCallbackId Enum
             try:
                 command_enum = CmdCallbackId[command_args.command]
             except KeyError:
                 print("Invalid Command")
                 return None
             else:
-                # We check how many arguments have been parsed and call functions accordingly
+                # We check how many arguments are in the parsed object and call functions accordingly.
+                # This is the reason why it's important to use the arg1, arg2, arg3 naming convention when creating
+                # specific parsers
                 if hasattr(command_args, "arg3"):
+                    # This line is just accessing a function in the commmand_factories list and passing in arguments
+                    # via brackets
                     command = commmand_factories[command_enum.value](
                         command_args.arg1, command_args.arg2, command_args.arg3, command_args.timestamp
                     )
@@ -240,12 +258,14 @@ def generate_command(args: str) -> CmdMsg | None:
                 return command
 
     parser = arg_parse()
+    # If the command did not pass any of the specific parsers, we try the general one
     try:
         command_args = parser.parse_args(arguments)
     except ArgumentError:
         print("Invalid Commands")
         return None
     else:
+        # Same thing as before, we try to convert to a CmdCallbackId Enum to see if the command if valid
         try:
             command_enum = CmdCallbackId[command_args.command]
         except KeyError:
@@ -259,6 +279,10 @@ def generate_command(args: str) -> CmdMsg | None:
 def poll(com_port: str, print_console: bool = False) -> None:
     """
     A function that is supposed to run in the background to keep receiving logs from the board
+
+    :param com_port: The port that the board is connected to so it can poll
+    :param print_console: Whether the function should print to console or not. By default, this is set to False. This is
+                          useful for the CLI where sometimes we want to print out the received logs from the board
     """
     with serial.Serial(
         com_port,
