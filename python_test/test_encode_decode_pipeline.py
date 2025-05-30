@@ -1,7 +1,7 @@
 import random
 
 from ax25 import FrameType
-from interfaces import RS_DECODED_DATA_SIZE
+from interfaces import INFO_FIELD_END_POSITION, INFO_FIELD_START_POSITION, RS_DECODED_DATA_SIZE
 from interfaces.obc_gs_interface.aes128 import AES128
 from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (
@@ -308,9 +308,9 @@ def test_receive():
     # Instantiate FEC class to error correct
     fec_coder = FEC()
     # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
-    data_to_decode = fec_coder.decode(bin[17:272])
+    data_to_decode = fec_coder.decode(bin[INFO_FIELD_START_POSITION : INFO_FIELD_END_POSITION + 1])
     # With the data decoded we need to add the rest of the data back to get a full frame
-    decoded_data = bytes(bin[:17] + data_to_decode + bin[272:])
+    decoded_data = bytes(bin[:INFO_FIELD_START_POSITION] + data_to_decode + bin[INFO_FIELD_END_POSITION + 1 :])
 
     # Now we can finally decode the frame and extract information
     rcv_frame = ax25_proto.decode_frame(decoded_data)
@@ -324,7 +324,10 @@ def test_receive():
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
     )
-    decrypted_data = aes_cipher.decrypt(frame_data)
+    decrypted_data = b""
+
+    if frame_data is not None:
+        decrypted_data = aes_cipher.decrypt(bytes(frame_data))
 
     # What the data should be and see if it matches
     intended_str = "64 121 190 31 108 53 202 59 88 177 150 23 4 237 34 179 112 233 110 15 156 165 122 43 136 33 70 7 52 93 210 163 160 89 30 255 204 21 42 27 184 145 246 247 100 205 130 147 208 201 206 239 252 133 218 11 232 1 166 231 148 61 50 131 0 57 126 223 44 245 138 251 24 113 86 215 196 173 226 115 48 169 46 207 92 101 58 235 72 225 6 199 244 29 146 99 96 25 222 191 140 213 234 219 120 81 182 183 36 141 66 83 144 137 142 175 188 69 154 203 168 193 102 167 84 253 242 67 192 249 62 159 236 181 74 187 216 49 22 151 132 109 162 51 240 105 238 143 28 37 250 171 8 161 198 135 180 221 82 35 32 217 158 127 76 149 170 155 56 17 118 119 228 77 2 19 80 73 78 111 124 5 90 139 104 129 38 103 20 189 178 3 128 185 254 95 172 117 10 123 152 241 214 87 68 45 98 243 176 41 174 79 220 229 186 107 200 97 134 71 116 157 18 "
@@ -345,7 +348,7 @@ def test_send():
     # Generating pseudo-random data
     data = []
     random.seed(777)
-    for i in range(RS_DECODED_DATA_SIZE):
+    for _ in range(RS_DECODED_DATA_SIZE):
         data.append(random.randint(0, 255))
 
     # Instantaite the aes cipher with the same defaults from the c implementation
@@ -354,7 +357,7 @@ def test_send():
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
     )
     # Encrypt data
-    encrypted_data = aes_cipher.encrypt(data)
+    encrypted_data = aes_cipher.encrypt(bytes(data))
     # Encode data for error correction
     encode_data = fec_coder.encode(bytes(encrypted_data))
     # Create the frame
@@ -754,9 +757,9 @@ def test_receive_command():
     # Instantiate FEC class to error correct
     fec_coder = FEC()
     # NOTE: 17 (inclusive) to 272 (exclusive) is the range for info bytes that are needed for the decoding
-    data_to_decode = fec_coder.decode(bin[17:272])
+    data_to_decode = fec_coder.decode(bin[INFO_FIELD_START_POSITION : INFO_FIELD_END_POSITION + 1])
     # With the data decoded we need to add the rest of the data back to get a full frame
-    decoded_data = bytes(bin[:17] + data_to_decode + bin[272:])
+    decoded_data = bytes(bin[:INFO_FIELD_START_POSITION] + data_to_decode + bin[INFO_FIELD_END_POSITION + 1 :])
 
     # Now we can finally decode the frame and extract information
     rcv_frame = ax25_proto.decode_frame(decoded_data)

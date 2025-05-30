@@ -5,17 +5,7 @@ from multiprocessing import Process
 
 from serial import Serial, SerialException
 
-from gs.backend.comms_pipeline import arg_parse, poll, send_command, send_conn_request
-from interfaces.obc_gs_interface.commands import (
-    CmdCallbackId,
-    create_cmd_downlink_telem,
-    create_cmd_end_of_frame,
-    create_cmd_exec_obc_reset,
-    create_cmd_mirco_sd_format,
-    create_cmd_ping,
-    create_cmd_rtc_sync,
-    create_cmd_uplink_disc,
-)
+from gs.backend.obc_utils.command_utils import arg_parse, poll, send_command, send_conn_request
 
 
 class GroundStationShell(Cmd):
@@ -30,7 +20,7 @@ class GroundStationShell(Cmd):
         self._conn_request_sent: bool = False
         self._verbose: bool = False
         self.background_logging: Process | None = None
-        with open("logs.txt", "w") as file:
+        with open("obc_utils/logs.txt", "w") as file:
             file.write("LOGS (Date: " + str(datetime.now()) + ")\n")
 
     intro = """
@@ -58,7 +48,7 @@ class GroundStationShell(Cmd):
         try:
             if self.background_logging is not None:
                 self.background_logging.kill()
-            send_conn_request(self._com_port, self._verbose)
+            send_conn_request(self._com_port)
         except IndexError:
             if self.background_logging is not None and not self.background_logging.is_alive():
                 self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
@@ -75,54 +65,21 @@ class GroundStationShell(Cmd):
         """
         Sends a command to the ground station
         """
-        try:
-            parsed = self.parser.parse_args(line.split())
-        except SystemExit:
-            if line.split()[0] != "-h" and line.split()[0] != "--help":
-                print("Invalid input into console")
-        else:
-            if not self._com_port:
-                print("Com port needs to be configured using set_comm_port. Aborting...")
-                return
-            if not self._conn_request_sent:
-                print("Connection Request needs to be sent using send_conn_request. Aborting...")
-                return
+        if not self._com_port:
+            print("Com port needs to be configured using set_comm_port. Aborting...")
+            return
+        if not self._conn_request_sent:
+            print("Connection Request needs to be sent first. Aborting...")
+            return
 
-            command = create_cmd_end_of_frame()
-            match parsed.command:
-                case str(CmdCallbackId.CMD_PING.name):
-                    command = create_cmd_ping(parsed.timestamp)
-                case str(CmdCallbackId.CMD_EXEC_OBC_RESET.name):
-                    command = create_cmd_exec_obc_reset()
-                case str(CmdCallbackId.CMD_RTC_SYNC.name):
-                    if parsed.rtc_sync is None:
-                        print("Unixtime not provided for RTC Sync. Aborting...")
-                        return
-                    command = create_cmd_rtc_sync(parsed.rtc_sync, parsed.timestamp)
-                case str(CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS.name):
-                    if parsed.log_level is None:
-                        print("Log Level not provided. Aborting...")
-                        return
-                    command = create_cmd_rtc_sync(parsed.log_level, parsed.timestamp)
-                case str(CmdCallbackId.CMD_MICRO_SD_FORMAT.name):
-                    command = create_cmd_mirco_sd_format(parsed.timestamp)
-                case str(CmdCallbackId.CMD_PING.name):
-                    command = create_cmd_ping(parsed.timestamp)
-                case str(CmdCallbackId.CMD_DOWNLINK_TELEM.name):
-                    command = create_cmd_downlink_telem(parsed.timestamp)
-                case str(CmdCallbackId.CMD_UPLINK_DISC.name):
-                    command = create_cmd_uplink_disc(parsed.timestamp)
-                case _:
-                    print("Invalid Command to Send")
+        if self.background_logging is not None:
+            self.background_logging.kill()
 
-            if self.background_logging is not None:
-                self.background_logging.kill()
+        send_command(line, self._com_port)
 
-            send_command(command, self._com_port, self._verbose)
-
-            if self.background_logging is not None and not self.background_logging.is_alive():
-                self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
-                self.background_logging.start()
+        if self.background_logging is not None and not self.background_logging.is_alive():
+            self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
+            self.background_logging.start()
 
     def do_set_comm_port(self, line: str) -> None:
         """
@@ -142,10 +99,12 @@ class GroundStationShell(Cmd):
         """
         Start writing logs from the board in a file
         """
+        if not self._com_port:
+            print("Com port needs to be configured using set_comm_port. Aborting...")
+            return
         if self.background_logging is None or not self.background_logging.is_alive():
             self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
             self.background_logging.start()
-            print("Started Logging")
         else:
             print("Logging has already been started")
 
@@ -165,8 +124,24 @@ class GroundStationShell(Cmd):
         """
         Prints out logs
         """
-        with open("logs.txt") as file:
+        if not self._com_port:
+            print("Com port needs to be configured using set_comm_port. Aborting...")
+            return
+
+        with open("obc_utils/logs.txt") as file:
             print(file.read())
+
+        if self.background_logging is not None:
+            self.background_logging.kill()
+
+        try:
+            poll(self._com_port, True)
+        except KeyboardInterrupt:
+            print("Exiting Polling")
+
+        if self.background_logging is not None and not self.background_logging.is_alive():
+            self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
+            self.background_logging.start()
 
     def do_set_conn(self, line: str) -> None:
         """

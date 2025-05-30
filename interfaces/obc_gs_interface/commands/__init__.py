@@ -5,7 +5,11 @@ from typing import Final
 from interfaces import MAX_CMD_MSG_SIZE, MAX_REPONSE_PACKED_SIZE, RS_DECODED_DATA_SIZE
 from interfaces.obc_gs_interface import interface
 
-## Ctypes Declerations for CommandPackUnpack
+# ######################################################################
+# ||                                                                  ||
+# ||          Ctype Declerations for Command Pack and Unpack          ||
+# ||                                                                  ||
+# ######################################################################
 
 
 class RtcSyncCmdData(Structure):
@@ -54,7 +58,11 @@ interface.packCmdMsg.argtypes = (
 interface.packCmdMsg.restype = c_uint
 
 
-## Ctypes Declerations for CommandResponsePackUnpack
+# ######################################################################
+# ||                                                                  ||
+# ||     Ctype Declerations for Command Response Pack and Unpack      ||
+# ||                                                                  ||
+# ######################################################################
 
 
 # NOTE: Just like the C implementation, this is a sample implementation. Add implemetnations as command responses are
@@ -96,7 +104,11 @@ interface.unpackCommandResponse.argtypes = (POINTER(c_uint8 * MAX_REPONSE_PACKED
 interface.unpackCommandResponse.restype = c_uint
 
 
-## Enum Declerations
+# ######################################################################
+# ||                                                                  ||
+# ||                        ENUM Declerations                         ||
+# ||                                                                  ||
+# ######################################################################
 # NOTE: Update these files accordingly when the C Enums are updated
 
 
@@ -127,7 +139,11 @@ class CmdResponseErrorCode(IntEnum):
     CMD_RESPONSE_ERROR = 1
 
 
-## Command Factories
+# ######################################################################
+# ||                                                                  ||
+# ||                        Command Factories                         ||
+# ||                                                                  ||
+# ######################################################################
 # NOTE: Update these when adding in new commands
 
 
@@ -272,7 +288,11 @@ def create_cmd_uplink_disc(unixtime_of_execution: int | None = None) -> CmdMsg:
     return cmd_msg
 
 
-## Class Implementation for CommandPackUnpack
+# ######################################################################
+# ||                                                                  ||
+# ||             Command Pack and Unpack Implementations              ||
+# ||                                                                  ||
+# ######################################################################
 
 
 _PACK_OFFSET_INITIAL: Final[int] = 0
@@ -342,7 +362,11 @@ def unpack_command(cmd_msg_packed: bytes) -> tuple[list[CmdMsg], bytes]:
     return (cmd_msg_list, bytes_not_unpacked)
 
 
-## Class implementation for CommandReponsePackUnpack
+# ######################################################################
+# ||                                                                  ||
+# ||         Command Response Pack and Unpack Implementations         ||
+# ||                                                                  ||
+# ######################################################################
 
 
 def pack_command_response(cmd_msg_response: CmdUnpackedReponse) -> bytes:
