@@ -7,11 +7,11 @@
 #include "obc_scheduler_config.h"
 #include "obc_time.h"
 
+#include "arducam.h"
+#include "cc1120.h"
+#include "cc1120_txrx.h"
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
-#include "cc1120_txrx.h"
-#include "cc1120.h"
-#include "arducam.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>

@@ -5,6 +5,9 @@
 #include "obc_gs_errors.h"
 
 #include <gtest/gtest.h>
+#include <cstdio>
+#include <iostream>
+#include <stdio.h>
 
 // CMD_EXEC_OBC_RESET
 TEST(TestCommandPackUnpack, ValidCmdExecObcResetPackUnpack) {
