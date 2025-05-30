@@ -46,7 +46,7 @@ def encode(data: bytes) -> bytes:
     return send_frame_stuffed
 
 
-def decode(data: bytes) -> Frame:
+def decode(data: bytes) -> Frame | None:
     """
     Given a stuffed ax25 frame with fec and aes128, this function decodes the data into a usable Frame object from the
     pyham_ax25 library
