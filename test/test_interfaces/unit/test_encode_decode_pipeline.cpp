@@ -33,7 +33,7 @@ TEST(TestEncodeDecode, sendData) {
   uint8_t output[RS_DECODED_SIZE];
   ASSERT_EQ(aes128Decrypt(&aesData, output, RS_DECODED_SIZE), 0);
 
-  setCurrentLinkDestCallSign((uint8_t *)"AKITO", CALLSIGN_LENGTH, DEFAULT_SSID);
+  setCurrentLinkDestCallSign(CUBE_SAT_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
 
   // Create fec data and encode
   packed_rs_packet_t fecData = {0};
@@ -241,7 +241,7 @@ TEST(TestEncodeDecode, sendCommandData) {
   cmdPing.id = CMD_PING;
   ASSERT_EQ(packCmdMsg(data, &packOffset, &cmdPing, &numPacked), OBC_GS_ERR_CODE_SUCCESS);
 
-  setCurrentLinkDestCallSign((uint8_t *)"AKITO", CALLSIGN_LENGTH, DEFAULT_SSID);
+  setCurrentLinkDestCallSign(CUBE_SAT_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
 
   // Create fec data and encode
   packed_rs_packet_t fecData = {0};

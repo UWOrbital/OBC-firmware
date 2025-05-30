@@ -1,6 +1,8 @@
 from ax25 import Frame, FrameType
 
 from interfaces import (
+    CUBE_SAT_CALLSIGN,
+    GROUND_STATION_CALLSIGN,
     INFO_FIELD_END_POSITION,
     INFO_FIELD_START_POSITION,
     RS_DECODED_DATA_SIZE,
@@ -22,10 +24,10 @@ def encode(data: bytes) -> bytes:
         raise ValueError("Invalid Argument: Data to encode is too long, it must be shorter or equal to 223 bytes")
 
     # Instantiate our ax25 class to get ready to create frame
-    ax25 = AX25("ATLAS", "AKITO")
+    ax25 = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     # Instantiate the fec class for forward error correction
     fec = FEC()
-    # Instantaite the aes cipher with the same defaults from the c implementation
+    # Instantiate the aes cipher with the same defaults from the c implementation
     aes = AES128(
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",
@@ -53,10 +55,10 @@ def decode(data: bytes) -> Frame:
     :return: A Frame object representing that data
     """
     # Instantiate our ax25 class to get ready to decode frame
-    ax25 = AX25("ATLAS", "AKITO")
+    ax25 = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     # Instantiate the fec class for forward error correction
     fec = FEC()
-    # Instantaite the aes cipher with the same defaults from the c implementation
+    # Instantiate the aes cipher with the same defaults from the c implementation
     aes = AES128(
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
         b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01",

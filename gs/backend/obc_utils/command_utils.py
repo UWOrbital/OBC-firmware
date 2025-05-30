@@ -7,6 +7,8 @@ from ax25 import Frame, FrameType
 
 from gs.backend.obc_utils.encode_decode import decode, encode
 from interfaces import (
+    CUBE_SAT_CALLSIGN,
+    GROUND_STATION_CALLSIGN,
     OBC_UART_BAUD_RATE,
 )
 from interfaces.command_framing import command_multi_pack
@@ -81,9 +83,10 @@ def send_command(args: str, com_port: str) -> Frame | None:
         if len(rcv_frame_bytes) > 255:
             rcv_frame = decode(rcv_frame_bytes)
         else:
-            ax25 = AX25("ATLAS", "AKITO")
+            ax25 = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
             rcv_frame = ax25.decode_frame(rcv_frame_bytes)
 
+        # TODO: Handle these return frames
         return rcv_frame
 
 
@@ -102,7 +105,7 @@ def send_conn_request(com_port: str) -> Frame:
         timeout=1,
     ) as ser:
         # Encode using AX25, remember these frames don't have data fields so there's no need for fec or aes128
-        ax25_proto = AX25("ATLAS", "AKITO")
+        ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
         send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
         send_bytes = ax25_proto.stuff(send_bytes)
         ser.write(send_bytes.ljust(30, b"\x00"))
@@ -158,8 +161,8 @@ def arg_parse() -> ArgumentParser:
 
 
 # The following are specific command parsers with one argument
-# NOTE: Updated these and always set the destinations of variables to arg1, arg2, arg3 and make the arguments required
-# Additionally, keep the same arguments when initiailizing the ArgumentParser Class
+# NOTE: Update these as you add enums and always set the destinations of variables to arg1, arg2, arg3 and make the
+# arguments required. Additionally, keep the same arguments when initiailizing the ArgumentParser Class
 def parse_cmd_rtc_time_sync() -> ArgumentParser:
     """
     A function to parse the argument for the rtc_time_sync command
@@ -246,6 +249,7 @@ def generate_command(args: str) -> CmdMsg | None:
                 if hasattr(command_args, "arg3"):
                     # This line is just accessing a function in the commmand_factories list and passing in arguments
                     # via brackets
+                    # This line also shows why the order is important of the functions in that list
                     command = commmand_factories[command_enum.value](
                         command_args.arg1, command_args.arg2, command_args.arg3, command_args.timestamp
                     )

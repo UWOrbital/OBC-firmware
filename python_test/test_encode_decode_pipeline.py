@@ -1,7 +1,13 @@
 import random
 
 from ax25 import FrameType
-from interfaces import INFO_FIELD_END_POSITION, INFO_FIELD_START_POSITION, RS_DECODED_DATA_SIZE
+from interfaces import (
+    CUBE_SAT_CALLSIGN,
+    GROUND_STATION_CALLSIGN,
+    INFO_FIELD_END_POSITION,
+    INFO_FIELD_START_POSITION,
+    RS_DECODED_DATA_SIZE,
+)
 from interfaces.obc_gs_interface.aes128 import AES128
 from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (
@@ -302,7 +308,7 @@ def test_receive():
     bin = bytearray(c_data)
 
     # Instantiate the ax25 class to unstuff
-    ax25_proto = AX25("ATLAS", "AKITO")
+    ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     bin = ax25_proto.unstuff(bytes(bin))
 
     # Instantiate FEC class to error correct
@@ -314,8 +320,8 @@ def test_receive():
 
     # Now we can finally decode the frame and extract information
     rcv_frame = ax25_proto.decode_frame(decoded_data)
-    assert str(rcv_frame.src) == "ATLAS"
-    assert str(rcv_frame.dst) == "AKITO"
+    assert str(rcv_frame.src) == GROUND_STATION_CALLSIGN
+    assert str(rcv_frame.dst) == CUBE_SAT_CALLSIGN
     assert str(rcv_frame.control.frame_type) == "FrameType.I"
     frame_data = rcv_frame.data
 
@@ -341,7 +347,7 @@ def test_receive():
 # TEST: A simulated send with the entire pipline (some bits are also flipped before sending to test fec)
 def test_send():
     # Instantiate our ax25 class to get ready to create frame
-    ax25_proto = AX25("ATLAS", "AKITO")
+    ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     # Instantiate the fec class for forward error correction
     fec_coder = FEC()
 
@@ -384,7 +390,7 @@ def test_send():
 
 def test_uFrame_send():
     # Instantiate our ax25 class to get ready to create frame
-    ax25_proto = AX25("ATLAS", "AKITO")
+    ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     # Create the frame
     send_frame = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
     send_frame = ax25_proto.stuff(send_frame)
@@ -416,7 +422,7 @@ def test_uFrame_receive():
         "0x7e",
     ]
     receive_bytes = bytes([int(x, 0) for x in output_from_c])
-    ax25_proto = AX25("ATLAS", "AKITO")
+    ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     # Unstuff frame
     rcv_frame = ax25_proto.unstuff(receive_bytes)
     # Create the frame
@@ -427,7 +433,7 @@ def test_uFrame_receive():
 
 def test_command_send():
     # Instantiate our ax25 class to get ready to create frame
-    ax25_proto = AX25("ATLAS", "AKITO")
+    ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     # Instantiate the fec class for forward error correction
     fec_coder = FEC()
 
@@ -751,7 +757,7 @@ def test_receive_command():
     bin = bytearray(c_data)
 
     # Instantiate the ax25 class to unstuff
-    ax25_proto = AX25("ATLAS", "AKITO")
+    ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
     bin = ax25_proto.unstuff(bytes(bin))
 
     # Instantiate FEC class to error correct
@@ -763,8 +769,8 @@ def test_receive_command():
 
     # Now we can finally decode the frame and extract information
     rcv_frame = ax25_proto.decode_frame(decoded_data)
-    assert str(rcv_frame.src) == "ATLAS"
-    assert str(rcv_frame.dst) == "AKITO"
+    assert str(rcv_frame.src) == GROUND_STATION_CALLSIGN
+    assert str(rcv_frame.dst) == CUBE_SAT_CALLSIGN
     assert str(rcv_frame.control.frame_type) == "FrameType.I"
     frame_data = rcv_frame.data
 
