@@ -474,3 +474,14 @@ obc_error_code_t cc1120Rng(uint8_t *randomValue) {
   (*randomValue) ^= receivedData;
   return OBC_ERR_CODE_SUCCESS;
 }
+
+// TODO: This function just returns 0
+// This function must set temp in 1 step for thread safety
+obc_error_code_t readTempCC1120(uint32_t *temp) {
+  if (temp == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  uint32_t readValue = 0;
+  *temp = readValue << 1 | 1;
+  return OBC_ERR_CODE_SUCCESS;
+}

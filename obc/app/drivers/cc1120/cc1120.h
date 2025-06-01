@@ -180,3 +180,11 @@ obc_error_code_t cc1120Init(void);
  * @return obc_error_code_t - Whether or not the register read was successful
  */
 obc_error_code_t cc1120Rng(uint8_t *randomValue);
+
+/**
+ * @brief Reads the temperature sensor on the CC1120
+ *
+ * @param temp - A pointer to a float to store the temperature in
+ * @return obc_error_code_t - Whether or not the temperature read was successful
+ */
+obc_error_code_t readTempCC1120(uint32_t *temp);

@@ -16,6 +16,7 @@
 #include "cc1120.h"
 #include "rffm6404.h"
 #include "obc_privilege.h"
+#include "thermal_mgr.h"
 
 #if COMMS_PHY == COMMS_PHY_UART
 #include "obc_sci_io.h"
@@ -52,6 +53,8 @@ static uint8_t commsQueueStack[COMMS_MANAGER_QUEUE_LENGTH * COMMS_MANAGER_QUEUE_
 static QueueHandle_t cc1120TransmitQueueHandle = NULL;
 static StaticQueue_t cc1120TransmitQueue;
 static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH * CC1120_TRANSMIT_QUEUE_ITEM_SIZE];
+
+uint32_t cc1120TemperatureData;
 
 static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                                       0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
@@ -293,10 +296,19 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
+  TimeOut_t thermalMgrLastTempCollection;
+  vTaskSetTimeOutState(&thermalMgrLastTempCollection);
+
   initAllCc1120TxRxSemaphores();
 
   while (1) {
     comms_event_t queueMsg;
+
+    // Check if THERMAL_MGR_PERIOD_TICKS has passed and collect temperature data
+    if (xTaskCheckForTimeOut(&thermalMgrLastTempCollection, THERMAL_MGR_PERIOD_TICKS) == pdTRUE) {
+      LOG_IF_ERROR_CODE(collectCc1120Temp());
+      vTaskSetTimeOutState(&thermalMgrLastTempCollection);
+    }
 
     if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
