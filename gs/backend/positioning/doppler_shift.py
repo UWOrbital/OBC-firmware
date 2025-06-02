@@ -1,4 +1,3 @@
-from typing import Tuple
 from skyfield.api import EarthSatellite, Topos, load 
 
 SPEED_OF_LIGHT = 299_792_458
@@ -7,6 +6,7 @@ SPEED_OF_LIGHT = 299_792_458
 @brief Holds logic for calculating doppler shift from TLS and ground station coordinates
 @details Since we're not actually getting TLE or interfacing with HackRF it's not hooked up to anything yet
 """
+
 
 def load_satellite(tle_line1: str, tle_line2: str, name: str = "UW_SAT") -> EarthSatellite:
     """
@@ -36,7 +36,7 @@ def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: tupl
     # Separate velocity and position vectors
     vx, vy, vz = topocentric.velocity.km_per_s
     vel: tuple[float, float, float] = (vx, vy, vz)
-    
+
     px, py, pz = topocentric.position.km
     pos: tuple[float, float, float] = (px, py, pz)
 
