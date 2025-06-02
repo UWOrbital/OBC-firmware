@@ -1,6 +1,7 @@
 from typing import Tuple
 from skyfield.api import EarthSatellite, Topos, load 
-# There might be a slightly simpler library but we're already using skyfield in ephemeris, so might as well use it here too
+# There might be a slightly simpler library but we're already 
+# using skyfield in ephemeris, so might as well use it here too
 
 SPEED_OF_LIGHT = 299_792_458
 
