@@ -35,8 +35,8 @@ def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: Tupl
     topocentric = difference.at(t)
 
     # Separate velocity and position vectors
-    vel = topocentric.velocity.km_per_s
-    pos = topocentric.position.km
+    vel: Tuple[float, float, float] = topocentric.velocity.km_per_s
+    pos: Tuple[float, float, float] = topocentric.position.km
 
     # Normalize position
     pos_mag = sum(p**2 for p in pos) ** 0.5
