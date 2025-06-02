@@ -182,7 +182,6 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   if ((unstuffedPacket.data[AX25_CONTROL_BYTES_POSITION] & 0x01) == 0) {
     // If the second least significant bit was a 1 it is a U Frame
     // copy the unstuffed data into rsData
-    initRs();
     memcpy(rsData->data, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_ENCODED_SIZE);
     // decode the info field and store it in the unstuffed packet
     interfaceErr = rsDecode(rsData, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);

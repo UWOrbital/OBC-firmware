@@ -3,7 +3,7 @@ from binascii import crc_hqx
 from ax25 import Address, Control, Frame, FrameType
 from pyStuffing import BitStuffing
 
-from interfaces import RS_ENCODED_DATA_SIZE
+from interfaces import NON_INFO_BYTES, RS_ENCODED_DATA_SIZE
 
 
 class AX25:
@@ -37,7 +37,10 @@ class AX25:
         Note: The source and destination call signs passed in the constructor of the class are used
 
         :param data_to_send: Data that needs to be sent in the frame
-        :param ns: Send Sequence Number
+        :param frame_type: The type of frame being created (this directly influences the control field bytes)
+        :param sequence_number: Send Sequence Number, by default this is 0
+        :param poll: Whether the poll bit is used or not (this is for the U Frames that are used to esthablish a
+                     connection with the obc). By default, this is set to false
         :return: Generated Frame
         """
 
@@ -121,7 +124,7 @@ class AX25:
         # There is a small chance that the last fcs byte is 0 so we check if the data size is bigger than it's supposed
         # to be
         # We also check if the frame is a U frame in which case it has to be less than RS_ENCODED_DATA_SIZE
-        if (data[-1] == 0 and len(data) > RS_ENCODED_DATA_SIZE + 18) or (
+        if (data[-1] == 0 and len(data) > RS_ENCODED_DATA_SIZE + NON_INFO_BYTES) or (
             data[-1] == 0 and len(data) < RS_ENCODED_DATA_SIZE
         ):
             data = data[:-1]

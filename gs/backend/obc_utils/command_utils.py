@@ -1,15 +1,17 @@
 from argparse import ArgumentError, ArgumentParser
 from collections.abc import Callable
+from pathlib import Path
 from typing import Final
 
-import serial
 from ax25 import Frame, FrameType
+from serial import PARITY_NONE, STOPBITS_TWO, Serial
 
-from gs.backend.obc_utils.encode_decode import decode, encode
+from gs.backend.obc_utils.encode_decode import CommsPipeline
 from interfaces import (
     CUBE_SAT_CALLSIGN,
     GROUND_STATION_CALLSIGN,
     OBC_UART_BAUD_RATE,
+    RS_ENCODED_DATA_SIZE,
 )
 from interfaces.command_framing import command_multi_pack
 from interfaces.obc_gs_interface.ax25 import AX25
@@ -30,6 +32,8 @@ from interfaces.obc_gs_interface.commands import (
 # receive. This must be followed or the obc will not function as expected
 _PADDING_REQUIRED: Final[int] = 300
 
+LOG_PATH: Path = (Path(__file__).parent / "../logs.log").resolve()
+
 
 def send_command(args: str, com_port: str) -> Frame | None:
     """
@@ -48,15 +52,17 @@ def send_command(args: str, com_port: str) -> Frame | None:
     # command_multi_pack takes in a list of commands to pack thus we create that list here.
     data = [command]
 
-    # We pad the data to an amount that the OBC expects (See handleUplinkingState function in comms_manager.c)
-    send_bytes = encode(command_multi_pack(data)).ljust(_PADDING_REQUIRED, b"\x00")
+    comms = CommsPipeline()
 
+    # We pad the data to an amount that the OBC expects (See handleUplinkingState function in comms_manager.c)
+    # Note also that command_multi_pack returns a list of byte strings with each string stuffed to the max
+    send_bytes = comms.encode(command_multi_pack(data)[0]).ljust(_PADDING_REQUIRED, b"\x00")
     # Initialize pyserial
-    with serial.Serial(
+    with Serial(
         com_port,
         baudrate=OBC_UART_BAUD_RATE,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
+        parity=PARITY_NONE,
+        stopbits=STOPBITS_TWO,
         timeout=1,
     ) as ser:
         # Reset the output buffer just in case
@@ -72,16 +78,21 @@ def send_command(args: str, com_port: str) -> Frame | None:
         start_index = read_bytes.find(b"\x7e")
         end_index = read_bytes.rfind(b"\x7e")
 
-        with open("obc_utils/logs.txt", "a") as file:
-            file.write(str(read_bytes[:start_index].decode("utf-8")))
-            file.write(str(read_bytes[end_index + 1 :].decode("utf-8")))
+        outer_bytes = read_bytes[:start_index] + read_bytes[end_index + 1 :]
+
+        with open(LOG_PATH, "a") as file:
+            file.write(str(outer_bytes.decode("utf-8")))
 
         # Isolate the frame
         rcv_frame_bytes = read_bytes[start_index : end_index + 1]
 
+        # This accounts for the command having no response
+        if len(rcv_frame_bytes) == 0:
+            return None
+
         # Check if the frame is an I frame
-        if len(rcv_frame_bytes) > 255:
-            rcv_frame = decode(rcv_frame_bytes)
+        if len(rcv_frame_bytes) > RS_ENCODED_DATA_SIZE:
+            rcv_frame = comms.decode(rcv_frame_bytes)
         else:
             ax25 = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
             rcv_frame = ax25.decode_frame(rcv_frame_bytes)
@@ -97,11 +108,11 @@ def send_conn_request(com_port: str) -> Frame:
     :param com_port: The port which the function should use to send and receive on
     """
     # Initialize pyserial with the correct parameters
-    with serial.Serial(
+    with Serial(
         com_port,
         baudrate=OBC_UART_BAUD_RATE,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
+        parity=PARITY_NONE,
+        stopbits=STOPBITS_TWO,
         timeout=1,
     ) as ser:
         # Encode using AX25, remember these frames don't have data fields so there's no need for fec or aes128
@@ -117,9 +128,10 @@ def send_conn_request(com_port: str) -> Frame:
         # TODO: Handle invalid acknowledge frame
 
         # Write out any logs that we received while receiving the connection
-        with open("obc_utils/logs.txt", "a") as file:
-            file.write(str(rcv_frame_bytes[:start_index].decode("utf-8")))
-            file.write(str(rcv_frame_bytes[end_index + 1 :].decode("utf-8")))
+        outer_bytes = rcv_frame_bytes[:start_index] + rcv_frame_bytes[end_index + 1 :]
+
+        with open(LOG_PATH, "a") as file:
+            file.write(str(outer_bytes.decode("utf-8")))
 
         # Decode the frame
         rcv_frame_bytes = rcv_frame_bytes[start_index : end_index + 1]
@@ -280,7 +292,7 @@ def generate_command(args: str) -> CmdMsg | None:
             return command
 
 
-def poll(com_port: str, print_console: bool = False) -> None:
+def poll(com_port: str, file_path: str | Path, print_console: bool = False) -> None:
     """
     A function that is supposed to run in the background to keep receiving logs from the board
 
@@ -288,16 +300,19 @@ def poll(com_port: str, print_console: bool = False) -> None:
     :param print_console: Whether the function should print to console or not. By default, this is set to False. This is
                           useful for the CLI where sometimes we want to print out the received logs from the board
     """
-    with serial.Serial(
-        com_port,
-        baudrate=OBC_UART_BAUD_RATE,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
-        timeout=1,
-    ) as ser:
+    with (
+        Serial(
+            com_port,
+            baudrate=OBC_UART_BAUD_RATE,
+            parity=PARITY_NONE,
+            stopbits=STOPBITS_TWO,
+            timeout=1,
+        ) as ser,
+        open(file_path, "a") as file,
+    ):
         while True:
-            with open("obc_utils/logs.txt", "a") as file:
-                data = ser.read(10000).decode("utf-8")
-                file.write(data)
-                if print_console and len(data) != 0:
-                    print(data)
+            data = ser.read(10000).decode("utf-8")
+            file.write(data)
+            file.flush()
+            if print_console and len(data) != 0:
+                print(data)

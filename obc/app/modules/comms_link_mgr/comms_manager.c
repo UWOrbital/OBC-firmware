@@ -374,22 +374,8 @@ static obc_error_code_t handleAwaitingConnState(void) {
    * retries */
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
-  // uint8_t rxByte;
-  //
-  // // Read first byte
-  // RETURN_IF_ERROR_CODE(
-  //     sciReadBytes(&rxByte, 1, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
-  //
-  // RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  //
-  // // Read the rest of the bytes until we stop uplinking
-  // do {
-  //   RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY,
-  //                                     pdMS_TO_TICKS(10), UART_READ_REG));
-  //   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  // } while (rxByte != AX25_FLAG);
   uint8_t readBytes[AX25_MAXIMUM_U_FRAME_CMD_LENGTH] = {0};
-  RETURN_IF_ERROR_CODE(sciReadBytes(readBytes, 30, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
+  RETURN_IF_ERROR_CODE(sciReadBytes(readBytes, U_FRAME_COMMS_RECV_SIZE, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
   for (uint16_t i = 0; i < AX25_MAXIMUM_U_FRAME_CMD_LENGTH; i++) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&readBytes[i]));
     if (readBytes[i] == AX25_FLAG && i > 0) {
@@ -520,32 +506,11 @@ static obc_error_code_t handleAwaitingAckConnState(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// TODO: Define COMMS_PHY_UART
-// TODO:
 static obc_error_code_t handleUplinkingState(void) {
   obc_error_code_t errCode;
 #if COMMS_PHY == COMMS_PHY_UART
-  // uint8_t rxByte;
-  //
-  // // Read first byte
-  // RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY,
-  // portMAX_DELAY, UART_READ_REG));
-  //
-  // RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  //
-  // // Read the rest of the bytes until we stop uplinking
-  // do {
-  //   RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY,
-  //   portMAX_DELAY, UART_READ_REG));
-  //   RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&rxByte));
-  // } while (rxByte != AX25_FLAG);
-  // uint8_t rxByte;
-  //
-  // // Read first byte
-  // RETURN_IF_ERROR_CODE(sciReadBytes(&rxByte, 1, portMAX_DELAY,
-  // portMAX_DELAY, UART_READ_REG));
   uint8_t readBytes[AX25_MAXIMUM_PKT_LEN] = {0};
-  RETURN_IF_ERROR_CODE(sciReadBytes(readBytes, 300, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
+  RETURN_IF_ERROR_CODE(sciReadBytes(readBytes, I_FRAME_COMMS_RECV_SIZE, portMAX_DELAY, portMAX_DELAY, UART_READ_REG));
   uint16_t i;
   for (i = 0; i < AX25_MAXIMUM_PKT_LEN; i++) {
     RETURN_IF_ERROR_CODE(sendToDecodeDataQueue(&readBytes[i]));

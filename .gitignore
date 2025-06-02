@@ -101,6 +101,3 @@ lerna-debug.log*
 *dist-ssr
 *.local
 *.vite
-
-# Log Files
-gs/backend/logs.txt

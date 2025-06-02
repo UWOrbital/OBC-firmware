@@ -5,25 +5,26 @@ from interfaces.obc_gs_interface.commands import (
 )
 
 
-def command_multi_pack(commands: list[CmdMsg]) -> bytes:
+def command_multi_pack(commands: list[CmdMsg]) -> list[bytes]:
     """
     A function that generates bytes based on the commands passed in
 
     :param command: A list of commands to convert to bytes
-    :return: The commands fully packed in sequence and ready to be encoded. Note, this will always be padded with 0x00
-             to 223 bytes
+    :return: The commands fully packed in sequence and ready to be encoded. Depending on the number of commands, this
+             function will return a list of byte strings, each containing the maximum possible amount of commands. Note,
+             this will always pad each byte stringwith 0x00 to 223 bytes
     """
-    data = bytearray(b"")
+    data: bytearray = bytearray(b"")
+    command_list: list[bytes] = []
 
     for command in commands:
         command_packed = bytearray(pack_command(command))
         # NOTE: We check its greater than the max size - 1 as we need the last byte to be 0x00
         if (len(data) + len(command_packed)) > RS_DECODED_DATA_SIZE - 1:
-            break
-        else:
-            data += command_packed
+            command_list.append(bytes(data).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+            data = bytearray(b"")
 
-    data_bytes = bytes(data)
-    data_bytes = data_bytes.ljust(RS_DECODED_DATA_SIZE, b"\x00")
+        data += command_packed
 
-    return data_bytes
+    command_list.append(bytes(data).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+    return command_list

@@ -2,10 +2,11 @@ import sys
 from cmd import Cmd
 from datetime import datetime
 from multiprocessing import Process
+from sys import argv
 
 from serial import Serial, SerialException
 
-from gs.backend.obc_utils.command_utils import arg_parse, poll, send_command, send_conn_request
+from gs.backend.obc_utils.command_utils import LOG_PATH, arg_parse, poll, send_command, send_conn_request
 
 
 class GroundStationShell(Cmd):
@@ -13,16 +14,16 @@ class GroundStationShell(Cmd):
     Cmd Class for the Wired Comms Command Line Interface
     """
 
-    def __init__(self) -> None:
+    def __init__(self, com_port: str) -> None:
         Cmd.__init__(self)
         self.parser = arg_parse()
-        self._com_port: str = ""
+        self._com_port: str = com_port
         self._conn_request_sent: bool = False
         self._verbose: bool = False
         self.background_logging: Process | None = None
 
         # At the start of each command shell use, we clear the file and create a dated title
-        with open("obc_utils/logs.txt", "w") as file:
+        with open(LOG_PATH, "w") as file:
             file.write("LOGS (Date: " + str(datetime.now()) + ")\n")
 
     intro = """
@@ -38,12 +39,25 @@ class GroundStationShell(Cmd):
     prompt = "(UW Orbital): "
     file = None
 
+    def _restart_logging(self) -> None:
+        """
+        A function with the appropriate checks to restart the logging process
+        """
+        if self.background_logging is not None and not self.background_logging.is_alive():
+            self.background_logging = Process(
+                target=poll,
+                args=(
+                    self._com_port,
+                    LOG_PATH,
+                    False,
+                ),
+                daemon=True,
+            )
+            self.background_logging.start()
+
     def do_send_conn_request(self, line: str) -> None:
         "Sends the initial connection request"
         # Preliminary checks for the function to run
-        if not self._com_port:
-            print("Com port needs to be configured using set_comm_port. Aborting...")
-            return
         if self._conn_request_sent:
             print("Connection Request has already been sent. Aborting...")
             return
@@ -54,25 +68,18 @@ class GroundStationShell(Cmd):
                 self.background_logging.kill()
             send_conn_request(self._com_port)
         except IndexError:
-            if self.background_logging is not None and not self.background_logging.is_alive():
-                self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
-                self.background_logging.start()
             print("Connection request was not successful. Try resetting the board")
             return
-        else:
-            if self.background_logging is not None and not self.background_logging.is_alive():
-                self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
-                self.background_logging.start()
-            self._conn_request_sent = True
+        finally:
+            self._restart_logging()
+
+        self._conn_request_sent = True
 
     def do_send_command(self, line: str) -> None:
         """
         Sends a command to the ground station
         """
         # Preliminary checks for the function to run
-        if not self._com_port:
-            print("Com port needs to be configured using set_comm_port. Aborting...")
-            return
         if not self._conn_request_sent:
             print("Connection Request needs to be sent first. Aborting...")
             return
@@ -82,9 +89,7 @@ class GroundStationShell(Cmd):
 
         send_command(line, self._com_port)
 
-        if self.background_logging is not None and not self.background_logging.is_alive():
-            self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
-            self.background_logging.start()
+        self._restart_logging()
 
     def do_set_comm_port(self, line: str) -> None:
         """
@@ -95,11 +100,10 @@ class GroundStationShell(Cmd):
             ser = Serial(line)
             print("Comm port set to: " + str(ser.name))
             ser.close()
+            self._com_port = line
         except SerialException:
             print("Invalid port entered")
             return
-        else:
-            self._com_port = line
 
     def do_start_logging(self, line: str) -> None:
         """
@@ -107,26 +111,27 @@ class GroundStationShell(Cmd):
         """
         # Here we have to be careful that everything is configured and that we don't start two processes, thus the
         # checks
-        if not self._com_port:
-            print("Com port needs to be configured using set_comm_port. Aborting...")
-            return
         if self.background_logging is None or not self.background_logging.is_alive():
-            self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
+            self.background_logging = Process(
+                target=poll,
+                args=(
+                    self._com_port,
+                    LOG_PATH,
+                    False,
+                ),
+                daemon=True,
+            )
             self.background_logging.start()
         else:
             print("Logging has already been started")
 
     def do_print_logs(self, line: str) -> None:
         """
-        Prints out logs and polls for logs that are comming in. Use a Keyboard Interupt to exit (e.g. Ctrl + C)
+        Prints out logs and polls for log_pathlogs that are comming in. Use a Keyboard Interupt to exit (e.g. Ctrl + C)
         """
         # Preliminary checks for the function to run
-        if not self._com_port:
-            print("Com port needs to be configured using set_comm_port. Aborting...")
-            return
-
         # Write out the logs that we previously got
-        with open("obc_utils/logs.txt") as file:
+        with open(LOG_PATH) as file:
             print(file.read())
 
         if self.background_logging is not None:
@@ -134,13 +139,11 @@ class GroundStationShell(Cmd):
 
         # Here we run the function and catch an interrupt if it is executed by the user
         try:
-            poll(self._com_port, True)
+            poll(self._com_port, LOG_PATH, True)
         except KeyboardInterrupt:
             print("Exiting polling...")
 
-        if self.background_logging is not None and not self.background_logging.is_alive():
-            self.background_logging = Process(target=poll, args=(self._com_port,), daemon=True)
-            self.background_logging.start()
+        self._restart_logging()
 
     def do_set_conn(self, line: str) -> None:
         """
@@ -167,5 +170,15 @@ class GroundStationShell(Cmd):
 
 
 if __name__ == "__main__":
-    # We call a loop and the command shell runs as expected
-    GroundStationShell().cmdloop()
+    if len(argv) != 2:
+        print("One argument needed: Com Port")
+    else:
+        try:
+            com_port = str(argv[1])
+            ser = Serial(com_port)
+            print("Comm port set to: " + str(ser.name))
+            ser.close()
+            GroundStationShell(com_port).cmdloop()
+        except SerialException:
+            print("Invalid port entered")
+        # We call a loop and the command shell runs as expected
