@@ -48,7 +48,7 @@ def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: Tupl
     # Radial velocity = dot product of velocity vector with line-of-sight unit vector
     radial_velocity_km_s = sum(vel[i] * los_unit[i] for i in range(3))
 
-    return radial_velocity_km_s * 1000.0  # km/s -> m/s
+    return float(radial_velocity_km_s * 1000.0)  # km/s -> m/s
 
 
 def compute_doppler_shift(frequency_hz: float, relative_velocity_m_s: float) -> float:
