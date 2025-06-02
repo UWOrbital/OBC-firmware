@@ -1,4 +1,4 @@
-from skyfield.api import EarthSatellite, Topos, load 
+from skyfield.api import EarthSatellite, Topos, load
 
 SPEED_OF_LIGHT = 299_792_458
 
