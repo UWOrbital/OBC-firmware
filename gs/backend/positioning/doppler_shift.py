@@ -1,7 +1,5 @@
 from typing import Tuple
 from skyfield.api import EarthSatellite, Topos, load 
-# There might be a slightly simpler library but we're already 
-# using skyfield in ephemeris, so might as well use it here too
 
 SPEED_OF_LIGHT = 299_792_458
 
@@ -21,7 +19,7 @@ def load_satellite(tle_line1: str, tle_line2: str, name: str = "UW_SAT") -> Eart
     return EarthSatellite(tle_line1, tle_line2, name, load.timescale())
 
 
-def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: Tuple[float, float, float]) -> float:
+def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: tuple[float, float, float]) -> float:
     """
     @brief Computes relative velocity between satellite and observer
     @param satellite: EarthSatellite object
@@ -37,10 +35,10 @@ def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: Tupl
 
     # Separate velocity and position vectors
     vx, vy, vz = topocentric.velocity.km_per_s
-    vel: Tuple[float, float, float] = (vx, vy, vz)
+    vel: tuple[float, float, float] = (vx, vy, vz)
     
     px, py, pz = topocentric.position.km
-    pos: Tuple[float, float, float] = (px, py, pz)
+    pos: tuple[float, float, float] = (px, py, pz)
 
     # Normalize position
     pos_mag = sum(p**2 for p in pos) ** 0.5
@@ -65,8 +63,8 @@ def compute_doppler_shift(frequency_hz: float, relative_velocity_m_s: float) -> 
 def calculate_doppler(
     tle_line1: str,
     tle_line2: str,
-    observer_coords: Tuple[float, float, float],
-    transmission_frequency_hz: float = 433_920_000  # Default frequency, UW-Orbital's 433.920 MHz band
+    observer_coords: tuple[float, float, float],
+    transmission_frequency_hz: float = 433_920_000,  # Default frequency, UW-Orbital's 433.920 MHz band
 ) -> float:
     """
     @brief High-level function to compute Doppler shift
