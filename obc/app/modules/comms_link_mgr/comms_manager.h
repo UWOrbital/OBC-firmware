@@ -10,6 +10,9 @@
 
 #define MAX_DOWNLINK_TELEM_BUFFER_SIZE 1U
 
+#define U_FRAME_COMMS_RECV_SIZE 30
+#define I_FRAME_COMMS_RECV_SIZE 300
+
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.

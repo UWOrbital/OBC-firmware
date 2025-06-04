@@ -8,6 +8,7 @@ loguru==0.7.3
 pyham_ax25==1.0.2
 tinyaes==1.1.1
 pyStuffing==0.0.4
+hypothesis==6.131.30
 
 # Typed packages
 types-requests==2.31.0

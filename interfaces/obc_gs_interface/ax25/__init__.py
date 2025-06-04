@@ -3,6 +3,8 @@ from binascii import crc_hqx
 from ax25 import Address, Control, Frame, FrameType
 from pyStuffing import BitStuffing
 
+from interfaces import NON_INFO_BYTES, RS_ENCODED_DATA_SIZE
+
 
 class AX25:
     """
@@ -28,22 +30,22 @@ class AX25:
             raise ValueError("Destination Address is not valid")
 
     def encode_frame(
-        self,
-        data_to_send: bytes,
-        frame_type: FrameType,
-        sequence_number: int = 0,
+        self, data_to_send: bytes | None, frame_type: FrameType, sequence_number: int = 0, poll: bool = False
     ) -> bytes:
         """
         Encodes and Information Frame with the requested data using the ax25 library
         Note: The source and destination call signs passed in the constructor of the class are used
 
         :param data_to_send: Data that needs to be sent in the frame
-        :param ns: Send Sequence Number
+        :param frame_type: The type of frame being created (this directly influences the control field bytes)
+        :param sequence_number: Send Sequence Number, by default this is 0
+        :param poll: Whether the poll bit is used or not (this is for the U Frames that are used to esthablish a
+                     connection with the obc). By default, this is set to false
         :return: Generated Frame
         """
 
         # Generate Frame Object as per Library Specfications
-        control_block = Control(frame_type, poll_final=False, send_seqno=sequence_number)
+        control_block = Control(frame_type, poll_final=poll, send_seqno=sequence_number)
         src_address = Address(call=self.src_callsign, ssid=self._DEFAULT_SSID)
         dst_address = Address(call=self.dst_callsign, ssid=self._DEFAULT_SSID)
         frame_bytes = bytearray(
@@ -119,11 +121,17 @@ class AX25:
         data = self._int_list_to_bytes(unstuff.unStuffed)
 
         # Remove a 0 at the end of the string that might have been created as a result of adding in 0s
-        if data[-1] == 0:
+        # There is a small chance that the last fcs byte is 0 so we check if the data size is bigger than it's supposed
+        # to be
+        # We also check if the frame is a U frame in which case it has to be less than RS_ENCODED_DATA_SIZE
+        if (data[-1] == 0 and len(data) > RS_ENCODED_DATA_SIZE + NON_INFO_BYTES) or (
+            data[-1] == 0 and len(data) < RS_ENCODED_DATA_SIZE
+        ):
             data = data[:-1]
 
         data_bytes = bytearray(data)
         start_end_flag = bytearray(bytes.fromhex("7E"))
+
         return bytes(start_end_flag + data_bytes + start_end_flag)
 
     def stuff(self, input_data: bytes) -> bytes:
@@ -137,7 +145,7 @@ class AX25:
 
         unstuff = BitStuffing(self._bytes_to_int_list(data_stripped))
         unstuff.startStuffing()
-        data_bytes = bytearray(self._int_list_to_bytes(unstuff.stuffed))
+        data_bytes = bytearray(self._int_list_to_bytes(unstuff.stuffed)).rstrip(b"\x00")
 
         # Define the flags
         start_end_flag = bytearray(bytes.fromhex("7E"))

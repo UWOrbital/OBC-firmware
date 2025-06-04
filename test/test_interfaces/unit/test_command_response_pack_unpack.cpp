@@ -8,6 +8,8 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <iostream>
 
 TEST(pack_unpack_command_responses, packResponse) {
   cmd_unpacked_response_t unpackedResponse = {
