@@ -36,6 +36,7 @@ void obcTaskFunctionThermalMgr(void* pvParameters) {
     // add telemetry data
     for (uint8 i = 0; i < sizeof(thermalMgrTelemetryFns) / sizeof(thermal_mgr_telemetry_func_t); i++) {
       if (thermalMgrTelemetryFns[i] != NULL) {
+        printf("Running thermal manager telemetry function %d\n", i);
         LOG_IF_ERROR_CODE(thermalMgrTelemetryFns[i]());
       }
     }
@@ -56,21 +57,23 @@ static obc_error_code_t collectObcLm75bdTemp(void) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-#define COLLECT_TEMP_DATA(tempData, tempId, tempName)                                             \
-  obc_error_code_t errCode;                                                                       \
-  bool isValid;                                                                                   \
-  RETURN_IF_ERROR_CODE(isTemperatureValid(tempData, &isValid));                                   \
-  if (!isValid) {                                                                                 \
-    return OBC_ERR_CODE_INVALID_STATE;                                                            \
-  }                                                                                               \
-  uint32_t temp = 0;                                                                              \
-  RETURN_IF_ERROR_CODE(getTemperatureData(tempData, &temp));                                      \
-  telemetry_data_t tempVal = {.tempName = temp, .id = tempId, .timestamp = getCurrentUnixTime()}; \
-  RETURN_IF_ERROR_CODE(addTelemetryData(&tempVal));                                               \
-  RETURN_IF_ERROR_CODE(setTemperatureData(&tempData, temp, false));                               \
-  return OBC_ERR_CODE_SUCCESS;
+#define COLLECT_TEMP_DATA(tempData, tempId, tempName)                                               \
+  do {                                                                                              \
+    obc_error_code_t errCode;                                                                       \
+    bool isValid;                                                                                   \
+    RETURN_IF_ERROR_CODE(isTemperatureValid(tempData, &isValid));                                   \
+    if (!isValid) {                                                                                 \
+      return OBC_ERR_CODE_INVALID_STATE;                                                            \
+    }                                                                                               \
+    uint32_t temp = 0;                                                                              \
+    RETURN_IF_ERROR_CODE(getTemperatureData(tempData, &temp));                                      \
+    telemetry_data_t tempVal = {.tempName = temp, .id = tempId, .timestamp = getCurrentUnixTime()}; \
+    RETURN_IF_ERROR_CODE(addTelemetryData(&tempVal));                                               \
+    RETURN_IF_ERROR_CODE(setTemperatureData(&tempData, temp, false));                               \
+  } while (0)
 static obc_error_code_t collectCc1120Temp(void) {
   COLLECT_TEMP_DATA(cc1120TemperatureData, TELEM_CC1120_TEMP, cc1120Temp);
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t setTemperatureData(uint32_t* temperatureData, uint32_t temperature, bool isValid) {
