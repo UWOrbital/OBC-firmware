@@ -10,7 +10,7 @@ class PackedRsPacket(Structure):
     The python equivalent class for the packed_rs_packet_t structure in the C implementation
     """
 
-    _fields_ = [("data", c_uint8 * 255)]
+    _fields_ = [("data", c_uint8 * RS_ENCODED_DATA_SIZE)]
 
 
 # Below are the ctype definitions from all the functions needed for fec
@@ -19,11 +19,11 @@ interface.initRs.argtypes = ()
 interface.initRs.restype = None
 
 # rsEncode()
-interface.rsEncode.argtypes = [POINTER(c_uint8 * 223), POINTER(PackedRsPacket)]
+interface.rsEncode.argtypes = [POINTER(c_uint8 * RS_DECODED_DATA_SIZE), POINTER(PackedRsPacket)]
 interface.rsEncode.restype = c_uint
 
 # rsDecode()
-interface.rsDecode.argtypes = [POINTER(PackedRsPacket), POINTER(c_uint8 * 223), c_uint8]
+interface.rsDecode.argtypes = [POINTER(PackedRsPacket), POINTER(c_uint8 * RS_DECODED_DATA_SIZE), c_uint8]
 interface.rsDecode.restype = c_uint
 
 # destroyRs()
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     fec_code = FEC()
 
     # Telem data from the C test case
-    telem_data = (c_uint8 * 223)(
+    telem_data = (c_uint8 * RS_DECODED_DATA_SIZE)(
         64,
         121,
         190,
