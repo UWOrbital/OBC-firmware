@@ -296,8 +296,9 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
   obc_error_code_t errCode;
   comms_state_t commsState = *((comms_state_t *)pvParameters);
 
-  TimeOut_t thermalMgrLastTempCollection;
-  vTaskSetTimeOutState(&thermalMgrLastTempCollection);
+  TimeOut_t thermalMgrLastTempCollectionTimeout;
+  TickType_t thermalMgrLastTempCollectionTicksToWait = THERMAL_MGR_PERIOD_TICKS;
+  vTaskSetTimeOutState(&thermalMgrLastTempCollectionTimeout);
 
   initAllCc1120TxRxSemaphores();
 
@@ -305,9 +306,11 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
     comms_event_t queueMsg;
 
     // Check if THERMAL_MGR_PERIOD_TICKS has passed and collect temperature data
-    if (xTaskCheckForTimeOut(&thermalMgrLastTempCollection, THERMAL_MGR_PERIOD_TICKS) == pdTRUE) {
-      LOG_IF_ERROR_CODE(collectCc1120Temp());
-      vTaskSetTimeOutState(&thermalMgrLastTempCollection);
+    if (xTaskCheckForTimeOut(&thermalMgrLastTempCollectionTimeout, &thermalMgrLastTempCollectionTicksToWait) ==
+        pdTRUE) {
+      LOG_IF_ERROR_CODE(readTempCC1120(&cc1120TemperatureData));
+      vTaskSetTimeOutState(&thermalMgrLastTempCollectionTimeout);
+      thermalMgrLastTempCollectionTicksToWait = THERMAL_MGR_PERIOD_TICKS;
     }
 
     if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {

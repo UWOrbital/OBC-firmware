@@ -10,6 +10,7 @@
 #include <FreeRTOS.h>
 #include <os_task.h>
 #include <sys_common.h>
+#include <stdio.h>
 
 static obc_error_code_t collectObcLm75bdTemp(void);
 static obc_error_code_t collectCc1120Temp(void);
