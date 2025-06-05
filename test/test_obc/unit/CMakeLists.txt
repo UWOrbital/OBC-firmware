@@ -45,6 +45,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
     ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
+    ${CMAKE_SOURCE_DIR}/obc/shared/commands
 )
 
 # Add peripheral configs
