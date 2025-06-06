@@ -110,6 +110,11 @@ target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     ${PERIPHERAL_CONFIG}
 )
 
+# Use SD card for REV1
+if(${BOARD_TYPE} MATCHES OBC_REVISION_1)
+    target_compile_definitions(OBC-firmware.out PRIVATE CONFIG_SDCARD)
+endif()
+
 # Determine the root of the repository
 execute_process(
     COMMAND git rev-parse --show-toplevel
