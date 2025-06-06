@@ -1,9 +1,13 @@
 #pragma once
 
-#include "FreeRTOS.h"
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
+
+#ifdef IS_BL
+#include "bl_command_callbacks.h"
+#else
 #include "command_callbacks.h"
+#endif
 
 typedef struct {
   cmd_callback_t callback;
@@ -20,7 +24,7 @@ typedef struct {
  * command_manager.c)
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo, bool cmdProgressTracker[]);
+obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
 
 /**
  * @brief Processes non time tagged commands
@@ -39,14 +43,3 @@ obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmd
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
 obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
-
-static const cmd_info_t cmdsConfig[] = {
-    [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
-    [CMD_RTC_SYNC] = {rtcSyncCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
-    [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
-    [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
-
-#define CMDS_CONFIG_SIZE (sizeof(cmdsConfig) / sizeof(cmd_info_t))
