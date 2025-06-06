@@ -6,7 +6,6 @@
 #include "obc_time.h"
 #include "obc_time_utils.h"
 #include "downlink_encoder.h"
-#include "comms_manager.h"
 #include "telemetry_manager.h"
 
 #include <redposix.h>

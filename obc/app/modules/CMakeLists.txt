@@ -16,6 +16,7 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector
     ${CMAKE_CURRENT_SOURCE_DIR}/logger
+    ${CMAKE_SOURCE_DIR}/obc/shared/commands
 )
 
 set(SOURCES
@@ -24,7 +25,9 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/camera_mgr/payload_manager.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/command_mgr/command_manager.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/command_mgr/command_callbacks.c
+
+    ${CMAKE_SOURCE_DIR}/obc/shared/commands/command_callbacks.c
+    ${CMAKE_SOURCE_DIR}/obc/shared/commands/command.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/comms_manager.c
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/downlink_encoder.c
