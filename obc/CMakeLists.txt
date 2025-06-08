@@ -110,7 +110,7 @@ target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     ${PERIPHERAL_CONFIG}
 )
 
-# Use SD card for REV1
+# Use SD card for REV1 or REV2
 if((${BOARD_TYPE} MATCHES OBC_REVISION_1) OR (${BOARD_TYPE} MATCHES OBC_REVISION_2))
     target_compile_definitions(${OUT_FILE_NAME} PRIVATE CONFIG_SDCARD)
 endif()
