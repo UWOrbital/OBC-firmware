@@ -4,7 +4,6 @@
 #include "obc_gs_command_data.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
-#include "obc_assert.h"
 
 #include <FreeRTOS.h>
 #include <sys_common.h>

@@ -1,8 +1,6 @@
 #include "command.h"
 #include "obc_logging.h"
 
-extern const cmd_info_t cmdConfig[];
-
 #ifdef IS_BL
 static const cmd_info_t cmdsConfig[] = {[CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
 #else
