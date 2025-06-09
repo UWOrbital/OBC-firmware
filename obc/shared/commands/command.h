@@ -2,12 +2,7 @@
 
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
-
-#ifdef IS_BL
-#include "bl_command_callbacks.h"
-#else
 #include "command_callbacks.h"
-#endif
 
 typedef struct {
   cmd_callback_t callback;
