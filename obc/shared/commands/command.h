@@ -2,7 +2,8 @@
 
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
-#include "command_callbacks.h"
+
+typedef obc_error_code_t (*cmd_callback_t)(cmd_msg_t *);
 
 typedef struct {
   cmd_callback_t callback;

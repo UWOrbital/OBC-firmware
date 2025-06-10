@@ -84,6 +84,8 @@ add_executable(debug-tool.out)
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
 add_subdirectory(shared/metadata)
+add_subdirectory(shared/obc_errors)
+add_subdirectory(shared/commands)
 
 # Application
 target_link_options(${OUT_FILE_NAME} PRIVATE
@@ -107,7 +109,6 @@ target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
     ENABLE_BL_BYPASS=${ENABLE_BL_BYPASS}
-    IS_BL=0
     ${PERIPHERAL_CONFIG}
 )
 
@@ -203,7 +204,7 @@ target_compile_definitions(OBC-bl.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
-    IS_BL=0
+    NO_FREERTOS
     ${PERIPHERAL_CONFIG}
 )
 
@@ -235,7 +236,6 @@ target_compile_definitions(debug-tool.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
-    IS_BL=0
     ${PERIPHERAL_CONFIG}
 )
 
