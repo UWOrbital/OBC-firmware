@@ -1,14 +1,19 @@
 #include "command.h"
 #include "obc_gs_command_id.h"
+#ifndef NO_FREERTOS
 #include "obc_logging.h"
+#else
+#include "bl_logging.h"
+#include <stddef.h>
+#endif
 
 extern const cmd_info_t cmdsConfig[];
 
-#define CMDS_CONFIG_SIZE (sizeof(cmdsConfig[0]) * NUM_CMD_CALLBACKS / sizeof(cmd_info_t))
+#define CMDS_CONFIG_SIZE NUM_CMD_CALLBACKS
 
 // Used to track whether a safety-critical command is currently being executed
 // This is inefficient space-wise, but simplifies the code. We can optimize later if needed.
-static bool cmdProgressTracker[sizeof(cmdsConfig[0]) * NUM_CMD_CALLBACKS / sizeof(cmd_info_t)] = {false};
+static bool cmdProgressTracker[NUM_CMD_CALLBACKS] = {false};
 
 obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
   if (cmd->id >= CMDS_CONFIG_SIZE) {

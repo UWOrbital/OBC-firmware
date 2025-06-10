@@ -101,4 +101,6 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
 
+// This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the
+// unused variable error
 void unusedFunc() { UNUSED(cmdsConfig); }

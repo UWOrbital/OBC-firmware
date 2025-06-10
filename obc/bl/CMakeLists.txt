@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(IS_BL 1)
-
 set(BL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/bl_main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_flash.c

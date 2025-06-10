@@ -44,9 +44,11 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
 obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
   // If the timetag is in the past, throw away the command
   obc_error_code_t errCode;
+
   if (!cmd->isTimeTagged) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
   if (cmd->timestamp < getCurrentUnixTime()) {
     return OBC_ERR_CODE_SUCCESS;
   }

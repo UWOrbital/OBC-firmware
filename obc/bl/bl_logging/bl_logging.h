@@ -51,3 +51,20 @@ typedef enum { LOG_TYPE_ERROR_CODE = 0, LOG_TYPE_MSG = 1 } log_type_t;
 #define LOG_FATAL_FROM_ISR(msg)
 
 #define LOG_ERROR_CODE(errCode)
+
+#define RETURN_IF_ERROR_CODE(_ret)         \
+  do {                                     \
+    errCode = _ret;                        \
+    if (errCode != OBC_ERR_CODE_SUCCESS) { \
+      LOG_ERROR_CODE(errCode);             \
+      return errCode;                      \
+    }                                      \
+  } while (0)
+
+#define LOG_IF_ERROR_CODE(_ret)            \
+  do {                                     \
+    errCode = _ret;                        \
+    if (errCode != OBC_ERR_CODE_SUCCESS) { \
+      LOG_ERROR_CODE(errCode);             \
+    }                                      \
+  } while (0)

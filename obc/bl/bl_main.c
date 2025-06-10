@@ -2,12 +2,15 @@
 #include "bl_flash.h"
 #include "bl_uart.h"
 #include "bl_errors.h"
+#include "obc_errors.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_unpack.h"
 #include <metadata_struct.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "command.h"
+#include "bl_logging.h"
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
 extern uint32_t __ramFuncsSize__;
@@ -50,13 +53,15 @@ int main(void) {
     uint8_t buffer[16] = {0};
     blUartReadBytes(buffer, 16);
 
+    cmd_info_t currCmdInfo;
     cmd_msg_t unpackedCmdMsg = {0};
     uint32_t unpackOffset = 0;
     unpackCmdMsg(buffer, &unpackOffset, &unpackedCmdMsg);
 
-    if (unpackedCmdMsg.id == CMD_PING) {
-      blUartWriteBytes(1, (uint8_t *)"A");
-    }
+    obc_error_code_t errCode;
+
+    LOG_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
+    LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
   }
 
   // TODO: Modify the transfer protocol to be faster and more robust

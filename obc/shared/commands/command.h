@@ -30,12 +30,3 @@ obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
 obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
-
-/**
- * @brief Processes time tagged commands
- *
- * @param cmd Pointer to the command message
- * @param currCmdInfo Pointer to the command information
- * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
- */
-obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
