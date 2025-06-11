@@ -3,10 +3,15 @@
 #include "bl_uart.h"
 #include "bl_errors.h"
 #include "rti.h"
+#include "obc_errors.h"
+#include "obc_gs_command_data.h"
+#include "obc_gs_command_unpack.h"
 #include <metadata_struct.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "command.h"
+#include "bl_logging.h"
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
 extern uint32_t __ramFuncsSize__;

@@ -24,7 +24,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/camera_mgr/payload_manager.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/command_mgr/command_manager.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/command_mgr/command_callbacks.c
+
+    ${CMAKE_SOURCE_DIR}/obc/shared/commands/command_callbacks.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/comms_manager.c
     ${CMAKE_CURRENT_SOURCE_DIR}/comms_link_mgr/downlink_encoder.c
