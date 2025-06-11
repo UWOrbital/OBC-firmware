@@ -2,6 +2,7 @@
 #include "bl_flash.h"
 #include "bl_uart.h"
 #include "bl_errors.h"
+#include "rti.h"
 #include <metadata_struct.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -40,6 +41,8 @@ int main(void) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
   blUartInit();
+  rtiInit();
+  rtiStartCounter(rtiCOUNTER_BLOCK1);
 
   // F021 API and the functions that use it must be executed from RAM since they
   // can't execute from the same flash bank being modified
@@ -62,7 +65,7 @@ int main(void) {
           state = BL_STATE_ERASE_IMAGE;
         } else if (c == 'r' || c == '\0') {
           state = BL_STATE_RUN_APP;
-          blUartWriteBytes(1, (uint8_t *)"A");
+          blUartWriteBytes(strlen("Jumping to app location\r\n"), (uint8_t *)"Jumping to app location\r\n");
         }
         break;
       }

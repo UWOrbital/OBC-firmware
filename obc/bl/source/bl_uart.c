@@ -20,9 +20,6 @@ void blUartInit(void) {
   sciInit();
 
   sciSetBaudrate(UART_BL_REG, BL_UART_SCIREG_BAUD);
-
-  rtiInit();
-  rtiStartCounter(rtiCOUNTER_BLOCK1);
 }
 
 void blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
@@ -33,7 +30,7 @@ void blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
         buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
       }
     }
-  } while ((rtiGetCurrentTick(rtiCOMPARE1) - initTime) < (timeout_ms * 50));
+  } while (((rtiGetCurrentTick(rtiCOMPARE1) - initTime) / 50) < timeout_ms);
 }
 
 void blUartWriteBytes(uint32_t numBytes, uint8_t *buf) { sciSend(UART_BL_REG, numBytes, buf); }
