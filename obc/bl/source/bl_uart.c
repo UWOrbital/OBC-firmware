@@ -30,7 +30,8 @@ void blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
         buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
       }
     }
-  } while (((rtiGetCurrentTick(rtiCOMPARE1) - initTime) / 50) < timeout_ms);
+  } while (((rtiGetCurrentTick(rtiCOMPARE1) - initTime) / 50) < timeout_ms ||
+           rtiGetCurrentTick(rtiCOMPARE1) < initTime);
 }
 
 void blUartWriteBytes(uint32_t numBytes, uint8_t *buf) { sciSend(UART_BL_REG, numBytes, buf); }

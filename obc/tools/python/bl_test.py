@@ -13,7 +13,7 @@ if __name__ == "__main__":
         baudrate=OBC_UART_BAUD_RATE,
         parity=PARITY_NONE,
         stopbits=STOPBITS_TWO,
-        timeout=5,
+        timeout=20,
     ) as ser:
         print("Receiving from bootloader...")
         print(ser.read(len("Waiting for input\r\n")))
