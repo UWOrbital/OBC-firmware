@@ -51,14 +51,6 @@ TEST(TestEncodeDecode, sendData) {
   // Manipulate some bits for testing purposes
   ax25Data.data[40] ^= 0b10000001;
   ax25Data.data[220] ^= 0b10100011;
-
-  // Print out the ax25 data in hex to use in python testing
-  // NOTE: Uncomment to see output when running c tests
-  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  // for (int i = 0; i < ax25Data.length; i++) {
-  //   printf(" 0x%x", ax25Data.data[i]);
-  // }
-  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 }
 
 // TEST: A simulated receive with the entire pipline
@@ -138,13 +130,6 @@ TEST(TestEncodeDecode, uFrameReceive) {
   ASSERT_EQ(ax25Unstuff(ax25Data.data, ax25Data.length, unstuffedPacket.data, &unstuffedPacket.length),
             OBC_GS_ERR_CODE_SUCCESS);
 
-  // NOTE: Uncomment to see frame data
-  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  // for (int i = 0; i < unstuffedPacket.length; i++) {
-  //   printf(" 0x%x", unstuffedPacket.data[i]);
-  // }
-  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
-
   u_frame_cmd_t command;
   ASSERT_EQ(ax25Recv(&unstuffedPacket, &command), OBC_GS_ERR_CODE_SUCCESS);
 }
@@ -155,13 +140,6 @@ TEST(TestEncodeDecode, uFrameSend) {
 
   setCurrentLinkDestCallSign(CUBE_SAT_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
   ASSERT_EQ(ax25SendUFrame(&ax25Data, U_FRAME_CMD_CONN, pollFinalBit), OBC_GS_ERR_CODE_SUCCESS);
-
-  // NOTE: Uncomment to see frame data
-  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  // for (int i = 0; i < ax25Data.length; i++) {
-  //   printf(" 0x%x", ax25Data.data[i]);
-  // }
-  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 }
 
 TEST(TestEncodeDecode, receiveCommandData) {
@@ -210,12 +188,6 @@ TEST(TestEncodeDecode, receiveCommandData) {
   memset(aesData.iv, 1, AES_IV_SIZE);
   uint8_t output[RS_DECODED_SIZE];
   aes128Decrypt(&aesData, output, RS_DECODED_SIZE);
-  // NOTE: Uncomment to see frame data
-  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  // for (int i = 0; i < RS_DECODED_SIZE; i++) {
-  //   printf(" 0x%x", output[i]);
-  // }
-  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
 
   uint32_t bytesUnpacked = 0;
   while (bytesUnpacked < AES_DECRYPTED_SIZE) {
@@ -260,14 +232,5 @@ TEST(TestEncodeDecode, sendCommandData) {
   ax25Data.data[40] ^= 0b10000001;
   ax25Data.data[220] ^= 0b10100011;
 
-  // Print out the ax25 data in hex to use in python testing
-  // NOTE: Uncomment to see output when running c tests
-  // std::cout << std::endl << "Frame Hex Data:" << std::endl;
-  // for (int i = 0; i < ax25Data.length; i++) {
-  //   printf(" 0x%x", ax25Data.data[i]);
-  // }
-  // std::cout << std::endl << "End of Frame Hex Data" << std::endl;
-
-  // NOTE: This should only be called after everything with fec is done (thus why its not called in the first test)
   destroyRs();
 }

@@ -71,13 +71,6 @@ TEST(TestTelemetryPackUnpack, ValidTelemPongPackUnpack) {
   err = packTelemetry((const telemetry_data_t *)&data, buffer, MAX_TELEMETRY_DATA_SIZE, &numPacked);
   ASSERT_EQ(err, OBC_GS_ERR_CODE_SUCCESS);
 
-  // NOTE: Uncomment to see output bytes in hex (Useful for debugging CMD_PING)
-  // std::cout << "---Start of Telem Data---" << std::endl;
-  // for (int i = 0; i < MAX_TELEMETRY_DATA_SIZE; i++) {
-  //   printf(" 0x%x", buffer[i]);
-  // }
-  // std::cout << std::endl << "---End of Telem Data---" << std::endl;
-
   telemetry_data_t unpackedData = {0};
   uint32_t numUnpacked = 0;
   err = unpackTelemetry((const uint8_t *)&buffer, &numUnpacked, &unpackedData);

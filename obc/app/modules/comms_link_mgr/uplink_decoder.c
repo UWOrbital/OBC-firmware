@@ -230,14 +230,14 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   aes_data_t aesDataT = {
       .iv = {0}, .ciphertext = unstuffedPacket.data + AX25_INFO_FIELD_POSITION, .ciphertextLen = RS_DECODED_SIZE};
   memset(aesDataT.iv, 1, AES_IV_SIZE);
-  uint8_t output[RS_DECODED_SIZE];
-  aes128Decrypt(&aesDataT, output, RS_DECODED_SIZE);
+  uint8_t decryptedCmdData[RS_DECODED_SIZE];
+  aes128Decrypt(&aesDataT, decryptedCmdData, RS_DECODED_SIZE);
 
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
   }
 
-  RETURN_IF_ERROR_CODE(handleCommands(output));
+  RETURN_IF_ERROR_CODE(handleCommands(decryptedCmdData));
 
   return OBC_ERR_CODE_SUCCESS;
 }
