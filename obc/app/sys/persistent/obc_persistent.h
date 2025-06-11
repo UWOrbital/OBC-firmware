@@ -57,9 +57,6 @@ extern "C" {
 /* Current version of obc_persistent to store in section headers */
 #define OBC_PERSISTENT_VERSION 1
 
-/* Current version of obc_persistent to store in section headers */
-#define OBC_PERSISTENT_VERSION 1
-
 /*---------------------------------------------------------------------------*/
 /**
  * @brief Header struct to be placed at the start of each persistent section
