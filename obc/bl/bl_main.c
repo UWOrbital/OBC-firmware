@@ -2,7 +2,9 @@
 #include "bl_flash.h"
 #include "bl_uart.h"
 #include "bl_errors.h"
+#include "rti.h"
 #include <metadata_struct.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 /* LINKER EXPORTED SYMBOLS */
@@ -20,6 +22,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define BL_MAX_MSG_SIZE 64U
 #define RM46_FLASH_BANK 0U
 #define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
+#define WAIT_FOREVER UINT32_MAX
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -36,6 +39,8 @@ int main(void) {
   bl_error_code_t errCode = BL_ERR_CODE_SUCCESS;
 
   blUartInit();
+  rtiInit();
+  rtiStartCounter(rtiCOUNTER_BLOCK1);
 
   // F021 API and the functions that use it must be executed from RAM since they
   // can't execute from the same flash bank being modified
@@ -50,16 +55,16 @@ int main(void) {
         blUartWriteBytes(strlen("Waiting for input\r\n"), (uint8_t *)"Waiting for input\r\n");
 
         char c = '\0';
-        blUartReadBytes((uint8_t *)&c, 1);
+        blUartReadBytes((uint8_t *)&c, 1, 10000);
 
         if (c == 'd') {
           state = BL_STATE_DOWNLOAD_IMAGE;
         } else if (c == 'e') {
           state = BL_STATE_ERASE_IMAGE;
-        } else if (c == 'r') {
+        } else if (c == 'r' || c == '\0') {
           state = BL_STATE_RUN_APP;
+          blUartWriteBytes(strlen("Jumping to app location\r\n"), (uint8_t *)"Jumping to app location\r\n");
         }
-
         break;
       }
       case BL_STATE_DOWNLOAD_IMAGE: {
@@ -67,7 +72,7 @@ int main(void) {
 
         uint8_t recvBuffer[sizeof(app_metadata_t)] = {0U};
 
-        blUartReadBytes(recvBuffer, sizeof(app_metadata_t));
+        blUartReadBytes(recvBuffer, sizeof(app_metadata_t), WAIT_FOREVER);
 
         app_metadata_t appHeader = {0};
         memcpy((void *)&appHeader, (void *)recvBuffer, sizeof(app_metadata_t));
@@ -122,7 +127,7 @@ int main(void) {
         while (1) {
           char waitChar = '\0';
 
-          blUartReadBytes((uint8_t *)&waitChar, 1U);
+          blUartReadBytes((uint8_t *)&waitChar, 1U, WAIT_FOREVER);
 
           if (waitChar == 'D') {
             break;
@@ -139,7 +144,7 @@ int main(void) {
           uint32_t numBytesToRead =
               (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
 
-          blUartReadBytes(recvBuffer, numBytesToRead);
+          blUartReadBytes(recvBuffer, numBytesToRead, WAIT_FOREVER);
 
           blFlashFapiBlockWrite(APP_START_ADDRESS + (appHeader.binSize - numAppBytesToFlash), (uint32_t)recvBuffer,
                                 numBytesToRead);

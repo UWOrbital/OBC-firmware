@@ -18,6 +18,10 @@ uint32_t rtiGetCounterOneTick() {
   return rtiBase->CNT[1].FRCx; 
 }
 
+uint32 rtiGetCurrentTick(uint32 compare) {
+    return rtiBase->CNT[1].FRCx;
+}
+
 /**
  * @brief Resets all of RTI Counter 1. Disables the counter until enabled again 
  * using rtiStartCounter.
