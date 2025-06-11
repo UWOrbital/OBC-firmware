@@ -1,4 +1,5 @@
 #include "bl_uart.h"
+#include "rti.h"
 
 #include <sci.h>
 #include <stdarg.h>
@@ -19,12 +20,20 @@ void blUartInit(void) {
   sciInit();
 
   sciSetBaudrate(UART_BL_REG, BL_UART_SCIREG_BAUD);
+
+  rtiInit();
+  rtiStartCounter(rtiCOUNTER_BLOCK1);
 }
 
-void blUartReadBytes(uint8_t *buf, uint32_t numBytes) {
-  for (uint32_t i = 0U; i < numBytes; i++) {
-    buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
-  }
+void blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
+  uint32_t initTime = rtiGetCurrentTick(rtiCOMPARE1);
+  do {
+    if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {
+      for (uint32_t i = 0U; i < numBytes; i++) {
+        buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
+      }
+    }
+  } while ((rtiGetCurrentTick(rtiCOMPARE1) - initTime) < (timeout_ms * 50));
 }
 
 void blUartWriteBytes(uint32_t numBytes, uint8_t *buf) { sciSend(UART_BL_REG, numBytes, buf); }
