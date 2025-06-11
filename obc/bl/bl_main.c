@@ -22,9 +22,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define BL_MAX_MSG_SIZE 64U
 #define RM46_FLASH_BANK 0U
 #define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
-#define WAIT_FOREVER \
-  4000000000  // A very large number to pass as an argument to wait forever when using
-              // blUartReadBytes()
+#define WAIT_FOREVER UINT32_MAX
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -57,7 +55,7 @@ int main(void) {
         blUartWriteBytes(strlen("Waiting for input\r\n"), (uint8_t *)"Waiting for input\r\n");
 
         char c = '\0';
-        blUartReadBytes((uint8_t *)&c, 1, 1000);
+        blUartReadBytes((uint8_t *)&c, 1, 10000);
 
         if (c == 'd') {
           state = BL_STATE_DOWNLOAD_IMAGE;

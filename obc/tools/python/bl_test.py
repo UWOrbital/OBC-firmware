@@ -18,6 +18,6 @@ if __name__ == "__main__":
         print("Receiving from bootloader...")
         print(ser.read(len("Waiting for input\r\n")))
         start = time.time()
-        print(ser.read(1))
+        print(ser.read(len("Jumping to app location\r\n")))
         end = time.time()
         print(end - start)
