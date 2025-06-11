@@ -54,8 +54,8 @@ int main(void) {
 
   // bl_state_t state = BL_STATE_IDLE;
   uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
-  blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 200);
-  if (recvBuffer[1] == 0U) {
+
+  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 200) != OBC_ERR_CODE_SUCCESS) {
     // Jump to app
   } else {
     while (1) {
@@ -66,8 +66,7 @@ int main(void) {
       LOG_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
       LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
       memset(recvBuffer, 0, sizeof(recvBuffer));
-      blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 2000);
-      if (recvBuffer[1] == 0U) {
+      if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 2000) != OBC_ERR_CODE_SUCCESS) {
         // Verify CRC
         // Verify Hardware
         // Jump to app

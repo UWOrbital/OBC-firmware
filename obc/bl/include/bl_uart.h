@@ -1,6 +1,7 @@
 #pragma once
 
 #include "obc_board_config.h"
+#include "obc_errors.h"
 #include <stdint.h>
 
 /**
@@ -17,7 +18,7 @@ void blUartInit(void);
  * @param timeout The timeout for the function to wait to receive bytes.
  * @param numBytes Number of bytes to read
  */
-void blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms);
+obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms);
 
 /**
  * @brief Write a stream of bytes to the UART

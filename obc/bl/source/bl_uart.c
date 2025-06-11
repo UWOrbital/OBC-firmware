@@ -22,16 +22,19 @@ void blUartInit(void) {
   sciSetBaudrate(UART_BL_REG, BL_UART_SCIREG_BAUD);
 }
 
-void blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
+obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
   uint32_t initTime = rtiGetCurrentTick(rtiCOMPARE1);
   do {
     if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {
       for (uint32_t i = 0U; i < numBytes; i++) {
         buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
       }
+      return OBC_ERR_CODE_SUCCESS;
     }
   } while (((rtiGetCurrentTick(rtiCOMPARE1) - initTime) / 50) < timeout_ms ||
            rtiGetCurrentTick(rtiCOMPARE1) < initTime);
+
+  return OBC_ERR_CODE_UART_FAILURE;
 }
 
 void blUartWriteBytes(uint32_t numBytes, uint8_t *buf) { sciSend(UART_BL_REG, numBytes, buf); }
