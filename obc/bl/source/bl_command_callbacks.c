@@ -35,6 +35,9 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  // TODO: Implement Erase App
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -49,6 +52,9 @@ static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  // TODO: Implement a check that verifies the crc
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -56,6 +62,9 @@ static obc_error_code_t resetBlCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  // TODO: Implement OBC reset functionality
+
   return OBC_ERR_CODE_SUCCESS;
 }
 

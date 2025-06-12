@@ -31,6 +31,18 @@ static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cm
 // CMD_SET_PROGRAMMING_SESSION
 static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
 
+// CMD_DOWNLOAD_DATA (This should never need to be packed as the obc should never send this to the ground station)
+static void packDownloadDataCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_ERASE_APP
+static void packEraseAppCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_VERIFY_CRC
+static void packVerifyCrcCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_RESET_BL
+static void packResetBlCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
 typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);
 
 static const pack_func_t packFns[] = {
@@ -41,6 +53,11 @@ static const pack_func_t packFns[] = {
     [CMD_PING] = packPingCmdData,
     [CMD_DOWNLINK_TELEM] = packDownlinkTelemCmdData,
     [CMD_SET_PROGRAMMING_SESSION] = packSetProgrammingSessionCmdData,
+    [CMD_DOWNLOAD_DATA] = packDownloadDataCmdData,
+    [CMD_ERASE_APP] = packEraseAppCmdData,
+    [CMD_VERIFY_CRC] = packVerifyCrcCmdData,
+    [CMD_RESET_BL] = packResetBlCmdData,
+
     // Add more functions for other commands as needed
 };
 
@@ -105,4 +122,24 @@ static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cm
 // CMD_SET_PROGRAMMING_SESSION
 static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   packUint8((uint8_t)cmdMsg->setProgrammingSession.programmingSession, buffer, offset);
+}
+
+// CMD_DOWNLOAD_DATA
+static void packDownloadDataCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  // No data to pack (the obc should never send this command back)
+}
+
+// CMD_ERASE_APP
+static void packEraseAppCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  // No data to pack
+}
+
+// CMD_VERIFY_CRC
+static void packVerifyCrcCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  // No data to pack
+}
+
+// CMD_RESET_BL
+static void packResetBlCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+  // No data to pack
 }
