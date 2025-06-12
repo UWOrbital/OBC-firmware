@@ -1,0 +1,318 @@
+from argparse import ArgumentError, ArgumentParser
+from collections.abc import Callable
+from pathlib import Path
+from typing import Final
+
+from ax25 import Frame, FrameType
+from serial import PARITY_NONE, STOPBITS_TWO, Serial
+
+from gs.backend.obc_utils.encode_decode import CommsPipeline
+from interfaces import (
+    CUBE_SAT_CALLSIGN,
+    GROUND_STATION_CALLSIGN,
+    OBC_UART_BAUD_RATE,
+    RS_ENCODED_DATA_SIZE,
+)
+from interfaces.command_framing import command_multi_pack
+from interfaces.obc_gs_interface.ax25 import AX25
+from interfaces.obc_gs_interface.commands import (
+    CmdCallbackId,
+    CmdMsg,
+    create_cmd_downlink_logs_next_pass,
+    create_cmd_downlink_telem,
+    create_cmd_end_of_frame,
+    create_cmd_exec_obc_reset,
+    create_cmd_mirco_sd_format,
+    create_cmd_ping,
+    create_cmd_rtc_sync,
+    create_cmd_uplink_disc,
+)
+
+# This is a constant value set in the python and OBC side as to what length of I Frame the OBC will be waiting to
+# receive. This must be followed or the obc will not function as expected
+_PADDING_REQUIRED: Final[int] = 300
+
+LOG_PATH: Path = (Path(__file__).parent / "../logs.log").resolve()
+
+
+def send_command(args: str, com_port: str) -> Frame | None:
+    """
+    A function to send a command up to the cube satellite and awaits a response
+
+    :param args: A string that contains all the arguments the user passed in
+    :param com_port: The port that the board is connected to (i.e. which port the program should use)
+    """
+    # Using generate commands, we generate a command based on the arguments passed in
+    command = generate_command(args)
+
+    # We do a check to see if the arguments were properly passed in otherwise we return None
+    if command is None:
+        return None
+
+    # command_multi_pack takes in a list of commands to pack thus we create that list here.
+    data = [command]
+
+    comms = CommsPipeline()
+
+    # We pad the data to an amount that the OBC expects (See handleUplinkingState function in comms_manager.c)
+    # Note also that command_multi_pack returns a list of byte strings with each string stuffed to the max
+    send_bytes = comms.encode(command_multi_pack(data)[0]).ljust(_PADDING_REQUIRED, b"\x00")
+    # Initialize pyserial
+    with Serial(
+        com_port,
+        baudrate=OBC_UART_BAUD_RATE,
+        parity=PARITY_NONE,
+        stopbits=STOPBITS_TWO,
+        timeout=1,
+    ) as ser:
+        # Reset the output buffer just in case
+        ser.reset_output_buffer()
+
+        # Send the frames to the board
+        ser.write(send_bytes)
+        print("Frame Sent")
+
+        # Await a response (This is set to an arbitrary large amount as the logger and stats collector might
+        # send through data)
+        read_bytes = ser.read(10000)
+        start_index = read_bytes.find(b"\x7e")
+        end_index = read_bytes.rfind(b"\x7e")
+
+        outer_bytes = read_bytes[:start_index] + read_bytes[end_index + 1 :]
+
+        with open(LOG_PATH, "a") as file:
+            file.write(str(outer_bytes.decode("utf-8")))
+
+        # Isolate the frame
+        rcv_frame_bytes = read_bytes[start_index : end_index + 1]
+
+        # This accounts for the command having no response
+        if len(rcv_frame_bytes) == 0:
+            return None
+
+        # Check if the frame is an I frame
+        if len(rcv_frame_bytes) > RS_ENCODED_DATA_SIZE:
+            rcv_frame = comms.decode(rcv_frame_bytes)
+        else:
+            ax25 = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
+            rcv_frame = ax25.decode_frame(rcv_frame_bytes)
+
+        # TODO: Handle these return frames
+        return rcv_frame
+
+
+def send_conn_request(com_port: str) -> Frame:
+    """
+    Sends the initial connection request to the board
+
+    :param com_port: The port which the function should use to send and receive on
+    """
+    # Initialize pyserial with the correct parameters
+    with Serial(
+        com_port,
+        baudrate=OBC_UART_BAUD_RATE,
+        parity=PARITY_NONE,
+        stopbits=STOPBITS_TWO,
+        timeout=1,
+    ) as ser:
+        # Encode using AX25, remember these frames don't have data fields so there's no need for fec or aes128
+        ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
+        send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
+        send_bytes = ax25_proto.stuff(send_bytes)
+        ser.write(send_bytes.ljust(30, b"\x00"))
+
+        # We wait for an acknowledge from the board
+        rcv_frame_bytes = ser.read(10000)
+        start_index = rcv_frame_bytes.find(b"\x7e")
+        end_index = rcv_frame_bytes.rfind(b"\x7e")
+        # TODO: Handle invalid acknowledge frame
+
+        # Write out any logs that we received while receiving the connection
+        outer_bytes = rcv_frame_bytes[:start_index] + rcv_frame_bytes[end_index + 1 :]
+
+        with open(LOG_PATH, "a") as file:
+            file.write(str(outer_bytes.decode("utf-8")))
+
+        # Decode the frame
+        rcv_frame_bytes = rcv_frame_bytes[start_index : end_index + 1]
+        rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
+        rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
+        return rcv_frame
+
+
+def arg_parse() -> ArgumentParser:
+    """
+    This is a parent argument parser for all commands since all commands share the timestamp and command name in common
+    """
+    # We set add_help False here to avoid the child parsers from raising errors.
+    # exit_on_error is also set to False to allow us to handle errors ourselves
+    parser = ArgumentParser(add_help=False, exit_on_error=False)
+
+    # Command Argument
+    parser.add_argument(
+        "-c",
+        "--command",
+        required=True,
+        dest="command",
+        type=str,
+        choices=[x.name for x in CmdCallbackId],
+        help="The command to send to the board",
+    )
+
+    # Timestamp Argument
+    parser.add_argument(
+        "-t",
+        "--timestamp",
+        required=False,
+        dest="timestamp",
+        type=int,
+        help="The time stamp for when the command should execute",
+    )
+
+    return parser
+
+
+# The following are specific command parsers with one argument
+# NOTE: Update these as you add enums and always set the destinations of variables to arg1, arg2, arg3 and make the
+# arguments required. Additionally, keep the same arguments when initiailizing the ArgumentParser Class
+def parse_cmd_rtc_time_sync() -> ArgumentParser:
+    """
+    A function to parse the argument for the rtc_time_sync command
+    """
+    parent_parser = arg_parse()
+    parser = ArgumentParser(parents=[parent_parser], exit_on_error=False)
+    parser.add_argument(
+        "-rtc",
+        "--rtc_sync_time",
+        required=True,
+        dest="arg1",
+        type=int,
+        help="The time that the should be used to sync",
+    )
+    return parser
+
+
+def parse_cmd_downlink_logs_next_pass() -> ArgumentParser:
+    """
+    A function to parse the argument for the downlink_logs_next_pass command
+    """
+    parent_parser = arg_parse()
+    parser = ArgumentParser(parents=[parent_parser], exit_on_error=False)
+    parser.add_argument(
+        "-lnp",
+        "--log_next_pass",
+        required=True,
+        dest="arg1",
+        type=int,
+        help="The log level for when the logs are downlinked",
+    )
+    return parser
+
+
+# End of specific command parsers
+
+
+def generate_command(args: str) -> CmdMsg | None:
+    """
+    A function that parsed command arguments and returns the corresponding command frame
+
+    :param args: The arguments to parse to create the command
+    """
+    arguments = args.split()
+    command = CmdMsg()
+
+    # These are a list of parsers for commands that require additional arguments
+    # NOTE: Update this list when another command with a specific parser is required
+    child_parsers = [parse_cmd_downlink_logs_next_pass, parse_cmd_rtc_time_sync]
+
+    # A list of Command factories for all commands
+    # NOTE: Update these when a command is added and make sure to keep them in the order that the commands are described
+    # in the CmdCallbackId Enum
+    commmand_factories: list[Callable[..., CmdMsg]] = [
+        create_cmd_end_of_frame,
+        create_cmd_exec_obc_reset,
+        create_cmd_rtc_sync,
+        create_cmd_downlink_logs_next_pass,
+        create_cmd_mirco_sd_format,
+        create_cmd_ping,
+        create_cmd_downlink_telem,
+        create_cmd_uplink_disc,
+    ]
+
+    # Loop through each of the specific parses and see if we get a valid parse on any of them
+    for func in child_parsers:
+        try:
+            parser = func()
+            command_args = parser.parse_args(arguments)
+        except ArgumentError:
+            continue
+
+        # Once we do get a valid parse we try to see if the command is in the list of commands by converting it to
+        # the CmdCallbackId Enum
+        try:
+            command_enum = CmdCallbackId[command_args.command]
+        except KeyError:
+            print("Invalid Command")
+            return None
+
+        # We check how many arguments are in the parsed object and call functions accordingly.
+        # This is the reason why it's important to use the arg1, arg2, arg3 naming convention when creating
+        # specific parsers
+        if hasattr(command_args, "arg3"):
+            # This line is just accessing a function in the commmand_factories list and passing in arguments
+            # via brackets
+            # This line also shows why the order is important of the functions in that list
+            command = commmand_factories[command_enum.value](
+                command_args.arg1, command_args.arg2, command_args.arg3, command_args.timestamp
+            )
+        elif hasattr(command_args, "arg2"):
+            command = commmand_factories[command_enum.value](
+                command_args.arg1, command_args.arg2, command_args.timestamp
+            )
+        elif hasattr(command_args, "arg1"):
+            command = commmand_factories[command_enum.value](command_args.arg1, command_args.timestamp)
+        return command
+
+    parser = arg_parse()
+    # If the command did not pass any of the specific parsers, we try the general one
+    try:
+        command_args = parser.parse_args(arguments)
+    except ArgumentError:
+        print("Invalid Commands")
+        return None
+
+    # Same thing as before, we try to convert to a CmdCallbackId Enum to see if the command if valid
+    try:
+        command_enum = CmdCallbackId[command_args.command]
+    except KeyError:
+        print("Invalid Command")
+        return None
+
+    command = commmand_factories[command_enum.value](command_args.timestamp)
+    return command
+
+
+def poll(com_port: str, file_path: str | Path, print_console: bool = False) -> None:
+    """
+    A function that is supposed to run in the background to keep receiving logs from the board
+
+    :param com_port: The port that the board is connected to so it can poll
+    :param print_console: Whether the function should print to console or not. By default, this is set to False. This is
+                          useful for the CLI where sometimes we want to print out the received logs from the board
+    """
+    with (
+        Serial(
+            com_port,
+            baudrate=OBC_UART_BAUD_RATE,
+            parity=PARITY_NONE,
+            stopbits=STOPBITS_TWO,
+            timeout=1,
+        ) as ser,
+        open(file_path, "a") as file,
+    ):
+        while True:
+            data = ser.read(10000).decode("utf-8")
+            file.write(data)
+            file.flush()
+            if print_console and len(data) != 0:
+                print(data)

@@ -6,6 +6,9 @@
 #include <string.h>
 
 #define AX25_U_FRAME_SABME_CMD_CONTROL 0b01101111
+// NOTE: This is defined and used since we are using mod 8 control fields (8 bit
+// fields)
+#define AX25_U_FRAME_SABM_CMD_CONTROL 0b00101111
 #define AX25_U_FRAME_DISC_CMD_CONTROL 0b01000011
 #define AX25_U_FRAME_ACK_CMD_CONTROL 0b01100011
 #define POLL_FINAL_BIT_OFFSET 4
@@ -240,16 +243,15 @@ obc_gs_error_code_t ax25SendUFrame(packed_ax25_u_frame_t *ax25Data, uint8_t cmd,
   } else if (cmd == U_FRAME_CMD_DISC) {
     ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] |= AX25_U_FRAME_DISC_CMD_CONTROL;
   } else {
-    ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] |= AX25_U_FRAME_SABME_CMD_CONTROL;
+    ax25PacketUnstuffed[AX25_CONTROL_BYTES_POSITION] |= AX25_U_FRAME_SABM_CMD_CONTROL;
   }
-
-  ax25PacketUnstuffed[AX25_MOD8_PID_POSITION] = AX25_PID;
 
   uint16_t fcs;
   fcsCalculate(ax25PacketUnstuffed + 1, AX25_MINIMUM_U_FRAME_CMD_LENGTH, &fcs);
 
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION] = (uint8_t)(fcs >> 8);
   ax25PacketUnstuffed[AX25_U_FRAME_FCS_POSITION + 1] = (uint8_t)(fcs & 0xFF);
+  ax25PacketUnstuffed[AX25_MINIMUM_U_FRAME_CMD_LENGTH - 1] = AX25_FLAG;
 
   errCode =
       ax25Stuff(ax25PacketUnstuffed, AX25_MINIMUM_U_FRAME_CMD_LENGTH, ax25Data->data, (uint16_t *)&ax25Data->length);
@@ -351,7 +353,7 @@ obc_gs_error_code_t ax25Unstuff(uint8_t *packet, uint16_t packetLen, uint8_t *un
   // bytes at the end as a result of unstuffing
   if (tailBytes == 0) {
     unstuffedPacket[(unstuffedBitLength + 7) / 8] = AX25_FLAG;
-    *unstuffedPacketLen = (unstuffedBitLength + 7) / 8;
+    *unstuffedPacketLen = ((unstuffedBitLength + 7) / 8) + 1;
   } else {
     unstuffedPacket[(unstuffedBitLength / 8) - tailBytes + 1] = AX25_FLAG;
     *unstuffedPacketLen = unstuffedBitLength / 8 - tailBytes + 2;
@@ -447,9 +449,12 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
 }
 
 static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command) {
-  if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID) {
-    return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
-  }
+  // NOTE: This is not a part of the u Frame implementation (i.e. U Frames do
+  // not have PID fields) but is kept just in case any other code throughout the
+  // code base was written with U Frames having PID fields
+  // if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID) {
+  //   return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
+  // }
 
   uint8_t controlByte = unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION];
   // uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK; TODO: figure out
@@ -464,7 +469,7 @@ static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket,
   // the destination address for the packet we send will be the src address of
   // the packet we just received
   memcpy(destAddr.data, unstuffedPacket->data + AX25_SRC_ADDR_POSITION, AX25_DEST_ADDR_BYTES);
-  if (controlByte == AX25_U_FRAME_SABME_CMD_CONTROL) {
+  if (controlByte == AX25_U_FRAME_SABM_CMD_CONTROL) {
     // Reset the various numbering variables for the new link
     pktSentNum = 0;
     pktReceiveNum = 0;

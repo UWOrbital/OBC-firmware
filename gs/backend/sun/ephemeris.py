@@ -108,7 +108,8 @@ def define_parser() -> argparse.ArgumentParser:
         "--step-size",
         type=str,
         default=DEFAULT_STEP_SIZE,
-        help=f"Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 100). Default: {DEFAULT_STEP_SIZE}",
+        help=f"Step size in the same format as the Horizons API (e.g. 1m, 1h, 1d, 100). "
+        f"Default: {DEFAULT_STEP_SIZE}",
     )
     parser.add_argument(
         "-t",
@@ -139,7 +140,8 @@ def define_parser() -> argparse.ArgumentParser:
         "--exclude",
         choices=["first", "last", "both", "none"],
         default=DEFAULT_EXCLUDE,
-        help=f"Exclude the first, last, both or none of the values from the output file. Default: {DEFAULT_EXCLUDE}",
+        help=f"Exclude the first, last, both or none of the values from the output file. "
+        f"Default: {DEFAULT_EXCLUDE}",
     )
     parser.add_argument(
         "-l",

@@ -1,12 +1,12 @@
 #include "command_callbacks.h"
-#include "obc_gs_command_data.h"
-#include "obc_reset.h"
+#include "comms_manager.h"
+#include "downlink_encoder.h"
 #include "obc_errors.h"
+#include "obc_gs_command_data.h"
 #include "obc_logging.h"
+#include "obc_reset.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
-#include "downlink_encoder.h"
-#include "comms_manager.h"
 #include "telemetry_manager.h"
 
 #include <redposix.h>
