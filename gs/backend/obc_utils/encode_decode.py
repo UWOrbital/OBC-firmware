@@ -48,7 +48,6 @@ class CommsPipeline:
         send_frame = self._ax25.encode_frame(encode_data, FrameType.I, 0)
         # Stuff the frame as per the standard
         send_frame_stuffed = self._ax25.stuff(send_frame)
-        print(send_frame_stuffed)
 
         return send_frame_stuffed
 
@@ -71,6 +70,5 @@ class CommsPipeline:
         # Turn the bytes into the frame using the ax25 library
         # We don't do aes decryption as the fcs values won't match, thus, we create and return a new frame instead
         rcv_frame = self._ax25.decode_frame(decoded_data)
-        print(rcv_frame.data)
 
         return rcv_frame
