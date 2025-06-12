@@ -20,13 +20,16 @@ static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_ms
 static void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_MICRO_SD_FORMAT
-static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg);
+static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_PING
 static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_DOWNLINK_TELEM
 static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_SET_PROGRAMMING_SESSION
+static void unpackSetProgrammingSessionCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 typedef void (*unpack_func_t)(const uint8_t*, uint32_t*, cmd_msg_t*);
 
@@ -37,6 +40,7 @@ static const unpack_func_t unpackFns[] = {
     [CMD_MICRO_SD_FORMAT] = unpackMicroSdFormat,
     [CMD_PING] = unpackPingCmdData,
     [CMD_DOWNLINK_TELEM] = unpackDownlinkTelemCmdData,
+    [CMD_SET_PROGRAMMING_SESSION] = unpackSetProgrammingSessionCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -90,14 +94,22 @@ static void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* o
   cmdMsg->downlinkLogsNextPass.logLevel = unpackUint8(buffer, offset);
 }
 
+// CMD_MICRO_SD_FORMAT
 static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
+// CMD_PING
 static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
-static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
+// CMD_DOWNLINK_TELEM
+static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
+}
+
+// CMD_SET_PROGRAMMING_SESSION
+static void unpackSetProgrammingSessionCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+  cmdMsg->setProgrammingSession.programmingSession = unpackUint8(buffer, offset);
 }

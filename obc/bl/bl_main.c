@@ -2,6 +2,7 @@
 #include "bl_flash.h"
 #include "bl_uart.h"
 #include "bl_errors.h"
+#include "obc_gs_errors.h"
 #include "rti.h"
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
@@ -11,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "command.h"
+#include "bl_command.h"
 #include "bl_logging.h"
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
@@ -33,12 +35,23 @@ extern uint32_t __ramFuncsRunEnd__;
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
 
-typedef enum {
-  BL_STATE_IDLE,
-  BL_STATE_DOWNLOAD_IMAGE,
-  BL_STATE_ERASE_IMAGE,
-  BL_STATE_RUN_APP,
-} bl_state_t;
+// Get this from the bl_command_callbacks for simplicity
+extern programming_session_t programmingSession;
+
+static obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
+  obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
+  cmd_info_t currCmdInfo;
+  cmd_msg_t unpackedCmdMsg = {0};
+  uint32_t unpackOffset = 0;
+  obc_gs_error_code_t interfaceErr = unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_CORRUPTED_MSG;
+  }
+  RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
+  RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
+  memset(recvBuffer, 0, MAX_PACKET_SIZE);
+  return errCode;
+}
 
 /* PUBLIC FUNCTIONS */
 int main(void) {
@@ -52,24 +65,31 @@ int main(void) {
   // can't execute from the same flash bank being modified
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
 
-  // bl_state_t state = BL_STATE_IDLE;
   uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
-  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 200) != OBC_ERR_CODE_SUCCESS) {
+  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 2000) != OBC_ERR_CODE_SUCCESS) {
     // Jump to app
+    blUartWriteBytes(1, (uint8_t *)"B");
   } else {
+    blUartWriteBytes(1, (uint8_t *)"Z");
+    LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+    if (programmingSession == BOOTLOADER) {
+      blUartWriteBytes(1, (uint8_t *)"E");
+    }
+
     while (1) {
-      cmd_info_t currCmdInfo;
-      cmd_msg_t unpackedCmdMsg = {0};
-      uint32_t unpackOffset = 0;
-      unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
-      LOG_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
-      LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
-      memset(recvBuffer, 0, sizeof(recvBuffer));
-      if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 2000) != OBC_ERR_CODE_SUCCESS) {
+      if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
         // Verify CRC
         // Verify Hardware
         // Jump to app
+        blUartWriteBytes(1, (uint8_t *)"V");
+        break;
+      }
+      blUartWriteBytes(1, (uint8_t *)"W");
+      LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+
+      if (programmingSession == APPLICATION) {
+        blUartWriteBytes(1, (uint8_t *)"D");
       }
     }
   }

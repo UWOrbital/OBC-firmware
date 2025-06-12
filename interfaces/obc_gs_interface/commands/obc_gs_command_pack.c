@@ -28,6 +28,9 @@ static void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* 
 // CMD_DOWNLINK_TELEM
 static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
 
+// CMD_SET_PROGRAMMING_SESSION
+static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
 typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);
 
 static const pack_func_t packFns[] = {
@@ -37,6 +40,7 @@ static const pack_func_t packFns[] = {
     [CMD_MICRO_SD_FORMAT] = packMicroSdFormat,
     [CMD_PING] = packPingCmdData,
     [CMD_DOWNLINK_TELEM] = packDownlinkTelemCmdData,
+    [CMD_SET_PROGRAMMING_SESSION] = packSetProgrammingSessionCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -94,6 +98,11 @@ static void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* 
 }
 
 // CMD_DOWNLINK_TELEM
-static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
   // No data to pack
+}
+
+// CMD_SET_PROGRAMMING_SESSION
+static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  packUint8((uint8_t)cmdMsg->setProgrammingSession.programmingSession, buffer, offset);
 }
