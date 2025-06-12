@@ -5,6 +5,7 @@
 #include "obc_gs_errors.h"
 
 #include <gtest/gtest.h>
+#include <stdio.h>
 
 // CMD_EXEC_OBC_RESET
 TEST(TestCommandPackUnpack, ValidCmdExecObcResetPackUnpack) {
@@ -134,4 +135,31 @@ TEST(TestCommandPackUnpack, ValidCmdDownlinkTelemPackUnpack) {
 
   EXPECT_EQ(packOffset, unpackOffset);
   EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+}
+
+// CMD_RTC_SYNC
+TEST(TestCommandPackUnpack, ValidCmdSetProgrammingSessionPackUnpack) {
+  obc_gs_error_code_t errCode;
+  cmd_msg_t cmdMsg = {0};
+  cmdMsg.id = CMD_SET_PROGRAMMING_SESSION;
+  cmdMsg.setProgrammingSession.programmingSession = APPLICATION;
+
+  uint8_t buff[MAX_CMD_MSG_SIZE] = {0};
+  uint32_t packOffset = 0;
+  uint8_t numPacked = 0;
+  errCode = packCmdMsg(buff, &packOffset, &cmdMsg, &numPacked);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  for (int i = 0; i < MAX_CMD_MSG_SIZE; i++) {
+    printf(" 0x%x", buff[i]);
+  }
+
+  cmd_msg_t unpackedCmdMsg = {0};
+  uint32_t unpackOffset = 0;
+  errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(cmdMsg.setProgrammingSession.programmingSession, unpackedCmdMsg.setProgrammingSession.programmingSession);
 }
