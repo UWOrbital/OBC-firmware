@@ -1,8 +1,7 @@
-import sys
 from cmd import Cmd
 from datetime import datetime
 from multiprocessing import Process
-from sys import argv
+from sys import argv, exit
 
 from serial import Serial, SerialException
 
@@ -166,7 +165,7 @@ class GroundStationShell(Cmd):
     def do_exit(self, arg: str) -> None | bool:
         "Close the UW Orbital CLI"
         print("Closing CLI...")
-        sys.exit()
+        exit()
 
 
 def main() -> None:
