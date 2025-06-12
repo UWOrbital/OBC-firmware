@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "command.h"
-#include "bl_command.h"
 #include "bl_logging.h"
+
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
 extern uint32_t __ramFuncsSize__;
@@ -73,9 +73,6 @@ int main(void) {
   } else {
     blUartWriteBytes(1, (uint8_t *)"Z");
     LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
-    if (programmingSession == BOOTLOADER) {
-      blUartWriteBytes(1, (uint8_t *)"E");
-    }
 
     while (1) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
@@ -87,10 +84,6 @@ int main(void) {
       }
       blUartWriteBytes(1, (uint8_t *)"W");
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
-
-      if (programmingSession == APPLICATION) {
-        blUartWriteBytes(1, (uint8_t *)"D");
-      }
     }
   }
 }

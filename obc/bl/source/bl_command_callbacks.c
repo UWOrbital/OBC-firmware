@@ -2,7 +2,6 @@
 #include "obc_general_util.h"
 #include "obc_gs_command_id.h"
 #include "command.h"
-#include "bl_command.h"
 #include <stddef.h>
 #include <stdint.h>
 #include "bl_uart.h"
