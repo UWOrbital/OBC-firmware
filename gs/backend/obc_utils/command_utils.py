@@ -246,32 +246,32 @@ def generate_command(args: str) -> CmdMsg | None:
             command_args = parser.parse_args(arguments)
         except ArgumentError:
             continue
-        else:
-            # Once we do get a valid parse we try to see if the command is in the list of commands by converting it to
-            # the CmdCallbackId Enum
-            try:
-                command_enum = CmdCallbackId[command_args.command]
-            except KeyError:
-                print("Invalid Command")
-                return None
-            else:
-                # We check how many arguments are in the parsed object and call functions accordingly.
-                # This is the reason why it's important to use the arg1, arg2, arg3 naming convention when creating
-                # specific parsers
-                if hasattr(command_args, "arg3"):
-                    # This line is just accessing a function in the commmand_factories list and passing in arguments
-                    # via brackets
-                    # This line also shows why the order is important of the functions in that list
-                    command = commmand_factories[command_enum.value](
-                        command_args.arg1, command_args.arg2, command_args.arg3, command_args.timestamp
-                    )
-                elif hasattr(command_args, "arg2"):
-                    command = commmand_factories[command_enum.value](
-                        command_args.arg1, command_args.arg2, command_args.timestamp
-                    )
-                elif hasattr(command_args, "arg1"):
-                    command = commmand_factories[command_enum.value](command_args.arg1, command_args.timestamp)
-                return command
+
+        # Once we do get a valid parse we try to see if the command is in the list of commands by converting it to
+        # the CmdCallbackId Enum
+        try:
+            command_enum = CmdCallbackId[command_args.command]
+        except KeyError:
+            print("Invalid Command")
+            return None
+
+        # We check how many arguments are in the parsed object and call functions accordingly.
+        # This is the reason why it's important to use the arg1, arg2, arg3 naming convention when creating
+        # specific parsers
+        if hasattr(command_args, "arg3"):
+            # This line is just accessing a function in the commmand_factories list and passing in arguments
+            # via brackets
+            # This line also shows why the order is important of the functions in that list
+            command = commmand_factories[command_enum.value](
+                command_args.arg1, command_args.arg2, command_args.arg3, command_args.timestamp
+            )
+        elif hasattr(command_args, "arg2"):
+            command = commmand_factories[command_enum.value](
+                command_args.arg1, command_args.arg2, command_args.timestamp
+            )
+        elif hasattr(command_args, "arg1"):
+            command = commmand_factories[command_enum.value](command_args.arg1, command_args.timestamp)
+        return command
 
     parser = arg_parse()
     # If the command did not pass any of the specific parsers, we try the general one
@@ -280,16 +280,16 @@ def generate_command(args: str) -> CmdMsg | None:
     except ArgumentError:
         print("Invalid Commands")
         return None
-    else:
-        # Same thing as before, we try to convert to a CmdCallbackId Enum to see if the command if valid
-        try:
-            command_enum = CmdCallbackId[command_args.command]
-        except KeyError:
-            print("Invalid Command")
-            return None
-        else:
-            command = commmand_factories[command_enum.value](command_args.timestamp)
-            return command
+
+    # Same thing as before, we try to convert to a CmdCallbackId Enum to see if the command if valid
+    try:
+        command_enum = CmdCallbackId[command_args.command]
+    except KeyError:
+        print("Invalid Command")
+        return None
+
+    command = commmand_factories[command_enum.value](command_args.timestamp)
+    return command
 
 
 def poll(com_port: str, file_path: str | Path, print_console: bool = False) -> None:

@@ -169,16 +169,24 @@ class GroundStationShell(Cmd):
         sys.exit()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """
+    A function that initializes the com port and starts the ground station shell
+    """
     if len(argv) != 2:
         print("One argument needed: Com Port")
-    else:
-        try:
-            com_port = str(argv[1])
-            ser = Serial(com_port)
-            print("Comm port set to: " + str(ser.name))
-            ser.close()
-            GroundStationShell(com_port).cmdloop()
-        except SerialException:
-            print("Invalid port entered")
+        return
+
+    try:
+        com_port = str(argv[1])
+        ser = Serial(com_port)
+        print("Comm port set to: " + str(ser.name))
+        ser.close()
+        GroundStationShell(com_port).cmdloop()
+    except SerialException:
+        print("Invalid port entered")
         # We call a loop and the command shell runs as expected
+
+
+if __name__ == "__main__":
+    main()
