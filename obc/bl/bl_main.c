@@ -24,10 +24,7 @@ extern uint32_t __ramFuncsRunEnd__;
 /* DEFINES */
 // These values were chosen so that the UART transfers and flash writes are quick, but don't
 // use too much RAM
-#define BL_BIN_RX_CHUNK_SIZE 128U   // Bytes
 #define BL_ECC_FIX_CHUNK_SIZE 128U  // Bytes
-#define BL_MAX_MSG_SIZE 64U
-#define RM46_FLASH_BANK 0U
 #define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
@@ -37,6 +34,8 @@ typedef void (*appStartFunc_t)(void);
 
 // Get this from the bl_command_callbacks for simplicity
 extern programming_session_t programmingSession;
+
+uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
 static obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
@@ -64,8 +63,6 @@ int main(void) {
   // F021 API and the functions that use it must be executed from RAM since they
   // can't execute from the same flash bank being modified
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
-
-  uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
   if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 2000) != OBC_ERR_CODE_SUCCESS) {
     // Jump to app

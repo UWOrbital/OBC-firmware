@@ -135,8 +135,9 @@ static void unpackSetProgrammingSessionCmdData(const uint8_t* buffer, uint32_t* 
 
 // CMD_DOWNLOAD_DATA
 static void unpackDownloadDataCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
-  cmdMsg->downloadData.downloadData = offset;
-  cmdMsg->downloadData.length = 223 - *offset;
+  cmdMsg->downloadData.programmingSession = unpackUint8(buffer, offset);
+  cmdMsg->downloadData.length = unpackUint16(buffer, offset);
+  cmdMsg->downloadData.address = unpackUint32(buffer, offset);
 }
 
 // CMD_ERASE_APP

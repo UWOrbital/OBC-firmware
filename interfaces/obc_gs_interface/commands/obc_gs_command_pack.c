@@ -126,7 +126,9 @@ static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, 
 
 // CMD_DOWNLOAD_DATA
 static void packDownloadDataCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
-  // No data to pack (the obc should never send this command back)
+  packUint8((uint8_t)cmdMsg->downloadData.programmingSession, buffer, offset);
+  packUint16(cmdMsg->downloadData.length, buffer, offset);
+  packUint32(cmdMsg->downloadData.address, buffer, offset);
 }
 
 // CMD_ERASE_APP

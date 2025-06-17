@@ -1,3 +1,4 @@
+#include "bl_errors.h"
 #include "obc_errors.h"
 #include "obc_general_util.h"
 #include "obc_gs_command_id.h"
@@ -5,8 +6,17 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "bl_uart.h"
+#include "bl_flash.h"
+#include <stdio.h>
+
+#define BL_BIN_RX_CHUNK_SIZE 208U  // Bytes
+#define MAX_PACKET_SIZE 223
+#define RM46_FLASH_BANK 0U
+#define BL_MAX_MSG_SIZE 64U
 
 programming_session_t programmingSession = BOOTLOADER;
+
+extern uint8_t recvBuffer[MAX_PACKET_SIZE];
 
 static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
@@ -35,8 +45,7 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-
-  // TODO: Implement Erase App
+  // TODO: Implement Erase App Block API Erase
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -45,6 +54,40 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+  // TODO: Replace magic number
+  if (!blFlashIsStartAddrValid(cmd->downloadData.address, 208)) {
+    blUartWriteBytes(strlen("Invalid start address\r\n"), (uint8_t *)"Invalid start address\r\n");
+  }
+
+  blUartWriteBytes(strlen("Received header\r\n"), (uint8_t *)"Received header\r\n");
+
+  bl_error_code_t errCode = blFlashFapiInitBank(RM46_FLASH_BANK);
+
+  if (errCode != BL_ERR_CODE_SUCCESS) {
+    char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+    int32_t blUartWriteBufferLen =
+        snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
+    if (blUartWriteBufferLen < 0) {
+      blUartWriteBytes(strlen("Error with processing message buffer length\r\n"),
+                       (uint8_t *)"Error with processing message buffer length\r\n");
+    } else {
+      blUartWriteBytes(blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+    }
+  }
+
+  uint32_t numAppBytesToFlash = cmd->downloadData.length;
+
+  while (numAppBytesToFlash > 0) {
+    uint32_t numBytesToRead = (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
+
+    blFlashFapiBlockWrite(cmd->downloadData.address + (cmd->downloadData.length - numAppBytesToFlash),
+                          (uint32_t)recvBuffer, numBytesToRead);
+
+    numAppBytesToFlash -= numBytesToRead;
+  }
+
+  blUartWriteBytes(strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
+  // BLOCK WRITE ONLY, NO ERASE
   return OBC_ERR_CODE_SUCCESS;
 }
 

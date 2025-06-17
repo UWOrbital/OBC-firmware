@@ -25,8 +25,10 @@ typedef enum { BOOTLOADER = 0x00, APPLICATION } programming_session_t;
 
 // CMD_DOWNLOAD_DATA
 typedef struct {
-  uint32_t *downloadData;
-  uint8_t length;
+  programming_session_t programmingSession;
+  uint16_t length;
+  uint32_t address;
+  // TODO: Add all other fields as well
 } download_data_cmd_data_t;
 
 // CMD_SET_PROGRAMMING_SESSION
