@@ -16,8 +16,6 @@
 
 programming_session_t programmingSession = BOOTLOADER;
 
-extern uint8_t recvBuffer[MAX_PACKET_SIZE];
-
 static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -57,16 +55,17 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
   // TODO: Replace magic number
   if (!blFlashIsStartAddrValid(cmd->downloadData.address, 208)) {
     blUartWriteBytes(strlen("Invalid start address\r\n"), (uint8_t *)"Invalid start address\r\n");
+    return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  blUartWriteBytes(strlen("Received header\r\n"), (uint8_t *)"Received header\r\n");
+  blUartWriteBytes(strlen("Received packet\r\n"), (uint8_t *)"Received packet\r\n");
 
   bl_error_code_t errCode = blFlashFapiInitBank(RM46_FLASH_BANK);
 
   if (errCode != BL_ERR_CODE_SUCCESS) {
     char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
     int32_t blUartWriteBufferLen =
-        snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, error code: %d\r\n", errCode);
+        snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, BL error code: %d\r\n", errCode);
     if (blUartWriteBufferLen < 0) {
       blUartWriteBytes(strlen("Error with processing message buffer length\r\n"),
                        (uint8_t *)"Error with processing message buffer length\r\n");
@@ -75,19 +74,23 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
     }
   }
 
-  uint32_t numAppBytesToFlash = cmd->downloadData.length;
+  errCode =
+      blFlashFapiBlockWrite(cmd->downloadData.address, (uint32_t)cmd->downloadData.data, cmd->downloadData.length);
 
-  while (numAppBytesToFlash > 0) {
-    uint32_t numBytesToRead = (numAppBytesToFlash > BL_BIN_RX_CHUNK_SIZE) ? BL_BIN_RX_CHUNK_SIZE : numAppBytesToFlash;
-
-    blFlashFapiBlockWrite(cmd->downloadData.address + (cmd->downloadData.length - numAppBytesToFlash),
-                          (uint32_t)recvBuffer, numBytesToRead);
-
-    numAppBytesToFlash -= numBytesToRead;
+  if (errCode != BL_ERR_CODE_SUCCESS) {
+    char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+    int32_t blUartWriteBufferLen =
+        snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to write, BL error code: %d\r\n", errCode);
+    if (blUartWriteBufferLen < 0) {
+      blUartWriteBytes(strlen("Error with processing message buffer length\r\n"),
+                       (uint8_t *)"Error with processing message buffer length\r\n");
+    } else {
+      blUartWriteBytes(blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+    }
+    return OBC_ERR_CODE_FAILED_FILE_WRITE;
   }
 
-  blUartWriteBytes(strlen("Wrote application\r\n"), (uint8_t *)"Wrote application\r\n");
-  // BLOCK WRITE ONLY, NO ERASE
+  blUartWriteBytes(strlen("Write success\r\n"), (uint8_t *)"Write success\r\n");
   return OBC_ERR_CODE_SUCCESS;
 }
 

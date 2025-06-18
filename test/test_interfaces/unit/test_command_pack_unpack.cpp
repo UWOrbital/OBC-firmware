@@ -137,7 +137,7 @@ TEST(TestCommandPackUnpack, ValidCmdDownlinkTelemPackUnpack) {
   EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
 }
 
-// CMD_RTC_SYNC
+// CMD_SET_PROGRAMMING_SESSION
 TEST(TestCommandPackUnpack, ValidCmdSetProgrammingSessionPackUnpack) {
   obc_gs_error_code_t errCode;
   cmd_msg_t cmdMsg = {0};
@@ -162,4 +162,36 @@ TEST(TestCommandPackUnpack, ValidCmdSetProgrammingSessionPackUnpack) {
   EXPECT_EQ(packOffset, unpackOffset);
   EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
   EXPECT_EQ(cmdMsg.setProgrammingSession.programmingSession, unpackedCmdMsg.setProgrammingSession.programmingSession);
+}
+
+// CMD_DOWNLOAD_DATA
+TEST(TestCommandPackUnpack, ValidCmdDownloadDataPackUnpack) {
+  obc_gs_error_code_t errCode;
+  cmd_msg_t cmdMsg = {0};
+  cmdMsg.id = CMD_DOWNLOAD_DATA;
+  cmdMsg.downloadData.programmingSession = APPLICATION;
+  cmdMsg.downloadData.length = 208;
+  cmdMsg.downloadData.address = 0x00040000;
+
+  uint8_t buff[MAX_CMD_MSG_SIZE] = {0};
+  uint32_t packOffset = 0;
+  uint8_t numPacked = 0;
+  errCode = packCmdMsg(buff, &packOffset, &cmdMsg, &numPacked);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  for (int i = 0; i < MAX_CMD_MSG_SIZE; i++) {
+    printf(" 0x%x", buff[i]);
+  }
+  printf(" %d", packOffset);
+
+  cmd_msg_t unpackedCmdMsg = {0};
+  uint32_t unpackOffset = 0;
+  errCode = unpackCmdMsg(buff, &unpackOffset, &unpackedCmdMsg);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+  EXPECT_EQ(packOffset, unpackOffset);
+  EXPECT_EQ(cmdMsg.id, unpackedCmdMsg.id);
+  EXPECT_EQ(cmdMsg.downloadData.programmingSession, unpackedCmdMsg.downloadData.programmingSession);
+  EXPECT_EQ(cmdMsg.downloadData.length, unpackedCmdMsg.downloadData.length);
+  EXPECT_EQ(cmdMsg.downloadData.address, unpackedCmdMsg.downloadData.address);
 }

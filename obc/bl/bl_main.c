@@ -1,7 +1,4 @@
-#include "bl_config.h"
-#include "bl_flash.h"
 #include "bl_uart.h"
-#include "bl_errors.h"
 #include "obc_gs_errors.h"
 #include "rti.h"
 #include "obc_errors.h"

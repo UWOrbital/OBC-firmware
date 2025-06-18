@@ -138,6 +138,8 @@ static void unpackDownloadDataCmdData(const uint8_t* buffer, uint32_t* offset, c
   cmdMsg->downloadData.programmingSession = unpackUint8(buffer, offset);
   cmdMsg->downloadData.length = unpackUint16(buffer, offset);
   cmdMsg->downloadData.address = unpackUint32(buffer, offset);
+  // Typecast necessary to avoid the const pointer to pointer conversion warning
+  cmdMsg->downloadData.data = (uint8_t*)buffer + *offset;
 }
 
 // CMD_ERASE_APP
