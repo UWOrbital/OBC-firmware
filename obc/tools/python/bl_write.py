@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Final
 
 from serial import PARITY_NONE, STOPBITS_TWO, Serial
@@ -24,7 +25,7 @@ if __name__ == "__main__":
         baudrate=OBC_UART_BAUD_RATE,
         parity=PARITY_NONE,
         stopbits=STOPBITS_TWO,
-        timeout=7,
+        timeout=5,
     ) as ser:
         # Ping Test 0x05
         # send_data(ser, b"\x05".ljust(223, b"\x00"))
@@ -36,3 +37,8 @@ if __name__ == "__main__":
 
         # Download data test
         send_data(ser, b"\x09\x00\x00\x00\x00\x01\x00\xd0\x00\x04\x00\x00".ljust(223, b"\xff"))
+
+        sleep(1)
+
+        # Erase data test
+        send_data(ser, b"\x08\x00\x00\x00\x00".ljust(223, b"\x00"))
