@@ -1,5 +1,6 @@
-from skyfield.api import EarthSatellite, Topos, load
 from typing import Final
+
+from skyfield.api import EarthSatellite, Topos, load
 
 SPEED_OF_LIGHT_METERS_PER_SECOND: Final[int] = 299_792_458
 
