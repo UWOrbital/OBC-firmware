@@ -19,7 +19,9 @@ def load_satellite(tle_line1: str, tle_line2: str, name: str = "UW_SAT") -> Eart
     return EarthSatellite(tle_line1, tle_line2, name, load.timescale())
 
 
-def calculate_relative_velocity(satellite: EarthSatellite, observer_latitude_deg: float, observer_longitude_deg: float, observer_altitude_m: float) -> float:
+def calculate_relative_velocity(
+    satellite: EarthSatellite, observer_latitude_deg: float, observer_longitude_deg: float, observer_altitude_m: float
+) -> float:
     """
     @brief Computes relative velocity between satellite and observer
     @param satellite: EarthSatellite object
@@ -30,7 +32,11 @@ def calculate_relative_velocity(satellite: EarthSatellite, observer_latitude_deg
     """
     time_current = load.timescale().now()
 
-    observer = Topos(latitude_degrees=observer_latitude_deg, longitude_degrees=observer_longitude_deg, elevation_m=observer_altitude_m)
+    observer = Topos(
+        latitude_degrees=observer_latitude_deg,
+        longitude_degrees=observer_longitude_deg,
+        elevation_m=observer_altitude_m,
+    )
     difference = satellite - observer
     topocentric = difference.at(time_current)
 
@@ -58,7 +64,9 @@ def compute_doppler_shift(frequency_hz: float, relative_velocity_m_s: float) -> 
     @param relative_velocity_m_s: Relative radial velocity in m/s
     @returns Doppler-shift frequency in Hz
     """
-    return frequency_hz * (((SPEED_OF_LIGHT_METERS_PER_SECOND + relative_velocity_m_s) / SPEED_OF_LIGHT_METERS_PER_SECOND) - 1)
+    return frequency_hz * (
+        ((SPEED_OF_LIGHT_METERS_PER_SECOND + relative_velocity_m_s) / SPEED_OF_LIGHT_METERS_PER_SECOND) - 1
+    )
 
 
 def calculate_doppler(
