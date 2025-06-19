@@ -1,6 +1,6 @@
 from skyfield.api import EarthSatellite, Topos, load
 
-SPEED_OF_LIGHT = 299_792_458
+SPEED_OF_LIGHT_METERS_PER_SECOND: Final[int] = 299_792_458
 
 """
 @brief Holds logic for calculating doppler shift from TLS and ground station coordinates
@@ -19,19 +19,20 @@ def load_satellite(tle_line1: str, tle_line2: str, name: str = "UW_SAT") -> Eart
     return EarthSatellite(tle_line1, tle_line2, name, load.timescale())
 
 
-def calculate_relative_velocity(satellite: EarthSatellite, observer_coords: tuple[float, float, float]) -> float:
+def calculate_relative_velocity(satellite: EarthSatellite, observer_latitude_deg: float, observer_longitude_deg: float, observer_altitude_m: float) -> float:
     """
     @brief Computes relative velocity between satellite and observer
     @param satellite: EarthSatellite object
-    @param observer_coords: latitude_deg, longitude_deg, altitude_m
+    @param observer_latitude_degree: Latitude of observer in degrees
+    @param observer_longitude_deg: Longitude of observer in degrees
+    @param observer_altitude_m: Altitude of observer in meters
     @returns Relative radial velocity in m/s (positive is moving away)
     """
-    latitude_deg, longitude_deg, altitude_m = observer_coords
-    t = load.timescale().now()
+    time_current = load.timescale().now()
 
-    observer = Topos(latitude_degrees=latitude_deg, longitude_degrees=longitude_deg, elevation_m=altitude_m)
+    observer = Topos(latitude_degrees=observer_latitude_deg, longitude_degrees=observer_longitude_deg, elevation_m=observer_altitude_m)
     difference = satellite - observer
-    topocentric = difference.at(t)
+    topocentric = difference.at(time_current)
 
     # Separate velocity and position vectors
     vx, vy, vz = topocentric.velocity.km_per_s
@@ -57,13 +58,15 @@ def compute_doppler_shift(frequency_hz: float, relative_velocity_m_s: float) -> 
     @param relative_velocity_m_s: Relative radial velocity in m/s
     @returns Doppler-shift frequency in Hz
     """
-    return frequency_hz * (((SPEED_OF_LIGHT + relative_velocity_m_s) / SPEED_OF_LIGHT) - 1)
+    return frequency_hz * (((SPEED_OF_LIGHT_METERS_PER_SECOND + relative_velocity_m_s) / SPEED_OF_LIGHT_METERS_PER_SECOND) - 1)
 
 
 def calculate_doppler(
     tle_line1: str,
     tle_line2: str,
-    observer_coords: tuple[float, float, float],
+    observer_latitude_deg: float,
+    observer_longitude_deg: float,
+    observer_altitude_m: float,
     transmission_frequency_hz: float = 433_920_000,  # Default frequency, UW-Orbital's 433.920 MHz band
 ) -> float:
     """
@@ -75,5 +78,5 @@ def calculate_doppler(
     @returns Doppler-shifted frequency in Hz
     """
     sat = load_satellite(tle_line1, tle_line2)
-    rv = calculate_relative_velocity(sat, observer_coords)
+    rv = calculate_relative_velocity(sat, observer_latitude_deg, observer_longitude_deg, observer_altitude_m)
     return compute_doppler_shift(transmission_frequency_hz, rv)
