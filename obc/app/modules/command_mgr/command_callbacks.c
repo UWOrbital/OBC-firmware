@@ -1,12 +1,12 @@
 #include "command_callbacks.h"
-#include "comms_manager.h"
-#include "downlink_encoder.h"
-#include "obc_errors.h"
 #include "obc_gs_command_data.h"
-#include "obc_logging.h"
 #include "obc_reset.h"
+#include "obc_errors.h"
+#include "obc_logging.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
+#include "downlink_encoder.h"
+#include "comms_manager.h"
 #include "telemetry_manager.h"
 
 #include <redposix.h>
@@ -88,15 +88,6 @@ obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(setTelemetryManagerDownlinkReady());
-
-  return OBC_ERR_CODE_SUCCESS;
-}
-
-obc_error_code_t uplinkDisconnectCmdCallback(cmd_msg_t *cmd) {
-  obc_error_code_t errCode;
-
-  comms_event_t disconnectSentEvent = {.eventID = COMMS_EVENT_START_DISC};
-  RETURN_IF_ERROR_CODE(sendToCommsManagerQueue(&disconnectSentEvent));
 
   return OBC_ERR_CODE_SUCCESS;
 }

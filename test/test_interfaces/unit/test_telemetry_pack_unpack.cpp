@@ -5,8 +5,6 @@
 #include "obc_gs_errors.h"
 
 #include <gtest/gtest.h>
-#include <stdio.h>
-#include <iostream>
 
 TEST(TestTelemetryPackUnpack, ValidTelemObcTempPackUnpack) {
   obc_gs_error_code_t err;

@@ -41,6 +41,7 @@ def send_command(args: str, com_port: str) -> Frame | None:
 
     :param args: A string that contains all the arguments the user passed in
     :param com_port: The port that the board is connected to (i.e. which port the program should use)
+    :return: A decoded frame if command is valid and has a response else None
     """
     # Using generate commands, we generate a command based on the arguments passed in
     command = generate_command(args)
@@ -52,10 +53,11 @@ def send_command(args: str, com_port: str) -> Frame | None:
     # command_multi_pack takes in a list of commands to pack thus we create that list here.
     data = [command]
 
+    # Initialize a helper class to help with encoding and decoding the message
     comms = CommsPipeline()
 
     # We pad the data to an amount that the OBC expects (See handleUplinkingState function in comms_manager.c)
-    # Note also that command_multi_pack returns a list of byte strings with each string stuffed to the max
+    # Note also that command_multi_pack returns a list of byte strings with each string stuffed with \x00 to 223 bytes
     send_bytes = comms.encode(command_multi_pack(data)[0]).ljust(_PADDING_REQUIRED, b"\x00")
     # Initialize pyserial
     with Serial(
@@ -65,7 +67,7 @@ def send_command(args: str, com_port: str) -> Frame | None:
         stopbits=STOPBITS_TWO,
         timeout=1,
     ) as ser:
-        # Reset the output buffer just in case
+        # Reset the output buffer to ensure no previous data is lurking
         ser.reset_output_buffer()
 
         # Send the frames to the board
@@ -78,6 +80,7 @@ def send_command(args: str, com_port: str) -> Frame | None:
         start_index = read_bytes.find(b"\x7e")
         end_index = read_bytes.rfind(b"\x7e")
 
+        # These are all the bytes from other tasks that are not a part of the frame
         outer_bytes = read_bytes[:start_index] + read_bytes[end_index + 1 :]
 
         with open(LOG_PATH, "a") as file:
@@ -106,6 +109,7 @@ def send_conn_request(com_port: str) -> Frame:
     Sends the initial connection request to the board
 
     :param com_port: The port which the function should use to send and receive on
+    :return: Returns decoded acknowledge frame. Will throw an IndexError if no frame is received
     """
     # Initialize pyserial with the correct parameters
     with Serial(
@@ -140,6 +144,7 @@ def send_conn_request(com_port: str) -> Frame:
         return rcv_frame
 
 
+# The following docstrings do not follow convention as their docstrings are used in the CLI for the help command
 def arg_parse() -> ArgumentParser:
     """
     This is a parent argument parser for all commands since all commands share the timestamp and command name in common
@@ -217,6 +222,7 @@ def generate_command(args: str) -> CmdMsg | None:
     A function that parsed command arguments and returns the corresponding command frame
 
     :param args: The arguments to parse to create the command
+    :return: CmdMsg structure with the requested command if the command is valid, else none
     """
     arguments = args.split()
     command = CmdMsg()

@@ -12,7 +12,7 @@ def command_multi_pack(commands: list[CmdMsg]) -> list[bytes]:
     :param command: A list of commands to convert to bytes
     :return: The commands fully packed in sequence and ready to be encoded. Depending on the number of commands, this
              function will return a list of byte strings, each containing the maximum possible amount of commands. Note,
-             this will always pad each byte stringwith 0x00 to 223 bytes
+             this function will always pad each byte string with 0x00 to 223 bytes
     """
     data: bytearray = bytearray(b"")
     command_list: list[bytes] = []
@@ -26,5 +26,8 @@ def command_multi_pack(commands: list[CmdMsg]) -> list[bytes]:
 
         data += command_packed
 
-    command_list.append(bytes(data).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+    # This is for commands that have not been padded at the end of the for loop
+    if data != b"":
+        command_list.append(bytes(data).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+
     return command_list

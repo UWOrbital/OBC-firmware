@@ -18,7 +18,6 @@ class GroundStationShell(Cmd):
         self.parser = arg_parse()
         self._com_port: str = com_port
         self._conn_request_sent: bool = False
-        self._verbose: bool = False
         self.background_logging: Process | None = None
 
         # At the start of each command shell use, we clear the file and create a dated title
@@ -143,18 +142,6 @@ class GroundStationShell(Cmd):
             print("Exiting polling...")
 
         self._restart_logging()
-
-    def do_set_conn(self, line: str) -> None:
-        """
-        Configures whether the connection request was already sent via a boolean
-        """
-        args = line.lower()
-        if args == "true":
-            self._conn_request_sent = True
-        elif args == "false":
-            self._conn_request_sent = False
-        else:
-            print("Invalid boolean value passed in")
 
     def help_send_command(self) -> None:
         """

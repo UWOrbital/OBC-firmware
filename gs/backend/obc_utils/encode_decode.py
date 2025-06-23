@@ -31,7 +31,7 @@ class CommsPipeline:
 
     def encode(self, data: bytes) -> bytes:
         """
-        Given data that is less than 223 bytes, this function applies fec and aes128 as well as frames the data in
+        Given data that is less than 223 bytes, this function applies fec and aes128 and frames the data in
         accordance with the ax25 protocol with bit stuffing
 
         :param data: The data to be encoded
@@ -68,7 +68,6 @@ class CommsPipeline:
             data_unstuffed[:INFO_FIELD_START_POSITION] + fec_data + data_unstuffed[INFO_FIELD_END_POSITION + 1 :]
         )
         # Turn the bytes into the frame using the ax25 library
-        # We don't do aes decryption as the fcs values won't match, thus, we create and return a new frame instead
         rcv_frame = self._ax25.decode_frame(decoded_data)
 
         return rcv_frame
