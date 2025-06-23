@@ -429,6 +429,7 @@ def test_uFrame_receive():
     rcv_frame = ax25_proto.decode_frame(rcv_frame)
 
     assert rcv_frame.control.frame_type == FrameType.SABM
+    assert rcv_frame.control.poll_final == True
 
 
 def test_command_send():

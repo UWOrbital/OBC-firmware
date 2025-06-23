@@ -206,6 +206,7 @@ def create_cmd_downlink_logs_next_pass(log_level: int, unixtime_of_execution: in
     """
     Function to create a CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
 
+    :param log_level: The Log Level for the logs
     :param unixtime_of_execution: A time of when to execute a certain event,
                                   by default, it is set to None (i.e. a specific
                                   time is not needed)
