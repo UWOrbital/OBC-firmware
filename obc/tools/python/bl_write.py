@@ -16,7 +16,7 @@ def send_data(ser: Serial, write_bytes: bytes) -> None:
     print(write_bytes)
     ser.write(write_bytes)
     print("Receiving from bootloader...")
-    print(ser.read(100))
+    print(ser.read(1000))
 
 
 if __name__ == "__main__":
