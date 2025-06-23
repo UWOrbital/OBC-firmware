@@ -3,7 +3,7 @@ from binascii import crc_hqx
 from ax25 import Address, Control, Frame, FrameType
 from pyStuffing import BitStuffing
 
-from interfaces import NON_INFO_BYTES, RS_ENCODED_DATA_SIZE
+from interfaces import AX25_NON_INFO_BYTES, RS_ENCODED_DATA_SIZE
 
 
 class AX25:
@@ -124,7 +124,7 @@ class AX25:
         # There is a small chance that the last fcs byte is 0 so we check if the data size is bigger than it's supposed
         # to be
         # We also check if the frame is a U frame in which case it has to be less than RS_ENCODED_DATA_SIZE
-        if (data[-1] == 0 and len(data) > RS_ENCODED_DATA_SIZE + NON_INFO_BYTES) or (
+        if (data[-1] == 0 and len(data) > RS_ENCODED_DATA_SIZE + AX25_NON_INFO_BYTES) or (
             data[-1] == 0 and len(data) < RS_ENCODED_DATA_SIZE
         ):
             data = data[:-1]

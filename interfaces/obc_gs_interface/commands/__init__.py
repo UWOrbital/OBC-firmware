@@ -28,6 +28,8 @@ class DownlinkLogsNextPassCmdData(Structure):
     _fields_ = [("logLevel", c_uint8)]
 
 
+# NOTE: When adding commands only add their data to the following union type as shown with RtcSyncCmdData and
+# DownlinkLogsNextPassCmdData
 class _U(Union):
     """
     Union class needed to create the CmdMsgType Class
