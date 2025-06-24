@@ -213,22 +213,15 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
       return OBC_ERR_CODE_INVALID_AX25_PACKET;
     }
   }
-  // uint8_t ciphertext[RS_DECODED_SIZE - AES_IV_SIZE] = {0};
-  // aesData->ciphertext = ciphertext;
-  //
-  // memcpy(aesData->iv, unstuffedPacket.data + AX25_INFO_FIELD_POSITION,
-  //        AES_IV_SIZE);
-  // memcpy(aesData->ciphertext,
-  //        unstuffedPacket.data + AX25_INFO_FIELD_POSITION + AES_IV_SIZE,
-  //        RS_DECODED_SIZE - AES_IV_SIZE);
-  // aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
+  uint8_t ciphertext[RS_DECODED_SIZE] = {0};
+  aesData->ciphertext = ciphertext;
+  // TODO: Implement aes so that the the IV is set properly
+  memset(aesData->iv, 1, AES_IV_SIZE);
+  memcpy(aesData->ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
+  aesData->ciphertextLen = RS_DECODED_SIZE;
 
-  // TODO: Implement aes so that the commented code above works
-  aes_data_t aesDataT = {
-      .iv = {0}, .ciphertext = unstuffedPacket.data + AX25_INFO_FIELD_POSITION, .ciphertextLen = RS_DECODED_SIZE};
-  memset(aesDataT.iv, 1, AES_IV_SIZE);
   uint8_t decryptedCmdData[RS_DECODED_SIZE];
-  aes128Decrypt(&aesDataT, decryptedCmdData, RS_DECODED_SIZE);
+  interfaceErr = aes128Decrypt(aesData, decryptedCmdData, RS_DECODED_SIZE);
 
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AES_DECRYPT_FAILURE;
