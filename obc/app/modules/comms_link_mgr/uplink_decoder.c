@@ -224,9 +224,6 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   // aesData->ciphertextLen = RS_DECODED_SIZE - AES_IV_SIZE;
 
   // TODO: Implement aes so that the commented code above works
-  uint8_t key[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-  initializeAesCtx((uint8_t *)key);
   aes_data_t aesDataT = {
       .iv = {0}, .ciphertext = unstuffedPacket.data + AX25_INFO_FIELD_POSITION, .ciphertextLen = RS_DECODED_SIZE};
   memset(aesDataT.iv, 1, AES_IV_SIZE);
