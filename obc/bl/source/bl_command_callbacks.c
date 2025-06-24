@@ -1,5 +1,5 @@
-#include "bl_config.h"
 #include "bl_errors.h"
+#include "bl_config.h"
 #include "obc_errors.h"
 #include "obc_general_util.h"
 #include "obc_gs_command_id.h"
@@ -16,6 +16,7 @@
 #define BL_MAX_MSG_SIZE 64U
 
 programming_session_t programmingSession = BOOTLOADER;
+extern uint32_t __APP_IMAGE_TOTAL_SECTION_SIZE;
 
 static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
@@ -59,7 +60,7 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
     }
   }
 
-  errCode = blFlashFapiBlockErase(APP_START_ADDRESS, APP_SIZE_BITS);
+  errCode = blFlashFapiBlockErase(APP_START_ADDRESS, (uint32_t)(&__APP_IMAGE_TOTAL_SECTION_SIZE));
 
   if (errCode != BL_ERR_CODE_SUCCESS) {
     char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};

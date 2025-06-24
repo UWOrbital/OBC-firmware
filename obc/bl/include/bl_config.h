@@ -12,8 +12,6 @@
 // The flash image of the bootloader must not be larger than this value.
 //*****************************************************************************
 #define APP_START_ADDRESS (uint32_t)0x00040000
-#define APP_SIZE_SECTORS 7
-#define APP_SIZE_BITS 128 * 8 * APP_SIZE_SECTORS
 
 // The start address of metadata, and the size (used in bl_flash.c and bl_main.c)
 
