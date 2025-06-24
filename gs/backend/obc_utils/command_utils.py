@@ -3,18 +3,14 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Final
 
-from ax25 import Frame, FrameType
+from ax25 import Frame
 from serial import PARITY_NONE, STOPBITS_TWO, Serial
 
 from gs.backend.obc_utils.encode_decode import CommsPipeline
 from interfaces import (
-    CUBE_SAT_CALLSIGN,
-    GROUND_STATION_CALLSIGN,
     OBC_UART_BAUD_RATE,
-    RS_ENCODED_DATA_SIZE,
 )
 from interfaces.command_framing import command_multi_pack
-from interfaces.obc_gs_interface.ax25 import AX25
 from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
     CmdMsg,
@@ -58,7 +54,7 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> Frame | None:
 
     # We pad the data to an amount that the OBC expects (See handleUplinkingState function in comms_manager.c)
     # Note also that command_multi_pack returns a list of byte strings with each string stuffed with \x00 to 223 bytes
-    send_bytes = comms.encode(command_multi_pack(data)[0]).ljust(_PADDING_REQUIRED, b"\x00")
+    send_bytes = comms.encode_frame(command_multi_pack(data)[0]).ljust(_PADDING_REQUIRED, b"\x00")
     # Initialize pyserial
     with Serial(
         com_port,
@@ -80,28 +76,23 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> Frame | None:
         start_index = read_bytes.find(b"\x7e")
         end_index = read_bytes.rfind(b"\x7e")
 
-        # These are all the bytes from other tasks that are not a part of the frame
-        outer_bytes = read_bytes[:start_index] + read_bytes[end_index + 1 :]
+        # Check if a frame is what is sent back
+        if start_index != -1:
+            # These are all the bytes from other tasks that are not a part of the frame
+            outer_bytes = read_bytes[:start_index] + read_bytes[end_index + 1 :]
 
-        with open(LOG_PATH, "a") as file:
-            file.write(str(outer_bytes.decode("utf-8")))
+            with open(LOG_PATH, "a") as file:
+                file.write(str(outer_bytes.decode("utf-8")))
 
-        # Isolate the frame
-        rcv_frame_bytes = read_bytes[start_index : end_index + 1]
+            # Isolate the frame
+            rcv_frame_bytes = read_bytes[start_index : end_index + 1]
 
-        # This accounts for the command having no response
-        if len(rcv_frame_bytes) == 0:
-            return None
-
-        # Check if the frame is an I frame
-        if len(rcv_frame_bytes) > RS_ENCODED_DATA_SIZE:
-            rcv_frame = comms.decode(rcv_frame_bytes)
+            rcv_frame = comms.decode_frame(rcv_frame_bytes)
+            # TODO: Handle these return frames
+            return rcv_frame
         else:
-            ax25 = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
-            rcv_frame = ax25.decode_frame(rcv_frame_bytes)
-
-        # TODO: Handle these return frames
-        return rcv_frame
+            # TODO: Handle bootloader recieve
+            return None
 
 
 def send_conn_request(com_port: str, timeout: int = 0) -> Frame:
@@ -120,9 +111,8 @@ def send_conn_request(com_port: str, timeout: int = 0) -> Frame:
         timeout=timeout,
     ) as ser:
         # Encode using AX25, remember these frames don't have data fields so there's no need for fec or aes128
-        ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
-        send_bytes = ax25_proto.encode_frame(None, FrameType.SABM, 0, True)
-        send_bytes = ax25_proto.stuff(send_bytes)
+        comms = CommsPipeline()
+        send_bytes = comms.encode_frame(None)
         ser.write(send_bytes.ljust(30, b"\x00"))
 
         # We wait for an acknowledge from the board
@@ -139,8 +129,7 @@ def send_conn_request(com_port: str, timeout: int = 0) -> Frame:
 
         # Decode the frame
         rcv_frame_bytes = rcv_frame_bytes[start_index : end_index + 1]
-        rcv_frame_bytes = ax25_proto.unstuff(rcv_frame_bytes)
-        rcv_frame = ax25_proto.decode_frame(rcv_frame_bytes)
+        rcv_frame = comms.decode_frame(rcv_frame_bytes)
         return rcv_frame
 
 
