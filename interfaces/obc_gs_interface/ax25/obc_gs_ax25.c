@@ -449,13 +449,6 @@ static obc_gs_error_code_t iFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket)
 }
 
 static obc_gs_error_code_t uFrameRecv(unstuffed_ax25_i_frame_t *unstuffedPacket, u_frame_cmd_t *command) {
-  // NOTE: This is not a part of the u Frame implementation (i.e. U Frames do
-  // not have PID fields) but is kept just in case any other code throughout the
-  // code base was written with U Frames having PID fields
-  // if (unstuffedPacket->data[AX25_MOD8_PID_POSITION] != AX25_PID) {
-  //   return OBC_GS_ERR_CODE_INVALID_AX25_PACKET;
-  // }
-
   uint8_t controlByte = unstuffedPacket->data[AX25_CONTROL_BYTES_POSITION];
   // uint8_t pollFinalBit = controlByte & POLL_FINAL_BIT_MASK; TODO: figure out
   // how to handle poll/control bits

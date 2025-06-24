@@ -35,7 +35,7 @@ _PADDING_REQUIRED: Final[int] = 300
 LOG_PATH: Path = (Path(__file__).parent / "../logs.log").resolve()
 
 
-def send_command(args: str, com_port: str) -> Frame | None:
+def send_command(args: str, com_port: str, timeout: int = 0) -> Frame | None:
     """
     A function to send a command up to the cube satellite and awaits a response
 
@@ -65,7 +65,7 @@ def send_command(args: str, com_port: str) -> Frame | None:
         baudrate=OBC_UART_BAUD_RATE,
         parity=PARITY_NONE,
         stopbits=STOPBITS_TWO,
-        timeout=1,
+        timeout=timeout,
     ) as ser:
         # Reset the output buffer to ensure no previous data is lurking
         ser.reset_output_buffer()
@@ -104,7 +104,7 @@ def send_command(args: str, com_port: str) -> Frame | None:
         return rcv_frame
 
 
-def send_conn_request(com_port: str) -> Frame:
+def send_conn_request(com_port: str, timeout: int = 0) -> Frame:
     """
     Sends the initial connection request to the board
 
@@ -117,7 +117,7 @@ def send_conn_request(com_port: str) -> Frame:
         baudrate=OBC_UART_BAUD_RATE,
         parity=PARITY_NONE,
         stopbits=STOPBITS_TWO,
-        timeout=1,
+        timeout=timeout,
     ) as ser:
         # Encode using AX25, remember these frames don't have data fields so there's no need for fec or aes128
         ax25_proto = AX25(GROUND_STATION_CALLSIGN, CUBE_SAT_CALLSIGN)
@@ -298,7 +298,7 @@ def generate_command(args: str) -> CmdMsg | None:
     return command
 
 
-def poll(com_port: str, file_path: str | Path, print_console: bool = False) -> None:
+def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: bool = False) -> None:
     """
     A function that is supposed to run in the background to keep receiving logs from the board
 
@@ -312,7 +312,7 @@ def poll(com_port: str, file_path: str | Path, print_console: bool = False) -> N
             baudrate=OBC_UART_BAUD_RATE,
             parity=PARITY_NONE,
             stopbits=STOPBITS_TWO,
-            timeout=1,
+            timeout=timeout,
         ) as ser,
         open(file_path, "a") as file,
     ):

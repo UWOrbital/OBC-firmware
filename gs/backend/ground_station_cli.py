@@ -64,7 +64,7 @@ class GroundStationShell(Cmd):
         try:
             if self.background_logging is not None:
                 self.background_logging.kill()
-            send_conn_request(self._com_port)
+            send_conn_request(self._com_port, 1)
         except IndexError:
             print("Connection request was not successful. Try resetting the board")
             return
@@ -85,7 +85,7 @@ class GroundStationShell(Cmd):
         if self.background_logging is not None:
             self.background_logging.kill()
 
-        send_command(line, self._com_port)
+        send_command(line, self._com_port, 1)
 
         self._restart_logging()
 
@@ -137,7 +137,7 @@ class GroundStationShell(Cmd):
 
         # Here we run the function and catch an interrupt if it is executed by the user
         try:
-            poll(self._com_port, LOG_PATH, True)
+            poll(self._com_port, LOG_PATH, 1, True)
         except KeyboardInterrupt:
             print("Exiting polling...")
 
