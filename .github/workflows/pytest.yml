@@ -12,10 +12,6 @@ jobs:
 
     strategy:
       matrix:
-<<<<<<< adityya/python_telem_script
-        os: [ubuntu-latest]
-=======
->>>>>>> main
         python-version: ['3.11']
 
     steps:
