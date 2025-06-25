@@ -18,6 +18,27 @@ typedef struct {
 } downlink_logs_next_pass_cmd_data_t;
 
 /* -------------------------- */
+/* BL Command Data Structures */
+/* -------------------------- */
+// Programming Session Enum
+typedef enum { BOOTLOADER = 0x00, APPLICATION } programming_session_t;
+
+// CMD_DOWNLOAD_DATA
+typedef struct {
+  programming_session_t programmingSession;
+  uint16_t length;
+  uint32_t address;
+  // Defined as a pointer to avoid packing
+  uint8_t *data;
+  // TODO: Add all other fields as well
+} download_data_cmd_data_t;
+
+// CMD_SET_PROGRAMMING_SESSION
+typedef struct {
+  programming_session_t programmingSession;
+} set_programming_session_cmd_data_t;
+
+/* -------------------------- */
 /*   Command Message Struct   */
 /* -------------------------- */
 
@@ -25,6 +46,8 @@ typedef struct {
   union {
     rtc_sync_cmd_data_t rtcSync;
     downlink_logs_next_pass_cmd_data_t downlinkLogsNextPass;
+    download_data_cmd_data_t downloadData;
+    set_programming_session_cmd_data_t setProgrammingSession;
   };
 
   uint32_t timestamp;  // Unix timestamp in seconds

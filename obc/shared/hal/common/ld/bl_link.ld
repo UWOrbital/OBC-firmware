@@ -6,6 +6,8 @@ _estack = 0x8040000;    /* end of 256K RAM */
 
 _Min_Heap_Size = 0x400;      /* required amount of heap  */
 
+__APP_IMAGE_TOTAL_SECTION_SIZE = LENGTH(APP_VECTORS) + LENGTH(APP_KERNEL) + LENGTH(APP_FLASH) + LENGTH(METADATA_FLASH);
+
 SECTIONS
 {
   /* The ISR vector goes first into RAM */
