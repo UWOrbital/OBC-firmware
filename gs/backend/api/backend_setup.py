@@ -7,6 +7,7 @@ from gs.backend.api.v1.aro.endpoints.picture_requests import picture_requests_ro
 from gs.backend.api.v1.aro.endpoints.user import aro_user_router
 from gs.backend.api.v1.mcc.endpoints.aro_requests import aro_requests_router
 from gs.backend.api.v1.mcc.endpoints.commands import commands_router
+from gs.backend.api.v1.mcc.endpoints.main_commands import main_commands_router
 from gs.backend.api.v1.mcc.endpoints.telemetry import telemetry_router
 
 
@@ -24,6 +25,7 @@ def setup_routes(app: FastAPI) -> None:
     app.include_router(commands_router, prefix=f"{mcc_prefix}/commands")
     app.include_router(telemetry_router, prefix=f"{mcc_prefix}/telemetry")
     app.include_router(aro_requests_router, prefix=f"{mcc_prefix}/requests")
+    app.include_router(main_commands_router, prefix=f"{mcc_prefix}/main-commands")
 
 
 def setup_middlewares(app: FastAPI) -> None:
