@@ -21,6 +21,11 @@
  *        struct that you declared in the union type of cmd_unpacked_response_t struct below.
  *      - You must use the data_pack_unpack interface to avoid issues with endianess. The callback is executed after
  *        the cmdId is passed from the cmd_unpacked_response_t struct.
+ * 3. In the __init__.py file define the changes made in the c files using the following steps...
+ *      - Declare a structure for the command response you defined (Look for the note in the python file that
+ *        specifies to do this)
+ *      - Add the defined structure to the union class defined in the file (Again, look for a note)
+ *      - Add any new reponse error codes to the enum class defined in the python file
  *---------------------------------------------------------------------------*/
 
 typedef struct {
@@ -28,6 +33,7 @@ typedef struct {
   uint32_t data2;
 } obc_cmd_reset_response_t;  // This is only a sample response. Implement an actual one
 
+// NOTE: Update python error codes as well when these are updated
 typedef enum { CMD_RESPONSE_SUCCESS = 0x0, CMD_RESPONSE_ERROR } cmd_response_error_code_t;
 
 typedef struct {
