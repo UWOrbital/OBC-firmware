@@ -167,6 +167,15 @@ class CmdResponseErrorCode(IntEnum):
     CMD_RESPONSE_ERROR = 1
 
 
+class ProgrammingSession(IntEnum):
+    """
+    Enums corresponding to the C implementation of the cmd_response_error_code_t
+    """
+
+    BOOTLOADER = 0
+    APPLICATION = 1
+
+
 # ######################################################################
 # ||                                                                  ||
 # ||                        Command Factories                         ||
@@ -311,6 +320,108 @@ def create_cmd_uplink_disc(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     cmd_msg = CmdMsg()
     cmd_msg.id = CmdCallbackId.CMD_UPLINK_DISC
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
+    return cmd_msg
+
+
+def create_cmd_set_programming_session(
+    programming_session: ProgrammingSession, unixtime_of_execution: int | None = None
+) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_SET_PROGRAMMING_SESSION
+
+    :param programming_session: The programming session to set the bootloader to
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_SET_PROGRAMMING_SESSION
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_SET_PROGRAMMING_SESSION
+    cmd_msg.setProgrammingSession.programmingSession = c_uint(programming_session.value)
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
+    return cmd_msg
+
+
+def create_cmd_erase_app(unixtime_of_execution: int | None = None) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_ERASE_APP
+
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_ERASE_APP
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_ERASE_APP
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
+    return cmd_msg
+
+
+def create_cmd_download_data(
+    programming_session: ProgrammingSession, length: int, address: int, unixtime_of_execution: int | None = None
+) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_DOWNLOAD_DATA
+
+    :param programming_session: Sets the programming session
+    :param length: The length of the data to be downloaded
+    :param address: The address on the board where the data should be written to
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_DOWNLOAD_DATA
+    """
+    if length > 65535:
+        raise ValueError("Length for download data command too large (cannot be encoded into a c_uint16)")
+    if address > 4294967295:
+        raise ValueError("Invalid address download data command (cannot be encoded into a c_uint32)")
+
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_DOWNLOAD_DATA
+    cmd_msg.downloadData.programmingSession = c_uint(programming_session.value)
+    cmd_msg.downloadData.length = c_uint16(length)
+    cmd_msg.downloadData.address = c_uint32(address)
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
+    return cmd_msg
+
+
+def create_cmd_verify_crc(unixtime_of_execution: int | None = None) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_VERIFY_CRC
+
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_VERIFY_CRC
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_VERIFY_CRC
+    if unixtime_of_execution is not None:
+        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
+        cmd_msg.isTimeTagged = c_bool(True)
+    return cmd_msg
+
+
+def create_cmd_reset_bl(unixtime_of_execution: int | None = None) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_RESET_BL
+
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_RESET_BL
+    """
+    cmd_msg = CmdMsg()
+    cmd_msg.id = CmdCallbackId.CMD_RESET_BL
     if unixtime_of_execution is not None:
         cmd_msg.timestamp = c_uint32(unixtime_of_execution)
         cmd_msg.isTimeTagged = c_bool(True)
