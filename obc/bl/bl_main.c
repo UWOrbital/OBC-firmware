@@ -10,6 +10,7 @@
 #include <string.h>
 #include "command.h"
 #include "bl_logging.h"
+#include "bl_config.h"
 
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
@@ -32,15 +33,14 @@ typedef void (*appStartFunc_t)(void);
 // Get this from the bl_command_callbacks for simplicity
 extern programming_session_t programmingSession;
 
-uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
-
-static obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
+obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
   cmd_info_t currCmdInfo;
   cmd_msg_t unpackedCmdMsg = {0};
   uint32_t unpackOffset = 0;
   obc_gs_error_code_t interfaceErr = unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(15, recvBuffer);
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
   RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
@@ -56,27 +56,30 @@ int main(void) {
   blUartInit();
   rtiInit();
   rtiStartCounter(rtiCOUNTER_BLOCK1);
+  uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
   // F021 API and the functions that use it must be executed from RAM since they
   // can't execute from the same flash bank being modified
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
 
-  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 2000) != OBC_ERR_CODE_SUCCESS) {
+  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 5000) != OBC_ERR_CODE_SUCCESS) {
     // Jump to app
-    blUartWriteBytes(1, (uint8_t *)"B");
   } else {
-    blUartWriteBytes(1, (uint8_t *)"Z");
     LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
 
     while (1) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
         // Verify CRC
         // Verify Hardware
-        // Jump to app
-        blUartWriteBytes(1, (uint8_t *)"V");
+        blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+
+        // Go to the application's entry point
+        uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
+        ((appStartFunc_t)appStartAddress)();
+
+        blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
         break;
       }
-      blUartWriteBytes(1, (uint8_t *)"W");
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
     }
   }

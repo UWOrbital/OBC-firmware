@@ -28,6 +28,10 @@ obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeo
     if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {
       for (uint32_t i = 0U; i < numBytes; i++) {
         buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
+        // TODO: Figure out why the board sometimes receives 0x00 as the first byte
+        if (i == 0 && buf[i] == 0) {
+          i -= 1;
+        }
       }
       return OBC_ERR_CODE_SUCCESS;
     }
