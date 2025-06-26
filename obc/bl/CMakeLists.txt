@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 
+# Optimize for code size
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
+
 set(BL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/bl_main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_flash.c
