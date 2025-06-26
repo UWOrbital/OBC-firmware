@@ -17,9 +17,20 @@
 #define COMMAND_QUEUE_LENGTH 25UL
 #define COMMAND_QUEUE_ITEM_SIZE sizeof(cmd_msg_t)
 
-static QueueHandle_t commandQueueHandle;
-static StaticQueue_t commandQueue;
-static uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
+typedef enum {
+  CMD_SEQ_DISARM,
+  CMD_SEQ_ARM,
+  CMD_SEQ_EXEC,
+} cmd_seq_t;
+
+typedef struct {
+  QueueHandle_t commandQueueHandle;
+  StaticQueue_t commandQueue;
+  uint8_t commandQueueStack[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
+  int8_t armedCommandId;
+} command_manager_private_data_t;
+
+static command_manager_private_data_t command_manager_privateData;
 
 typedef struct {
   cmd_callback_t callback;
@@ -44,15 +55,18 @@ static const cmd_info_t cmdsConfig[] = {
 STATIC_ASSERT(CMDS_CONFIG_SIZE <= UINT8_MAX, "Max command ID must be less than 256");
 
 void obcTaskInitCommandMgr(void) {
-  ASSERT((commandQueueStack != NULL) && (&commandQueue != NULL));
-  if (commandQueueHandle == NULL) {
-    commandQueueHandle =
-        xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, commandQueueStack, &commandQueue);
+  ASSERT((command_manager_privateData.commandQueueStack != NULL) &&
+         (&command_manager_privateData.commandQueue != NULL));
+  if (command_manager_privateData.commandQueueHandle == NULL) {
+    command_manager_privateData.commandQueueHandle =
+        xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, command_manager_privateData.commandQueueStack,
+                           &command_manager_privateData.commandQueue);
   }
+  command_manager_privateData.armedCommandId = -1;
 }
 
 obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
-  if (commandQueueHandle == NULL) {
+  if (command_manager_privateData.commandQueueHandle == NULL) {
     return OBC_ERR_CODE_INVALID_STATE;
   }
 
@@ -60,7 +74,7 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (xQueueSend(commandQueueHandle, (void *)cmd, portMAX_DELAY) == pdPASS) {
+  if (xQueueSend(command_manager_privateData.commandQueueHandle, (void *)cmd, portMAX_DELAY) == pdPASS) {
     return OBC_ERR_CODE_SUCCESS;
   }
 
@@ -70,13 +84,9 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
 void obcTaskFunctionCommandMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
-  // Used to track whether a safety-critical command is currently being executed
-  // This is inefficient space-wise, but simplifies the code. We can optimize later if needed.
-  static bool cmdProgressTracker[sizeof(cmdsConfig) / sizeof(cmd_info_t)] = {false};
-
   while (1) {
     cmd_msg_t cmd;
-    if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
+    if (xQueueReceive(command_manager_privateData.commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
       // Check if the ID is a valid index
       if (cmd.id >= CMDS_CONFIG_SIZE) {
         LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_CMD);
@@ -97,25 +107,36 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
         continue;
       }
 
-      // Check if the command is safety-critical
-      if (currCmdInfo.opts & CMD_TYPE_CRITICAL) {
-        // TODO: Make this persistent across resets
-        if (!cmdProgressTracker[cmd.id]) {
-          // Begin the two-step process of executing a safety-critical command
-          LOG_DEBUG("Process started to execute safety-critical command");
-          cmdProgressTracker[cmd.id] = true;
-          continue;
-        }
-
-        // Reset the progress tracker
-        cmdProgressTracker[cmd.id] = false;
-      }
-
-      // If the command is not time-tagged, execute it immediately
       if (!cmd.isTimeTagged) {
-        // TODO: Handle safety-critical command failures
         LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
         continue;
+      }
+
+      switch (cmd.seq) {  // add seq field to cmd_msg_t?
+        case CMD_SEQ_ARM:
+          if (currCmdInfo.callback != NULL) {
+            command_manager_privateData.armedCommandId = cmd.id;
+            LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
+          }
+          break;
+
+        case CMD_SEQ_EXEC:
+          if (currCmdInfo.callback != NULL && command_manager_privateData.armedCommandId == cmd.id) {
+            command_manager_privateData.armedCommandId = -1;  // reset
+            LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
+          }
+          break;
+
+        case CMD_SEQ_DISARM:
+          if (command_manager_privateData.armedCommandId == cmd.id) {
+            command_manager_privateData.armedCommandId = -1;  // disarm
+            LOG_IF_ERROR_CODE(currCmdInfo.callback(&cmd));
+          }
+          break;
+
+        default:
+          LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
+          break;
       }
 
       // If the timetag is in the past, throw away the command
@@ -126,10 +147,7 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
       alarm_handler_event_t alarm = {.id = ALARM_HANDLER_NEW_ALARM,
                                      .alarmInfo = {
                                          .unixTime = cmd.timestamp,
-                                         .callbackDef =
-                                             {
-                                                 .cmdCallback = currCmdInfo.callback,
-                                             },
+                                         .callbackDef = {.cmdCallback = currCmdInfo.callback},
                                          .type = ALARM_TYPE_TIME_TAGGED_CMD,
                                          .cmdMsg = cmd,
                                      }};
