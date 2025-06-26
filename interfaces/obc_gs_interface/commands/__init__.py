@@ -1,4 +1,4 @@
-from ctypes import POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint32, pointer
+from ctypes import POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint16, c_uint32, pointer
 from enum import IntEnum
 from typing import Final
 
@@ -28,6 +28,22 @@ class DownlinkLogsNextPassCmdData(Structure):
     _fields_ = [("logLevel", c_uint8)]
 
 
+class DownloadDataCmdData(Structure):
+    """
+    The python equivalent class for the download_data_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("programmingSession", c_uint), ("length", c_uint16), ("address", c_uint32), ("data", POINTER(c_uint8))]
+
+
+class SetProgrammingSessionCmdData(Structure):
+    """
+    The python equivalent class for the set_programming_session_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("programmingSession", c_uint)]
+
+
 # NOTE: When adding commands only add their data to the following union type as shown with RtcSyncCmdData and
 # DownlinkLogsNextPassCmdData
 class _U(Union):
@@ -35,7 +51,12 @@ class _U(Union):
     Union class needed to create the CmdMsgType Class
     """
 
-    _fields_ = [("rtcSync", RtcSyncCmdData), ("downlinkLogsNextPass", DownlinkLogsNextPassCmdData)]
+    _fields_ = [
+        ("rtcSync", RtcSyncCmdData),
+        ("downlinkLogsNextPass", DownlinkLogsNextPassCmdData),
+        ("downloadData", DownloadDataCmdData),
+        ("setProgrammingSession", SetProgrammingSessionCmdData),
+    ]
 
 
 class CmdMsg(Structure):
@@ -128,7 +149,12 @@ class CmdCallbackId(IntEnum):
     CMD_PING = 5
     CMD_DOWNLINK_TELEM = 6
     CMD_UPLINK_DISC = 7
-    NUM_CMD_CALLBACKS = 8
+    CMD_SET_PROGRAMMING_SESSION = 8
+    CMD_ERASE_APP = 9
+    CMD_DOWNLOAD_DATA = 10
+    CMD_VERIFY_CRC = 11
+    CMD_RESET_BL = 12
+    NUM_CMD_CALLBACKS = 13
 
 
 # Path to File: interfaces/obc_gs_interface/commands/obc_gs_commands_response.h
