@@ -6,7 +6,6 @@ import dataclasses
 import datetime
 import enum
 import json
-import logging
 import math
 import os
 import re
@@ -19,6 +18,8 @@ from typing import BinaryIO, Final
 import requests
 from skyfield.api import load
 
+from gs.backend.common.logger import DEFAULT_LOG_FORMAT, logger
+
 # Script constants
 SUPPORTED_VERSION: Final[str] = "1.2"
 NUMBER_OF_HEADER_DOUBLES: Final[int] = 2
@@ -26,7 +27,7 @@ RELATIVE_TOLERANCE: Final[float] = 1e-7
 API_LIMIT: Final[int] = 90_000
 
 # Print values
-LOGGING_LEVELS = [logging.WARNING, logging.INFO, logging.DEBUG]
+LOGGER_LEVELS = ["WARNING", "INFO", "DEBUG"]
 DEFAULT_PRINT_WARNING: Final[int] = 0  # Prints the required output
 
 # Data types
@@ -231,17 +232,17 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
     if not (is_valid_date(start_time) and is_valid_date(stop_time)) and not (
         is_valid_julian_date(start_time) and is_valid_julian_date(stop_time)
     ):
-        logging.critical("Start time or stop time do not both have the same format of YYYY-MM-DD or JD#")
+        logger.critical("Start time or stop time do not both have the same format of YYYY-MM-DD or JD#")
         return ErrorCode.INVALID_DATE_TIME
 
     # Checks if the step size is in the correct format
     if not ((step_size[-1] in ["m", "d", "h", "s"] and step_size[:-1].isnumeric()) or step_size.isnumeric()):
-        logging.critical("Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer")
+        logger.critical("Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer")
         return ErrorCode.INVALID_STEP_SIZE
 
     # Checks if the output file is in the correct format
     if not output.endswith(".bin"):
-        logging.critical("Output file must be in the format *.bin")
+        logger.critical("Output file must be in the format *.bin")
         return ErrorCode.INVALID_OUTPUT_FILE
 
     return ErrorCode.SUCCESS
@@ -258,12 +259,12 @@ def check_version(data: dict) -> ErrorCode:  # type: ignore
 
     # Checks if the signature is valid
     if signature is None or not isinstance(signature, dict):
-        logging.critical("ERROR: INVALID SIGNATURE")
+        logger.critical("ERROR: INVALID SIGNATURE")
         return ErrorCode.NO_SIGNATURE_FOUND
 
     # Checks if the version is supported
     if signature.get("version") != SUPPORTED_VERSION:
-        logging.warning("WARNING: UNSUPPORTED HORIZON API VERSION USED")
+        logger.warning("WARNING: UNSUPPORTED HORIZON API VERSION USED")
 
     return ErrorCode.SUCCESS
 
@@ -279,21 +280,22 @@ def validate_response(response: requests.Response) -> ErrorCode:
     :return: ErrorCode.SUCCESS if the response is valid otherwise ErrorCode.INVALID_REQUEST400
     or ErrorCode.INVALID_REQUEST
     """
-    if response.status_code == 400:
+    status_code = response.status_code
+    if status_code == 400:
         data = json.loads(response.text)
         if "message" in data:
-            logging.critical(f"Message: {data['message']}")
+            logger.critical("Message: {message}", message=data["message"])
         else:
-            logging.critical(json.dumps(data, indent=2))
+            logger.critical(json.dumps(data, indent=2))
         return ErrorCode.INVALID_REQUEST400
 
-    if response.status_code != 200:
-        logging.critical(f"{response.status_code = }")
+    if status_code != 200:
+        logger.critical("{status_code}", status_code=status_code)
         return ErrorCode.INVALID_REQUEST
 
     data = json.loads(response.text)
     if data.get("error") is not None:
-        logging.critical(data.get("error"))
+        logger.critical(data.get("error"))
         return ErrorCode.UNKNOWN
 
     return ErrorCode.SUCCESS
@@ -307,10 +309,10 @@ def print_debug_header(reverse: bool = False) -> None:
     :param reverse: If True then reverses the order of the header and prints and extra seperator line
     """
     if reverse:
-        logging.info("-" * 130)
+        logger.info("-" * 130)
 
-    logging.info(("\t" * 3) + "JD:" + ("\t" * 4) + "X:" + ("\t" * 5) + "Y:" + ("\t" * 4) + "Z:")
-    logging.info("-" * 130)
+    logger.info(("\t" * 3) + "JD:" + ("\t" * 4) + "X:" + ("\t" * 5) + "Y:" + ("\t" * 4) + "Z:")
+    logger.info("-" * 130)
 
 
 def write_data(data: DataPoint, file: BinaryIO) -> None:
@@ -321,7 +323,7 @@ def write_data(data: DataPoint, file: BinaryIO) -> None:
     :param data: Data to be written
     """
     # Appends the data to the file and prints the expected data written if applicable
-    logging.debug(f"\tData written: {data}")
+    logger.debug("\tData written: {data}", data=data)
 
     # Write the x value
     bx = struct.pack(DATA_FLOAT, data.x)
@@ -368,12 +370,12 @@ def write_header(
 
     # Write the data to the file
     with open(file_output, "rb+") as file:
-        logging.debug(f"Writing header to {file_output}")
+        logger.debug(f"Writing header to {file_output}")
         file.seek(0)
 
         # Write the data to the file that is of type double
         for i in data:
-            logging.debug(f"\tData written: {i}")
+            logger.debug("\tData written: {i}", i=i)
             b = struct.pack(DATA_DOUBLE, i)
             byte: bytearray = bytearray(b)
             file.write(byte)
@@ -478,7 +480,7 @@ def get_lines_from_api(start_time: float, stop_time: float, step_size: int, targ
     try:
         data = json.loads(response.text)
     except ValueError:
-        logging.critical("Invalid JSON response")
+        logger.critical("Invalid JSON response")
         sys.exit(-1)
 
     exit_program_on_error(check_version(data))
@@ -486,6 +488,17 @@ def get_lines_from_api(start_time: float, stop_time: float, step_size: int, targ
     # Start processing the data taken from API
     lines = data.get("result").split("\n")
     return extract_data_lines(lines)
+
+
+def logger_setup(log_level: str, file_name: str | None) -> None:
+    """
+    Sets up the logger for the program
+    """
+    logger.remove()
+    if file_name is not None:
+        logger.add(file_name, level=log_level, format=DEFAULT_LOG_FORMAT, diagnose=True)
+    else:
+        logger.add(sys.stderr, level=log_level, format=DEFAULT_LOG_FORMAT, colorize=True, diagnose=True)
 
 
 def main(argsv: str | None = None) -> list[DataPoint]:
@@ -497,15 +510,8 @@ def main(argsv: str | None = None) -> list[DataPoint]:
     args = define_parser().parse_args(argsv.split() if isinstance(argsv, str) else None)
     exit_program_on_error(validate_input(args.start_time, args.stop_time, args.step_size, args.output))
 
-    # Set up logging
-    # TODO: Setup proper logging
-    logging.basicConfig(
-        filename=args.log,
-        level=LOGGING_LEVELS[args.print],
-        encoding="utf-8",
-        format="%(asctime)s %(levelname)s (Line: %(lineno)d):  %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-    )
+    # Set up logger
+    logger_setup(LOGGER_LEVELS[args.print], args.log)
 
     start_time = convert_date_to_jd(args.start_time)
     stop_time = convert_date_to_jd(args.stop_time)
@@ -513,7 +519,7 @@ def main(argsv: str | None = None) -> list[DataPoint]:
     try:
         step_size = calculate_step_size(start_time, stop_time, data_count)
     except ValueError as e:
-        logging.critical(e)
+        logger.critical(e)
         sys.exit(-2)
 
     # Make requests to api
@@ -560,11 +566,11 @@ def main(argsv: str | None = None) -> list[DataPoint]:
                 and (args.exclude == "both" or args.exclude == "last")
             ):
                 # Parse the line of data
-                logging.debug(f"Line being parsed: {line}")
+                logger.debug("Line being parsed: {line}", line=line)
                 output = line[:-1].split(", ")
 
                 # Parse, store and write the data point
-                logging.info(f"Output written: {output}")
+                logger.info("Output written: {output}", output=output)
                 # 1st element of parsed string is the date in YYYY-MM-DD format
                 data_point = DataPoint(
                     float(output[0]),
@@ -579,7 +585,8 @@ def main(argsv: str | None = None) -> list[DataPoint]:
     # Write the header, print debug header
     print_debug_header(True)
 
-    print(f"Lines written: {lines_written + 1}")
+    print(f"Lines written: {lines_written+1}")
+    logger.info("Lines written: {lines_written}", lines_written=lines_written + 1)
     return data_points
 
 
