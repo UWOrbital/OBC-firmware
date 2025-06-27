@@ -125,17 +125,17 @@ bool blFlashIsStartAddrValid(uint32_t addr, uint32_t binSize) {
   }
 
   /* The start address must be at the beginning of the sector */
-  bool isSectionStart = false;
-  for (uint8_t i = 0; i < NUM_FLASH_SECTORS; i++) {
-    if (addr == (uint32_t)(flashSectors[i].start)) {
-      isSectionStart = true;
-      break;
-    }
-  }
-
-  if (!isSectionStart) {
-    return false;
-  }
+  // bool isSectionStart = false;
+  // for (uint8_t i = 0; i < NUM_FLASH_SECTORS; i++) {
+  //   if (addr == (uint32_t)(flashSectors[i].start)) {
+  //     isSectionStart = true;
+  //     break;
+  //   }
+  // }
+  //
+  // if (!isSectionStart) {
+  //   return false;
+  // }
 
   return true;
 }
