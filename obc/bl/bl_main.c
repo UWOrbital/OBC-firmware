@@ -64,6 +64,14 @@ int main(void) {
 
   if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 5000) != OBC_ERR_CODE_SUCCESS) {
     // Jump to app
+    blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+
+    // Go to the application's entry point
+    uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
+    ((appStartFunc_t)appStartAddress)();
+
+    blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
+
   } else {
     LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
 

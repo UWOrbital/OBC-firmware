@@ -65,6 +65,9 @@ def send_bin(file_path: str, com_port: str) -> None:
     file_obj = Path(file_path)
     app_bin = file_obj.read_bytes()
 
+    commands_needed = ceil(len(app_bin) / 208)
+    print(commands_needed)
+
     # Open serial port and write binary to device via UART
     with Serial(
         com_port,
@@ -78,9 +81,6 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.read(len("Erase success\r\n"))
         print("Erased App")
         sleep(2)
-
-        commands_needed = ceil(len(app_bin) / 208)
-        print(commands_needed)
 
         for i in range(commands_needed - 1):
             app_packet = create_app_packet(i, app_bin)
