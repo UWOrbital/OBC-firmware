@@ -60,7 +60,7 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
     }
   }
 
-  errCode = blFlashFapiBlockErase(APP_START_ADDRESS, (uint32_t)(&__APP_IMAGE_TOTAL_SECTION_SIZE) - 1);
+  errCode = blFlashFapiBlockErase(APP_START_ADDRESS, (uint32_t)(&__APP_IMAGE_TOTAL_SECTION_SIZE));
 
   if (errCode != BL_ERR_CODE_SUCCESS) {
     char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
