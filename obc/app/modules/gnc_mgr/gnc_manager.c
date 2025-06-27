@@ -24,7 +24,7 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
   xLastWakeTime = xTaskGetTickCount();
 
   // Spam logs at startup
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 6; i++) {
     // LOG_DEBUG("BLOCK TEST LOG");
     LOG_ERROR_CODE(1000 + i);
     // printf("Finished log %d\n", i);
