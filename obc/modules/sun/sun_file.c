@@ -164,3 +164,27 @@ obc_error_code_t sunFileGetIndexOfJD(julian_date_t jd, uint32_t *index) {
   *index = (jd - minJD) / stepSize;
   return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t sunFileWriteHeader(julian_date_t minimumJD, double stepSize, uint32_t numDataPoints) {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(sunFileSeek(0));
+  RETURN_IF_ERROR_CODE(writeFile(fileID, &minimumJD, sizeof(julian_date_t)));
+  RETURN_IF_ERROR_CODE(writeFile(fileID, &stepSize, sizeof(double)));
+  RETURN_IF_ERROR_CODE(writeFile(fileID, &numDataPoints, sizeof(uint32_t)));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff){
+  obc_error_code_t errCode;
+  if (buff == NULL || index >= numberOfDataPoints) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  RETURN_IF_ERROR_CODE(sunFileSeek(SUN_FILE_HEADER_SIZE + index * SUN_FILE_DATA_POINT_SIZE));
+  float x = (float)buff->x;
+  float y = (float)buff->y;
+  float z = (float)buff->z;
+  RETURN_IF_ERROR_CODE(writeFile(fileID, &x, sizeof(float)));
+  RETURN_IF_ERROR_CODE(writeFile(fileID, &y, sizeof(float)));
+  RETURN_IF_ERROR_CODE(writeFile(fileID, &z, sizeof(float)));
+  return OBC_ERR_CODE_SUCCESS;
+}

@@ -58,6 +58,21 @@ obc_error_code_t sunFileGetNumDataPoints(uint32_t *number);
  */
 obc_error_code_t sunFileGetIndexOfJD(julian_date_t jd, uint32_t *index);
 
+/**
+ * @brief Writes the header for the beginning of the sun file
+ * @attention Requires that minimumJD, stepSize, and numDataPoints are valid values
+ * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
+ */
+
+obc_error_code_t sunFileWriteHeader(julian_date_t minimumJD, double stepSize, uint32_t numDataPoints);
+
+/**
+ * @brief Writes a data point to the file at the specified index
+ * @attention Requires that buff is a valid pointer and that the index is less than the number of data ponts
+ * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
+*/
+obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff);
+
 #ifdef __cplusplus
 }
 #endif
