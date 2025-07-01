@@ -25,15 +25,23 @@ typedef enum {
  *
  * - The command IDs are used to identify the command in the command message.
  * - All command IDs must be unique and fit in a uint8_t.
+ * - Update the corresponding python implemtation by defining a new enum in
+ *   the CmdCallbackId class and creating the respective factory function
+ *   (Look for notes in the python file:
+ *   interfaces/obc_gs_interface/commands/__init__.py)
  */
 
 /* Used to indicate that the command is invalid.
    It should not have an unpack function. */
-#define CMD_END_OF_FRAME (uint8_t)0
-
-#define CMD_EXEC_OBC_RESET (uint8_t)1
-#define CMD_RTC_SYNC (uint8_t)2
-#define CMD_DOWNLINK_LOGS_NEXT_PASS (uint8_t)3
-#define CMD_MICRO_SD_FORMAT (uint8_t)4
-#define CMD_PING (uint8_t)5
-#define CMD_DOWNLINK_TELEM (uint8_t)6
+// NOTE: Update the python versions as well when commands are added
+typedef enum {
+  CMD_END_OF_FRAME = 0x00,
+  CMD_EXEC_OBC_RESET,
+  CMD_RTC_SYNC,
+  CMD_DOWNLINK_LOGS_NEXT_PASS,
+  CMD_MICRO_SD_FORMAT,
+  CMD_PING,
+  CMD_DOWNLINK_TELEM,
+  CMD_UPLINK_DISC,
+  NUM_CMD_CALLBACKS,
+} cmd_callback_id_t;

@@ -21,9 +21,16 @@
 #define AX25_MINIMUM_I_FRAME_LEN_SHARE_FLAG                                                                   \
   (AX25_SHARE_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
    AX25_INFO_BYTES)
-#define AX25_MINIMUM_I_FRAME_LEN                                                                              \
-  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
+
+// NOTE: We do MOD8 implementation
+#define AX25_MINIMUM_I_FRAME_LEN                                                                            \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
    AX25_INFO_BYTES)
+
+// NOTE: This is for the mod128 implementation
+/* #define AX25_MINIMUM_I_FRAME_LEN                                                                            \
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES + \
+   AX25_INFO_BYTES) */
 /*
 AX.25 bit stuffing will add a bit after every 5 consecutive 1s. The maximum number of added bits for a buffer of x bytes
 is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x)/5] / 8 = x * 6/5
@@ -33,7 +40,7 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 #define AX25_SUPERVISORY_FRAME_LENGTH \
   (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD128_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
 #define AX25_MINIMUM_U_FRAME_CMD_LENGTH \
-  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_PID_BYTES + AX25_FCS_BYTES)
+  (AX25_TOTAL_FLAG_BYTES + AX25_ADDRESS_BYTES + AX25_MOD8_CONTROL_BYTES + AX25_FCS_BYTES)
 /* same calculation as explained above for maximum bytes after bit stuffing */
 #define AX25_MAXIMUM_U_FRAME_CMD_LENGTH                 \
   (AX25_MINIMUM_U_FRAME_CMD_LENGTH +                    \
@@ -48,10 +55,14 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 #define AX25_MOD8_PID_POSITION (AX25_CONTROL_BYTES_POSITION + AX25_MOD8_CONTROL_BYTES)
 /* Index of PID for a mod 128 frame (ex: our I Frames or S frames) which have two control bytes */
 #define AX25_MOD128_PID_POSITION (AX25_CONTROL_BYTES_POSITION + AX25_MOD128_CONTROL_BYTES)
-#define AX25_INFO_FIELD_POSITION (AX25_MOD128_PID_POSITION + AX25_PID_BYTES)
+
+// NOTE: This is with the MOD8 implementation
+#define AX25_INFO_FIELD_POSITION (AX25_MOD8_PID_POSITION + AX25_PID_BYTES)
+// NOTE: This is for the mod128 implementation
+// #define AX25_INFO_FIELD_POSITION (AX25_MOD128_PID_POSITION + AX25_PID_BYTES)
 #define AX25_I_FRAME_FCS_POSITION (AX25_INFO_FIELD_POSITION + AX25_INFO_BYTES)
 #define AX25_S_FRAME_FCS_POSITION AX25_INFO_FIELD_POSITION
-#define AX25_U_FRAME_FCS_POSITION (AX25_MOD8_PID_POSITION + AX25_PID_BYTES)
+#define AX25_U_FRAME_FCS_POSITION (AX25_MOD8_PID_POSITION)
 
 #define AX25_FLAG 0x7E
 #define AX25_PID 0xF0U
@@ -64,6 +75,13 @@ is (8*x)/5. As a result, the maximum number of bytes in a frame is [(8*x) + (8*x
 #define MAX_U_FRAME_CMD_VALUE 3
 
 #define CALL_SIGN_BYTES 6
+
+#define CUBE_SAT_CALLSIGN (uint8_t *)"AKITO"
+#define GROUND_STATION_CALLSIGN (uint8_t *)"ATLAS"
+#define CALLSIGN_LENGTH 5
+#define DEFAULT_SSID 0
+#define DEFAULT_CONTROL_BIT 0
+#define MAX_CONTINUOUS_PACKETS_ALLOWED 7
 
 typedef struct {
   uint8_t data[AX25_MINIMUM_I_FRAME_LEN];
@@ -203,11 +221,11 @@ obc_gs_error_code_t ax25GetSourceAddress(ax25_addr_t *address, uint8_t callSign[
                                          uint8_t controlBit);
 
 /**
- * @brief sets the address for the TNC we are communicating with in the current link session
+ * @brief sets the address via Call Sign for the TNC we are communicating with in the current link session
  *
  * @param destAdress address of the TNC for the current link session
  */
-void setCurrentLinkDestAddress(ax25_addr_t *destAddress);
+void setCurrentLinkDestCallSign(uint8_t *destCallSign, uint8_t destCallSignLength, uint8_t ssid);
 
 /**
  * @brief clears the destination address for the current link once we have disconnected

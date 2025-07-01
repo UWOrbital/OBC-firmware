@@ -1,13 +1,12 @@
 set(TEST_BINARY obc-firmware-tests)
 
 set(TEST_DEPENDENCIES
-    ${CMAKE_SOURCE_DIR}/obc/sys/time/obc_time_utils.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/arducam/image_processing.c
-    ${CMAKE_SOURCE_DIR}/obc/modules/sun/sun_utils.c
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100/vn100_binary_parsing.c
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/time/obc_time_utils.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/arducam/image_processing.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/vn100/vn100_binary_parsing.c
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common/obc_gs_crc.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
-    ${CMAKE_SOURCE_DIR}/obc/sys/persistent/obc_persistent.c
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
 )
 
 set(TEST_MOCKS
@@ -31,24 +30,26 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
-    ${CMAKE_SOURCE_DIR}/obc/sys
-    ${CMAKE_SOURCE_DIR}/obc/sys/time
-    ${CMAKE_SOURCE_DIR}/obc/sys/utils
-    ${CMAKE_SOURCE_DIR}/obc/sys/logging
-    ${CMAKE_SOURCE_DIR}/obc/sys/persistent
-    ${CMAKE_SOURCE_DIR}/obc/drivers/ds3232
-    ${CMAKE_SOURCE_DIR}/obc/drivers/arducam
-    ${CMAKE_SOURCE_DIR}/obc/modules/sun
-    ${CMAKE_SOURCE_DIR}/obc/drivers/vn100
+    ${CMAKE_SOURCE_DIR}/obc/app/sys
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/time
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/utils
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/logging
+    ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/ds3232
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/arducam
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/vn100
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack
-    ${CMAKE_SOURCE_DIR}/obc/drivers/fram
-    ${CMAKE_SOURCE_DIR}/obc/reliance_edge/projects/freertos_rm46/host/ # redconf.h
-    ${CMAKE_SOURCE_DIR}/obc/reliance_edge/include # redconf.h
-    ${CMAKE_SOURCE_DIR}/obc/modules/alarm_mgr
-    ${CMAKE_SOURCE_DIR}/obc/modules/command_mgr
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/fram
+    ${CMAKE_SOURCE_DIR}/obc/app/reliance_edge/projects/freertos_rm46/host/ # redconf.h
+    ${CMAKE_SOURCE_DIR}/obc/app/reliance_edge/include # redconf.h
+    ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
+    ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
 )
+
+# Add peripheral configs
+add_definitions(-DCONFIG_VN100 -DCONFIG_ARDUCAM)
 
 target_link_libraries(${TEST_BINARY}
     PRIVATE
