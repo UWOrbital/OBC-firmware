@@ -5,8 +5,8 @@ bool equalsPositionData(const position_data_t data1, const position_data_t data2
 }
 
 bool closePositionData(const position_data_t data1, const position_data_t data2) {
-  return doubleCloseDefault(data1.julianDate, data2.julianDate) && doubleCloseDefault(data1.x, data1.x) &&
-         doubleCloseDefault(data1.y, data1.y) && doubleCloseDefault(data1.z, data1.z);
+  return doubleCloseDefault(data1.julianDate, data2.julianDate) && doubleCloseDefault(data1.x, data2.x) &&
+         doubleCloseDefault(data1.y, data2.y) && doubleCloseDefault(data1.z, data2.z);
 }
 
 obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t point1, position_t point2,
