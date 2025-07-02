@@ -37,6 +37,7 @@ static obc_error_code_t sunFileJDOfIndex(uint32_t index, julian_date_t *jd) {
  * @return OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
 static obc_error_code_t sunFileSeek(int64_t location) {
+  obc_error_code_t errCode;
   int64_t offSet = red_lseek(fileID, location, RED_SEEK_SET);
   if (offSet < 0) {
     LOG_IF_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
@@ -51,6 +52,7 @@ static obc_error_code_t sunFileSeek(int64_t location) {
  * @return OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
 static obc_error_code_t sunFileReadPosition(position_t *buff) {
+  obc_error_code_t errCode;
   if (buff == NULL) return OBC_ERR_CODE_INVALID_ARG;
   obc_error_code_t errCode;
   size_t bytesRead;
