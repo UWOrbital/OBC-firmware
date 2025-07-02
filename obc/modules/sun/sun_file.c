@@ -52,7 +52,6 @@ static obc_error_code_t sunFileSeek(int64_t location) {
  * @return OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
 static obc_error_code_t sunFileReadPosition(position_t *buff) {
-  obc_error_code_t errCode;
   if (buff == NULL) return OBC_ERR_CODE_INVALID_ARG;
   obc_error_code_t errCode;
   size_t bytesRead;
