@@ -39,7 +39,7 @@ static obc_error_code_t sunFileJDOfIndex(uint32_t index, julian_date_t *jd) {
 static obc_error_code_t sunFileSeek(int64_t location) {
   int64_t offSet = red_lseek(fileID, location, RED_SEEK_SET);
   if (offSet < 0) {
-    LOG_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
+    LOG_IF_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_INVALID_STATE;
   }
   return OBC_ERR_CODE_SUCCESS;
