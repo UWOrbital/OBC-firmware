@@ -65,7 +65,7 @@ def send_bin(file_path: str, com_port: str) -> None:
     file_obj = Path(file_path)
     app_bin = file_obj.read_bytes()
 
-    commands_needed = ceil(len(app_bin) / 208)
+    commands_needed = ceil(len(app_bin) / COMMAND_DATA_SIZE)
     print(commands_needed)
 
     # Open serial port and write binary to device via UART

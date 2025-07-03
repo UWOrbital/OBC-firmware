@@ -76,16 +76,16 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
     if (xQueueReceive(commandQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
       cmd_info_t currCmdInfo;
 
-      LOG_ERROR_CODE(verifyCommand(&cmd, &currCmdInfo));
+      LOG_IF_ERROR_CODE(verifyCommand(&cmd, &currCmdInfo));
 
       if (errCode != OBC_ERR_CODE_SUCCESS) {
         continue;
       }
 
       if (cmd.isTimeTagged) {
-        LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&cmd, &currCmdInfo));
-      } else {
         LOG_IF_ERROR_CODE(processTimeTaggedCommand(&cmd, &currCmdInfo));
+      } else {
+        LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&cmd, &currCmdInfo));
       }
     }
   }
