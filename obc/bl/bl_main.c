@@ -49,6 +49,18 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   return errCode;
 }
 
+void blJumpToApp() {
+    // Jump to app
+    blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+
+    // Go to the application's entry point
+    uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
+    ((appStartFunc_t)appStartAddress)();
+
+    // If it was not possible to jump to the app, we log that error here
+    blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
+}
+
 /* PUBLIC FUNCTIONS */
 int main(void) {
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
@@ -63,15 +75,7 @@ int main(void) {
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
 
   if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 5000) != OBC_ERR_CODE_SUCCESS) {
-    // Jump to app
-    blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
-
-    // Go to the application's entry point
-    uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
-    ((appStartFunc_t)appStartAddress)();
-
-    blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
-
+    blJumpToApp();
   } else {
     LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
 
@@ -79,13 +83,7 @@ int main(void) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
         // Verify CRC
         // Verify Hardware
-        blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
-
-        // Go to the application's entry point
-        uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
-        ((appStartFunc_t)appStartAddress)();
-
-        blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
+        blJumpToApp();
         break;
       }
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
