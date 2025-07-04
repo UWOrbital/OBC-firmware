@@ -56,6 +56,9 @@ void blJumpToApp() {
   // Jump to app
   blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
 
+  uint32_t initTime = blGetCurrentTick();
+  while ((blGetCurrentTick() - initTime) < 100 || blGetCurrentTick() < initTime) {
+  };
   // Go to the application's entry point
   uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
   ((appStartFunc_t)appStartAddress)();

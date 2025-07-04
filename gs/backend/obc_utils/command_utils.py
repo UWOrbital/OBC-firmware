@@ -73,7 +73,6 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> Frame | None:
         # Await a response (This is set to an arbitrary large amount as the logger and stats collector might
         # send through data)
         read_bytes = ser.read(10000)
-        print(read_bytes)
         start_index = read_bytes.find(b"\x7e")
         end_index = read_bytes.rfind(b"\x7e")
 
