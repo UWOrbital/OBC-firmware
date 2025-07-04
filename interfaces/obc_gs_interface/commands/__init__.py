@@ -172,8 +172,7 @@ class ProgrammingSession(IntEnum):
     Enums corresponding to the C implementation of the cmd_response_error_code_t
     """
 
-    BOOTLOADER = 0
-    APPLICATION = 1
+    APPLICATION = 0
 
 
 # ######################################################################

@@ -1,7 +1,6 @@
 #include "bl_uart.h"
-#include "rti.h"
+#include "bl_time.h"
 
-#include <sci.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -23,7 +22,7 @@ void blUartInit(void) {
 }
 
 obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
-  uint32_t initTime = rtiGetCurrentTick(rtiCOMPARE1);
+  uint32_t initTime = blGetCurrentTick();
   do {
     if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {
       for (uint32_t i = 0U; i < numBytes; i++) {
@@ -35,8 +34,7 @@ obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeo
       }
       return OBC_ERR_CODE_SUCCESS;
     }
-  } while (((rtiGetCurrentTick(rtiCOMPARE1) - initTime) / 50) < timeout_ms ||
-           rtiGetCurrentTick(rtiCOMPARE1) < initTime);
+  } while (((blGetCurrentTick() - initTime) / 50) < timeout_ms || blGetCurrentTick() < initTime);
 
   return OBC_ERR_CODE_UART_FAILURE;
 }

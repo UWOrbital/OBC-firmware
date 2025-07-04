@@ -5,6 +5,7 @@ set(BL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_flash.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_uart.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_command_callbacks.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_time.c
     ${CMAKE_CURRENT_SOURCE_DIR}/F021_Flash_API/source/Fapi_UserDefinedFunctions.c
 
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands/obc_gs_command_pack.c

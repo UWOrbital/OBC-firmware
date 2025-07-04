@@ -21,7 +21,7 @@ typedef struct {
 /* BL Command Data Structures */
 /* -------------------------- */
 // Programming Session Enum
-typedef enum { BOOTLOADER = 0x00, APPLICATION } programming_session_t;
+typedef enum { APPLICATION = 0x00 } programming_session_t;
 
 // CMD_DOWNLOAD_DATA
 typedef struct {

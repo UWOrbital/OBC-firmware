@@ -1,4 +1,5 @@
 #include "bl_uart.h"
+#include "bl_flash.h"
 #include "obc_gs_errors.h"
 #include "rti.h"
 #include "obc_errors.h"
@@ -8,9 +9,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 #include "command.h"
 #include "bl_logging.h"
 #include "bl_config.h"
+#include "bl_errors.h"
+#include "bl_time.h"
 
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
@@ -40,12 +44,11 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   uint32_t unpackOffset = 0;
   obc_gs_error_code_t interfaceErr = unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    blUartWriteBytes(15, recvBuffer);
+    blUartWriteBytes(strlen("Message Corrupted\r\n"), (uint8_t *)"Message Corrupted\r\n");
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
   RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
   RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
-  memset(recvBuffer, 0, MAX_PACKET_SIZE);
   return errCode;
 }
 
@@ -66,19 +69,33 @@ int main(void) {
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
   blUartInit();
-  rtiInit();
-  rtiStartCounter(rtiCOUNTER_BLOCK1);
+  blInitTick();
   uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
   // F021 API and the functions that use it must be executed from RAM since they
   // can't execute from the same flash bank being modified
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
 
+  bl_error_code_t interfaceErr = blFlashFapiInitBank(RM46_FLASH_BANK);
+
+  if (interfaceErr != BL_ERR_CODE_SUCCESS) {
+    char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
+    int32_t blUartWriteBufferLen =
+        snprintf(blUartWriteBuffer, BL_MAX_MSG_SIZE, "Failed to init flash, BL error code: %d\r\n", errCode);
+    if (blUartWriteBufferLen < 0) {
+      blUartWriteBytes(strlen("Error with processing message buffer length\r\n"),
+                       (uint8_t *)"Error with processing message buffer length\r\n");
+    } else {
+      blUartWriteBytes(blUartWriteBufferLen, (uint8_t *)blUartWriteBuffer);
+    }
+  }
+
   if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 5000) != OBC_ERR_CODE_SUCCESS) {
     // Jump to app if the initial timeout is exceeded
     blJumpToApp();
   } else {
     LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+    memset(recvBuffer, 0, MAX_PACKET_SIZE);
 
     while (1) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
@@ -88,6 +105,7 @@ int main(void) {
         break;
       }
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+      memset(recvBuffer, 0, MAX_PACKET_SIZE);
     }
   }
 }
