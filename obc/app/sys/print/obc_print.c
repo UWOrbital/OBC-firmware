@@ -9,7 +9,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define OBC_UART_BAUD_RATE 115200
+#ifndef OBC_UART_BAUD_RATE
+#define OBC_UART_BAUD_RATE PRINT_BAUD_RATE
+#endif
 #define UART_MUTEX_BLOCK_TIME portMAX_DELAY
 #define MAX_PRINTF_SIZE 128U
 

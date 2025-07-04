@@ -1,12 +1,13 @@
 #pragma once
 
 #include "obc_errors.h"
+#include "obc_board_config.h"
 
 #include <sci.h>
 #include <stdint.h>
 
 #ifndef OBC_UART_BAUD_RATE
-#define OBC_UART_BAUD_RATE 115200
+#define OBC_UART_BAUD_RATE PRINT_BAUD_RATE
 #endif
 
 /**
