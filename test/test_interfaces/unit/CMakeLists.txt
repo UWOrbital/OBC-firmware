@@ -25,7 +25,7 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
-    ${CMAKE_SOURCE_DIR}/obc/sys/logging
+    ${CMAKE_SOURCE_DIR}/obc/shared/logging
 )
 
 target_link_libraries(${TEST_BINARY}
