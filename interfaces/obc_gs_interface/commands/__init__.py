@@ -369,7 +369,7 @@ def create_cmd_download_data(
     """
     Function to create a CmdMsg structure for CMD_DOWNLOAD_DATA
 
-    :param programming_session: Sets the programming session
+    :param programming_session: Defines the programming session of the current packet
     :param length: The length of the data to be downloaded
     :param address: The address on the board where the data should be written to
     :param unixtime_of_execution: A time of when to execute a certain event,

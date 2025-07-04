@@ -6,6 +6,7 @@ set(BL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_uart.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_command_callbacks.c
     ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_time.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/bl_logging.c
     ${CMAKE_CURRENT_SOURCE_DIR}/F021_Flash_API/source/Fapi_UserDefinedFunctions.c
 
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands/obc_gs_command_pack.c
@@ -17,7 +18,6 @@ set(BL_SOURCES
 set(BL_INCLUDES
     ${CMAKE_BINARY_DIR}/toolchain/arm-none-eabi/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/bl_logging
 
     ${CMAKE_SOURCE_DIR}/obc/app/sys/utils
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common

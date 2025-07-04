@@ -34,7 +34,7 @@ obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeo
       }
       return OBC_ERR_CODE_SUCCESS;
     }
-  } while (((blGetCurrentTick() - initTime) / 50) < timeout_ms || blGetCurrentTick() < initTime);
+  } while ((blGetCurrentTick() - initTime) < timeout_ms || blGetCurrentTick() < initTime);
 
   return OBC_ERR_CODE_UART_FAILURE;
 }

@@ -32,7 +32,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/shared/obc_errors
     ${CMAKE_SOURCE_DIR}/obc/app/sys/time
     ${CMAKE_SOURCE_DIR}/obc/app/sys/utils
-    ${CMAKE_SOURCE_DIR}/obc/app/sys/logging
+    ${CMAKE_SOURCE_DIR}/obc/shared/logging
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/ds3232
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/arducam

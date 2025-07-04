@@ -9,4 +9,4 @@ void blInitTick() {
   initTime = rtiGetCurrentTick(rtiCOMPARE1);
 }
 
-uint32_t blGetCurrentTick() { return rtiGetCurrentTick(rtiCOMPARE1) - initTime; }
+uint32_t blGetCurrentTick() { return (rtiGetCurrentTick(rtiCOMPARE1) - initTime) / 50; }

@@ -1,9 +1,7 @@
 #include "command.h"
 #include "obc_gs_command_id.h"
-#ifndef NO_FREERTOS
 #include "obc_logging.h"
-#else
-#include "bl_logging.h"
+#ifdef NO_FREERTOS
 #include <stddef.h>
 #endif
 

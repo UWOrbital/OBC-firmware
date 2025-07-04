@@ -86,6 +86,7 @@ add_subdirectory(shared/hal)
 add_subdirectory(shared/metadata)
 add_subdirectory(shared/obc_errors)
 add_subdirectory(shared/commands)
+add_subdirectory(shared/logging)
 
 # Application
 target_link_options(${OUT_FILE_NAME} PRIVATE

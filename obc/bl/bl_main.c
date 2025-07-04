@@ -11,7 +11,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include "command.h"
-#include "bl_logging.h"
+#include "obc_logging.h"
 #include "bl_config.h"
 #include "bl_errors.h"
 #include "bl_time.h"
@@ -95,7 +95,6 @@ int main(void) {
     blJumpToApp();
   } else {
     LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
-    memset(recvBuffer, 0, MAX_PACKET_SIZE);
 
     while (1) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
@@ -105,7 +104,6 @@ int main(void) {
         break;
       }
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
-      memset(recvBuffer, 0, MAX_PACKET_SIZE);
     }
   }
 }
