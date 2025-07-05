@@ -1,4 +1,5 @@
 #include "bl_uart.h"
+#include "obc_board_config.h"
 
 #include <sci.h>
 #include <stdarg.h>
@@ -6,7 +7,7 @@
 #include <stdio.h>
 
 /* DEFINES */
-#define BL_UART_SCIREG_BAUD 115200U
+#define BL_UART_SCIREG_BAUD PRINT_BAUD_RATE
 
 /* TYPEDEFS */
 typedef struct {
