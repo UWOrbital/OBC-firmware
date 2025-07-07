@@ -180,15 +180,15 @@ add_custom_command(
 
 
 add_custom_target(
-		OBC-firmware_bin
-		ALL
-		DEPENDS ${BIN_FILE_NAME}
+  OBC_firmware-crc_bin
+  ALL
+  DEPENDS ${BIN_FILE_NAME}
 )
 
 # Find Python 3 interpreter
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "OBC")
+if(${CMAKE_BUILD_TYPE} MATCHES OBC)
 	add_custom_target(firmware_crc ALL
 			COMMAND "${Python3_EXECUTABLE}"
 			"${CMAKE_SOURCE_DIR}/obc/tools/CRC/append_crc.py"
