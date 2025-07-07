@@ -14,7 +14,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.intvecs)) /* ISR vector */
     . = ALIGN(4);
-  } >APP_VECTORS
+  } >APP_FLASH
 
  /* FreeRTOS Kernel in protected region of Flash */
   .kernelTEXT :
@@ -22,7 +22,14 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.kernelTEXT))
     . = ALIGN(4);
-  } >APP_KERNEL
+  } >APP_FLASH
+  
+  /* Metadata is first program-section in the app flash*/ 
+  .metadata :
+  {
+    KEEP(*(.metadata))
+    . = ALIGN(32);
+  } > APP_FLASH
 
   /* The program code and other data goes into RAM */
   .text :
@@ -119,6 +126,12 @@ SECTIONS
     . = ALIGN(4);
     _kedata = .;        /* define a global symbol at data end */
   } >RAM AT> APP_FLASH
+
+  .crc :
+  {
+    . = ALIGN(8);
+    __crc_addr = .;
+  } > APP_FLASH
   
   .metadata_section :
   {
