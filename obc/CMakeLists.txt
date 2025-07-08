@@ -180,9 +180,9 @@ add_custom_command(
 
 
 add_custom_target(
-  OBC_firmware-crc_bin
-  ALL
-  DEPENDS ${BIN_FILE_NAME}
+    OBC_firmware-crc_bin
+    ALL
+    DEPENDS ${BIN_FILE_NAME}
 )
 
 # Find Python 3 interpreter

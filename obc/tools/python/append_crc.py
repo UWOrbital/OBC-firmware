@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Check if the file provided file exists and has a .bin suffix
     path = Path(argv[1]).resolve()
-    if not path.is_file() and path.suffix != ".bin":
+    if not path.is_file() or path.suffix != ".bin":
         print("Invalid file path")
         exit(1)
 
