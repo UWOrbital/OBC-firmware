@@ -7,7 +7,8 @@ from typing import Final
 
 import serial
 
-OBC_UART_BAUD_RATE: Final = 115200
+from interfaces import OBC_UART_BAUD_RATE
+
 # Total app header size (includes unused bytes)
 APP_HEADER_SIZE: Final = 32
 
