@@ -35,9 +35,9 @@ add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
     set(OUT_FILE_NAME OBC-firmware.out)
     set(BIN_FILE_NAME OBC-firmware.bin)
-	set(CRC_FILE_NAME firmware_crc.bin)
-  add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
-	add_executable(${OUT_FILE_NAME} app/app_main.c)
+    set(CRC_FILE_NAME firmware_crc.bin)
+    add_compile_options(-Werror) # TODO: Move this back to download_arm_toolchain once all examples warnings are fixed
+    add_executable(${OUT_FILE_NAME} app/app_main.c)
 elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
     set(OUT_FILE_NAME OBC-firmware-${EXAMPLE_TYPE}.out)
     set(BIN_FILE_NAME OBC-firmware-${EXAMPLE_TYPE}.bin)
@@ -191,7 +191,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
 	add_custom_target(firmware_crc ALL
 			COMMAND "${Python3_EXECUTABLE}"
-			"${CMAKE_SOURCE_DIR}/obc/tools/CRC/append_crc.py"
+			"${CMAKE_SOURCE_DIR}/obc/tools/python/append_crc.py"
 			"${CMAKE_BINARY_DIR}/${BIN_FILE_NAME}"
 			"${CMAKE_BINARY_DIR}/${CRC_FILE_NAME}"
 			DEPENDS "${CMAKE_BINARY_DIR}/${BIN_FILE_NAME}"
