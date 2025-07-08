@@ -1,5 +1,6 @@
 #include "bl_uart.h"
 #include "bl_time.h"
+#include "obc_errors.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -22,6 +23,10 @@ void blUartInit(void) {
 }
 
 obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
+  if (buf == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
   uint32_t initTime = blGetCurrentTick();
   do {
     if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {

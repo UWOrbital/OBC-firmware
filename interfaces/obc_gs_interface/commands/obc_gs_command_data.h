@@ -30,7 +30,6 @@ typedef struct {
   uint32_t address;
   // Defined as a pointer to avoid packing
   uint8_t *data;
-  // TODO: Add all other fields as well
 } download_data_cmd_data_t;
 
 // CMD_SET_PROGRAMMING_SESSION

@@ -1,4 +1,5 @@
 #include "command.h"
+#include "obc_errors.h"
 #include "obc_gs_command_id.h"
 #include "obc_logging.h"
 #ifdef NO_FREERTOS
@@ -14,6 +15,9 @@ extern const cmd_info_t cmdsConfig[];
 static bool cmdProgressTracker[NUM_CMD_CALLBACKS] = {false};
 
 obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
+  if (cmd == NULL || currCmdInfo == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
   if (cmd->id >= CMDS_CONFIG_SIZE) {
     return OBC_ERR_CODE_UNSUPPORTED_CMD;
   }
@@ -34,9 +38,10 @@ obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
     // TODO: Make this persistent across resets
     if (!cmdProgressTracker[cmd->id]) {
       // Begin the two-step process of executing a safety-critical command
+      // TODO: Create arm cmd that sets the progress tracker to true and fully
+      // implement the two-step process to execute the safety-critical command
       LOG_DEBUG("Process started to execute safety-critical command");
-      cmdProgressTracker[cmd->id] = true;
-      return OBC_ERR_CODE_SUCCESS;
+      return OBC_ERR_CODE_UNSUPPORTED_CMD;
     }
 
     // Reset the progress tracker
@@ -47,6 +52,9 @@ obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
 }
 
 obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
+  if (cmd == NULL || currCmdInfo == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
   // If the command is not time-tagged, execute it immediately
   obc_error_code_t errCode;
   if (cmd->isTimeTagged) {

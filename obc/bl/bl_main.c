@@ -38,6 +38,10 @@ typedef void (*appStartFunc_t)(void);
 extern programming_session_t programmingSession;
 
 obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
+  if (recvBuffer == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
   cmd_info_t currCmdInfo;
   cmd_msg_t unpackedCmdMsg = {0};
