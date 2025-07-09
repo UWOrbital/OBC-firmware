@@ -85,6 +85,9 @@ add_executable(debug-tool.out)
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
 add_subdirectory(shared/metadata)
+add_subdirectory(shared/obc_errors)
+add_subdirectory(shared/commands)
+add_subdirectory(shared/logging)
 
 # Application
 target_link_options(${OUT_FILE_NAME} PRIVATE
@@ -224,6 +227,8 @@ target_compile_definitions(OBC-bl.out PRIVATE
     OBC_UART_BAUD_RATE=${OBC_UART_BAUD_RATE}
     CSDC_DEMO_ENABLED=${CSDC_DEMO_ENABLED}
     ENABLE_TASK_STATS_COLLECTOR=${ENABLE_TASK_STATS_COLLECTOR}
+    ENABLE_BL_BYPASS=${ENABLE_BL_BYPASS}
+    NO_FREERTOS
     ${PERIPHERAL_CONFIG}
 )
 

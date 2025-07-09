@@ -34,6 +34,7 @@ typedef enum {
 /* Used to indicate that the command is invalid.
    It should not have an unpack function. */
 // NOTE: Update the python versions as well when commands are added
+
 typedef enum {
   CMD_END_OF_FRAME = 0x00,
   CMD_EXEC_OBC_RESET,
@@ -43,5 +44,10 @@ typedef enum {
   CMD_PING,
   CMD_DOWNLINK_TELEM,
   CMD_UPLINK_DISC,
-  NUM_CMD_CALLBACKS,
+  CMD_SET_PROGRAMMING_SESSION,
+  CMD_ERASE_APP,
+  CMD_DOWNLOAD_DATA,
+  CMD_VERIFY_CRC,
+  CMD_RESET_BL,
+  NUM_CMD_CALLBACKS
 } cmd_callback_id_t;
