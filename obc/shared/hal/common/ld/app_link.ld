@@ -8,6 +8,12 @@ _Min_Heap_Size = 0x400;      /* required amount of heap  */
 
 SECTIONS
 {
+  .metadata :
+  {
+    KEEP(*(.metadata))
+    . = ALIGN(32);
+  } > APP_FLASH
+
   /* The ISR vector goes first into RAM */
   .intvecs :
   {
@@ -22,14 +28,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.kernelTEXT))
     . = ALIGN(4);
-  } >APP_FLASH
-  
-  /* Metadata is first program-section in the app flash*/ 
-  .metadata :
-  {
-    KEEP(*(.metadata))
-    . = ALIGN(32);
-  } > APP_FLASH
+  } >APP_FLASH 
 
   /* The program code and other data goes into RAM */
   .text :
@@ -133,11 +132,6 @@ SECTIONS
     __crc_addr = .;
   } > APP_FLASH
   
-  .metadata_section :
-  {
-    __metadata_start__ = ORIGIN(METADATA_FLASH);
-  } >METADATA_FLASH
-
   .kernelHEAP : {} >RAM
 
   /* Uninitialized data section */

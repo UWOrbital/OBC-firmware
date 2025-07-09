@@ -18,3 +18,9 @@ obc_error_code_t readAppMetadata(app_metadata_t* metadata) {
   return OBC_ERR_CODE_SUCCESS;
 #endif
 }
+
+// TODO: DELETE Alll
+// Include Metadata.h from
+// Set reset handle to c_int(00)
+// extern the crc address from app_link.ld
+// Add the BL verify CRC check (Before jumping to app verify if crc is valid otherwise keep listening for commands)
