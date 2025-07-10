@@ -165,7 +165,8 @@ add_dependencies(${OUT_FILE_NAME} generate-scheduler-config)
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
 add_custom_command(
     OUTPUT ${BIN_FILE_NAME}
-    COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.intvecs
+    COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.metadata
+                                                                     --only-section=.intvecs
                                                                      --only-section=.kernelTEXT
                                                                      --only-section=.text
                                                                      --only-section=.rodata
