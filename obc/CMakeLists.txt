@@ -174,6 +174,7 @@ add_custom_command(
                                                                      --only-section=.init_array
                                                                      --only-section=.fini_array
                                                                      --only-section=.data
+                                                                     --only-section=.crc
                                                                      ${OUT_FILE_NAME} ${BIN_FILE_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${OUT_FILE_NAME}

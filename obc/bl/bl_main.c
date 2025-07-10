@@ -1,7 +1,7 @@
 #include "bl_uart.h"
 #include "bl_flash.h"
 #include "obc_gs_errors.h"
-#include "rti.h"
+#include "obc_gs_crc.h"
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_unpack.h"
@@ -30,6 +30,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
+uint32_t __crc_addr = 0x0008f4f0;
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -107,7 +108,13 @@ int main(void) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
         // Verify CRC
         // Verify Hardware
-        blJumpToApp();
+        uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, __crc_addr - APP_START_ADDRESS);
+        if (calculatedCrc == *((uint32_t *)__crc_addr)) {
+          blUartWriteBytes(strlen("Crc matches\r\n"), (uint8_t *)"Crc matches\r\n");
+          blJumpToApp();
+        } else {
+          blUartWriteBytes(strlen("Crc does not match\r\n"), (uint8_t *)"Crc does not match\r\n");
+        }
         break;
       }
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
