@@ -74,6 +74,7 @@ venv/
 __pycache__/
 .pytest_cache/
 .hypothesis/
+obc_venv/
 
 #matlab
 /matlab

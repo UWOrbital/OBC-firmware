@@ -38,7 +38,7 @@ jobs:
             # CC1120_SPI,
             RS,
             ADC,
-
+            SUN,
             # ADD NEW EXAMPLES ABOVE THIS LINE, MUST BE INLINE WITH OTHER EXAMPLES
           ]
         board:  [
