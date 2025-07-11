@@ -16,3 +16,12 @@ uint16_t calculateCrc16Ccitt(const uint8_t *data, uint16_t dataLen) {
 
   return crc;
 }
+
+uint32_t crc32(uint32_t crc, uint8_t *data, uint32_t dataLen) {
+  crc = ~crc;
+  while (dataLen--) {
+    crc ^= *data++;
+    for (uint8_t k = 0; k < 8; k++) crc = crc & 1 ? (crc >> 1) ^ 0xedb88320 : crc >> 1;
+  }
+  return ~crc;
+}

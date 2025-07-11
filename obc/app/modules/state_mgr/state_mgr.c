@@ -165,7 +165,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
     if (xQueueReceive(stateMgrQueueHandle, &inMsg, STATE_MGR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
-      vTaskDelay(pdMS_TO_TICKS(1000));
+      vTaskDelay(pdMS_TO_TICKS(100));
       gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 #endif
       continue;
