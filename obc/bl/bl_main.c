@@ -17,6 +17,9 @@
 #include "bl_errors.h"
 #include "bl_time.h"
 #include "obc_metadata.h"
+#if defined(DEBUG) && !defined(OBC_REVISION_2)
+#include <gio.h>
+#endif
 
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
@@ -117,7 +120,6 @@ void blJumpToApp() {
 
 /* PUBLIC FUNCTIONS */
 int main(void) {
-  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
   blUartInit();
@@ -146,10 +148,11 @@ int main(void) {
   uint32_t flashTick = blGetCurrentTick();
   uint32_t ledTick = blGetCurrentTick();
   uint32_t timeout = 5000;
-  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
   while (1) {
     if (blGetCurrentTick() - ledTick > 500) {
+#if defined(DEBUG) && !defined(OBC_REVISION_2)
       gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
+#endif
       ledTick = blGetCurrentTick();
     }
 
