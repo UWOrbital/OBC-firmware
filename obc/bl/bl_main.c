@@ -15,6 +15,7 @@
 #include "bl_config.h"
 #include "bl_errors.h"
 #include "bl_time.h"
+#include "obc_metadata.h"
 
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
@@ -30,7 +31,6 @@ extern uint32_t __ramFuncsRunEnd__;
 #define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
-uint32_t __crc_addr = 0x0008f540;
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -47,27 +47,45 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   cmd_info_t currCmdInfo;
   cmd_msg_t unpackedCmdMsg = {0};
   uint32_t unpackOffset = 0;
+
   obc_gs_error_code_t interfaceErr = unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     blUartWriteBytes(strlen("Message Corrupted\r\n"), (uint8_t *)"Message Corrupted\r\n");
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
+
   RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
   RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
+
   return errCode;
 }
 
 void blJumpToApp() {
-  // Jump to app
-  blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+  // Cast the metadata of the flash into a usable pointer
+  metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
 
-  uint32_t initTime = blGetCurrentTick();
-  while ((blGetCurrentTick() - initTime) < 100 || blGetCurrentTick() < initTime) {
-  };
-  // Go to the application's entry point
-  uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
-  ((appStartFunc_t)appStartAddress)();
+  // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
+  uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, app_metadata->crc_addr - APP_START_ADDRESS);
 
+  // Check CRC
+  if (calculatedCrc == *((uint32_t *)app_metadata->crc_addr)) {
+    blUartWriteBytes(strlen("Crc matches\r\n"), (uint8_t *)"Crc matches\r\n");
+
+    blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+
+    // We wait for about 100ms so that the remaining uart info can be sent before the buffer is cleared
+    // by the app being initialized
+    uint32_t initTime = blGetCurrentTick();
+    while ((blGetCurrentTick() - initTime) < 100 || blGetCurrentTick() < initTime) {
+    };
+
+    // Go to the application's entry point
+    uint32_t appStartAddress = (uint32_t)app_metadata->app_entry_func_addr;
+    ((appStartFunc_t)appStartAddress)();
+
+  } else {
+    blUartWriteBytes(strlen("Crc does not match\r\n"), (uint8_t *)"Crc does not match\r\n");
+  }
   // If it was not possible to jump to the app, we log that error here
   blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
 }
@@ -106,14 +124,7 @@ int main(void) {
 
     while (1) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
-        // Verify CRC
         // Verify Hardware
-        uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, __crc_addr - APP_START_ADDRESS);
-        if (calculatedCrc == *((uint32_t *)__crc_addr)) {
-          blUartWriteBytes(strlen("Crc matches\r\n"), (uint8_t *)"Crc matches\r\n");
-        } else {
-          blUartWriteBytes(strlen("Crc does not match\r\n"), (uint8_t *)"Crc does not match\r\n");
-        }
         blJumpToApp();
         break;
       }
