@@ -32,6 +32,12 @@ extern uint32_t __ramFuncsRunEnd__;
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
 
+#if defined(BOARD_TYPE_TO_INT_MAP)
+#define BOARD_ID BOARD_TYPE_TO_INT_MAP
+#else
+#define BOARD_ID OBC_ERR_CODE_BOARD_NOT_DEFINED
+#endif
+
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
 
@@ -50,7 +56,7 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
 
   obc_gs_error_code_t interfaceErr = unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    blUartWriteBytes(strlen("Message Corrupted\r\n"), (uint8_t *)"Message Corrupted\r\n");
+    blUartWriteBytes(strlen("ERROR: Message Corrupted\r\n"), (uint8_t *)"ERROR: Message Corrupted\r\n");
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
 
@@ -64,14 +70,27 @@ void blJumpToApp() {
   // Cast the metadata of the flash into a usable pointer
   metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
 
+  if (BOARD_ID == OBC_ERR_CODE_BOARD_NOT_DEFINED) {
+    blUartWriteBytes(strlen("ERROR: Board type not specified, aborting...\r\n"),
+                     (uint8_t *)"ERROR: Board type not specified, aborting...\r\n");
+    return;
+  } else if (app_metadata->board_id == BOARD_ID) {
+    blUartWriteBytes(strlen("SUCCESS: Board ID of bootloader and app match\r\n"),
+                     (uint8_t *)"SUCCESS: Board ID of bootloader and app match\r\n");
+  } else {
+    blUartWriteBytes(strlen("ERROR: Board ID of bootloader and app are different, aborting...\r\n"),
+                     (uint8_t *)"ERROR: Board ID of bootloader and app are different, aborting...\r\n");
+    return;
+  }
+
   // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
   uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, app_metadata->crc_addr - APP_START_ADDRESS);
 
   // Check CRC
   if (calculatedCrc == *((uint32_t *)app_metadata->crc_addr)) {
-    blUartWriteBytes(strlen("Crc matches\r\n"), (uint8_t *)"Crc matches\r\n");
+    blUartWriteBytes(strlen("SUCCESS: Crc matches\r\n"), (uint8_t *)"SUCCESS: Crc matches\r\n");
 
-    blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+    blUartWriteBytes(strlen("Running application...\r\n"), (uint8_t *)"Running application..\r\n");
 
     // We wait for about 100ms so that the remaining uart info can be sent before the buffer is cleared
     // by the app being initialized
@@ -84,10 +103,10 @@ void blJumpToApp() {
     ((appStartFunc_t)appStartAddress)();
 
   } else {
-    blUartWriteBytes(strlen("Crc does not match\r\n"), (uint8_t *)"Crc does not match\r\n");
+    blUartWriteBytes(strlen("ERROR: Crc does not match\r\n"), (uint8_t *)"ERROR: Crc does not match\r\n");
   }
   // If it was not possible to jump to the app, we log that error here
-  blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
+  blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
 }
 
 /* PUBLIC FUNCTIONS */
@@ -124,7 +143,6 @@ int main(void) {
 
     while (1) {
       if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
-        // Verify Hardware
         blJumpToApp();
         break;
       }
