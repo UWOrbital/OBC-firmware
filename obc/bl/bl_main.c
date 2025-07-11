@@ -1,5 +1,6 @@
 #include "bl_uart.h"
 #include "bl_flash.h"
+#include "gio.h"
 #include "obc_gs_errors.h"
 #include "obc_gs_crc.h"
 #include "obc_errors.h"
@@ -34,8 +35,6 @@ extern uint32_t __ramFuncsRunEnd__;
 
 #if defined(BOARD_TYPE_TO_INT_MAP)
 #define BOARD_ID BOARD_TYPE_TO_INT_MAP
-#else
-#define BOARD_ID OBC_ERR_CODE_BOARD_NOT_DEFINED
 #endif
 
 /* TYPEDEFS */
@@ -66,31 +65,40 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   return errCode;
 }
 
+obc_error_code_t verifyBoardType(uint8_t boardType) {
+  if (boardType == BOARD_ID) {
+    blUartWriteBytes(strlen("SUCCESS: Board ID of bootloader and app match\r\n"),
+                     (uint8_t *)"SUCCESS: Board ID of bootloader and app match\r\n");
+    return OBC_ERR_CODE_SUCCESS;
+  } else {
+    blUartWriteBytes(strlen("ERROR: Board ID of bootloader and app are different, aborting...\r\n"),
+                     (uint8_t *)"ERROR: Board ID of bootloader and app are different, aborting...\r\n");
+    return OBC_ERR_CODE_BOARD_MISMATCH;
+  }
+}
+
+obc_error_code_t verifyCrc(uint32_t crc_addr) {
+  // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
+  uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, crc_addr - APP_START_ADDRESS);
+
+  if (calculatedCrc == *((uint32_t *)crc_addr)) {
+    blUartWriteBytes(strlen("SUCCESS: Crc matches\r\n"), (uint8_t *)"SUCCESS: Crc matches\r\n");
+    return OBC_ERR_CODE_SUCCESS;
+  } else {
+    blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
+    return OBC_ERR_CODE_CORRUPTED_MSG;
+  }
+}
+
 void blJumpToApp() {
   // Cast the metadata of the flash into a usable pointer
   metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
 
-  if (BOARD_ID == OBC_ERR_CODE_BOARD_NOT_DEFINED) {
-    blUartWriteBytes(strlen("ERROR: Board type not specified, aborting...\r\n"),
-                     (uint8_t *)"ERROR: Board type not specified, aborting...\r\n");
-    return;
-  } else if (app_metadata->board_id == BOARD_ID) {
-    blUartWriteBytes(strlen("SUCCESS: Board ID of bootloader and app match\r\n"),
-                     (uint8_t *)"SUCCESS: Board ID of bootloader and app match\r\n");
-  } else {
-    blUartWriteBytes(strlen("ERROR: Board ID of bootloader and app are different, aborting...\r\n"),
-                     (uint8_t *)"ERROR: Board ID of bootloader and app are different, aborting...\r\n");
-    return;
-  }
-
-  // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
-  uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, app_metadata->crc_addr - APP_START_ADDRESS);
-
-  // Check CRC
-  if (calculatedCrc == *((uint32_t *)app_metadata->crc_addr)) {
-    blUartWriteBytes(strlen("SUCCESS: Crc matches\r\n"), (uint8_t *)"SUCCESS: Crc matches\r\n");
-
-    blUartWriteBytes(strlen("Running application...\r\n"), (uint8_t *)"Running application..\r\n");
+  // Check board id and verify the crc
+  if (verifyBoardType(app_metadata->board_id) == OBC_ERR_CODE_SUCCESS &&
+      verifyCrc(app_metadata->crc_addr) == OBC_ERR_CODE_SUCCESS) {
+    blUartWriteBytes(strlen("ATTEMPTING: Running application...\r\n"),
+                     (uint8_t *)"ATTEMPTING: Running application..\r\n");
 
     // We wait for about 100ms so that the remaining uart info can be sent before the buffer is cleared
     // by the app being initialized
@@ -101,20 +109,20 @@ void blJumpToApp() {
     // Go to the application's entry point
     uint32_t appStartAddress = (uint32_t)app_metadata->app_entry_func_addr;
     ((appStartFunc_t)appStartAddress)();
-
-  } else {
-    blUartWriteBytes(strlen("ERROR: Crc does not match\r\n"), (uint8_t *)"ERROR: Crc does not match\r\n");
   }
+
   // If it was not possible to jump to the app, we log that error here
   blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
 }
 
 /* PUBLIC FUNCTIONS */
 int main(void) {
+  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
   obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
 
   blUartInit();
   blInitTick();
+  gioInit();
   uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
   // F021 API and the functions that use it must be executed from RAM since they
@@ -135,18 +143,23 @@ int main(void) {
     }
   }
 
-  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 5000) != OBC_ERR_CODE_SUCCESS) {
-    // Jump to app if the initial timeout is exceeded
-    blJumpToApp();
-  } else {
-    LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+  uint32_t flashTick = blGetCurrentTick();
+  uint32_t ledTick = blGetCurrentTick();
+  uint32_t timeout = 5000;
+  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
+  while (1) {
+    if (blGetCurrentTick() - ledTick > 500) {
+      gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
+      ledTick = blGetCurrentTick();
+    }
 
-    while (1) {
-      if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
-        blJumpToApp();
-        break;
-      }
+    if (blGetCurrentTick() - flashTick > timeout) {
+      blJumpToApp();
+      break;
+    } else if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 0) == OBC_ERR_CODE_SUCCESS) {
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+      timeout = 7000;
+      flashTick = blGetCurrentTick();
     }
   }
 }

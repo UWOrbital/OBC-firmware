@@ -3,8 +3,6 @@
 
 #if defined(BOARD_TYPE_TO_INT_MAP)
 #define BOARD_ID BOARD_TYPE_TO_INT_MAP
-#else
-#define BOARD_ID OBC_ERR_CODE_BOARD_NOT_DEFINED
 #endif
 
 extern void _c_int00(void);
