@@ -23,5 +23,6 @@ jobs:
         output: ' '
     - uses: pre-commit/action@v3.0.0
       name: pre-commit
+      if: steps.file_changes.outputs.files != ''
       with:
         extra_args: --files ${{ steps.file_changes.outputs.files}}
