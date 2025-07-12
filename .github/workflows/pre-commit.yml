@@ -21,10 +21,10 @@ jobs:
       with:
         prNumber: ${{ github.event.number }}
         output: ' '
+    - name: Show files to pre-commit
+      run: echo "${{ steps.file_changes.outputs.files }}"
     - uses: pre-commit/action@v3.0.0
       name: pre-commit
       if: steps.file_changes.outputs.files != ''
       with:
         extra_args: --files ${{ steps.file_changes.outputs.files}}
-    - name: Show files to pre-commit
-      run: echo "${{ steps.file_changes.outputs.files }}"
