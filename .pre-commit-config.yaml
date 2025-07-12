@@ -26,4 +26,4 @@ repos:
     rev: 0.1.0
     hooks:
     -   id: deno-fmt
-        files: \.(ts|tsx|js|jsx|md|json)$
+        files: \.(ts|tsx|js|jsx|json)$
