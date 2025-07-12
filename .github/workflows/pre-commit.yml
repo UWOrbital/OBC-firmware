@@ -26,3 +26,5 @@ jobs:
       if: steps.file_changes.outputs.files != ''
       with:
         extra_args: --files ${{ steps.file_changes.outputs.files}}
+    - name: Show files to pre-commit
+      run: echo "${{ steps.file_changes.outputs.files }}"
