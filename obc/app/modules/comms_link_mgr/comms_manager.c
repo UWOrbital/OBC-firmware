@@ -308,7 +308,14 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
     // Check if THERMAL_MGR_PERIOD_TICKS has passed and collect temperature data
     if (xTaskCheckForTimeOut(&thermalMgrLastTempCollectionTimeout, &thermalMgrLastTempCollectionTicksToWait) ==
         pdTRUE) {
-      LOG_IF_ERROR_CODE(readTempCC1120(&cc1120TemperatureData));
+      bool isValid;
+      LOG_IF_ERROR_CODE(isTemperatureValid(cc1120TemperatureData, &isValid));
+      // Temperature becomes not valid once it's read by thermal manager
+      if (!isValid) {
+        LOG_IF_ERROR_CODE(readTempCC1120(&cc1120TemperatureData));
+      } else {
+        LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_STATE);
+      }
       vTaskSetTimeOutState(&thermalMgrLastTempCollectionTimeout);
       thermalMgrLastTempCollectionTicksToWait = THERMAL_MGR_PERIOD_TICKS;
     }

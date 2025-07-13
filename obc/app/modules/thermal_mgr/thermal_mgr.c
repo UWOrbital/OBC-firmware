@@ -6,6 +6,7 @@
 #include "obc_logging.h"
 #include "obc_scheduler_config.h"
 #include "digital_watchdog_mgr.h"
+#include "obc_print.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -37,7 +38,7 @@ void obcTaskFunctionThermalMgr(void* pvParameters) {
     // add telemetry data
     for (uint8 i = 0; i < sizeof(thermalMgrTelemetryFns) / sizeof(thermal_mgr_telemetry_func_t); i++) {
       if (thermalMgrTelemetryFns[i] != NULL) {
-        printf("Running thermal manager telemetry function %d\n", i);
+        sciPrintf("Running thermal manager telemetry function %d\r\n", i);
         LOG_IF_ERROR_CODE(thermalMgrTelemetryFns[i]());
       }
     }
@@ -68,6 +69,7 @@ static obc_error_code_t collectObcLm75bdTemp(void) {
     }                                                                                               \
     uint32_t temp = 0;                                                                              \
     RETURN_IF_ERROR_CODE(getTemperatureData(tempData, &temp));                                      \
+    sciPrintf("Thermal manager: %s temperature is %d\r\n", #tempName, temp);                        \
     telemetry_data_t tempVal = {.tempName = temp, .id = tempId, .timestamp = getCurrentUnixTime()}; \
     RETURN_IF_ERROR_CODE(addTelemetryData(&tempVal));                                               \
     RETURN_IF_ERROR_CODE(setTemperatureData(&tempData, temp, false));                               \
