@@ -29,7 +29,7 @@ extern void *__stack_chk_guard;
 /* Supervisor queue config */
 #define STATE_MGR_QUEUE_LENGTH 10U
 #define STATE_MGR_QUEUE_ITEM_SIZE sizeof(state_mgr_event_t)
-#define STATE_MGR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define STATE_MGR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(100)
 #define STATE_MGR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 static QueueHandle_t stateMgrQueueHandle = NULL;
@@ -165,7 +165,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
     if (xQueueReceive(stateMgrQueueHandle, &inMsg, STATE_MGR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
-      vTaskDelay(pdMS_TO_TICKS(100));
       gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 #endif
       continue;

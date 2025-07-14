@@ -97,9 +97,6 @@ def send_bin(file_path: str, com_port: str) -> None:
         progress_bar.update(1)
         progress_bar.close()
         print("App Successfully Written. Waiting 15 seconds for any messages sent by the board.")
-        print("===== FROM BOARD =====")
-        print(ser.read(10000).decode("utf-8"))
-        print("===== END =====")
 
 
 def main() -> None:
