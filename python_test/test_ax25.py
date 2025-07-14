@@ -20,16 +20,20 @@ def test_I_frame_encode_decode(data_bytes: bytes):
     try:
         frame_decoded = framer.decode_frame(unstuffed_frame)
         frame_data = bytes(frame_decoded.data)
-    except ValueError:
-        print(ValueError)
+    except ValueError as e:
+        print(e)
         print("--- FRAME DATA ---")
         print(frame)
+        print(len(frame))
         print("--- STUFFED FRAME ---")
         print(stuffed_frame)
+        print(len(stuffed_frame))
         print("--- UNSTUFFED FRAME ---")
         print(unstuffed_frame)
+        print(len(unstuffed_frame))
         print("--- FRAME DATA ---")
         print(frame_data)
+        print(len(frame_data))
 
     assert frame_data == data_bytes
 
