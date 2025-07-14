@@ -380,14 +380,19 @@ All function and method parameters (except for the `self` and `cls` parameters) 
 ```python
 def my_add(num1: int, num2: int) -> int:
 	"""
-	@brief Adds two numbers together
+	Adds two numbers together
 
-	@param num1 - The first number to add.
-	@param num2 - The second number to add.
-	@return Returns the sum of the two numbers.
+  :warning: Add a warning if your function requires
+  :note: Add a note that other developers might find helpful
+
+	:param num1: The first number to add.
+	:param num2: The second number to add.
+	:return: Returns the sum of the two numbers.
 	"""
 	return num1 + num2
 ```
+
+Notice that the docstring is formatted using reST (reStructuredText) with two outliers: `:warning:` and `:note:`. The outliers will need to be changed to their proper, `..note::` and `..warning::` counterparts if doc-generation using sphinx is implemented.
 
 ### Comments
 
