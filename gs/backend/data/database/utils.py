@@ -13,7 +13,6 @@ def to_foreign_key_value(
         schemas, thus `Column(type, ForeignKey(Table.id_field)) # type: ignore` is used
 
     :param foreign_table_name: The table to which to create a reference to.
-    :param foreign_schema_name: The schema for which to link to or the current schema if not provided
     :param foreign_column_name: The column to reference to. The default is "id"
 
     :return: The foreign key value

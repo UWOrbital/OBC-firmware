@@ -445,8 +445,10 @@ class PointTwoDimension:
 	"""
 	Class for storing a 2D point
 
-	:attribute x (int): x coordinate of the point
-	:attribute y (int): y coordinate of the point
+	:param x: x coordinate of the point
+  :type x: int
+	:param y: y coordinate of the point
+  :type y: int
 	"""
 
 	def __init__(x: int, y: int):
@@ -458,8 +460,10 @@ class PointTwoDimension:
 	"""
 	Class for storing a 2D point
 
-	:attribute x (int): x coordinate of the point
-	:attribute y (int): y coordinate of the point
+	:param x: x coordinate of the point
+  :type x: int
+	:param y: y coordinate of the point
+  :type y: int
 	"""
 
 	x: int
