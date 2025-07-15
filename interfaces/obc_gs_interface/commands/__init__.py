@@ -1,4 +1,15 @@
-from ctypes import POINTER, Structure, Union, c_bool, c_float, c_uint, c_uint8, c_uint16, c_uint32, pointer
+from ctypes import (
+    POINTER,
+    Structure,
+    Union,
+    c_bool,
+    c_float,
+    c_uint,
+    c_uint8,
+    c_uint16,
+    c_uint32,
+    pointer,
+)
 from enum import IntEnum
 from typing import Final
 
@@ -67,6 +78,20 @@ class CmdMsg(Structure):
 
     _anonymous_ = ("u",)
     _fields_ = [("u", _U), ("timestamp", c_uint32), ("isTimeTagged", c_bool), ("id", c_uint)]
+
+    def __init__(self, unixtime_of_execution: int | None = None) -> None:
+        """
+        Constructor for the CmdMsg Class
+
+        :param unixtime_of_execution: Can be an integer or None. If None the function will set isTimeTagged to false and
+                                      make the timestamp 0. If an integer is passed in then the function sets
+                                      isTimeTagged to True and timestamp to the integer passed in.
+        """
+        if unixtime_of_execution is None:
+            # NOTE: By default these will be 0-initialized but, just for clarity the values are specified
+            super().__init__(_U(), c_uint32(0), c_bool(False), c_uint())
+        else:
+            super().__init__(_U(), c_uint32(unixtime_of_execution), c_bool(True), c_uint())
 
 
 interface.unpackCmdMsg.argtypes = (POINTER(c_uint8 * MAX_CMD_MSG_SIZE), POINTER(c_uint32), POINTER(CmdMsg))
@@ -192,11 +217,8 @@ def create_cmd_end_of_frame(unixtime_of_execution: int | None = None) -> CmdMsg:
                                   time is not needed)
     :return: CmdMsg structure for CMD_END_OF_FRAME
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_END_OF_FRAME
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -209,11 +231,8 @@ def create_cmd_exec_obc_reset(unixtime_of_execution: int | None = None) -> CmdMs
                                   time is not needed)
     :return: CmdMsg structure for CMD_EXEC_OBC_RESET
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_EXEC_OBC_RESET
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -227,12 +246,9 @@ def create_cmd_rtc_sync(time: int, unixtime_of_execution: int | None = None) -> 
                                   time is not needed)
     :return: CmdMsg structure for CMD_RTC_SYNC
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
     cmd_msg.rtcSync.unixTime = c_uint32(time)
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -248,12 +264,9 @@ def create_cmd_downlink_logs_next_pass(log_level: int, unixtime_of_execution: in
     """
     if log_level > 255:
         raise ValueError("Log level passed is too large (cannot be encoded into a c_uint8)")
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS
     cmd_msg.downlinkLogsNextPass.logLevel = log_level
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -266,11 +279,8 @@ def create_cmd_mirco_sd_format(unixtime_of_execution: int | None = None) -> CmdM
                                   time is not needed)
     :return: CmdMsg structure for CMD_MICRO_SD_FORMAT
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_MICRO_SD_FORMAT
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -283,11 +293,8 @@ def create_cmd_ping(unixtime_of_execution: int | None = None) -> CmdMsg:
                                   time is not needed)
     :return: CmdMsg structure for CMD_PING
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_PING
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -300,11 +307,8 @@ def create_cmd_downlink_telem(unixtime_of_execution: int | None = None) -> CmdMs
                                   time is not needed)
     :return: CmdMsg structure for CMD_DOWNLINK_TELEM
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_TELEM
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -317,11 +321,8 @@ def create_cmd_uplink_disc(unixtime_of_execution: int | None = None) -> CmdMsg:
                                   time is not needed)
     :return: CmdMsg structure for CMD_UPLINK_DISC
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_UPLINK_DISC
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -337,12 +338,9 @@ def create_cmd_set_programming_session(
                                   time is not needed)
     :return: CmdMsg structure for CMD_SET_PROGRAMMING_SESSION
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_SET_PROGRAMMING_SESSION
     cmd_msg.setProgrammingSession.programmingSession = c_uint(programming_session.value)
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -355,11 +353,8 @@ def create_cmd_erase_app(unixtime_of_execution: int | None = None) -> CmdMsg:
                                   time is not needed)
     :return: CmdMsg structure for CMD_ERASE_APP
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_ERASE_APP
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -382,14 +377,11 @@ def create_cmd_download_data(
     if address > 4294967295:
         raise ValueError("Invalid address download data command (cannot be encoded into a c_uint32)")
 
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_DOWNLOAD_DATA
     cmd_msg.downloadData.programmingSession = c_uint(programming_session.value)
     cmd_msg.downloadData.length = c_uint16(length)
     cmd_msg.downloadData.address = c_uint32(address)
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -402,11 +394,8 @@ def create_cmd_verify_crc(unixtime_of_execution: int | None = None) -> CmdMsg:
                                   time is not needed)
     :return: CmdMsg structure for CMD_VERIFY_CRC
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_VERIFY_CRC
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
@@ -419,11 +408,8 @@ def create_cmd_reset_bl(unixtime_of_execution: int | None = None) -> CmdMsg:
                                   time is not needed)
     :return: CmdMsg structure for CMD_RESET_BL
     """
-    cmd_msg = CmdMsg()
+    cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_RESET_BL
-    if unixtime_of_execution is not None:
-        cmd_msg.timestamp = c_uint32(unixtime_of_execution)
-        cmd_msg.isTimeTagged = c_bool(True)
     return cmd_msg
 
 
