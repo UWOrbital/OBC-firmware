@@ -51,9 +51,9 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector/runtime_stats.c
     ${CMAKE_CURRENT_SOURCE_DIR}/logger/logger.c
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/sun/sun_utils.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/sun/ephemeris.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/sun/sun_file.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../sys/sun_utils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../sys/ephemeris.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../sys/sun_file.c
 
 )
 
