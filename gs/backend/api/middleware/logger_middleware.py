@@ -12,8 +12,10 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 
 class LoggerMiddleware(BaseHTTPMiddleware):
     """
-    @breif Middleware that logs the request and response
-    @attribute excluded_endpoints (Sequence[str]) - endpoints that won't be logged
+    Middleware that logs the request and response
+
+    :param excluded_endpoints: endpoints that won't be logged
+    :type excluded_endpoints: Sequence[str]
     """
 
     def __init__(self, app: FastAPI, excluded_endpoints: Sequence[str] = ()) -> None:

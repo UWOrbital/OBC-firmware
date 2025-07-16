@@ -9,8 +9,9 @@ from gs.backend.data.tables.transactional_tables import TRANSACTIONAL_SCHEMA_MET
 
 def get_db_engine() -> Engine:
     """
-    @brief Creates the database engine
-    @returns engine
+    Creates the database engine
+
+    :return: engine
     """
     # TODO: Add loguru to sqlalchemy.engine logger
     return create_engine(DATABASE_CONNECTION_STRING, echo=True)
@@ -18,9 +19,11 @@ def get_db_engine() -> Engine:
 
 def get_db_session() -> Session:
     """
-    @brief Creates the database session.
-    @warning This function depends on the `get_db_engine`.
-    @returns session
+    Creates the database session.
+
+    :warning: This function depends on the `get_db_engine`.
+
+    :return: session
     """
     engine = get_db_engine()
     with Session(engine) as session:
@@ -29,8 +32,9 @@ def get_db_session() -> Session:
 
 def _create_schemas(session: Session) -> None:
     """
-    @brief Creates the schemas in the database.
-    @param session: The session for which to create the schemas
+    Creates the schemas in the database.
+
+    :param session: The session for which to create the schemas
     """
     connection = session.connection()
     schemas = [MAIN_SCHEMA_NAME, TRANSACTIONAL_SCHEMA_NAME, ARO_USER_SCHEMA_NAME]
@@ -42,9 +46,11 @@ def _create_schemas(session: Session) -> None:
 
 def _create_tables(session: Session) -> None:
     """
-    @brief Creates the tables.
-    @warning This assumes the relevant schemas were already created
-    @param session: The session for which to create the schemas
+    Creates the tables.
+
+    :warning: This assumes the relevant schemas were already created
+
+    :param session: The session for which to create the schemas
     """
     metadatas = [MAIN_SCHEMA_METADATA, ARO_USER_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_METADATA]
     connection = session.connection()
@@ -55,8 +61,9 @@ def _create_tables(session: Session) -> None:
 
 def setup_database(session: Session) -> None:
     """
-    @brief Creates the schemas and tables for the session.
-    @param session: The session for which to create the schemas
+    Creates the schemas and tables for the session.
+
+    :param session: The session for which to create the schemas
     """
     _create_schemas(session)
     _create_tables(session)

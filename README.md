@@ -380,11 +380,14 @@ All function and method parameters (except for the `self` and `cls` parameters) 
 ```python
 def my_add(num1: int, num2: int) -> int:
 	"""
-	@brief Adds two numbers together
+	Adds two numbers together
 
-	@param num1 - The first number to add.
-	@param num2 - The second number to add.
-	@return Returns the sum of the two numbers.
+  	:warning: Add a warning if your function requires
+  	:note: Add a note that other developers might find helpful
+
+	:param num1: The first number to add.
+	:param num2: The second number to add.
+	:return: Returns the sum of the two numbers.
 	"""
 	return num1 + num2
 ```
@@ -402,21 +405,26 @@ Function and method comments using `""" """` should exist below the function dec
 ```python
 def my_add(num1: int, num2: int) -> int:
 	"""
-	@brief Adds two numbers together
+	Adds two numbers together
 
-	@param num1 - The first number to add.
-	@param num2 - The second number to add.
-	@return Returns the sum of the two numbers.
+  	:warning: Add a warning if your function requires
+  	:note: Add a note that other developers might find helpful
+
+	:param num1: The first number to add.
+	:param num2: The second number to add.
+	:return: Returns the sum of the two numbers.
 	"""
 	return num1 + num2
 ```
 
+Notice that the docstring is formatted using reST (reStructuredText) with two outliers: `:warning:` and `:note:`. The outliers will need to be changed to their proper, `..note::` and `..warning::` counterparts if doc-generation using sphinx is implemented.
+
 ```python
 def increase_x(self, count: int) -> None:
 	"""
-	@brief Increases the x attribute by the count.
+	Increases the x attribute by the count.
 
-	@param count - Count to increase the x attribute by.
+	:param count: Count to increase the x attribute by.
 	"""
 	self.x += count
 ```
@@ -435,10 +443,12 @@ File comments are not required
 ```python
 class PointTwoDimension:
 	"""
-	@brief Class for storing a 2D point
+	Class for storing a 2D point
 
-	@attribute x (int) - x coordinate of the point
-	@attribute y (int) - y coordinate of the point
+	:param x: x coordinate of the point
+	:type x: int
+	:param y: y coordinate of the point
+	:type y: int
 	"""
 
 	def __init__(x: int, y: int):
@@ -448,9 +458,12 @@ class PointTwoDimension:
 @dataclass
 class PointTwoDimension:
 	"""
-	@brief Class for storing a 2D point
-	@attribute x (int) - x coordinate of the point
-	@attribute y (int) - y coordinate of the point
+	Class for storing a 2D point
+
+	:param x: x coordinate of the point
+	:type x: int
+	:param y: y coordinate of the point
+	:type y: int
 	"""
 
 	x: int
@@ -463,7 +476,7 @@ from enum import Enum
 # No comments required
 class ErrorCode(Enum):
    """
-   @brief Enum for the error codes
+   Enum for the error codes
    """
 
    SUCCESS = 0

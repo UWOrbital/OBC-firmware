@@ -5,10 +5,11 @@ from zlib import crc32
 
 def append_crc(input_path: str | Path, output_path: str | Path) -> None:
     """
-    @brief Read a file, calculate its CRC32 checksum, and create a new file with the checksum appended.
-    @param input_path: Path to the input file to read
-    @param output_path: Path where the output file (original data + CRC32) will be written
-    @returns None
+    Read a file, calculate its CRC32 checksum, and create a new file with the checksum appended.
+
+    :param input_path: Path to the input file to read
+    :param output_path: Path where the output file (original data + CRC32) will be written
+    :return: None
     """
     input_path = Path(input_path)
     output_path = Path(output_path)
