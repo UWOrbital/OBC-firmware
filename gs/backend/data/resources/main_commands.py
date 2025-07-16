@@ -5,7 +5,7 @@ from gs.backend.data.tables.main_tables import MainCommand
 # TODO: Add more main commands
 def main_commands() -> list[MainCommand]:
     """
-    @brief returns the list of main commands
+    Returns the list of main commands
     """
     return [
         MainCommand(
