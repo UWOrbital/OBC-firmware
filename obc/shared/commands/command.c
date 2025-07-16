@@ -1,6 +1,7 @@
 #include "command.h"
 #include "obc_errors.h"
 #include "obc_gs_command_id.h"
+#include "obc_gs_commands_response.h"
 #include "obc_logging.h"
 #ifdef NO_FREERTOS
 #include <stddef.h>
@@ -51,8 +52,8 @@ obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
-  if (cmd == NULL || currCmdInfo == NULL) {
+obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo, uint8_t *responseData) {
+  if (cmd == NULL || currCmdInfo == NULL || responseData == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   // If the command is not time-tagged, execute it immediately
@@ -61,6 +62,6 @@ obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmd
     return OBC_ERR_CODE_INVALID_ARG;
   }
   // TODO: Handle safety-critical command failures
-  RETURN_IF_ERROR_CODE(currCmdInfo->callback(cmd));
+  RETURN_IF_ERROR_CODE(currCmdInfo->callback(cmd, responseData));
   return OBC_ERR_CODE_SUCCESS;
 }

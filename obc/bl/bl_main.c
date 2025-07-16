@@ -61,8 +61,9 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
 
+  uint8_t responseBuffer[MAX_RESPONSE_BUFFER_SIZE] = {0};
   RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
-  RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
+  RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo, responseBuffer));
 
   return errCode;
 }

@@ -12,7 +12,7 @@
 #include <redposix.h>
 #include <stddef.h>
 
-static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t execObcResetCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -21,11 +21,14 @@ static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
   LOG_DEBUG("Executing OBC reset command");
   resetSystem(RESET_REASON_CMD_EXEC_OBC_RESET);
 
+  // We set the data here to indicate that the reset was unsuccessful
+  memset(responseData, 0xFF, MAX_RESPONSE_BUFFER_SIZE);
+
   // Should never get here
   return OBC_ERR_CODE_UNKNOWN;
 }
 
-static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
   obc_error_code_t errCode;
 
   if (cmd == NULL) {
@@ -42,7 +45,7 @@ static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -52,7 +55,7 @@ static obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -66,25 +69,18 @@ static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
-  obc_error_code_t errCode;
-
+static obc_error_code_t pingCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  encode_event_t encodeQueueMsg = {0};
-  encodeQueueMsg.eventID = DOWNLINK_DATA_BUFFER;
-  encodeQueueMsg.telemetryDataBuffer.bufferSize = 1;
-  encodeQueueMsg.telemetryDataBuffer.telemData[0] =
-      (telemetry_data_t){.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
-
-  RETURN_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeQueueMsg));
+  responseData[0] = 0xFF;
+  responseData[1] = 0xFF;
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(setTelemetryManagerDownlinkReady());

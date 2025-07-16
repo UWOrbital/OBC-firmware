@@ -1,4 +1,5 @@
 #include "alarm_handler.h"
+#include "command.h"
 #include "ds3232_mz.h"
 #include "obc_scheduler_config.h"
 #include "obc_errors.h"
@@ -126,7 +127,8 @@ void obcTaskFunctionAlarmMgr(void *pvParameters) {
               LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
               break;
             case ALARM_TYPE_TIME_TAGGED_CMD:
-              LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg));
+              uint8_t responseBuffer[MAX_RESPONSE_BUFFER_SIZE] = {0};
+              LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg, responseBuffer));
               break;
             default:
               LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);
