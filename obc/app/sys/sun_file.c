@@ -211,10 +211,13 @@ obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t packDouble(double value, uint8_t *buff) { memcpy(buff, &value, sizeof(double)); }
+obc_error_code_t packDouble(double value, uint8_t *buff) {
+  memcpy(buff, &value, sizeof(double));
+  return OBC_ERR_CODE_SUCCESS;
+}
 
 obc_error_code_t unpackDouble(const uint8_t *buff) {
   double value;
   memcpy(&value, buff, sizeof(double));
-  return value;
+  return OBC_ERR_CODE_SUCCESS;
 }
