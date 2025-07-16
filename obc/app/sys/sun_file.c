@@ -146,7 +146,6 @@ obc_error_code_t sunFileGetNumDataPoints(uint32_t *number) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-
 obc_error_code_t sunFileGetIndexOfJD(julian_date_t jd, uint32_t *index) {
   if (stepSize == 0) {
     return OBC_ERR_CODE_INVALID_STATE;
@@ -184,7 +183,7 @@ obc_error_code_t sunFileGetNumDataPointsAfter(julian_date_t jd, uint32_t *number
   } else {
     *number = totalDataPoints - (index + 1);
   }
-  
+
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -197,7 +196,7 @@ obc_error_code_t sunFileWriteHeader(julian_date_t minimumJD, double stepSize, ui
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff){
+obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff) {
   obc_error_code_t errCode;
   if (buff == NULL || index >= numberOfDataPoints) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -210,4 +209,12 @@ obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff){
   RETURN_IF_ERROR_CODE(writeFile(fileID, &y, sizeof(float)));
   RETURN_IF_ERROR_CODE(writeFile(fileID, &z, sizeof(float)));
   return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t packDouble(double value, uint8_t *buff) { memcpy(buff, &value, sizeof(double)); }
+
+obc_error_code_t unpackDouble(const uint8_t *buff) {
+  double value;
+  memcpy(&value, buff, sizeof(double));
+  return value;
 }

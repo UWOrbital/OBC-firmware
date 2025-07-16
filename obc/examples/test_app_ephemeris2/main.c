@@ -38,15 +38,16 @@ static StackType_t taskStack[2560];
   }                                                 \
   sciPrintf("%s was successful\r\n", text)
 
-#define CLEANUP_ON_ERROR(text, _ret, fileName)                \
-  errCode = _ret;                                             \
-  if (errCode != OBC_ERR_CODE_SUCCESS) {                      \
-    sciPrintf("%s failed with error %d\r\n", text, errCode);  \
-    deleteFile(fileName);                                     \
-    sciPrintf("Deleted file %s\r\n", fileName);               \
-    while(1);                                                 \
-  }                                                           \
-  sciPrintf("%s was successful\r\n", text);                   \
+#define CLEANUP_ON_ERROR(text, _ret, fileName)               \
+  errCode = _ret;                                            \
+  if (errCode != OBC_ERR_CODE_SUCCESS) {                     \
+    sciPrintf("%s failed with error %d\r\n", text, errCode); \
+    deleteFile(fileName);                                    \
+    sciPrintf("Deleted file %s\r\n", fileName);              \
+    while (1)                                                \
+      ;                                                      \
+  }                                                          \
+  sciPrintf("%s was successful\r\n", text);
 
 void vTask1(void *pvParameters) {
   // Data from JD1 to JD99 inclusive with step of 1 JD
@@ -168,15 +169,22 @@ void vTask1(void *pvParameters) {
   STOP_ON_ERROR("sunFileGetNumDataPointsAfter JD=82.77", sunFileGetNumDataPointsAfter(82.77, &pointsAfter));
   sciPrintf("Data points after JD=82.77: %d\r\n", pointsAfter);
 
+  // Pack and unpack double
 
+  double num = 1234.567;
+  uint8_t buff[8];
+  packDouble(num, buff);
+  double unpacked = unpackDouble(buff);
+  sciPrintf("Original: %lf", num);
+  sciPrintf("Packed and unpacked: %lf", unpacked);
 
   sciPrintf("Test complete");
   while (true) {
   }
 }
 
-void runSunPositionTests(){
-  sciPrintf("Sun position tests\r\n");
+void runSunPositionTests() {
+  sciPrintf("Test the ephemeris module\r\n");
   obc_error_code_t errCode;
   position_data_t testData;
 
@@ -189,11 +197,10 @@ void runSunPositionTests(){
 }
 
 void vTask2(void *pvParameters) {
-
   // Data from ephemeris.py (8 KB)
   position_data_t ephemerisData[256];
   FILE *inputFile = fopen("sunData.bin", "rb");
-  while(inputFile == NULL) {
+  while (inputFile == NULL) {
     sciPrintf("Could not open sunData.bin\r\n");
   }
 
@@ -212,7 +219,7 @@ void vTask2(void *pvParameters) {
   fclose(inputFile);
 
   // Write data points to new file
-  const char *sunFileName = "/sunData.bin";
+  const char *sunFileName = "/NewSunData.bin";
   int32_t fileID;
   obc_error_code_t errCode;
   STOP_ON_ERROR("createFile", createFile(sunFileName, &fileID));
@@ -224,7 +231,7 @@ void vTask2(void *pvParameters) {
 
   STOP_ON_ERROR("sunPositionInit", sunPositionInit());
   sciPrintf("Sun module initialized\r\n");
-  
+
   // Testing
   runSunPositionTests();
   sciPrintf("Deleting file\r\n");
@@ -232,8 +239,6 @@ void vTask2(void *pvParameters) {
 
   sciPrintf("vTask2 complete, deleting task\r\n");
   vTaskDelete(NULL);
-  
-  
 }
 
 int main() {
@@ -245,9 +250,9 @@ int main() {
 
   sciPrintf("Starting Sun Position Tests\r\n");
 
-  //xTaskCreateStatic(vTask1, "SunPositionTests", 2560, NULL, 1, taskStack, &taskBuffer);
+  xTaskCreateStatic(vTask1, "SunPositionTests", 2560, NULL, 1, taskStack, &taskBuffer);
 
-  xTaskCreateStatic(vTask2, "SunPositionTests2", 2560, NULL, 1, taskStack, &taskBuffer);
+  // xTaskCreateStatic(vTask2, "SunPositionTests2", 2560, NULL, 1, taskStack, &taskBuffer);
 
   vTaskStartScheduler();
 

@@ -75,10 +75,28 @@ obc_error_code_t sunFileWriteHeader(julian_date_t minimumJD, double stepSize, ui
 
 /**
  * @brief Writes a data point to the file at the specified index
- * @attention Requires that buff is a valid pointer and that the index is less than the number of data ponts
+ * @attention Requires that buff is a valid pointer and that the index is less than the number of data points
  * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
-*/
+ */
 obc_error_code_t sunFileWriteDataPoint(uint32_t index, position_data_t *buff);
+
+/**
+ * @brief Pack double into an 8 byte buffer
+ * @attention Requires that buff is a valid pointer
+ * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
+ */
+obc_error_code_t packDouble(double value, uint8_t *buff);
+
+/**
+ * @brief Pack double into an 8 byte buffer
+ * @attention Requires that buff is a valid pointer
+ * @warning This operation is NOT atomic. It is the responsibility of the caller to setup the appropriate locks
+ */
+obc_error_code_t unpackDouble(const uint8_t *buff);
+
+/**
+ * @brief Unpacks double from an 8 byte buffer
+ */
 
 #ifdef __cplusplus
 }
