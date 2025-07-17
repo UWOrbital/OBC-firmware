@@ -36,7 +36,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
 #define EXTENDED_APP_JUMP_TIMEOUT 2000
-#define DEFAULT_APP_JUMP_TIMEOUT 500
+#define DEFAULT_APP_JUMP_TIMEOUT 2000
 #define LED_DELAY_MS 500
 
 /* TYPEDEFS */
@@ -107,14 +107,14 @@ obc_error_code_t verifyMetadata(metadata_t *app_metadata) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-void blJumpToApp() {
+obc_error_code_t blJumpToApp() {
   obc_error_code_t errCode;
 
   // Cast the metadata of the flash into a usable pointer
   metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
 
   // Check magic number, board id and verify the crc
-  LOG_IF_ERROR_CODE(verifyMetadata(app_metadata));
+  RETURN_IF_ERROR_CODE(verifyMetadata(app_metadata));
 
   blUartWriteBytes(strlen("ATTEMPTING: Running application...\r\n"),
                    (uint8_t *)"ATTEMPTING: Running application..\r\n");
@@ -122,7 +122,7 @@ void blJumpToApp() {
   // We wait for about 100ms so that the remaining uart info can be sent before the buffer is cleared
   // by the app being initialized
   uint32_t initTime = blGetCurrentTick();
-  while ((blGetCurrentTick() - initTime) < 100 || blGetCurrentTick() < initTime) {
+  while ((blGetCurrentTick() - initTime) < 10 || blGetCurrentTick() < initTime) {
   };
 
   // Go to the application's entry point
@@ -131,6 +131,7 @@ void blJumpToApp() {
 
   // If it was not possible to jump to the app, we log that error here
   blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
+  return OBC_ERR_CODE_FAILED_TO_LOAD_APP;
 }
 
 /* PUBLIC FUNCTIONS */
@@ -174,8 +175,7 @@ int main(void) {
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
       jumpToAppTimeout = blGetCurrentTick() + EXTENDED_APP_JUMP_TIMEOUT;
     } else if (blGetCurrentTick() > jumpToAppTimeout) {
-      blJumpToApp();
-      break;
+      LOG_IF_ERROR_CODE(blJumpToApp());
     }
   }
 }
