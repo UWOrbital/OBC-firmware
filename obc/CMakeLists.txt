@@ -81,6 +81,18 @@ endif()
 add_executable(OBC-bl.out)
 add_executable(debug-tool.out)
 
+# Mapping the board for metadata
+if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
+    set(BOARD_TYPE_TO_INT_MAP 0)
+elseif (${BOARD_TYPE} MATCHES OBC_REVISION_1)
+    set(BOARD_TYPE_TO_INT_MAP 1)
+elseif (${BOARD_TYPE} MATCHES OBC_REVISION_2)
+    set(BOARD_TYPE_TO_INT_MAP 2)
+# Add OBC_REVISION_3 or other boards above
+else()
+    message (FATAL_ERROR "BOARD NOT YET ADDED TO INT MAP FOR METADATA")
+endif()
+
 # Shared
 add_subdirectory(shared/config)
 add_subdirectory(shared/hal)
@@ -101,6 +113,7 @@ target_compile_options(${OUT_FILE_NAME} PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
 
 target_compile_definitions(${OUT_FILE_NAME} PRIVATE
     ${BOARD_TYPE}
+    BOARD_ID=${BOARD_TYPE_TO_INT_MAP}
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
     LOG_DATE_TIME
@@ -165,7 +178,8 @@ add_dependencies(${OUT_FILE_NAME} generate-scheduler-config)
 string(CONCAT commentStr "Generating " ${BIN_FILE_NAME})
 add_custom_command(
     OUTPUT ${BIN_FILE_NAME}
-    COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.intvecs
+    COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.metadata
+                                                                     --only-section=.intvecs
                                                                      --only-section=.kernelTEXT
                                                                      --only-section=.text
                                                                      --only-section=.rodata
@@ -174,6 +188,7 @@ add_custom_command(
                                                                      --only-section=.init_array
                                                                      --only-section=.fini_array
                                                                      --only-section=.data
+                                                                     --only-section=.crc
                                                                      ${OUT_FILE_NAME} ${BIN_FILE_NAME}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${OUT_FILE_NAME}
@@ -219,6 +234,7 @@ target_compile_options(OBC-bl.out PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
 
 target_compile_definitions(OBC-bl.out PRIVATE
     ${BOARD_TYPE}
+    BOARD_ID=${BOARD_TYPE_TO_INT_MAP}
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
     DEBUG=${DEBUG}
@@ -251,6 +267,7 @@ target_compile_options(debug-tool.out PRIVATE ${TARGET_OPTIMIZATION_FLAGS})
 
 target_compile_definitions(debug-tool.out PRIVATE
     ${BOARD_TYPE}
+    BOARD_ID=${BOARD_TYPE_TO_INT_MAP}
     LOG_DEFAULT_OUTPUT_LOCATION=${LOG_DEFAULT_OUTPUT_LOCATION}
     LOG_DEFAULT_LEVEL=${LOG_DEFAULT_LEVEL}
     LOG_DATE_TIME
@@ -279,18 +296,6 @@ target_link_libraries(debug-tool.out PRIVATE
     ${FREERTOS_LIB_OPTIMIZE}
     $<TARGET_OBJECTS:${FREERTOS_LIB_NO_OPTIMIZE}>
 )
-
-
-if (${BOARD_TYPE} MATCHES RM46_LAUNCHPAD)
-    set(BOARD_TYPE_TO_INT_MAP 0)
-elseif (${BOARD_TYPE} MATCHES OBC_REVISION_1)
-    set(BOARD_TYPE_TO_INT_MAP 1)
-elseif (${BOARD_TYPE} MATCHES OBC_REVISION_2)
-    set(BOARD_TYPE_TO_INT_MAP 2)
-# Add OBC_REVISION_3 or other boards above
-else()
-    message (FATAL_ERROR "BOARD NOT YET ADDED TO INT MAP FOR METADATA")
-endif()
 
 # Generate file with CMake metadata
 file(WRITE ${CMAKE_BINARY_DIR}/OBC-metadata.bin
