@@ -12,6 +12,7 @@ from interfaces.obc_gs_interface.commands import (
     ProgrammingSession,
     create_cmd_download_data,
     create_cmd_erase_app,
+    create_cmd_verify_crc,
     pack_command,
 )
 
@@ -96,6 +97,8 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.read(len("Received packet\r\nWrite success\r\n"))
         progress_bar.update(1)
         progress_bar.close()
+        ser.write(pack_command(create_cmd_verify_crc()).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+        print(ser.read(1000))
         print("App Successfully Written. Waiting 15 seconds for any messages sent by the board.")
 
 

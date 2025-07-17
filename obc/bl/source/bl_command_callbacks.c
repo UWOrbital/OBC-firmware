@@ -1,5 +1,6 @@
 #include "bl_errors.h"
 #include "bl_config.h"
+#include "gio.h"
 #include "obc_errors.h"
 #include "obc_general_util.h"
 #include "obc_gs_command_data.h"

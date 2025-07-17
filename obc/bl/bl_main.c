@@ -1,6 +1,9 @@
 #include "bl_uart.h"
 #include "bl_flash.h"
 #include "gio.h"
+#include "obc_gs_command_id.h"
+#include "obc_gs_commands_response.h"
+#include "obc_gs_commands_response_pack.h"
 #include "obc_gs_errors.h"
 #include "obc_gs_crc.h"
 #include "obc_errors.h"
@@ -45,6 +48,10 @@ typedef void (*appStartFunc_t)(void);
 // Get this from the bl_command_callbacks for simplicity
 extern programming_session_t programmingSession;
 
+static uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
+static uint8_t sendBuffer[MAX_PACKET_SIZE] = {0U};
+static uint8_t responseBuffer[MAX_RESPONSE_BUFFER_SIZE] = {0U};
+
 obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   if (recvBuffer == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -61,9 +68,25 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
 
-  uint8_t responseBuffer[MAX_RESPONSE_BUFFER_SIZE] = {0};
+  memset(responseBuffer, 0, MAX_RESPONSE_BUFFER_SIZE);
   RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
-  RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo, responseBuffer));
+  errCode = processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo, responseBuffer);
+
+  cmd_response_t cmdResponse = {0};
+  cmdResponse.cmdId = unpackedCmdMsg.id;
+  cmdResponse.data = responseBuffer;
+  cmdResponse.dataLen = MAX_RESPONSE_BUFFER_SIZE;
+  cmdResponse.errCode = errCode == OBC_ERR_CODE_SUCCESS ? CMD_RESPONSE_SUCCESS : CMD_RESPONSE_ERROR;
+
+  memset(sendBuffer, 0, MAX_PACKET_SIZE);
+  interfaceErr = packCmdResponse(&cmdResponse, sendBuffer);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_FAILED_PACK;
+  }
+
+  if (unpackedCmdMsg.id == CMD_VERIFY_CRC) {
+    blUartWriteBytes(MAX_PACKET_SIZE, sendBuffer);
+  }
 
   return errCode;
 }
@@ -141,7 +164,6 @@ int main(void) {
   blUartInit();
   blInitTick();
   gioInit();
-  uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
   // F021 API and the functions that use it must be executed from RAM since they
   // can't execute from the same flash bank being modified
