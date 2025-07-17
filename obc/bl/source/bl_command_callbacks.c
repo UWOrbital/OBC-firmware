@@ -1,5 +1,6 @@
 #include "bl_errors.h"
 #include "bl_config.h"
+#include "gio.h"
 #include "obc_errors.h"
 #include "obc_general_util.h"
 #include "obc_gs_command_data.h"
@@ -9,6 +10,8 @@
 #include <stdint.h>
 #include "bl_uart.h"
 #include "bl_flash.h"
+#include "obc_gs_crc.h"
+#include "obc_metadata.h"
 #include <stdio.h>
 
 #define BL_BIN_RX_CHUNK_SIZE 208U  // Bytes
@@ -17,7 +20,7 @@
 programming_session_t programmingSession = APPLICATION;
 extern uint32_t __APP_IMAGE_TOTAL_SECTION_SIZE;
 
-static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -25,7 +28,7 @@ static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd, uint8_t *responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -38,11 +41,12 @@ static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd, uint8_t *responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  bl_error_code_t errCode = blFlashFapiBlockErase(APP_START_ADDRESS, (uint32_t)(&__APP_IMAGE_TOTAL_SECTION_SIZE));
+  bl_error_code_t errCode =
+      blFlashFapiBlockErase((uint32_t)APP_START_ADDRESS, (uint32_t)(&__APP_IMAGE_TOTAL_SECTION_SIZE));
 
   if (errCode != BL_ERR_CODE_SUCCESS) {
     char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
@@ -61,7 +65,7 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd, uint8_t *responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -93,17 +97,19 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd, uint8_t *responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  // TODO: Implement a check that verifies the crc
+  metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
+  uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, app_metadata->crc_addr - APP_START_ADDRESS);
+  memcpy(responseData, &calculatedCrc, sizeof(calculatedCrc));
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t resetBlCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t resetBlCmdCallback(cmd_msg_t *cmd, uint8_t *responseData) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

@@ -145,11 +145,15 @@ class CmdUnpackedReponse(Structure):
     _fields_ = [("errCode", c_uint), ("cmdId", c_uint), ("u", _UR)]
 
 
-interface.packCommandResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE))
-interface.packCommandResponse.restype = c_uint
+interface.packCmdResponse.argtypes = (POINTER(CmdUnpackedReponse), POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE))
+interface.packCmdResponse.restype = c_uint
 
-interface.unpackCommandResponse.argtypes = (POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE), POINTER(CmdUnpackedReponse))
-interface.unpackCommandResponse.restype = c_uint
+interface.unpackCmdResponse.argtypes = (
+    POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE),
+    POINTER(CmdUnpackedReponse),
+    POINTER(c_uint8 * MAX_REPONSE_PACKED_SIZE),
+)
+interface.unpackCmdResponse.restype = c_uint
 
 
 # ######################################################################
