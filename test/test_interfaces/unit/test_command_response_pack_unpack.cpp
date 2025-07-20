@@ -1,13 +1,36 @@
 
+#include "obc_gs_command_id.h"
 #include "obc_gs_commands_response_pack.h"
 #include "obc_gs_commands_response_unpack.h"
 #include "obc_gs_commands_response.h"
 #include "data_unpack_utils.h"
 #include "obc_gs_errors.h"
+#include "obc_gs_fec.h"
 
+#include <stdio.h>
 #include <iostream>
 #include <gtest/gtest.h>
 #include <stdbool.h>
+
+TEST(pack_unpack_command_responses, packUnpackResponse) {
+  uint32_t crc = 0x12345678;
+  cmd_response_t cmdResponse = {.cmdId = CMD_VERIFY_CRC, .errCode = CMD_RESPONSE_SUCCESS, .data = (uint8_t *)&crc, .dataLen = 4};
+  uint8_t buffer[RS_DECODED_SIZE] = {0};
+  obc_gs_error_code_t errCode = packCmdResponse(&cmdResponse, buffer);
+  ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
+
+
+  for (int i = 0; i < RS_DECODED_SIZE; i++) {
+    printf("\\x%02x", buffer[i]);
+  }
+
+  cmd_response_t cmdResponseU;
+
+  errCode = unpackCmdResponse(buffer, &cmdResponseU);
+  EXPECT_EQ(cmdResponseU.cmdId, CMD_VERIFY_CRC);
+  EXPECT_EQ(cmdResponseU.errCode, CMD_RESPONSE_SUCCESS);
+  EXPECT_EQ(*(uint32_t *)cmdResponseU.data, 0x12345678);
+}
 
 // TODO: Rewrite tests
 // TEST(pack_unpack_command_responses, packResponse) {

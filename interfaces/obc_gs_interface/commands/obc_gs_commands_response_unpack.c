@@ -8,8 +8,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-obc_gs_error_code_t unpackCmdResponse(uint8_t* buffer, cmd_response_t* response, uint8_t* dataBuffer) {
-  if (response == NULL || buffer == NULL || dataBuffer == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
+obc_gs_error_code_t unpackCmdResponse(uint8_t* buffer, cmd_response_t* response) {
+  if (response == NULL || buffer == NULL ) return OBC_GS_ERR_CODE_INVALID_ARG;
 
   uint32_t offset = 0;
 
@@ -19,7 +19,7 @@ obc_gs_error_code_t unpackCmdResponse(uint8_t* buffer, cmd_response_t* response,
   response->errCode = (cmd_response_error_code_t)unpackUint8(buffer, &offset);
 
   response->dataLen = unpackUint8(buffer, &offset);
-  response->data = dataBuffer;
+  response->data = &buffer[offset];
 
   return OBC_GS_ERR_CODE_SUCCESS;
 }
