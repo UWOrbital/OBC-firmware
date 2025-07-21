@@ -41,13 +41,10 @@ obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeo
       }
 
       bytesRead++;
-
-      // Reset the timeout each time a byte is received
-      timeout = blGetCurrentTick() + timeout_ms + 1;
     }
   } while (blGetCurrentTick() <= timeout && bytesRead < numBytes);
 
-  if (bytesRead < numBytes - 1) {
+  if (bytesRead < numBytes) {
     return OBC_ERR_CODE_INCOMPLETE_MESSAGE;
   } else {
     return OBC_ERR_CODE_SUCCESS;
