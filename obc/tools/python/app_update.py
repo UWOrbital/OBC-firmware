@@ -101,7 +101,6 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.write(pack_command(create_cmd_verify_crc()).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
         recieve_bytes = ser.read(RS_DECODED_DATA_SIZE)
         print(parse_command_response(recieve_bytes))
-        print("App Successfully Written. Waiting 15 seconds for any messages sent by the board.")
 
 
 def main() -> None:

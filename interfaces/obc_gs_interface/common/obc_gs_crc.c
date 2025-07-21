@@ -17,6 +17,8 @@ uint16_t calculateCrc16Ccitt(const uint8_t *data, uint16_t dataLen) {
   return crc;
 }
 
+// This algorithm is a memory efficient version of the alogrithms used in python's zlib and binascii library
+// Source: https://stackoverflow.com/questions/15030011/same-crc32-for-python-and-c
 uint32_t crc32(uint32_t crc, uint8_t *data, uint32_t dataLen) {
   crc = ~crc;
   while (dataLen--) {

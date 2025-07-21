@@ -1,4 +1,5 @@
 #include "obc_gs_command_data.h"
+#include "obc_gs_command_id.h"
 #include "obc_reset.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -88,6 +89,11 @@ static obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t* cmd, uint8_t* respon
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t i2cReadCmdCallback(cmd_msg_t* cmd, uint8_t* responseData) {
+  obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
+  return errCode;
+}
+
 const cmd_info_t cmdsConfig[] = {
     [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
@@ -95,7 +101,8 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_DOWNLINK_LOGS_NEXT_PASS] = {downlinkLogsNextPassCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_MICRO_SD_FORMAT] = {microSDFormatCmdCallback, CMD_POLICY_PROD, CMD_TYPE_CRITICAL},
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
+    [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_I2C_READ] = {i2cReadCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL}};
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the
 // unused variable error

@@ -1,3 +1,6 @@
+from collections import defaultdict
+from collections.abc import Callable
+
 from interfaces.obc_gs_interface.commands import CmdCallbackId, unpack_command_response
 from interfaces.obc_gs_interface.commands.command_response_classes import CmdRes, CmdRtcSyncRes, CmdVerifyCrcRes
 
@@ -23,6 +26,9 @@ def parse_cmd_rtc_sync(cmd_response: CmdRes, data: bytes) -> CmdRtcSyncRes:
     :return: CmdRes (i.e. A command response with no data for CMD_RTC_SYNC)
     """
     # TODO: Implement this callback properly
+    if cmd_response.cmd_id != CmdCallbackId.CMD_RTC_SYNC:
+        raise ValueError("Wrong command id for parsing the rtc sync command")
+
     return CmdRtcSyncRes(cmd_response.cmd_id, cmd_response.error_code, 0x123478)
 
 
@@ -34,29 +40,21 @@ def parse_cmd_verify_crc(cmd_response: CmdRes, data: bytes) -> CmdVerifyCrcRes:
     :param data: The raw bytes containing the data that needs to be parsed
     :return: CmdVerifyCrcRes (i.e. The command response for CMD_VERIFY_CRC)
     """
+    if cmd_response.cmd_id != CmdCallbackId.CMD_VERIFY_CRC:
+        raise ValueError("Wrong command id for parsing the verify crc command")
+
     crc = int.from_bytes(data[:4], "little")
     return CmdVerifyCrcRes(cmd_response.cmd_id, cmd_response.error_code, crc)
 
 
 # Function array where each index corresponds to the command enum value + 1
-parse_func_list = [
-    parse_cmd_with_no_data,
-    parse_cmd_rtc_sync,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-    parse_cmd_verify_crc,
-    parse_cmd_with_no_data,
-    parse_cmd_with_no_data,
-]
+
+parse_func_dict: dict[CmdCallbackId, Callable[..., CmdRes]] = defaultdict(lambda: parse_cmd_with_no_data)
+parse_func_dict[CmdCallbackId.CMD_VERIFY_CRC] = parse_cmd_verify_crc
+parse_func_dict[CmdCallbackId.CMD_RTC_SYNC] = parse_cmd_rtc_sync
 
 
-def parse_command_response(data: bytes) -> type[CmdRes] | CmdRes:
+def parse_command_response(data: bytes) -> CmdRes:
     """
     A function that unpacks a command response and returns a response structure
 
@@ -64,11 +62,11 @@ def parse_command_response(data: bytes) -> type[CmdRes] | CmdRes:
     """
     cmd_response_raw, data_bytes = unpack_command_response(data)
     cmd_response = CmdRes(CmdCallbackId(cmd_response_raw.cmdId), cmd_response_raw.errCode)
-    cmd_parsed = parse_func_list[cmd_response.cmd_id.value - 1](cmd_response, data_bytes)
+    cmd_parsed = parse_func_dict[cmd_response.cmd_id](cmd_response, data_bytes)
 
     return cmd_parsed
 
 
 if __name__ == "__main__":
     data_bytes = b"\x0b\x01\x04\x78\x56\x34\x12\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-    parse_command_response(data_bytes)
+    print(parse_command_response(data_bytes))

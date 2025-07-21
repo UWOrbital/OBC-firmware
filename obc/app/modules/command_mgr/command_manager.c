@@ -127,9 +127,9 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
       }
 
       if (cmd.isTimeTagged) {
-        errCode = processTimeTaggedCommand(&cmd, &currCmdInfo);
+        LOG_IF_ERROR_CODE(processTimeTaggedCommand(&cmd, &currCmdInfo));
       } else {
-        errCode = processNonTimeTaggedCommand(&cmd, &currCmdInfo, responseBuffer);
+        LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&cmd, &currCmdInfo, responseBuffer));
       }
 
       cmdResponse.cmdId = cmd.id;
