@@ -15,6 +15,7 @@ from interfaces.obc_gs_interface.commands import (
     create_cmd_verify_crc,
     pack_command,
 )
+from interfaces.obc_gs_interface.commands.command_response_callbacks import parse_command_response
 
 # Refer to the bl_command_callbacks.c for the number
 COMMAND_DATA_SIZE: Final[int] = 208
@@ -98,7 +99,8 @@ def send_bin(file_path: str, com_port: str) -> None:
         progress_bar.update(1)
         progress_bar.close()
         ser.write(pack_command(create_cmd_verify_crc()).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
-        print(ser.read(1000))
+        recieve_bytes = ser.read(RS_DECODED_DATA_SIZE)
+        print(parse_command_response(recieve_bytes))
         print("App Successfully Written. Waiting 15 seconds for any messages sent by the board.")
 
 

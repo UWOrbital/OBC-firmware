@@ -6,6 +6,7 @@ from sys import argv, exit
 from serial import Serial, SerialException
 
 from gs.backend.obc_utils.command_utils import LOG_PATH, arg_parse, poll, send_command, send_conn_request
+from interfaces.obc_gs_interface.commands import CmdResponseErrorCode
 
 
 class GroundStationShell(Cmd):
@@ -85,7 +86,12 @@ class GroundStationShell(Cmd):
         if self.background_logging is not None:
             self.background_logging.kill()
 
-        send_command(line, self._com_port, 1)
+        cmd_response = send_command(line, self._com_port, 1)
+
+        if cmd_response is None:
+            print("Invalid command sent or Invalid response recieved")
+        elif cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
+            print(cmd_response)
 
         self._restart_logging()
 
