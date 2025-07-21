@@ -9,7 +9,6 @@
 
 /* DEFINES */
 #define BL_UART_SCIREG_BAUD 115200U
-#define BL_UART_CONSECUTIVE_READ_TIMEOUT 200
 
 /* TYPEDEFS */
 typedef struct {
@@ -30,23 +29,25 @@ obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeo
   }
 
   uint32_t timeout = blGetCurrentTick() + timeout_ms;
-  uint32_t i = 0U;
+  uint32_t bytesRead = 0U;
 
   do {
     if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {
-      buf[i] = (uint8_t)sciReceiveByte(UART_BL_REG);
+      buf[bytesRead] = (uint8_t)sciReceiveByte(UART_BL_REG);
 
       // TODO: Figure out why the board sometimes receives 0x00 as the first byte
-      if (i == 0 && buf[i] == 0) {
-        i -= 1;
+      if (bytesRead == 0 && buf[bytesRead] == 0) {
+        bytesRead -= 1;
       }
 
-      i++;
-      timeout += BL_UART_CONSECUTIVE_READ_TIMEOUT;
-    }
-  } while (blGetCurrentTick() < timeout && i < numBytes);
+      bytesRead++;
 
-  if (i < numBytes - 1) {
+      // Reset the timeout each time a byte is received
+      timeout = blGetCurrentTick() + timeout_ms;
+    }
+  } while (blGetCurrentTick() < timeout && bytesRead < numBytes);
+
+  if (bytesRead < numBytes - 1) {
     return OBC_ERR_CODE_INCOMPLETE_MESSAGE;
   } else {
     return OBC_ERR_CODE_SUCCESS;
