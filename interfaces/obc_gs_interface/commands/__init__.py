@@ -3,7 +3,6 @@ from ctypes import (
     Structure,
     Union,
     c_bool,
-    c_float,
     c_uint,
     c_uint8,
     c_uint16,
@@ -127,7 +126,8 @@ interface.packCmdResponse.restype = c_uint
 
 interface.unpackCmdResponse.argtypes = (
     POINTER(c_uint8 * RS_DECODED_DATA_SIZE),
-    POINTER(CmdResponse)
+    POINTER(CmdResponse),
+    POINTER(c_uint8 * RS_DECODED_DATA_SIZE),
 )
 interface.unpackCmdResponse.restype = c_uint
 
@@ -169,7 +169,7 @@ class CmdResponseErrorCode(IntEnum):
     """
 
     CMD_RESPONSE_SUCCESS = 0x01
-    CMD_RESPONSE_ERROR = 0x7f
+    CMD_RESPONSE_ERROR = 0x7F
 
 
 class ProgrammingSession(IntEnum):
@@ -490,7 +490,7 @@ def pack_command_response(cmd_msg_response: CmdResponse) -> bytes:
     return bytes(buffer).rstrip(b"\x00")
 
 
-def unpack_command_response(cmd_msg_packed: bytes) -> CmdResponse:
+def unpack_command_response(cmd_msg_packed: bytes) -> tuple[CmdResponse, bytes]:
     """
     This takes in a bytes of data to be unpacked into a command response (see the C implementation for more on how
     that's exactly done)
@@ -503,11 +503,13 @@ def unpack_command_response(cmd_msg_packed: bytes) -> CmdResponse:
 
     buffer_elements = list(cmd_msg_packed)
     buff = (c_uint8 * RS_DECODED_DATA_SIZE)(*buffer_elements)
+    data_buffer = (c_uint8 * RS_DECODED_DATA_SIZE)()
     cmd_msg_response = CmdResponse()
 
-    res = interface.unpackCmdResponse(pointer(buff), pointer(cmd_msg_response))
+    res = interface.unpackCmdResponse(pointer(buff), pointer(cmd_msg_response), pointer(data_buffer))
+    data_bytes = bytes(data_buffer)
 
     if res != 0:
         raise ValueError("Could not unpack command response. OBC Error Code: " + str(res))
 
-    return cmd_msg_response
+    return cmd_msg_response, data_bytes
