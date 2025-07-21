@@ -14,11 +14,12 @@
 
 TEST(pack_unpack_command_responses, packUnpackResponse) {
   uint32_t crc = 0x12345678;
-  cmd_response_t cmdResponse = {.cmdId = CMD_VERIFY_CRC, .errCode = CMD_RESPONSE_SUCCESS, .data = (uint8_t *)&crc, .dataLen = 4};
+  cmd_response_t cmdResponse = {
+      .cmdId = CMD_VERIFY_CRC, .errCode = CMD_RESPONSE_SUCCESS, .data = (uint8_t *)&crc, .dataLen = 4};
   uint8_t buffer[RS_DECODED_SIZE] = {0};
+  uint8_t dataBuffer[RS_DECODED_SIZE] = {0};
   obc_gs_error_code_t errCode = packCmdResponse(&cmdResponse, buffer);
   ASSERT_EQ(errCode, OBC_GS_ERR_CODE_SUCCESS);
-
 
   for (int i = 0; i < RS_DECODED_SIZE; i++) {
     printf("\\x%02x", buffer[i]);
@@ -26,7 +27,7 @@ TEST(pack_unpack_command_responses, packUnpackResponse) {
 
   cmd_response_t cmdResponseU;
 
-  errCode = unpackCmdResponse(buffer, &cmdResponseU);
+  errCode = unpackCmdResponse(buffer, &cmdResponseU, dataBuffer);
   EXPECT_EQ(cmdResponseU.cmdId, CMD_VERIFY_CRC);
   EXPECT_EQ(cmdResponseU.errCode, CMD_RESPONSE_SUCCESS);
   EXPECT_EQ(*(uint32_t *)cmdResponseU.data, 0x12345678);
