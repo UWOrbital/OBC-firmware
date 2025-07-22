@@ -111,6 +111,24 @@ obc_error_code_t verifyMetadata(metadata_t *app_metadata) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+// NOTE: This function does not check if the crc is written
+obc_error_code_t blAppBlankCheck(metadata_t *app_metadata) {
+  uint16_t writeSections = (app_metadata->crc_addr - APP_START_ADDRESS) / 208;
+
+  for (uint16_t i = 0; i < writeSections; i++) {
+    if (blFlashFapiBlankCheck(APP_START_ADDRESS + i * 208, 52)) {
+      return OBC_ERR_CODE_CORRUPTED_APP;
+    }
+  }
+
+  if (!blFlashFapiBlankCheck(app_metadata->crc_addr + writeSections * 208,
+                             (app_metadata->crc_addr - writeSections * 208) / 32 + 1)) {
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t blJumpToApp() {
   obc_error_code_t errCode;
 
@@ -121,6 +139,8 @@ obc_error_code_t blJumpToApp() {
 
   // Cast the metadata of the flash into a usable pointer
   metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
+
+  RETURN_IF_ERROR_CODE(blAppBlankCheck(app_metadata));
 
   // Check magic number, board id and verify the crc
   RETURN_IF_ERROR_CODE(verifyMetadata(app_metadata));
