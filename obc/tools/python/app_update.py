@@ -96,7 +96,6 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.read(len("Received packet\r\nWrite success\r\n"))
         progress_bar.update(1)
         progress_bar.close()
-        print("App Successfully Written. Waiting 15 seconds for any messages sent by the board.")
 
 
 def main() -> None:

@@ -78,6 +78,10 @@ obc_error_code_t verifyBoardType(uint8_t boardType) {
 }
 
 obc_error_code_t verifyCrc(uint32_t crcAddr) {
+  if (blFlashFapiBlankCheck(crcAddr, 1)) {
+    blUartWriteBytes(strlen("ERROR: Corrupted App\r\n"), (uint8_t *)"ERROR: Corrupted App\r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
   // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
   uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, crcAddr - APP_START_ADDRESS);
 
@@ -109,6 +113,11 @@ obc_error_code_t verifyMetadata(metadata_t *app_metadata) {
 
 obc_error_code_t blJumpToApp() {
   obc_error_code_t errCode;
+
+  // If a success error code is sent, it means that the memory is occupied
+  if (blFlashFapiBlankCheck(APP_START_ADDRESS, 2)) {
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
 
   // Cast the metadata of the flash into a usable pointer
   metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
@@ -171,10 +180,12 @@ int main(void) {
       ledTimeout = blGetCurrentTick() + LED_DELAY_MS;
     }
 
-    if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 0) == OBC_ERR_CODE_SUCCESS) {
+    if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 100) == OBC_ERR_CODE_SUCCESS) {
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
       jumpToAppTimeout = blGetCurrentTick() + EXTENDED_APP_JUMP_TIMEOUT;
-    } else if (blGetCurrentTick() > jumpToAppTimeout) {
+    }
+
+    if (blGetCurrentTick() > jumpToAppTimeout) {
       LOG_IF_ERROR_CODE(blJumpToApp());
     }
   }
