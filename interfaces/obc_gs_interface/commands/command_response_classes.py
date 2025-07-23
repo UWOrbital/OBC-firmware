@@ -17,6 +17,20 @@ class CmdRes:
     cmd_id: CmdCallbackId
     error_code: CmdResponseErrorCode
 
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = ""
+        formatted_string += "Class Name: CmdRes\n"
+        formatted_string += "Cmd ID: " + self.cmd_id.name + "\n"
+        if self.error_code == CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
+            formatted_string += "Command Execution: SUCCESS!\n"
+        else:
+            formatted_string += "Command Execution: ERROR!\n"
+
+        return formatted_string
+
 
 @dataclass
 class CmdRtcSyncRes(CmdRes):
@@ -29,6 +43,15 @@ class CmdRtcSyncRes(CmdRes):
 
     board_unixtime: int
 
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        formatted_string += "Unixtime from Board: " + str(self.board_unixtime) + "\n"
+
+        return formatted_string
+
 
 @dataclass
 class CmdVerifyCrcRes(CmdRes):
@@ -40,3 +63,17 @@ class CmdVerifyCrcRes(CmdRes):
     """
 
     crc: int
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        formatted_string += "Application CRC: " + str(self.crc) + "\n"
+
+        return formatted_string
+
+
+if __name__ == "__main__":
+    cmd = CmdVerifyCrcRes(CmdCallbackId.CMD_VERIFY_CRC, CmdResponseErrorCode.CMD_RESPONSE_ERROR, 0x12345678)
+    print(cmd)
