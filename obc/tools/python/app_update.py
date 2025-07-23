@@ -79,7 +79,7 @@ def send_bin(file_path: str, com_port: str) -> None:
     ) as ser:
         erase_command = pack_command(create_cmd_erase_app())
         ser.write(erase_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
-        ser.read(len("Erase success\r\n"))
+        print(ser.read(len("Erase success\r\n")))
         print("Erased App")
         sleep(0.1)
 

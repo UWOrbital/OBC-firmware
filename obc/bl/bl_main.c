@@ -39,8 +39,9 @@ extern uint32_t __ramFuncsRunEnd__;
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
 #define EXTENDED_APP_JUMP_TIMEOUT 2000
-#define DEFAULT_APP_JUMP_TIMEOUT 500
+#define DEFAULT_APP_JUMP_TIMEOUT 2000
 #define LED_DELAY_MS 500
+#define MEMORY_BLANK_CHECK_SIZE 20
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -102,6 +103,10 @@ obc_error_code_t verifyBoardType(uint8_t boardType) {
 }
 
 obc_error_code_t verifyCrc(uint32_t crcAddr) {
+  if (blFlashFapiBlankCheck(crcAddr, 1)) {
+    blUartWriteBytes(strlen("ERROR: CRC blank check failed\r\n"), (uint8_t *)"ERROR: CRC blank check failed\r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
   // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
   uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, crcAddr - APP_START_ADDRESS);
 
@@ -131,14 +136,44 @@ obc_error_code_t verifyMetadata(metadata_t *app_metadata) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-void blJumpToApp() {
+// NOTE: This function does not check if the crc is written
+obc_error_code_t blAppBlankCheck(metadata_t *app_metadata) {
+  uint16_t writeSections = (app_metadata->crc_addr - APP_START_ADDRESS) / MEMORY_BLANK_CHECK_SIZE;
+
+  for (uint16_t i = 0; i < writeSections; i++) {
+    if (blFlashFapiBlankCheck(APP_START_ADDRESS + i * MEMORY_BLANK_CHECK_SIZE, MEMORY_BLANK_CHECK_SIZE / 4)) {
+      blUartWriteBytes(strlen("ERROR: Blank check failed \r\n"), (uint8_t *)"ERROR: Blank check failed \r\n");
+      return OBC_ERR_CODE_CORRUPTED_APP;
+    }
+  }
+
+  // Any left over memory that needs to be checked
+  if (blFlashFapiBlankCheck(APP_START_ADDRESS + writeSections * MEMORY_BLANK_CHECK_SIZE,
+                            (app_metadata->crc_addr - APP_START_ADDRESS - writeSections * MEMORY_BLANK_CHECK_SIZE))) {
+    blUartWriteBytes(strlen("ERROR: Blank check failed \r\n"), (uint8_t *)"ERROR: Blank check failed \r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t blJumpToApp() {
   obc_error_code_t errCode;
+
+  // If a success error code is sent, it means that the memory is occupied
+  if (blFlashFapiBlankCheck(APP_START_ADDRESS, 2)) {
+    blUartWriteBytes(strlen("ERROR: Metadata blank check failed\r\n"),
+                     (uint8_t *)"ERROR: Metadata blank check failed\r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
 
   // Cast the metadata of the flash into a usable pointer
   metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
 
+  RETURN_IF_ERROR_CODE(blAppBlankCheck(app_metadata));
+
   // Check magic number, board id and verify the crc
-  LOG_IF_ERROR_CODE(verifyMetadata(app_metadata));
+  RETURN_IF_ERROR_CODE(verifyMetadata(app_metadata));
 
   blUartWriteBytes(strlen("ATTEMPTING: Running application...\r\n"),
                    (uint8_t *)"ATTEMPTING: Running application..\r\n");
@@ -146,7 +181,7 @@ void blJumpToApp() {
   // We wait for about 100ms so that the remaining uart info can be sent before the buffer is cleared
   // by the app being initialized
   uint32_t initTime = blGetCurrentTick();
-  while ((blGetCurrentTick() - initTime) < 100 || blGetCurrentTick() < initTime) {
+  while ((blGetCurrentTick() - initTime) < 10 || blGetCurrentTick() < initTime) {
   };
 
   // Go to the application's entry point
@@ -155,6 +190,7 @@ void blJumpToApp() {
 
   // If it was not possible to jump to the app, we log that error here
   blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
+  return OBC_ERR_CODE_FAILED_TO_LOAD_APP;
 }
 
 /* PUBLIC FUNCTIONS */
@@ -193,12 +229,13 @@ int main(void) {
       ledTimeout = blGetCurrentTick() + LED_DELAY_MS;
     }
 
-    if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 0) == OBC_ERR_CODE_SUCCESS) {
+    if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 100) == OBC_ERR_CODE_SUCCESS) {
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
       jumpToAppTimeout = blGetCurrentTick() + EXTENDED_APP_JUMP_TIMEOUT;
-    } else if (blGetCurrentTick() > jumpToAppTimeout) {
-      blJumpToApp();
-      break;
+    }
+
+    if (blGetCurrentTick() > jumpToAppTimeout) {
+      LOG_IF_ERROR_CODE(blJumpToApp());
     }
   }
 }

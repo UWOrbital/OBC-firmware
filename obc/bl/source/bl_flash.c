@@ -4,7 +4,11 @@
 #include "bl_errors.h"
 
 #include "F021.h"
+#include "reg_flash.h"
+#include "sys_core.h"
 
+#include <FapiFunctions.h>
+#include <Types.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -109,6 +113,22 @@ bl_error_code_t blFlashFapiBlockWrite(uint32_t dstAddr, uint32_t srcAddr, uint32
   }
 
   return errCode;
+}
+
+bool blFlashFapiBlankCheck(uint32_t startAddr, uint32_t size32) {
+  Fapi_FlashStatusWordType wordType = {.au32StatusWord = {0}};
+  _coreDisableFlashEcc_();
+  flashWREG->FEDACCTRL1 = 0x00000005U;
+
+  Fapi_StatusType status = Fapi_doBlankCheckByByte((uint8_t *)startAddr, size32, &wordType);
+  flashWREG->FEDACCTRL1 = 0x000A060AU;
+  _coreEnableFlashEcc_();
+
+  if (status == Fapi_Status_Success) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 bool blFlashIsStartAddrValid(uint32_t addr, uint32_t binSize) {
