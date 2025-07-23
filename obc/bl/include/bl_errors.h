@@ -12,5 +12,6 @@ typedef enum {
   BL_ERR_CODE_FAPI_INIT = 100,
   BL_ERR_CODE_FAPI_ERASE = 101,
   BL_ERR_CODE_FAPI_PROGRAM = 102,
+  BL_ERR_CODE_FAPI_BLANK = 103,
 
 } bl_error_code_t;
