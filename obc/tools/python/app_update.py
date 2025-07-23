@@ -12,8 +12,10 @@ from interfaces.obc_gs_interface.commands import (
     ProgrammingSession,
     create_cmd_download_data,
     create_cmd_erase_app,
+    create_cmd_verify_crc,
     pack_command,
 )
+from interfaces.obc_gs_interface.commands.command_response_callbacks import parse_command_response
 
 # Refer to the bl_command_callbacks.c for the number
 COMMAND_DATA_SIZE: Final[int] = 208
@@ -96,6 +98,9 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.read(len("Received packet\r\nWrite success\r\n"))
         progress_bar.update(1)
         progress_bar.close()
+        ser.write(pack_command(create_cmd_verify_crc()).ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+        recieve_bytes = ser.read(RS_DECODED_DATA_SIZE)
+        print(parse_command_response(recieve_bytes))
 
 
 def main() -> None:

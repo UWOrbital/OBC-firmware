@@ -1,9 +1,13 @@
 #pragma once
 
+#include <stdint.h>
+#include <sys/types.h>
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
 
-typedef obc_error_code_t (*cmd_callback_t)(cmd_msg_t *);
+#define MAX_RESPONSE_BUFFER_SIZE 220
+
+typedef obc_error_code_t (*cmd_callback_t)(cmd_msg_t *, uint8_t *);
 
 typedef struct {
   cmd_callback_t callback;
@@ -27,4 +31,4 @@ obc_error_code_t verifyCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
  * @param currCmdInfo Pointer to the command information
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise an error code
  */
-obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo);
+obc_error_code_t processNonTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo, uint8_t *responseData);

@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #define CMD_RESPONSE_SUCCESS_MASK 0x01
-#define CMD_RESPONSE_MAX_PACKED_SIZE sizeof(cmd_unpacked_response_t)
+#define CMD_RESPONSE_MAX_PACKED_SIZE sizeof(cmd_response_t)
 
 /*---------------------------------------------------------------------------*/
 /* GUIDE FOR ADDING A NEW COMMAND RESPONSE
@@ -28,18 +28,12 @@
  *      - Add any new reponse error codes to the enum class defined in the python file
  *---------------------------------------------------------------------------*/
 
-typedef struct {
-  float data1;
-  uint32_t data2;
-} obc_cmd_reset_response_t;  // This is only a sample response. Implement an actual one
-
 // NOTE: Update python error codes as well when these are updated
-typedef enum { CMD_RESPONSE_SUCCESS = 0x0, CMD_RESPONSE_ERROR } cmd_response_error_code_t;
+typedef enum { CMD_RESPONSE_SUCCESS = 0x01, CMD_RESPONSE_ERROR = 0x7F } cmd_response_error_code_t;
 
 typedef struct {
-  cmd_response_error_code_t errCode;
   cmd_callback_id_t cmdId;
-  union {
-    obc_cmd_reset_response_t obcResetResponse;
-  };
-} cmd_unpacked_response_t;
+  cmd_response_error_code_t errCode;
+  uint8_t* data;
+  uint8_t dataLen;
+} cmd_response_t;
