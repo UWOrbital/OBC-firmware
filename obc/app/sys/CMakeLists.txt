@@ -20,6 +20,9 @@ SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_crc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_heap.c
     ${CMAKE_CURRENT_SOURCE_DIR}/metadata/obc_metadata.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun_utils.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/sun_file.c
 )
 
 target_include_directories(${OUT_FILE_NAME} PUBLIC ${INCLUDES})

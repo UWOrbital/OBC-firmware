@@ -9,6 +9,7 @@
 #include "obc_sci_io.h"
 #include "obc_i2c_io.h"
 #include "obc_spi_io.h"
+#include "obc_reliance_fs.h"
 #include "sun_utils.h"
 
 #include <FreeRTOS.h>
@@ -22,10 +23,12 @@
 #include <spi.h>
 #include <can.h>
 #include <het.h>
+#include <redposix.h>
 
 #include <string.h>
+#include <stdio.h>
 static StaticTask_t taskBuffer;
-static StackType_t taskStack[1024];
+static StackType_t taskStack[2560];
 
 #define STOP_ON_ERROR(text, _ret)                   \
   errCode = _ret;                                   \
@@ -37,13 +40,55 @@ static StackType_t taskStack[1024];
   }                                                 \
   sciPrintf("%s was successful\r\n", text)
 
+#define CLEANUP_ON_ERROR(text, _ret, fileName)               \
+  errCode = _ret;                                            \
+  if (errCode != OBC_ERR_CODE_SUCCESS) {                     \
+    sciPrintf("%s failed with error %d\r\n", text, errCode); \
+    deleteFile(fileName);                                    \
+    sciPrintf("Deleted file %s\r\n", fileName);              \
+    while (1)                                                \
+      ;                                                      \
+  }                                                          \
+  sciPrintf("%s was successful\r\n", text);
+
 void vTask1(void *pvParameters) {
+  obc_error_code_t errCode;
+
+  // Data from ephemeris.py (8 KB)
+  position_data_t ephemerisData[681];
+  int32_t fileID;
+  STOP_ON_ERROR("openFile", openFile("/sunData.bin", RED_O_RDONLY, &fileID));
+
+  // Skip header, then read data points
+  for (int i = 0; i < 681; i++) {
+    STOP_ON_ERROR("sunFileReadDataPoint", sunFileReadDataPoint(i, &ephemerisData[i]));
+  }
+  STOP_ON_ERROR("closeFile", closeFile(fileID));
+
+  // Write data points to new file
+  const char *sunFileName = "/NewSunData.bin";
+  STOP_ON_ERROR("createFile", createFile(sunFileName, &fileID));
+  STOP_ON_ERROR("sunFileWriteHeader", sunFileWriteHeader(1.0, 1.0, 681));
+  for (int i = 0; i < 681; i++) {
+    STOP_ON_ERROR("sunFileWriteDataPoint", sunFileWriteDataPoint(i, &ephemerisData[i]));
+  }
+  STOP_ON_ERROR("closeFile", closeFile(fileID));
+
+  STOP_ON_ERROR("sunPositionInit", sunPositionInit());
+  sciPrintf("Sun module initialized\r\n");
+
+  // Testing
+  sciPrintf("Deleting file\r\n");
+  deleteFile("/sunData.bin");
+
+  sciPrintf("vTask2 complete, deleting task\r\n");
+  vTaskDelete(NULL);
+
   // Data from JD1 to JD99 inclusive with step of 1 JD
   const char *fName = "/sunData.bin";
 
   // Init
 
-  obc_error_code_t errCode;
   STOP_ON_ERROR("sunFileInit", sunFileInit(fName));
   sciPrintf("Sun module successfully initialized");
 
@@ -145,6 +190,35 @@ void vTask1(void *pvParameters) {
   STOP_ON_ERROR("sunPositionGet(6.9)", sunPositionGet(6.9, &readData));
   sciPrintf("Expected %d\r\n", closePositionData(expected4, readData));
 
+  // Get number of data points after specific JD
+
+  uint32_t pointsAfter;
+  STOP_ON_ERROR("sunFileGetNumDataPointsAfter JD=50", sunFileGetNumDataPointsAfter(50.0, &pointsAfter));
+  sciPrintf("Data points after JD=50: %d\r\n", pointsAfter);
+
+  STOP_ON_ERROR("sunFileGetNumDataPointsAfter JD=70.5", sunFileGetNumDataPointsAfter(70.5, &pointsAfter));
+  sciPrintf("Data points after JD=70.5: %d\r\n", pointsAfter);
+
+  STOP_ON_ERROR("sunFileGetNumDataPointsAfter JD=82.77", sunFileGetNumDataPointsAfter(82.77, &pointsAfter));
+  sciPrintf("Data points after JD=82.77: %d\r\n", pointsAfter);
+
+  // Position tests
+
+  position_data_t posTestData;
+  CLEANUP_ON_ERROR("sunPositionGet(1.0)", sunPositionGet(1.0, &posTestData), "/sunData.bin");
+  sciPrintf("JD=1.0: x=%e, y=%e, z=%e\r\n", posTestData.x, posTestData.y, posTestData.z);
+  CLEANUP_ON_ERROR("sunPositionGet(33.0)", sunPositionGet(33.0, &posTestData), "/sunData.bin");
+  sciPrintf("JD=33.0: x=%e, y=%e, z=%e\r\n", posTestData.x, posTestData.y, posTestData.z);
+
+  // Pack and unpack double
+
+  double num = 1234.567;
+  uint8_t buff[8];
+  packDouble(num, buff);
+  double unpacked = unpackDouble(buff);
+  sciPrintf("Original: %lf", num);
+  sciPrintf("Packed and unpacked: %lf", unpacked);
+
   sciPrintf("Test complete");
   while (true) {
   }
@@ -159,7 +233,9 @@ int main() {
 
   sciPrintf("Starting Sun Position Tests\r\n");
 
-  xTaskCreateStatic(vTask1, "SunPositionTests", 1024, NULL, 1, taskStack, &taskBuffer);
+  xTaskCreateStatic(vTask1, "SunPositionTests", 2560, NULL, 1, taskStack, &taskBuffer);
+
+  // xTaskCreateStatic(vTask2, "SunPositionTests2", 2560, NULL, 1, taskStack, &taskBuffer);
 
   vTaskStartScheduler();
 

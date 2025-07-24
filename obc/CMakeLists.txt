@@ -69,7 +69,7 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
   elseif(${EXAMPLE_TYPE} MATCHES RS)
     add_executable(${OUT_FILE_NAME} examples/test_app_rs/main.c)
   elseif(${EXAMPLE_TYPE} MATCHES SUN_FILE)
-	add_executable(${OUT_FILE_NAME} examples/test_app_ephemeris2/main.c)
+	add_executable(${OUT_FILE_NAME} examples/test_app_ephemeris/main.c)
 
   # ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()
