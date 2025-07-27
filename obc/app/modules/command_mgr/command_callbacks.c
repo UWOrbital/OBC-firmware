@@ -11,8 +11,9 @@
 
 #include <redposix.h>
 #include <stddef.h>
+#include <stdint.h>
 
-static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -25,7 +26,7 @@ static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_UNKNOWN;
 }
 
-static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   obc_error_code_t errCode;
 
   if (cmd == NULL) {
@@ -42,7 +43,8 @@ static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd, uint8_t *responseData,
+                                                        uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -52,7 +54,7 @@ static obc_error_code_t downlinkLogsNextPassCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -66,7 +68,7 @@ static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   obc_error_code_t errCode;
 
   if (cmd == NULL) {
@@ -84,7 +86,7 @@ static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t downlinkTelemCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   obc_error_code_t errCode;
 
   RETURN_IF_ERROR_CODE(setTelemetryManagerDownlinkReady());

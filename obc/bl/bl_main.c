@@ -1,5 +1,6 @@
 #include "bl_uart.h"
 #include "bl_flash.h"
+#include "obc_gs_commands_response.h"
 #include "obc_gs_errors.h"
 #include "rti.h"
 #include "obc_errors.h"
@@ -51,8 +52,13 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
     blUartWriteBytes(strlen("Message Corrupted\r\n"), (uint8_t *)"Message Corrupted\r\n");
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
+
+  // TODO: Finish implementation on BL side once rework is merged
+  uint8_t responseDataLen = 0;
+  uint8_t responseDataBuffer[CMD_RESPONSE_DATA_MAX_SIZE] = {0};
   RETURN_IF_ERROR_CODE(verifyCommand(&unpackedCmdMsg, &currCmdInfo));
-  RETURN_IF_ERROR_CODE(processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo));
+  RETURN_IF_ERROR_CODE(
+      processNonTimeTaggedCommand(&unpackedCmdMsg, &currCmdInfo, responseDataBuffer, &responseDataLen));
   return errCode;
 }
 

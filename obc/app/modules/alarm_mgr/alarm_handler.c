@@ -1,5 +1,6 @@
 #include "alarm_handler.h"
 #include "ds3232_mz.h"
+#include "obc_gs_commands_response.h"
 #include "obc_scheduler_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -45,9 +46,10 @@ void obcTaskInitAlarmMgr(void) {
 
 void obcTaskFunctionAlarmMgr(void *pvParameters) {
   obc_error_code_t errCode;
-
+  uint8_t responseData[CMD_RESPONSE_DATA_MAX_SIZE] = {0};
   while (1) {
     alarm_handler_event_t event;
+    uint8_t responseDataLen = 0;
 
     if (xQueueReceive(alarmHandlerQueueHandle, &event, ALARM_HANDLER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
       continue;
@@ -126,7 +128,9 @@ void obcTaskFunctionAlarmMgr(void *pvParameters) {
               LOG_IF_ERROR_CODE(alarm.callbackDef.defaultCallback());
               break;
             case ALARM_TYPE_TIME_TAGGED_CMD:
-              LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg));
+              LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg, responseData, &responseDataLen));
+              // TODO: Implement this so it send to downlink flow
+              memset(responseData, 0, CMD_RESPONSE_DATA_MAX_SIZE);
               break;
             default:
               LOG_ERROR_CODE(OBC_ERR_CODE_UNSUPPORTED_ALARM_TYPE);

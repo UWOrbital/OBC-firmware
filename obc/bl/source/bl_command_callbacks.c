@@ -17,7 +17,7 @@
 programming_session_t programmingSession = APPLICATION;
 extern uint32_t __APP_IMAGE_TOTAL_SECTION_SIZE;
 
-static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -25,7 +25,8 @@ static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd, uint8_t *responseData,
+                                                         uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -38,7 +39,7 @@ static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -61,7 +62,7 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -93,7 +94,7 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -103,7 +104,7 @@ static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t resetBlCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t resetBlCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
