@@ -67,8 +67,14 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   // TODO: Replace magic number
-  if (!blFlashIsStartAddrValid(cmd->downloadData.address, 208)) {
+  if (!blFlashIsStartAddrValid(cmd->downloadData.address, APP_WRITE_PACKET_SIZE)) {
     blUartWriteBytes(strlen("Invalid start address\r\n"), (uint8_t *)"Invalid start address\r\n");
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  if ((cmd->downloadData.address - APP_START_ADDRESS) % 208 != 0) {
+    blUartWriteBytes(strlen("Start address not 208 byte aligned\r\n"),
+                     (uint8_t *)"Start address not 208 byte aligned\r\n");
     return OBC_ERR_CODE_INVALID_ARG;
   }
 

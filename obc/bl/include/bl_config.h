@@ -21,3 +21,5 @@
 
 #define BL_MAX_MSG_SIZE 64U
 #define RM46_FLASH_BANK 0U
+
+#define APP_WRITE_PACKET_SIZE 208

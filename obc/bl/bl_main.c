@@ -38,7 +38,7 @@ extern uint32_t __ramFuncsRunEnd__;
 #define EXTENDED_APP_JUMP_TIMEOUT 2000
 #define DEFAULT_APP_JUMP_TIMEOUT 2000
 #define LED_DELAY_MS 500
-#define MEMORY_BLANK_CHECK_SIZE 20
+#define MEMORY_BLANK_CHECK_SIZE APP_WRITE_PACKET_SIZE
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
