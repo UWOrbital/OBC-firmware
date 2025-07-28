@@ -16,6 +16,7 @@ class CmdRes:
 
     cmd_id: CmdCallbackId
     error_code: CmdResponseErrorCode
+    response_length: int
 
     def __str__(self) -> str:
         """
@@ -28,6 +29,8 @@ class CmdRes:
             formatted_string += "Command Execution: SUCCESS!\n"
         else:
             formatted_string += "Command Execution: ERROR!\n"
+
+        formatted_string += "Response Length: " + str(self.response_length) + "\n"
 
         return formatted_string
 
@@ -74,6 +77,29 @@ class CmdVerifyCrcRes(CmdRes):
         return formatted_string
 
 
+@dataclass
+class CmdI2CProbeRes(CmdRes):
+    """
+    Class for storing the response to CMD_I2C_PROBE
+
+    :param valid_addresses: The valid I2C addresses from the board
+    :type valid_addresses: list[int]
+    """
+
+    valid_addresses: list[int]
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        formatted_string += "Valid I2C Addresses: |"
+        for address in self.valid_addresses:
+            formatted_string += " " + str(address) + " |"
+
+        return formatted_string
+
+
 if __name__ == "__main__":
-    cmd = CmdVerifyCrcRes(CmdCallbackId.CMD_VERIFY_CRC, CmdResponseErrorCode.CMD_RESPONSE_ERROR, 0x12345678)
+    cmd = CmdVerifyCrcRes(CmdCallbackId.CMD_VERIFY_CRC, CmdResponseErrorCode.CMD_RESPONSE_ERROR, 4, 0x12345678)
     print(cmd)

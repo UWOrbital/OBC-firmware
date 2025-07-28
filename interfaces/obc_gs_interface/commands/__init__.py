@@ -113,20 +113,20 @@ interface.packCmdMsg.restype = c_uint
 
 
 # NOTE: No modifications to this class are necessary when adding new responses
-class CmdResponse(Structure):
+class CmdResponseHeader(Structure):
     """
     The python equivalent class for the cmd_unpacked_response_t structure in the C implementation
     """
 
-    _fields_ = [("cmdId", c_uint), ("errCode", c_uint), ("data", POINTER(c_uint8)), ("dataLen", c_uint8)]
+    _fields_ = [("cmdId", c_uint), ("errCode", c_uint), ("dataLen", c_uint8)]
 
 
-interface.packCmdResponse.argtypes = (POINTER(CmdResponse), POINTER(c_uint8 * RS_DECODED_DATA_SIZE))
+interface.packCmdResponse.argtypes = (POINTER(CmdResponseHeader), POINTER(c_uint8 * RS_DECODED_DATA_SIZE))
 interface.packCmdResponse.restype = c_uint
 
 interface.unpackCmdResponse.argtypes = (
     POINTER(c_uint8 * RS_DECODED_DATA_SIZE),
-    POINTER(CmdResponse),
+    POINTER(CmdResponseHeader),
     POINTER(c_uint8 * RS_DECODED_DATA_SIZE),
 )
 interface.unpackCmdResponse.restype = c_uint
@@ -159,7 +159,8 @@ class CmdCallbackId(IntEnum):
     CMD_DOWNLOAD_DATA = 10
     CMD_VERIFY_CRC = 11
     CMD_RESET_BL = 12
-    NUM_CMD_CALLBACKS = 13
+    CMD_I2C_PROBE = 13
+    NUM_CMD_CALLBACKS = 14
 
 
 # Path to File: interfaces/obc_gs_interface/commands/obc_gs_commands_response.h
@@ -393,6 +394,20 @@ def create_cmd_reset_bl(unixtime_of_execution: int | None = None) -> CmdMsg:
     return cmd_msg
 
 
+def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_I2C_PROBE
+
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_I2C_PROBE
+    """
+    cmd_msg = CmdMsg(unixtime_of_execution)
+    cmd_msg.id = CmdCallbackId.CMD_I2C_PROBE
+    return cmd_msg
+
+
 # ######################################################################
 # ||                                                                  ||
 # ||             Command Pack and Unpack Implementations              ||
@@ -474,7 +489,7 @@ def unpack_command(cmd_msg_packed: bytes) -> tuple[list[CmdMsg], bytes]:
 # ######################################################################
 
 
-def pack_command_response(cmd_msg_response: CmdResponse) -> bytes:
+def pack_command_response(cmd_msg_response: CmdResponseHeader) -> bytes:
     """
     This takes a command message reponse to pack it (see the C implementation for more on how that's exactly done)
 
@@ -490,7 +505,7 @@ def pack_command_response(cmd_msg_response: CmdResponse) -> bytes:
     return bytes(buffer).rstrip(b"\x00")
 
 
-def unpack_command_response(cmd_msg_packed: bytes) -> tuple[CmdResponse, bytes]:
+def unpack_command_response(cmd_msg_packed: bytes) -> tuple[CmdResponseHeader, bytes]:
     """
     This takes in a bytes of data to be unpacked into a command response (see the C implementation for more on how
     that's exactly done)
@@ -504,7 +519,7 @@ def unpack_command_response(cmd_msg_packed: bytes) -> tuple[CmdResponse, bytes]:
     buffer_elements = list(cmd_msg_packed)
     buff = (c_uint8 * RS_DECODED_DATA_SIZE)(*buffer_elements)
     data_buffer = (c_uint8 * RS_DECODED_DATA_SIZE)()
-    cmd_msg_response = CmdResponse()
+    cmd_msg_response = CmdResponseHeader()
 
     res = interface.unpackCmdResponse(pointer(buff), pointer(cmd_msg_response), pointer(data_buffer))
     data_bytes = bytes(data_buffer)
