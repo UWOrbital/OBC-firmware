@@ -39,10 +39,13 @@ static obc_error_code_t rtcSyncCmdCallback(cmd_msg_t *cmd, uint8_t *responseData
 
   rtc_date_time_t dt;
   RETURN_IF_ERROR_CODE(unixToDatetime(cmd->rtcSync.unixTime, &dt));
-
   RETURN_IF_ERROR_CODE(setCurrentDateTimeRTC(&dt));
-
   RETURN_IF_ERROR_CODE(syncUnixTime());
+
+  uint32_t currentUnixTime = getCurrentUnixTime();
+  memcpy(responseData, &currentUnixTime, sizeof(currentUnixTime));
+
+  *responseDataLen = sizeof(currentUnixTime);
 
   return OBC_ERR_CODE_SUCCESS;
 }

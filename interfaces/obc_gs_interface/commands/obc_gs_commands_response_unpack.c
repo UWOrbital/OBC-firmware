@@ -18,6 +18,6 @@ obc_gs_error_code_t unpackCmdResponse(uint8_t* buffer, cmd_response_header_t* re
   response->errCode = (cmd_response_error_code_t)unpackUint8(buffer, &offset);
   response->dataLen = unpackUint8(buffer, &offset);
 
-  memcpy(&buffer[offset], responseDataBuffer, CMD_RESPONSE_DATA_MAX_SIZE);
+  memcpy(responseDataBuffer, &buffer[offset], CMD_RESPONSE_DATA_MAX_SIZE);
   return errCode;
 }

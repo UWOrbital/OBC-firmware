@@ -34,7 +34,9 @@ def parse_cmd_rtc_sync(cmd_response: CmdRes, data: bytes) -> CmdRtcSyncRes:
     if cmd_response.cmd_id != CmdCallbackId.CMD_RTC_SYNC:
         raise ValueError("Wrong command id for parsing the rtc sync command")
 
-    return CmdRtcSyncRes(cmd_response.cmd_id, cmd_response.error_code, cmd_response.response_length, 0x123478)
+    board_unixtime = int.from_bytes(data[:4], "little")
+
+    return CmdRtcSyncRes(cmd_response.cmd_id, cmd_response.error_code, cmd_response.response_length, board_unixtime)
 
 
 def parse_cmd_verify_crc(cmd_response: CmdRes, data: bytes) -> CmdVerifyCrcRes:
