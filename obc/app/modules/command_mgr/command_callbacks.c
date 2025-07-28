@@ -105,8 +105,8 @@ static obc_error_code_t I2CProbeCmdCallback(cmd_msg_t *cmd, uint8_t *responseDat
 
   uint8_t messageData[] = {0xff, 0x00, 0xff};
   uint8_t validAddresses = 0;
-  for (uint8_t i = 0; i < 127; i++) {
-    if (i2cSendTo(i, 3, messageData, portMAX_DELAY, pdMS_TO_TICKS(100)) == OBC_ERR_CODE_SUCCESS) {
+  for (uint8_t i = 0; i < 128; i++) {
+    if (i2cSendTo(i, 3, messageData, pdMS_TO_TICKS(10), portMAX_DELAY) == OBC_ERR_CODE_SUCCESS) {
       responseData[validAddresses] = i;
       validAddresses++;
     }
