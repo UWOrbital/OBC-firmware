@@ -7,8 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_response_header_t* response,
-                                          uint8_t* responseDataBuffer) {
+obc_gs_error_code_t unpackCmdResponse(uint8_t* buffer, cmd_response_header_t* response, uint8_t* responseDataBuffer) {
   if (response == NULL || buffer == NULL || responseDataBuffer == NULL) return OBC_GS_ERR_CODE_INVALID_ARG;
 
   uint32_t offset = 0;

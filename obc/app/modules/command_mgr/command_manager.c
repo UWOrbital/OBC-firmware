@@ -1,12 +1,15 @@
 #include "alarm_handler.h"
 #include "command.h"
 #include "command_manager.h"
+#include "downlink_encoder.h"
 #include "obc_general_util.h"
 #include "obc_gs_aes128.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_command_data.h"
 #include "obc_errors.h"
 #include "obc_gs_commands_response.h"
+#include "obc_gs_commands_response_pack.h"
+#include "obc_gs_errors.h"
 #include "obc_gs_fec.h"
 #include "obc_logging.h"
 
@@ -80,6 +83,8 @@ obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInf
 void obcTaskFunctionCommandMgr(void *pvParameters) {
   obc_error_code_t errCode = 0;
   uint8_t responseData[CMD_RESPONSE_DATA_MAX_SIZE] = {0};
+  uint8_t sendBuffer[RS_DECODED_SIZE] = {0};
+  obc_gs_error_code_t interfaceErr = 0;
 
   while (1) {
     cmd_msg_t cmd;
@@ -109,8 +114,17 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
         cmdResHeader.errCode = CMD_RESPONSE_ERROR;
       }
 
-      // TODO: Implement this in a downlink flow
-      UNUSED(cmdResHeader);
+      interfaceErr = packCmdResponse(&cmdResHeader, sendBuffer, responseData);
+
+      if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+        LOG_ERROR_CODE(OBC_ERR_CODE_FAILED_PACK);
+      } else {
+        for (uint8_t i = 0; i < RS_DECODED_SIZE; i++) {
+          encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
+          LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
+        }
+      }
+
       memset(responseData, 0, CMD_RESPONSE_DATA_MAX_SIZE);
     }
   }

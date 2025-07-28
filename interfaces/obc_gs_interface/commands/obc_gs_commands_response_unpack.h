@@ -20,8 +20,8 @@ extern "C" {
  * @return Error code indicating if the write was successful. OBC_GS_ERR_CODE_UNSUPPORTED_CMD if the unpacked cmd was
  * not valid.
  */
-obc_gs_error_code_t unpackCommandResponse(uint8_t* buffer, cmd_response_header_t* unpackedResponsePtr,
-                                          uint8_t* responseDataBuffer);
+obc_gs_error_code_t unpackCmdResponse(uint8_t* buffer, cmd_response_header_t* unpackedResponsePtr,
+                                      uint8_t* responseDataBuffer);
 
 #ifdef __cplusplus
 }

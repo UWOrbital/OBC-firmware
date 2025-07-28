@@ -11,7 +11,7 @@
 #define CMD_RESPONSE_DATA_MAX_SIZE 220
 
 // NOTE: Update python error codes as well when these are updated
-typedef enum { CMD_RESPONSE_SUCCESS = 0x0, CMD_RESPONSE_ERROR } cmd_response_error_code_t;
+typedef enum { CMD_RESPONSE_SUCCESS = 0x01, CMD_RESPONSE_ERROR = 0x7F } cmd_response_error_code_t;
 
 typedef struct {
   cmd_callback_id_t cmdId;

@@ -9,6 +9,7 @@ from serial import PARITY_NONE, STOPBITS_TWO, Serial
 from gs.backend.obc_utils.encode_decode import CommsPipeline
 from interfaces import (
     OBC_UART_BAUD_RATE,
+    RS_DECODED_DATA_SIZE,
 )
 from interfaces.command_framing import command_multi_pack
 from interfaces.obc_gs_interface.commands import (
@@ -23,6 +24,8 @@ from interfaces.obc_gs_interface.commands import (
     create_cmd_rtc_sync,
     create_cmd_uplink_disc,
 )
+from interfaces.obc_gs_interface.commands.command_response_callbacks import parse_command_response
+from interfaces.obc_gs_interface.commands.command_response_classes import CmdRes
 
 # This is a constant value set in the python and OBC side as to what length of I Frame the OBC will be waiting to
 # receive. This must be followed or the obc will not function as expected
@@ -31,7 +34,7 @@ _PADDING_REQUIRED: Final[int] = 300
 LOG_PATH: Path = (Path(__file__).parent / "../logs.log").resolve()
 
 
-def send_command(args: str, com_port: str, timeout: int = 0) -> Frame | None:
+def send_command(args: str, com_port: str, timeout: int = 0) -> CmdRes | type[CmdRes] | None:
     """
     A function to send a command up to the cube satellite and awaits a response
 
@@ -89,10 +92,13 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> Frame | None:
 
             rcv_frame = comms.decode_frame(rcv_frame_bytes)
             # TODO: Handle these return frames
-            return rcv_frame
+            if rcv_frame is not None:
+                return parse_command_response(rcv_frame.data[:RS_DECODED_DATA_SIZE])
+            else:
+                return None
         else:
             # TODO: Handle bootloader recieve
-            return None
+            return parse_command_response(read_bytes[:RS_DECODED_DATA_SIZE])
 
 
 def send_conn_request(com_port: str, timeout: int = 0) -> Frame:
@@ -174,7 +180,7 @@ def parse_cmd_rtc_time_sync() -> ArgumentParser:
     A function to parse the argument for the rtc_time_sync command
     """
     parent_parser = arg_parse()
-    parser = ArgumentParser(parents=[parent_parser], exit_on_error=False)
+    parser = ArgumentParser(parents=[parent_parser], add_help=False, exit_on_error=False)
     parser.add_argument(
         "-rtc",
         "--rtc_sync_time",
@@ -191,7 +197,7 @@ def parse_cmd_downlink_logs_next_pass() -> ArgumentParser:
     A function to parse the argument for the downlink_logs_next_pass command
     """
     parent_parser = arg_parse()
-    parser = ArgumentParser(parents=[parent_parser], exit_on_error=False)
+    parser = ArgumentParser(parents=[parent_parser], add_help=False, exit_on_error=False)
     parser.add_argument(
         "-lnp",
         "--log_next_pass",

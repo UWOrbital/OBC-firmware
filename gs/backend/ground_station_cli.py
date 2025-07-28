@@ -85,7 +85,8 @@ class GroundStationShell(Cmd):
         if self.background_logging is not None:
             self.background_logging.kill()
 
-        send_command(line, self._com_port, 1)
+        cmd_response = send_command(line, self._com_port, 1)
+        print(cmd_response)
 
         self._restart_logging()
 

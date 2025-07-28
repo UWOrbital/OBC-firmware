@@ -69,19 +69,13 @@ static obc_error_code_t microSDFormatCmdCallback(cmd_msg_t *cmd, uint8_t *respon
 }
 
 static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
-  obc_error_code_t errCode;
-
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  encode_event_t encodeQueueMsg = {0};
-  encodeQueueMsg.eventID = DOWNLINK_DATA_BUFFER;
-  encodeQueueMsg.telemetryDataBuffer.bufferSize = 1;
-  encodeQueueMsg.telemetryDataBuffer.telemData[0] =
-      (telemetry_data_t){.id = TELEM_PONG, .timestamp = getCurrentUnixTime()};
-
-  RETURN_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeQueueMsg));
+  responseData[0] = 0xFF;
+  responseData[1] = 0xFF;
+  *responseDataLen = 2;
 
   return OBC_ERR_CODE_SUCCESS;
 }
