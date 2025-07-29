@@ -7,7 +7,6 @@
 #include <stdbool.h>
 
 #define CMD_RESPONSE_SUCCESS_MASK 0x01
-#define CMD_RESPONSE_MAX_PACKED_SIZE sizeof(cmd_unpacked_response_t)
 #define CMD_RESPONSE_DATA_MAX_SIZE 220
 
 // NOTE: Update python error codes as well when these are updated
