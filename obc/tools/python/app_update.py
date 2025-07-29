@@ -1,7 +1,6 @@
 from math import ceil
 from pathlib import Path
 from sys import argv
-from time import sleep
 from typing import Final
 
 from serial import PARITY_NONE, STOPBITS_TWO, Serial, SerialException
@@ -9,6 +8,7 @@ from tqdm import tqdm
 
 from interfaces import OBC_UART_BAUD_RATE, RS_DECODED_DATA_SIZE
 from interfaces.obc_gs_interface.commands import (
+    CmdCallbackId,
     CmdResponseErrorCode,
     ProgrammingSession,
     create_cmd_download_data,
@@ -57,6 +57,54 @@ def create_app_packet(packet_number: int, app_bin: bytes, is_last_packet: bool =
         ].ljust(RS_DECODED_DATA_SIZE, b"\x00")
 
 
+def write_command(
+    ser: Serial,
+    command: CmdCallbackId,
+    app_data: bytes | None = None,
+    iteration: int | None = None,
+    is_last_packet: bool | None = None,
+) -> bool:
+    """
+    Generates and writes command as well as handling command responses
+
+    :param ser: The Serial object to communicate over UART with
+    :param command: The command that needs to be send over UART
+    :param app_data: The app binary in bytes for the CMD_DOWNLOAD_DATA
+    :param iteration: The packet of app being written for CMD_DOWNLOAD_DATA
+    """
+    packed_command = b""
+    cmd_print_response = False
+
+    # TODO: Remove: Temporary variables till the sci bug during flash write gets sorted
+    bytes_to_read = RS_DECODED_DATA_SIZE
+    cmd_res_cutoff = 0
+
+    match command:
+        case CmdCallbackId.CMD_ERASE_APP:
+            packed_command = pack_command(create_cmd_erase_app()).ljust(RS_DECODED_DATA_SIZE, b"\x00")
+        case CmdCallbackId.CMD_DOWNLOAD_DATA:
+            if app_data is not None and iteration is not None and is_last_packet is not None:
+                packed_command = create_app_packet(iteration, app_data, is_last_packet)
+                bytes_to_read = RS_DECODED_DATA_SIZE + 1
+                cmd_res_cutoff = 1
+            else:
+                raise ValueError("Data and iteration need to be specified for the write command")
+        case CmdCallbackId.CMD_VERIFY_CRC:
+            packed_command = pack_command(create_cmd_verify_crc()).ljust(RS_DECODED_DATA_SIZE, b"\x00")
+            cmd_print_response = True
+        case _:
+            raise ValueError("Command not supported")
+
+    ser.write(packed_command)
+    cmd_response_bytes = ser.read(bytes_to_read)
+    cmd_response = parse_command_response(cmd_response_bytes[cmd_res_cutoff:])
+    if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS or cmd_print_response:
+        print(cmd_response)
+        return False
+
+    return True
+
+
 def send_bin(file_path: str, com_port: str) -> None:
     """
     Sends .bin file over UART serial port
@@ -78,47 +126,29 @@ def send_bin(file_path: str, com_port: str) -> None:
         stopbits=STOPBITS_TWO,
         timeout=15,
     ) as ser:
-        erase_command = pack_command(create_cmd_erase_app())
-        ser.write(erase_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
-        cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE)
-        print(cmd_response_bytes)
-        cmd_response = parse_command_response(cmd_response_bytes)
-        if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
-            print(cmd_response)
+        if write_command(ser, CmdCallbackId.CMD_ERASE_APP):
+            print("Erased App")
+        else:
             return
-        print("Erased App")
-        sleep(0.1)
 
         # We create a progress bar with the tqdm library
         progress_bar = tqdm(desc="Packets Written: ", total=commands_needed, dynamic_ncols=True)
         for i in range(commands_needed - 1):
-            app_packet = create_app_packet(i, app_bin)
-            ser.write(app_packet)
-            cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE + 1)
-            cmd_response = parse_command_response(cmd_response_bytes[1:])
-            if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
-                print(cmd_response)
+            if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, i, False):
+                progress_bar.update(1)
+                ser.reset_output_buffer()
+                ser.reset_input_buffer()
+            else:
                 return
+
+        if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, commands_needed - 1, True):
             progress_bar.update(1)
-            ser.reset_output_buffer()
-            ser.reset_input_buffer()
-
-        app_packet = create_app_packet(commands_needed - 1, app_bin, True)
-        ser.write(app_packet)
-        cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE + 1)
-        cmd_response = parse_command_response(cmd_response_bytes[1:])
-        if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
-            print(cmd_response)
+            progress_bar.close()
+        else:
             return
-        progress_bar.update(1)
-        progress_bar.close()
 
-        verify_crc_command = pack_command(create_cmd_verify_crc())
-        ser.write(verify_crc_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
-        cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE)
-        print(cmd_response_bytes)
-        cmd_response = parse_command_response(cmd_response_bytes)
-        print(cmd_response)
+        if not write_command(ser, CmdCallbackId.CMD_VERIFY_CRC):
+            return
 
 
 def main() -> None:
