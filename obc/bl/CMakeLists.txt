@@ -13,6 +13,7 @@ set(BL_SOURCES
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands/obc_gs_command_unpack.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_pack_utils.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
+    ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common/obc_gs_crc.c
 )
 
 set(BL_INCLUDES

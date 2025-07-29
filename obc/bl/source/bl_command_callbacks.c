@@ -42,7 +42,8 @@ static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  bl_error_code_t errCode = blFlashFapiBlockErase(APP_START_ADDRESS, (uint32_t)(&__APP_IMAGE_TOTAL_SECTION_SIZE));
+  bl_error_code_t errCode =
+      blFlashFapiBlockErase((uint32_t)APP_START_ADDRESS, (uint32_t)&__APP_IMAGE_TOTAL_SECTION_SIZE - 1);
 
   if (errCode != BL_ERR_CODE_SUCCESS) {
     char blUartWriteBuffer[BL_MAX_MSG_SIZE] = {0};
@@ -66,8 +67,14 @@ static obc_error_code_t downloadDataCmdCallback(cmd_msg_t *cmd) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   // TODO: Replace magic number
-  if (!blFlashIsStartAddrValid(cmd->downloadData.address, 208)) {
+  if (!blFlashIsStartAddrValid(cmd->downloadData.address, APP_WRITE_PACKET_SIZE)) {
     blUartWriteBytes(strlen("Invalid start address\r\n"), (uint8_t *)"Invalid start address\r\n");
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  if ((cmd->downloadData.address - APP_START_ADDRESS) % APP_WRITE_PACKET_SIZE != 0) {
+    blUartWriteBytes(strlen("Start address not 208 byte aligned\r\n"),
+                     (uint8_t *)"Start address not 208 byte aligned\r\n");
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
