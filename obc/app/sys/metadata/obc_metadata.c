@@ -1,20 +1,17 @@
 #include "obc_metadata.h"
 #include "obc_errors.h"
-#include <metadata_struct.h>
 
-#include <stddef.h>
+extern void _c_int00(void);
+extern uint32_t __crc_addr;
 
-extern uint32_t __metadata_start__[sizeof(app_metadata_t) / sizeof(uint32_t)];
-
-obc_error_code_t readAppMetadata(app_metadata_t* metadata) {
-  if (metadata == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-// If BL is used, get the metadata and return success. Else return error code stating that there is no metadata
-#if ENABLE_BL_BYPASS
-  return OBC_ERR_CODE_NO_METADATA;
-#else
-  *metadata = *(app_metadata_t*)(&__metadata_start__);
-  return OBC_ERR_CODE_SUCCESS;
-#endif
-}
+const metadata_t app_metadata __attribute__((section(".metadata"), used)) = {
+    .magic_num = MAGIC_NUM,
+    .build_num = 1,
+    .git_hash = 0,
+    .app_entry_func_addr = (uint32_t)&_c_int00,
+    .release_ver_major = 0,
+    .release_ver_minor = 1,
+    .board_id = BOARD_ID,
+    .reserved = {0},
+    .crc_addr = (uint32_t)&__crc_addr,
+};

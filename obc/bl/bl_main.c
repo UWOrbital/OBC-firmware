@@ -2,7 +2,7 @@
 #include "bl_flash.h"
 #include "obc_gs_commands_response.h"
 #include "obc_gs_errors.h"
-#include "rti.h"
+#include "obc_gs_crc.h"
 #include "obc_errors.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_unpack.h"
@@ -16,6 +16,10 @@
 #include "bl_config.h"
 #include "bl_errors.h"
 #include "bl_time.h"
+#include "obc_metadata.h"
+#if defined(DEBUG) && !defined(OBC_REVISION_2)
+#include <gio.h>
+#endif
 
 /* LINKER EXPORTED SYMBOLS */
 extern uint32_t __ramFuncsLoadStart__;
@@ -31,6 +35,10 @@ extern uint32_t __ramFuncsRunEnd__;
 #define LAST_SECTOR_START_ADDR blFlashSectorStartAddr(15U)
 #define WAIT_FOREVER UINT32_MAX
 #define MAX_PACKET_SIZE 223
+#define EXTENDED_APP_JUMP_TIMEOUT 2000
+#define DEFAULT_APP_JUMP_TIMEOUT 2000
+#define LED_DELAY_MS 500
+#define MEMORY_BLANK_CHECK_SIZE APP_WRITE_PACKET_SIZE
 
 /* TYPEDEFS */
 typedef void (*appStartFunc_t)(void);
@@ -47,9 +55,10 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   cmd_info_t currCmdInfo;
   cmd_msg_t unpackedCmdMsg = {0};
   uint32_t unpackOffset = 0;
+
   obc_gs_error_code_t interfaceErr = unpackCmdMsg(recvBuffer, &unpackOffset, &unpackedCmdMsg);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    blUartWriteBytes(strlen("Message Corrupted\r\n"), (uint8_t *)"Message Corrupted\r\n");
+    blUartWriteBytes(strlen("ERROR: Message Corrupted\r\n"), (uint8_t *)"ERROR: Message Corrupted\r\n");
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }
 
@@ -62,19 +71,105 @@ obc_error_code_t blRunCommand(uint8_t recvBuffer[]) {
   return errCode;
 }
 
-void blJumpToApp() {
-  // Jump to app
-  blUartWriteBytes(strlen("Running application\r\n"), (uint8_t *)"Running application\r\n");
+obc_error_code_t verifyBoardType(uint8_t boardType) {
+  if (boardType == BOARD_ID) {
+    return OBC_ERR_CODE_SUCCESS;
+  } else {
+    blUartWriteBytes(strlen("ERROR: Board ID of bootloader and app are different, aborting...\r\n"),
+                     (uint8_t *)"ERROR: Board ID of bootloader and app are different, aborting...\r\n");
+    return OBC_ERR_CODE_BOARD_MISMATCH;
+  }
+}
 
+obc_error_code_t verifyCrc(uint32_t crcAddr) {
+  if (blFlashFapiBlankCheck(crcAddr, 1)) {
+    blUartWriteBytes(strlen("ERROR: CRC blank check failed\r\n"), (uint8_t *)"ERROR: CRC blank check failed\r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
+  // Calculate crc via the crc32 algorithm (same one used in python's binascii and zlib libraries)
+  uint32_t calculatedCrc = crc32(0, (uint8_t *)APP_START_ADDRESS, crcAddr - APP_START_ADDRESS);
+
+  if (calculatedCrc == *((uint32_t *)crcAddr)) {
+    return OBC_ERR_CODE_SUCCESS;
+  } else {
+    blUartWriteBytes(strlen("ERROR: Failed to verify CRC\r\n"), (uint8_t *)"ERROR: Failed to verify CRC\r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
+}
+
+obc_error_code_t verifyMagicNum(uint32_t magicNum) {
+  if (magicNum == MAGIC_NUM) {
+    return OBC_ERR_CODE_SUCCESS;
+  } else {
+    blUartWriteBytes(strlen("ERROR: Failed to verify Magic Number\r\n"),
+                     (uint8_t *)"ERROR: Failed to verify Magic Number\r\n");
+    return OBC_ERR_CODE_MAGIC_NUM_MISMATCH;
+  }
+}
+
+obc_error_code_t verifyMetadata(metadata_t *app_metadata) {
+  obc_error_code_t errCode;
+  RETURN_IF_ERROR_CODE(verifyMagicNum(app_metadata->magic_num));
+  RETURN_IF_ERROR_CODE(verifyBoardType(app_metadata->board_id));
+  RETURN_IF_ERROR_CODE(verifyCrc(app_metadata->crc_addr));
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+// NOTE: This function does not check if the crc is written
+obc_error_code_t blAppBlankCheck(metadata_t *app_metadata) {
+  uint16_t writeSections = (app_metadata->crc_addr - APP_START_ADDRESS) / MEMORY_BLANK_CHECK_SIZE;
+
+  for (uint16_t i = 0; i < writeSections; i++) {
+    if (blFlashFapiBlankCheck(APP_START_ADDRESS + i * MEMORY_BLANK_CHECK_SIZE, MEMORY_BLANK_CHECK_SIZE / 4)) {
+      blUartWriteBytes(strlen("ERROR: Blank check failed \r\n"), (uint8_t *)"ERROR: Blank check failed \r\n");
+      return OBC_ERR_CODE_CORRUPTED_APP;
+    }
+  }
+
+  // Any left over memory that needs to be checked
+  if (blFlashFapiBlankCheck(APP_START_ADDRESS + writeSections * MEMORY_BLANK_CHECK_SIZE,
+                            (app_metadata->crc_addr - APP_START_ADDRESS - writeSections * MEMORY_BLANK_CHECK_SIZE))) {
+    blUartWriteBytes(strlen("ERROR: Blank check failed \r\n"), (uint8_t *)"ERROR: Blank check failed \r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t blJumpToApp() {
+  obc_error_code_t errCode;
+
+  // If a success error code is sent, it means that the memory is occupied
+  if (blFlashFapiBlankCheck(APP_START_ADDRESS, 2)) {
+    blUartWriteBytes(strlen("ERROR: Metadata blank check failed\r\n"),
+                     (uint8_t *)"ERROR: Metadata blank check failed\r\n");
+    return OBC_ERR_CODE_CORRUPTED_APP;
+  }
+
+  // Cast the metadata of the flash into a usable pointer
+  metadata_t *app_metadata = (metadata_t *)(APP_START_ADDRESS + APP_METADATA_OFFSET);
+
+  RETURN_IF_ERROR_CODE(blAppBlankCheck(app_metadata));
+
+  // Check magic number, board id and verify the crc
+  RETURN_IF_ERROR_CODE(verifyMetadata(app_metadata));
+
+  blUartWriteBytes(strlen("ATTEMPTING: Running application...\r\n"),
+                   (uint8_t *)"ATTEMPTING: Running application..\r\n");
+
+  // We wait for about 100ms so that the remaining uart info can be sent before the buffer is cleared
+  // by the app being initialized
   uint32_t initTime = blGetCurrentTick();
-  while ((blGetCurrentTick() - initTime) < 100 || blGetCurrentTick() < initTime) {
+  while ((blGetCurrentTick() - initTime) < 10 || blGetCurrentTick() < initTime) {
   };
+
   // Go to the application's entry point
-  uint32_t appStartAddress = (uint32_t)APP_START_ADDRESS;
+  uint32_t appStartAddress = (uint32_t)app_metadata->app_entry_func_addr;
   ((appStartFunc_t)appStartAddress)();
 
   // If it was not possible to jump to the app, we log that error here
-  blUartWriteBytes(strlen("Failed to run application\r\n"), (uint8_t *)"Failed to run application\r\n");
+  blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
+  return OBC_ERR_CODE_FAILED_TO_LOAD_APP;
 }
 
 /* PUBLIC FUNCTIONS */
@@ -83,6 +178,7 @@ int main(void) {
 
   blUartInit();
   blInitTick();
+  gioInit();
   uint8_t recvBuffer[MAX_PACKET_SIZE] = {0U};
 
   // F021 API and the functions that use it must be executed from RAM since they
@@ -103,20 +199,23 @@ int main(void) {
     }
   }
 
-  if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 5000) != OBC_ERR_CODE_SUCCESS) {
-    // Jump to app if the initial timeout is exceeded
-    blJumpToApp();
-  } else {
-    LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+  uint32_t jumpToAppTimeout = blGetCurrentTick() + DEFAULT_APP_JUMP_TIMEOUT;
+  uint32_t ledTimeout = blGetCurrentTick() + LED_DELAY_MS;
+  while (1) {
+    if (blGetCurrentTick() > ledTimeout) {
+#if defined(DEBUG) && !defined(OBC_REVISION_2)
+      gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
+#endif
+      ledTimeout = blGetCurrentTick() + LED_DELAY_MS;
+    }
 
-    while (1) {
-      if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 7000) != OBC_ERR_CODE_SUCCESS) {
-        // Verify CRC
-        // Verify Hardware
-        blJumpToApp();
-        break;
-      }
+    if (blUartReadBytes(recvBuffer, MAX_PACKET_SIZE, 100) == OBC_ERR_CODE_SUCCESS) {
       LOG_IF_ERROR_CODE(blRunCommand(recvBuffer));
+      jumpToAppTimeout = blGetCurrentTick() + EXTENDED_APP_JUMP_TIMEOUT;
+    }
+
+    if (blGetCurrentTick() > jumpToAppTimeout) {
+      LOG_IF_ERROR_CODE(blJumpToApp());
     }
   }
 }
