@@ -33,14 +33,6 @@ SECTIONS
   __ramFuncsLoadStart__ = LOADADDR(.ramFuncs);
   __ramFuncsSize__ = SIZEOF(.ramFuncs);
 
- /* FreeRTOS Kernel in protected region of Flash */
-  .kernelTEXT :
-  {
-    . = ALIGN(4);
-    KEEP(*(.kernelTEXT))
-    . = ALIGN(4);
-  } >BL_KERNEL
-
   /* The program code and other data goes into RAM */
   .text :
   {
