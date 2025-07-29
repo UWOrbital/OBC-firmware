@@ -30,6 +30,17 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    - name: Create binary directory
+      run: |
+        mkdir build_gs
+        cd build_gs
+        cmake .. -DCMAKE_BUILD_TYPE=GS
+
+    - name: Build
+      run: |
+        cd build_gs
+        cmake --build .
+
     - name: Run pytest
       run: |
         python -m pytest
