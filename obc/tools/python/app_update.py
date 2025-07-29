@@ -9,11 +9,14 @@ from tqdm import tqdm
 
 from interfaces import OBC_UART_BAUD_RATE, RS_DECODED_DATA_SIZE
 from interfaces.obc_gs_interface.commands import (
+    CmdResponseErrorCode,
     ProgrammingSession,
     create_cmd_download_data,
     create_cmd_erase_app,
+    create_cmd_verify_crc,
     pack_command,
 )
+from interfaces.obc_gs_interface.commands.command_response_callbacks import parse_command_response
 
 # Refer to the bl_command_callbacks.c for the number
 COMMAND_DATA_SIZE: Final[int] = 208
@@ -77,7 +80,12 @@ def send_bin(file_path: str, com_port: str) -> None:
     ) as ser:
         erase_command = pack_command(create_cmd_erase_app())
         ser.write(erase_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
-        print(ser.read(len("Erase success\r\n")))
+        cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE)
+        print(cmd_response_bytes)
+        cmd_response = parse_command_response(cmd_response_bytes)
+        if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
+            print(cmd_response)
+            return
         print("Erased App")
         sleep(0.1)
 
@@ -86,16 +94,31 @@ def send_bin(file_path: str, com_port: str) -> None:
         for i in range(commands_needed - 1):
             app_packet = create_app_packet(i, app_bin)
             ser.write(app_packet)
-            ser.read(len("Received packet\r\nWrite success\r\n"))
+            cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE + 1)
+            cmd_response = parse_command_response(cmd_response_bytes[1:])
+            if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
+                print(cmd_response)
+                return
             progress_bar.update(1)
             ser.reset_output_buffer()
             ser.reset_input_buffer()
 
         app_packet = create_app_packet(commands_needed - 1, app_bin, True)
         ser.write(app_packet)
-        ser.read(len("Received packet\r\nWrite success\r\n"))
+        cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE + 1)
+        cmd_response = parse_command_response(cmd_response_bytes[1:])
+        if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS:
+            print(cmd_response)
+            return
         progress_bar.update(1)
         progress_bar.close()
+
+        verify_crc_command = pack_command(create_cmd_verify_crc())
+        ser.write(verify_crc_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+        cmd_response_bytes = ser.read(RS_DECODED_DATA_SIZE)
+        print(cmd_response_bytes)
+        cmd_response = parse_command_response(cmd_response_bytes)
+        print(cmd_response)
 
 
 def main() -> None:
