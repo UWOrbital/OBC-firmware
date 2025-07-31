@@ -228,7 +228,7 @@ Options for `EXAMPLE_TYPE` include:
 - `VN100` - for `vn100_demo`
 - `CC1120_SPI` - for `test_app_cc1120_spi`
 - `ADC` - for `test_app_adc`
-- `SUN_FILE` for `test_app_ephemeris2`
+- `SUN_FILE` for `test_app_ephemeris`
 
 Instructions on how to add examples:
 

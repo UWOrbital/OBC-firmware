@@ -48,7 +48,7 @@ obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer) {
   }
 
   bool isInRange = false;
- 
+
   RETURN_IF_ERROR_CODE(sunFileJDInRange(jd, &isInRange));
   if (!isInRange) return OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE;
 

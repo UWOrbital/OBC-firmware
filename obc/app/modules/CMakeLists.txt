@@ -15,7 +15,6 @@ set(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_mgr
     ${CMAKE_CURRENT_SOURCE_DIR}/timekeeper
     ${CMAKE_CURRENT_SOURCE_DIR}/task_stats_collector
-    ${CMAKE_CURRENT_SOURCE_DIR}/sun
     ${CMAKE_CURRENT_SOURCE_DIR}/logger
 )
 

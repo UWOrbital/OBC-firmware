@@ -1,7 +1,14 @@
 #include "sun_utils.h"
 
-bool equalsPositionData(const position_data_t data1, const position_data_t data2) {
-  return (data1.julianDate == data2.julianDate && data1.x == data2.x && data1.y == data2.y && data1.z == data2.z);
+bool equalsPositionData(const position_data_t* data1, const position_data_t* data2) {
+  if (data1 == NULL && data2 == NULL) {
+    return true;
+  } else if ((data1 == NULL && data2 != NULL) || (data1 != NULL && data2 == NULL)) {
+    return false;
+  }
+
+  return (data1->julianDate == data2->julianDate && data1->x == data2->x && data1->y == data2->y &&
+          data1->z == data2->z);
 }
 
 bool closePositionData(const position_data_t data1, const position_data_t data2) {
@@ -10,7 +17,7 @@ bool closePositionData(const position_data_t data1, const position_data_t data2)
 }
 
 obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t point1, position_t point2,
-                                     julian_date_t jd1, julian_date_t jd2, position_t *buffer) {
+                                     julian_date_t jd1, julian_date_t jd2, position_t* buffer) {
   if (jd1 == jd2 || buffer == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

@@ -70,6 +70,7 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
     add_executable(${OUT_FILE_NAME} examples/test_app_rs/main.c)
   elseif(${EXAMPLE_TYPE} MATCHES SUN_FILE)
 	add_executable(${OUT_FILE_NAME} examples/test_app_ephemeris/main.c)
+    target_include_directories (${OUT_FILE_NAME} PRIVATE app/sys/ephemeris)
 
   # ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()

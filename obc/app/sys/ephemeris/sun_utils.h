@@ -34,7 +34,7 @@ typedef struct position_data_t {
 /**
  * @brief Returns true if the data points 1 and 2 have the same coordinates and julian date
  */
-bool equalsPositionData(const position_data_t data1, const position_data_t data2);
+bool equalsPositionData(const position_data_t* data1, const position_data_t* data2);
 
 /**
  * @brief Returns true if the data points 1 and 2 have the close coordinates and julian date
@@ -56,7 +56,7 @@ bool closePositionData(const position_data_t data1, const position_data_t data2)
  * @return Returns the value of the point at the targetJulanDate liner interpolated
  */
 obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t point1, position_t point2,
-                                     julian_date_t jd1, julian_date_t jd2, position_t *buffer);
+                                     julian_date_t jd1, julian_date_t jd2, position_t* buffer);
 
 // These are place here as doubles are 64-bit thus these operations may not be atomic
 
