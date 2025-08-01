@@ -10,13 +10,20 @@ class Task(BaseModel):
     """
     @brief Class for storing task data
 
-    @attribute task_name (str) - name of task; snake_case
-    @attribute stack_size (PositiveInt) - stack size as 32-bit unsigned int
-    @attribute priority (str) - task priority as 32-bit unsigned int; #U or macro
-    @attribute function_stem (str) - base name for task functions; PascalCase
-    @attribute config_id_stem (str) - config id; SNAKE_CASE
-    @attribute conditional_enable (Optional[str]) - conditional macro; SNAKE_CASE
-    @attribute task_init (bool) - whether task has init function
+    :param task_name: name of task; snake_case
+    :type task_name: str
+    :param stack_size: Stack size as 32-bit unsigned int
+    :type stack_size: PositiveInt
+    :param priority: task priority as 32-bit unsigned int; #U or macro
+    :type priority: str
+    :param function_stem: base name for task functions; PascalCase
+    :type function_stem: str
+    :param config_id_stem: config id; SNAKE_CASE
+    :type config_id_stem: str
+    :param conditional_enable: conditional macro; SNAKE_CASE
+    :type conditional_enable: str, None
+    :param task_init: whether task has init function
+    :type task_init: bool
     """
 
     task_name: str

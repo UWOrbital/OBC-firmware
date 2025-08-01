@@ -16,6 +16,8 @@ extern "C" {
  */
 uint16_t calculateCrc16Ccitt(const uint8_t *data, uint16_t dataLen);
 
+uint32_t crc32(uint32_t crc, uint8_t *data, uint32_t dataLen);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,9 @@
 class BaseOrbitalError(Exception):
     """
-    @brief Base class for all orbital-related exceptions
-    @attribute message (str) - Custom error message providing additional context
+    Base class for all orbital-related exceptions
+
+    :param message: Custom error message providing additional context
+    :type message: str
     """
 
     def __init__(self, message: str) -> None:
@@ -11,8 +13,10 @@ class BaseOrbitalError(Exception):
 
 class ServiceError(BaseOrbitalError):
     """
-    @brief Exception related to general service errors
-    @attribute message (str) - Service exception message
+    Exception related to general service errors
+
+    :param message: Service exception message
+    :type message: str
     """
 
     def __init__(self, message: str = "Service exception") -> None:
@@ -21,8 +25,10 @@ class ServiceError(BaseOrbitalError):
 
 class NotFoundError(ServiceError):
     """
-    @brief Exception raised when an item is not found
-    @attribute message (str) - Item not found message
+    Exception raised when an item is not found
+
+    :param message: Item not found message
+    :type message: str
     """
 
     def __init__(self, message: str = "Item not found") -> None:
@@ -31,8 +37,10 @@ class NotFoundError(ServiceError):
 
 class InvalidArgumentError(BaseOrbitalError):
     """
-    @brief Exception raised when an invalid argument is provided
-    @attribute message (str) - Invalid argument message
+    Exception raised when an invalid argument is provided
+
+    :param message: Invalid argument message
+    :type message: str
     """
 
     def __init__(self, message: str = "The argument provided was invalid") -> None:
@@ -41,8 +49,10 @@ class InvalidArgumentError(BaseOrbitalError):
 
 class InvalidStateError(BaseOrbitalError):
     """
-    @brief Exception raised when an operation is performed in an invalid state
-    @attribute message (str) - Invalid state message
+    Exception raised when an operation is performed in an invalid state
+
+    :param message: Invalid state message
+    :type message: str
     """
 
     def __init__(self, message: str = "Invalid state") -> None:
@@ -51,8 +61,10 @@ class InvalidStateError(BaseOrbitalError):
 
 class DatabaseError(BaseOrbitalError):
     """
-    @brief Exception raised for database-related errors
-    @attribute message (str) - Database error message
+    Exception raised for database-related errors
+
+    :param message: Database error message
+    :type message: str
     """
 
     def __init__(self, message: str = "There was a database error") -> None:
@@ -61,8 +73,10 @@ class DatabaseError(BaseOrbitalError):
 
 class UnauthorizedError(BaseOrbitalError):
     """
-    @brief Exception raised when a user is not authorized to perform an action
-    @attribute message (str) - Unauthorized error message
+    Exception raised when a user is not authorized to perform an action
+
+    :param message: Unauthorized error message
+    :type message: str
     """
 
     def __init__(self, message: str = "The current user is not authorized to perform this action") -> None:
@@ -71,8 +85,10 @@ class UnauthorizedError(BaseOrbitalError):
 
 class UnknownError(BaseOrbitalError):
     """
-    @brief Exception raised for unexpected errors
-    @attribute message (str) - Unknown error message
+    Exception raised for unexpected errors
+
+    :param message: Unknown error message
+    :type message: str
     """
 
     def __init__(self, message: str = "An unexpected error occurred") -> None:
@@ -81,8 +97,10 @@ class UnknownError(BaseOrbitalError):
 
 class SunPositionError(BaseOrbitalError):
     """
-    @brief Exception raised when an error occurs in sun position data generation
-    @attribute message (str) - Sun position error message
+    Exception raised when an error occurs in sun position data generation
+
+    :param message: Sun position error message
+    :type message: str
     """
 
     def __init__(self, message: str = "There was an error when trying to generate the sun position data") -> None:

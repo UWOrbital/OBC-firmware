@@ -6,7 +6,7 @@ def add_cors_middleware(app: FastAPI) -> None:
     """
     Adds the cors middleware to the FastAPI app
 
-    @param app: FastAPI app to add the middleware to
+    :param app: FastAPI app to add the middleware to
     """
     app.add_middleware(
         CORSMiddleware,
