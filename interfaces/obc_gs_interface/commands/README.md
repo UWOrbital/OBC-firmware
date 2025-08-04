@@ -62,7 +62,7 @@ Each command has its respective pack function to turn the command into transmitt
 > [!NOTE]
 > In the following steps (and later on) we add comments at specific places as a part of codestyle and readability. Since there will be a large amount of commands at some point, these comments will hopefully serve as a way to find functions quickly as the codebase grows.
 
-1. Create a static decleration for the command's pack function near right before the type def that defines `pack_func_t` (`typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);`). The delecration should be done in the format used in the code snippet below. Make sure to replace `CmdName` with the name of the command being packed. Additionally, add a comment a line before the delecration that spells out the command enum the function is for.
+1. Create a static decleration for the command's pack function on the line right before the type def that defines `pack_func_t` (`typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);`). The delecration should be done in the format used in the code snippet below. Make sure to replace `CmdName` with the name of the command being packed. Additionally, add a comment a line before the delecration that spells out the command enum the function is for.
 ```c
 // CMD_NAME
 static void packCmdNameCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
@@ -86,23 +86,86 @@ static void packRtcSyncCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_
 ```
 3. The manner in which you do this step depends on if the command your packing has additional data or not.
     1. If your command has no data, simply add a comment saying `// No data to pack`.
-```c
-// CMD_NAME
-static void packCmdNameCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
-  // No data to pack
-}
-```
-2. If your command does have data, then we have to call specific pack functions to pack said data. Make sure to call the right pack function for the right datatype. For example, `CMD_RTC_SYNC` has additional data, `rtcSync.unixTime` which is a `uint32_t`. As such, we would call the `packUint32()` function to pack `rtcSync.unixTime` for us into bytes.
-```c
-// CMD_RTC_SYNC
-static void packRtcSyncCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
-  packUint32(cmdMsg->rtcSync.unixTime, buffer, offset);
-  // You can pack any extra data by calling one of the pack functions with the data you want to pack while leaving the rest of the arguments the same
-}
-```
+    ```c
+    // CMD_NAME
+    static void packCmdNameCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+      // No data to pack
+    }
+    ```
+    2. If your command does have data, then we have to call specific data pack functions to pack said data. Make sure to call the right data pack function for the right datatype. For example, `CMD_RTC_SYNC` has additional data, `rtcSync.unixTime` which is a `uint32_t`. As such, we would call the `packUint32()` function to pack `rtcSync.unixTime` for us into bytes.
+    ```c
+    // CMD_RTC_SYNC
+    static void packRtcSyncCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+      packUint32(cmdMsg->rtcSync.unixTime, buffer, offset);
+      // You can pack any extra data by calling one of the pack functions with the data you want to pack while leaving the rest of the arguments the same
+    }
+    ```
 >[!TIP]
 > Be mindful of the order you pack data in (i.e. what order you call the pack functions on data in) as you will have to unpack them in the same order while writing the unpack functions (don't worry there'll be a warning to remind you)
 
 > [!NOTE]
 > As of writing this procedure the code base has the following pack functions implemented and at your disposal:
 > `packUint8()`, `packUint16()`, `packUint32()`, `packInt8()`, `packInt16()`, `packInt32()` and `packFloat()`
+
+### Step 4: Adding the your command's unpack function
+In addition to a pack function, each command has it's own unpack function. Contrary to pack, the unpack function decodes an array of bytes into the `cmd_msg_t` struct. This is done by just reversing the bitshifts applied. To learn more you can look at `obc_gs_command_unpack.c` and `data_unpack_utils.c`.
+
+1. Create a static decleration for the command's unpack function on the line right before the type def that defines `unpack_func_t` (`typedef void (*unpack_func_t)(const uint8_t*, uint32_t*, cmd_msg_t*);`). The delecration should be done in the format used in the code snippet below. Make sure to replace `CmdName` with the name of the command being packed. Additionally, add a comment a line before the delecration that spells out the command enum the function is for.
+```c
+// CMD_NAME
+static void unpackCmdNameCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// Example: Unpack function for CMD_RTC_SYNC
+// CMD_RTC_SYNC
+static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+```
+2. Now let's define the actual function body at the end of the file. Again make sure to add a comment the line before with the command enum that the function is for.
+```c
+// CMD_NAME
+static void unpackCmdNameCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+
+}
+
+// Example: Unpack function body for CMD_RTC_SYNC
+// CMD_RTC_SYNC
+static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+
+}
+```
+3. The manner in which you do this step depends on if the command your unpacking has additional data or not.
+    1. If your command has no data, simply add a comment saying `// No data to pack`.
+    ```c
+    // CMD_NAME
+    static void unpackCmdNameCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+      // No data to unpack
+    }
+    ```
+    2. If your command has data, then we need to call data unpack functions in a specific order to unpack the necessary data. Like we did in the pack function, make sure to call the right data unpack function for the right datatype. For example, `CMD_RTC_SYNC` has additional data, `rtcSync.unixTime` which is a `uint32_t`. As such, we would call the `unpackUint32()` function to pack `rtcSync.unixTime` for us into bytes. In this case, we will be assigning the return of the data unpack functions to their respective variable in the `cmdMsg` struct (of type `cmd_msg_t`) which is passed into the unpack function as a parameter. **Be sure to call the respective data unpack functions in the order you called the data pack functions in the pack function of the commands.**
+    ```c
+    // CMD_RTC_SYNC
+    static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+      cmdMsg->rtcSync.unixTime = unpackUint32(buffer, offset);
+      // You can unpack any extra data by calling additional data unpack functions and assigning their returns to the variables necessary. The arguments passed in remain the same.
+    }
+    ```
+> [!WARNING]
+> Call the data unpack functions in the same order you called the data pack functions in the command's pack function. This will make sure that the data packed in unpacked correctly.
+>
+> For example, say we have `CMD_DOWNLOAD_DATA` which has the following pack function...
+> ```c
+> // CMD_DOWNLOAD_DATA
+> static void packDownloadDataCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+>   packUint8((uint8_t)cmdMsg->downloadData.programmingSession, buffer, offset);
+>   packUint16(cmdMsg->downloadData.length, buffer, offset);
+>   packUint32(cmdMsg->downloadData.address, buffer, offset);
+> }
+> ```
+> The unpack function would be...
+> ```c
+> // CMD_DOWNLOAD_DATA
+> static void unpackDownloadDataCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+>   cmdMsg->downloadData.programmingSession = unpackUint8(buffer, offset);
+>   cmdMsg->downloadData.length = unpackUint16(buffer, offset);
+>   cmdMsg->downloadData.address = unpackUint32(buffer, offset);
+> }
+> ```
