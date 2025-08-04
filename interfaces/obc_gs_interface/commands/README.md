@@ -170,5 +170,6 @@ static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_ms
 > }
 > ```
 
-> [!NOTE] As of writing this procedure the code base has the following unpack functions implemented and at your disposal:
+> [!NOTE]
+> As of writing this procedure the code base has the following unpack functions implemented and at your disposal:
 > `unpackUint8()`, `unpackUint16()`, `unpackUint32()`, `unpackInt8()`, `unpackInt16()`, `unpackInt32()` and `unpackFloat()`.
