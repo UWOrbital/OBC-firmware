@@ -28,17 +28,35 @@ jobs:
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=0
         make
 
+    - name: Upload CRC Binary (Release-Launchpad)
+      uses: actions/upload-artifact@v4
+      with:
+        name: launchpad-bin
+        path: build/OBC-firmware-crc.bin
+
     - name: Build (Release-OBC Rev1)
       run: |
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
         make
 
+    - name: Upload CRC Binary (Release-OBC Rev1)
+      uses: actions/upload-artifact@v4
+      with:
+        name: rev1-bin
+        path: build/OBC-firmware-crc.bin
+
     - name: Build (Release-OBC Rev2)
       run: |
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=0
         make
+
+    - name: Upload CRC Binary (Release-OBC Rev2)
+      uses: actions/upload-artifact@v4
+      with:
+        name: rev2-bin
+        path: build/OBC-firmware-crc.bin
 
     - name: Build (Debug-Launchpad)
       run: |

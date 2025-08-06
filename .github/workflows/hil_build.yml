@@ -14,16 +14,28 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
-    - name: Setup
+    - name: Install Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get -y install build-essential cmake
-    - name: Create binary directory
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Create Ground Station Binary Directory
       run: |
-        mkdir build_hil
+        mkdir build_gs
+        cd build_gs
+        cmake .. -DCMAKE_BUILD_TYPE=GS
+
     - name: Build
       run: |
-        cd build_hil
-        #Seems like we need to force the cxx standard here for it to be set in actions
-        cmake .. -DCMAKE_BUILD_TYPE=HIL -DCMAKE_CXX_STANDARD=20
-        make
+        cd build_gs
+        cmake --build .
+
+    - name: Download binary wiht CRC
+      uses: actions/download-artifact@v4
+      with:
+        name: launchpad-bin
+
+    - name: Run HIL
+      run: |
+          python hil/hil_main.c /dev/ttyUSB0 OBC-firmware-crc.bin
