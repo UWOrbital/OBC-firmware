@@ -83,7 +83,7 @@ jobs:
         path: build/OBC-firmware.bin
 
   CRC:
-    needs: build
+    needs: OBC_BUILD
     runs-on: ubuntu-latest
     steps:
     - name: Download binary
@@ -98,7 +98,7 @@ jobs:
         cksum OBC-firmware.bin
 
   OBC_HIL:
-    needs: build
+    needs: OBC_BUILD
     runs-on: self-hosted
 
     defaults:
