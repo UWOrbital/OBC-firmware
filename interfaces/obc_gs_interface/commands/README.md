@@ -262,3 +262,52 @@ static obc_error_code_t cmdNameCmdCallback(cmd_msg_t *cmd, uint8_t *responseData
 For our ground station to effectively use commands, we re-define and add some logic for commands in the python side of our code base.
 
 ### Step 1: Adding the command id
+Just like the c-side, the python side also defines an enum for the commands.
+
+1. Navigate to `commands/__init__.py` and find the `CmdCallbackId` struct. Insert your command just before `NUM_CMD_CALLBACKS` and change the enum integer assignments so that the integers remain consecutive (in python you have to explicitly assign the integers that C just assigns implicitly). You can replace `CMD_NAME` with your command enum name.
+
+```python
+# Original Structure
+class CmdCallbackId(IntEnum):
+    """
+    Enums corresponding to the C implementation of cmd_callback_id_t
+    """
+
+    CMD_END_OF_FRAME = 0
+    CMD_EXEC_OBC_RESET = 1
+    CMD_RTC_SYNC = 2
+    CMD_DOWNLINK_LOGS_NEXT_PASS = 3
+    CMD_MICRO_SD_FORMAT = 4
+    CMD_PING = 5
+    CMD_DOWNLINK_TELEM = 6
+    CMD_UPLINK_DISC = 7
+    CMD_SET_PROGRAMMING_SESSION = 8
+    CMD_ERASE_APP = 9
+    CMD_DOWNLOAD_DATA = 10
+    CMD_VERIFY_CRC = 11
+    CMD_RESET_BL = 12
+    NUM_CMD_CALLBACKS = 13
+
+# Structure with added command (Notice how the numbering changes)
+class CmdCallbackId(IntEnum):
+    """
+    Enums corresponding to the C implementation of cmd_callback_id_t
+    """
+
+    CMD_END_OF_FRAME = 0
+    CMD_EXEC_OBC_RESET = 1
+    CMD_RTC_SYNC = 2
+    CMD_DOWNLINK_LOGS_NEXT_PASS = 3
+    CMD_MICRO_SD_FORMAT = 4
+    CMD_PING = 5
+    CMD_DOWNLINK_TELEM = 6
+    CMD_UPLINK_DISC = 7
+    CMD_SET_PROGRAMMING_SESSION = 8
+    CMD_ERASE_APP = 9
+    CMD_DOWNLOAD_DATA = 10
+    CMD_VERIFY_CRC = 11
+    CMD_RESET_BL = 12
+    CMD_NAME = 13
+    NUM_CMD_CALLBACKS = 14
+```
+### Step 2: Adding command data
