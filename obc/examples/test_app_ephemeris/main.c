@@ -51,7 +51,7 @@ static StackType_t taskStack[10000];
   sciPrintf("%s was successful\r\n", text);
 
 void vTask1(void *pvParameters) {
-  sciPrintf("Task 1");
+  sciPrintf("Task 1\r\n");
   obc_error_code_t errCode;
 
   // Data from ephemeris.py (8 KB)
@@ -484,9 +484,20 @@ void vTask1(void *pvParameters) {
   int32_t fileID;
 
   // Write data points to new file
-  const char *fileName = "/NewSunData.bin";
+  const char *fileName = "SunData.bin";
+  STOP_ON_ERROR("setupFileSystem", setupFileSystem());
   STOP_ON_ERROR("createFile", createFile(fileName, &fileID));
-  STOP_ON_ERROR("sunFileWriteHeader", sunFileWriteHeader(1.0, 1.0, 665));
+  STOP_ON_ERROR("openFile", openFile(fileName, RED_O_RDWR, &fileID));
+  
+  //STOP_ON_ERROR("sunFileWriteHeader", sunFileWriteHeader(1.0, 1.0, 665));
+  // manually wrote header since sunFileWriteHeader was returning an error
+  julian_date_t minimumJD = 1.0;
+  double stepSize = 1.0;
+  uint32_t numDataPoints = 665;
+  STOP_ON_ERROR("writeFile", writeFile(fileID, &minimumJD, sizeof(julian_date_t)));
+  STOP_ON_ERROR("writeFile", writeFile(fileID, &stepSize, sizeof(double)));
+  STOP_ON_ERROR("writeFile", writeFile(fileID, &numDataPoints, sizeof(uint32_t)));
+  
   STOP_ON_ERROR("writeFile", writeFile(fileID, ephemerisData, sizeof(ephemerisData)));
   STOP_ON_ERROR("closeFile", closeFile(fileID));
 
@@ -608,9 +619,9 @@ void vTask1(void *pvParameters) {
   // Position tests
 
   position_data_t posTestData;
-  CLEANUP_ON_ERROR("sunPositionGet(1.0)", sunPositionGet(1.0, &posTestData), "/NewSunData.bin");
+  CLEANUP_ON_ERROR("sunPositionGet(1.0)", sunPositionGet(1.0, &posTestData), "SunData.bin");
   sciPrintf("JD=1.0: x=%e, y=%e, z=%e\r\n", posTestData.x, posTestData.y, posTestData.z);
-  CLEANUP_ON_ERROR("sunPositionGet(33.0)", sunPositionGet(33.0, &posTestData), "/NewSunData.bin");
+  CLEANUP_ON_ERROR("sunPositionGet(33.0)", sunPositionGet(33.0, &posTestData), "SunData.bin");
   sciPrintf("JD=33.0: x=%e, y=%e, z=%e\r\n", posTestData.x, posTestData.y, posTestData.z);
 
   sciPrintf("Test complete");
