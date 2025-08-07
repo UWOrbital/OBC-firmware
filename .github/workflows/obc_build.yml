@@ -104,6 +104,7 @@ jobs:
     defaults:
       run:
         shell: bash
+
     steps:
     - uses: actions/checkout@v3
     - name: Install Dependencies
@@ -132,6 +133,5 @@ jobs:
         name: launchpad-bin
 
     - name: Run HIL
-      uses: actions/checkout@v3
       run: |
-          python hil/hil_main.c /dev/ttyACM0 OBC-firmware-crc.bin
+          python ../hil/hil_main.c /dev/ttyACM0 OBC-firmware-crc.bin
