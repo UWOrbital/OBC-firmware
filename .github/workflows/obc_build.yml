@@ -132,5 +132,6 @@ jobs:
         name: launchpad-bin
 
     - name: Run HIL
+      uses: actions/checkout@v3
       run: |
-          python hil/hil_main.c /dev/ttyUSB0 OBC-firmware-crc.bin
+          python hil/hil_main.c /dev/ttyACM0 OBC-firmware-crc.bin
