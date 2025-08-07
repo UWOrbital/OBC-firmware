@@ -134,5 +134,5 @@ jobs:
 
     - name: Run HIL
       run: |
-          cd hil
-          python hil_main.py /dev/ttyACM0 OBC-firmware-crc.bin
+          source venv/bin/activate
+          python hil/hil_main.py /dev/ttyACM0 OBC-firmware-crc.bin
