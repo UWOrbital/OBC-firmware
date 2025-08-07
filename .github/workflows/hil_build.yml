@@ -37,4 +37,4 @@ jobs:
 
     - name: Run HIL
       run: |
-          python3 ../hil/hil_main.c /dev/ttyUSB0 OBC-firmware-crc.bin
+          python3 hil/hil_main.py /dev/ttyACM0 OBC-firmware-crc.bin
