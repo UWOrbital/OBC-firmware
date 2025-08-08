@@ -48,6 +48,5 @@ typedef enum {
   CMD_ERASE_APP,
   CMD_DOWNLOAD_DATA,
   CMD_VERIFY_CRC,
-  CMD_RESET_BL,
   NUM_CMD_CALLBACKS
 } cmd_callback_id_t;
