@@ -67,6 +67,7 @@ compile_commands.json
 *.db
 
 /build*
+*.log
 
 # Python
 .venv/
