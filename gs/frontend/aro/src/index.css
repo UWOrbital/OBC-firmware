@@ -52,7 +52,7 @@ img {
 }
 
 #main-form {
-  padding: 3% 20%;
+  padding-top: 3%;
 }
 
 label {
@@ -73,17 +73,14 @@ select {
   font-family: "Comic Sans MS";
 }
 
-input[type="submit"] {
-  margin: 20px 0;
-  width: 125px;
-  height: 50px;
+input[type="submit"], input[type="button"] {
   font-family: "Comic Sans MS";
   font-size: 20px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-input[type="submit"]:hover {
+input[type="submit"]:hover, input[type="button"]:hover {
   background-color: #cdcdcd;
 }
 
