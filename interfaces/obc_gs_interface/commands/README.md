@@ -259,7 +259,7 @@ static obc_error_code_t cmdNameCmdCallback(cmd_msg_t *cmd, uint8_t *responseData
 }
 ```
 ## Adding commands to the Python side
-For our ground station to effectively use commands, we re-define and add some logic for commands in the python side of our code base.
+For our ground station to effectively use commands, we re-define and add some logic for commands in the python side of our code base. However, the core functions are actually just wrapped from their c implementations using `ctypes`.
 
 ### Step 1: Adding the command id
 Just like the c-side, the python side also defines an enum for the commands.
@@ -311,3 +311,4 @@ class CmdCallbackId(IntEnum):
     NUM_CMD_CALLBACKS = 14
 ```
 ### Step 2: Adding command data
+Just like in the C version, we need to tell python the data that a command may store. This definition helps `ctypes` wrap the c-side functions
