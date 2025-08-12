@@ -25,7 +25,7 @@ option(ENABLE_BL_BYPASS "Write directly to 0x0 and overwrite the bootloader" ON)
 if(ENABLE_BL_BYPASS)
     set(CUSTOM_START_ADDRESS 0)
 else()
-    set(CUSTOM_START_ADDRESS 0x00040000)
+  set(CUSTOM_START_ADDRESS 0x000C0000)
 endif()
 
 # Pass the address to the linker
