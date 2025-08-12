@@ -142,7 +142,7 @@ void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
           cmdResBytesRecieved++;
         }
 
-        if (cmdResBytesRecieved >= 223) {
+        if (cmdResBytesRecieved >= RS_DECODED_SIZE) {
           // Downlink this response if the array gets filled up
           setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
           LOG_IF_ERROR_CODE(sendPacket(cmdResBuffer));

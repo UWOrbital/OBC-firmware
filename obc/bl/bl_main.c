@@ -1,6 +1,5 @@
 #include "bl_uart.h"
 #include "bl_flash.h"
-#include "obc_general_util.h"
 #include "obc_gs_commands_response.h"
 #include "obc_gs_commands_response_pack.h"
 #include "obc_gs_errors.h"

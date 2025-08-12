@@ -129,7 +129,9 @@ void obcTaskFunctionAlarmMgr(void *pvParameters) {
               break;
             case ALARM_TYPE_TIME_TAGGED_CMD:
               LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg, responseData, &responseDataLen));
-              // TODO: Implement this so it send to downlink flow
+              // TODO: Implement this so it send to downlink flow once time-tagged responses are implemented correctly
+              // The way this gets downlinked will have to be thought out as it neds to work well with the Ground
+              // Station cli.
               memset(responseData, 0, CMD_RESPONSE_DATA_MAX_SIZE);
               break;
             default:
