@@ -19,7 +19,7 @@ from interfaces.obc_gs_interface.commands import (
 COMMAND_DATA_SIZE: Final[int] = 208
 
 # Refer to bl_config.h for the start address
-APP_STARTING_ADDRESS: Final[int] = 0x000C0000
+APP_STARTING_ADDRESS: Final[int] = 0x00040000
 
 
 def create_app_packet(packet_number: int, app_bin: bytes, is_last_packet: bool = False) -> bytes:

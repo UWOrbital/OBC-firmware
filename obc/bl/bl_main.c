@@ -28,6 +28,8 @@ extern uint32_t __ramFuncsSize__;
 extern uint32_t __ramFuncsRunStart__;
 extern uint32_t __ramFuncsRunEnd__;
 
+extern void _c_int00(void);
+
 /* DEFINES */
 // These values were chosen so that the UART transfers and flash writes are quick, but don't
 // use too much RAM
@@ -161,8 +163,8 @@ obc_error_code_t blJumpToApp() {
   };
 
   // Go to the application's entry point
-  uint32_t appStartAddress = (uint32_t)app_metadata->app_entry_func_addr;
-  ((appStartFunc_t)appStartAddress)();
+  // uint32_t appStartAddress = (uint32_t)app_metadata->app_entry_func_addr;
+  ((appStartFunc_t)(uint32_t)APP_START_ADDRESS)();
 
   // If it was not possible to jump to the app, we log that error here
   blUartWriteBytes(strlen("ERROR: Failed to run application\r\n"), (uint8_t *)"ERROR: Failed to run application\r\n");
