@@ -1,6 +1,7 @@
 from math import ceil
 from pathlib import Path
 from sys import argv
+from time import sleep
 from typing import Final
 
 from serial import PARITY_NONE, STOPBITS_TWO, Serial, SerialException

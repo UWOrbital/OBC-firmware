@@ -137,7 +137,7 @@ static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd, uint8_t *responseDa
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
+static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }

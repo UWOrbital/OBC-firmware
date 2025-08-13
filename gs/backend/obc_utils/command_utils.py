@@ -24,7 +24,6 @@ from interfaces.obc_gs_interface.commands import (
     create_cmd_i2c_probe,
     create_cmd_mirco_sd_format,
     create_cmd_ping,
-    create_cmd_reset_bl,
     create_cmd_rtc_sync,
     create_cmd_set_programming_session,
     create_cmd_uplink_disc,
@@ -248,7 +247,6 @@ def generate_command(args: str) -> CmdMsg | None:
         create_cmd_erase_app,
         create_cmd_download_data,
         create_cmd_verify_crc,
-        create_cmd_reset_bl,
         create_cmd_i2c_probe,
     ]
 
