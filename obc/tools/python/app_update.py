@@ -171,6 +171,8 @@ def main() -> None:
 
         print("Starting Flashing Procedure...")
         send_bin(str(path), com_port)
+        sleep(5)
+
     except SerialException:
         print("Invalid port entered")
 

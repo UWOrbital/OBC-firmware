@@ -46,9 +46,6 @@ static void unpackEraseAppCmdData(const uint8_t* buffer, uint32_t* offset, cmd_m
 // CMD_VERIFY_CRC
 static void unpackVerifyCrcCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
-// CMD_RESET_BL
-static void unpackResetBlCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
-
 // CMD_I2C_PROBE
 static void unpackI2CProbeCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
@@ -66,7 +63,6 @@ static const unpack_func_t unpackFns[] = {
     [CMD_DOWNLOAD_DATA] = unpackDownloadDataCmdData,
     [CMD_ERASE_APP] = unpackEraseAppCmdData,
     [CMD_VERIFY_CRC] = unpackVerifyCrcCmdData,
-    [CMD_RESET_BL] = unpackResetBlCmdData,
     [CMD_I2C_PROBE] = unpackI2CProbeCmdData,
     // Add more functions for other commands as needed
 };
@@ -162,11 +158,6 @@ static void unpackEraseAppCmdData(const uint8_t* buffer, uint32_t* offset, cmd_m
 
 // CMD_VERIFY_CRC
 static void unpackVerifyCrcCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
-  // No data to unpack
-}
-
-// CMD_RESET_BL
-static void unpackResetBlCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 

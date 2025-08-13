@@ -158,9 +158,8 @@ class CmdCallbackId(IntEnum):
     CMD_ERASE_APP = 9
     CMD_DOWNLOAD_DATA = 10
     CMD_VERIFY_CRC = 11
-    CMD_RESET_BL = 12
-    CMD_I2C_PROBE = 13
-    NUM_CMD_CALLBACKS = 14
+    CMD_I2C_PROBE = 12
+    NUM_CMD_CALLBACKS = 13
 
 
 # Path to File: interfaces/obc_gs_interface/commands/obc_gs_commands_response.h
@@ -379,21 +378,6 @@ def create_cmd_verify_crc(unixtime_of_execution: int | None = None) -> CmdMsg:
     cmd_msg.id = CmdCallbackId.CMD_VERIFY_CRC
     return cmd_msg
 
-
-def create_cmd_reset_bl(unixtime_of_execution: int | None = None) -> CmdMsg:
-    """
-    Function to create a CmdMsg structure for CMD_RESET_BL
-
-    :param unixtime_of_execution: A time of when to execute a certain event,
-                                  by default, it is set to None (i.e. a specific
-                                  time is not needed)
-    :return: CmdMsg structure for CMD_RESET_BL
-    """
-    cmd_msg = CmdMsg(unixtime_of_execution)
-    cmd_msg.id = CmdCallbackId.CMD_RESET_BL
-    return cmd_msg
-
-
 def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_I2C_PROBE
@@ -406,7 +390,6 @@ def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_I2C_PROBE
     return cmd_msg
-
 
 # ######################################################################
 # ||                                                                  ||

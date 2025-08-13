@@ -1,3 +1,4 @@
+#include "reg_system.h"
 #include "bl_errors.h"
 #include "bl_config.h"
 #include "bl_time.h"
@@ -16,6 +17,7 @@
 
 #define BL_BIN_RX_CHUNK_SIZE 208U  // Bytes
 #define MAX_PACKET_SIZE 223
+#define RESET_SYSTEM_MASK (1 << 15)
 
 programming_session_t programmingSession = APPLICATION;
 extern uint32_t __APP_IMAGE_TOTAL_SECTION_SIZE;
@@ -135,23 +137,27 @@ static obc_error_code_t verifyCrcCmdCallback(cmd_msg_t *cmd, uint8_t *responseDa
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t resetBlCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
   // TODO: Implement OBC reset functionality
+  blUartWriteBytes(strlen("Resetting System \r\n"), (uint8_t *)"Resetting System \r\n");
+  systemREG1->SYSECR |= RESET_SYSTEM_MASK;
+  while (1) {
+  }
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
 const cmd_info_t cmdsConfig[] = {
+    [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_SET_PROGRAMMING_SESSION] = {setProgrammingSessionCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_ERASE_APP] = {eraseAppCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLOAD_DATA] = {downloadDataCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_VERIFY_CRC] = {verifyCrcCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_RESET_BL] = {resetBlCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
 };
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the
