@@ -378,6 +378,7 @@ def create_cmd_verify_crc(unixtime_of_execution: int | None = None) -> CmdMsg:
     cmd_msg.id = CmdCallbackId.CMD_VERIFY_CRC
     return cmd_msg
 
+
 def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_I2C_PROBE
@@ -390,6 +391,7 @@ def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_I2C_PROBE
     return cmd_msg
+
 
 # ######################################################################
 # ||                                                                  ||
