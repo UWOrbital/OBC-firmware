@@ -21,9 +21,14 @@ endif()
 # Define the bootloader bypass option
 option(ENABLE_BL_BYPASS "Write directly to 0x0 and overwrite the bootloader" ON)
 
+# Define the build app B option
+option(APP_B "Set the starting address to 0x000C0000 to flash app B" ON)
+
 # Set the custom address based on the option
 if(ENABLE_BL_BYPASS)
     set(CUSTOM_START_ADDRESS 0)
+elseif(APP_B)
+    set(CUSTOM_START_ADDRESS 0x000C0000)
 else()
     set(CUSTOM_START_ADDRESS 0x00040000)
 endif()
