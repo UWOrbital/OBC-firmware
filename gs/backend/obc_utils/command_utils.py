@@ -15,6 +15,7 @@ from interfaces.command_framing import command_multi_pack
 from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
     CmdMsg,
+    CmdResponseErrorCode,
     create_cmd_downlink_logs_next_pass,
     create_cmd_downlink_telem,
     create_cmd_download_data,
@@ -83,6 +84,10 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> CmdRes | type[Cm
         read_bytes = ser.read(10000)
         start_index = read_bytes.find(b"\x7e")
         end_index = read_bytes.rfind(b"\x7e")
+
+        if command.id == CmdCallbackId.CMD_EXEC_OBC_RESET.value:
+            print(read_bytes)
+            return CmdRes(CmdCallbackId.CMD_EXEC_OBC_RESET, CmdResponseErrorCode.CMD_RESPONSE_SUCCESS, 0)
 
         # Check if a frame is what is sent back
         if start_index != -1:
