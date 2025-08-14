@@ -12,6 +12,7 @@ from interfaces.obc_gs_interface.commands import (
     ProgrammingSession,
     create_cmd_download_data,
     create_cmd_erase_app,
+    create_cmd_exec_obc_reset,
     pack_command,
 )
 
@@ -96,6 +97,12 @@ def send_bin(file_path: str, com_port: str) -> None:
         ser.read(len("Received packet\r\nWrite success\r\n"))
         progress_bar.update(1)
         progress_bar.close()
+        reset_command = pack_command(create_cmd_exec_obc_reset())
+        print("Reset App")
+        print(reset_command)
+        ser.write(reset_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
+        print(ser.read(100))
+        sleep(0.1)
 
 
 def main() -> None:
@@ -118,6 +125,8 @@ def main() -> None:
 
         print("Starting Flashing Procedure...")
         send_bin(str(path), com_port)
+        sleep(5)
+
     except SerialException:
         print("Invalid port entered")
 
