@@ -266,7 +266,7 @@ def create_cmd_downlink_logs_next_pass(log_level: int, unixtime_of_execution: in
         raise ValueError("Log level passed is too large (cannot be encoded into a c_uint8)")
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS
-    cmd_msg.downlinkLogsNextPass.logLevel = log_level
+    cmd_msg.downlinkLogsNextPass.logLevel = c_uint8(log_level)
     return cmd_msg
 
 

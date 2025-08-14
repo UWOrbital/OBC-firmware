@@ -312,3 +312,269 @@ class CmdCallbackId(IntEnum):
 ```
 ### Step 2: Adding command data
 Just like in the C version, we need to tell python the data that a command may store. This definition helps `ctypes` wrap the c-side functions
+
+1. Locate the union class named `_U`. Before that class you can add the data that your command will store as a child class of the `ctypes` class `Structure`. Continuing the example of `CMD_RTC_SYNC`, it's data would be defined as the following in python:
+```python
+class RtcSyncCmdData(Structure):
+    """
+    The python equivalent class for the rtc_sync_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("unixTime", c_uint32)]
+```
+> [!NOTE]
+> If one of the data fields is defined as an enum on the c-side, we can just define it as a `c_uint` on the python side (or whatever size of int the enum happens to be defined as: a `uint8_t` enum would have to be declared as a `c_uint8` in python)
+
+2. Now go to the child class of the `ctypes` `Union` class named `_U` and add the class you just created to store the command's data as a field which is a tuple of a string name and the corresponding class.
+
+> [!WARNING]
+> The name in the field should be the same as the name used in the c files. For example, for `CMD_RTC_SYNC` the `rtcSync` field is the same as the name of the `rtcSync` struct defined on the c-side.
+
+```python
+class _U(Union):
+    """
+    Union class needed to create the CmdMsgType Class
+    """
+
+    _fields_ = [
+        # Note how we define a tuple with the name of the variable on the c-side
+        # as a string and then we add it's corresponding python class.
+        ("rtcSync", RtcSyncCmdData),
+        ("downlinkLogsNextPass", DownlinkLogsNextPassCmdData),
+        ("downloadData", DownloadDataCmdData),
+        ("setProgrammingSession", SetProgrammingSessionCmdData),
+    ]
+```
+### Step 3: Adding a command factory function
+To integrate the commands in a more pythonic style, we create command factories which are functions that take in a specific commands parameters and return the generated `CmdMsg` class. Note, `CmdMsg` is the python equivalent of the `cmd_msg_t` class on the c-side.
+
+1. Locate the command block header (the big rectangles of hashtags with text in the middle) and locate the one that says "Command Pack and Unpack Implementations". Right before that block we can start creating the command factory function as seen in the code snippet below. Be sure to replace `cmd_name` with the name of the command your creating the factory for and update the doc string accordingly (refer to the main README for docstring style).
+```python
+def create_cmd_name(unixtime_of_execution: int | None = None) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_NAME
+
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_NAME
+    """
+    cmd_msg = CmdMsg(unixtime_of_execution)
+    cmd_msg.id = CmdCallbackId.CMD_NAME
+    return cmd_msg
+```
+
+2. If your command does not have an associated data with it, you can skip this step. If your command does have data we need to add that to your function.
+    1. Define the data your command takes in the function parameters. Be sure to just use regular python types here. If your command has any integer data fields, no matter the size, declare it as an `int` when writing a function parameter to define it. Remember to update the docstring as well. Again using `CMD_RTC_SYNC` as an example...
+    ```python
+    # Note how the time parameter is defined as a regular int
+    def create_cmd_rtc_sync(time: int, unixtime_of_execution: int | None = None) -> CmdMsg:
+        """
+        Function to create a CmdMsg structure for CMD_RTC_SYNC
+
+        :param time: Unixtime as an integer
+        :param unixtime_of_execution: A time of when to execute a certain event,
+                                      by default, it is set to None (i.e. a specific
+                                      time is not needed)
+        :return: CmdMsg structure for CMD_RTC_SYNC
+        """
+        cmd_msg = CmdMsg(unixtime_of_execution)
+        cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
+        return cmd_msg
+    ```
+    2. This step only applies if your integer data field is less than 32 bits (i.e. `uint8_t` or `uint16_t`). To the function we need to add some validation that verifies that the number passed into the function can actually be stored as an 8-bit or 16-bit integer, otherwise ctypes will throw an error. Note, we did not need to do this for `CMD_RTC_SYNC` because, by default, a python int is 32-bit. Thus, for this example we will be using another command called `CMD_DOWNLINK_LOGS_NEXT_PASS` which takes in a `logLevel` that is defined as a `uint8_t` on the c-side. To validate the value passed into the function we add a simple conditional that throws a `ValueError` if the number is too large as seen int he code snippet below:
+    ```python
+    # Notice the log level parameter follows python naming and is defined as a regular python int
+    def create_cmd_downlink_logs_next_pass(log_level: int, unixtime_of_execution: int | None = None) -> CmdMsg:
+        """
+        Function to create a CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
+
+        :param log_level: The Log Level for the logs
+        :param unixtime_of_execution: A time of when to execute a certain event,
+                                      by default, it is set to None (i.e. a specific
+                                      time is not needed)
+        :return: CmdMsg structure for CMD_DOWNLINK_LOGS_NEXT_PASS
+        """
+
+        # The conditional checks if the number passed in is larger than what a uint8_t can actually stores
+        # and throws a ValueError with a message (Don't make these messages too long but they should be
+        # descriptive so that developers can debug)
+        if log_level > 255:
+            raise ValueError("Log level passed is too large (cannot be encoded into a c_uint8)")
+        cmd_msg = CmdMsg(unixtime_of_execution)
+        cmd_msg.id = CmdCallbackId.CMD_DOWNLINK_LOGS_NEXT_PASS
+
+        # Don't worry, this is explained in the next step
+        cmd_msg.downlinkLogsNextPass.logLevel = c_uint8(log_level)
+        return cmd_msg
+    ```
+    3. Finally, we assign the parameter to the right variable in the `cmd_msg` class variable defined in the function. You'll notice that the data fields in `cmd_msg` are made of types from `ctypes` while the parameter is a regular python `int`. Thus we use functions provided by `ctypes` to convert them to the right type. Note that these functions will fail if the value being converted is invalid (i.e. too large/small). For `CMD_RTC_SYNC`, this means converting the `time` variable to a `c_uint32` using the `c_uint32()` function. Note that we access the variable by using the string names we defined in the tuples for the `ctypes` class `_fields_` and regular python dot syntax.
+
+    > [!NOTE]
+    > There are functions for each possible type in c, defined by `ctypes`. Consult the `ctypes` documentation to see how they are defined!
+
+    ```python
+    def create_cmd_rtc_sync(time: int, unixtime_of_execution: int | None = None) -> CmdMsg:
+        """
+        Function to create a CmdMsg structure for CMD_RTC_SYNC
+
+        :param time: Unixtime as an integer
+        :param unixtime_of_execution: A time of when to execute a certain event,
+                                      by default, it is set to None (i.e. a specific
+                                      time is not needed)
+        :return: CmdMsg structure for CMD_RTC_SYNC
+        """
+        cmd_msg = CmdMsg(unixtime_of_execution)
+        cmd_msg.id = CmdCallbackId.CMD_RTC_SYNC
+        # Here we convert and assign the parameter.
+        # If you recall, we defined the union field and gave it the name "rtcSync"
+        # and then gave the variable in that class the name "unixTime", corresponding
+        # to the c names.
+        cmd_msg.rtcSync.unixTime = c_uint32(time)
+        return cmd_msg
+    ```
+
+### Step 4: Adding command responses
+If the command response being sent by the command has no data, you can skip this step. Otherwise we define a class in python to store the data nicely and in a more usable format.
+
+1. Locate the `command_response_classes.py` file. Right after the last class we can define a new one in the format specified in the code snipped. Make sure to replace `CmdName` and `CMD_NAME` with the name of your command. Note, this is a child class of the base class used to store command responses `CmdRes` and is defined with the `dataclass` decorator. Additionally, we override the string method to help us better format the response (this is especially useful with the ground station CLI).
+```python
+@dataclass
+class CmdCmdNameRes(CmdRes):
+    """
+    Class for storing the response to CMD_NAME
+    """
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        return formatted_string
+```
+2. Before the override for the string method, add in the data fields that your command response will contain. Note, we do add a type hint since this is specifically a dataclass. For example, `CMD_RTC_SYNC` will send a response that contains the unixtime of the board when the command was sent. Make sure to update the docstring as seen in the code snippet below:
+```python
+@dataclass
+class CmdRtcSyncRes(CmdRes):
+    """
+    Child class for storing the response to the CMD_RTC_SYNC
+    :param board_unixtime: The time on the board when the sync command was sent
+    :type board_unixtime: int
+    """
+
+    board_unixtime: int
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+
+        return formatted_string
+```
+3. Now we fully define the string override by appending the data the class has as a formatted string to the `formatted_string` variable. Ideally each variable is it's own line in the `formatted_string`. For example, for `CMD_RTC_SYNC` we just add the unixtime of the board to the `formatted_string`. Remember to add the newline character so that the variables are formatted as their own lines.
+```python
+@dataclass
+class CmdRtcSyncRes(CmdRes):
+    """
+    Child class for storing the response to the CMD_RTC_SYNC
+    :param board_unixtime: The time on the board when the sync command was sent
+    :type board_unixtime: int
+    """
+
+    board_unixtime: int
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        # We just add the unixtime from the board into the string
+        formatted_string += "Unixtime from Board: " + str(self.board_unixtime) + "\n"
+
+        return formatted_string
+```
+
+### Step 5: Parsing Command Responses
+If your command response has no data, you can skip this step. If your command response does have data we have to define a parsing callback function since the python side will receive the data as a array of bytes (or bytestring in python).
+
+1. Locate the `command_response_callbacks.py`. Before the `parse_func_dict` we can define the function callback as seen in the code snipped below. Make sure to replace `CmdName`, `name`, `cmd_name` and `CMD_NAME` with the name of the command your parsing a response for.
+```python
+def parse_cmd_name(cmd_response: CmdRes, data: bytes) -> CmdCmdNameRes:
+    """
+    A function to parse the raw data from the response of CMD_NAME
+    :param cmd_response: Basic command response
+    :param data: The raw bytes containing the data that needs to be parsed
+    :return: CmdCmdNameRes (i.e. A command response with no data for CMD_NAME)
+    """
+    if cmd_response.cmd_id != CmdCallbackId.CMD_NAME:
+        raise ValueError("Wrong command id for parsing the name command")
+
+    return CmdCmdNameRes(cmd_response.cmd_id, cmd_response.error_code, cmd_response.response_length)
+```
+2. In between the conditional and the return, add in the logic that takes a bytestring from the `data` parameter and converts it to data that can be stored in the command's respective response class. An example for the command response for `CMD_RTC_SYNC` is provided below.
+```python
+def parse_cmd_rtc_sync(cmd_response: CmdRes, data: bytes) -> CmdRtcSyncRes:
+    """
+    A function to parse the raw data from the response of CMD_RTC_SYNC
+    :param cmd_response: Basic command response
+    :param data: The raw bytes containing the data that needs to be parsed
+    :return: CmdRes (i.e. A command response with no data for CMD_RTC_SYNC)
+    """
+    # TODO: Implement this callback properly
+    if cmd_response.cmd_id != CmdCallbackId.CMD_RTC_SYNC:
+        raise ValueError("Wrong command id for parsing the rtc sync command")
+
+    # The first four bytes store an integer so we convert it back to an integer
+    board_unixtime = int.from_bytes(data[:4], "little")
+
+    # We use the data that we just created and construct the command response class for CMD_RTC_SYNC
+    return CmdRtcSyncRes(cmd_response.cmd_id, cmd_response.error_code, cmd_response.response_length, board_unixtime)
+```
+
+3. Add the function callback you just created to the `parse_func_dict`, using the command enum in python as an index.
+```python
+parse_func_dict: dict[CmdCallbackId, Callable[..., CmdRes]] = defaultdict(lambda: parse_cmd_with_no_data)
+parse_func_dict[CmdCallbackId.CMD_VERIFY_CRC] = parse_cmd_verify_crc
+parse_func_dict[CmdCallbackId.CMD_RTC_SYNC] = parse_cmd_rtc_sync
+parse_func_dict[CmdCallbackId.CMD_I2C_PROBE] = parse_cmd_i2c_probe
+# Add entry here
+```
+
+### Step 6: Adding functions throughout to command utils
+We need to add the command factory functions to a specific list in our command utils file so that everything works as intended.
+1. Locate `command_utils.py`. In the `generate_commands` function, there will be a `command_factories` list. Add the command factory for your newly created command there.
+```python
+def generate_command(args: str) -> CmdMsg | None:
+    """
+    A function that parsed command arguments and returns the corresponding command frame
+
+    :param args: The arguments to parse to create the command
+    :return: CmdMsg structure with the requested command if the command is valid, else none
+    """
+    arguments = args.split()
+    command = CmdMsg()
+
+    # These are a list of parsers for commands that require additional arguments
+    # NOTE: Update this list when another command with a specific parser is required
+    child_parsers = [parse_cmd_downlink_logs_next_pass, parse_cmd_rtc_time_sync]
+
+    # A list of Command factories for all commands
+    # NOTE: Update these when a command is added and make sure to keep them in the order that the commands are described
+    # in the CmdCallbackId Enum
+    commmand_factories: list[Callable[..., CmdMsg]] = [
+        create_cmd_end_of_frame,
+        create_cmd_exec_obc_reset,
+        create_cmd_rtc_sync,
+        create_cmd_downlink_logs_next_pass,
+        create_cmd_mirco_sd_format,
+        create_cmd_ping,
+        create_cmd_downlink_telem,
+        create_cmd_uplink_disc,
+        # Add command factory function here
+    ]
+
+```
+
+## DONE!
+That was a long list of steps that hopefully will be simplified in the future. But, you've successfully added your function. If something is wrong with the guide or something needs changing, bring it up on the discord!
