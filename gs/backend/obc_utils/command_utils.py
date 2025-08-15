@@ -49,7 +49,7 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> CmdRes | type[Cm
     :return: A decoded frame if command is valid and has a response else None
     """
     # Using generate commands, we generate a command based on the arguments passed in
-    command = generate_command(args)
+    command, is_timetagged = generate_command(args)
 
     # We do a check to see if the arguments were properly passed in otherwise we return None
     if command is None:
@@ -102,10 +102,13 @@ def send_command(args: str, com_port: str, timeout: int = 0) -> CmdRes | type[Cm
 
             rcv_frame = comms.decode_frame(rcv_frame_bytes)
             # TODO: Handle these return frames
-            if rcv_frame is not None:
+            if rcv_frame is not None and not is_timetagged:
                 return parse_command_response(rcv_frame.data[:RS_DECODED_DATA_SIZE])
             else:
                 return None
+        elif is_timetagged:
+            print("Command is time tagged, enable and check logs for a response")
+            return None
         else:
             # TODO: Handle bootloader recieve
             return parse_command_response(read_bytes[:RS_DECODED_DATA_SIZE])
@@ -222,7 +225,7 @@ def parse_cmd_downlink_logs_next_pass() -> ArgumentParser:
 # End of specific command parsers
 
 
-def generate_command(args: str) -> CmdMsg | None:
+def generate_command(args: str) -> tuple[CmdMsg | None, bool]:
     """
     A function that parsed command arguments and returns the corresponding command frame
 
@@ -235,6 +238,7 @@ def generate_command(args: str) -> CmdMsg | None:
     # These are a list of parsers for commands that require additional arguments
     # NOTE: Update this list when another command with a specific parser is required
     child_parsers = [parse_cmd_downlink_logs_next_pass, parse_cmd_rtc_time_sync]
+    is_timetagged = False
 
     # A list of Command factories for all commands
     # NOTE: Update these when a command is added and make sure to keep them in the order that the commands are described
@@ -287,7 +291,10 @@ def generate_command(args: str) -> CmdMsg | None:
             )
         elif hasattr(command_args, "arg1"):
             command = commmand_factories[command_enum.value](command_args.arg1, command_args.timestamp)
-        return command
+
+        if command_args.timestamp is not None and command_args.timestamp > 0:
+            is_timetagged = True
+        return command, is_timetagged
 
     parser = arg_parse()
     # If the command did not pass any of the specific parsers, we try the general one
@@ -295,17 +302,20 @@ def generate_command(args: str) -> CmdMsg | None:
         command_args = parser.parse_args(arguments)
     except ArgumentError:
         print("Invalid Commands")
-        return None
+        return None, False
 
     # Same thing as before, we try to convert to a CmdCallbackId Enum to see if the command if valid
     try:
         command_enum = CmdCallbackId[command_args.command]
     except KeyError:
         print("Invalid Command")
-        return None
+        return None, False
 
     command = commmand_factories[command_enum.value](command_args.timestamp)
-    return command
+
+    if command_args.timestamp is not None and command_args.timestamp > 0:
+        is_timetagged = True
+    return command, is_timetagged
 
 
 def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: bool = False) -> None:
@@ -316,6 +326,9 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
     :param print_console: Whether the function should print to console or not. By default, this is set to False. This is
                           useful for the CLI where sometimes we want to print out the received logs from the board
     """
+
+    comms = CommsPipeline()
+
     with (
         Serial(
             com_port,
@@ -327,8 +340,31 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
         open(file_path, "a") as file,
     ):
         while True:
-            data = ser.read(10000).decode("utf-8")
-            file.write(data)
+            data = ser.read(100000)
+            start_index = data.find(b"\x7e")
+            end_index = data.rfind(b"\x7e")
+
+            # Check if a frame is in what is sent back
+            if start_index != -1:
+                # These are all the bytes from other tasks that are not a part of the frame
+                command_res = ""
+                outer_bytes_left = data[:start_index]
+                outer_bytes_right = data[end_index + 1 :]
+
+                # Isolate the frame
+                rcv_frame_bytes = data[start_index : end_index + 1]
+
+                rcv_frame = comms.decode_frame(rcv_frame_bytes)
+                # TODO: Handle these return frames
+                if rcv_frame is not None:
+                    command_res = parse_command_response(rcv_frame.data[:RS_DECODED_DATA_SIZE])
+
+                data_string = outer_bytes_left.decode("utf-8") + str(command_res) + outer_bytes_right.decode("utf-8")
+                print("Time Tagged Command Response:")
+            else:
+                data_string = data.decode("utf-8")
+
+            file.write(data_string)
             file.flush()
-            if print_console and len(data) != 0:
-                print(data)
+            if print_console and len(data_string) != 0:
+                print(data_string)

@@ -47,8 +47,7 @@ obc_error_code_t sendToCommandQueue(cmd_msg_t *cmd) {
   return OBC_ERR_CODE_QUEUE_FULL;
 }
 
-obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo, uint8_t *responseData,
-                                          uint8_t *responseDataLen) {
+obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInfo) {
   if (cmd == NULL || currCmdInfo == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -124,12 +123,12 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
       }
 
       if (cmd.isTimeTagged) {
-        LOG_IF_ERROR_CODE(processTimeTaggedCommand(&cmd, &currCmdInfo, responseData, &responseDataLen));
+        LOG_IF_ERROR_CODE(processTimeTaggedCommand(&cmd, &currCmdInfo));
       } else {
         LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&cmd, &currCmdInfo, responseData, &responseDataLen));
+        LOG_IF_ERROR_CODE(
+            downlinkCmdResponse(&cmdResHeader, &cmd, errCode, responseData, &responseDataLen, sendBuffer));
       }
-
-      LOG_IF_ERROR_CODE(downlinkCmdResponse(&cmdResHeader, &cmd, errCode, responseData, &responseDataLen, sendBuffer));
     }
   }
 }
