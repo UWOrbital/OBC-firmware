@@ -11,6 +11,7 @@
 #include "obc_logging.h"
 
 #include <FreeRTOS.h>
+#include <stdint.h>
 #include <sys_common.h>
 #include <os_task.h>
 #include <os_queue.h>
@@ -77,11 +78,37 @@ obc_error_code_t processTimeTaggedCommand(cmd_msg_t *cmd, cmd_info_t *currCmdInf
   return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t downlinkCmdResponse(cmd_response_header_t *cmdResHeader, cmd_msg_t *cmd, obc_error_code_t errCode,
+                                     uint8_t *responseData, uint8_t *responseDataLen, uint8_t *sendBuffer) {
+  cmdResHeader->cmdId = cmd->id;
+  cmdResHeader->dataLen = *responseDataLen;
+
+  if (errCode == OBC_ERR_CODE_SUCCESS) {
+    cmdResHeader->errCode = CMD_RESPONSE_SUCCESS;
+  } else {
+    cmdResHeader->errCode = CMD_RESPONSE_ERROR;
+  }
+
+  obc_gs_error_code_t interfaceErr = packCmdResponse(cmdResHeader, sendBuffer, responseData);
+
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_FAILED_PACK;
+  } else {
+    for (uint8_t i = 0; i < RS_DECODED_SIZE; i++) {
+      encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
+      LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
+    }
+  }
+
+  memset(responseData, 0, CMD_RESPONSE_DATA_MAX_SIZE);
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 void obcTaskFunctionCommandMgr(void *pvParameters) {
   obc_error_code_t errCode = 0;
   uint8_t responseData[CMD_RESPONSE_DATA_MAX_SIZE] = {0};
   uint8_t sendBuffer[RS_DECODED_SIZE] = {0};
-  obc_gs_error_code_t interfaceErr = 0;
 
   while (1) {
     cmd_msg_t cmd;
@@ -102,27 +129,7 @@ void obcTaskFunctionCommandMgr(void *pvParameters) {
         LOG_IF_ERROR_CODE(processNonTimeTaggedCommand(&cmd, &currCmdInfo, responseData, &responseDataLen));
       }
 
-      cmdResHeader.cmdId = cmd.id;
-      cmdResHeader.dataLen = responseDataLen;
-
-      if (errCode == OBC_ERR_CODE_SUCCESS) {
-        cmdResHeader.errCode = CMD_RESPONSE_SUCCESS;
-      } else {
-        cmdResHeader.errCode = CMD_RESPONSE_ERROR;
-      }
-
-      interfaceErr = packCmdResponse(&cmdResHeader, sendBuffer, responseData);
-
-      if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-        LOG_ERROR_CODE(OBC_ERR_CODE_FAILED_PACK);
-      } else {
-        for (uint8_t i = 0; i < RS_DECODED_SIZE; i++) {
-          encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
-          LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
-        }
-      }
-
-      memset(responseData, 0, CMD_RESPONSE_DATA_MAX_SIZE);
+      LOG_IF_ERROR_CODE(downlinkCmdResponse(&cmdResHeader, &cmd, errCode, responseData, &responseDataLen, sendBuffer));
     }
   }
 }

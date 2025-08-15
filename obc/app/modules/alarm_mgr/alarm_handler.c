@@ -1,6 +1,7 @@
 #include "alarm_handler.h"
 #include "ds3232_mz.h"
 #include "obc_gs_commands_response.h"
+#include "obc_gs_fec.h"
 #include "obc_scheduler_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -8,6 +9,7 @@
 #include "obc_time_utils.h"
 #include "obc_persistent.h"
 #include "obc_assert.h"
+#include "command_manager.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -47,6 +49,8 @@ void obcTaskInitAlarmMgr(void) {
 void obcTaskFunctionAlarmMgr(void *pvParameters) {
   obc_error_code_t errCode;
   uint8_t responseData[CMD_RESPONSE_DATA_MAX_SIZE] = {0};
+  uint8_t sendBuffer[RS_DECODED_SIZE] = {0};
+  cmd_response_header_t cmdResHeader = {0};
   while (1) {
     alarm_handler_event_t event;
     uint8_t responseDataLen = 0;
@@ -129,9 +133,8 @@ void obcTaskFunctionAlarmMgr(void *pvParameters) {
               break;
             case ALARM_TYPE_TIME_TAGGED_CMD:
               LOG_IF_ERROR_CODE(alarm.callbackDef.cmdCallback(&alarm.cmdMsg, responseData, &responseDataLen));
-              // TODO: Implement this so it send to downlink flow once time-tagged responses are implemented correctly
-              // The way this gets downlinked will have to be thought out as it neds to work well with the Ground
-              // Station cli.
+              LOG_IF_ERROR_CODE(downlinkCmdResponse(&cmdResHeader, &alarm.cmdMsg, errCode, responseData,
+                                                    &responseDataLen, sendBuffer));
               memset(responseData, 0, CMD_RESPONSE_DATA_MAX_SIZE);
               break;
             default:
