@@ -2,7 +2,7 @@ from __future__ import annotations
 
 # Standard library imports
 from argparse import ArgumentParser
-from dataclasses import dataclasses
+from dataclasses import dataclass
 from datetime import datetime, date, UTC
 from enum import Enum
 from json import loads, dumps
@@ -61,7 +61,7 @@ class ErrorCode(Enum):
     UNKNOWN = 7
 
 
-@dataclasses.dataclass
+@dataclass
 class DataPoint:
     """Data class to store a position data point"""
 
