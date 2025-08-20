@@ -1,6 +1,6 @@
-import dataclasses
-import struct
-import time
+from dataclasses import dataclass
+from struct import pack, calcsize
+from time import sleep
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Final
@@ -13,7 +13,7 @@ from interfaces import OBC_UART_BAUD_RATE
 APP_HEADER_SIZE: Final = 32
 
 
-@dataclasses.dataclass
+@dataclass
 class BootloaderHeader:
     """Header for the application binary"""
 
@@ -25,7 +25,7 @@ class BootloaderHeader:
 
     def serialize(self) -> bytes:
         """Returns the serialized version of the object with extra padding to reach specified APP_HEADER_SIZE"""
-        header_data = struct.pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size, self.board_type)
+        header_data = pack(BootloaderHeader.HEADER_FMT, self.version, self.bin_size, self.board_type)
         unused_bytes = self.get_unused_size()
         # Add padding for the unused bytes
         padding = bytes(unused_bytes)
@@ -35,7 +35,7 @@ class BootloaderHeader:
     @staticmethod
     def get_used_size() -> int:
         """Returns the total size of the used header (equal to size of all BootloaderHeader fields)"""
-        return struct.calcsize(BootloaderHeader.HEADER_FMT)
+        return calcsize(BootloaderHeader.HEADER_FMT)
 
     def get_unused_size(self) -> int:
         """Returns how much of the header size is unused"""
@@ -51,7 +51,7 @@ class BootloaderHeader:
 
 
 # More fields will be added later
-@dataclasses.dataclass
+@dataclass
 class CMakeData:
     """Build variables from CMake"""
 
@@ -132,11 +132,11 @@ def send_bin(file_path: str, com_port: str) -> None:
 
         # Start program download
         ser.write("d".encode("ascii"))
-        time.sleep(0.1)
+        sleep(0.1)
 
         # Send header
         ser.write(data[0:APP_HEADER_SIZE])
-        time.sleep(0.1)
+        sleep(0.1)
 
         # Wait for user to initiate transfer
         while input("Enter 1 to start program transfer: ") != "1":
@@ -144,7 +144,7 @@ def send_bin(file_path: str, com_port: str) -> None:
 
         # Bootloader expects a 'D' to be sent before the app
         ser.write("D".encode("ascii"))
-        time.sleep(0.1)
+        sleep(0.1)
 
         # Send app in chunks of 128 bytes
         total_bytes_to_write = len(data) - APP_HEADER_SIZE
@@ -155,7 +155,7 @@ def send_bin(file_path: str, com_port: str) -> None:
             if total_bytes_to_write - num_bytes_written >= chunk_size:
                 ser.write(data[APP_HEADER_SIZE + num_bytes_written : APP_HEADER_SIZE + num_bytes_written + chunk_size])
                 num_bytes_written += chunk_size
-                time.sleep(0.1)
+                sleep(0.1)
             else:
                 ser.write(data[num_bytes_written + APP_HEADER_SIZE :])
                 num_bytes_written += total_bytes_to_write - num_bytes_written
