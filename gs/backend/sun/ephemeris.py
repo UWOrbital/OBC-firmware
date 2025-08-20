@@ -2,22 +2,22 @@ from __future__ import annotations
 
 # Standard library imports
 from argparse import ArgumentParser
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, date, UTC
+from datetime import UTC, date, datetime
 from enum import Enum
-from json import loads, dumps
-from logging import critical, warning, info, debug, basicConfig, WARNING, INFO, DEBUG
+from json import dumps, loads
+from logging import DEBUG, INFO, WARNING, basicConfig, critical, debug, info, warning
 from math import isclose
 from os import remove
 from os.path import exists
 from re import compile
 from struct import pack
 from sys import exit
-from collections.abc import Iterable
 from typing import BinaryIO, Final
 
 # 3rd party imports
-from requests import get, Response
+from requests import Response, get
 from skyfield.api import load
 
 # Script constants

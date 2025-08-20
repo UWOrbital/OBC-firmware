@@ -1,8 +1,8 @@
-from dataclasses import dataclass
-from struct import pack, calcsize
-from time import sleep
 from argparse import ArgumentParser
+from dataclasses import dataclass
 from pathlib import Path
+from struct import calcsize, pack
+from time import sleep
 from typing import Final
 
 import serial
