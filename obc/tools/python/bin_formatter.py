@@ -5,7 +5,7 @@ from struct import calcsize, pack
 from time import sleep
 from typing import Final
 
-from serial import Serial, PARITY_NONE, STOPBITS_TWO
+from serial import PARITY_NONE, STOPBITS_TWO, Serial
 
 from interfaces import OBC_UART_BAUD_RATE
 
