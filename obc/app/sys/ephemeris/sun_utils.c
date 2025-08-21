@@ -21,8 +21,9 @@ obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t 
   if (jd1 == jd2 || buffer == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-
-  *buffer = point1 + ((point1 - point2) / (jd1 - jd2)) * (targetJulianDate - jd1);
+  sciPrintf("p1: %f | p2: %f | jd1: %lf | jd2: %lf \r\n", point1, point2, jd1, jd2);
+  *buffer = point1 + ((point2 - point1) / (jd2 - jd1)) * (targetJulianDate - jd1);
+  sciPrintf("interpolated: %f\r\n", *buffer);
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -31,5 +32,7 @@ obc_error_code_t linearlyInterpolate(julian_date_t targetJulianDate, position_t 
 bool doubleCloseDefault(double a, double b) { return doubleClose(a, b, RELATIVE_TOLERANCE); }
 
 bool doubleClose(double a, double b, double relativeTolerance) {
+  sciPrintf("doubleAbs(a - b): %lf\r\n", doubleAbs(a - b));
+  sciPrintf("relativeTolerance * doubleMax(doubleAbs(a), doubleAbs(b): %lf", relativeTolerance * doubleMax(doubleAbs(a), doubleAbs(b)));
   return doubleAbs(a - b) <= relativeTolerance * doubleMax(doubleAbs(a), doubleAbs(b));
 }

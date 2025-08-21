@@ -50,7 +50,10 @@ obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer) {
   bool isInRange = false;
 
   RETURN_IF_ERROR_CODE(sunFileJDInRange(jd, &isInRange));
-  if (!isInRange) return OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE;
+  if (!isInRange) {
+    xSemaphoreGive(fileMutex);
+    return OBC_ERR_CODE_SUN_POSITION_JD_OUT_OF_RANGE;
+  }
 
   // Read data point
   uint32_t index;
@@ -60,6 +63,7 @@ obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer) {
 
   if (doubleCloseDefault(jd, dataLower.julianDate)) {
     memcpy(buffer, &dataLower, sizeof(position_data_t));
+    xSemaphoreGive(fileMutex);
     return OBC_ERR_CODE_SUCCESS;
   }
 
@@ -74,7 +78,8 @@ obc_error_code_t sunPositionGet(julian_date_t jd, position_data_t *buffer) {
   RETURN_IF_ERROR_CODE(
       linearlyInterpolate(jd, dataLower.z, dataHigher.z, dataLower.julianDate, dataHigher.julianDate, &(newData.z)));
   memcpy(buffer, &newData, sizeof(position_data_t));
-
+  
+  xSemaphoreGive(fileMutex);
   return OBC_ERR_CODE_SUCCESS;
 }
 

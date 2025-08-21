@@ -6,7 +6,7 @@
 #include <redposix.h>
 
 #define SUN_FILE_HEADER_SIZE 20U
-#define SUN_FILE_DATA_POINT_SIZE 12U
+#define SUN_FILE_DATA_POINT_SIZE 32U
 
 // Cache data
 static julian_date_t minJD = -1;
@@ -39,6 +39,7 @@ static obc_error_code_t sunFileJDOfIndex(uint32_t index, julian_date_t *jd) {
 static obc_error_code_t sunFileSeek(int64_t location) {
   obc_error_code_t errCode;
   int64_t offSet = red_lseek(fileID, location, RED_SEEK_SET);
+  //sciPrintf("offSet:%lld\r\n", offSet);
   if (offSet < 0) {
     LOG_IF_ERROR_CODE(red_errno + RELIANCE_EDGE_ERROR_CODES_OFFSET);
     return OBC_ERR_CODE_INVALID_STATE;
@@ -55,10 +56,10 @@ static obc_error_code_t sunFileReadPosition(position_t *buff) {
   if (buff == NULL) return OBC_ERR_CODE_INVALID_ARG;
   obc_error_code_t errCode;
   size_t bytesRead;
-  position_t tmp;
-  RETURN_IF_ERROR_CODE(readFile(fileID, &tmp, sizeof(position_t), &bytesRead));
-  if (bytesRead != sizeof(position_t)) return OBC_ERR_CODE_INVALID_STATE;
-  *buff = tmp;
+  double tmp;
+  RETURN_IF_ERROR_CODE(readFile(fileID, &tmp, sizeof(double), &bytesRead));
+  if (bytesRead != sizeof(double)) return OBC_ERR_CODE_INVALID_STATE;
+  *buff = (position_t)tmp;
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -67,30 +68,51 @@ static obc_error_code_t sunFileReadPosition(position_t *buff) {
 obc_error_code_t sunFileInit(const char *fileName) {
   obc_error_code_t errCode;
   // Init file
+  //f("sunFileInit - createFile\r\n");
   RETURN_IF_ERROR_CODE(createFile(fileName, &fileID));
+
+  RETURN_IF_ERROR_CODE(openFile(fileName, RED_O_RDONLY, &fileID));
 
   // Set offset to beginning
   size_t length;
+  //sciPrintf("sunFileInit - sunFileSeek\r\n");
   RETURN_IF_ERROR_CODE(sunFileSeek(0));
 
   // Read minimum jd
   julian_date_t minimumJD;
+  //sciPrintf("sunFileInit - readFile\r\n");
   RETURN_IF_ERROR_CODE(readFile(fileID, &minimumJD, sizeof(julian_date_t), &length));
+  // sciPrintf("length: %zu != sizeof(julian_date_t): %zu \r\n", length, sizeof(julian_date_t));
+  // sciPrintf("test\r\n");
   if (length != sizeof(julian_date_t)) return OBC_ERR_CODE_INVALID_STATE;
 
   // Read step size
   double stepSizeBuffer;
+  //sciPrintf("test 2\r\n");
   RETURN_IF_ERROR_CODE(readFile(fileID, &stepSizeBuffer, sizeof(double), &length));
+  //sciPrintf("length != sizeof(double)\r\n");
   if (length != sizeof(double)) return OBC_ERR_CODE_INVALID_STATE;
 
   // Read number of data points
   uint32_t numDataPoints;
   RETURN_IF_ERROR_CODE(readFile(fileID, &numDataPoints, sizeof(uint32_t), &length));
-  RETURN_IF_ERROR_CODE(closeFile(fileID));
+  //RETURN_IF_ERROR_CODE(closeFile(fileID));
   if (length != sizeof(uint32_t) || numDataPoints == 0) return OBC_ERR_CODE_INVALID_STATE;
 
-  RETURN_IF_ERROR_CODE(sunFileJDOfIndex(numDataPoints, &maxJD));
+  
+  minJD = minimumJD;
+  stepSize = stepSizeBuffer;
   numberOfDataPoints = numDataPoints;
+  maxJD = minJD + (numberOfDataPoints - 1) * stepSize;
+
+  // debugging
+  //sciPrintf("minJD: %lf, stepSize: %lf, numberOfDataPoints: %u, maxJD: %lf \r\n", minJD, stepSize, numberOfDataPoints, maxJD);
+  //uint8_t* bytes = (uint8_t*)&minimumJD;
+  //sciPrintf("minimumJD bytes: %02X %02X %02X %02X %02X %02X %02X %02X\r\n", 
+          //bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7]);
+
+  RETURN_IF_ERROR_CODE(sunFileJDOfIndex(numDataPoints - 1, &maxJD));
+  
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -118,15 +140,38 @@ obc_error_code_t sunFileJDInRange(julian_date_t jd, bool *buff) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+obc_error_code_t testRead() {
+  obc_error_code_t errCode;
+
+  RETURN_IF_ERROR_CODE("sunFileSeek", sunFileSeek(SUN_FILE_HEADER_SIZE));
+
+  uint8_t raw[12];
+  size_t bytesRead;
+  STOP_ON_ERROR("readFile", readFile(fileID, raw, sizeof(raw), &bytesRead));
+  sciPrintf("Raw bytes after header");
+  for (int i = 0; i < 12; ++i) sciPrintf("%02X ", raw[i]);
+  sciPrintf("\r\n");
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 obc_error_code_t sunFileReadDataPoint(uint32_t index, position_data_t *buff) {
   obc_error_code_t errCode;
+  //sciPrintf("check");
   if (buff == NULL || index >= numberOfDataPoints) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   julian_date_t jd;
   RETURN_IF_ERROR_CODE(sunFileJDOfIndex(index, &jd));
-
   RETURN_IF_ERROR_CODE(sunFileSeek(SUN_FILE_HEADER_SIZE + index * SUN_FILE_DATA_POINT_SIZE));
+
+
+
+  
+  //sciPrintf("RETURN_IF_ERROR_CODE(sunFileReadPosition(&x));\r\n");
+  double fileJD;
+  size_t bytesRead;
+  RETURN_IF_ERROR_CODE(readFile(fileID, &fileJD, sizeof(double), &bytesRead));
   position_t x, y, z;
   RETURN_IF_ERROR_CODE(sunFileReadPosition(&x));
   RETURN_IF_ERROR_CODE(sunFileReadPosition(&y));

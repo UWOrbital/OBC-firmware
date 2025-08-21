@@ -51,18 +51,30 @@ static StackType_t taskStack[10000];
   sciPrintf("%s was successful\r\n", text);
 
 void vTask1(void *pvParameters) {
-  sciPrintf("Task 1\r\n");
+  sciPrintf("---------------\r\nTask 1\r\n");
   obc_error_code_t errCode;
 
   // Data from ephemeris.py (8 KB)
   // 20+12*n bytes. use n=665
   uint8_t ephemerisData[8000] = {
-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f, 0x98, 0x02, 0x00,
-      0x00, 0xc1, 0x09, 0x04, 0x4d, 0x71, 0xc4, 0x50, 0xcc, 0x26, 0xe0, 0x9b, 0xc9, 0xae, 0xf7, 0x04, 0x4d, 0x90, 0xa2,
-      0x47, 0xcc, 0x60, 0xb6, 0x97, 0xc9, 0x6e, 0xdb, 0x05, 0x4d, 0x24, 0x71, 0x3e, 0xcc, 0x33, 0x81, 0x93, 0xc9, 0xef,
-      0xb4, 0x06, 0x4d, 0xde, 0x30, 0x35, 0xcc, 0xc5, 0x40, 0x8f, 0xc9, 0x20, 0x84, 0x07, 0x4d, 0x73, 0xe2, 0x2b, 0xcc,
-      0x3a, 0xf5, 0x8a, 0xc9, 0xed, 0x48, 0x08, 0x4d, 0x9e, 0x86, 0x22, 0xcc, 0xbb, 0x9e, 0x86, 0xc9, 0x48, 0x03, 0x09,
-      0x4d, 0x1e, 0x1e, 0x19, 0xcc, 0x74, 0x3d, 0x82, 0xc9, 0x21, 0xb3, 0x09, 0x4d, 0xb7, 0xa9, 0x0f, 0xcc, 0x38, 0xa3,
+      // header
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f, 
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f, 
+      0x98, 0x02, 0x00, 0x00, 
+      // point index 0
+      0xc1, 0x09, 0x04, 0x4d, 
+      0x71, 0xc4, 0x50, 0xcc, 
+      0x26, 0xe0, 0x9b, 0xc9, 
+      // ...
+      0xae, 0xf7, 0x04, 0x4d, 0x90, 0xa2, 0x47, 0xcc, 0x60, 0xb6, 0x97, 0xc9, 
+      0x6e, 0xdb, 0x05, 0x4d, 0x24, 0x71, 0x3e, 0xcc, 0x33, 0x81, 0x93, 0xc9, 
+      0xef, 0xb4, 0x06, 0x4d, 0xde, 0x30, 0x35, 0xcc, 0xc5, 0x40, 0x8f, 0xc9, 
+      0x20, 0x84, 0x07, 0x4d, 0x73, 0xe2, 0x2b, 0xcc,
+      0x3a, 0xf5, 0x8a, 0xc9, 
+      0xed, 0x48, 0x08, 0x4d, 0x9e, 0x86, 0x22, 0xcc, 0xbb, 0x9e, 0x86, 0xc9, 
+      0x48, 0x03, 0x09,
+      0x4d, 0x1e, 0x1e, 0x19, 0xcc, 0x74, 0x3d, 0x82, 0xc9, 
+      0x21, 0xb3, 0x09, 0x4d, 0xb7, 0xa9, 0x0f, 0xcc, 0x38, 0xa3,
       0x7b, 0xc9, 0x6a, 0x58, 0x0a, 0x4d, 0x31, 0x2a, 0x06, 0xcc, 0xeb, 0xb6, 0x72, 0xc9, 0x19, 0xf3, 0x0a, 0x4d, 0xab,
       0x40, 0xf9, 0xcb, 0x9d, 0xb6, 0x69, 0xc9, 0x21, 0x83, 0x0b, 0x4d, 0xe2, 0x19, 0xe6, 0xcb, 0x09, 0xa3, 0x60, 0xc9,
       0x7d, 0x08, 0x0c, 0x4d, 0x9f, 0xe1, 0xd2, 0xcb, 0xfe, 0x7c, 0x57, 0xc9, 0x24, 0x83, 0x0c, 0x4d, 0x76, 0x99, 0xbf,
@@ -484,26 +496,32 @@ void vTask1(void *pvParameters) {
   int32_t fileID;
 
   // Write data points to new file
-  const char *fileName = "SunData.bin";
+  const char *fileName = "sunData.bin";
   STOP_ON_ERROR("setupFileSystem", setupFileSystem());
   STOP_ON_ERROR("createFile", createFile(fileName, &fileID));
   STOP_ON_ERROR("openFile", openFile(fileName, RED_O_RDWR, &fileID));
-  
-  //STOP_ON_ERROR("sunFileWriteHeader", sunFileWriteHeader(1.0, 1.0, 665));
-  // manually wrote header since sunFileWriteHeader was returning an error
-  julian_date_t minimumJD = 1.0;
-  double stepSize = 1.0;
-  uint32_t numDataPoints = 665;
-  STOP_ON_ERROR("writeFile", writeFile(fileID, &minimumJD, sizeof(julian_date_t)));
-  STOP_ON_ERROR("writeFile", writeFile(fileID, &stepSize, sizeof(double)));
-  STOP_ON_ERROR("writeFile", writeFile(fileID, &numDataPoints, sizeof(uint32_t)));
-  
+    
   STOP_ON_ERROR("writeFile", writeFile(fileID, ephemerisData, sizeof(ephemerisData)));
   STOP_ON_ERROR("closeFile", closeFile(fileID));
 
   // Init
 
+  // temporary code since sunFileInit has an error with sunFileSeek
   STOP_ON_ERROR("sunFileInit", sunFileInit(fileName));
+  // STOP_ON_ERROR("openFile", openFile(fileName, RED_O_RDONLY, &fileID));
+  // julian_date_t testMinimumJD = 1.0;
+  // double testStepSize = 1.0;
+  // uint32_t testNumDataPoints = 665;
+  // size_t bytesRead;
+  // STOP_ON_ERROR("readFile", readFile(fileID, &testMinimumJD, sizeof(julian_date_t), &bytesRead));
+  // STOP_ON_ERROR("readFile", readFile(fileID, &testStepSize, sizeof(double), &bytesRead));
+  // STOP_ON_ERROR("readFile", readFile(fileID, &testNumDataPoints, sizeof(uint32_t), &bytesRead));
+  // sciPrintf("test header: minJD=%lf, stepSize=%lf, numDataPoints=%u\r\n", testMinimumJD, testStepSize, testNumDataPoints);
+  // minJD = testMinimumJD;
+  // stepSize = testStepSize;
+  // numberOfDataPoints = testNumDataPoints;
+  // maxJD = minJD + (numberOfDataPoints - 1) * stepSize;
+  // STOP_ON_ERROR("closeFile", closeFile(fileID));
   sciPrintf("Sun module successfully initialized");
 
   // Basic checks
@@ -573,7 +591,7 @@ void vTask1(void *pvParameters) {
   // Stored at index 32:
   position_data_t expected2 = {
       .julianDate = 33.000000000, .x = 1.481637529364224E+08, .y = 2.596441718873117E+07, .z = -5.378180895996094E+04};
-  STOP_ON_ERROR("sunFileReadDataPoint index=33", sunFileReadDataPoint(33, &readData));
+  STOP_ON_ERROR("sunFileReadDataPoint index=32", sunFileReadDataPoint(32, &readData));
   sciPrintf("Expected %d\r\n", closePositionData(expected2, readData));
 
   // Stored at index 98:
@@ -582,11 +600,17 @@ void vTask1(void *pvParameters) {
   STOP_ON_ERROR("sunFileReadDataPoint index=98", sunFileReadDataPoint(98, &readData));
   sciPrintf("Expected %d\r\n", closePositionData(expected3, readData));
 
+  // Stored at index 500
+  position_data_t expected4 = {
+      .julianDate = 501.000000000, .x = -4.741550812771726E+07, .y = 1.445224547355318E+08, .z = 2.390815344204761E+06};
+  STOP_ON_ERROR("sunFileReadDataPoint index=500", sunFileReadDataPoint(500, &readData));
+  sciPrintf("Expected %d\r\n", closePositionData(expected4, readData));
+
   /*     Ephemeris test       */
 
   STOP_ON_ERROR("sunPositionInit", sunPositionInit());
   const char *actualFileName = sunPositionGetFileName();
-  sciPrintf("File name: %s", actualFileName);
+  sciPrintf("File name: %s\r\n", actualFileName);
 
   // sunPositionGet Basic
 
@@ -600,9 +624,27 @@ void vTask1(void *pvParameters) {
   sciPrintf("Expected %d\r\n", closePositionData(expected3, readData));
 
   // Testing linear interpolation
-  position_data_t expected4 = {6.9, 39864448.7227, -1415999740.727, 7447.80624892};
+
+  STOP_ON_ERROR("sunFileReadDataPoint index=5", sunFileReadDataPoint(5, &readData));
+  sciPrintf("Index 5 (JD=6): x=%.6e, y=%.6e, z=%.6e\r\n", readData.x, readData.y, readData.z);
+
+  STOP_ON_ERROR("sunFileReadDataPoint index=6", sunFileReadDataPoint(6, &readData));
+  sciPrintf("Index 6 (JD=7): x=%.6e, y=%.6e, z=%.6e\r\n", readData.x, readData.y, readData.z);
+  
+  position_data_t expected5 = {
+    .julianDate = 6.9, .x = 1.435920e+08, .y = -4.038550e+07, .z = -1.070515e+06};
   STOP_ON_ERROR("sunPositionGet(6.9)", sunPositionGet(6.9, &readData));
-  sciPrintf("Expected %d\r\n", closePositionData(expected4, readData));
+  sciPrintf("Interpolated (JD=6.9): x=%.6e, y=%.6e, z=%.6e\r\n", readData.x, readData.y, readData.z);
+  sciPrintf("Expected %d\r\n", closePositionData(expected5, readData));
+  uint8_t *x_bytes = (uint8_t *)&readData.x;
+  sciPrintf("x bytes: %02X %02X %02X %02X\r\n", x_bytes[0], x_bytes[1], x_bytes[2], x_bytes[3]);
+  uint8_t *y_bytes = (uint8_t *)&readData.y;
+  sciPrintf("y bytes: %02X %02X %02X %02X\r\n", y_bytes[0], y_bytes[1], y_bytes[2], y_bytes[3]);
+  uint8_t *z_bytes = (uint8_t *)&readData.z;
+  sciPrintf("z bytes: %02X %02X %02X %02X\r\n", z_bytes[0], z_bytes[1], z_bytes[2], z_bytes[3]);
+  sciPrintf("diff x: %.10f\r\n", fabsf(expected5.x - readData.x));
+  sciPrintf("diff y: %.10f\r\n", fabsf(expected5.y - readData.y));
+  sciPrintf("diff z: %.10f\r\n", fabsf(expected5.z - readData.z));
 
   // Get number of data points after specific JD
 
@@ -619,9 +661,9 @@ void vTask1(void *pvParameters) {
   // Position tests
 
   position_data_t posTestData;
-  CLEANUP_ON_ERROR("sunPositionGet(1.0)", sunPositionGet(1.0, &posTestData), "SunData.bin");
+  CLEANUP_ON_ERROR("sunPositionGet(1.0)", sunPositionGet(1.0, &posTestData), "sunData.bin");
   sciPrintf("JD=1.0: x=%e, y=%e, z=%e\r\n", posTestData.x, posTestData.y, posTestData.z);
-  CLEANUP_ON_ERROR("sunPositionGet(33.0)", sunPositionGet(33.0, &posTestData), "SunData.bin");
+  CLEANUP_ON_ERROR("sunPositionGet(33.0)", sunPositionGet(33.0, &posTestData), "sunData.bin");
   sciPrintf("JD=33.0: x=%e, y=%e, z=%e\r\n", posTestData.x, posTestData.y, posTestData.z);
 
   sciPrintf("Test complete");
