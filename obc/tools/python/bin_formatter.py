@@ -5,7 +5,7 @@ from struct import calcsize, pack
 from time import sleep
 from typing import Final
 
-import serial
+from serial import Serial, PARITY_NONE, STOPBITS_TWO
 
 from interfaces import OBC_UART_BAUD_RATE
 
@@ -121,11 +121,11 @@ def send_bin(file_path: str, com_port: str) -> None:
         return
 
     # Open serial port and write binary to device via UART
-    with serial.Serial(
+    with Serial(
         com_port,
         baudrate=OBC_UART_BAUD_RATE,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
+        parity=PARITY_NONE,
+        stopbits=STOPBITS_TWO,
         timeout=1,
     ) as ser:
         # TODO: Improve transfer protocol
