@@ -16,11 +16,12 @@ export default defineConfig({
 					autogenerate: { directory: 'getting-started' },
 				},
 				{
+					label: 'Comms Guides',
+					autogenerate: { directory: 'comms' },
+				},
+				{
 					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],
+					autogenerate: { directory: 'guides' },
 				},
 			],
 		}),
