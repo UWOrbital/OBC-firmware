@@ -102,3 +102,11 @@ lerna-debug.log*
 *dist-ssr
 *.local
 *.vite
+
+# docs
+dist/
+.astro/
+docs/node_modules/
+
+# macOS-specific files
+.DS_Store
