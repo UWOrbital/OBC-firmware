@@ -273,7 +273,7 @@ def generate_command(args: str) -> tuple[CmdMsg | None, bool]:
             command_enum = CmdCallbackId[command_args.command]
         except KeyError:
             print("Invalid Command")
-            return None
+            return None, False
 
         # We check how many arguments are in the parsed object and call functions accordingly.
         # This is the reason why it's important to use the arg1, arg2, arg3 naming convention when creating
@@ -347,7 +347,7 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
             # Check if a frame is in what is sent back
             if start_index != -1:
                 # These are all the bytes from other tasks that are not a part of the frame
-                command_res = ""
+                command_res = None
                 outer_bytes_left = data[:start_index]
                 outer_bytes_right = data[end_index + 1 :]
 
@@ -356,8 +356,8 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
 
                 rcv_frame = comms.decode_frame(rcv_frame_bytes)
                 # TODO: Handle these return frames
-                if rcv_frame is not None:
-                    command_res = parse_command_response(rcv_frame.data[:RS_DECODED_DATA_SIZE])
+                if rcv_frame is not None and rcv_frame.data is not None:
+                    command_res = parse_command_response(bytes(rcv_frame.data[:RS_DECODED_DATA_SIZE]))
 
                 data_string = outer_bytes_left.decode("utf-8") + str(command_res) + outer_bytes_right.decode("utf-8")
                 print("Time Tagged Command Response:")
