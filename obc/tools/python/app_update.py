@@ -12,7 +12,6 @@ from interfaces.obc_gs_interface.commands import (
     ProgrammingSession,
     create_cmd_download_data,
     create_cmd_erase_app,
-    create_cmd_exec_obc_reset,
     pack_command,
 )
 
@@ -23,7 +22,9 @@ COMMAND_DATA_SIZE: Final[int] = 208
 APP_STARTING_ADDRESS: Final[int] = 0x00040000
 
 
-def create_app_packet(packet_number: int, app_bin: bytes, is_last_packet: bool = False) -> bytes:
+def create_app_packet(
+    packet_number: int, app_bin: bytes, app_starting_address: int, is_last_packet: bool = False
+) -> bytes:
     """
     A helper function that creates an app packet to send to the bootloader
 
@@ -38,7 +39,7 @@ def create_app_packet(packet_number: int, app_bin: bytes, is_last_packet: bool =
             create_cmd_download_data(
                 ProgrammingSession.APPLICATION,
                 len(app_bin[packet_number * COMMAND_DATA_SIZE :]),
-                APP_STARTING_ADDRESS + packet_number * COMMAND_DATA_SIZE,
+                app_starting_address + packet_number * COMMAND_DATA_SIZE,
             )
         )
         return (command_bytes + app_bin[packet_number * COMMAND_DATA_SIZE :]).ljust(RS_DECODED_DATA_SIZE, b"\x00")
@@ -47,7 +48,7 @@ def create_app_packet(packet_number: int, app_bin: bytes, is_last_packet: bool =
             create_cmd_download_data(
                 ProgrammingSession.APPLICATION,
                 COMMAND_DATA_SIZE,
-                APP_STARTING_ADDRESS + packet_number * COMMAND_DATA_SIZE,
+                app_starting_address + packet_number * COMMAND_DATA_SIZE,
             )
         )
         return command_bytes + app_bin[
@@ -55,7 +56,7 @@ def create_app_packet(packet_number: int, app_bin: bytes, is_last_packet: bool =
         ].ljust(RS_DECODED_DATA_SIZE, b"\x00")
 
 
-def send_bin(file_path: str, com_port: str) -> None:
+def send_bin(file_path: str, com_port: str, app_starting_address: int) -> None:
     """
     Sends .bin file over UART serial port
 
@@ -85,32 +86,26 @@ def send_bin(file_path: str, com_port: str) -> None:
         # We create a progress bar with the tqdm library
         progress_bar = tqdm(desc="Packets Written: ", total=commands_needed, dynamic_ncols=True)
         for i in range(commands_needed - 1):
-            app_packet = create_app_packet(i, app_bin)
+            app_packet = create_app_packet(i, app_bin, app_starting_address)
             ser.write(app_packet)
             ser.read(len("Received packet\r\nWrite success\r\n"))
             progress_bar.update(1)
             ser.reset_output_buffer()
             ser.reset_input_buffer()
 
-        app_packet = create_app_packet(commands_needed - 1, app_bin, True)
+        app_packet = create_app_packet(commands_needed - 1, app_bin, app_starting_address, True)
         ser.write(app_packet)
         ser.read(len("Received packet\r\nWrite success\r\n"))
         progress_bar.update(1)
         progress_bar.close()
-        reset_command = pack_command(create_cmd_exec_obc_reset())
-        print("Reset App")
-        print(reset_command)
-        ser.write(reset_command.ljust(RS_DECODED_DATA_SIZE, b"\x00"))
-        print(ser.read(100))
-        sleep(0.1)
 
 
 def main() -> None:
     """
     A function that initializes the com port and path to update the app
     """
-    if len(argv) != 3:
-        print("Two arguments needed: Com Port and Application File Path")
+    if len(argv) != 4:
+        print("Three arguments needed: Com Port, Application File Path and APP_A or APP_B")
         return
 
     try:
@@ -118,13 +113,23 @@ def main() -> None:
         ser = Serial(com_port)
         print("Comm port set to: " + str(ser.name))
         ser.close()
+
         path = Path(argv[2]).resolve()
         if not path.is_file() and path.suffix != ".bin":
             print("Invalid file path")
             return
 
+        app_starting_address = 0
+        if argv[3] == "APP_A":
+            app_starting_address = 0x00040000
+        elif argv[3] == "APP_B":
+            app_starting_address = 0x000C0000
+        else:
+            print("Invalid app type")
+            return
+
         print("Starting Flashing Procedure...")
-        send_bin(str(path), com_port)
+        send_bin(str(path), com_port, app_starting_address)
         sleep(5)
 
     except SerialException:
