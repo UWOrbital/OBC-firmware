@@ -4,8 +4,7 @@ FROM denoland/deno:alpine
 WORKDIR /app
 COPY . /app/
 
-# Install npm dependencies using Deno's npm compatibility
-RUN deno task npm:install || deno run -A npm:install || true
+RUN deno install
 
 EXPOSE 3000
 

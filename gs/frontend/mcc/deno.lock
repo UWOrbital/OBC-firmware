@@ -5,6 +5,7 @@
     "npm:@tanstack/react-query@^5.56.2": "5.85.5_react@18.3.1",
     "npm:@types/react@^18.3.1": "18.3.24",
     "npm:@vitejs/plugin-react@^4.3.3": "4.7.0_vite@5.4.19_@babel+core@7.28.3",
+    "npm:bootstrap@^5.3.3": "5.3.8_@popperjs+core@2.11.8",
     "npm:react-dom@^18.3.1": "18.3.1_react@18.3.1",
     "npm:react-hook-form@^7.53.0": "7.62.0_react@18.3.1",
     "npm:react-router-dom@^6.26.0": "6.30.1_react@18.3.1_react-dom@18.3.1__react@18.3.1",
@@ -298,6 +299,9 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
+    "@popperjs/core@2.11.8": {
+      "integrity": "sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A=="
+    },
     "@remix-run/router@1.23.0": {
       "integrity": "sha512-O3rHJzAQKamUz1fvE0Qaw0xSFqsA/yafi2iqeE0pvdFtCO1viYx8QL6f3Ln/aCCTLxs68SLf0KPM9eSeM8yBnA=="
     },
@@ -466,6 +470,12 @@
         "@types/babel__core",
         "react-refresh",
         "vite"
+      ]
+    },
+    "bootstrap@5.3.8_@popperjs+core@2.11.8": {
+      "integrity": "sha512-HP1SZDqaLDPwsNiqRqi5NcP0SSXciX2s9E+RyqJIIqGo+vJeN5AJVM98CXmW/Wux0nQ5L7jeWUdplCEf0Ee+tg==",
+      "dependencies": [
+        "@popperjs/core"
       ]
     },
     "browserslist@4.25.3": {
@@ -696,6 +706,7 @@
       "npm:@tanstack/react-query@^5.56.2",
       "npm:@types/react@^18.3.1",
       "npm:@vitejs/plugin-react@^4.3.3",
+      "npm:bootstrap@^5.3.3",
       "npm:react-dom@^18.3.1",
       "npm:react-hook-form@^7.53.0",
       "npm:react-router-dom@^6.26.0",
