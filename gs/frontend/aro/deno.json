@@ -17,7 +17,7 @@
     "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4.3.3",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^1.0.0",
     "vite": "npm:vite@^5.4.11",
-    "vite-tsconfig-paths": "npm:vite-tsconfig-paths@^4.2.0"
+    "vite-tsconfig-paths": "npm:vite-tsconfig-paths@^5.0.1"
   },
   "exports": {}
 }
