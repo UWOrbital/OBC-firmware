@@ -1,6 +1,13 @@
-# ARO Frontend Dockerfile (Node.js)
-FROM node:20.19-alpine
+
+# ARO Frontend Dockerfile (Deno + Vite.js)
+FROM denoland/deno:alpine
 WORKDIR /app
 COPY . /app/
+
+# Install npm dependencies using Deno's npm compatibility
+RUN deno task npm:install || deno run -A npm:install || true
+
 EXPOSE 3000
-CMD ["deno", "run", "dev", "--port", "3000"]
+
+# Start Vite dev server using Deno
+CMD ["deno", "task", "dev", "--host", "0.0.0.0","--port", "3000"]
