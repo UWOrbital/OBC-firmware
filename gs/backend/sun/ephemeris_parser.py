@@ -2,8 +2,8 @@
 # Test harness for test_ephemeris.py
 from __future__ import annotations
 
-import dataclasses
-import struct
+from dataclasses import dataclass
+from struct import unpack
 
 # Standard library imports
 from typing import BinaryIO
@@ -13,7 +13,7 @@ from . import ephemeris
 from .ephemeris import DataPoint
 
 
-@dataclasses.dataclass
+@dataclass
 class Header:
     """
     Data class to store the header information
@@ -37,7 +37,7 @@ def parse_header(file: str) -> Header:
         step_size = get_single_data_point(f, False)
 
         # Read 1 uint value
-        num_data_points = int(struct.unpack(ephemeris.DATA_UINT, f.read(ephemeris.SIZE_OF_INT))[0])
+        num_data_points = int(unpack(ephemeris.DATA_UINT, f.read(ephemeris.SIZE_OF_INT))[0])
         return Header(start_time, step_size, num_data_points)
 
 
@@ -57,7 +57,7 @@ def get_single_data_point(file: BinaryIO, is_float: bool = True) -> float:
 
     # Read and parse 1 float/double value
     byte_str = file.read(read_size)
-    float_val = struct.unpack(read_type, byte_str)[0]
+    float_val = unpack(read_type, byte_str)[0]
     return float(float_val)
 
 

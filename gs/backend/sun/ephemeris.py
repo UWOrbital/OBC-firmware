@@ -1,22 +1,23 @@
 from __future__ import annotations
 
 # Standard library imports
-import argparse
-import dataclasses
-import datetime
-import enum
-import json
-import logging
-import math
-import os
-import re
-import struct
-import sys
+from argparse import ArgumentParser
 from collections.abc import Iterable
+from dataclasses import dataclass
+from datetime import UTC, date, datetime
+from enum import Enum
+from json import dumps, loads
+from logging import DEBUG, INFO, WARNING, basicConfig, critical, debug, info, warning
+from math import isclose
+from os import remove
+from os.path import exists
+from re import compile
+from struct import pack
+from sys import exit
 from typing import BinaryIO, Final
 
 # 3rd party imports
-import requests
+from requests import Response, get
 from skyfield.api import load
 
 # Script constants
@@ -26,7 +27,7 @@ RELATIVE_TOLERANCE: Final[float] = 1e-7
 API_LIMIT: Final[int] = 90_000
 
 # Print values
-LOGGING_LEVELS = [logging.WARNING, logging.INFO, logging.DEBUG]
+LOGGING_LEVELS = [WARNING, INFO, DEBUG]
 DEFAULT_PRINT_WARNING: Final[int] = 0  # Prints the required output
 
 # Data types
@@ -47,7 +48,7 @@ SIZE_OF_INT: Final[int] = 4
 SIZE_OF_HEADER: Final[int] = SIZE_OF_DOUBLE * NUMBER_OF_HEADER_DOUBLES + SIZE_OF_INT
 
 
-class ErrorCode(enum.Enum):
+class ErrorCode(Enum):
     """Error codes enumerator"""
 
     SUCCESS = 0
@@ -60,7 +61,7 @@ class ErrorCode(enum.Enum):
     UNKNOWN = 7
 
 
-@dataclasses.dataclass
+@dataclass
 class DataPoint:
     """Data class to store a position data point"""
 
@@ -79,20 +80,20 @@ class DataPoint:
         if not isinstance(other, DataPoint):
             return NotImplemented
         return (
-            math.isclose(self.jd, other.jd, rel_tol=RELATIVE_TOLERANCE)
-            and math.isclose(self.x, other.x, rel_tol=RELATIVE_TOLERANCE)
-            and math.isclose(self.y, other.y, rel_tol=RELATIVE_TOLERANCE)
-            and math.isclose(self.z, other.z, rel_tol=RELATIVE_TOLERANCE)
+            isclose(self.jd, other.jd, rel_tol=RELATIVE_TOLERANCE)
+            and isclose(self.x, other.x, rel_tol=RELATIVE_TOLERANCE)
+            and isclose(self.y, other.y, rel_tol=RELATIVE_TOLERANCE)
+            and isclose(self.z, other.z, rel_tol=RELATIVE_TOLERANCE)
         )
 
 
-def define_parser() -> argparse.ArgumentParser:
+def define_parser() -> ArgumentParser:
     """
     Defines the parser for the script
 
     :return: The parser
     """
-    parser = argparse.ArgumentParser(description="Position Ephemeris Retriever")
+    parser = ArgumentParser(description="Position Ephemeris Retriever")
     parser.add_argument(
         "start_time",
         type=str,
@@ -168,19 +169,19 @@ def is_float(num: str) -> bool:
         return False
 
 
-def is_valid_date(date: str) -> bool:
+def is_valid_date(date_str: str) -> bool:
     """
     Checks if date is a valid date of the YYYY-MM-DD format
 
-    :param date: The date to be checked
+    :param date_str: The date to be checked
     :return: True if the date is a valid date, otherwise False
     """
-    time_regex = re.compile(r"^[1-9]\d{3}-\d{2}-\d{2}$")
-    if not time_regex.match(date):
+    time_regex = compile(r"^[1-9]\d{3}-\d{2}-\d{2}$")
+    if not time_regex.match(date_str):
         return False
     try:
-        year, month, day = date.split("-")
-        datetime.date(year=int(year), month=int(month), day=int(day))
+        year, month, day = date_str.split("-")
+        date(year=int(year), month=int(month), day=int(day))
 
         return True
     except ValueError:
@@ -211,7 +212,7 @@ def convert_date_to_jd(time: str) -> float:
 
     timescale = load.timescale()
 
-    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.UTC)
+    base_date = datetime.fromisoformat(time).replace(tzinfo=UTC)
     sky_date = timescale.from_datetime(base_date)
 
     return float(sky_date.ut1)
@@ -231,17 +232,17 @@ def validate_input(start_time: str, stop_time: str, step_size: str, output: str)
     if not (is_valid_date(start_time) and is_valid_date(stop_time)) and not (
         is_valid_julian_date(start_time) and is_valid_julian_date(stop_time)
     ):
-        logging.critical("Start time or stop time do not both have the same format of YYYY-MM-DD or JD#")
+        critical("Start time or stop time do not both have the same format of YYYY-MM-DD or JD#")
         return ErrorCode.INVALID_DATE_TIME
 
     # Checks if the step size is in the correct format
     if not ((step_size[-1] in ["m", "d", "h", "s"] and step_size[:-1].isnumeric()) or step_size.isnumeric()):
-        logging.critical("Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer")
+        critical("Step size must be in the format #m, #d, #h, #s, or #. Where # is an integer")
         return ErrorCode.INVALID_STEP_SIZE
 
     # Checks if the output file is in the correct format
     if not output.endswith(".bin"):
-        logging.critical("Output file must be in the format *.bin")
+        critical("Output file must be in the format *.bin")
         return ErrorCode.INVALID_OUTPUT_FILE
 
     return ErrorCode.SUCCESS
@@ -258,19 +259,19 @@ def check_version(data: dict) -> ErrorCode:  # type: ignore
 
     # Checks if the signature is valid
     if signature is None or not isinstance(signature, dict):
-        logging.critical("ERROR: INVALID SIGNATURE")
+        critical("ERROR: INVALID SIGNATURE")
         return ErrorCode.NO_SIGNATURE_FOUND
 
     # Checks if the version is supported
     if signature.get("version") != SUPPORTED_VERSION:
-        logging.warning("WARNING: UNSUPPORTED HORIZON API VERSION USED")
+        warning("WARNING: UNSUPPORTED HORIZON API VERSION USED")
 
     return ErrorCode.SUCCESS
 
 
 # Not testable as we can't simulate a Response object
 # Code taken from horizon API with slight modifications
-def validate_response(response: requests.Response) -> ErrorCode:
+def validate_response(response: Response) -> ErrorCode:
     """
     Validates the responses. It handles the 400 status error code specifically. It also makes sure that the status code
     is always 200 (success) for the rest of the script
@@ -280,20 +281,20 @@ def validate_response(response: requests.Response) -> ErrorCode:
     or ErrorCode.INVALID_REQUEST
     """
     if response.status_code == 400:
-        data = json.loads(response.text)
+        data = loads(response.text)
         if "message" in data:
-            logging.critical(f"Message: {data['message']}")
+            critical(f"Message: {data['message']}")
         else:
-            logging.critical(json.dumps(data, indent=2))
+            critical(dumps(data, indent=2))
         return ErrorCode.INVALID_REQUEST400
 
     if response.status_code != 200:
-        logging.critical(f"{response.status_code = }")
+        critical(f"{response.status_code = }")
         return ErrorCode.INVALID_REQUEST
 
-    data = json.loads(response.text)
+    data = loads(response.text)
     if data.get("error") is not None:
-        logging.critical(data.get("error"))
+        critical(data.get("error"))
         return ErrorCode.UNKNOWN
 
     return ErrorCode.SUCCESS
@@ -307,10 +308,10 @@ def print_debug_header(reverse: bool = False) -> None:
     :param reverse: If True then reverses the order of the header and prints and extra seperator line
     """
     if reverse:
-        logging.info("-" * 130)
+        info("-" * 130)
 
-    logging.info(("\t" * 3) + "JD:" + ("\t" * 4) + "X:" + ("\t" * 5) + "Y:" + ("\t" * 4) + "Z:")
-    logging.info("-" * 130)
+    info(("\t" * 3) + "JD:" + ("\t" * 4) + "X:" + ("\t" * 5) + "Y:" + ("\t" * 4) + "Z:")
+    info("-" * 130)
 
 
 def write_data(data: DataPoint, file: BinaryIO) -> None:
@@ -321,18 +322,18 @@ def write_data(data: DataPoint, file: BinaryIO) -> None:
     :param data: Data to be written
     """
     # Appends the data to the file and prints the expected data written if applicable
-    logging.debug(f"\tData written: {data}")
+    debug(f"\tData written: {data}")
 
     # Write the x value
-    bx = struct.pack(DATA_FLOAT, data.x)
+    bx = pack(DATA_FLOAT, data.x)
     file.write(bytearray(bx))
 
     # Write the y value
-    by = struct.pack(DATA_FLOAT, data.y)
+    by = pack(DATA_FLOAT, data.y)
     file.write(bytearray(by))
 
     # Write the z value
-    bz = struct.pack(DATA_FLOAT, data.z)
+    bz = pack(DATA_FLOAT, data.z)
     file.write(bytearray(bz))
 
 
@@ -358,7 +359,7 @@ def write_header(
         return None
 
     # Create the file if it doesn't exist as it doesn't create one by default
-    if not os.path.exists(file_output):
+    if not exists(file_output):
         open(file_output, "wb").close()
 
     data = [min_jd, step_size]
@@ -368,18 +369,18 @@ def write_header(
 
     # Write the data to the file
     with open(file_output, "rb+") as file:
-        logging.debug(f"Writing header to {file_output}")
+        debug(f"Writing header to {file_output}")
         file.seek(0)
 
         # Write the data to the file that is of type double
         for i in data:
-            logging.debug(f"\tData written: {i}")
-            b = struct.pack(DATA_DOUBLE, i)
+            debug(f"\tData written: {i}")
+            b = pack(DATA_DOUBLE, i)
             byte: bytearray = bytearray(b)
             file.write(byte)
 
         # Write the count to the file
-        byte_count = struct.pack(DATA_UINT, int(count))
+        byte_count = pack(DATA_UINT, int(count))
         file.write(bytearray(byte_count))
 
 
@@ -429,7 +430,7 @@ def exit_program_on_error(error_code: ErrorCode) -> None:
     :param error_code: The error code
     """
     if error_code != ErrorCode.SUCCESS:
-        sys.exit(error_code.value)
+        exit(error_code.value)
 
 
 def extract_data_lines(lines: Iterable[str]) -> list[str]:
@@ -472,14 +473,14 @@ def get_lines_from_api(start_time: float, stop_time: float, step_size: int, targ
         f"JD{str(stop_time)}&CSV_FORMAT=YES&CAL_FORMAT=JD&VEC_TABLE=1"
     )
 
-    response = requests.get(url)
+    response = get(url)
     exit_program_on_error(validate_response(response))
 
     try:
-        data = json.loads(response.text)
+        data = loads(response.text)
     except ValueError:
-        logging.critical("Invalid JSON response")
-        sys.exit(-1)
+        critical("Invalid JSON response")
+        exit(-1)
 
     exit_program_on_error(check_version(data))
 
@@ -499,7 +500,7 @@ def main(argsv: str | None = None) -> list[DataPoint]:
 
     # Set up logging
     # TODO: Setup proper logging
-    logging.basicConfig(
+    basicConfig(
         filename=args.log,
         level=LOGGING_LEVELS[args.print],
         encoding="utf-8",
@@ -513,8 +514,8 @@ def main(argsv: str | None = None) -> list[DataPoint]:
     try:
         step_size = calculate_step_size(start_time, stop_time, data_count)
     except ValueError as e:
-        logging.critical(e)
-        sys.exit(-2)
+        critical(e)
+        exit(-2)
 
     # Make requests to api
     lines = []
@@ -540,8 +541,8 @@ def main(argsv: str | None = None) -> list[DataPoint]:
     )
 
     # Delete file if it exists
-    if os.path.exists(args.output):
-        os.remove(args.output)
+    if exists(args.output):
+        remove(args.output)
 
     # Write header
     write_header(args.output, start_time, step_size, data_count, args.exclude)
@@ -560,11 +561,11 @@ def main(argsv: str | None = None) -> list[DataPoint]:
                 and (args.exclude == "both" or args.exclude == "last")
             ):
                 # Parse the line of data
-                logging.debug(f"Line being parsed: {line}")
+                debug(f"Line being parsed: {line}")
                 output = line[:-1].split(", ")
 
                 # Parse, store and write the data point
-                logging.info(f"Output written: {output}")
+                info(f"Output written: {output}")
                 # 1st element of parsed string is the date in YYYY-MM-DD format
                 data_point = DataPoint(
                     float(output[0]),
