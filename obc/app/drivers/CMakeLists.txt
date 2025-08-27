@@ -14,6 +14,9 @@ SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/tpl5010
     ${CMAKE_CURRENT_SOURCE_DIR}/bd621x
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100
+    ${CMAKE_CURRENT_SOURCE_DIR}/max17320
+    # TODO: Update cc1120 driver so that it doesn't need to include this
+    ${CMAKE_CURRENT_SOURCE_DIR}../services/comms_link_manager
 )
 
 SET(SOURCES
@@ -54,6 +57,7 @@ SET(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vn100/vn100_binary_parsing.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/max17320/max17320.c
 )
 
 target_include_directories(${OUT_FILE_NAME} PUBLIC ${INCLUDES})

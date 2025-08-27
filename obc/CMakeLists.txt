@@ -8,6 +8,18 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/cmake/board_lib_defs.cmake)
 # Load setup-specific definitions
 include(${CMAKE_SOURCE_DIR}/obc/shared/config/peripheral_config_definitions.cmake)
 
+if (${EXAMPLE} MATCHES 1)
+    add_executable(OBC-firmware.out examples/test_max17320/main.c)
+else()
+    add_executable(OBC-firmware.out main.c)
+endif()
+
+target_link_options(OBC-firmware.out PRIVATE
+    -specs=nosys.specs
+    -Wl,-Map=${CMAKE_PROJECT_NAME}.map -T${LINKER_SCRIPT}
+    -Wl,--print-memory-usage
+)
+
 set(LD_DIR_PATH "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld")
 set(APP_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/app_link.ld")
 set(BL_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/shared/hal/common/ld/bl_link.ld")
