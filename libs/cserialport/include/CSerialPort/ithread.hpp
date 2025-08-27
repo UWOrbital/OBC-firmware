@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file ithread.hpp
  * @author itas109 (itas109@qq.com) \n\n
  * Blog : https://blog.csdn.net/itas109 \n

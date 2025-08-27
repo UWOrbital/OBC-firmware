@@ -11,6 +11,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install GNU cross compilation
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc-multilib g++-multilib
     - name: Configure CMake
       run: |
         mkdir build

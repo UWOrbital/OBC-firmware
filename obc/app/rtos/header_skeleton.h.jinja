@@ -1,0 +1,36 @@
+{# Scheduler config generation header template #}
+// This code is generated, do not modify directly!
+#pragma once
+
+#include <stdint.h>
+
+typedef enum {
+{% for t in tasks %}
+{% if t.conditional_enable %}
+#if {{ t.conditional_enable }} == 1
+{% endif %}
+  OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}{% if t.task_name == "state_mgr" %} = 0{% endif %},
+{% if t.conditional_enable %}
+#endif
+{% endif %}
+{% endfor %}
+  OBC_SCHEDULER_TASK_COUNT
+} obc_scheduler_config_id_t;
+
+/**
+ * @brief Create a task with the given ID. The task function will be called with
+ * no arguments.
+ */
+void obcSchedulerCreateTask(obc_scheduler_config_id_t taskID);
+
+/**
+ * @brief Create a task with the given ID. The task function will be called with
+ * the given arguments.
+ */
+void obcSchedulerCreateTaskWithArgs(obc_scheduler_config_id_t taskID, void *args);
+
+/**
+ * @brief Initialize the task with the given ID. This should be called
+ * before the task is created.
+ */
+void obcSchedulerInitTask(obc_scheduler_config_id_t taskID);

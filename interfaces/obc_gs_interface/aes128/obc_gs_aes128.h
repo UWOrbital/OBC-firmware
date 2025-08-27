@@ -10,6 +10,10 @@
 #define AES_IV_SIZE 16U
 #define AES_DECRYPTED_SIZE RS_DECODED_SIZE - AES_IV_SIZE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   uint8_t iv[AES_IV_SIZE];
   uint8_t *ciphertext;
@@ -31,3 +35,7 @@ obc_gs_error_code_t aes128Decrypt(aes_data_t *aesData, uint8_t *output, uint8_t 
  * @param key - The key to decrypt the AES blocks with
  */
 obc_gs_error_code_t initializeAesCtx(const uint8_t *key);
+
+#ifdef __cplusplus
+}
+#endif

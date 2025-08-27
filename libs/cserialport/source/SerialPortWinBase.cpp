@@ -1,4 +1,4 @@
-﻿#include "CSerialPort/SerialPortWinBase.h"
+#include "CSerialPort/SerialPortWinBase.h"
 #include "CSerialPort/SerialPortListener.h"
 #include "CSerialPort/iutils.hpp"
 #include "CSerialPort/ithread.hpp"

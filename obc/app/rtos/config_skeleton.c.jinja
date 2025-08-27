@@ -1,0 +1,116 @@
+{# Scheduler config generation template #}
+// This code is generated, do not modify directly!
+#include "obc_scheduler_config.h"
+
+#include "obc_errors.h"
+#include "obc_assert.h"
+
+#include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
+#include <os_task.h>
+#include <sys_common.h>
+
+#include <stdint.h>
+
+/* DEFINES */
+#define OBC_SCHEDULER_MAX_PRIORITY configMAX_PRIORITIES - 1U
+#define TASK_IDLE_PRIORITY 0U
+#define TASK_COMMS_PRIORITY 2U  // Comms tasks must have the same priority
+
+/* TYPEDEFS */
+typedef struct {
+  TaskHandle_t *taskHandle;
+  StaticTask_t *taskBuffer;
+  StackType_t *taskStack;
+  uint32_t stackSize;
+  uint32_t priority;
+  const char *taskName;
+  void (*taskFunc)(void *);
+  void (*taskInit)(void);  // Optional
+} obc_scheduler_config_t;
+
+/* TASK INIT PROTOTYPES - These run before their respective tasks are created */
+{% for t in tasks %}
+{% if t.task_init %}
+extern void obcTaskInit{{ t.function_stem }}(void);
+{% endif %}
+{% endfor %}
+
+/* TASK FUNCTION PROTOTYPES */
+{% for t in tasks %}
+extern void obcTaskFunction{{ t.function_stem }}(void *params);
+{% endfor %}
+
+/* PRIVATE FUNCTION PROTOTYPES */
+static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID);
+
+/* PRIVATE DATA */
+{% for t in tasks %}
+{% if t.conditional_enable %}
+#if {{ t.conditional_enable }} == 1
+{% endif %}
+static StackType_t obcTaskStack{{ t.function_stem }}[{{ t.stack_size }}U];
+static StaticTask_t obcTaskBuffer{{ t.function_stem }};
+{% if t.conditional_enable %}
+#endif
+{% endif %}
+{% endfor %}
+
+static obc_scheduler_config_t obcSchedulerConfig[] = {
+{% for t in tasks %}
+{% if t.conditional_enable %}
+#if {{ t.conditional_enable }} == 1
+{% endif %}
+    [OBC_SCHEDULER_CONFIG_ID_{{ t.config_id_stem }}] =
+        {
+            .taskName = "{{ t.task_name }}",
+            .taskStack = obcTaskStack{{ t.function_stem }},
+            .taskBuffer = &obcTaskBuffer{{ t.function_stem }},
+            .stackSize = {{ t.stack_size }}U,
+            .priority = {{ t.priority }},
+            .taskFunc = obcTaskFunction{{ t.function_stem }},
+            {% if t.task_init %}
+            .taskInit = obcTaskInit{{ t.function_stem }},
+            {% else %}
+            .taskInit = NULL,
+            {% endif %}
+        },
+{% if t.conditional_enable %}
+#endif
+{% endif %}
+{% endfor %}
+};
+
+STATIC_ASSERT_EQ(sizeof(obcSchedulerConfig) / sizeof(obc_scheduler_config_t), OBC_SCHEDULER_TASK_COUNT);
+
+/* PUBLIC FUNCTION DEFINITIONS */
+void obcSchedulerCreateTask(obc_scheduler_config_id_t taskID) { obcSchedulerCreateTaskWithArgs(taskID, NULL); }
+
+void obcSchedulerCreateTaskWithArgs(obc_scheduler_config_id_t taskID, void *args) {
+  obc_scheduler_config_t *taskConfig = obcSchedulerGetConfig(taskID);
+  ASSERT(taskConfig != NULL);
+
+  const bool taskConfigExists =
+      (taskConfig->taskFunc != NULL) && (taskConfig->taskStack != NULL) && (taskConfig->taskBuffer != NULL);
+
+  if (taskConfigExists) {
+    taskConfig->taskHandle = xTaskCreateStatic(taskConfig->taskFunc, taskConfig->taskName, taskConfig->stackSize, args,
+                                               taskConfig->priority, taskConfig->taskStack, taskConfig->taskBuffer);
+  }
+}
+
+void obcSchedulerInitTask(obc_scheduler_config_id_t taskID) {
+  obc_scheduler_config_t *taskConfig = obcSchedulerGetConfig(taskID);
+
+  ASSERT(taskConfig != NULL);
+
+  if (taskConfig->taskInit != NULL) {
+    taskConfig->taskInit();
+  }
+}
+
+/* PRIVATE FUNCTION DEFINITIONS */
+static obc_scheduler_config_t *obcSchedulerGetConfig(obc_scheduler_config_id_t taskID) {
+  if (taskID >= OBC_SCHEDULER_TASK_COUNT) return NULL;
+  return &obcSchedulerConfig[taskID];
+}

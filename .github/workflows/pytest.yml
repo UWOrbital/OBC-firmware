@@ -1,0 +1,46 @@
+name: Pytest
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y postgresql
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Create binary directory
+      run: |
+        mkdir build_gs
+        cd build_gs
+        cmake .. -DCMAKE_BUILD_TYPE=GS
+
+    - name: Build
+      run: |
+        cd build_gs
+        cmake --build .
+
+    - name: Run pytest
+      run: |
+        python -m pytest

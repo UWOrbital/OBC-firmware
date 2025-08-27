@@ -1,4 +1,4 @@
-﻿#include "CSerialPort/SerialPortBase.h"
+#include "CSerialPort/SerialPortBase.h"
 #include "CSerialPort/ithread.hpp"
 #include "CSerialPort/itimer.hpp"
 
