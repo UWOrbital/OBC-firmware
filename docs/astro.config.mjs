@@ -8,6 +8,13 @@ export default defineConfig({
   base: 'OBC-firmware',
 	integrations: [
 		starlight({
+      customCss: [
+        './src/styles/custom.css',
+      ],
+      expressiveCode: {
+        themes: ['github-light-high-contrast', 'tokyo-night'],
+        removeUnusedThemes: true,
+      },
 			title: 'UW Orbital',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/UWOrbital/OBC-firmware' }],
 			sidebar: [
