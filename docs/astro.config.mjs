@@ -14,6 +14,16 @@ export default defineConfig({
       expressiveCode: {
         themes: ['github-light-high-contrast', 'tokyo-night'],
         removeUnusedThemes: true,
+        styleOverrides: {
+          // You can also override styles
+          borderRadius: '0.5rem',
+          borderColor: ['gray', 'black'],
+          frames: {
+            terminalTitlebarBackground: ['#414868', 'lightGray'],
+            terminalTitlebarBorderBottomColor: ['gray', 'black'],
+            terminalTitlebarDotsOpacity: '0.5',
+          }
+        },
       },
 			title: 'UW Orbital',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/UWOrbital/OBC-firmware' }],

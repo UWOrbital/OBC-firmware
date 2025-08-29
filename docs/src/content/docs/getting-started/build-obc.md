@@ -39,6 +39,25 @@ There are two main ways to flash to the OBC: **using the bootloader** or **using
     :::note
     UniFlash may get stuck sometimes and throw errors. In such cases, navigate to session on the top red bar and start a new session. You will have to reconfigure UniFlash but it should get working again.
     :::
-### Flashing Via the Bootloader (WIP)
-1. Use UniFlash to flash the `OBC-bl.out` file, ensuring you have built it for the correct board.
 
+### Accessing UART
+This is an important type of confi
+### Flashing Via the Bootloader (WIP)
+1. Use UniFlash to flash the `OBC-bl.out` file, ensuring you have built it for the correct board using the right argument for the `-DBOARD_TYPE=` option.
+2. From the root directory activate the python virtual environment with the following command
+
+    ```shell
+    source venv/bin/activate
+    ```
+3. Navigate to the `obc/tools/python/` directory from root...
+    ```shell
+    cd obc/tools/python/
+    ```
+4. Run the app `app_update.py` script specifying a usb port and the absolute file path. The following is an example for linux.
+    ```shell
+    python3 app_update.py /dev/ttyS0 ~/Desktop/dev/OBC-firmware/build_arm/OBC-firmware.bin
+    ```
+    :::note
+    The bootloader sends messages through the UART port so if the first string that the script displays is not 'Erase Successful' or the script is takes more than 1 second to start, re-run the script.
+    :::
+5. Wait for the script to flash and the board should jump to app within 2 seconds of when flashing is completed. If not check the error that is being logged to UART and try again!
