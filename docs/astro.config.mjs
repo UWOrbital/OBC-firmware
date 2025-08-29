@@ -18,6 +18,11 @@ export default defineConfig({
           // You can also override styles
           borderRadius: '0.5rem',
           borderColor: ['gray', 'black'],
+          frames: {
+            terminalTitlebarBackground: ['#414868', 'lightGray'],
+            terminalTitlebarBorderBottomColor: ['gray', 'black'],
+            terminalTitlebarDotsOpacity: '0.5',
+          }
         },
       },
 			title: 'UW Orbital',

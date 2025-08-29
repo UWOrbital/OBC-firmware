@@ -40,5 +40,10 @@ There are two main ways to flash to the OBC: **using the bootloader** or **using
     UniFlash may get stuck sometimes and throw errors. In such cases, navigate to session on the top red bar and start a new session. You will have to reconfigure UniFlash but it should get working again.
     :::
 ### Flashing Via the Bootloader (WIP)
-1. Use UniFlash to flash the `OBC-bl.out` file, ensuring you have built it for the correct board.
+1. Use UniFlash to flash the `OBC-bl.out` file, ensuring you have built it for the correct board using the right argument for the `-DBOARD_TYPE=` option.
+2. From the root directory activate the python virtual environment with the following command
+
+    ```shell
+    source venv/bin/activate
+    ```
 
