@@ -552,16 +552,6 @@
       border-inline-start-width: 1px;
     }
 
-    .expressive-code {
-      .has-title {
-        --ec-uiPadBlk: 0.375rem;
-      }
-
-      .frame.is-terminal .header {
-        border-bottom: 1px solid var(--sl-rapide-ui-border-color);
-        background-color: var(--sl-color-blue-low)
-      }
-    }
   }
 
   /**
