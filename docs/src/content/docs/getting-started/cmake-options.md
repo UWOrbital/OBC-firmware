@@ -1,5 +1,5 @@
 ---
-title: CMake Options Guide
+title: CMake options guide
 description: Some useful options and options that we have defined
 ---
 The following is a list of options along with their brief description. The guide is divided into most used and extra for convenience. You can go to the end of this page for examples on how to chain these options together.
@@ -10,10 +10,10 @@ The following is a list of options along with their brief description. The guide
 If an argument is marked as **Default**, it will be the default argument that is used if the option is not specified. If there are no arguments marked as default then nothing will happen.
 :::
 
-## Most Used Options
+## Most used options
 These are options that you will frequently be using while compiling. **Unless otherwise specified these options are to be use within the `build_arm` directory of the project**
 
-### `-DCMAKE_BUILD_TYPE=` (Can be used in directories other than `build_arm`)
+### `-DCMAKE_BUILD_TYPE=` (can be used in directories other than `build_arm`)
 This specifies what the current build directory is for. You can pass either of the **four** arguments into this command...
 * `OBC`: Used to build for the board (use in the `build_arm` directory)
 * `GS`: Used to build code for the ground station (use in the `build_gs` directory)
@@ -27,7 +27,7 @@ This option specifies the board that the binary is being built for since differe
 * `OBC_REVISION_2`: Build the files for the second revision of the OBC
 
 
-## Extra Options
+## Extra options
 
 ### `-DDEBUG`
 If specified, this removes all optimization flags to debug. Sometimes optimizations can interfere with critical code but, first check your code's logic before using this option.
