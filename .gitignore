@@ -112,4 +112,4 @@ docs/node_modules/
 .DS_Store
 
 # WSL files 
-.Identifier
+*:Zone.Identifier
