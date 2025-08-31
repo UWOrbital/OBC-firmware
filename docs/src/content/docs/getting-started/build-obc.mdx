@@ -2,9 +2,12 @@
 title: Building for the OBC
 description: On how to build for the board
 ---
+import { Steps } from '@astrojs/starlight/components';
+
 The following is a simple guide for building the app for the OBC and flashing.
 
 ## Compiling for the OBC
+<Steps>
 1. From the root directory you can run the following commands
     ```shell
     mkdir -p build_arm && cd build_arm
@@ -22,11 +25,13 @@ The following is a simple guide for building the app for the OBC and flashing.
     :::caution
     Make sure to specify the `-DBOARD_TYPE=` option to avoid any unwanted behavior
     :::
+</Steps>
 
 ## Flashing to the OBC
 There are two main ways to flash to the OBC: **using the bootloader** or **using UniFlash**. UniFlash is the more common way so let's go over that first.
 
 ### Flashing via UniFlash
+<Steps>
 1. When you open UniFlash you should be greeted with the following screen...
 
     ![UniFlash on startup](../../../assets/docs_images/uniflash.png)
@@ -42,6 +47,7 @@ There are two main ways to flash to the OBC: **using the bootloader** or **using
     :::note
     UniFlash may get stuck sometimes and throw errors. In such cases, navigate to session on the top red bar and start a new session. You will have to reconfigure UniFlash but it should start working again.
     :::
+</Steps>
 
 ### Accessing UART
 This is an important skill everyone should know just for debugging. We will go through the process for Windows and Linux.
@@ -49,6 +55,7 @@ This is an important skill everyone should know just for debugging. We will go t
 #### Base setup
 Both Linux and Windows have a program called `puTTY` available to download. `puTTY` is a great program to detect serial activity on ports so make sure you download this before proceeding!
 
+<Steps>
 1. Download and open `puTTY`. You should be greeted with the following screen...
 
     ![puTTY on startup](../../../assets/docs_images/putty.png)
@@ -59,9 +66,11 @@ Both Linux and Windows have a program called `puTTY` available to download. `puT
 3. You can set the speed to `115200` which is the baud rate at the time of writing this tutorial (August, 2025). Update this rate if the baud rate of the board is increased!
 4. If you know how to detect what USB port is connected to UART you can type that USB port into the `Serial line` field in `puTTY`. If you need help, read through the following sections!
 5. You can then press the `Open` button and there should be a black screen that starts printing out text sent by the board!
+</Steps>
 
 #### Finding USB port on Linux
 On Linux the port name will be in the form of `/dev/tty*`. For example the port could be named `/dev/ttyACM0` or `/dev/ttyUSB0`. To find the port connected to the board do the following...
+<Steps>
 1. Open up a terminal without the board connected and type in the following command that will list out all file paths starting with `/dev/tty`
     ```shell
     ls /dev/tty*
@@ -69,16 +78,20 @@ On Linux the port name will be in the form of `/dev/tty*`. For example the port 
 2. Now connect the board and repeat the same command.
 3. Look for differences in outputs between running the command before and after connecting the board. The `/dev/tty` file path that gets added the second time around is the port that your board is connected on!
 4. You can type the name of the port you have determined to be going to the board in the `Serial line` field in `puTTY`. If you are using JTAG and have to connect two USBs to your Linux system, you will have to experiment and see which port outputs logs on puTTY.
+</Steps>
 
 #### Finding USB port on Windows
 On Windows the port name will be in the form of `COMXX` with `XX` denoting numbers. For example possible port names are `COM1`, `COM12`, etc. To find the port connected to the board do the following...
+<Steps>
 1. Open `Device Manager` and you should be greeted with the following (the image is taken off the web so your window may look a bit different)...
     ![Device Manager Windows](../../../assets/docs_images/device-manager.webp)
 2. Under `Ports` try to find the COM port labelled with `UART` somewhere in it's name. Once you have found it that is the COM port you will be using in `puTTY`.
+</Steps>
 
 ### Working with USB on WSL (`usbipd`)
 Unfortunately Windows does not pass-through USB ports by default to WSL. Thus, we have to use a utility called `usbipd` to handle USB device pass-through in WSL. The following are the steps needed to attach/detach USB devices from WSL.
 
+<Steps>
 1. Open a `PowerShell` window. Within the window type the following command to find the bus-id of the USB device that you want to attach.
 
     ```shell title="PowerShell"
@@ -100,9 +113,11 @@ Unfortunately Windows does not pass-through USB ports by default to WSL. Thus, w
     ```shell title="PowerShell"
     usbipd detach --busid 1-1
     ```
+</Steps>
 
 
 ### Flashing via the bootloader
+<Steps>
 1. Use UniFlash to flash the `OBC-bl.out` file, ensuring you have built it for the correct board using the right argument for the `-DBOARD_TYPE=` option.
 2. From the root directory activate the python virtual environment with the following command
 
@@ -125,3 +140,4 @@ Unfortunately Windows does not pass-through USB ports by default to WSL. Thus, w
     The bootloader sends messages through the UART port so if the first string that the script displays is not 'Erase Successful' or the script is takes more than 1 second to start, re-run the script. Hopefully this is addressed in the future!
     :::
 5. Wait for the script to flash and the board should jump to app within 2 seconds of when flashing is completed. If not check the error that is being logged to UART and try again!
+</Steps>
