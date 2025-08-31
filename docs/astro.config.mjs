@@ -22,6 +22,7 @@ export default defineConfig({
             terminalTitlebarBackground: ['#414868', 'lightGray'],
             terminalTitlebarBorderBottomColor: ['gray', 'black'],
             terminalTitlebarDotsOpacity: '0.5',
+            terminalTitlebarForeground: ['white', 'black']
           }
         },
       },

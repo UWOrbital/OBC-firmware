@@ -37,7 +37,7 @@ There are two main ways to flash to the OBC: **using the bootloader** or **using
     ![UniFlash on flash](../../../assets/docs_images/uniflash2.png)
 5. Browse for the file with a `.out` suffix that you would like to flash and then press `Load Image`. Usually you will flash one of the following files...
     * `OBC-firmware.out` in the `build_arm` directory >> This contains the main app to run on the OBC.
-    * `OBC-bl.out` in the `build_arm` directory >> This contains the bootloader for the OBC. 
+    * `OBC-bl.out` in the `build_arm` directory >> This contains the bootloader for the OBC.
     * An OBC example file from the `build_examples` directory >> This is for when you want to test specific functionality on the OBC (assuming you have written a test file for it and added it to the build script. See [Building Examples](/OBC-firmware/getting-started/build-examples/))
     :::note
     UniFlash may get stuck sometimes and throw errors. In such cases, navigate to session on the top red bar and start a new session. You will have to reconfigure UniFlash but it should start working again.
@@ -46,7 +46,7 @@ There are two main ways to flash to the OBC: **using the bootloader** or **using
 ### Accessing UART
 This is an important skill everyone should know just for debugging. We will go through the process for Windows and Linux.
 
-#### Pre-requisites
+#### Base setup
 Both Linux and Windows have a program called `puTTY` available to download. `puTTY` is a great program to detect serial activity on ports so make sure you download this before proceeding!
 
 1. Download and open `puTTY`. You should be greeted with the following screen...
@@ -60,14 +60,14 @@ Both Linux and Windows have a program called `puTTY` available to download. `puT
 4. If you know how to detect what USB port is connected to UART you can type that USB port into the `Serial line` field in `puTTY`. If you need help, read through the following sections!
 5. You can then press the `Open` button and there should be a black screen that starts printing out text sent by the board!
 
-#### Finding USB port on Linux 
+#### Finding USB port on Linux
 On Linux the port name will be in the form of `/dev/tty*`. For example the port could be named `/dev/ttyACM0` or `/dev/ttyUSB0`. To find the port connected to the board do the following...
 1. Open up a terminal without the board connected and type in the following command that will list out all file paths starting with `/dev/tty`
     ```shell
     ls /dev/tty*
     ```
 2. Now connect the board and repeat the same command.
-3. Look for differences in outputs between running the command before and after connecting the board. The `/dev/tty` file path that gets added the second time around is the port that your board is connected on! 
+3. Look for differences in outputs between running the command before and after connecting the board. The `/dev/tty` file path that gets added the second time around is the port that your board is connected on!
 4. You can type the name of the port you have determined to be going to the board in the `Serial line` field in `puTTY`. If you are using JTAG and have to connect two USBs to your Linux system, you will have to experiment and see which port outputs logs on puTTY.
 
 #### Finding USB port on Windows
@@ -76,9 +76,33 @@ On Windows the port name will be in the form of `COMXX` with `XX` denoting numbe
     ![Device Manager Windows](../../../assets/docs_images/device-manager.webp)
 2. Under `Ports` try to find the COM port labelled with `UART` somewhere in it's name. Once you have found it that is the COM port you will be using in `puTTY`.
 
-### Working with USB on WSL (WIP)
+### Working with USB on WSL (`usbipd`)
+Unfortunately Windows does not pass-through USB ports by default to WSL. Thus, we have to use a utility called `usbipd` to handle USB device pass-through in WSL. The following are the steps needed to attach/detach USB devices from WSL.
 
-### Flashing via the bootloader (WIP)
+1. Open a `PowerShell` window. Within the window type the following command to find the bus-id of the USB device that you want to attach.
+
+    ```shell title="PowerShell"
+    usbipd list
+    ```
+    You need to locate the device that has UART in it's name and make note of the busid that will show in the left most column of the command's output.
+2. If the device's `STATE` shows up as `shared`, you may skip this step else execute the command. The example is using the busid of `1-1` for demonstration purposes
+
+    ```shell title="PowerShell"
+    usbipd bind --busid 1-1
+    ```
+3. If the device's `STATE` shows up as `attached`, you may skip this step else execute the command. Again this example uses a busid of `1-1` for demonstration purposes.
+    ```shell title="PowerShell"
+
+    usbipd attach --wsl --busid 1-1
+    ```
+4. If you ever need to detach the USB port (to use `puTTY` for example) then you can run the following command. Again this example uses a busid of `1-1` for demonstration purposes.
+
+    ```shell title="PowerShell"
+    usbipd detach --busid 1-1
+    ```
+
+
+### Flashing via the bootloader
 1. Use UniFlash to flash the `OBC-bl.out` file, ensuring you have built it for the correct board using the right argument for the `-DBOARD_TYPE=` option.
 2. From the root directory activate the python virtual environment with the following command
 
