@@ -1,6 +1,10 @@
 ---
 title: CMake options guide
 description: Some useful options and options that we have defined
+sidebar:
+  badge:
+    text: New
+    variant: success
 ---
 The following is a list of options along with their brief description. The guide is divided into most used and extra for convenience. You can go to the end of this page for examples on how to chain these options together.
 
