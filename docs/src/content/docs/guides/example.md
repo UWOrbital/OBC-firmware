@@ -5,7 +5,7 @@ sidebar:
   badge:
     text: Dev Only
     variant: danger
-  position: 1
+  order: 1
 ---
 
 Delete this folder once the docs are ready to merge to main
