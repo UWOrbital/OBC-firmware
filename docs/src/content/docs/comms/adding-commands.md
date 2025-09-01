@@ -1,10 +1,11 @@
 ---
-title: Adding Commands
+title: Adding commands
 description: A guide on how to add commands to the codebase
 sidebar:
   badge:
     text: New
     variant: success
+  position: 1
 ---
 The following is a guide to adding commands to ensure that they work in the python and c sections of this code base. (To navigate quickly, github provides a table of contents via the little list icon on the README header)
 
@@ -514,7 +515,7 @@ class CmdRtcSyncRes(CmdRes):
         return formatted_string
 ```
 
-### Step 5: Parsing Command Responses
+### Step 5: Parsing command responses
 If your command response has no data, you can skip this step. If your command response does have data we have to define a parsing callback function since the python side will receive the data as a array of bytes (or bytestring in python).
 
 1. Locate the `command_response_callbacks.py`. Before the `parse_func_dict` we can define the function callback as seen in the code snippet below. Make sure to replace `CmdName`, `name`, `cmd_name` and `CMD_NAME` with the name of the command your parsing a response for.
