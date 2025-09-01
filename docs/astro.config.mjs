@@ -33,6 +33,10 @@ export default defineConfig({
 					label: 'Getting Started',
 					autogenerate: { directory: 'getting-started' },
 				},
+        {
+          label: 'Build Guides',
+          autogenerate: { directory: 'builds'},
+        },
 				{
 					label: 'Comms Guides',
 					autogenerate: { directory: 'comms' },
