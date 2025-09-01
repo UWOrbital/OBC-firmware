@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://uworbital.github.io',
-  base: 'OBC-firmware',
+  base: '/OBC-firmware/',
 	integrations: [
 		starlight({
       customCss: [
