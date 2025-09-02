@@ -1,4 +1,4 @@
-﻿#include "CSerialPort/SerialPortInfoUnixBase.h"
+#include "CSerialPort/SerialPortInfoUnixBase.h"
 #include "CSerialPort/SerialPort_global.h"
 #include "CSerialPort/iutils.hpp"
 

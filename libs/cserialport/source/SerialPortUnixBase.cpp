@@ -1,4 +1,4 @@
-﻿#include <unistd.h> // usleep
+#include <unistd.h> // usleep
 
 #include "CSerialPort/SerialPortUnixBase.h"
 #include "CSerialPort/SerialPortListener.h"
