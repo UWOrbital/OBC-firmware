@@ -20,13 +20,31 @@ static void unpackRtcSyncCmdData(const uint8_t* buffer, uint32_t* offset, cmd_ms
 static void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_MICRO_SD_FORMAT
-static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg);
+static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_PING
 static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 // CMD_DOWNLINK_TELEM
 static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_UPLINK_DISC
+static void unpackUplinkDisconnectCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_SET_PROGRAMMING_SESSION
+static void unpackSetProgrammingSessionCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_SET_PROGRAMMING_SESSION
+static void unpackSetProgrammingSessionCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_DOWNLOAD_DATA
+static void unpackDownloadDataCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_ERASE_APP
+static void unpackEraseAppCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
+
+// CMD_VERIFY_CRC
+static void unpackVerifyCrcCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg);
 
 typedef void (*unpack_func_t)(const uint8_t*, uint32_t*, cmd_msg_t*);
 
@@ -37,6 +55,11 @@ static const unpack_func_t unpackFns[] = {
     [CMD_MICRO_SD_FORMAT] = unpackMicroSdFormat,
     [CMD_PING] = unpackPingCmdData,
     [CMD_DOWNLINK_TELEM] = unpackDownlinkTelemCmdData,
+    [CMD_UPLINK_DISC] = unpackUplinkDisconnectCmdData,
+    [CMD_SET_PROGRAMMING_SESSION] = unpackSetProgrammingSessionCmdData,
+    [CMD_DOWNLOAD_DATA] = unpackDownloadDataCmdData,
+    [CMD_ERASE_APP] = unpackEraseAppCmdData,
+    [CMD_VERIFY_CRC] = unpackVerifyCrcCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -90,14 +113,46 @@ static void unpackDownlinkLogsNextPassCmdData(const uint8_t* buffer, uint32_t* o
   cmdMsg->downlinkLogsNextPass.logLevel = unpackUint8(buffer, offset);
 }
 
+// CMD_MICRO_SD_FORMAT
 static void unpackMicroSdFormat(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
+// CMD_PING
 static void unpackPingCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }
 
+// CMD_DOWNLINK_TELEM
 static void unpackDownlinkTelemCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
+  // No data to unpack
+}
+
+// CMD_UPLINK_DISC
+static void unpackUplinkDisconnectCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* msg) {
+  // No data to unpack
+}
+
+// CMD_SET_PROGRAMMING_SESSION
+static void unpackSetProgrammingSessionCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+  cmdMsg->setProgrammingSession.programmingSession = unpackUint8(buffer, offset);
+}
+
+// CMD_DOWNLOAD_DATA
+static void unpackDownloadDataCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+  cmdMsg->downloadData.programmingSession = unpackUint8(buffer, offset);
+  cmdMsg->downloadData.length = unpackUint16(buffer, offset);
+  cmdMsg->downloadData.address = unpackUint32(buffer, offset);
+  // Typecast necessary to avoid the const pointer to pointer conversion warning
+  cmdMsg->downloadData.data = (uint8_t*)buffer + *offset;
+}
+
+// CMD_ERASE_APP
+static void unpackEraseAppCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
+  // No data to unpack
+}
+
+// CMD_VERIFY_CRC
+static void unpackVerifyCrcCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
   // No data to unpack
 }

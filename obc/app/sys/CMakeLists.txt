@@ -8,6 +8,7 @@ SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/print
     ${CMAKE_CURRENT_SOURCE_DIR}/time
     ${CMAKE_CURRENT_SOURCE_DIR}/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/metadata
 )
 
 SET(SOURCES
@@ -18,6 +19,7 @@ SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/time/obc_time_utils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_crc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/utils/obc_heap.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/metadata/obc_metadata.c
 )
 
 target_include_directories(${OUT_FILE_NAME} PUBLIC ${INCLUDES})

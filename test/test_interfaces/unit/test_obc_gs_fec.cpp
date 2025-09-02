@@ -23,7 +23,7 @@ TEST(TestFecEncodeDecode, EncodeDecodeNonZero) {
   packed_rs_packet_t encodedData = {0};
   uint8_t data[RS_DECODED_SIZE];
   uint32_t seed = 0x7A21C3;  // random number
-  for (uint16_t i = 0; i < RS_ENCODED_SIZE; ++i) {
+  for (uint16_t i = 0; i < RS_DECODED_SIZE; ++i) {
     // Pseudorandom generation using a simple algorithm
     seed = (seed * 1103515245 + 12345) % (1 << 31);
     data[i] = (uint8_t)(seed & 0xFF);
@@ -36,5 +36,4 @@ TEST(TestFecEncodeDecode, EncodeDecodeNonZero) {
   uint8_t decodedData[RS_DECODED_SIZE];
   ASSERT_EQ(rsDecode(&encodedData, decodedData, RS_DECODED_SIZE), 0);
   ASSERT_EQ(memcmp(decodedData, data, RS_DECODED_SIZE), 0);
-  destroyRs();
 }

@@ -12,6 +12,9 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install build-essential cmake
 
+    - name: Install requirements
+      run: |
+        python3 -m pip install -r requirements.txt
 
     - name: Create binary directory
       run: |
@@ -54,3 +57,24 @@ jobs:
         cd build
         cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=1
         make
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: bin-file
+        path: build/OBC-firmware.bin
+
+  crc:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download binary
+      uses: actions/download-artifact@v4
+      with:
+        name: bin-file
+        path: .
+
+    - name: Display CRC
+      run: |
+        echo "CRC checksum:"
+        cksum OBC-firmware.bin

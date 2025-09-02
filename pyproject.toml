@@ -4,7 +4,7 @@ requires = ["setuptools>=59.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "--cov=gs --cov=obc/tools/python -v"
+addopts = "--cov=gs/backend --cov=obc/tools/python -v"
 testpaths = ["python_test"]
 
 [tool.mypy]
@@ -14,21 +14,34 @@ exclude = [
   "build*",
   "python_test/*",
   "test/*"]
-mypy_path = "gs:obc/tools/python"
+mypy_path = "gs/backend:obc/tools/python"
 strict = true
+plugins = "pydantic.mypy"
 
 [[tool.mypy.overrides]]
 module = "skyfield.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "ax25.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tinyaes.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pyStuffing.*"
+ignore_missing_imports = true
+
 [tool.ruff]
-include = ["pyproject.toml", "gs/**/*.py", "obc/tools/python/**/*.py"]
+include = ["pyproject.toml", "gs/backend/**/*.py", "obc/tools/python/**/*.py"]
 exclude = [
   "libs/*",
   "cmake/*",
   "build*",
   "test/*"]
-target-version = "py310"
+target-version = "py311"
 line-length = 120
 indent-width = 4
 
@@ -66,3 +79,6 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 docstring-code-format = false
 docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]

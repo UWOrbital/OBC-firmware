@@ -1,25 +1,28 @@
 #include "downlink_encoder.h"
 #include "cc1120_txrx.h"
-#include "obc_gs_fec.h"
+#include "obc_board_config.h"
 #include "obc_gs_ax25.h"
+#include "obc_gs_fec.h"
 
+#include "obc_gs_telemetry_pack.h"
+#include "obc_sci_io.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
-#include "obc_gs_telemetry_pack.h"
 
-#include "obc_scheduler_config.h"
-#include "obc_logging.h"
-#include "obc_errors.h"
-#include "obc_reliance_fs.h"
 #include "comms_manager.h"
+#include "obc_errors.h"
+#include "obc_logging.h"
+#include "obc_reliance_fs.h"
+#include "obc_scheduler_config.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
 #include <os_task.h>
 
-#include <sys_common.h>
 #include <gio.h>
+#include <stdint.h>
+#include <sys_common.h>
 
 #define COMMS_TELEM_ENCODE_QUEUE_LENGTH 2U
 #define COMMS_TELEM_ENCODE_QUEUE_ITEM_SIZE sizeof(encode_event_t)  // Size of the telemetry batch ID
@@ -40,10 +43,12 @@ static uint8_t telemEncodeQueueStack[COMMS_TELEM_ENCODE_QUEUE_LENGTH * COMMS_TEL
 static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffer, uint8_t numTelemetryData);
 
 /**
- * @brief Reads chunks of telemetry out of a file and sends it into the CC1120 transmit queue
+ * @brief Reads chunks of telemetry out of a file and sends it into the CC1120
+ * transmit queue
  *
  * @param telemetryBatchId - ID of the telemetry batch to send
- * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all telemetry data was sent successfully
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all telemetry data was
+ * sent successfully
  */
 static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId);
 
@@ -65,11 +70,13 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
 static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket);
 
 /**
- * @brief Either sends a single piece of telemetry or packs it into the current telemetry packet
+ * @brief Either sends a single piece of telemetry or packs it into the current
+ * telemetry packet
  *
  * @param singleTelem - A single piece of telemetry_data_t
  * @param telemPacket - A complete telemetry packet of size 223B
- * @param telemPacketOffset - Pointer to number of bytes already filled in telemPacket
+ * @param telemPacketOffset - Pointer to number of bytes already filled in
+ * telemPacket
  * @return obc_error_code_t
  */
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
@@ -85,8 +92,10 @@ void obcTaskInitCommsDownlinkEncoder(void) {
 /**
  * @brief Sends downlink data to encoding task queue
  *
- * @param queueMsg - Includes command ID, and either a telemetry batch ID or a telemetry_data_t array
- * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was successfully sent to the queue
+ * @param queueMsg - Includes command ID, and either a telemetry batch ID or a
+ * telemetry_data_t array
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the telemetry batch ID was
+ * successfully sent to the queue
  */
 obc_error_code_t sendToDownlinkEncodeQueue(encode_event_t *queueMsg) {
   ASSERT(telemEncodeQueueHandle != NULL);
@@ -112,13 +121,13 @@ void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
     transmit_event_t transmitEvent = {0};
     switch (queueMsg.eventID) {
       case DOWNLINK_TELEMETRY_FILE:
-        setCurrentLinkDestAddress(&groundStationCallsign);
+        setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
         LOG_IF_ERROR_CODE(sendTelemetryFile(queueMsg.telemetryBatchId));
         transmitEvent.eventID = END_DOWNLINK;
         LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       case DOWNLINK_DATA_BUFFER:
-        setCurrentLinkDestAddress(&groundStationCallsign);
+        setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
         transmitEvent.eventID = END_DOWNLINK;
@@ -149,9 +158,11 @@ static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffe
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  // Initialize important variables related to packing and queueing the telemetry to be sen
+  // Initialize important variables related to packing and queueing the
+  // telemetry to be sen
   packed_telem_packet_t telemPacket = {0};  // Holds 223B of "raw" telemetry data.
-                                            // Zero initialized because telem IDs of 0 are ignored at the ground station
+                                            // Zero initialized because telem IDs of 0 are ignored at the ground
+                                            // station
   size_t telemPacketOffset = 0;             // Number of bytes filled in telemPacket
 
   // Loop through all telemetry data in the buffer
@@ -168,10 +179,12 @@ static obc_error_code_t sendTelemetryBuffer(telemetry_data_t *telemetryDataBuffe
 }
 
 /**
- * @brief Reads chunks of telemetry out of a file and sends it into the CC1120 transmit queue
+ * @brief Reads chunks of telemetry out of a file and sends it into the CC1120
+ * transmit queue
  *
  * @param telemetryBatchId - ID of the telemetry batch to send
- * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all telemetry data was sent successfully
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all telemetry data was
+ * sent successfully
  */
 static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
   obc_error_code_t errCode;
@@ -180,11 +193,13 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId) {
   int32_t fd;
   RETURN_IF_ERROR_CODE(getFileDescriptor(telemetryBatchId, &fd));
 
-  // Initialize important variables related to packing and queueing the telemetry to be sent
+  // Initialize important variables related to packing and queueing the
+  // telemetry to be sent
   telemetry_data_t singleTelem;  // Holds a single piece of telemetry from getNextTelemetry()
 
   packed_telem_packet_t telemPacket = {0};  // Holds 223B of "raw" telemetry data.
-                                            // Zero initialized because telem IDs of 0 are ignored at the ground station
+                                            // Zero initialized because telem IDs of 0 are ignored at the ground
+                                            // station
   size_t telemPacketOffset = 0;             // Number of bytes filled in telemPacket
 
   // Read a single piece of telemetry from the file
@@ -262,18 +277,22 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
 }
 
 /**
- * @brief Either sends a single piece of telemetry or packs it into the current telemetry packet
+ * @brief Either sends a single piece of telemetry or packs it into the current
+ * telemetry packet
  *
  * @param singleTelem - A single piece of telemetry_data_t
  * @param telemPacket - A complete telemetry packet of size 223B
- * @param telemPacketOffset - Pointer to number of bytes already filled in telemPacket
+ * @param telemPacketOffset - Pointer to number of bytes already filled in
+ * telemPacket
  * @return obc_error_code_t
  */
 static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, packed_telem_packet_t *telemPacket,
                                                 size_t *telemPacketOffset) {
   obc_error_code_t errCode;
 
-  uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized version of the current piece of telemetry
+  uint8_t packedSingleTelem[MAX_TELEMETRY_DATA_SIZE];  // Holds a serialized
+                                                       // version of the current
+                                                       // piece of telemetry
   uint32_t packedSingleTelemSize = 0;                  // Size of the packed single telemetry
 
   // Pack the single telemetry into a uint8_t array
@@ -282,7 +301,8 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
     return OBC_ERR_CODE_FAILED_PACK;
   }
 
-  // If the single telemetry is too large to continue adding to the telemPacket, send the telemPacket
+  // If the single telemetry is too large to continue adding to the telemPacket,
+  // send the telemPacket
   if ((*telemPacketOffset) + packedSingleTelemSize > PACKED_TELEM_PACKET_SIZE) {
     RETURN_IF_ERROR_CODE(sendTelemetryPacket(telemPacket));
     // Reset the packedTelem struct and offset
@@ -309,29 +329,23 @@ static obc_error_code_t sendTelemetryPacket(packed_telem_packet_t *telemPacket) 
   transmit_event_t transmitEvent = {.eventID = DOWNLINK_PACKET};
 
   obc_gs_error_code_t interfaceErr;
-
-  // Perform AX.25 framing
-  interfaceErr = ax25SendIFrame(telemPacket->data, RS_DECODED_SIZE, &unstuffedAx25Pkt);
-  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
-  }
-
   // Apply Reed Solomon FEC
-  interfaceErr = rsEncode(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, &fecPkt);
+  interfaceErr = rsEncode(telemPacket->data, &fecPkt);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_FEC_ENCODE_FAILURE;
   }
 
-  memcpy(unstuffedAx25Pkt.data + AX25_INFO_FIELD_POSITION, fecPkt.data, RS_ENCODED_SIZE);
+  // Perform AX.25 framing
+  interfaceErr = ax25SendIFrame((uint8_t *)&fecPkt.data, RS_ENCODED_SIZE, &unstuffedAx25Pkt);
+  if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
+    return OBC_ERR_CODE_AX25_ENCODE_FAILURE;
+  }
 
   interfaceErr = ax25Stuff(unstuffedAx25Pkt.data, unstuffedAx25Pkt.length, transmitEvent.ax25Pkt.data,
                            &transmitEvent.ax25Pkt.length);
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {
     return OBC_ERR_CODE_AX25_BIT_STUFF_FAILURE;
   }
-
-  transmitEvent.ax25Pkt.data[0] = AX25_FLAG;
-  transmitEvent.ax25Pkt.data[transmitEvent.ax25Pkt.length - 1] = AX25_FLAG;
 
   // Send into CC1120 transmit queue
   obc_error_code_t errCode;
