@@ -122,17 +122,6 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
 
   SemaphoreHandle_t mutex = NULL;
   SemaphoreHandle_t transferCompleteSemaphore = NULL;
-
-  if (sciReg == sciREG) {
-    mutex = sciMutex;
-    transferCompleteSemaphore = sciTransferComplete;
-  } else {
-    mutex = sciLinMutex;
-    transferCompleteSemaphore = sciLinTransferComplete;
-  }
-
-  SemaphoreHandle_t mutex = NULL;
-  SemaphoreHandle_t transferCompleteSemaphore = NULL;
   SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciWriteMutex : sciLinWriteMutex;
   transferCompleteSemaphore = sciLinTransferComplete;
 
