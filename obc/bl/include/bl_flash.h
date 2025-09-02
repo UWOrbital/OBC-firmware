@@ -38,6 +38,17 @@ bl_error_code_t blFlashFapiBlockWrite(uint32_t flashAddress, uint32_t dataAddres
                                       uint32_t numBytes) BL_FLASH_ATTR_RAMFUNC_SECTION;
 
 /**
+ * @brief Checks if a given section has any bytes written
+ *
+ * @note This will also pick up an ecc bytes written
+ *
+ * @param startAddr Which address to start the blank check
+ * @param size32 Number of 32-bit words to check
+ * @return bool True if the area is blank, else false
+ */
+bool blFlashFapiBlankCheck(uint32_t startAddr, uint32_t size32) BL_FLASH_ATTR_RAMFUNC_SECTION;
+
+/**
  * @brief Check if an address is a valid start address for the binary
  *
  * @param addr The address to check

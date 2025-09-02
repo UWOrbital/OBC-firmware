@@ -1,7 +1,7 @@
 #include "obc_sci_io.h"
-#include "obc_errors.h"
 #include "obc_assert.h"
 #include "obc_board_config.h"
+#include "obc_errors.h"
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -14,10 +14,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static SemaphoreHandle_t sciMutex = NULL;
-static StaticSemaphore_t sciMutexBuffer;
-static SemaphoreHandle_t sciLinMutex = NULL;
-static StaticSemaphore_t sciLinMutexBuffer;
+static SemaphoreHandle_t sciReadMutex = NULL;
+static SemaphoreHandle_t sciWriteMutex = NULL;
+static StaticSemaphore_t sciReadMutexBuffer;
+static StaticSemaphore_t sciWriteMutexBuffer;
+static SemaphoreHandle_t sciLinReadMutex = NULL;
+static SemaphoreHandle_t sciLinWriteMutex = NULL;
+static StaticSemaphore_t sciLinReadMutexBuffer;
+static StaticSemaphore_t sciLinWriteMutexBuffer;
 
 // Semaphore to signal when an async transfer is complete
 static SemaphoreHandle_t sciTransferComplete = NULL;
@@ -30,15 +34,25 @@ STATIC_ASSERT((UART_PRINT_REG == sciREG) || (UART_PRINT_REG == scilinREG),
 STATIC_ASSERT((UART_READ_REG == sciREG) || (UART_READ_REG == scilinREG), "UART_READ_REG must be sciREG or scilinREG");
 
 void initSciMutex(void) {
-  if (sciMutex == NULL) {
-    sciMutex = xSemaphoreCreateMutexStatic(&sciMutexBuffer);
+  if (sciReadMutex == NULL) {
+    sciReadMutex = xSemaphoreCreateMutexStatic(&sciReadMutexBuffer);
   }
-  configASSERT(sciMutex);
+  configASSERT(sciReadMutex);
 
-  if (sciLinMutex == NULL) {
-    sciLinMutex = xSemaphoreCreateMutexStatic(&sciLinMutexBuffer);
+  if (sciWriteMutex == NULL) {
+    sciWriteMutex = xSemaphoreCreateMutexStatic(&sciWriteMutexBuffer);
   }
-  configASSERT(sciLinMutex);
+  configASSERT(sciWriteMutex);
+
+  if (sciLinReadMutex == NULL) {
+    sciLinReadMutex = xSemaphoreCreateMutexStatic(&sciLinReadMutexBuffer);
+  }
+  configASSERT(sciLinReadMutex);
+
+  if (sciLinWriteMutex == NULL) {
+    sciLinWriteMutex = xSemaphoreCreateMutexStatic(&sciLinWriteMutexBuffer);
+  }
+  configASSERT(sciLinWriteMutex);
 
   if (sciTransferComplete == NULL) {
     sciTransferComplete = xSemaphoreCreateBinaryStatic(&sciTransferCompleteBuffer);
@@ -67,10 +81,10 @@ obc_error_code_t sciReadBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
   SemaphoreHandle_t transferCompleteSemaphore = NULL;
 
   if (sciReg == sciREG) {
-    mutex = sciMutex;
+    mutex = sciReadMutex;
     transferCompleteSemaphore = sciTransferComplete;
   } else {
-    mutex = sciLinMutex;
+    mutex = sciLinReadMutex;
     transferCompleteSemaphore = sciLinTransferComplete;
   }
 
@@ -116,6 +130,11 @@ obc_error_code_t sciSendBytes(uint8_t *buf, size_t numBytes, TickType_t uartMute
     mutex = sciLinMutex;
     transferCompleteSemaphore = sciLinTransferComplete;
   }
+
+  SemaphoreHandle_t mutex = NULL;
+  SemaphoreHandle_t transferCompleteSemaphore = NULL;
+  SemaphoreHandle_t mutex = (sciReg == sciREG) ? sciWriteMutex : sciLinWriteMutex;
+  transferCompleteSemaphore = sciLinTransferComplete;
 
   configASSERT(mutex != NULL);
   configASSERT(transferCompleteSemaphore != NULL);

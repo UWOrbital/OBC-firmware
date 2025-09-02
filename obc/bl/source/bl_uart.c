@@ -1,14 +1,14 @@
 #include "bl_uart.h"
-
-#include <sci.h>
+#include "bl_time.h"
+#include "obc_errors.h"
+#include "sci.h"
 
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 
 /* DEFINES */
-#define BL_UART_SCIREG_1_BAUD 115200U
-#define BL_UART_SCIREG_2_BAUD 115200U
+#define BL_UART_SCIREG_BAUD 115200U
 
 /* TYPEDEFS */
 typedef struct {
@@ -16,26 +16,39 @@ typedef struct {
   sciBASE_t *sciReg;
 } bl_uart_reg_config_t;
 
-/* PRIVATE VARIABLES */
-static const bl_uart_reg_config_t bl_uart_reg_config[] = {
-    [BL_UART_SCIREG_1] = {BL_UART_SCIREG_1_BAUD, sciREG},
-    [BL_UART_SCIREG_2] = {BL_UART_SCIREG_2_BAUD, scilinREG},
-};
-
 /* PUBLIC FUNCTIONS */
 void blUartInit(void) {
   sciInit();
 
-  sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG_1].sciReg, bl_uart_reg_config[BL_UART_SCIREG_1].baud);
-  sciSetBaudrate(bl_uart_reg_config[BL_UART_SCIREG_2].sciReg, bl_uart_reg_config[BL_UART_SCIREG_2].baud);
+  sciSetBaudrate(UART_BL_REG, BL_UART_SCIREG_BAUD);
 }
 
-void blUartReadBytes(bl_uart_reg_t reg, uint8_t *buf, uint32_t numBytes) {
-  for (uint32_t i = 0U; i < numBytes; i++) {
-    buf[i] = (uint8_t)sciReceiveByte(bl_uart_reg_config[reg].sciReg);
+obc_error_code_t blUartReadBytes(uint8_t *buf, uint32_t numBytes, uint32_t timeout_ms) {
+  if (buf == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  uint32_t timeout = blGetCurrentTick() + timeout_ms;
+  uint32_t bytesRead = 0U;
+
+  do {
+    if (sciIsRxReady(UART_BL_REG) == SCI_RX_INT) {
+      buf[bytesRead] = (uint8_t)sciReceiveByte(UART_BL_REG);
+
+      // TODO: Figure out why the board sometimes receives 0x00 as the first byte
+      if (bytesRead == 0 && buf[bytesRead] == 0) {
+        bytesRead -= 1;
+      }
+
+      bytesRead++;
+    }
+  } while (blGetCurrentTick() <= timeout && bytesRead < numBytes);
+
+  if (bytesRead < numBytes) {
+    return OBC_ERR_CODE_INCOMPLETE_MESSAGE;
+  } else {
+    return OBC_ERR_CODE_SUCCESS;
   }
 }
 
-void blUartWriteBytes(bl_uart_reg_t reg, uint32_t numBytes, uint8_t *buf) {
-  sciSend(bl_uart_reg_config[reg].sciReg, numBytes, buf);
-}
+void blUartWriteBytes(uint32_t numBytes, uint8_t *buf) { sciSend(UART_BL_REG, numBytes, buf); }

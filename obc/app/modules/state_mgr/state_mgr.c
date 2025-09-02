@@ -1,6 +1,5 @@
 #include "state_mgr.h"
 #include "comms_manager.h"  // for comms_state_t
-
 #include "obc_board_config.h"
 #include "obc_errors.h"
 #include "obc_logging.h"
@@ -10,6 +9,9 @@
 
 #include "fm25v20a.h"
 #include "lm75bd.h"  // TODO: Handle within thermal manager
+#include "cc1120_txrx.h"
+#include "cc1120.h"
+#include "arducam.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
@@ -21,17 +23,20 @@
 #include <gio.h>
 #endif
 
+extern void *__stack_chk_guard;
+#define STACK_CANARY_BYTES 4
+
 /* Supervisor queue config */
 #define STATE_MGR_QUEUE_LENGTH 10U
 #define STATE_MGR_QUEUE_ITEM_SIZE sizeof(state_mgr_event_t)
-#define STATE_MGR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define STATE_MGR_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(100)
 #define STATE_MGR_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 static QueueHandle_t stateMgrQueueHandle = NULL;
 static StaticQueue_t stateMgrQueue;
 static uint8_t stateMgrQueueStack[STATE_MGR_QUEUE_LENGTH * STATE_MGR_QUEUE_ITEM_SIZE];
 
-static comms_state_t commsManagerState = COMMS_STATE_DISCONNECTED;
+static comms_state_t commsManagerState = COMMS_STATE_AWAITING_CONN;
 
 /**
  * @brief Send all startup messages from the stateMgr task to other tasks.
@@ -59,6 +64,27 @@ obc_error_code_t sendToStateMgrEventQueue(state_mgr_event_t *event) {
 
 static void sendStartupMessages(void) {}
 
+uint32_t stack_chk_guard_change(void) {
+  obc_error_code_t errCode;
+  uint32_t newStackGuard = 0;
+  for (uint8_t i = 0; i < STACK_CANARY_BYTES; i++) {
+    uint8_t randomByte;
+    LOG_IF_ERROR_CODE(cc1120Rng(&randomByte));
+    if (errCode == OBC_ERR_CODE_SUCCESS) {
+      (newStackGuard) = (newStackGuard << 8) | randomByte;
+    } else {
+      return 0xDEADBEEF;
+    }
+  }
+  return newStackGuard;
+}
+
+static inline void __attribute__((no_stack_protector)) construct_stk_chk_guard() {
+  if (__stack_chk_guard == (void *)0xDEADBEEF) {
+    __stack_chk_guard = (void *)stack_chk_guard_change();
+  }
+}
+
 void obcTaskFunctionStateMgr(void *pvParameters) {
   obc_error_code_t errCode;
 
@@ -68,8 +94,19 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
   obcSchedulerCreateTask(OBC_SCHEDULER_CONFIG_ID_LOGGER);
 
   /* Initialize critical peripherals */
-  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card
-  LOG_IF_ERROR_CODE(initTime());         // RTC
+
+#ifdef CONFIG_SDCARD
+  LOG_IF_ERROR_CODE(setupFileSystem());  // microSD card (commented out due to bug)
+#endif                                   // CONFIG_SDCARD
+#ifdef CONFIG_DS3232
+  LOG_IF_ERROR_CODE(initTime());  // RTC
+#endif                            // CONFIG_DS3232
+#ifdef CONFIG_CC1120
+  LOG_IF_ERROR_CODE(cc1120Init());
+  construct_stk_chk_guard();
+#endif
+
+  // TODO add other peripherals
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
@@ -128,7 +165,6 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 
     if (xQueueReceive(stateMgrQueueHandle, &inMsg, STATE_MGR_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
-      vTaskDelay(pdMS_TO_TICKS(1000));
       gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 #endif
       continue;

@@ -14,7 +14,7 @@
 #define MUTEX_TIMEOUT portMAX_DELAY
 #define MAX_BAUDRATE_LENGTH 7U
 #define MAX_OUTPUT_RATE_LENGTH 3U
-#define DEFAULT_OUTPUT_RATE_HZ 10U
+#define DEFAULT_OUTPUT_RATE_HZ 20U
 #define SCI_SEMAPHORE_TIMEOUT_MS \
   100U /* Time between successive sensor outputs (period): 1/output rate = 1/10Hz = 0.1s = 100ms */
 #define SCI_SEMAPHORE_TIMEOUT_TICKS pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS)  // Converting timeout ms to ticks
@@ -23,7 +23,7 @@
 #define BINARY_OUTPUT_START_PREFIX "$VNWRG,75,2,"  // Configure write command to output on register 75 and serial port 2
 #define BINARY_OUTPUT_STOP_PREFIX "$VNWRG,75,0,"   // Configure write command to stop outputs on register 75
 #define BINARY_OUTPUT_RATE_DIVISOR \
-  "80"  // Calculated by taking the IMU rate = 800Hz and dividing by the desired Output rate = 10Hz (800/10 = 80)
+  "40"  // Calculated by taking the IMU rate = 800Hz and dividing by the desired Output rate = 20Hz (800/20 = 40)
 #define BINARY_OUTPUT_POSTFIX \
   ",01,0528*XX\r\n"  // Configure to use output group 1 and enable the aforemore mentioned outputs, see section 4.2.4
                      // for more details.
