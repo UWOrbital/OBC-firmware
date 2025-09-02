@@ -9,6 +9,7 @@
 #define UART_PRINT_REG scilinREG
 #define UART_READ_REG scilinREG
 #define UART_VN100_REG sciREG
+#define UART_BL_REG scilinREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG3
@@ -57,12 +58,13 @@
 #define UART_PRINT_REG sciREG
 #define UART_READ_REG sciREG
 #define UART_VN100_REG scilinREG
+#define UART_BL_REG sciREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG1
 #define FRAM_spiPORT spiPORT1
 #define FRAM_CS 1UL
-#define FRAM_spiFMT SPI_FMT_1
+#define FRAM_spiFMT SPI_FMT_0
 
 // SD Card SPI config
 #define SDC_SPI_PORT spiPORT1
@@ -105,6 +107,7 @@
 #define UART_PRINT_REG sciREG
 #define UART_READ_REG sciREG
 #define UART_VN100_REG scilinREG
+#define UART_BL_REG sciREG
 
 // Fram SPI config
 #define FRAM_spiREG spiREG5

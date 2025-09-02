@@ -205,7 +205,7 @@
 /** @brief Product edition.
  */
 #if RED_KIT == RED_KIT_GPL
-#define RED_PRODUCT_EDITION "Open-Source GPLv2 Edition -- Compiled " __DATE__ " at " __TIME__
+#define RED_PRODUCT_EDITION "Open-Source GPLv2 Edition"
 #elif RED_KIT == RED_KIT_COMMERCIAL
 #define RED_PRODUCT_EDITION "Commercial Edition -- Compiled " __DATE__ " at " __TIME__
 #else
