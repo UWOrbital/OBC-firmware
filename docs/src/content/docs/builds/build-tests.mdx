@@ -3,8 +3,57 @@ title: Building tests
 description: On how to build tests
 sidebar:
   badge:
-    text: WIP
-    variant: caution
+    text: New
+    variant: success
   order: 3
 ---
-The following guide outlines a procedure to build tests for code.
+import { Steps } from '@astrojs/starlight/components';
+
+Sometimes you will have to write tests to debug c-side code. This guide will be a guide on how to compile and run these tests.
+
+## Adding the file to CMake
+Before you can compile you need to tell CMake to actually build the file for you. If you are not creating a new set of tests, you may skip this section. The following steps show how to add a test file to CMake.
+<Steps>
+1. Navigate to the directory where you have written your test. As of writing this directory can be any one of the following.
+    * `test_interfaces/unit`
+    * `test_gs/unit` (Note: As of writing you will need to do extra work to get this to work. Contact a lead if you need to build this directory)
+    * `test_obc/unit`
+2. Open the `CMakeLists.txt` file.
+3. Add the correct files and dependencies to the `CMakeLists.txt`. Usually this will be a file path in the `TEST_SOURCES` variable to your `.cpp` file that contains the tests you want to run. As an example the `TEST_SOURCES` CMake variable in `CMakeLists.txt` under the `test_interfaces/unit` directory is shown below.
+
+    ```cmake
+    set(TEST_SOURCES
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/main.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_pack_unpack_utils.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_command_pack_unpack.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_telemetry_pack_unpack.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_ax25.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_obc_gs_fec.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_command_response_pack_unpack.cpp
+      ${CMAKE_SOURCE_DIR}/test/test_interfaces/unit/test_encode_decode_pipeline.cpp
+      # Add a new file name here
+    )
+    ```
+
+    :::note
+    `CMAKE_SOURCE_DIR` is the repository's root directory.
+    :::
+</Steps>
+
+## Compiling and running tests
+With the file defined in CMake, we can now run tests. Or if there are no new tests this section still applies.
+
+<Steps>
+1. From the root directory run the following commands.
+
+    ```shell
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Test
+    cmake --build .
+    ctest --verbose
+    ```
+    :::note
+    To speed up the `cmake --build .` command you can use the `make -j 16` or the `make -j 32` (if your computer can handle 32 parallel jobs)
+    :::
+2. If the tests pass, well done! If you find that there is a failed test check your test's logic and then check your code!
+</Steps>
