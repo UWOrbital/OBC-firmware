@@ -3,8 +3,36 @@ title: Getting started
 description: Welcome to the Orbital Docs
 sidebar:
   badge:
-    text: WIP
-    variant: caution
+    text: New
+    variant: success
   order: 1
 ---
-Welcome to the Orbital Docs!
+import { LinkCard } from '@astrojs/starlight/components';
+
+Welcome to the Orbital Docs! Here you will find all codebase-related documentation.
+
+:::caution
+These docs are a work in-progress. As such not everything may be documented. If you need something and you do not find it in the documentation, be sure to mention it on our Discord server so that it can be added!
+:::
+
+## About the team
+> UW Orbital is a student design team at the University of Waterloo participating in the Canadian Satellite Design Challenge (CSDC) - a competition that involves a dozen universities from across Canada and runs every two years. Teams design a 3U CubeSats with unique missions and payloads, and attempt to pass launch readiness evaluations such as vibration testing. The competition offers to fund the launch costs for the winning team.
+
+**You can find out more on our site:** [https://www.uworbital.com/](https://www.uworbital.com/)
+
+## What software does
+Software is a sub-team consisting of two major code projects: the ground station and the satellite.
+
+Ground station related code includes coding front-ends that operators can interact with as well as code that interfaces with the satellite. The ground station mostly consists of Python and React.
+
+The satellite related code includes coding firmware for our onboard computer (OBC) and electrical systems (e.g. BMS). This is a major portion of the codebase and helps the software team enable the creations from the mechanical and electrical sub-teams.
+
+## Suggested Guides
+Don't know where to go first? Try one of the following links!
+
+<LinkCard title="The build guide for firmware" href="/OBC-firmware/builds/build-obc/" />
+<LinkCard title="The build guide for ground station" href="/OBC-firmware/builds/build-gs/" />
+<LinkCard title="The style guide for the code we write" href="/OBC-firmware/getting-started/style-guide/" />
+<LinkCard title="An overview of our codebase's file structure" href="/OBC-firmware/getting-started/file-structure/" />
+
+Happy Coding!
