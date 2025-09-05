@@ -30,8 +30,8 @@ export default defineConfig({
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/UWOrbital/OBC-firmware' }],
 			sidebar: [
 				{
-					label: 'Getting Started',
-					autogenerate: { directory: 'getting-started' },
+					label: 'Start Here',
+					autogenerate: { directory: 'start-here' },
 				},
         {
           label: 'Build Guides',
