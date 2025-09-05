@@ -31,6 +31,10 @@ export default defineConfig({
         Pagination: './src/components/Pagination.astro',
       },
       title: 'UW Orbital',
+      logo: {
+        src: './src/assets/icons/orbital_logo_long.png',
+        replacesTitle: true,
+      },
       social: [
         {
           icon: 'github',
