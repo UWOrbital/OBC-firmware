@@ -26,6 +26,10 @@ export default defineConfig({
           }
         },
       },
+      components: {
+        ThemeSelect: './src/components/ThemeSelect.astro',
+        Pagination: './src/components/Pagination.astro',
+      },
 			title: 'UW Orbital',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/UWOrbital/OBC-firmware' }],
 			sidebar: [

@@ -1,0 +1,76 @@
+---
+import { Icon } from '@astrojs/starlight/components'
+
+const { dir, pagination } = Astro.locals.starlightRoute
+const { prev, next } = pagination
+const isRtl = dir === 'rtl'
+---
+
+{
+  (prev || next) && (
+    <div class="pagination-links print:hidden" dir={dir}>
+      {prev && (
+        <a href={prev.href} rel="prev">
+          <span class="link-label sl-flex">
+            <Icon name={isRtl ? 'right-arrow' : 'left-arrow'} size="1.25rem" />
+            {Astro.locals.t('page.previousLink')}
+          </span>
+          <span class="link-title">{prev.label}</span>
+        </a>
+      )}
+      {next && (
+        <a href={next.href} rel="next">
+          <span class="link-label sl-flex">
+            {Astro.locals.t('page.nextLink')}
+            <Icon name={isRtl ? 'left-arrow' : 'right-arrow'} size="1.25rem" />
+          </span>
+          <span class="link-title">{next.label}</span>
+        </a>
+      )}
+    </div>
+  )
+}
+
+<style>
+  @layer rapide {
+    .pagination-links {
+      border-top: 1px solid var(--sl-color-gray-5);
+      display: flex;
+      padding-top: 1.5rem;
+    }
+
+    a {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      text-decoration: none;
+
+      &:is(:hover, :focus-visible) {
+        .link-label {
+          color: var(--sl-color-gray-2);
+        }
+
+        .link-title {
+          color: var(--sl-color-white);
+        }
+      }
+
+      &[rel='next'] {
+        align-items: flex-end;
+      }
+    }
+
+    .link-label {
+      align-items: center;
+      color: var(--sl-color-gray-3);
+      font-size: var(--sl-text-sm);
+      gap: 0.15rem;
+    }
+
+    .link-title {
+      color: var(--sl-color-gray-2);
+      font-weight: 600;
+      margin-inline: 0.25rem;
+    }
+  }
+</style>
