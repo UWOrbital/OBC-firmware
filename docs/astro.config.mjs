@@ -60,6 +60,10 @@ export default defineConfig({
           autogenerate: { directory: 'comms' },
         },
         {
+          label: 'FreeRTOS Tasks',
+          autogenerate: { directory: 'tasks' },
+        },
+        {
           label: 'Guides',
           autogenerate: { directory: 'guides' },
         },
