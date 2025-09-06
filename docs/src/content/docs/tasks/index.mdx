@@ -1,8 +1,131 @@
 ---
-title: FreeRTOS tasks
-description: The FreeRTOS tasks throughout the codebase
+title: Modules/FreeRTOS tasks
+description: Overview of all of our running FreeRTOS Tasks
 sidebar:
   badge:
     text: WIP
-    variant: caution
+    variant: success
+  order: 4
 ---
+import { FileTree } from '@astrojs/starlight/components';
+
+## Introduction
+
+Often, understanding the starting point through which the application "does stuff" can give a more holistic view 
+of our architecture and our folder/file organization. This helps put things into context when working on smaller scoped tasks
+and generally trying to understand parts of the codebase.
+
+Our application can be broken into modules. This is the name we use to isolate a single FreeRTOS task, and any relevant
+logic specific to the task. You can think of FreeRTOS tasks like threads in an OS - FreeRTOS chooses which thread is running at one time,
+and these threads use other FreeRTOS tools, and our drivers, to perform logic and interact with our peripherals (note that
+this is a simplified explanation - FreeRTOS tasks are not exactly analagous to OS threads). 
+
+Tasks are our highest level of abstraction, with some of the FreeRTOS API and all of our periheral drivers directly underneath. 
+
+## File structure 
+<FileTree>
+- obc 
+  - app
+    - app_main.c 
+    - modules FreeRTOS tasks
+        - alarm_mgr
+            - ...
+        - camera_mgr
+            - ...
+        - command_mgr
+            - ...
+        - comms_link_mgr
+            - ...
+        - digital_watchdog_mgr
+            - ...
+        - eps_mgr
+            - ...
+        - gnc_mgr
+            - ...
+        - health_collector
+            - ...
+        - logger
+            - ...
+        - state_mgr
+            - ...
+        - task_stats_collector
+            - ...
+        - telemetry_mgr
+            - ...
+        - timekeeper
+            - ...
+</FileTree>
+
+## About this guide
+
+This guide aims to give a practical overview and understanding of what each FreeRTOS task we currently have does. It will start
+chronologically by what code executes. Though, there is no set order after the state manager.
+
+The reader should be able to understand the specifics of how each task is implemented by referring to the codebase after 
+understanding their general purposes and functions from this document. However, soon we will have guides up explaining each 
+task more in depth, and how they are implemented.
+
+## Understanding app_main.c 
+
+Before FreeRTOS starts, the application executes the code in app_main.c. You can think of this file as the true entry point to the 
+firmware - similar to the main.c file in other projects. This file initializes general hardware for the RM46, creates the state manager task, 
+and then starts the FreeRTOS scheduler. It is minimalistic by design, app_main does not have a lot of stack size. 
+Once the main loop calls the FreeRTOS scheduler, the state manager task starts running.
+
+## State manager
+
+This task can be thought of as the **"initializing/config" task**. It currently creates the base states for tasks that 
+track their own state (e.g. comms_manager), initializes most external peripherals, and initializes and starts running the 
+other tasks. State manager currently does not yet have many events/functionality once the other tasks start running. 
+(Note that the only event possible to send to its queue is a null event)
+
+The actual config for all tasks can be found in 
+<FileTree>
+- obc
+  - app
+    - rtos 
+      - obc_scheduler_config.h
+      - obc_scheduler_config.c
+</FileTree>
+
+The various functions used by the state manager to initialize and create the tasks can be found here, as well as the static config array 
+containing all the fields needed by FreeRTOS for each task for those who are curious. This will also be explained in greater
+detail in the page focused solely on the state manager.
+
+Though the task does not currently have any events that can be sent to its queue, in the future it is planned to also be responsible for
+  - General RM46 system states (e.g. low power mode, testing/debug mode)
+  - Handling resets
+  - Controlling load switches
+  
+The state manager is a system service, along with the alarm handler, watchdog manager, logger, and timekeeper.
+
+## System services vs mission services  (todo: make this a tip/note)
+
+Though this is not significant from a technical standpoint, our tasks can generally be thought of as either a system service or 
+a mission service. This is not a distinction made using strict criteria.
+
+The best explanation is that **system services manage the general upkeep of the software systems**, interacting minimally 
+with the external world. They help ensure that the mission services function, and that there are no issues in the overall software.
+
+**Mission services on the other hand perform needed functions for the cubesat systems**. They often interface and interact directly with
+the environment through sensors and devices (e.g. thermal manager gets temp data and then activates heaters, GNC manager 
+uses motors, comms manager exchanges data between our satellite and the ground through a custom transceiver).
+
+## Alarm manager
+
+We need the capibility to execute commands at specific times. To do this, we have an RTC (the DS3232). However, the RTC can 
+only alert to one event at a time. So what happens when we receive multiple time tagged commands in a short span, where all of them
+are set to some time in the future?
+
+The alarm manager was created exactly for this purpose. It has a static queue (separate from its FreeRTOS queue) to track all
+the future alarms that need to be set in the RTC. The soonest of these alarms are then loaded into the RTC. Once an alarm
+is triggered, an event is sent to the alarm manager FreeRTOS queue, which signals to load the next soonest alarm.
+
+Overall, **the alarm manager is responsible for managing all the alarms for the RTC**. 
+
+## Digital watchdog manager
+
+
+
+
+
