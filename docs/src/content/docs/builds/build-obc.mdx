@@ -10,7 +10,8 @@ The following is a simple guide for building the app for the OBC and flashing.
 
 ## Compiling for the OBC
 <Steps>
-1. From the root directory you can run the following commands
+1. Before compiling, ensure that the Python virtual environment is activated. If you do not have this configured, see [Initial setup](/OBC-firmware/start-here/setup/).
+2. From the root directory, run the following commands:
     ```shell
     mkdir -p build_arm && cd build_arm
     cmake .. -DCMAKE_BUILD_TYPE=OBC
@@ -18,11 +19,11 @@ The following is a simple guide for building the app for the OBC and flashing.
     ```
 
     :::tip[Tip: Reducing Build Time]{icon="setting"}
-    The `cmake --build .` takes some time to run since it is using a single thread to compile. To speed up the process we can replace it with one of the following commands...
+    The `cmake --build .` takes some time to run since it is using a single thread to compile. To speed up the process we can replace it with one of the following commands:
     1. `make -j 16` (Recommended for most systems)
     2. `make -j 32` (This is faster but depends on if your system can handle 32 parallel jobs)
     :::
-2. There are also plenty of extra options that you can use besides `-DCMAKE_BUILD_TYPE` by appending them to the `cmake ..` command. Take a look at the [CMake Options Guide](/OBC-firmware/builds/cmake-options/).
+3. There are also plenty of extra options that you can use besides `-DCMAKE_BUILD_TYPE` by appending them to the `cmake ..` command. Take a look at the [CMake options guide](/OBC-firmware/builds/cmake-options/).
 
     :::caution
     Make sure to specify the `-DBOARD_TYPE=` option to avoid any unwanted behavior

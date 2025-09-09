@@ -9,7 +9,7 @@ sidebar:
 ---
 The following is a guide to adding commands to ensure that they work in the python and c sections of this code base. (To navigate quickly, github provides a table of contents via the little list icon on the README header)
 
-## Adding commands to the C Side
+## Adding commands to the C side
 ### Step 1: Adding the command id
 1. Navigate to `obc_gs_command_id.h` and in the `cmd_callback_id_t` enum struct, add your command id. This must be **before** `NUM_CMD_CALLBACKS` (since we use it to count the number of commands throughout the codebase). The command should be written in uppercase with underscores as spaces and should be prefixed with `CMD`. As an example, `CMD_MAPLE_LEAFS` is correct but `CmdMapleLeafs`, `CMDMAPLELEAFS`, `cmd_maple_leafs` are not.
 ```c

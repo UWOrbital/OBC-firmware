@@ -3,8 +3,47 @@ title: Building the ground station
 description: On how to build for ground station
 sidebar:
   badge:
-    text: WIP
-    variant: caution
+    text: New
+    variant: success
   order: 2
 ---
+import { Steps } from '@astrojs/starlight/components';
+
 The following guide outlines a procedure to build the ground station.
+
+## Compiling for the ground station
+From the root directory, run the following commands:
+```shell
+mkdir -p build_gs && cd build_gs
+cmake .. -DCMAKE_BUILD_TYPE=GS
+cmake --build .
+```
+
+:::tip[Tip: Reducing Build Time]{icon="setting"}
+The `cmake --build .` takes some time to run since it is using a single thread to compile. To speed up the process we can replace it with one of the following commands:
+1. `make -j 16` (Recommended for most systems)
+2. `make -j 32` (This is faster but depends on if your system can handle 32 parallel jobs)
+:::
+
+## Setting up frontend development
+To run the frontend, Deno 2 must be installed. If it isn't, see [Initial setup](/OBC-firmware/start-here/setup/) and follow it to set up the database as well.
+
+Run all commands from the root directory.
+
+### Installing the frontend
+```shell
+cd gs/frontend
+deno install --frozen
+```
+### Running the ARO frontend
+This will start the frontend at `localhost:5173`.
+```shell
+cd gs/frontend/aro
+deno task dev
+```
+### Running the MCC frontend
+This will start the frontend at `localhost:5173`.
+```shell
+cd gs/frontend/mcc
+deno task dev
+```
