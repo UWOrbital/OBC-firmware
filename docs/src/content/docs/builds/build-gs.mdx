@@ -28,7 +28,7 @@ The `cmake --build .` takes some time to run since it is using a single thread t
 ## Setting up frontend development
 To run the frontend, Deno must be installed. If it isn't, see [Initial setup](/OBC-firmware/start-here/initial-setup/) and follow it to set up the database as well.
 
-Run all commands from the root directory.
+**Run all commands from the root directory!**
 
 ### Installing Deno
 ```shell
@@ -40,6 +40,7 @@ sudo snap install deno
 cd gs/frontend
 deno install --frozen
 ```
+
 ### Running the ARO frontend
 This will start the frontend at `localhost:5173`.
 ```shell
@@ -52,3 +53,6 @@ This will start the frontend at `localhost:5173`.
 cd gs/frontend/mcc
 deno task dev
 ```
+:::note
+If you have issues starting the MCC, try restarting your shell after installing Deno.
+:::
