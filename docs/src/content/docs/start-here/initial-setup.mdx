@@ -24,14 +24,26 @@ Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en
 ## Linux/WSL
 
 <Steps>
-1. Open a terminal and run the following commands to install our required tools:
+1. Ensure you have Git installed. If you are using Ubuntu 24.04 LTS or later, or installed the default WSL distribution, you should already have it installed.
+If not, open a terminal and run the following command to install Git:
+
+    ```shell
+    sudo apt install git
+    ```
+
+2. Run the following command in a directory of your choice to clone the repository:
+    ```shell
+    git clone https://github.com/UWOrbital/OBC-firmware.git
+    ```
+
+3. Install our required tools:
 
     ```shell
     sudo apt update
     sudo apt install -y build-essential gcc-multilib g++-multilib cmake curl
     ```
 
-2. Install Python 3.11+ and pip. If you are using Ubuntu 24.04 LTS or later, or installed the default WSL distribution, you should already have a compatible version of Python installed.
+4. Install Python 3.11+ and pip. If you are using Ubuntu 24.04 LTS or later, or installed the default WSL distribution, you should already have a compatible version of Python installed.
 
     ```shell
     sudo apt install python3
@@ -45,13 +57,13 @@ Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en
     ```
     If it's 3.11 or higher, you're good.
 
-3. Install the Python virtual environment:
+5. Install the Python virtual environment:
 
     ```shell
     sudo apt install python3-venv
     ```
 
-4. Setup your virtual environment by running the following commands in the repository's root directory:
+6. Setup your virtual environment by running the following commands in the repository's root directory (the `OBC-firmware` folder):
 
     ```shell
     python3 -m venv .venv
@@ -59,7 +71,7 @@ Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en
     pip install -r requirements.txt
     pip install -e .
 
-5. Setup pre-commit:
+7. Setup pre-commit:
 
     ```shell
     # The first command installs Deno, which is required for our pre-commit
@@ -67,7 +79,7 @@ Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en
     pre-commit install
     ```
 
-6. 
+8. 
     :::note[Ground station only]
     Setup the PostgreSQL database with the [Database setup](/OBC-firmware/start-here/database-setup) guide.
     :::
