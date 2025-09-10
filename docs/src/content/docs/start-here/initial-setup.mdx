@@ -31,8 +31,15 @@ Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en
     sudo apt install -y build-essential gcc-multilib g++-multilib cmake curl
     ```
 
-2. Install Python 3.11+ and pip. If you are using Ubuntu 24.04 LTS or later, or installed the default WSL distribution, you should already have a compatible version of Python installed. <br/>Check your installed Python version with:
+2. Install Python 3.11+ and pip. If you are using Ubuntu 24.04 LTS or later, or installed the default WSL distribution, you should already have a compatible version of Python installed.
 
+    ```shell
+    sudo apt install python3
+    sudo apt install python3-pip
+    
+    ```
+    
+    Check your installed Python version with:
     ```shell
     python3 --version
     ```
