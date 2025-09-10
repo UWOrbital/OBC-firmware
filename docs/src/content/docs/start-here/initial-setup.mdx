@@ -9,7 +9,7 @@ import { Steps } from '@astrojs/starlight/components';
 This guide walks you through the process of setting up your development environment.
 
 ## Windows
-:::caution[]
+:::caution
 **Windows is not supported for firmware and ground station development.**
 
 If you are using Windows, you will need to install Windows Subsystem for Linux (WSL). WSL lets you run a complete Linux environment directly inside Windows without virtual machine overhead or dual booting.
@@ -21,6 +21,11 @@ After installing WSL, continue to the [Linux/WSL](#linuxwsl) section of the guid
 
 Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en-us/windows/wsl/install. Make sure you install the latest Ubuntu distribution for consistency (this should be the default). You can use another distribution, but note that some steps may differ, most notably package installation.
 
+:::tip
+For command-line work, it's recommended to use **Windows Terminal** (in Windows, it's just called **Terminal**). Despite being a built-in Microsoft app, it's surprisingly powerful and intuitive. Use Windows Terminal to access WSL and run any command-line tasks.
+
+You can also work with WSL in VS Code. To open VS Code in WSL, install the WSL extension, then either run `code .` from a WSL directory or use the Remote Explorer in VS Code.
+:::
 ## Linux/WSL
 
 <Steps>
