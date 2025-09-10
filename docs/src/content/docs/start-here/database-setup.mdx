@@ -7,3 +7,56 @@ sidebar:
     text: WIP
     variant: caution
 ---
+import { Steps } from '@astrojs/starlight/components';
+
+This guide will help you install and setup PostgreSQL for hosting the database locally.
+
+## Windows
+:::caution[]
+**Windows is not supported for firmware and ground station development.**
+
+If you are using Windows, you will need to install Windows Subsystem for Linux (WSL). WSL lets you run a complete Linux environment directly inside Windows without virtual machine overhead or dual booting.
+
+Make sure you follow the [Initial setup](/OBC-firmware/start-here/initial-setup) guide.
+:::
+
+## Linux/WSL
+
+<Steps>
+1. Open a terminal and run the following commands to install PostgreSQL:
+
+    ```shell
+    sudo apt update
+    sudo apt install postgresql-16
+    ```
+
+2. Run `sudo -u postgres psql --version` to ensure PostgreSQL was installed properly. It should print that the major version is 16.
+
+3. Run the following commands to setup PostgreSQL for the ground station:
+
+    ```shell
+    # Connect to PostgreSQL CLI as the postgres superuser
+    sudo -u postgres psql
+    # Replace 'your_username' and 'your_password' with your desired values
+    CREATE USER your_username WITH PASSWORD 'your_password' SUPERUSER;
+    CREATE DATABASE gs
+    ```
+
+4. Log out, then verify that you can log in to your newly created user and database:
+
+    ```shell
+    \q # Log out
+    # Replace 'your_username' with your actual username
+    psql -U your_username -d gs
+    # You should be logged into the database
+    \q # Log out again
+
+5. From the root directory, run the following commands to create a new .env file:
+
+    ```shell
+    cd gs/backend/config
+    cp template.env .env
+    ```
+
+6. Edit the new .env file to add your login details in the quotes. In Linux/WSL, you can use `vim` or `nano`.
+</Steps>
