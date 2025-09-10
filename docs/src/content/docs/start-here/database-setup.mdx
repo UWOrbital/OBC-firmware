@@ -52,14 +52,14 @@ Make sure you follow the [Initial setup](/OBC-firmware/start-here/initial-setup)
     # You should be logged into the database
     \q # Log out again
 
-5. From the root directory, run the following commands to create a new .env file:
+5. From the root directory, run the following commands to create a new `.env` file:
 
     ```shell
     cd gs/backend/config
     cp template.env .env
     ```
 
-6. Edit the new .env file to add your login details in the quotes. In Linux/WSL, you can use `vim` or `nano`.
+6. Edit the `.env` file to add your login details in the quotes. In Linux/WSL, you can use `vim` or `nano`.
 
 7. Ensure that your Python virtual environment is activated. If not, follow [Initial setup](/OBC-firmware/start-here/initial-setup). Start the backend in development mode by running `fastapi dev gs/backend/main.py` from the root directory. This will also initialize the database.
 </Steps>
