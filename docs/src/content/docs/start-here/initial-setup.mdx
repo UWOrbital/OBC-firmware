@@ -1,0 +1,66 @@
+---
+title: Initial setup
+description: Initial setup for your development workflow
+sidebar:
+  order: 2
+  badge:
+    text: WIP
+    variant: caution
+---
+import { Steps } from '@astrojs/starlight/components';
+
+This guide walks you through the process of setting up your development environment.
+
+## Windows
+:::caution[]
+**Windows is not supported for firmware and ground station development.**
+
+If you are using Windows, you will need to install Windows Subsystem for Linux (WSL). WSL lets you run a complete Linux environment directly inside Windows without virtual machine overhead or dual booting.
+
+After installing WSL, continue to the [Linux/WSL](#linuxwsl) section of the guide.
+:::
+
+### WSL installation
+
+Follow Microsoft's official guide to install WSL: https://learn.microsoft.com/en-us/windows/wsl/install. Make sure you install the latest Ubuntu distribution for consistency (this should be the default). You can use another distribution, but note that some steps may differ, most notably package installation.
+
+## Linux/WSL
+
+<Steps>
+1. Open a terminal and run the following commands to install our required tools:
+
+    ```shell
+    sudo apt update
+    sudo apt install -y build-essential gcc-multilib g++-multilib cmake curl
+    ```
+
+2. Install Python 3.11+ and pip. If you are using Ubuntu 24.04 LTS and up or installed the default distribution of WSL, you should already have a sufficient version of Python installed. Check your installed version with:
+
+    ```shell
+    python3 --version
+    ```
+    If it is 3.11 or higher, you're good.
+
+3. Install the Python virtual environment:
+
+    ```shell
+    sudo apt install python3-venv
+    ```
+
+4. Setup your virtual environment by running the following commands in the repository's root directory:
+
+    ```shell
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    pip install -e .
+
+5. Setup pre-commit:
+
+    ```shell
+    curl -fsSL https://deno.land/install.sh | sh
+    pre-commit install
+    ```
+
+6. Finally, setup the PostgreSQL database with the [Database setup](/OBC-firmware/start-here/database-setup) guide.
+</Steps>

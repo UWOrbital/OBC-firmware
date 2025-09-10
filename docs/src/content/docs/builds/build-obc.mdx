@@ -18,7 +18,7 @@ The following is a simple guide for building the app for the OBC and flashing.
     cmake --build .
     ```
 
-    :::tip[Tip: Reducing Build Time]{icon="setting"}
+    :::tip[Tip: Reducing build time]{icon="setting"}
     The `cmake --build .` takes some time to run since it is using a single thread to compile. To speed up the process we can replace it with one of the following commands:
     1. `make -j 16` (Recommended for most systems)
     2. `make -j 32` (This is faster but depends on if your system can handle 32 parallel jobs)
