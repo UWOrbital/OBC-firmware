@@ -12,12 +12,12 @@ from gs.backend.data.tables.aro_user_tables import AROUsers
 
 
 # selects all objects of type AROUser from db and returns them in list
-def get_all_users() -> list:
+def get_all_users() -> list[AROUsers]:
     """
     @brief gets all user
     """
     with get_db_session() as session:
-        users = session.exec(select(AROUsers)).all()
+        users = list(session.exec(select(AROUsers)).all())
         return users
 
 
@@ -47,7 +47,7 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
 
 # deletes the user with given id and returns the remaining users
 # TODO deleting should also delete all entries in all tables which has the same id
-def delete_by_id(userid: str) -> list:
+def delete_by_id(userid: str) -> list[AROUsers]:
     """
     @brief use the user.id to delete a user from table
     """

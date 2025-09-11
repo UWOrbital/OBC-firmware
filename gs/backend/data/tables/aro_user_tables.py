@@ -73,7 +73,7 @@ class AROUserLogin(BaseSQLModel, table=True):
     password: str = Field(max_length=20)
     salt: bytes = urandom(16)
     created_on: datetime = datetime.now()
-    hashing_algorithm_name = Field(min_length=1, max_length=20)
+    hashing_algorithm_name: str = Field(min_length=1, max_length=20)
     user_data_id: UUID
     email_verification_token: str
 
