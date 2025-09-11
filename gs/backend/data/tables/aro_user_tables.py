@@ -1,3 +1,5 @@
+from datetime import datetime
+from os import urandom
 from typing import Final
 from uuid import UUID, uuid4
 
@@ -19,6 +21,7 @@ ARO_USER_SCHEMA_METADATA: Final[MetaData] = MetaData(ARO_USER_SCHEMA_NAME)
 
 # Table names in database
 ARO_USER_TABLE_NAME: Final[str] = "users_data"
+ARO_USER_LOGIN: Final[str] = "user_login"
 
 
 class AROUsers(BaseSQLModel, table=True):
@@ -49,3 +52,30 @@ class AROUsers(BaseSQLModel, table=True):
     # table information
     metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_USER_TABLE_NAME
+
+
+class AROUserLogin(BaseSQLModel, table=True):
+    """
+    Stores all information on AROUserLogin
+
+    :param id: AROUserLogin id
+    :param email: AROUserLogin email for login
+    :param password: AROUserLogin password for login
+    :param salt: 16 random bytes for password hashing
+    :param created_on: datetime object of the time at which AROUserLogin was created
+    :param hashing_algorithm_name: the name of the hashing algorithm for pwd hashing
+    :param user_data_id: id created by AROUsers
+    :param email_verification_token: given after user verifies
+    """
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)  # unique id for logins
+    email: EmailStr = Field(min_length=EMAIL_MIN_LENGTH, max_length=DEFAULT_MAX_LENGTH, unique=True)
+    password: str = Field(max_length=20)
+    salt: bytes = urandom(16)
+    created_on: datetime = datetime.now()
+    hashing_algorithm_name = Field(min_length=1, max_length=20)
+    user_data_id: UUID
+    email_verification_token: str
+
+    metadata = ARO_USER_SCHEMA_METADATA
+    __tablename__ = ARO_USER_LOGIN
