@@ -4,7 +4,7 @@ from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.main_tables import MainCommand
 
 
-def get_all_commands() -> list:
+def get_all_main_commands() -> list:
     """
     @brief get all data wrapper for MainCommand
     """
@@ -13,7 +13,7 @@ def get_all_commands() -> list:
         return commands
 
 
-def create_command(command_data: dict) -> MainCommand:
+def create_main_command(command_data: dict) -> MainCommand:
     """
     @brief post data wrapper for MainCommand
     """
@@ -25,7 +25,7 @@ def create_command(command_data: dict) -> MainCommand:
         return command
 
 
-def delete_command_by_id(command_id: int) -> bool:
+def delete_main_command_by_id(command_id: int) -> bool:
     """
     @brief delete data wrapper for MainCommand
     """

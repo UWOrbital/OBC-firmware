@@ -4,7 +4,7 @@ from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.main_tables import MainTelemetry
 
 
-def get_all_telemetries() -> list:
+def get_all_main_telemetries() -> list:
     """
     @brief get all data wrapper for MainTelemetry
     """
@@ -13,7 +13,7 @@ def get_all_telemetries() -> list:
         return telemetries
 
 
-def create_telemetry(telemetry_data: dict) -> MainTelemetry:
+def create_main_telemetry(telemetry_data: dict) -> MainTelemetry:
     """
     @brief post data wrapper for MainTelemetry
     """
@@ -25,7 +25,7 @@ def create_telemetry(telemetry_data: dict) -> MainTelemetry:
         return telemetry
 
 
-def delete_telemetry_by_id(telemetry_id: int) -> None:
+def delete_main_telemetry_by_id(telemetry_id: int) -> None:
     """
     @brief delete data wrapper for MainTelemetry
     """
