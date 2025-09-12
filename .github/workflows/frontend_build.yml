@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies for ${{ matrix.project }}
         run: |
           cd ./gs/frontend/${{ matrix.project }}
-          npm ci   # or `npm install` if you don't use package-lock.json
+          npm ci
       - name: Build ${{ matrix.project }}
         run: |
           cd ./gs/frontend/${{ matrix.project }}
