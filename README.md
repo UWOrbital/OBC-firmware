@@ -82,7 +82,6 @@ You'll be using WSL2 for all development.
 
 This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
 
-
 #### **MacOS**
 
 1. Install required build tools (CMake, Make, gcc)
@@ -112,10 +111,10 @@ curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
+
 4. Setup the PostgreSQL database
 
 This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
-
 
 #### **Linux**
 
@@ -266,9 +265,10 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 
 ### **Frontend Development**
 
-To run the frontend, you will need Deno 2 installed which was installed in the pre-commit setup instructions above.
+To run the frontend, you will need npm installed which was installed in the pre-commit setup instructions above.
 
 #### **Setting up the Frontend **
+
 ```sh
 cd gs/frontend
 deno install --frozen
@@ -580,6 +580,7 @@ Variable and function names should be descriptive enough to understand even with
 #### Function Comments
 
 Function comments should follow the format shown below:
+
 ```typescript
 /**
  * @brief Adds two numbers together
@@ -597,13 +598,13 @@ function addNumbers(num1: number, num2: number): number {
 
 - File comments are not required
 
-### ****Naming and typing conventions****
+### \***\*Naming and typing conventions\*\***
 
--   `variableNames` in camelCase
--   `functionNames()` in camelCase
--   `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
--   `file_names` in snake_case
--   `ClassName` and `ComponentName` in PascalCase
+- `variableNames` in camelCase
+- `functionNames()` in camelCase
+- `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
+- `file_names` in snake_case
+- `ClassName` and `ComponentName` in PascalCase
 
 **[Back to top](#table-of-contents)**
 
