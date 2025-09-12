@@ -1,6 +1,6 @@
 import { type MouseEvent, useEffect, useState } from "react";
-import RequestItem from "./request-item.tsx";
 import type { RequestItemData } from "./request-item-data.ts";
+import RequestItem from "./request-item.tsx";
 import { getRequestItems } from "./requests-api.ts";
 
 const Requests = () => {
