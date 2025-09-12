@@ -4,7 +4,9 @@ from typing import Final
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr
-from sqlalchemy.schema import MetaData
+from sqlalchemy import Enum
+from sqlalchemy.dialects.postgresql import UUID as DB_UUID
+from sqlalchemy.schema import Column, ForeignKey, MetaData
 from sqlmodel import Field
 
 from gs.backend.config.data_config import (
@@ -13,6 +15,7 @@ from gs.backend.config.data_config import (
     DEFAULT_MAX_LENGTH,
     EMAIL_MIN_LENGTH,
 )
+from gs.backend.data.enums.aro_auth_token import AROAuthToken
 from gs.backend.data.tables.base_model import BaseSQLModel
 
 # Schema information
@@ -72,10 +75,32 @@ class AROUserLogin(BaseSQLModel, table=True):
     email: EmailStr = Field(min_length=EMAIL_MIN_LENGTH, max_length=DEFAULT_MAX_LENGTH, unique=True)
     password: str = Field(max_length=20)
     salt: bytes = urandom(16)
-    created_on: datetime = datetime.now()
+    created_on: datetime = Field(default_factory=datetime.now)
     hashing_algorithm_name: str = Field(min_length=1, max_length=20)
-    user_data_id: UUID
-    email_verification_token: str
+    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
+    email_verification_token: str = Field(min_length=1, max_length=200)
 
     metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_USER_LOGIN
+
+
+class AROUserAuthToken(BaseSQLModel, table=True):
+    """
+    Stores all information for User Auth Tokens
+
+    :param id: a unique identifier for the user auth token
+    :param user_data_id: id created by AROUser
+    :param token: UUID token
+    :param created_on: datetime object which tracks the date and time at which user auth token was created
+    :param expiry: datetime object which represents the time at which the token expires
+    :param auth_type: the type of the token
+    """
+
+    id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
+    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
+    # TODO add proper UUID support for token
+    token: str
+    created_on: datetime = Field(default_factory=datetime.now)
+    expiry: datetime = Field()
+    # TODO create a python enum with the allowed type
+    auth_type: AROAuthToken = Field(sa_column=Column(Enum(AROAuthToken, name="auth_type"), nullable=False))

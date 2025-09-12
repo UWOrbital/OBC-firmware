@@ -50,6 +50,6 @@ def delete_login_by_id(loginid: str) -> list[AROUserLogin]:
             session.delete(user_login)
             session.commit()
         else:
-            print("User does not exist")
+            print("Login details does not exist")
 
         return get_all_logins()
