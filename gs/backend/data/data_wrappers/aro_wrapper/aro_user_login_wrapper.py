@@ -19,11 +19,11 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: str, email_ver
     """
     with get_db_session() as session:
         # check if the user exists already
-        user_login = session.exec(select(AROUserLogin).where(AROUserLogin.email == email))
+        existing_login = session.exec(select(AROUserLogin).where(AROUserLogin.email == email)).first()
 
-        if user_login:
+        if existing_login:
             print("User login already exists")
-            return user_login
+            return existing_login
 
         user_login = AROUserLogin(
             email=email,
@@ -46,7 +46,7 @@ def delete_login_by_id(loginid: str) -> list[AROUserLogin]:
     with get_db_session() as session:
         user_login = session.exec(select(AROUserLogin).where(AROUserLogin.id == loginid)).first()
 
-        if AROUserLogin:
+        if user_login:
             session.delete(user_login)
             session.commit()
         else:

@@ -13,7 +13,7 @@ def get_all_requests() -> list[ARORequest]:
     @breif get all the requests from aro
     """
     with get_db_session() as session:
-        requests = session.exec(select(ARORequest).all())
+        requests = list(session.exec(select(ARORequest)).all())
         return requests
 
 

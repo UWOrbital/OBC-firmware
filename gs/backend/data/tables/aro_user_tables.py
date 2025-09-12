@@ -77,7 +77,9 @@ class AROUserLogin(BaseSQLModel, table=True):
     salt: bytes = urandom(16)
     created_on: datetime = Field(default_factory=datetime.now)
     hashing_algorithm_name: str = Field(min_length=1, max_length=20)
-    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
+    user_data_id: UUID = Field(
+        sa_column=Column(DB_UUID, ForeignKey(f"{ARO_USER_SCHEMA_NAME}.{ARO_USER_TABLE_NAME}.id"))
+    )
     email_verification_token: str = Field(min_length=1, max_length=200)
 
     metadata = ARO_USER_SCHEMA_METADATA
@@ -97,7 +99,9 @@ class AROUserAuthToken(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
+    user_data_id: UUID = Field(
+        sa_column=Column(DB_UUID, ForeignKey(f"{ARO_USER_SCHEMA_NAME}.{ARO_USER_TABLE_NAME}.id"))
+    )
     # TODO add proper UUID support for token
     token: str
     created_on: datetime = Field(default_factory=datetime.now)
