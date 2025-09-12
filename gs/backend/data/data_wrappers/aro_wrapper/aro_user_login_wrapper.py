@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
@@ -13,7 +15,7 @@ def get_all_logins() -> list[AROUserLogin]:
         return user_logins
 
 
-def add_login(email: str, pwd: str, hash_algo: str, user_data_id: str, email_verification_token: str) -> AROUserLogin:
+def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_verification_token: str) -> AROUserLogin:
     """
     @brief add a new user login
     """
@@ -39,7 +41,7 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: str, email_ver
         return user_login
 
 
-def delete_login_by_id(loginid: str) -> list[AROUserLogin]:
+def delete_login_by_id(loginid: UUID) -> list[AROUserLogin]:
     """
     @brief use the .id to delete a user from table
     """

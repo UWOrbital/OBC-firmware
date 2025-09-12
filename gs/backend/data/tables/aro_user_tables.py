@@ -5,8 +5,7 @@ from uuid import UUID, uuid4
 
 from pydantic import EmailStr
 from sqlalchemy import Enum
-from sqlalchemy.dialects.postgresql import UUID as DB_UUID
-from sqlalchemy.schema import Column, ForeignKey, MetaData
+from sqlalchemy.schema import Column, MetaData
 from sqlmodel import Field
 
 from gs.backend.config.data_config import (
@@ -25,6 +24,7 @@ ARO_USER_SCHEMA_METADATA: Final[MetaData] = MetaData(ARO_USER_SCHEMA_NAME)
 # Table names in database
 ARO_USER_TABLE_NAME: Final[str] = "users_data"
 ARO_USER_LOGIN: Final[str] = "user_login"
+ARO_AUTH_TOKEN: Final[str] = "auth_tokens"
 
 
 class AROUsers(BaseSQLModel, table=True):
@@ -77,9 +77,7 @@ class AROUserLogin(BaseSQLModel, table=True):
     salt: bytes = urandom(16)
     created_on: datetime = Field(default_factory=datetime.now)
     hashing_algorithm_name: str = Field(min_length=1, max_length=20)
-    user_data_id: UUID = Field(
-        sa_column=Column(DB_UUID, ForeignKey(f"{ARO_USER_SCHEMA_NAME}.{ARO_USER_TABLE_NAME}.id"))
-    )
+    user_data_id: UUID
     email_verification_token: str = Field(min_length=1, max_length=200)
 
     metadata = ARO_USER_SCHEMA_METADATA
@@ -99,12 +97,13 @@ class AROUserAuthToken(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    user_data_id: UUID = Field(
-        sa_column=Column(DB_UUID, ForeignKey(f"{ARO_USER_SCHEMA_NAME}.{ARO_USER_TABLE_NAME}.id"))
-    )
+    user_data_id: UUID = Field()
     # TODO add proper UUID support for token
     token: str
     created_on: datetime = Field(default_factory=datetime.now)
     expiry: datetime = Field()
     # TODO create a python enum with the allowed type
     auth_type: AROAuthToken = Field(sa_column=Column(Enum(AROAuthToken, name="auth_type"), nullable=False))
+
+    metadata = ARO_USER_SCHEMA_METADATA
+    __tablename__ = ARO_AUTH_TOKEN

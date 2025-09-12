@@ -17,12 +17,12 @@ def get_all_auth_tokens() -> list[AROUserAuthToken]:
         return auth_tokens
 
 
-def add_auth_token(token: str, expiry: datetime, auth_type: AROEnums) -> AROUserAuthToken:
+def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: AROEnums) -> AROUserAuthToken:
     """
     @brief add auth token to the db
     """
     with get_db_session() as session:
-        auth_token = AROUserAuthToken(token=token, expiry=expiry, auth_type=auth_type)
+        auth_token = AROUserAuthToken(token=token, user_data_id=user_data_id, expiry=expiry, auth_type=auth_type)
 
         session.add(auth_token)
         session.commit()
