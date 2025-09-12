@@ -35,5 +35,21 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: str, email_ver
 
         session.add(user_login)
         session.commit()
-        session.resfresh(user_login)
+        session.refresh(user_login)
         return user_login
+
+
+def delete_login_by_id(loginid: str) -> list[AROUserLogin]:
+    """
+    @brief use the .id to delete a user from table
+    """
+    with get_db_session() as session:
+        user_login = session.exec(select(AROUserLogin).where(AROUserLogin.id == loginid)).first()
+
+        if AROUserLogin:
+            session.delete(user_login)
+            session.commit()
+        else:
+            print("User does not exist")
+
+        return get_all_logins()
