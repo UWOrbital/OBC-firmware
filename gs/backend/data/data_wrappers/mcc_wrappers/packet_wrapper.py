@@ -25,7 +25,7 @@ def create_packet(packet_data: dict) -> Packet:
         return packet
 
 
-def delete_packet_by_id(packet_id: int) -> None:
+def delete_packet_by_id(packet_id: int) -> bool:
     """
     @brief delete data wrapper for Packet
     """

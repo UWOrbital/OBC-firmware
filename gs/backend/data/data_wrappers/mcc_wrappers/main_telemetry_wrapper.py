@@ -25,7 +25,7 @@ def create_main_telemetry(telemetry_data: dict) -> MainTelemetry:
         return telemetry
 
 
-def delete_main_telemetry_by_id(telemetry_id: int) -> None:
+def delete_main_telemetry_by_id(telemetry_id: int) -> bool:
     """
     @brief delete data wrapper for MainTelemetry
     """

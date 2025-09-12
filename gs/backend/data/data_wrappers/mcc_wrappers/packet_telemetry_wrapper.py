@@ -25,7 +25,7 @@ def create_packet_telemetry(telemetry_data: dict) -> PacketTelemetry:
         return telemetry
 
 
-def delete_packet_telemetry_by_id(telemetry_id: int) -> None:
+def delete_packet_telemetry_by_id(telemetry_id: int) -> bool:
     """
     @brief delete data wrapper for PacketTelemetry
     """

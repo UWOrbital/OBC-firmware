@@ -25,7 +25,7 @@ def create_commands(command_data: dict) -> Commands:
         return command
 
 
-def delete_commands_by_id(command_id: int) -> None:
+def delete_commands_by_id(command_id: int) -> bool:
     """
     @brief delete data wrapper for Commands
     """

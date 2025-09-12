@@ -25,7 +25,7 @@ def create_telemetry(command_data: dict) -> PacketCommands:
         return command
 
 
-def delete_telemetry_by_id(command_id: int) -> None:
+def delete_telemetry_by_id(command_id: int) -> bool:
     """
     @brief delete data wrapper for PacketCommands
     """

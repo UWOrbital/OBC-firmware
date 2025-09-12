@@ -25,7 +25,7 @@ def create_telemetry(session_data: dict) -> CommsSession:
         return comms_session
 
 
-def delete_telemetry_by_id(session_id: int) -> None:
+def delete_telemetry_by_id(session_id: int) -> bool:
     """
     @brief delete data wrapper for CommsSession
     """
