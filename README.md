@@ -330,32 +330,36 @@ npm -v # Should print "10.9.3".
 
 If you have Docker installed, you can run the following command to start the ARO frontend:
 
+_All instructions assume you are in the top-level directory_
+
 ```sh
-docker compose up aro-frontend  # Assuming you are in the top-level directory
+docker compose up aro-frontend
 ```
 
 Otherwise, you can run the following commands to start the ARO frontend:
 
 ```sh
-cd gs/frontend/aro # Assuming you are in the top-level directory
-npm install # This will install the dependencies for the ARO frontend
-npm run dev # This will start the frontend on localhost:5173
+cd gs/frontend/aro
+npm install
+npm run dev
 ```
 
 #### **Running the MCC Frontend**
 
 If you have Docker installed, you can run the following command to start the MCC frontend:
 
+_All instructions assume you are in the top-level directory_
+
 ```sh
-docker compose up mcc-frontend  # Assuming you are in the top-level directory
+docker compose up mcc-frontend
 ```
 
 Otherwise, you can run the following commands to start the MCC frontend:
 
 ```sh
-cd gs/frontend/mcc # Assuming you are in the top-level directory
-npm install # This will install the dependencies for the MCC frontend
-npm run dev # This will start the frontend on localhost:5174
+cd gs/frontend/mcc
+npm install
+npm run dev
 ```
 
 ## Contributing
