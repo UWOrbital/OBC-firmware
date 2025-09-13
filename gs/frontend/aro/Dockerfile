@@ -1,12 +1,14 @@
+# ARO docker file (vite + react)
+# for development only
 
-# ARO Frontend Dockerfile (Deno + Vite.js)
-FROM denoland/deno:alpine
+FROM node:24-alpine
+
 WORKDIR /app
-COPY . /app/
 
-RUN deno install
+COPY package*.json .
 
-EXPOSE 3000
+RUN npm ci
 
-# Start Vite dev server using Deno
-CMD ["deno", "task", "dev", "--host", "0.0.0.0","--port", "3000"]
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

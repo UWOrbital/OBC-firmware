@@ -1,7 +1,7 @@
 import { type MouseEvent, useEffect, useState } from "react";
-import RequestItem from "./request_item.tsx";
-import type { RequestItemData } from "./request_item_data.ts";
-import { getRequestItems } from "./requests_api.ts";
+import type { RequestItemData } from "./request-item-data.ts";
+import RequestItem from "./request-item.tsx";
+import { getRequestItems } from "./requests-api.ts";
 
 const Requests = () => {
   // TODO: Switch to using react-query
@@ -17,7 +17,8 @@ const Requests = () => {
   // Removes the request with the given id from the list of data
   // TODO: Cancel request on the backend
   const cancelRequest = (id: number) => {
-    return async (_: MouseEvent) => {
+    return async (a: MouseEvent) => {
+      a.preventDefault();
       setData((prev: RequestItemData[]) =>
         prev.filter((item) => item.id != id)
       );

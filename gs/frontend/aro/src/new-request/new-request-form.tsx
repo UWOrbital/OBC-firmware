@@ -1,4 +1,4 @@
-import "./new_request_form.css";
+import "./new-request-form.css";
 import { type ChangeEvent, useState } from "react";
 
 const NewRequestForm = () => {
@@ -11,7 +11,7 @@ const NewRequestForm = () => {
     // TODO: Show a map centered at latitude / longitude.
   });
 
-  const handleSubmit = (_: unknown) => {
+  const handleSubmit = () => {
     // TODO: Use the proper type for this
     const submission = {
       latitude,

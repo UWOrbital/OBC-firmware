@@ -1,5 +1,5 @@
 import type { MouseEvent } from "react";
-import type { RequestItemData } from "./request_item_data.ts";
+import type { RequestItemData } from "./request-item-data.ts";
 
 export interface RequestItemProp extends RequestItemData {
   cancelRequest: (_: MouseEvent) => Promise<void>;
@@ -7,7 +7,8 @@ export interface RequestItemProp extends RequestItemData {
 
 const RequestItem = (props: RequestItemProp) => {
   // TODO: Implement this
-  const downloadPacket = async (_: MouseEvent) => {
+  const downloadPacket = async (a: MouseEvent) => {
+    a.preventDefault();
     console.log(`Downloading packet for ${props.id}`);
   };
 

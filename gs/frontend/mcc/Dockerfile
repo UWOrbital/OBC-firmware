@@ -1,12 +1,14 @@
+# MCC docker file (vite + react)
+# for development only
 
-# MCC Frontend Dockerfile (Deno + Vite.js)
-FROM denoland/deno:alpine
+FROM node:24-alpine
+
 WORKDIR /app
-COPY . /app/
 
-RUN deno install
+COPY package*.json .
 
-EXPOSE 3001
+RUN npm ci
 
-# Start Vite dev server using Deno
-CMD ["deno", "task", "dev", "--host", "0.0.0.0","--port", "3001"]
+EXPOSE 5174
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
