@@ -67,7 +67,6 @@ Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be
 4. Setup pre-commit.
    In the WSL, under the OBC-firmware directory, run the following commands:
    ```sh
-   curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
    pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
    pre-commit install
    ```
@@ -92,8 +91,9 @@ brew install make
 brew install gcc
 ```
 
-2. Install Python 3.11 and setup Python virtual environment (Only required for GS devs)
+2. Install Python 3.11 and setup Python virtual environment
 
+This is only required for GS devs.
 Run the following commands in the OBC-firmware directory:
 
 ```sh
@@ -107,7 +107,6 @@ pip install -e .
 3. Setup pre-commit
 
 ```sh
-curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
@@ -125,8 +124,9 @@ sudo apt-get update
 sudo apt-get install build-essential gcc-multilib g++-multilib curl
 ```
 
-2. Install Python 3.11 and setup Python virtual environment (Only required for GS devs)
+2. Install Python 3.11 and setup Python virtual environment
 
+This is only required for GS devs.
 Run the following commands in the OBC-firmware directory:
 
 ```sh
@@ -140,7 +140,6 @@ pip install -e .
 3. Setup pre-commit
 
 ```sh
-curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
@@ -265,27 +264,98 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 
 ### **Frontend Development**
 
-To run the frontend, you will need npm installed which was installed in the pre-commit setup instructions above.
+To run the frontend, you will need nodejs installed.
 
-#### **Setting up the Frontend **
+<details>
+<summary>If you don't have nodejs installed, run the following commands to install it:</summary>
+
+#### **MacOS**
 
 ```sh
-cd gs/frontend
-deno install --frozen
+# Download and install nvm:
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+\. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+nvm install 22
+
+# Verify the Node.js version:
+node -v # Should print "v22.19.0".
+
+# Verify npm version:
+npm -v # Should print "10.9.3".
 ```
+
+#### **Windows**
+
+```sh
+# Download and install Chocolatey:
+powershell -c "irm https://community.chocolatey.org/install.ps1|iex"
+
+# Download and install Node.js:
+choco install nodejs --version="22.19.0"
+
+# Verify the Node.js version:
+node -v # Should print "v22.19.0".
+
+# Verify npm version:
+npm -v # Should print "10.9.3".
+```
+
+#### **Linux**
+
+```sh
+# Download and install nvm:
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+\. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+nvm install 22
+
+# Verify the Node.js version:
+node -v # Should print "v22.19.0".
+
+# Verify npm version:
+npm -v # Should print "10.9.3".
+
+```
+
+</details>
 
 #### **Running the ARO Frontend**
 
+If you have Docker installed, you can run the following command to start the ARO frontend:
+
+```sh
+docker compose up aro-frontend  # you need to be in the top-level directory
+```
+
+Otherwise, you can run the following commands to start the ARO frontend:
+
 ```sh
 cd gs/frontend/aro # Assuming you are in the top-level directory
-deno task dev # This will start the frontend on localhost:5173
+npm install # This will install the dependencies for the ARO frontend
+npm run dev # This will start the frontend on localhost:5173
 ```
 
 #### **Running the MCC Frontend**
 
+If you have Docker installed, you can run the following command to start the MCC frontend:
+
+```sh
+docker compose up mcc-frontend  # you need to be in the top-level directory
+```
+
+Otherwise, you can run the following commands to start the MCC frontend:
+
 ```sh
 cd gs/frontend/mcc # Assuming you are in the top-level directory
-deno task dev # This will start the frontend on localhost:5173
+npm install # This will install the dependencies for the MCC frontend
+npm run dev # This will start the frontend on localhost:5174
 ```
 
 ## Contributing
@@ -602,8 +672,8 @@ function addNumbers(num1: number, num2: number): number {
 
 - `variableNames` in camelCase
 - `functionNames()` in camelCase
-- `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
-- `file_names` in snake_case
+- `CONSTANTNAME` in PascalCase
+- `file-names` in kebab-case
 - `ClassName` and `ComponentName` in PascalCase
 
 **[Back to top](#table-of-contents)**
