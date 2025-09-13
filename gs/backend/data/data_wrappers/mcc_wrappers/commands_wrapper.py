@@ -11,7 +11,7 @@ def get_all_commands() -> list[Commands]:
     @brief get all data wrapper for Commands
     """
     with get_db_session() as session:
-        commands = list(session.exec(select(Commands))).all()
+        commands = list(session.exec(select(Commands)).all())
         return commands
 
 
