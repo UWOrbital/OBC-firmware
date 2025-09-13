@@ -362,6 +362,8 @@ npm install
 npm run dev
 ```
 
+Note that after you install new dependencies, you need to rebuild the container with `docker-compose up --build aro-frontend` or `docker-compose up --build mcc-frontend`
+
 ## Contributing
 
 1. Make sure you're added as a member to the UW Orbital organization on GitHub.
