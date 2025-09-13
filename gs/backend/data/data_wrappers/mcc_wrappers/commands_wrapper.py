@@ -1,19 +1,21 @@
+from typing import Any
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.transactional_tables import Commands
 
 
-def get_all_commands() -> list:
+def get_all_commands() -> list[Commands]:
     """
     @brief get all data wrapper for Commands
     """
     with get_db_session() as session:
-        commands = session.exec(select(Commands)).all()
+        commands = list(session.exec(select(Commands))).all()
         return commands
 
 
-def create_commands(command_data: dict) -> Commands:
+def create_commands(command_data: dict[str, Any]) -> Commands:
     """
     @brief post data wrapper for Commands
     """
