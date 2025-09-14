@@ -3,23 +3,24 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        project: ['aro', 'mcc']
+        project: ["aro", "mcc"]
 
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: actions/setup-node@v4
         with:
-          deno-version: v2.x
-      - name: Install dependencies for ${{matrix.project}}
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./gs/frontend/${{ matrix.project }}/package-lock.json"
+      - name: Install dependencies for ${{ matrix.project }}
         run: |
-          cd ./gs/frontend/${{matrix.project}}
-          deno install
-      - name: Build ${{matrix.project}}
+          cd ./gs/frontend/${{ matrix.project }}
+          npm ci
+      - name: Build ${{ matrix.project }}
         run: |
-          cd ./gs/frontend/${{matrix.project}}
-          deno task build
+          cd ./gs/frontend/${{ matrix.project }}
+          npm run build

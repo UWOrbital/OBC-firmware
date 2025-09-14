@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:16-alpine
@@ -22,17 +22,19 @@ services:
   aro-frontend:
     build: ./gs/frontend/aro
     ports:
-      - "3000:3000"
+      - "5173:5173"
     working_dir: /app
     volumes:
       - ./gs/frontend/aro:/app
+      - /app/node_modules
   mcc-frontend:
     build: ./gs/frontend/mcc
     ports:
-      - "3001:3001"
+      - "5174:5174"
     working_dir: /app
     volumes:
       - ./gs/frontend/mcc:/app
+      - /app/node_modules
 
 volumes:
   pgdata:
