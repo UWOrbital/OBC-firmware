@@ -1,4 +1,4 @@
-import "./home_status.css";
+import "./home-status.css";
 /**
  * @file HomeStatus.tsx
  * @brief Displays the status of the most recent request by a user or a message if there are no requests
