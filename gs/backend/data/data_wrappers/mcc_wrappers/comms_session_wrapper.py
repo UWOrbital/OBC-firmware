@@ -1,19 +1,21 @@
+from typing import Any
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.transactional_tables import CommsSession
 
 
-def get_all_comms_sessions() -> list:
+def get_all_comms_sessions() -> list[CommsSession]:
     """
     @brief get all data wrapper for CommsSession
     """
     with get_db_session() as session:
-        sessions = session.exec(select(CommsSession)).all()
+        sessions = list(session.exec(select(CommsSession)).all())
         return sessions
 
 
-def create_telemetry(session_data: dict) -> CommsSession:
+def create_comms_session(session_data: dict[str, Any]) -> CommsSession:
     """
     @brief post data wrapper for CommsSession
     """

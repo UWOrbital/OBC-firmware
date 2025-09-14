@@ -1,19 +1,21 @@
+from typing import Any
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.main_tables import MainTelemetry
 
 
-def get_all_main_telemetries() -> list:
+def get_all_main_telemetries() -> list[MainTelemetry]:
     """
     @brief get all data wrapper for MainTelemetry
     """
     with get_db_session() as session:
-        telemetries = session.exec(select(MainTelemetry)).all()
+        telemetries = list(session.exec(select(MainTelemetry)).all())
         return telemetries
 
 
-def create_main_telemetry(telemetry_data: dict) -> MainTelemetry:
+def create_main_telemetry(telemetry_data: dict[str, Any]) -> MainTelemetry:
     """
     @brief post data wrapper for MainTelemetry
     """

@@ -1,19 +1,21 @@
+from typing import Any
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.main_tables import MainCommand
 
 
-def get_all_main_commands() -> list:
+def get_all_main_commands() -> list[MainCommand]:
     """
     @brief get all data wrapper for MainCommand
     """
     with get_db_session() as session:
-        commands = session.exec(select(MainCommand)).all()
+        commands = list(session.exec(select(MainCommand)).all())
         return commands
 
 
-def create_main_command(command_data: dict) -> MainCommand:
+def create_main_command(command_data: dict[str, Any]) -> MainCommand:
     """
     @brief post data wrapper for MainCommand
     """

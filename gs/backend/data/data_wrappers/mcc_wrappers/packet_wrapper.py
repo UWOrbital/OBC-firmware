@@ -1,19 +1,21 @@
+from typing import Any
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.transactional_tables import Packet
 
 
-def get_all_packets() -> list:
+def get_all_packets() -> list[Packet]:
     """
     @brief get all data wrapper for Packet
     """
     with get_db_session() as session:
-        packets = session.exec(select(Packet)).all()
+        packets = list(session.exec(select(Packet)).all())
         return packets
 
 
-def create_packet(packet_data: dict) -> Packet:
+def create_packet(packet_data: dict[str, Any]) -> Packet:
     """
     @brief post data wrapper for Packet
     """

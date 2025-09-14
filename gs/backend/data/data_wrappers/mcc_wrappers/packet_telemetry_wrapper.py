@@ -1,19 +1,21 @@
+from typing import Any
+
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.transactional_tables import PacketTelemetry
 
 
-def get_all_packet_telemetries() -> list:
+def get_all_packet_telemetries() -> list[PacketTelemetry]:
     """
     @brief get all data wrapper for PacketTelemetry
     """
     with get_db_session() as session:
-        telemetries = session.exec(select(PacketTelemetry)).all()
+        telemetries = list(session.exec(select(PacketTelemetry)).all())
         return telemetries
 
 
-def create_packet_telemetry(telemetry_data: dict) -> PacketTelemetry:
+def create_packet_telemetry(telemetry_data: dict[str, Any]) -> PacketTelemetry:
     """
     @brief post data wrapper for PacketTelemetry
     """
