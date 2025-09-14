@@ -93,7 +93,6 @@ brew install gcc
 
 2. Install Python 3.11 and setup Python virtual environment
 
-This is only required for GS devs.
 Run the following commands in the OBC-firmware directory:
 
 ```sh
@@ -678,7 +677,7 @@ function addNumbers(num1: number, num2: number): number {
 
 - `variableNames` in camelCase
 - `functionNames()` in camelCase
-- `CONSTANTNAME` in PascalCase
+- `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
 - `file-names` in kebab-case
 - `ClassName` and `ComponentName` in PascalCase
 
