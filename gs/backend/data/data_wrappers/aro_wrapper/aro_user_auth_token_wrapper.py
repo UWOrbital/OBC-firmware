@@ -20,6 +20,11 @@ def get_all_auth_tokens() -> list[AROUserAuthToken]:
 def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: AROEnums) -> AROUserAuthToken:
     """
     @brief add auth token to the db
+
+    :param token: the auth token we want to add
+    :param user_data_id: UUID which identifies which user this auth token belongs to
+    :param expiry: the date in which this token expires
+    :param auth_type: the type of auth token this is, can only be from AROAuthToken
     """
     with get_db_session() as session:
         auth_token = AROUserAuthToken(token=token, user_data_id=user_data_id, expiry=expiry, auth_type=auth_type)
@@ -33,6 +38,8 @@ def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: 
 def delete_auth_token(token_id: UUID) -> list[AROUserAuthToken]:
     """
     @brief delete the auth token based on the token id
+
+    :param token_id: the unique identifier for a particular auth token
     """
 
     with get_db_session() as session:

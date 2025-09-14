@@ -18,6 +18,12 @@ def get_all_logins() -> list[AROUserLogin]:
 def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_verification_token: str) -> AROUserLogin:
     """
     @brief add a new user login
+
+    :param email: the email which the user used to sign up
+    :param pwd: the password the user set
+    :hash_algo: the hashing algorithm used to encrypt the password w the salt
+    :user_data_id: the unique identifier which binds this login to the user which created it
+    :email_verification_token: email verification token
     """
     with get_db_session() as session:
         # check if the user exists already
@@ -44,6 +50,8 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_ve
 def delete_login_by_id(loginid: UUID) -> list[AROUserLogin]:
     """
     @brief use the .id to delete a user from table
+
+    :param loginid: unique identifier of the target login
     """
     with get_db_session() as session:
         user_login = session.exec(select(AROUserLogin).where(AROUserLogin.id == loginid)).first()

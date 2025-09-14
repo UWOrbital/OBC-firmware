@@ -28,6 +28,12 @@ def get_all_users() -> list[AROUsers]:
 def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number: str) -> AROUsers:
     """
     @brief add a new user to the AROUser table in database
+
+    :param call_sign: a 6 character string such as ABCDEF
+    :param email: unique email which is bound to the user
+    :param f_name: first name of user
+    :param l_name: last name of user
+    :param phone_numer: phone number of user
     """
     with get_db_session() as session:
         # check if the user already exists with email as it is unique
@@ -52,6 +58,8 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
 def delete_user_by_id(userid: UUID) -> list[AROUsers]:
     """
     @brief use the user.id to delete a user from table
+
+    :param userid: identifier unique to the user
     """
     with get_db_session() as session:
         user = session.exec(select(AROUsers).where(AROUsers.id == userid)).first()

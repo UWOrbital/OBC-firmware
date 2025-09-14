@@ -10,7 +10,7 @@ from gs.backend.data.tables.transactional_tables import ARORequest
 
 def get_all_requests() -> list[ARORequest]:
     """
-    @breif get all the requests from aro
+    @brief get all the requests from aro
     """
     with get_db_session() as session:
         requests = list(session.exec(select(ARORequest)).all())
@@ -28,6 +28,13 @@ def add_request(
 ) -> ARORequest:
     """
     @brief add a request
+
+    :param long: the longitude represented as a decimal of max 3 decimal places
+    :param lat: the latitude represented as a decimal of max 3 decimal places
+    :param created_on: datetime object representing the date this request was made. defaults to now
+    :param taken_date: datetime object representing the date that this picture was taken on
+    :param taken_date: datetime object representing the date that this picture was trasmitted
+    :param status: the status of the request, can only be from the requets in ARORequestStatus
     """
     with get_db_session() as session:
         request = ARORequest(
@@ -49,6 +56,8 @@ def add_request(
 def delete_request(request_id: str) -> list[ARORequest]:
     """
     @brief delete a request based on id
+
+    :param request_id: unique identifier of the request
     """
     with get_db_session() as session:
         request = session.exec(select(ARORequest).where(ARORequest.id == request_id)).first()
