@@ -23,30 +23,32 @@ The `cmake --build .` takes some time to run since it is using a single thread t
 :::
 
 ## Setting up frontend development
-To run the frontend, Deno must be installed. If it isn't, see [Initial setup](/OBC-firmware/start-here/initial-setup/) and follow it to set up the database as well.
-
-Run all commands from the root directory.
-
-:::note
-If you have issues running any Deno commands, try restarting your shell after installing Deno.
-:::
-
-
-### Installing the frontend
-```shell
-cd gs/frontend
-deno install --frozen
-```
+To run the frontend, Node.js must be installed. If it isn't, see [Initial setup](/OBC-firmware/start-here/initial-setup/) and follow it to set up the database as well.
 
 ### Running the ARO frontend
-This will start the frontend at `localhost:5173`.
+While in the root directory, run the following commands to start the ARO frontend:
 ```shell
 cd gs/frontend/aro
-deno task dev
+npm install
+npm run dev
 ```
+If you have Docker installed, you can instead run the following command:
+```shell
+docker compose up aro-frontend
+```
+
+After you install new dependencies, you will need to rebuild the container with `docker-compose up --build aro-frontend`.
+
 ### Running the MCC frontend
-This will start the frontend at `localhost:5173`.
+While in the root directory, run the following commands to start the MCC frontend:
 ```shell
 cd gs/frontend/mcc
-deno task dev
+npm install
+npm run dev
 ```
+If you have Docker installed, you can instead run the following command:
+```shell
+docker compose up mcc-frontend
+```
+
+After you install new dependencies, you will need to rebuild the container with `docker-compose up --build mcc-frontend`.
