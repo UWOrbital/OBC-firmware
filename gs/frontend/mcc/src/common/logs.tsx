@@ -22,11 +22,12 @@ function LogItem() {
 
   return (
     <tr>
-      {loading ? <td>Loading...</td> : (
+      {loading ? (
+        <td>Loading...</td>
+      ) : (
         <>
           <td>{date}</td>
-          <td>{log}</td>
-          {" "}
+          <td>{log}</td>{" "}
         </>
       )}
     </tr>
@@ -45,7 +46,9 @@ function Logs() {
           </tr>
         </thead>
         <tbody>
-          {[...Array(count).keys()].map((key) => <LogItem key={key} />)}
+          {[...Array(count).keys()].map((key) => (
+            <LogItem key={key} />
+          ))}
         </tbody>
       </Table>
     </div>
