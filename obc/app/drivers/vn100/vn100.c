@@ -16,7 +16,8 @@
 #define MAX_OUTPUT_RATE_LENGTH 3U
 #define DEFAULT_OUTPUT_RATE_HZ 20U
 #define SCI_SEMAPHORE_TIMEOUT_MS \
-  50U /* Time between successive sensor outputs (period): 1/output rate = 1/20Hz = 0.05s = 50ms */
+  100U /* Time between successive sensor outputs (period): 1/output rate = 1/10Hz = 0.1s = 100ms */
+#define SCI_SEMAPHORE_TIMEOUT_TICKS pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS)  // Converting timeout ms to ticks
 
 /* Building start and stop binary output comands */
 #define BINARY_OUTPUT_START_PREFIX "$VNWRG,75,2,"  // Configure write command to output on register 75 and serial port 2
@@ -50,7 +51,8 @@ void initVn100(void) {
 obc_error_code_t vn100ResetModule(void) {
   obc_error_code_t errCode;
   unsigned char buf[] = "$VNRST*4D\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, (sizeof(buf) - 1), MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(
+      sciSendBytes(buf, (sizeof(buf) - 1), MUTEX_TIMEOUT, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -99,7 +101,7 @@ obc_error_code_t vn100SetBaudrate(uint32_t baudrate) {
 
   size_t numBytes = headerLength + baudrateLength + checksumLength;
 
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   sciSetBaudrate(UART_VN100_REG, baudrate);
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -127,7 +129,7 @@ obc_error_code_t vn100SetOutputRate(uint32_t outputRateHz) {
 
   size_t numBytes = headerLength + freqLength + checksumLength;
 
-  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(buf, numBytes, MUTEX_TIMEOUT, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -136,14 +138,14 @@ obc_error_code_t vn100StartBinaryOutputs(void) {
      Initialized to start with an output rate of 10Hz */
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(START_BINARY_OUTPUTS), (sizeof(START_BINARY_OUTPUTS) - 1),
-                                    portMAX_DELAY, UART_VN100_REG));
+                                    portMAX_DELAY, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t vn100StopBinaryOutputs(void) {
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(sciSendBytes((unsigned char*)(STOP_BINARY_OUTPUTS), (sizeof(STOP_BINARY_OUTPUTS) - 1),
-                                    portMAX_DELAY, UART_VN100_REG));
+                                    portMAX_DELAY, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -154,8 +156,8 @@ obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t* parsedPacket) {
 
   unsigned char buf[VN100_BINARY_PACKET_SIZE] = {'\0'};
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciReadBytes(buf, VN100_BINARY_PACKET_SIZE, portMAX_DELAY,
-                                    pdMS_TO_TICKS(SCI_SEMAPHORE_TIMEOUT_MS), UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(
+      sciReadBytes(buf, VN100_BINARY_PACKET_SIZE, portMAX_DELAY, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
 
   RETURN_IF_ERROR_CODE(vn100ParsePacket(buf, VN100_BINARY_PACKET_SIZE, parsedPacket));
   return OBC_ERR_CODE_SUCCESS;
@@ -164,13 +166,15 @@ obc_error_code_t vn100ReadBinaryOutputs(vn100_binary_packet_t* parsedPacket) {
 obc_error_code_t vn100PauseAsync(void) {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,0*XX\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(command, (sizeof(command) - 1), MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(
+      sciSendBytes(command, (sizeof(command) - 1), MUTEX_TIMEOUT, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t vn100ResumeAsync(void) {
   obc_error_code_t errCode;
   unsigned char command[] = "$VNASY,1*XX\r\n";
-  RETURN_IF_ERROR_CODE(sciSendBytes(command, (sizeof(command) - 1), MUTEX_TIMEOUT, UART_VN100_REG));
+  RETURN_IF_ERROR_CODE(
+      sciSendBytes(command, (sizeof(command) - 1), MUTEX_TIMEOUT, SCI_SEMAPHORE_TIMEOUT_TICKS, UART_VN100_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
