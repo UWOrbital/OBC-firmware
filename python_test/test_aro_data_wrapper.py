@@ -104,13 +104,13 @@ def test_login_creation():
         pwd="password",
         hash_algo="kevalgo",
         user_data_id=user.id,
-        email_verification_token="SIXSEVEN_*hits_the_thing*",
+        email_verification_token="abcABC19201",
     )
     assert login.email == "bevian@gmail.com"
     assert login.password == "password"
     assert login.hashing_algorithm_name == "kevalgo"
     assert login.user_data_id == user.id
-    assert login.email_verification_token == "SIXSEVEN_*hits_the_thing*"
+    assert login.email_verification_token == "abcABC19201"
 
 
 def test_auth_token_creation():
