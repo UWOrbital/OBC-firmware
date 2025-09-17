@@ -99,19 +99,20 @@ def test_calculate_step_size_error(min_jd, max_jd, count):
 
 # Helper function to suppress logging during tests
 # Not tested as it is used in the tests itself
-# def suppress_logging(caplog, *, level=logging.ERROR):
-# instead of iterating over all the loggers just use caplog.set_level(level)
-# caplog.set_level(level)  applies to all loggers
-# for handler in logging.getLogger().handlers:
-#     caplog.set_level(level, logger=handler.name)
+def suppress_logging(caplog, *, level=logging.ERROR):
+    for handler in logging.getLogger().handlers:
+        caplog.set_level(level, logger=handler.name)
 
 
 # Test for suppress_logging function
 def test_suppress_logging1(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(level=logging.CRITICAL):
-        logging.error("This message should not be logged")
-        assert len(caplog.records) == 0
+    suppress_logging(caplog, level=logging.CRITICAL)
+
+    # Test if logging is suppressed
+    logging.error("This message should not be logged")
+    assert len(caplog.records) == 0
+    assert caplog.text == ""
 
 
 @pytest.mark.parametrize(
@@ -218,16 +219,17 @@ def test_suppress_logging1(caplog):
 )
 def test_suppress_logging(caplog, level, count, msg, func, expected):
     # Suppress logging messages during the test
-    with caplog.at_level(level):
-        # Test if logging is suppressed
-        func(msg)
-        assert len(caplog.records) == count
+    suppress_logging(caplog, level=level)
 
-        if expected:
-            assert expected in caplog.text
-        # Empty string case is handled separately
-        else:
-            assert expected == caplog.text
+    # Test if logging is suppressed
+    func(msg)
+    assert len(caplog.records) == count
+
+    if expected:
+        assert expected in caplog.text
+    # Empty string case is handled separately
+    else:
+        assert expected == caplog.text
 
 
 # Test cases for validate_input function
@@ -277,9 +279,10 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
 )
 def test_validate_input(start_time, stop_time, step_size, output, expected_result, caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(logging.CRITICAL):
-        result = ephemeris.validate_input(start_time, stop_time, step_size, output)
-        assert result == expected_result
+    suppress_logging(caplog)
+
+    result = ephemeris.validate_input(start_time, stop_time, step_size, output)
+    assert result == expected_result
 
 
 def test_define_parser_default_step_size():
@@ -335,57 +338,62 @@ def test_define_parser_argument_parsing():
 
 def test_check_version_success(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(logging.NOTSET):
-        d = {"signature": {"version": ephemeris.SUPPORTED_VERSION}}
-        assert ephemeris.check_version(d) == ErrorCode.SUCCESS
-        # assert caplog.text == "" # TODO: Fix this
+    suppress_logging(caplog, level=logging.NOTSET)
+    d = {"signature": {"version": ephemeris.SUPPORTED_VERSION}}
+
+    # Check if the version is correct
+    assert ephemeris.check_version(d) == ErrorCode.SUCCESS
+    assert caplog.text == ""
 
 
 def test_check_version_invalid_version(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(logging.WARNING):
-        d = {"signature": {"version": "0.0.0"}}
-        ephemeris.check_version(d)
-        # Check if the version is incorrect
-        assert "WARNING: UNSUPPORTED HORIZON API VERSION USED" in caplog.text
+    suppress_logging(caplog, level=logging.WARNING)
+    d = {"signature": {"version": "0.0.0"}}
+
+    # Check if the version is incorrect
+    assert ephemeris.check_version(d) == ErrorCode.SUCCESS
+    assert "WARNING: UNSUPPORTED HORIZON API VERSION USED" in caplog.text
 
 
 def test_check_version_no_version(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(logging.WARNING):
-        d = {"signature": "invalid"}
-        # Check if the signature is incorrect
-        assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
-        # assert "ERROR: INVALID SIGNATURE" in caplog.text # TODO: Fix this
+    suppress_logging(caplog, level=logging.WARNING)
+    d = {"signature": "invalid"}
+
+    # Check if the signature is incorrect
+    assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
+    assert "ERROR: INVALID SIGNATURE" in caplog.text
 
 
 def test_check_version_no_signature(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(logging.WARNING):
-        d = {}
-        # Check if the signature doesn't exist
-        assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
-        # assert "ERROR: INVALID SIGNATURE" in caplog.text# TODO: Fix this
+    suppress_logging(caplog, level=logging.WARNING)
+    d = {}
+
+    # Check if the signature doesn't exist
+    assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
+    assert "ERROR: INVALID SIGNATURE" in caplog.text
 
 
 def test_check_version_signature_none(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(level=logging.WARNING):
-        d = {"signature": None}
+    suppress_logging(caplog, level=logging.WARNING)
+    d = {"signature": None}
 
-        # Check if the signature is incorrect
-        assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
-        # assert "ERROR: INVALID SIGNATURE" in caplog.text# TODO: Fix this
+    # Check if the signature is incorrect
+    assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
+    assert "ERROR: INVALID SIGNATURE" in caplog.text
 
 
 def test_check_version_signature_not_dict(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(level=logging.WARNING):
-        d = {"signature": "invalid"}
+    suppress_logging(caplog, level=logging.WARNING)
+    d = {"signature": "invalid"}
 
-        # Check if the signature is incorrect
-        assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
-        # assert "ERROR: INVALID SIGNATURE" in caplog.text# TODO: Fix this
+    # Check if the signature is incorrect
+    assert ephemeris.check_version(d) == ErrorCode.NO_SIGNATURE_FOUND
+    assert "ERROR: INVALID SIGNATURE" in caplog.text
 
 
 def test_write_header():
