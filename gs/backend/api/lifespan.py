@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from gs.backend.common.logger import logger
+from gs.backend.common.logger import logger_close, logger_setup
 from gs.backend.data.database.engine import get_db_session, setup_database
 from gs.backend.data.resources.utils import add_main_commands
 
@@ -15,7 +15,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     # Otherwise, will get transaction is inactive error
 
     # setup logger
-    logger.setup_logger(enqueue=True)
+    logger_setup(enqueue=True)
 
     # Setup database and commands
     setup_database(get_db_session())
@@ -25,4 +25,4 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # shutdown logger when app closes
-    await logger.logger_close()
+    await logger_close()
