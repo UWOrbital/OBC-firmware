@@ -52,7 +52,11 @@ class ARORequest(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    aro_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))  # type: ignore
+    # aro_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))  # type: ignore
+    aro_id: UUID | None = Field(
+        default=None,
+        sa_column=Column("aro_id", DB_UUID(as_uuid=True), nullable=True),
+    )
     latitude: Decimal = Field(max_digits=LATITUDE_MAX_DIGIT_NUMBER, decimal_places=COORDINATE_DECIMAL_NUMBER)
     longitude: Decimal = Field(max_digits=LONGITUDE_MAX_DIGIT_NUMBER, decimal_places=COORDINATE_DECIMAL_NUMBER)
     created_on: datetime = Field(default_factory=datetime.now)

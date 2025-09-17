@@ -47,7 +47,7 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_ve
         return user_login
 
 
-def delete_login_by_id(loginid: UUID) -> list[AROUserLogin]:
+def delete_login(loginid: UUID) -> list[AROUserLogin]:
     """
     @brief use the .id to delete a user from table
 
