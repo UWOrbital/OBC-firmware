@@ -109,7 +109,7 @@ def test_calculate_step_size_error(min_jd, max_jd, count):
 # Test for suppress_logging function
 def test_suppress_logging1(caplog):
     # Suppress logging messages during the test
-    with caplog.set_level(caplog, level=logging.CRITICAL):
+    with caplog.at_level(level=logging.CRITICAL):
         logging.error("This message should not be logged")
         assert len(caplog.records) == 0
 
@@ -218,7 +218,7 @@ def test_suppress_logging1(caplog):
 )
 def test_suppress_logging(caplog, level, count, msg, func, expected):
     # Suppress logging messages during the test
-    with caplog.set_level(caplog, level=logging.CRITICAL):
+    with caplog.at_level(logging.CRITICAL):
         # Test if logging is suppressed
         func(msg)
         assert len(caplog.records) == count
@@ -277,7 +277,7 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
 )
 def test_validate_input(start_time, stop_time, step_size, output, expected_result, caplog):
     # Suppress logging messages during the test
-    with caplog.set_level(caplog):
+    with caplog.at_level(caplog):
         result = ephemeris.validate_input(start_time, stop_time, step_size, output)
         assert result == expected_result
 
