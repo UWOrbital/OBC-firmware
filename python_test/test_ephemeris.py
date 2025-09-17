@@ -218,7 +218,7 @@ def test_suppress_logging1(caplog):
 )
 def test_suppress_logging(caplog, level, count, msg, func, expected):
     # Suppress logging messages during the test
-    with caplog.at_level(logging.CRITICAL):
+    with caplog.at_level(level):
         # Test if logging is suppressed
         func(msg)
         assert len(caplog.records) == count
@@ -277,7 +277,7 @@ def test_suppress_logging(caplog, level, count, msg, func, expected):
 )
 def test_validate_input(start_time, stop_time, step_size, output, expected_result, caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(caplog):
+    with caplog.at_level(logging.CRITICAL):
         result = ephemeris.validate_input(start_time, stop_time, step_size, output)
         assert result == expected_result
 
@@ -370,7 +370,7 @@ def test_check_version_no_signature(caplog):
 
 def test_check_version_signature_none(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(caplog, level=logging.WARNING):
+    with caplog.at_level(level=logging.WARNING):
         d = {"signature": None}
 
         # Check if the signature is incorrect
@@ -380,7 +380,7 @@ def test_check_version_signature_none(caplog):
 
 def test_check_version_signature_not_dict(caplog):
     # Suppress logging messages during the test
-    with caplog.at_level(caplog, level=logging.WARNING):
+    with caplog.at_level(level=logging.WARNING):
         d = {"signature": "invalid"}
 
         # Check if the signature is incorrect
