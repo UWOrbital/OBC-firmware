@@ -1,4 +1,4 @@
-import sys
+from sys import stderr, stdout
 from typing import Final
 
 from loguru import logger as logger
@@ -25,7 +25,7 @@ def logger_setup(*, enqueue: bool = False, diagnose: bool = True) -> None:
 
     # Log info to stdout
     logger.add(
-        sys.stdout,
+        stdout,
         filter=lambda record: record["level"].name == "INFO",
         format=DEFAULT_LOG_FORMAT,
         level="INFO",
@@ -36,7 +36,7 @@ def logger_setup(*, enqueue: bool = False, diagnose: bool = True) -> None:
 
     # Log warnings and above to stderr
     logger.add(
-        sys.stderr,
+        stderr,
         format=DEFAULT_LOG_FORMAT,
         level="WARNING",
         colorize=True,

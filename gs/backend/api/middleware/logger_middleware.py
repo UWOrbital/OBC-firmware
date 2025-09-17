@@ -5,9 +5,10 @@ from time import perf_counter
 from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response
-from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
+
+from gs.backend.common.logger import logger
 
 
 class LoggerMiddleware(BaseHTTPMiddleware):

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-
 # Standard library imports
 from argparse import ArgumentParser
 from collections.abc import Iterable
@@ -14,7 +12,7 @@ from os import remove
 from os.path import exists
 from re import compile
 from struct import pack
-from sys import exit
+from sys import exit, stderr
 from typing import BinaryIO, Final
 
 # 3rd party imports
@@ -501,7 +499,7 @@ def logger_setup(log_level: str, file_name: str | None) -> None:
     if file_name is not None:
         logger.add(file_name, level=log_level, format=DEFAULT_LOG_FORMAT, diagnose=True)
     else:
-        logger.add(sys.stderr, level=log_level, format=DEFAULT_LOG_FORMAT, colorize=True, diagnose=True)
+        logger.add(stderr, level=log_level, format=DEFAULT_LOG_FORMAT, colorize=True, diagnose=True)
 
 
 def main(argsv: str | None = None) -> list[DataPoint]:
