@@ -4,7 +4,7 @@ from __future__ import annotations
 from argparse import ArgumentParser
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from enum import Enum
 from json import dumps, loads
 from math import isclose
@@ -213,7 +213,7 @@ def convert_date_to_jd(time: str) -> float:
 
     timescale = load.timescale()
 
-    base_date = datetime.datetime.fromisoformat(time).replace(tzinfo=datetime.timezone.utc)
+    base_date = datetime.fromisoformat(time).replace(tzinfo=UTC)
     sky_date = timescale.from_datetime(base_date)
 
     return float(sky_date.ut1)
