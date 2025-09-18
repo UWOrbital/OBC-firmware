@@ -1,5 +1,5 @@
 import "./new-request-form.css";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useState, useEffect} from "react";
 import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 
@@ -7,34 +7,35 @@ const NewRequestForm = () => {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
 
-  navigator.geolocation.getCurrentPosition((position) => {
-    setLatitude(position.coords.latitude);
-    setLongitude(position.coords.longitude);
-    // TODO: Show a map centered at latitude / longitude.
-  });
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+    });
+  }, []);
 
-  const handleSubmit = () => {
-    // TODO: Use the proper type for this
-    const submission = {
-      latitude,
-      longitude,
-    };
-    // TODO: Submit form to backend
-    console.log(submission);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  const formData = new FormData(e.currentTarget); // currentTarget is typed correctly
+  const newLatitude = parseFloat(formData.get("latitude") as string);
+  const newLongitude = parseFloat(formData.get("longitude") as string);
+  
+  if (newLatitude !== null && !isNaN(newLatitude) &&
+    newLongitude !== null && !isNaN(newLongitude)) {
+    
+    if (newLatitude < - 90 || newLatitude > 90 || newLongitude < -180 || newLongitude > 180) alert("Please enter valid coordinates!");
+    else {
+      setLatitude(newLatitude);
+      setLongitude(newLongitude);
+    }
+  }
+};
 
-    alert("Thanks for submitting!");
-  };
-
-  const handleLatitudeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value);
-    setLatitude(value);
-  };
-
-  const handleLongitudeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value);
-    setLongitude(value);
-  };
-  const position: [number, number] = [51.505, -0.09];
+  function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
+    const map = useMap();
+    map.setView([lat, lng]);
+    return null;
+  }
 
   // TODO: Add better error handling and switch to using react-hook-form
   return (
@@ -44,34 +45,35 @@ const NewRequestForm = () => {
       <input
         required
         type="number"
+        name="latitude"
         placeholder="Enter your coordinates"
-        value={latitude}
-        onChange={handleLatitudeChange}
+        defaultValue={latitude}
       />
       <label>Longitude</label>
       <input
         required
         type="number"
+        name="longitude"
         placeholder="Enter your coordinates"
-        value={longitude}
-        onChange={handleLongitudeChange}
+        defaultValue={longitude}
       />
-      <input type="submit" />
+      <input type="submit" value="Check" className="submit-button"/>
     </form>
 
   <MapContainer
-    center={[51.505, -0.09]}
-    zoom={13}
+    center={[latitude, longitude]}
+    zoom={7}
     scrollWheelZoom={false}
-    style={{ height: "50vh", width: "100%" }}
+    style={{ height: "70vh", width: "100%" }}
   >
     <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={position}>
+      <Marker position={[latitude, longitude]}>
         <Popup>A pretty CSS3 popup.</Popup>
       </Marker>
+      <RecenterMap lat={latitude} lng={longitude} />
     </MapContainer>
     </div>
     );
