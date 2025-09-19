@@ -10,8 +10,8 @@ export default defineConfig({
     host: "0.0.0.0",
   },
   test: {
-    globals: true,
     environment: "jsdom",
-    setupFiles: "./tests/setup.ts",
+    globals: true,
+    setupFiles: "./tests/setup.js",
   },
 } as UserConfig);

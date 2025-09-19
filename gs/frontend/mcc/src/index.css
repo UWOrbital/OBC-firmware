@@ -1,24 +1,11 @@
-body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@import "tailwindcss";
 
-code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-}
+@layer base {
+  body {
+    @apply bg-[#040910] h-screen overflow-hidden font-['Jaldi'];
+  }
 
-.layout {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
-
-.logo {
-  height: 150px;
-  width: 450px;
-  background-image: url("./assets/logo.png");
+  #root {
+    @apply h-screen overflow-hidden;
+  }
 }

@@ -1,18 +1,22 @@
-import { BrowserRouter, Routes } from "react-router-dom";
+import { Routes } from "react-router-dom";
+import Nav from "./components/Nav";
+import Background from "./components/Background";
 
 function App() {
   return (
-    <BrowserRouter>
-      {/* <Header /> */}
+    <>
+      <Nav />
+      <Background />
       <Routes>
-        {/* <Route path="*" element={<NotFound />} />
+        {/* uncomment these routes as the pages are created */}
+        {/* <Route path="*" element={<Dashboard />} />
         <Route path="/" element={<Dashboard />} />
-        <Route path="/mission-commands" element={<MissionCommands />} />
-        <Route path="/telemetry-data" element={<TelemetryData />} />
-        <Route path="/aro-requests" element={<ARORequests />} /> */}
+        <Route path="/commands" element={<Commands />} />
+        <Route path="/aro-admin" element={<AROAdmin />} />
+        <Route path="/live-sessions" element={<LiveSessions />} />
+        <Route path="/login" element={<Login />} /> */}
       </Routes>
-      {/* <Logs /> */}
-    </BrowserRouter>
+    </>
   );
 }
 
