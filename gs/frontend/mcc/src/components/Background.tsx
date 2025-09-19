@@ -1,5 +1,9 @@
 import background from "../assets/earth_compressed.webp";
 
+/**
+ * @brief Background component displaying the Earth image
+ * @return tsx element of Background component
+ */
 function Background() {
   return (
     <img

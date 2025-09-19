@@ -1,9 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
-import "./index.css";
+import "./index.css"; // tailwind css, jaldi font and overflow hidden are imported here
 import { BrowserRouter } from "react-router-dom";
 
+/**
+ * @brief Main component displaying the main application, which is linked to the index.html file
+ * @return tsx element of Main component
+ */
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

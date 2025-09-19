@@ -2,6 +2,10 @@ import { Routes } from "react-router-dom";
 import Nav from "./components/Nav";
 import Background from "./components/Background";
 
+/**
+ * @brief App component displaying the main application
+ * @return tsx element of App component
+ */
 function App() {
   return (
     <>
