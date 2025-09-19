@@ -5,7 +5,7 @@ function Background() {
     <img
       src={background}
       alt="background image"
-      className="absolute -bottom-20 -z-10 opacity-40"
+      className="absolute bottom-0 -z-10 opacity-40"
     />
   );
 }

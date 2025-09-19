@@ -12,6 +12,6 @@ describe("Background", () => {
   it("has correct CSS classes", () => {
     render(<Background />);
     const image = screen.getByAltText("background image");
-    expect(image).toHaveClass("opacity-40 -bottom-20 -z-10");
+    expect(image).toHaveClass("opacity-40 bottom-0 -z-10");
   });
 });
