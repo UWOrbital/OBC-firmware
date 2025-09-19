@@ -67,7 +67,6 @@ Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be
 4. Setup pre-commit.
    In the WSL, under the OBC-firmware directory, run the following commands:
    ```sh
-   curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
    pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
    pre-commit install
    ```
@@ -82,7 +81,6 @@ You'll be using WSL2 for all development.
 
 This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
 
-
 #### **MacOS**
 
 1. Install required build tools (CMake, Make, gcc)
@@ -93,7 +91,7 @@ brew install make
 brew install gcc
 ```
 
-2. Install Python 3.11 and setup Python virtual environment (Only required for GS devs)
+2. Install Python 3.11 and setup Python virtual environment
 
 Run the following commands in the OBC-firmware directory:
 
@@ -108,14 +106,13 @@ pip install -e .
 3. Setup pre-commit
 
 ```sh
-curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
+
 4. Setup the PostgreSQL database
 
 This setup is only required for GS members. Please follow the instructions located in [POSTGRESQL_SETUP.md](gs/POSTGRESQL_SETUP.md)
-
 
 #### **Linux**
 
@@ -126,8 +123,9 @@ sudo apt-get update
 sudo apt-get install build-essential gcc-multilib g++-multilib curl
 ```
 
-2. Install Python 3.11 and setup Python virtual environment (Only required for GS devs)
+2. Install Python 3.11 and setup Python virtual environment
 
+This is only required for GS devs.
 Run the following commands in the OBC-firmware directory:
 
 ```sh
@@ -141,7 +139,6 @@ pip install -e .
 3. Setup pre-commit
 
 ```sh
-curl -fsSL https://deno.land/install.sh | sh # Deno is required for pre-commit
 pip install -r requirements.txt # You may want to create a Python virtual env before this if you haven't already
 pre-commit install
 ```
@@ -266,27 +263,105 @@ We use Code Composer Studio for debugging the firmware. **TODO**: Write a tutori
 
 ### **Frontend Development**
 
-To run the frontend, you will need Deno 2 installed which was installed in the pre-commit setup instructions above.
+To run the frontend, you will need nodejs installed.
 
-#### **Setting up the Frontend **
+<details>
+<summary>If you don't have nodejs installed, run the following commands to install it:</summary>
+
+#### **MacOS**
+
 ```sh
-cd gs/frontend
-deno install --frozen
+# Download and install nvm:
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+\. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+nvm install 22
+
+# Verify the Node.js version:
+node -v # Should print "v22.19.0".
+
+# Verify npm version:
+npm -v # Should print "10.9.3".
 ```
+
+#### **Windows**
+
+```sh
+# Download and install Chocolatey:
+powershell -c "irm https://community.chocolatey.org/install.ps1|iex"
+
+# Download and install Node.js:
+choco install nodejs --version="22.19.0"
+
+# Verify the Node.js version:
+node -v # Should print "v22.19.0".
+
+# Verify npm version:
+npm -v # Should print "10.9.3".
+```
+
+#### **Linux**
+
+```sh
+# Download and install nvm:
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+\. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+nvm install 22
+
+# Verify the Node.js version:
+node -v # Should print "v22.19.0".
+
+# Verify npm version:
+npm -v # Should print "10.9.3".
+
+```
+
+</details>
 
 #### **Running the ARO Frontend**
 
+If you have Docker installed, you can run the following command to start the ARO frontend:
+
+_All instructions assume you are in the top-level directory_
+
 ```sh
-cd gs/frontend/aro # Assuming you are in the top-level directory
-deno task dev # This will start the frontend on localhost:5173
+docker compose up aro-frontend
+```
+
+Otherwise, you can run the following commands to start the ARO frontend:
+
+```sh
+cd gs/frontend/aro
+npm install
+npm run dev
 ```
 
 #### **Running the MCC Frontend**
 
+If you have Docker installed, you can run the following command to start the MCC frontend:
+
+_All instructions assume you are in the top-level directory_
+
 ```sh
-cd gs/frontend/mcc # Assuming you are in the top-level directory
-deno task dev # This will start the frontend on localhost:5173
+docker compose up mcc-frontend
 ```
+
+Otherwise, you can run the following commands to start the MCC frontend:
+
+```sh
+cd gs/frontend/mcc
+npm install
+npm run dev
+```
+
+Note that after you install new dependencies, you need to rebuild the container with `docker-compose up --build aro-frontend` or `docker-compose up --build mcc-frontend`
 
 ## Contributing
 
@@ -580,6 +655,7 @@ Variable and function names should be descriptive enough to understand even with
 #### Function Comments
 
 Function comments should follow the format shown below:
+
 ```typescript
 /**
  * @brief Adds two numbers together
@@ -597,13 +673,13 @@ function addNumbers(num1: number, num2: number): number {
 
 - File comments are not required
 
-### ****Naming and typing conventions****
+### \***\*Naming and typing conventions\*\***
 
--   `variableNames` in camelCase
--   `functionNames()` in camelCase
--   `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
--   `file_names` in snake_case
--   `ClassName` and `ComponentName` in PascalCase
+- `variableNames` in camelCase
+- `functionNames()` in camelCase
+- `CONSTANT_NAME` in CAPITAL_SNAKE_CASE
+- `file-names` in kebab-case
+- `ClassName` and `ComponentName` in PascalCase
 
 **[Back to top](#table-of-contents)**
 
