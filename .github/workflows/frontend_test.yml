@@ -1,4 +1,4 @@
-name: Frontend Build
+name: Frontend Test
 on: [push, pull_request]
 
 jobs:
