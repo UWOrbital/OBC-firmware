@@ -78,7 +78,7 @@ class AROUserLogin(BaseSQLModel, table=True):
     salt: bytes = urandom(16)
     created_on: datetime = Field(default_factory=datetime.now)
     hashing_algorithm_name: str = Field(min_length=1, max_length=20)
-    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
+    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))  # type: ignore
     email_verification_token: str = Field(min_length=1, max_length=200)
 
     metadata = ARO_USER_SCHEMA_METADATA
@@ -98,7 +98,7 @@ class AROUserAuthToken(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
+    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))  # type: ignore
     token: str
     created_on: datetime = Field(default_factory=datetime.now)
     expiry: datetime = Field()
