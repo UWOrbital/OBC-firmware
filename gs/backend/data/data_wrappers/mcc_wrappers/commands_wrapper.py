@@ -46,4 +46,4 @@ def delete_commands_by_id(command_id: UUID) -> Commands:
             raise ValueError("Command not found.")
         session.delete(command)
         session.commit()
-        return Commands
+        return command
