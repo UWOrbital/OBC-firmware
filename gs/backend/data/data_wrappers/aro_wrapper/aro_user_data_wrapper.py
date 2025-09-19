@@ -46,7 +46,7 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
 
 
 # deletes the user with given id and returns the remaining users
-def delete_user(userid: UUID) -> list[AROUsers]:
+def delete_user_by_id(userid: UUID) -> list[AROUsers]:
     """
     Use the user.id to delete a user from table
 

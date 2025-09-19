@@ -35,7 +35,7 @@ def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: 
         return auth_token
 
 
-def delete_auth_token(token_id: UUID) -> list[AROUserAuthToken]:
+def delete_auth_token_by_id(token_id: UUID) -> list[AROUserAuthToken]:
     """
     Delete the auth token based on the token id
 

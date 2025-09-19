@@ -56,7 +56,7 @@ def add_request(
         return request
 
 
-def delete_request(request_id: str) -> list[ARORequest]:
+def delete_request_by_id(request_id: str) -> list[ARORequest]:
     """
     Delete a request based on id
 
