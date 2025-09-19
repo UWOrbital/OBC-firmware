@@ -5,20 +5,6 @@ from uuid import UUID
 
 import pytest
 
-# wrappers (for monkeypatch targets)
-from gs.backend.data.data_wrappers.aro_wrapper import (
-    aro_request_wrapper as req_wrapper,
-)
-from gs.backend.data.data_wrappers.aro_wrapper import (
-    aro_user_auth_token_wrapper as tok_wrapper,
-)
-from gs.backend.data.data_wrappers.aro_wrapper import (
-    aro_user_data_wrapper as user_wrapper,
-)
-from gs.backend.data.data_wrappers.aro_wrapper import (
-    aro_user_login_wrapper as login_wrapper,
-)
-
 # funcs under test
 from gs.backend.data.data_wrappers.aro_wrapper.aro_request_wrapper import (
     add_request,
@@ -32,48 +18,6 @@ from gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper import add_
 from gs.backend.data.data_wrappers.aro_wrapper.aro_user_login_wrapper import add_login
 from gs.backend.data.enums.aro_auth_token import AROAuthToken
 from gs.backend.data.enums.aro_requests import ARORequestStatus
-
-# ensure models are imported/registered
-from gs.backend.data.tables import aro_user_tables as _u  # noqa: F401
-from gs.backend.data.tables import transactional_tables as _t
-
-# schema metadatas
-from gs.backend.data.tables.aro_user_tables import ARO_USER_SCHEMA_METADATA
-from gs.backend.data.tables.transactional_tables import TRANSACTIONAL_SCHEMA_METADATA
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, create_engine
-
-
-@pytest.fixture(name="session")
-def session_fixture():
-    engine = create_engine(
-        "sqlite+pysqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-
-    with engine.begin() as conn:
-        conn.exec_driver_sql("ATTACH DATABASE ':memory:' AS aro_users;")
-        conn.exec_driver_sql("ATTACH DATABASE ':memory:' AS transactional;")
-        # create schema tables only (no global SQLModel.metadata)
-        ARO_USER_SCHEMA_METADATA.create_all(conn)
-        TRANSACTIONAL_SCHEMA_METADATA.create_all(conn)
-
-    with Session(engine) as s:
-        yield s
-
-
-@pytest.fixture(autouse=True)
-def override_get_db_session(monkeypatch, session):
-    engine = session.get_bind()
-
-    def _get_session():
-        return Session(engine)
-
-    monkeypatch.setattr(req_wrapper, "get_db_session", _get_session, raising=True)
-    monkeypatch.setattr(tok_wrapper, "get_db_session", _get_session, raising=True)
-    monkeypatch.setattr(user_wrapper, "get_db_session", _get_session, raising=True)
-    monkeypatch.setattr(login_wrapper, "get_db_session", _get_session, raising=True)
 
 
 def test_user_creation():
