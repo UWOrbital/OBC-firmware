@@ -167,7 +167,68 @@ Take a look at `cmake/fw_build_options.cmake` to see the available build options
 
 #### **Ground Station**
 
-From the top-level directory, run the following to build the ground station. Currently, the ground station is only supported on Windows.
+From the top-level directory, run the following to build the ground station. Currently, the ground station has only been supported for Windows and may be subject to bugs on MacOS. If on a Linux or Windows system, skip the MacOS instructions.
+
+<b>For MacOS users only</b>:\
+First, add the following to the top of file `./obc/CMakeLists.txt`, and should be placed as shown:
+```
+...
+cmake_minimum_required(VERSION 3.15)
+
+# Add the following 4 lines
+if(APPLE)
+    find_library(COREFOUNDATION CoreFoundation)
+    find_library(IOKIT IOKit)
+endif()
+...
+```
+
+Next, add the following to the file `./gs/backend/CMakeLists.txt` positioned as below:
+```
+...
+target_compile_options(gs.out PUBLIC -Wall -g)
+
+# Add the following 6 lines
+if(APPLE)
+    target_link_libraries(gs.out PUBLIC
+        "-framework CoreFoundation"
+        "-framework IOKit"
+    )
+endif()
+...
+```
+
+Next, comment out line in `./CMakeLists.txt` like as shown:
+```
+...
+#set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/cmake/toolchain_ground_station_gcc.cmake)
+...
+```
+
+Next, open `./gs/backend/main.c` and add and remove the following headers:
+```.c
+...
+<malloc.h> # Remove
+...
+<CoreFoundation/CoreFoundation.h> # Add
+...
+```
+
+Next, open `./gs/interfaces/obc_gs_interface/__init__.py` and change the end of the path extension to `.dylib`, as shown:
+```py
+...
+path = (Path(__file__).parent / "../../build_gs/interfaces/libobc-gs-interface.dylib").resolve()
+# originally ...interface.so, change to ...interface.dylib
+...
+```
+
+Lastly, run the following in the terminal:
+```sh
+pip install -e .
+```
+<b>End of MacOS instructions. Continue with the last step below.</b>
+
+Then, run the following in the terminal from the top-level directory:
 
 ```sh
 mkdir -p build_gs && cd build_gs
