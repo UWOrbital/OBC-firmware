@@ -140,12 +140,21 @@ def test_auth_token_creation():
 
 
 def test_request_creation():
+    user = add_user(
+        call_sign="BEVWAN",
+        email="bevian@gmail.com",
+        f_name="bevin",
+        l_name="ban",
+        phone_number="9999999999",
+    )
+
     created_on = datetime.now()
     request_sent_obc = created_on + timedelta(minutes=1)
     taken_date = created_on + timedelta(minutes=2)
     transmission = created_on + timedelta(minutes=3)
     before = {r.id for r in get_all_requests()}
     req = add_request(
+        aro_id=user.id,
         long=Decimal("123.456"),
         lat=Decimal("49.282"),
         created_on=created_on,

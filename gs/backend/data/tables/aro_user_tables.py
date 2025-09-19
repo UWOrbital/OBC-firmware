@@ -5,7 +5,8 @@ from uuid import UUID, uuid4
 
 from pydantic import EmailStr
 from sqlalchemy import Enum
-from sqlalchemy.schema import Column, MetaData
+from sqlalchemy.dialects.postgresql import UUID as DB_UUID
+from sqlalchemy.schema import Column, ForeignKey, MetaData
 from sqlmodel import Field
 
 from gs.backend.config.data_config import (
@@ -77,7 +78,7 @@ class AROUserLogin(BaseSQLModel, table=True):
     salt: bytes = urandom(16)
     created_on: datetime = Field(default_factory=datetime.now)
     hashing_algorithm_name: str = Field(min_length=1, max_length=20)
-    user_data_id: UUID
+    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
     email_verification_token: str = Field(min_length=1, max_length=200)
 
     metadata = ARO_USER_SCHEMA_METADATA
@@ -97,12 +98,10 @@ class AROUserAuthToken(BaseSQLModel, table=True):
     """
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
-    user_data_id: UUID = Field()
-    # TODO add proper UUID support for token
+    user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))
     token: str
     created_on: datetime = Field(default_factory=datetime.now)
     expiry: datetime = Field()
-    # TODO create a python enum with the allowed type
     auth_type: AROAuthToken = Field(sa_column=Column(Enum(AROAuthToken, name="auth_type"), nullable=False))
 
     metadata = ARO_USER_SCHEMA_METADATA

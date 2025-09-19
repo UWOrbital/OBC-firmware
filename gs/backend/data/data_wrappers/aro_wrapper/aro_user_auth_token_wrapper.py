@@ -10,7 +10,7 @@ from gs.backend.data.tables.aro_user_tables import AROUserAuthToken
 
 def get_all_auth_tokens() -> list[AROUserAuthToken]:
     """
-    @brief get all the auth tokens
+    Get all the auth tokens
     """
     with get_db_session() as session:
         auth_tokens = list(session.exec(select(AROUserAuthToken)).all())
@@ -19,7 +19,7 @@ def get_all_auth_tokens() -> list[AROUserAuthToken]:
 
 def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: AROEnums) -> AROUserAuthToken:
     """
-    @brief add auth token to the db
+    Add auth token to the db
 
     :param token: the auth token we want to add
     :param user_data_id: UUID which identifies which user this auth token belongs to
@@ -37,13 +37,13 @@ def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: 
 
 def delete_auth_token(token_id: UUID) -> list[AROUserAuthToken]:
     """
-    @brief delete the auth token based on the token id
+    Delete the auth token based on the token id
 
     :param token_id: the unique identifier for a particular auth token
     """
 
     with get_db_session() as session:
-        auth_token = session.exec(select(AROUserAuthToken).where(AROUserAuthToken.id == token_id)).first()
+        auth_token = session.get(AROUserAuthToken, token_id)
 
         if auth_token:
             session.delete(auth_token)

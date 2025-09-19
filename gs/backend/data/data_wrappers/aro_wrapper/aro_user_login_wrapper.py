@@ -8,7 +8,7 @@ from gs.backend.data.tables.aro_user_tables import AROUserLogin
 
 def get_all_logins() -> list[AROUserLogin]:
     """
-    @brief gets all the logins
+    Gets all the logins
     """
     with get_db_session() as session:
         user_logins = list(session.exec(select(AROUserLogin)).all())
@@ -17,7 +17,7 @@ def get_all_logins() -> list[AROUserLogin]:
 
 def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_verification_token: str) -> AROUserLogin:
     """
-    @brief add a new user login
+    Add a new user login
 
     :param email: the email which the user used to sign up
     :param pwd: the password the user set
@@ -30,8 +30,7 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_ve
         existing_login = session.exec(select(AROUserLogin).where(AROUserLogin.email == email)).first()
 
         if existing_login:
-            print("User login already exists")
-            return existing_login
+            raise ValueError("User login already exists based on email")
 
         user_login = AROUserLogin(
             email=email,
@@ -49,17 +48,16 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_ve
 
 def delete_login(loginid: UUID) -> list[AROUserLogin]:
     """
-    @brief use the .id to delete a user from table
+    Use the .id to delete a user from table
 
     :param loginid: unique identifier of the target login
     """
     with get_db_session() as session:
-        user_login = session.exec(select(AROUserLogin).where(AROUserLogin.id == loginid)).first()
-
+        user_login = session.get(AROUserLogin, loginid)
         if user_login:
             session.delete(user_login)
             session.commit()
         else:
-            print("Login details does not exist")
+            raise ValueError("Login ID does not exist")
 
         return get_all_logins()

@@ -1,5 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from sqlmodel import select
 
@@ -10,7 +11,7 @@ from gs.backend.data.tables.transactional_tables import ARORequest
 
 def get_all_requests() -> list[ARORequest]:
     """
-    @brief get all the requests from aro
+    Get all the requests from aro
     """
     with get_db_session() as session:
         requests = list(session.exec(select(ARORequest)).all())
@@ -18,6 +19,7 @@ def get_all_requests() -> list[ARORequest]:
 
 
 def add_request(
+    aro_id: UUID,
     long: Decimal,
     lat: Decimal,
     created_on: datetime,
@@ -27,7 +29,7 @@ def add_request(
     status: ARORequestStatus,
 ) -> ARORequest:
     """
-    @brief add a request
+    Add a request
 
     :param long: the longitude represented as a decimal of max 3 decimal places
     :param lat: the latitude represented as a decimal of max 3 decimal places
@@ -38,6 +40,7 @@ def add_request(
     """
     with get_db_session() as session:
         request = ARORequest(
+            aro_id=aro_id,
             latitude=lat,
             longitude=long,
             created_on=created_on,
@@ -55,17 +58,16 @@ def add_request(
 
 def delete_request(request_id: str) -> list[ARORequest]:
     """
-    @brief delete a request based on id
+    Delete a request based on id
 
     :param request_id: unique identifier of the request
     """
     with get_db_session() as session:
-        request = session.exec(select(ARORequest).where(ARORequest.id == request_id)).first()
-
+        request = session.get(ARORequest, request_id)
         if request:
             session.delete(request)
             session.commit()
         else:
-            print("Request not found, ID does not exist")
+            raise ValueError("Request not found, ID does not exist")
 
         return get_all_requests()
