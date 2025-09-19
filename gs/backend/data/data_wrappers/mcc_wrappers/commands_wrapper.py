@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from sqlmodel import select
 
@@ -8,7 +9,9 @@ from gs.backend.data.tables.transactional_tables import Commands
 
 def get_all_commands() -> list[Commands]:
     """
-    @brief get all data wrapper for Commands
+    Get all data wrapper for Commands
+
+    :return: a list of all commands
     """
     with get_db_session() as session:
         commands = list(session.exec(select(Commands)).all())
@@ -17,7 +20,10 @@ def get_all_commands() -> list[Commands]:
 
 def create_commands(command_data: dict[str, Any]) -> Commands:
     """
-    @brief post data wrapper for Commands
+    Post data wrapper for Commands
+
+    :param command_data: the JSON object of the command to be created
+    :return: the newly created command
     """
     with get_db_session() as session:
         command = Commands(**command_data)
@@ -27,14 +33,17 @@ def create_commands(command_data: dict[str, Any]) -> Commands:
         return command
 
 
-def delete_commands_by_id(command_id: int) -> bool:
+def delete_commands_by_id(command_id: UUID) -> Commands:
     """
-    @brief delete data wrapper for Commands
+    Delete data wrapper for Commands
+
+    :param command_id: UUID of command to be deleted
+    :return: the deleted command
     """
     with get_db_session() as session:
         command = session.get(Commands, command_id)
         if not command:
-            return False
+            raise ValueError("Command not found.")
         session.delete(command)
         session.commit()
-        return True
+        return Commands
