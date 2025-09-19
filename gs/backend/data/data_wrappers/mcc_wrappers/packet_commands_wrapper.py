@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from sqlmodel import select
 
@@ -8,16 +9,21 @@ from gs.backend.data.tables.transactional_tables import PacketCommands
 
 def get_all_packet_commands() -> list[PacketCommands]:
     """
-    @brief get all data wrapper for PacketCommands
+    Get all data wrapper for PacketCommands
+
+    :return: a list of all packet_commands
     """
     with get_db_session() as session:
         commands = list(session.exec(select(PacketCommands)).all())
         return commands
 
 
-def create_telemetry(command_data: dict[str, Any]) -> PacketCommands:
+def create_packet_command(command_data: dict[str, Any]) -> PacketCommands:
     """
-    @brief post data wrapper for PacketCommands
+    Post data wrapper for PacketCommands
+
+    :param command_data: the JSON object of the packet_command to be created
+    :return: the newly created packet_command
     """
     with get_db_session() as session:
         command = PacketCommands(**command_data)
@@ -27,14 +33,17 @@ def create_telemetry(command_data: dict[str, Any]) -> PacketCommands:
         return command
 
 
-def delete_telemetry_by_id(command_id: int) -> bool:
+def delete_packet_command_by_id(command_id: UUID) -> PacketCommands:
     """
-    @brief delete data wrapper for PacketCommands
+    Delete data wrapper for PacketCommands
+
+    :param command_id: UUID of packet_command to be deleted
+    :return: the deleted packet_command
     """
     with get_db_session() as session:
         command = session.get(PacketCommands, command_id)
         if not command:
-            return False
+            raise ValueError("Packet command not found.")
         session.delete(command)
         session.commit()
-        return True
+        return command

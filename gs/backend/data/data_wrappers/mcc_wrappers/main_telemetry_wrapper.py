@@ -8,7 +8,9 @@ from gs.backend.data.tables.main_tables import MainTelemetry
 
 def get_all_main_telemetries() -> list[MainTelemetry]:
     """
-    @brief get all data wrapper for MainTelemetry
+    Get all data wrapper for MainTelemetry
+
+    :return: a list of all main_telemetries
     """
     with get_db_session() as session:
         telemetries = list(session.exec(select(MainTelemetry)).all())
@@ -17,7 +19,10 @@ def get_all_main_telemetries() -> list[MainTelemetry]:
 
 def create_main_telemetry(telemetry_data: dict[str, Any]) -> MainTelemetry:
     """
-    @brief post data wrapper for MainTelemetry
+    Post data wrapper for MainTelemetry
+
+    :param command_data: the JSON object of the main_telemetry to be created
+    :return: the newly created main_telemetry
     """
     with get_db_session() as session:
         telemetry = MainTelemetry(**telemetry_data)
@@ -27,14 +32,17 @@ def create_main_telemetry(telemetry_data: dict[str, Any]) -> MainTelemetry:
         return telemetry
 
 
-def delete_main_telemetry_by_id(telemetry_id: int) -> bool:
+def delete_main_telemetry_by_id(telemetry_id: int) -> MainTelemetry:
     """
-    @brief delete data wrapper for MainTelemetry
+    Delete data wrapper for MainTelemetry
+
+    :param command_id: id of main_telemetry to be deleted
+    :return: the deleted main_telemetry
     """
     with get_db_session() as session:
         telemetry = session.get(MainTelemetry, telemetry_id)
         if not telemetry:
-            return False
+            raise ValueError("Main telemetry not found.")
         session.delete(telemetry)
         session.commit()
-        return True
+        return telemetry

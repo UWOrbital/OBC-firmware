@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from sqlmodel import select
 
@@ -8,7 +9,9 @@ from gs.backend.data.tables.transactional_tables import Packet
 
 def get_all_packets() -> list[Packet]:
     """
-    @brief get all data wrapper for Packet
+    Get all data wrapper for Packet
+
+    :return: a list of all packets
     """
     with get_db_session() as session:
         packets = list(session.exec(select(Packet)).all())
@@ -17,7 +20,10 @@ def get_all_packets() -> list[Packet]:
 
 def create_packet(packet_data: dict[str, Any]) -> Packet:
     """
-    @brief post data wrapper for Packet
+    Post data wrapper for Packet
+
+    :param packet_data: the JSON object of the packet to be created
+    :return: the newly created packet
     """
     with get_db_session() as session:
         packet = Packet(**packet_data)
@@ -27,14 +33,17 @@ def create_packet(packet_data: dict[str, Any]) -> Packet:
         return packet
 
 
-def delete_packet_by_id(packet_id: int) -> bool:
+def delete_packet_by_id(packet_id: UUID) -> Packet:
     """
-    @brief delete data wrapper for Packet
+    Delete data wrapper for Packet
+
+    :param packet_id: UUID of packet to be deleted
+    :return: the deleted packet
     """
     with get_db_session() as session:
         packet = session.get(Packet, packet_id)
         if not packet:
-            return False
+            raise ValueError("Packet not found.")
         session.delete(packet)
         session.commit()
-        return True
+        return packet
