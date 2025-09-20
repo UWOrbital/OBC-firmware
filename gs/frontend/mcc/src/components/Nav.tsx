@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import orbital_logo from "../assets/orbital_logo.png";
 import { CSS_VARIABLES } from "../style-const";
+import { NAVIGATION_LINKS } from "../nav-links";
 
 /**
  * @brief Nav component displaying the navigation bar
@@ -18,18 +19,11 @@ function Nav() {
 
       {/* Navigation Links */}
       <div className="absolute left-1/2 transform -translate-x-1/2 mt-3 flex space-x-7">
-        <Link to="/" className="hover:underline">
-          Dashboard
-        </Link>
-        <Link to="/mission-commands" className="hover:underline">
-          Commands
-        </Link>
-        <Link to="/telemetry-data" className="hover:underline">
-          ARO Admin
-        </Link>
-        <Link to="/aro-requests" className="hover:underline">
-          Live Sessions
-        </Link>
+        {NAVIGATION_LINKS.map((link) => (
+          <Link key={link.url} to={link.url} className="hover:underline">
+            {link.text}
+          </Link>
+        ))}
       </div>
 
       {/* Login */}

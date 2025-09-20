@@ -2,12 +2,15 @@
 
 @layer base {
   body {
-    @apply overflow-hidden flex;
+    overflow: hidden;
+    display: flex;
     background-color: var(--color-background);
     font-family: var(--font-default);
   }
 
   #root {
-    @apply h-full w-full overflow-hidden;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
   }
 }
