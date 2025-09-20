@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css"; // tailwind css, jaldi font and overflow hidden are imported here
 import { BrowserRouter } from "react-router-dom";
-import { CSS_VARIABLES } from "./style-const.ts";
+import { CSS_VARIABLES } from "./utils/style-const.ts";
 
 // Inject CSS variables from css-const.ts into the document root
 Object.entries(CSS_VARIABLES).forEach(([property, value]) => {

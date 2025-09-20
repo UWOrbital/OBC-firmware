@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import orbital_logo from "../assets/orbital_logo.png";
-import { CSS_VARIABLES } from "../style-const";
-import { NAVIGATION_LINKS } from "../nav-links";
+import { CSS_VARIABLES } from "../utils/style-const";
+import { NAVIGATION_LINKS } from "../utils/nav-links";
 
 /**
  * @brief Nav component displaying the navigation bar
