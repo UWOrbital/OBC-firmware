@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 from interfaces.obc_gs_interface.commands import CmdCallbackId, CmdResponseErrorCode
 
@@ -31,6 +32,35 @@ class CmdRes:
             formatted_string += "Command Execution: ERROR!\n"
 
         formatted_string += "Response Length: " + str(self.response_length) + "\n"
+
+        return formatted_string
+
+
+class FirmwareType(Enum):
+    """
+    Enum for two possible states of the firmware
+    """
+
+    BOOTLOADER = (1,)
+    APP = (2,)
+
+
+@dataclass
+class CmdPingRes(CmdRes):
+    """
+    Child class for storing the response to the CMD_PING
+
+    :param loaded_firmware: Whether the board is running the app or the BOOTLOADER
+    """
+
+    loaded_firmware: FirmwareType
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = ""
+        formatted_string += "Loaded firmware: " + str(self.loaded_firmware) + "\n"
 
         return formatted_string
 

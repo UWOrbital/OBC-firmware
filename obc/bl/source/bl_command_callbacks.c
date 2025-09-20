@@ -26,6 +26,9 @@ static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, u
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  responseData[0] = 0x01;
+
   return OBC_ERR_CODE_SUCCESS;
 }
 

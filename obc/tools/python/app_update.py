@@ -7,6 +7,8 @@ from typing import Final
 from serial import PARITY_NONE, STOPBITS_TWO, Serial, SerialException
 from tqdm import tqdm
 
+from gs.backend.obc_utils.command_utils import send_conn_request
+from gs.backend.obc_utils.encode_decode import CommsPipeline
 from interfaces import OBC_UART_BAUD_RATE, RS_DECODED_DATA_SIZE
 from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
@@ -14,10 +16,12 @@ from interfaces.obc_gs_interface.commands import (
     ProgrammingSession,
     create_cmd_download_data,
     create_cmd_erase_app,
+    create_cmd_ping,
     create_cmd_verify_crc,
     pack_command,
 )
 from interfaces.obc_gs_interface.commands.command_response_callbacks import parse_command_response
+from interfaces.obc_gs_interface.commands.command_response_classes import CmdRes, FirmwareType
 
 # Refer to the bl_command_callbacks.c for the number
 COMMAND_DATA_SIZE: Final[int] = 208
@@ -64,7 +68,8 @@ def write_command(
     app_data: bytes | None = None,
     iteration: int | None = None,
     is_last_packet: bool | None = None,
-) -> bool:
+    firmware_type: FirmwareType | None = None,
+) -> tuple[bool, CmdRes]:
     """
     Generates and writes command as well as handling command responses
 
@@ -74,6 +79,7 @@ def write_command(
     :param iteration: The packet of app being written for CMD_DOWNLOAD_DATA
     """
     packed_command = b""
+
     cmd_print_response = False
 
     # TODO: Remove: Temporary variables till the sci bug during flash write gets sorted
@@ -81,6 +87,8 @@ def write_command(
     cmd_res_cutoff = 0
 
     match command:
+        case CmdCallbackId.CMD_PING:
+            packed_command = pack_command(create_cmd_ping()).ljust(RS_DECODED_DATA_SIZE, b"\x00")
         case CmdCallbackId.CMD_ERASE_APP:
             packed_command = pack_command(create_cmd_erase_app()).ljust(RS_DECODED_DATA_SIZE, b"\x00")
         case CmdCallbackId.CMD_DOWNLOAD_DATA:
@@ -96,17 +104,41 @@ def write_command(
         case _:
             raise ValueError("Command not supported")
 
-    ser.write(packed_command)
-    cmd_response_bytes = ser.read(bytes_to_read)
-    cmd_response = parse_command_response(cmd_response_bytes[cmd_res_cutoff:])
+    comms = CommsPipeline()
+
+    if firmware_type == FirmwareType.APP:
+        ser.write(comms.encode_frame(packed_command))
+
+        if command != CmdCallbackId.CMD_EXEC_OBC_RESET:
+            cmd_response_bytes = ser.read(bytes_to_read)
+            print(cmd_response_bytes)
+            frame = comms.decode_frame(cmd_response_bytes)
+
+        if frame is not None:
+            cmd_response = parse_command_response(frame.data[cmd_res_cutoff:])
+        else:
+            raise ValueError("Decoded frame is None")
+
+    elif firmware_type == FirmwareType.BOOTLOADER:
+        ser.write(packed_command)
+        if command != CmdCallbackId.CMD_EXEC_OBC_RESET:
+            cmd_response_bytes = ser.read(bytes_to_read)
+            cmd_response = parse_command_response(cmd_response_bytes[cmd_res_cutoff:])
+
+    else:
+        raise ValueError("Invalid firmware type argument (Recieved no response)")
+
     if cmd_response.error_code != CmdResponseErrorCode.CMD_RESPONSE_SUCCESS or cmd_print_response:
         print(cmd_response)
-        return False
+        return (False, cmd_response)
 
-    return True
+    return (True, cmd_response)
 
 
-def send_bin(file_path: str, com_port: str) -> None:
+def send_bin(
+    file_path: str,
+    com_port: str,
+) -> None:
     """
     Sends .bin file over UART serial port
 
@@ -127,7 +159,32 @@ def send_bin(file_path: str, com_port: str) -> None:
         stopbits=STOPBITS_TWO,
         timeout=15,
     ) as ser:
-        if write_command(ser, CmdCallbackId.CMD_ERASE_APP):
+        ping_response = None
+        loaded_firmware = None
+
+        send_conn_request(com_port)
+
+        while True:
+            ping_response = write_command(ser, CmdCallbackId.CMD_PING, firmware_type=FirmwareType.APP)
+            if ping_response[0]:
+                loaded_firmware = FirmwareType.APP
+                break
+
+            ping_response = write_command(ser, CmdCallbackId.CMD_PING, firmware_type=FirmwareType.BOOTLOADER)
+            if ping_response[0]:
+                loaded_firmware = FirmwareType.BOOTLOADER
+                break
+
+        if ping_response[1].error_code == 0x01:
+            print("Bootloader loaded, continuing...")
+        elif ping_response[1].error_code == 0x02:
+            print("App loaded, resetting OBC to load bootloader...")
+            if write_command(ser, CmdCallbackId.CMD_EXEC_OBC_RESET, firmware_type=loaded_firmware)[0]:
+                print("Successful, continuing...")
+        else:
+            return
+
+        if write_command(ser, CmdCallbackId.CMD_ERASE_APP, firmware_type=loaded_firmware)[0]:
             print("Erased App")
         else:
             return
@@ -135,20 +192,22 @@ def send_bin(file_path: str, com_port: str) -> None:
         # We create a progress bar with the tqdm library
         progress_bar = tqdm(desc="Packets Written: ", total=commands_needed, dynamic_ncols=True)
         for i in range(commands_needed - 1):
-            if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, i, False):
+            if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, i, False, firmware_type=loaded_firmware)[0]:
                 progress_bar.update(1)
                 ser.reset_output_buffer()
                 ser.reset_input_buffer()
             else:
                 return
 
-        if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, commands_needed - 1, True):
+        if write_command(
+            ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, commands_needed - 1, True, firmware_type=loaded_firmware
+        )[0]:
             progress_bar.update(1)
             progress_bar.close()
         else:
             return
 
-        if not write_command(ser, CmdCallbackId.CMD_VERIFY_CRC):
+        if not write_command(ser, CmdCallbackId.CMD_VERIFY_CRC, firmware_type=loaded_firmware)[0]:
             return
 
 

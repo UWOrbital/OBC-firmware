@@ -4,9 +4,11 @@ from collections.abc import Callable
 from interfaces.obc_gs_interface.commands import CmdCallbackId, unpack_command_response
 from interfaces.obc_gs_interface.commands.command_response_classes import (
     CmdI2CProbeRes,
+    CmdPingRes,
     CmdRes,
     CmdRtcSyncRes,
     CmdVerifyCrcRes,
+    FirmwareType,
 )
 
 
@@ -20,6 +22,29 @@ def parse_cmd_with_no_data(cmd_response: CmdRes, data: bytes) -> CmdRes:
     :return: CmdRes (i.e. A command response with no data for CMD_EXEC_OBC_RESET)
     """
     return cmd_response
+
+
+def parse_cmd_ping(cmd_response: CmdRes, data: bytes) -> CmdPingRes:
+    """
+    A function to parse the raw data from the response of CMD_PING
+
+    :param cmd_response: Basic command response
+    :param data: The raw bytes containing the data that needs to be parsed
+    :return: CmdPingRes (i.e. A command response with data for CMD_PING)
+    """
+    if cmd_response.cmd_id != CmdCallbackId.CMD_PING:
+        raise ValueError("Wrong command id for parsing the ping command")
+
+    state = FirmwareType.APP
+
+    if data[0] == 0x01:
+        state = FirmwareType.BOOTLOADER
+    elif data[0] == 0x02:
+        state = FirmwareType.APP
+    else:
+        raise ValueError("Invalid response to CMD_PING")
+
+    return CmdPingRes(cmd_response.cmd_id, cmd_response.error_code, cmd_response.response_length, state)
 
 
 def parse_cmd_rtc_sync(cmd_response: CmdRes, data: bytes) -> CmdRtcSyncRes:
@@ -79,6 +104,7 @@ parse_func_dict: dict[CmdCallbackId, Callable[..., CmdRes]] = defaultdict(lambda
 parse_func_dict[CmdCallbackId.CMD_VERIFY_CRC] = parse_cmd_verify_crc
 parse_func_dict[CmdCallbackId.CMD_RTC_SYNC] = parse_cmd_rtc_sync
 parse_func_dict[CmdCallbackId.CMD_I2C_PROBE] = parse_cmd_i2c_probe
+parse_func_dict[CmdCallbackId.CMD_PING] = parse_cmd_ping
 
 
 def parse_command_response(data: bytes) -> CmdRes:

@@ -22,6 +22,8 @@ static obc_error_code_t execObcResetCmdCallback(cmd_msg_t *cmd, uint8_t *respons
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
+  responseData[0] = 0x02;
+
   // TODO: Implement safe reset (i.e. save state somewhere)
   LOG_DEBUG("Executing OBC reset command");
   resetSystem(RESET_REASON_CMD_EXEC_OBC_RESET);
