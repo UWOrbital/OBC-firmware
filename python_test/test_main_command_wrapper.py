@@ -4,27 +4,6 @@ from gs.backend.data.database import engine as prod_engine
 from gs.backend.data.tables.main_tables import MAIN_SCHEMA_METADATA, MainCommand
 from sqlmodel import Session, SQLModel, create_engine
 
-# ---- Test Database Setup ----
-
-
-@pytest.fixture(name="session")
-def session_fixture():
-    # Use in-memory SQLite for tests
-    test_engine = create_engine("sqlite:///:memory:")
-    MAIN_SCHEMA_METADATA.create_all(test_engine)
-    with Session(test_engine) as session:
-        yield session
-
-
-# Monkeypatch get_db_session to use our test session
-@pytest.fixture(autouse=True)
-def override_get_db_session(monkeypatch, session):
-    def get_test_session():
-        return session
-
-    monkeypatch.setattr(wrapper, "get_db_session", lambda: get_test_session())
-
-
 # ---- Tests ----
 
 
