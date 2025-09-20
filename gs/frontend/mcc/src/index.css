@@ -2,10 +2,12 @@
 
 @layer base {
   body {
-    @apply bg-[#040910] h-screen overflow-hidden font-['Jaldi'];
+    @apply overflow-hidden flex;
+    background-color: var(--color-background);
+    font-family: var(--font-default);
   }
 
   #root {
-    @apply h-screen overflow-hidden;
+    @apply h-full w-full overflow-hidden;
   }
 }
