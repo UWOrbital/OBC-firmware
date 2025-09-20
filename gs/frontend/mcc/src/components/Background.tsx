@@ -8,7 +8,7 @@ function Background() {
   return (
     <img
       src={background}
-      alt="background image"
+      alt="background-image"
       className="absolute bottom-0 -z-10 opacity-40"
     />
   );
