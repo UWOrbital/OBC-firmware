@@ -1,8 +1,8 @@
-name: Frontend Build
+name: Frontend Test
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,7 +20,8 @@ jobs:
         run: |
           cd ./gs/frontend/${{ matrix.project }}
           npm ci
-      - name: Build ${{ matrix.project }}
+      - name: Build and test ${{ matrix.project }}
         run: |
           cd ./gs/frontend/${{ matrix.project }}
           npm run build
+          npm run test
