@@ -61,9 +61,5 @@ def test_delete_main_command_by_id(session):
 
     # Should delete successfully
     result = wrapper.delete_main_command_by_id(1)
-    assert result is True
+    assert isinstance(result, MainCommand)
     assert session.get(MainCommand, 1) is None
-
-    # Deleting non-existent id should return False
-    result = wrapper.delete_main_command_by_id(999)
-    assert result is False

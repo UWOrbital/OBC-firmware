@@ -53,6 +53,14 @@ def test_get_db_session(monkeypatch, db_session: Session):
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_auth_token_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_login_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.commands_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.comms_session_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.main_command_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.main_telemetry_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.packet_commands_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.packet_telemetry_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.packet_wrapper",
+        "gs.backend.data.data_wrappers.mcc_wrappers.telemetry_wrapper",
     ]
 
     for path in path_list:
