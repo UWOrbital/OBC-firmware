@@ -1,60 +1,81 @@
 import "./new-request-form.css";
-import { type ChangeEvent, useState } from "react";
+import React, { useState, useEffect} from "react";
+import InputForm from "./input-form";
+import MapView from "./map-view";
 
 const NewRequestForm = () => {
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
-  navigator.geolocation.getCurrentPosition((position) => {
-    setLatitude(position.coords.latitude);
-    setLongitude(position.coords.longitude);
-    // TODO: Show a map centered at latitude / longitude.
-  });
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+      }
+    );
+  }, []);
 
-  const handleSubmit = () => {
-    // TODO: Use the proper type for this
-    const submission = {
-      latitude,
-      longitude,
-    };
-    // TODO: Submit form to backend
-    console.log(submission);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newLatitude = parseFloat(formData.get("latitude") as string);
+    const newLongitude = parseFloat(formData.get("longitude") as string);
 
-    alert("Thanks for submitting!");
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLInputElement;
+    const action = submitter?.value;
+
+    if (newLatitude !== null && !isNaN(newLatitude) &&
+      newLongitude !== null && !isNaN(newLongitude)) {
+
+      if (newLatitude < - 90 || newLatitude > 90 || newLongitude < -180 || newLongitude > 180) alert("Please enter valid coordinates!");
+      else {
+        setLatitude(newLatitude);
+        setLongitude(newLongitude);
+        if (action === "Submit") {
+          alert(`Request submitted at (${newLatitude}, ${newLongitude})`);
+        }
+      }
+    }
   };
 
-  const handleLatitudeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value);
-    setLatitude(value);
+  const handleLatitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setLatitude(null);
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) setLatitude(num);
+    }
   };
 
-  const handleLongitudeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value);
-    setLongitude(value);
+  const handleLongitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      setLongitude(null);
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) setLongitude(num);
+    }
   };
-
-  // TODO: Add better error handling and switch to using react-hook-form
   return (
-    <form className="input-form" onSubmit={handleSubmit} id="main-form">
-      <label>Latitude</label>
-      <input
-        required
-        type="number"
-        placeholder="Enter your coordinates"
-        value={latitude}
-        onChange={handleLatitudeChange}
-      />
-      <label>Longitude</label>
-      <input
-        required
-        type="number"
-        placeholder="Enter your coordinates"
-        value={longitude}
-        onChange={handleLongitudeChange}
-      />
-      <input type="submit" />
-    </form>
-  );
+    <div className = "form-container">
+    <InputForm
+      latitude={latitude}
+      longitude={longitude}
+      handleSubmit={handleSubmit}
+      handleLatitudeChange={handleLatitudeChange}
+      handleLongitudeChange={handleLongitudeChange}
+    />
+  {latitude !== null && longitude !== null && (
+    <MapView
+      latitude={latitude}
+      longitude={longitude}
+      setLatitude={setLatitude}
+      setLongitude={setLongitude}
+    />
+  )}
+  </div>  );
 };
-
 export default NewRequestForm;
+
