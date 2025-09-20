@@ -1,5 +1,5 @@
-from state_enums import StateMachineStates
-from state_transition_enums import StateTransition
+from gs.backend.state_machine.state_enums import StateMachineStates
+from gs.backend.state_machine.state_transition_enums import StateTransition
 
 
 class StateMachine:
