@@ -64,6 +64,7 @@ def write_command(
     ser: Serial,
     command: CmdCallbackId,
     app_data: bytes | None = None,
+    app_start_address: int = APP_STARTING_ADDRESS,
     iteration: int | None = None,
     is_last_packet: bool | None = None,
 ) -> bool:
@@ -87,7 +88,7 @@ def write_command(
             packed_command = pack_command(create_cmd_erase_app()).ljust(RS_DECODED_DATA_SIZE, b"\x00")
         case CmdCallbackId.CMD_DOWNLOAD_DATA:
             if app_data is not None and iteration is not None and is_last_packet is not None:
-                packed_command = create_app_packet(iteration, app_data, is_last_packet)
+                packed_command = create_app_packet(iteration, app_data, app_start_address, is_last_packet)
                 bytes_to_read = RS_DECODED_DATA_SIZE + 1
                 cmd_res_cutoff = 1
             else:
@@ -108,7 +109,7 @@ def write_command(
     return True
 
 
-def send_bin(file_path: str, com_port: str) -> None:
+def send_bin(file_path: str, com_port: str, app_start_address: int) -> None:
     """
     Sends .bin file over UART serial port
 
@@ -137,14 +138,14 @@ def send_bin(file_path: str, com_port: str) -> None:
         # We create a progress bar with the tqdm library
         progress_bar = tqdm(desc="Packets Written: ", total=commands_needed, dynamic_ncols=True)
         for i in range(commands_needed - 1):
-            if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, i, False):
+            if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, app_start_address, i, False):
                 progress_bar.update(1)
                 ser.reset_output_buffer()
                 ser.reset_input_buffer()
             else:
                 return
 
-        if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, commands_needed - 1, True):
+        if write_command(ser, CmdCallbackId.CMD_DOWNLOAD_DATA, app_bin, app_start_address, commands_needed - 1, True):
             progress_bar.update(1)
             progress_bar.close()
         else:
