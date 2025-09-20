@@ -21,13 +21,13 @@ const NewRequestForm = () => {
     const formData = new FormData(e.currentTarget);
     const newLatitude = parseFloat(formData.get("latitude") as string);
     const newLongitude = parseFloat(formData.get("longitude") as string);
-    
+
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLInputElement;
     const action = submitter?.value;
-    
+
     if (newLatitude !== null && !isNaN(newLatitude) &&
       newLongitude !== null && !isNaN(newLongitude)) {
-      
+
       if (newLatitude < - 90 || newLatitude > 90 || newLongitude < -180 || newLongitude > 180) alert("Please enter valid coordinates!");
       else {
         setLatitude(newLatitude);
@@ -68,9 +68,9 @@ const NewRequestForm = () => {
       handleLongitudeChange={handleLongitudeChange}
     />
   {latitude !== null && longitude !== null && (
-    <MapView 
-      latitude={latitude} 
-      longitude={longitude} 
+    <MapView
+      latitude={latitude}
+      longitude={longitude}
       setLatitude={setLatitude}
       setLongitude={setLongitude}
     />
@@ -78,3 +78,4 @@ const NewRequestForm = () => {
   </div>  );
 };
 export default NewRequestForm;
+

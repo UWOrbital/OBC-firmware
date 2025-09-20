@@ -42,10 +42,10 @@ const MapView: React.FC<MapViewProps> = ({ latitude, longitude, setLatitude, set
             zoom={7}
             scrollWheelZoom={false}
             style={{ height: "70vh", width: "100%" }}
-            doubleClickZoom={false} 
-            boxZoom={false} 
+            doubleClickZoom={false}
+            boxZoom={false}
             keyboard={false}
-        > 
+        >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -60,3 +60,4 @@ const MapView: React.FC<MapViewProps> = ({ latitude, longitude, setLatitude, set
 };
 
 export default MapView;
+
