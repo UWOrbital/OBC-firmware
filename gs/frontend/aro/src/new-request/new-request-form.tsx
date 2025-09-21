@@ -28,44 +28,54 @@ const NewRequestForm = () => {
     if (newLatitude !== null && !isNaN(newLatitude) &&
       newLongitude !== null && !isNaN(newLongitude)) {
 
-      if (newLatitude < - 90 || newLatitude > 90 || newLongitude < -180 || newLongitude > 180) alert("Please enter valid coordinates!");
+      if (isInvalidCoordinate(newLatitude, newLongitude)) alert("Please enter valid coordinates!");
       else {
         setLatitude(newLatitude);
         setLongitude(newLongitude);
         if (action === "Submit") {
+          // TODO: Submit coordiantes to backend
           alert(`Request submitted at (${newLatitude}, ${newLongitude})`);
         }
       }
     }
   };
 
-  const handleLatitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoordinateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === "") {
-      setLatitude(null);
+    const name = e.target.name;
+    if (name == "latitude") {
+        if (value === "") {
+          setLatitude(null);
+        } else {
+          const num = parseFloat(value);
+          if (!isNaN(num)) setLatitude(num);
+        }
     } else {
-      const num = parseFloat(value);
-      if (!isNaN(num)) setLatitude(num);
+        if (value === "") {
+          setLongitude(null);
+        } else {
+          const num = parseFloat(value);
+          if (!isNaN(num)) setLongitude(num);
+        }
     }
   };
 
-  const handleLongitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setLongitude(null);
+  function isInvalidCoordinate(lat: number, lng: number) {
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return true;
     } else {
-      const num = parseFloat(value);
-      if (!isNaN(num)) setLongitude(num);
+      return false;
     }
-  };
+  }
+
   return (
     <div className = "form-container">
     <InputForm
       latitude={latitude}
       longitude={longitude}
       handleSubmit={handleSubmit}
-      handleLatitudeChange={handleLatitudeChange}
-      handleLongitudeChange={handleLongitudeChange}
+      handleLatitudeChange={handleCoordinateChange}
+      handleLongitudeChange={handleCoordinateChange}
     />
   {latitude !== null && longitude !== null && (
     <MapView
@@ -74,6 +84,7 @@ const NewRequestForm = () => {
       setLatitude={setLatitude}
       setLongitude={setLongitude}
     />
+
   )}
   </div>  );
 };

@@ -1,43 +1,47 @@
 import React from "react";
 
 interface InputFormProps {
-    latitude: number | null;
-    longitude: number | null;
-    handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-    handleLatitudeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleLongitudeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  latitude: number | null;
+  longitude: number | null;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleLatitudeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleLongitudeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const InputForm: React.FC<InputFormProps> = ({
-    latitude,
-    longitude,
-    handleSubmit,
-    handleLatitudeChange,
-    handleLongitudeChange,
+  latitude,
+  longitude,
+  handleSubmit,
+  handleLatitudeChange,
+  handleLongitudeChange,
 }) => {
-    return (
+  return (
     <form className="input-form" onSubmit={handleSubmit} id="main-form">
-        <label>Latitude</label>
+      <label>Latitude</label>
         <input
-            required
-            type="number"
-            name="latitude"
-            placeholder="Enter your coordinates"
-            value={latitude ?? ""}
-            onChange={handleLatitudeChange}
+          required
+          type="number"
+          name="latitude"
+          placeholder="Enter your coordinates"
+          value={latitude ?? ""}
+          onChange={handleLatitudeChange}
         />
-        <label>Longitude</label>
+      <label>Longitude</label>
         <input
-            required
-            type="number"
-            name="longitude"
-            placeholder="Enter your coordinates"
-            value={longitude ?? ""}
-            onChange={handleLongitudeChange}
+          required
+          type="number"
+          name="longitude"
+          placeholder="Enter your coordinates"
+          value={longitude ?? ""}
+          onChange={handleLongitudeChange}
         />
-        <input type="submit" name="action" value="Submit" className="submit-button"/>
-    </form>
-    );
+      <input type="submit" name="action" value="Submit" className="submit-button"/>
+
+      <p style={{ display: "block", color: "gray" }} >
+        Navigate the map with shift-click
+      </p>
+  </form>
+  );
 };
 
 export default InputForm;
