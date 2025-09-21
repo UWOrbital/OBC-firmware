@@ -7,21 +7,21 @@ class StateMachineStates(StrEnum):
     Defaults to disconnected
     """
 
+    # UPLINK STATES
     DISCONNECTED = auto()
-
     ATTEMPTING_CONNECTION = auto()
-
+    AWAITING_ACK = auto()
     UPLINKING = auto()
     DOWNLINKING = auto()
 
+    # DISCONNECT STATES
     AWAITING_DISCONNECT = auto()
-    AWAITING_ACK = auto()
-    AWAITING_CONNECTION = auto()
-
     SEND_DISCONNECT_ACK = auto()
-    SEND_CONNECTION_ACK = auto()
 
+    # EMERGENCY STATES
     ENTERING_EMERGENCY = auto()
+    AWAITING_CONNECTION = auto()
+    SEND_CONNECTION_ACK = auto()
     EMERGENCY_UPLINK = auto()
 
     SERVER_SIDE_ERROR = auto()

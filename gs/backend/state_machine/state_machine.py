@@ -7,14 +7,14 @@ class StateMachine:
     Ground station state machine.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, default_state: StateMachineStates) -> None:
         """
-        Initialize the state machine.
+        Initialize the state machine and sets the default state and default transitional state
 
-        Sets the initial state to DISCONNECTED and transitional_state to None.
+        :params default_state: default state which must come from one of the enums in StateMachineStates
         """
-        self.state = StateMachineStates.DISCONNECTED
-        self.transitional_state: StateTransition = StateTransition.DEFAULT
+        self.state = default_state
+        self.transitional_state: StateTransition = StateTransition.NO_TRANSITION_TRIGGERED
 
     def switch_state(self, transitional_state: StateTransition) -> None:
         """
@@ -43,7 +43,7 @@ class StateMachine:
 
             case StateMachineStates.AWAITING_ACK:
                 match self.transitional_state:
-                    case StateTransition.ACK_RECIEVED:
+                    case StateTransition.ACK_RECEIVED:
                         self.state = StateMachineStates.UPLINKING
                     case StateTransition.ERROR:
                         self.state = StateMachineStates.DISCONNECTED
@@ -63,7 +63,7 @@ class StateMachine:
 
             case StateMachineStates.AWAITING_DISCONNECT:
                 match self.transitional_state:
-                    case StateTransition.DISCONNECT_CMD_RECIEVED:
+                    case StateTransition.DISCONNECT_CMD_RECEIVED:
                         self.state = StateMachineStates.SEND_DISCONNECT_ACK
                     case StateTransition.ERROR:
                         self.state = StateMachineStates.DISCONNECTED
@@ -99,7 +99,7 @@ class StateMachine:
 
             case StateMachineStates.AWAITING_CONNECTION:
                 match self.transitional_state:
-                    case StateTransition.CONNECTION_RECIEVED:
+                    case StateTransition.CONNECTION_RECEIVED:
                         self.state = StateMachineStates.SEND_CONNECTION_ACK
                     case StateTransition.ERROR:
                         self.state = StateMachineStates.DISCONNECTED
