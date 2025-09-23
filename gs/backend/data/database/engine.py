@@ -13,8 +13,7 @@ def get_db_engine() -> Engine:
 
     :return: engine
     """
-    # TODO: Add loguru to sqlalchemy.engine logger
-    return create_engine(DATABASE_CONNECTION_STRING, echo=True)
+    return create_engine(DATABASE_CONNECTION_STRING)
 
 
 def get_db_session() -> Session:
