@@ -40,7 +40,7 @@ Download UniFlash here: https://www.ti.com/tool/UNIFLASH#downloads. This will be
      - Example: `danielg/implement-random-device-driver`
 3. Make a PR.
    - For the PR description, make sure to fill in all the required details in the generated template.
-   - Add at least two PR reviewers, including one software lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR.
+   - Add at least three PR reviewers, including one software lead. When a PR is created, PR stats are added as a comment. You can use these stats to choose reviewers. Send a message in the #pr channel on Discord to notify the reviewers of your PR.
 4. Make any requested changes and merge your branch onto main once the PR is approved.
 
 ## Authors
