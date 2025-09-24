@@ -1,28 +1,27 @@
 import type { RequestItemData } from "./request-item-data.ts";
 
 export const getRequestItems = async (): Promise<RequestItemData[]> => {
-  return [
-    {
-      id: 1,
-      status: "Pending",
-      longitude: 100,
-      latitude: 80,
-      created_on: new Date(2024, 10),
-      cancellable_after: new Date(2025, 12),
-      request_sent_to_obc_on: null,
-      pic_transmitted_on: null,
-      pic_taken_on: null,
-    },
-    {
-      id: 2,
-      status: "Pending",
-      longitude: 120,
-      latitude: 80,
-      created_on: new Date(2024, 10),
-      cancellable_after: new Date(2025, 12),
-      request_sent_to_obc_on: null,
-      pic_transmitted_on: null,
-      pic_taken_on: null,
-    },
-  ];
+  try {
+    const response = await fetch('http://localhost:5000/aro-request');
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform API response to match our interface if needed
+    return data.map((item: any) => ({
+      ...item,
+      status: item.status.toLowerCase(), // Ensure status matches our enum
+      created_on: new Date(item.created_on),
+      request_sent_to_obc_on: item.request_sent_to_obc_on ? new Date(item.request_sent_to_obc_on) : null,
+      pic_taken_on: item.pic_taken_on ? new Date(item.pic_taken_on) : null,
+      pic_transmitted_on: item.pic_transmitted_on ? new Date(item.pic_transmitted_on) : null,
+      cancellable_after: item.cancellable_after ? new Date(item.cancellable_after) : new Date(), // Calculate or get from API
+    }));
+  } catch (error) {
+    console.error('Error fetching ARO requests:', error);
+    throw error;
+  }
 };
