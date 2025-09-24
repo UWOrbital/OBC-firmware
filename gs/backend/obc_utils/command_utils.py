@@ -16,12 +16,14 @@ from interfaces.obc_gs_interface.commands import (
     CmdCallbackId,
     CmdMsg,
     CmdResponseErrorCode,
+    create_cmd_arm,
     create_cmd_downlink_logs_next_pass,
     create_cmd_downlink_telem,
     create_cmd_download_data,
     create_cmd_end_of_frame,
     create_cmd_erase_app,
     create_cmd_exec_obc_reset,
+    create_cmd_execute,
     create_cmd_i2c_probe,
     create_cmd_mirco_sd_format,
     create_cmd_ping,
@@ -257,6 +259,8 @@ def generate_command(args: str) -> tuple[CmdMsg | None, bool]:
         create_cmd_download_data,
         create_cmd_verify_crc,
         create_cmd_i2c_probe,
+        create_cmd_arm,
+        create_cmd_execute,
     ]
 
     # Loop through each of the specific parses and see if we get a valid parse on any of them
