@@ -9,7 +9,7 @@ import { Steps } from '@astrojs/starlight/components';
 This guide will help you install and setup PostgreSQL for hosting the database locally.
 
 ## Windows
-:::caution[]
+:::caution
 **Windows is not supported for firmware and ground station development.**
 
 If you are using Windows, you will need to install Windows Subsystem for Linux (WSL). WSL lets you run a complete Linux environment directly inside Windows without virtual machine overhead or dual booting.
@@ -29,7 +29,7 @@ Make sure you follow the [Initial setup](/OBC-firmware/start-here/initial-setup)
 
 2. Run `sudo -u postgres psql --version` to ensure PostgreSQL was installed properly. It should print that the major version is 16.
 
-3. Run the following commands to setup PostgreSQL for the ground station. 
+3. Run the following commands to setup PostgreSQL for the ground station.
     :::caution
     Make your PostgreSQL username the same as your Linux username.
     Also, try not to include special characters in your password as it may break connection strings.
