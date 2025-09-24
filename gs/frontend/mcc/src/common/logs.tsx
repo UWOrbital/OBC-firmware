@@ -27,11 +27,11 @@ function Logs() {
     try {
       const response = await fetch(`http://localhost:5000/recent-logs/`);
       const data = await response.json();
-      // Assuming data is either a single log or an array of logs
+
       if (Array.isArray(data)) {
         setLogs(data.map((item, index) => ({ ...item, id: index })));
       } else {
-        // If it's a single log entry, create an array with one item
+
         setLogs([{ id: 0, date: data.date, log: data.log }]);
       }
       setLoading(false);
