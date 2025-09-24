@@ -13,6 +13,8 @@
 #define U_FRAME_COMMS_RECV_SIZE 30
 #define I_FRAME_COMMS_RECV_SIZE 300
 
+extern QueueHandle_t cc1120TempQueueHandle;
+
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.

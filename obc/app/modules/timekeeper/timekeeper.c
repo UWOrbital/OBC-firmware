@@ -11,10 +11,31 @@
 #include <os_task.h>
 #include <os_timer.h>
 #include <sys_common.h>
+#include <os_queue.h>
 
 #define LOCAL_TIME_SYNC_PERIOD_S 60UL
 
-void obcTaskInitTimekeeper(void) {}
+#define RTC_TEMP_QUEUE_LENGTH 1
+#define RTC_TEMP_QUEUE_ITEM_SIZE sizeof(uint32_t)
+
+QueueHandle_t rtcTempQueueHandle = NULL;
+static StaticQueue_t rtcTempQueue;
+static uint32_t rtcTempQueueStack[RTC_TEMP_QUEUE_LENGTH];
+
+void obcTaskInitTimekeeper(void) {
+  ASSERT((rtcTempQueueStack != NULL) && (&rtcTempQueue != NULL));
+  if (rtcTempQueueHandle == NULL) {
+    rtcTempQueueHandle =
+        xQueueCreateStatic(RTC_TEMP_QUEUE_LENGTH, RTC_TEMP_QUEUE_ITEM_SIZE, rtcTempQueueStack, &rtcTempQueue);
+  }
+}
+
+obc_error_code_t postRtcTempQueue(uint32_t value) {
+  if (xQueueOverwrite(rtcTempQueueHandle, &value) != pdPASS) {
+    return OBC_ERR_CODE_UNKNOWN;
+  }
+  return OBC_ERR_CODE_INVALID_STATE;
+}
 
 void obcTaskFunctionTimekeeper(void *pvParameters) {
   /*

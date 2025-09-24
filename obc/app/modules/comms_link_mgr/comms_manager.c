@@ -61,6 +61,13 @@ static uint8_t cc1120TransmitQueueStack[CC1120_TRANSMIT_QUEUE_LENGTH * CC1120_TR
 static const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                                       0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
 
+#define CC1120_TEMP_QUEUE_LENGTH 1
+#define CC1120_TEMP_QUEUE_ITEM_SIZE sizeof(uint32_t)
+
+QueueHandle_t cc1120TempQueueHandle = NULL;
+static StaticQueue_t cc1120TempQueue;
+static uint32_t cc1120TempQueueStack[COMMS_MANAGER_QUEUE_LENGTH];
+
 /**
  * @brief determines what the next Comms Manager state should be and sets it to
  * that state
@@ -124,6 +131,12 @@ void obcTaskInitCommsMgr(void) {
   if (cc1120TransmitQueueHandle == NULL) {
     cc1120TransmitQueueHandle = xQueueCreateStatic(CC1120_TRANSMIT_QUEUE_LENGTH, CC1120_TRANSMIT_QUEUE_ITEM_SIZE,
                                                    cc1120TransmitQueueStack, &cc1120TransmitQueue);
+  }
+
+  ASSERT((cc1120TempQueueStack != NULL) && (&cc1120TempQueue != NULL));
+  if (cc1120TempQueueHandle == NULL) {
+    cc1120TempQueueHandle = xQueueCreateStatic(CC1120_TEMP_QUEUE_LENGTH, CC1120_TEMP_QUEUE_ITEM_SIZE,
+                                               cc1120TempQueueStack, &cc1120TempQueue);
   }
 
   // TODO: Implement a key exchange algorithm instead of using Pre-Shared/static
@@ -297,6 +310,13 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event) {
     return OBC_ERR_CODE_SUCCESS;
   }
   return OBC_ERR_CODE_QUEUE_FULL;
+}
+
+obc_error_code_t postCommsManagerTempQueue(uint32_t value) {
+  if (xQueueOverwrite(cc1120TempQueueHandle, &value) != pdPASS) {
+    return OBC_ERR_CODE_UNKNOWN;
+  }
+  return OBC_ERR_CODE_INVALID_STATE;
 }
 
 // NOTE: This is created on startup
