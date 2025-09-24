@@ -5,6 +5,7 @@ This repository holds all the code written by UW Orbital's software team. This i
 ## Table of Contents
 
 - [UW Orbital Docs](#uw-orbital-docs)
+- [Notion](#notion)
 - [Firmware Dependencies](#firmware-dependencies)
 - [Contributing](#contributing)
 - [Authors](#authors)
@@ -17,6 +18,16 @@ You will find it most helpful to check out the setup guides, build tutorials, an
 Check out the site here: https://uworbital.github.io/OBC-firmware/
 
 The documentation site now contains most of the information previously found in this README.
+
+## Notion
+The team Notion is another important source of information. Here you'll find other team documentation, onboarding info, and links to useful resources.
+
+The software section of the Notion is available here: https://www.notion.so/uworbital/Software-a613c4aaa36449969010cabba2fc329d
+
+Useful links:
+- Firmware Onboarding: https://www.notion.so/uworbital/Firmware-Onboarding-48aeba74f55045f5929b40d029202842
+- Ground Station Onboarding: https://www.notion.so/uworbital/Ground-Station-Onboarding-10f8a26d767780d7ae8de921d9782b77
+- Software Development Life Cycle (SDLC): https://www.notion.so/uworbital/Software-Development-Life-Cycle-1218a26d767780619d42fa22f0785e73
 
 ## Firmware Dependencies
 
