@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 /* DEFINES */
-#define BL_UART_SCIREG_BAUD 115200U
+#define BL_UART_SCIREG_BAUD PRINT_BAUD_RATE
 
 /* TYPEDEFS */
 typedef struct {

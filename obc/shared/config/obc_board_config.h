@@ -4,6 +4,7 @@
 
 /* Board macros for registers, ports, CS pins, data formats, etc. */
 
+#define PRINT_BAUD_RATE 1527771
 #ifdef RM46_LAUNCHPAD
 // Serial config
 #define UART_PRINT_REG scilinREG
