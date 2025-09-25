@@ -9,8 +9,8 @@ from struct import unpack
 from typing import BinaryIO
 
 # Local application imports
-from . import ephemeris
-from .ephemeris import DataPoint
+from gs.backend.sun import ephemeris
+from gs.backend.sun.ephemeris import DataPoint
 
 
 @dataclass
