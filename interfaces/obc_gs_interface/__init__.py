@@ -2,7 +2,7 @@ from ctypes import CDLL
 from pathlib import Path
 from sys import platform
 
-if platform == 'darwin':
+if platform == "darwin":
     extension = "dylib"
 else:
     extension = "so"
