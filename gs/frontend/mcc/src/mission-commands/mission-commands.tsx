@@ -1,52 +1,55 @@
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
 import Table from "react-bootstrap/Table";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 const MISSON_COMMAND_PREFIX = "MCC_";
 
 function MissionCommands() {
-  const [commands, setCommands] = useState("");
-  const [commandResponse, setCommandResponse] = useState("");
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    try {
-      const command = localStorage.getItem(MISSON_COMMAND_PREFIX + "command");
-      const response = localStorage.getItem(MISSON_COMMAND_PREFIX + "response");
-      if (!command) return;
-      if (!response) return;
-      setCommands(command);
-      setCommandResponse(response);
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
+  const { data: savedData } = useQuery({
+    queryKey: ["missionCommand"],
+    queryFn: () => {
+      const command = localStorage.getItem(MISSON_COMMAND_PREFIX + "command") || "";
+      const response = localStorage.getItem(MISSON_COMMAND_PREFIX + "response") || "";
+      return { command, response };
+    },
+    initialData: {
+      command: localStorage.getItem(MISSON_COMMAND_PREFIX + "command") || "",
+      response: localStorage.getItem(MISSON_COMMAND_PREFIX + "response") || "",
+    },
+});
+
+  const [commands, setCommands] = useState(savedData.command);
 
   // const handleChange = (event) => {
   //   setCommands(event.target.value);
   //   localStorage.setItem(MISSON_COMMAND_PREFIX + "command", event.target.value);
   // }
-
-  const handleCommand = () => {
-    try {
-      const requestOptions = {
+  const mutation = useMutation({
+    mutationFn: async (command: string) => {
+      const response = await fetch("http://localhost:5000/mission-control", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: commands }),
-      };
-      fetch("http://localhost:5000/mission-control", requestOptions)
-        .then((response) => response.json())
-        .then((data) => {
-          setCommandResponse(data.response);
-          localStorage.setItem(
-            MISSON_COMMAND_PREFIX + "response",
-            data.response,
-          );
-        });
-    } catch (error) {
-      console.error(error);
-    }
+        body: JSON.stringify({ command }),
+      });
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      localStorage.setItem(
+        MISSON_COMMAND_PREFIX + "response",
+        data.response
+      );
+    },
+  });
+
+   const handleCommand = () => {
+    mutation.mutate(commands);
   };
 
   const clear = () => {
@@ -56,8 +59,7 @@ function MissionCommands() {
       console.error(error);
     }
     setCommands("");
-    setCommandResponse("");
-    // inputRef.current.value = ''
+    mutation.reset();
   };
 
   return (
@@ -80,7 +82,13 @@ function MissionCommands() {
           </tr>
         </thead>
         <tbody>
-          <tr>{commandResponse && <td>{commandResponse}</td>}</tr>
+          <tr>
+            <td>
+              {mutation.status === "pending" && "Loading..."}
+              {mutation.status === "error" && `Error: ${(mutation.error as Error).message}`}
+              {mutation.status === "success" && mutation.data.response}
+            </td>
+          </tr>
         </tbody>
       </Table>
       <button onClick={clear}>Clear</button>
