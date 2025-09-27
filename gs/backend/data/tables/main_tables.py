@@ -44,17 +44,16 @@ class MainCommand(BaseSQLModel, table=True):
     @model_validator(mode="after")
     def validate_params_format(self):
 
-        if self.format == None and self.params == None:
+        if self.format is None and self.params is None:
             return self
         
-        elif self.params != None and self.format != None:
-            if self.params.count(",") == self.format.count(","):
-                return self
+        elif self.params is not None and self.format is not None and self.params.count(",") == self.format.count(","):
+            return self
             
-        if self.params == None:
+        if self.params is None:
             raise DatabaseError("Missing params")
         
-        elif self.format == None:
+        elif self.format is None:
             raise DatabaseError("Missing format")
         
         else:
