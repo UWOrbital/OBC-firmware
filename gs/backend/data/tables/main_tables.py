@@ -6,6 +6,9 @@ from sqlmodel import Field
 
 from gs.backend.data.tables.base_model import BaseSQLModel
 
+from pydantic import model_validator
+from gs.backend.exceptions.exceptions import DatabaseError
+
 # Schema information
 MAIN_SCHEMA_NAME: Final[str] = "main"
 MAIN_SCHEMA_METADATA: Final[MetaData] = MetaData(MAIN_SCHEMA_NAME)
@@ -37,6 +40,27 @@ class MainCommand(BaseSQLModel, table=True):
     # table information
     metadata = MAIN_SCHEMA_METADATA
     __tablename__ = MAIN_COMMAND_TABLE_NAME
+
+    @model_validator(mode="after")
+    def validate_params_format(self):
+
+        if self.format == None and self.params == None:
+            return self
+        
+        elif self.params != None and self.format != None:
+            if self.params.count(",") == self.format.count(","):
+                return self
+            
+        if self.params == None:
+            raise DatabaseError("Missing params")
+        
+        elif self.format == None:
+            raise DatabaseError("Missing format")
+        
+        else:
+            raise DatabaseError("Params and format do not have the same number of values")
+        
+
 
 
 class MainTelemetry(BaseSQLModel, table=True):
