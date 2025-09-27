@@ -3,23 +3,6 @@ from gs.backend.data.data_wrappers.mcc_wrappers.commands_wrapper import get_all_
 
 commands_router = APIRouter(tags=["MCC", "Commands"])
 
-'''
-IMPORTANT: Get endpoint is not properly implemented. 
-'''
-@commands_router.get("/")
-async def get_commands(request: Request, count: int = 100, offset: int = 0):
-    # Implementation to retrieve the most recent commands
-    commands = get_all_commands()  # Placeholder for actual data retrieva
-
-    return {
-        "data": commands[offset:offset + count],
-        "operations": {
-            "delete": request.url_for("delete_command", id="{id}")  # Dynamic URL generation
-        },
-        "datetime": "placeholder_for_datetime"  # Placeholder for actual datetime
-    }
-
-
 
 # Post
 @commands_router.post("/")
@@ -40,6 +23,6 @@ async def delete_command(id: int):
 
     if not command_to_delete:
         raise FileNotFoundError(f"Command with id {id} not found")
-    
-    delete_commands_by_id(id)
+    else:
+        delete_commands_by_id(id)
     return {"message": f"Command with id {id} deleted successfully"}
