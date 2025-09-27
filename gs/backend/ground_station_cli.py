@@ -33,7 +33,7 @@ class GroundStationShell(Cmd):
     ██║   ██║██║███╗██║    ██║   ██║██╔══██╗██╔══██╗██║   ██║   ██╔══██║██║
     ╚██████╔╝╚███╔███╔╝    ╚██████╔╝██║  ██║██████╔╝██║   ██║   ██║  ██║███████╗
      ╚═════╝  ╚══╝╚══╝      ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
-  Welcome to the UW Orbital Command Line Inteface! Type help or ? to list commands.\n
+  Welcome to the UW Orbital Command Line Interface! Type help or ? to list commands.\n
     """
     prompt = "(UW Orbital): "
     file = None
@@ -133,8 +133,10 @@ class GroundStationShell(Cmd):
         """
         # Preliminary checks for the function to run
         # Write out the logs that we previously got
-        with open(LOG_PATH) as file:
-            print(file.read())
+
+        # Commented out as it is displayed in the left pane
+        # with open(LOG_PATH) as file:
+        #     print(file.read())
 
         if self.background_logging is not None:
             self.background_logging.kill()
