@@ -46,7 +46,12 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
 
 
 # updates user into database of type AROUser then fetches the user from database
-def update_user_by_id(userid: UUID, call_sign: str, email: str, f_name: str, l_name: str, phone_number: str) -> AROUsers:
+def update_user_by_id(userid: UUID,
+                      call_sign: str,
+                      email: str,
+                      f_name: str,
+                      l_name: str,
+                      phone_number: str) -> AROUsers:
     """
     Update an existing user in the AROUser table in database
 
