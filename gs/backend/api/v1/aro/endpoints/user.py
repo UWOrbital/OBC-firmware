@@ -52,7 +52,7 @@ def update_user(userid: str, payload: UserRequest) -> UserResponse:
         )
         return UserResponse(data=user)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 @aro_user_router.delete("/{userid}", response_model=UsersResponse)
 def delete_user(userid: str) -> UsersResponse:
@@ -65,5 +65,5 @@ def delete_user(userid: str) -> UsersResponse:
         users = delete_user_by_id(UUID(userid))
         return UsersResponse(data=users)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
