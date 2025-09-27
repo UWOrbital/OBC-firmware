@@ -5,6 +5,9 @@ from sys import argv
 
 
 def main() -> None:
+    """
+    Set up a tmux session with two panes: one for logs, one for the CLI.
+    """
     if len(argv) != 2:
         print("One argument needed: Com Port")
         return
@@ -23,7 +26,9 @@ def main() -> None:
 
     # Initialize gs cli
     pane2.send_keys(
-        f"source .venv/bin/activate && tmux source-file .tmux.conf && python3.11 gs/backend/ground_station_cli.py {com_port}"
+        "source .venv/bin/activate && "
+        "tmux source-file .tmux.conf && "
+        f"python3.11 gs/backend/ground_station_cli.py {com_port}"
     )
 
     # Sleep to allow appropriate time for cli setup
