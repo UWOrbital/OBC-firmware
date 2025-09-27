@@ -366,5 +366,5 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
 
             file.write(data_string)
             file.flush()
-            if print_console and len(data_string) != 0:
-                print(data_string)
+            # if print_console and len(data_string) != 0:
+            #     # print(data_string)
