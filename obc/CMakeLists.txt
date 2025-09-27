@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 
+if(APPLE)
+    find_library(COREFOUNDATION CoreFoundation)
+    find_library(IOKIT IOKit)
+endif()
+
 # Set default values for firmware build options
 include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
