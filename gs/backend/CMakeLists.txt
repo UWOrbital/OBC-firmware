@@ -12,6 +12,13 @@ target_include_directories(gs.out PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/serial_utils
 )
 
+if(APPLE)
+    target_link_libraries(gs.out PUBLIC
+        "-framework CoreFoundation"
+        "-framework IOKit"
+    )
+endif()
+
 target_compile_options(gs.out PUBLIC -Wall -g)
 
 if(APPLE)
@@ -27,7 +34,7 @@ if(UNIX)
         lib-correct
         obc-gs-interface
         CSerialPort
-)
+    )
 elseif(WIN32)
     target_link_libraries(gs.out PUBLIC
         tiny-aes
@@ -35,5 +42,5 @@ elseif(WIN32)
         obc-gs-interface
         CSerialPort
         setupapi
-)
+    )
 endif()
