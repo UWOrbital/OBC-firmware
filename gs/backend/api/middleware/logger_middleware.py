@@ -85,7 +85,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                     f"Request ID: {request_id}",
                     f"Response: {response_body}",
                     f"Bytes: {response_size}",
-                    f"Seconds Elasped: {process_time:.3f}.",
+                    f"Seconds Elapsed: {process_time:.3f}.",
                 ]
             )
         )
