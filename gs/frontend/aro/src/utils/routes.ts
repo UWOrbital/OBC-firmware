@@ -7,7 +7,7 @@ export interface Route {
     url: string;
   }
 
-  export const ROUTES: Route[] = [
+  export const NAVIGATION_LINKS: Route[] = [
     {
       text: "Home",
       url: "/",
