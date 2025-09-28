@@ -20,10 +20,7 @@ describe("Nav", () => {
         <Nav />
       </BrowserRouter>
     );
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("Commands")).toBeInTheDocument();
-    expect(screen.getByText("ARO Admin")).toBeInTheDocument();
-    expect(screen.getByText("Live Sessions")).toBeInTheDocument();
-    expect(screen.getByText("Login")).toBeInTheDocument();
+    expect(screen.getByText("Home")).toBeInTheDocument();
+    expect(screen.getByText("Requests")).toBeInTheDocument();
   });
 });

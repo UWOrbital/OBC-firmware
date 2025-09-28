@@ -1,13 +1,13 @@
 /**
- * Navigation links for the MCC frontend
+ * Routes for the MCC frontend
  */
 
-export interface NavLink {
+export interface Route {
   text: string;
   url: string;
 }
 
-export const NAVIGATION_LINKS: NavLink[] = [
+export const ROUTES: Route[] = [
   {
     text: "Dashboard",
     url: "/",
