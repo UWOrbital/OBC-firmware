@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
+print(environ.get("GS_DATABASE_LOCATION"))
+print(environ.get("GS_DATABASE_PORT"))
 # TODO: Make these throw an exception if they are None
 GS_DATABASE_USER = environ.get("GS_DATABASE_USER")
 GS_DATABASE_PASSWORD = environ.get("GS_DATABASE_PASSWORD")

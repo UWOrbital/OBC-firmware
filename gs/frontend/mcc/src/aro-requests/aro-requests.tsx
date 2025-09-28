@@ -1,5 +1,5 @@
 import Table from "react-bootstrap/Table";
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 
 type AROItemProps = {
   id: number;
@@ -7,6 +7,7 @@ type AROItemProps = {
   longitude: number;
   status: string;
 };
+
 function AROItem({ id, latitude, longitude, status }: AROItemProps) {
   return (
     <>
@@ -21,17 +22,14 @@ function AROItem({ id, latitude, longitude, status }: AROItemProps) {
 }
 
 function ARORequests() {
-  const [loading, setLoading] = useState(true);
-  const [aroRequests, setARORequests] = useState<AROItemProps[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:5000/aro-request")
-      .then((response) => response.json())
-      .then((data) => {
-        setARORequests(data);
-        setLoading(false);
-      });
-  }, []);
+  const { data, isLoading} = useQuery<AROItemProps[]>({
+  queryKey: ["aro-requests"],
+  queryFn: async () => {
+    const response = await fetch("http://localhost:8000/api/v1/mcc/requests/");
+    if(!response.ok) throw new Error("Network response was not ok");
+    return response.json();
+  },
+  });
 
   return (
     <div className="arorequests layout">
@@ -45,14 +43,14 @@ function ARORequests() {
           </tr>
         </thead>
         <tbody>
-          {loading
+          {isLoading || !data
             ? (
               <tr>
                 <td colSpan={4}>Loading...</td>
               </tr>
             )
-            : (
-              aroRequests.map((item) => {
+            :(
+              data.map((item) => {
                 return (
                   <AROItem
                     key={item.id}
