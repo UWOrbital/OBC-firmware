@@ -11,7 +11,7 @@ describe("Nav", () => {
         <Nav />
       </BrowserRouter>
     );
-    expect(screen.getByAltText("orbital-logo")).toBeInTheDocument();
+    expect(screen.getByAltText("orbital logo")).toBeInTheDocument();
   });
 
   it("renders navigation links", () => {
