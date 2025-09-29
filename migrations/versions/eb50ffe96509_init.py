@@ -10,6 +10,10 @@ import sqlalchemy as sa
 import sqlmodel
 from alembic import op
 
+op.execute("CREATE SCHEMA IF NOT EXISTS aro_users;")
+op.execute("CREATE SCHEMA IF NOT EXISTS main;")
+op.execute("CREATE SCHEMA IF NOT EXISTS transactional;")
+
 # revision identifiers, used by Alembic.
 revision = "eb50ffe96509"
 down_revision = None
