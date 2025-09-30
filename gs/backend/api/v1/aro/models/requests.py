@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+
 
 class UserRequest(BaseModel):
     """
@@ -11,4 +12,3 @@ class UserRequest(BaseModel):
     first_name: str
     last_name: str
     phone_number: str
-
