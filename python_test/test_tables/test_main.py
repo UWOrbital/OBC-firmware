@@ -37,12 +37,7 @@ def test_main_telemetry_basic(db_session: Session):
 
 def test_main_command_valid():
     main_command = MainCommand(
-        id=1,
-        name="Test",
-        params="param1,param2,param3",
-        format="int,int,int",
-        data_size=3,
-        total_size=3
+        id=1, name="Test", params="param1,param2,param3", format="int,int,int", data_size=3, total_size=3
     )
     assert main_command.name == "Test"
     assert main_command.params == "param1,param2,param3"
