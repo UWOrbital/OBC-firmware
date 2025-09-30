@@ -7,6 +7,7 @@ from gs.backend.main import app
 def client():
     return TestClient(app)
 
+
 # Test data for user 1
 @pytest.fixture
 def user1_data():
@@ -15,8 +16,9 @@ def user1_data():
         "email": "bob@test.com",
         "first_name": "Bob",
         "last_name": "Smith",
-        "phone_number": "123456789"
+        "phone_number": "123456789",
     }
+
 
 # Test data for user 2
 @pytest.fixture
@@ -26,16 +28,14 @@ def user2_data():
         "email": "kevian@gmail.com",
         "first_name": "kevin",
         "last_name": "wan",
-        "phone_number": "8888888888"
+        "phone_number": "8888888888",
     }
+
 
 # Test creating user1
 @pytest.fixture
 def test_user1_creation(client, user1_data):
-    response = client.post(
-        "/api/v1/aro/user/",
-        json=user1_data,
-        headers={"Content-Type": "application/json"})
+    response = client.post("/api/v1/aro/user/", json=user1_data, headers={"Content-Type": "application/json"})
 
     assert response.status_code == 200
     user = response.json()["data"]
@@ -47,13 +47,11 @@ def test_user1_creation(client, user1_data):
 
     return user
 
+
 # Test creating user2
 @pytest.fixture
 def test_user2_creation(client, user2_data):
-    response = client.post(
-        "/api/v1/aro/user/",
-        json=user2_data,
-        headers={"Content-Type": "application/json"})
+    response = client.post("/api/v1/aro/user/", json=user2_data, headers={"Content-Type": "application/json"})
 
     assert response.status_code == 200
     user = response.json()["data"]
@@ -65,6 +63,7 @@ def test_user2_creation(client, user2_data):
 
     return user
 
+
 # Test updating user1 (depends on test_user1_creation)
 @pytest.fixture
 def test_user1_update(client, test_user1_creation):
@@ -74,12 +73,9 @@ def test_user1_update(client, test_user1_creation):
         "email": "bob2@test.com",
         "first_name": "Rob",
         "last_name": "Smith",
-        "phone_number": "234567890"
+        "phone_number": "234567890",
     }
-    res = client.put(
-        f"/api/v1/aro/user/{user_id}",
-        json=update_data,
-        headers={"Content-Type": "application/json"})
+    res = client.put(f"/api/v1/aro/user/{user_id}", json=update_data, headers={"Content-Type": "application/json"})
 
     assert res.status_code == 200
     updated_user = res.json()["data"]
@@ -90,6 +86,7 @@ def test_user1_update(client, test_user1_creation):
     assert updated_user["phone_number"] == update_data["phone_number"]
 
     return updated_user
+
 
 # Test getting all users (after creating user1 and user2, and updating user1 to ensure creation and update work oncorrect user objects)
 @pytest.fixture
@@ -104,7 +101,7 @@ def test_get_users(client, test_user1_update, test_user2_creation):
     user1_id = test_user1_update["id"]
     user1_from_response = next(user for user in all_users if user["id"] == user1_id)
     assert user1_from_response["call_sign"] == test_user1_update["call_sign"]
-    assert user1_from_response["email"]  == test_user1_update["email"]
+    assert user1_from_response["email"] == test_user1_update["email"]
     assert user1_from_response["first_name"] == test_user1_update["first_name"]
     assert user1_from_response["last_name"] == test_user1_update["last_name"]
     assert user1_from_response["phone_number"] == test_user1_update["phone_number"]
@@ -118,12 +115,11 @@ def test_get_users(client, test_user1_update, test_user2_creation):
     assert user2_from_response["last_name"] == test_user2_creation["last_name"]
     assert user2_from_response["phone_number"] == test_user2_creation["phone_number"]
 
+
 # Test deleting user1 (after test_get_users to ensure both users exist)
 def test_user1_deletion(client, test_user1_update, test_user2_creation, test_get_users):
     user_id = test_user1_update["id"]
-    res = client.delete(
-        f"/api/v1/aro/user/{user_id}",
-        headers={"Content-Type": "application/json"})
+    res = client.delete(f"/api/v1/aro/user/{user_id}", headers={"Content-Type": "application/json"})
 
     assert res.status_code == 200
     all_users = res.json()["data"]

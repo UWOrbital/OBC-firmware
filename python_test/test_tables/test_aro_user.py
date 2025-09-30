@@ -21,11 +21,12 @@ def test_users_data_basic(db_session: Session):
     assert data_returned1.last_name is None
     assert data_returned1.phone_number == "123456789"
 
+
 def test_users_data_invalid_email(db_session: Session):
     with pytest.raises(ValidationError):
         AROUsers(
             call_sign="123456",
             email="www.test.com",  # invalid email format
             first_name="Bob",
-            phone_number="123456789"
+            phone_number="123456789",
         )

@@ -10,8 +10,10 @@ class UsersResponse(BaseModel):
 
     data: list[AROUsers]
 
+
 class UserResponse(BaseModel):
     """
     Single user response model.
     """
+
     data: AROUsers

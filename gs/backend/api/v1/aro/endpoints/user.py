@@ -13,6 +13,7 @@ from gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper import (
 
 aro_user_router = APIRouter(tags=["ARO", "User Information"])
 
+
 @aro_user_router.get("/", response_model=UsersResponse)
 async def get_users() -> UsersResponse:
     """
@@ -23,6 +24,7 @@ async def get_users() -> UsersResponse:
     users = get_all_users()
     return UsersResponse(data=users)
 
+
 @aro_user_router.post("/", response_model=UserResponse)
 def create_user(payload: UserRequest) -> UserResponse:
     """
@@ -32,14 +34,15 @@ def create_user(payload: UserRequest) -> UserResponse:
     """
 
     user = add_user(
-        call_sign = payload.call_sign,
-        email = payload.email,
-        f_name = payload.first_name,
-        l_name = payload.last_name,
-        phone_number = payload.phone_number
+        call_sign=payload.call_sign,
+        email=payload.email,
+        f_name=payload.first_name,
+        l_name=payload.last_name,
+        phone_number=payload.phone_number,
     )
 
     return UserResponse(data=user)
+
 
 @aro_user_router.put("/{userid}", response_model=UserResponse)
 def update_user(userid: str, payload: UserRequest) -> UserResponse:
@@ -50,16 +53,17 @@ def update_user(userid: str, payload: UserRequest) -> UserResponse:
     """
     try:
         user = update_user_by_id(
-            userid = UUID(userid),
-            call_sign = payload.call_sign,
-            email = payload.email,
-            f_name = payload.first_name,
-            l_name = payload.last_name,
-            phone_number = payload.phone_number
+            userid=UUID(userid),
+            call_sign=payload.call_sign,
+            email=payload.email,
+            f_name=payload.first_name,
+            l_name=payload.last_name,
+            phone_number=payload.phone_number,
         )
         return UserResponse(data=user)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
 
 @aro_user_router.delete("/{userid}", response_model=UsersResponse)
 def delete_user(userid: str) -> UsersResponse:
