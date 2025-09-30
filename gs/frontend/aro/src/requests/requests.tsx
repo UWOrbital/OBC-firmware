@@ -1,31 +1,46 @@
-import { type MouseEvent, useEffect, useState } from "react";
+import { type MouseEvent} from "react";
 import type { RequestItemData } from "./request-item-data.ts";
 import RequestItem from "./request-item.tsx";
 import { getRequestItems } from "./requests-api.ts";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Requests = () => {
-  // TODO: Switch to using react-query
-  const [data, setData] = useState<RequestItemData[]>([]);
-  useEffect(() => {
-    const getRequestItemsRegular = async () => {
-      const response = await getRequestItems();
-      setData(response);
-    };
-    getRequestItemsRegular();
-  }, []);
+
+  const {
+    data = [],
+    isLoading,
+  } = useQuery<RequestItemData[]>({
+    queryKey: ["requests"],
+    queryFn: getRequestItems,
+  });
+
+  const queryClient = useQueryClient();
 
   // Removes the request with the given id from the list of data
   // TODO: Cancel request on the backend
+  const cancelRequestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return id;
+    },
+    onSuccess: (id: number) => {
+      queryClient.setQueryData<RequestItemData[]>(["requests"], (old) =>
+        old ? old.filter((item) => item.id !== id) : []
+      );
+    },
+  });
+
   const cancelRequest = (id: number) => {
     return async (a: MouseEvent) => {
       a.preventDefault();
-      setData((prev: RequestItemData[]) =>
-        prev.filter((item) => item.id != id)
-      );
+      await cancelRequestMutation.mutateAsync(id);
     };
   };
 
-  if (data.length === 0) {
+  if (isLoading) {
+    return <div>Loading requests...</div>;
+  }
+
+  if (!data || data.length === 0) {
     return <div>You do not have any request created.</div>;
   }
 
@@ -49,10 +64,9 @@ const Requests = () => {
         {data.map((item: RequestItemData, key: number) => {
           console.log(item);
           return (
-            <tr key={key}>
-              {" "}
-              <RequestItem {...item} cancelRequest={cancelRequest(item.id)} />
-            </tr>
+          <tr key={item.id}>
+            <RequestItem {...item} cancelRequest={cancelRequest(item.id)} />
+          </tr>
           );
         })}
       </tbody>
