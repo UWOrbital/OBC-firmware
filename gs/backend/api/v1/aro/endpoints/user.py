@@ -1,8 +1,15 @@
 from uuid import UUID
+
 from fastapi import APIRouter, HTTPException
+
 from gs.backend.api.v1.aro.models.requests import UserRequest
 from gs.backend.api.v1.aro.models.responses import UserResponse, UsersResponse
-from gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper import get_all_users, add_user, update_user_by_id, delete_user_by_id
+from gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper import (
+    add_user,
+    delete_user_by_id,
+    get_all_users,
+    update_user_by_id,
+)
 
 aro_user_router = APIRouter(tags=["ARO", "User Information"])
 
@@ -66,4 +73,3 @@ def delete_user(userid: str) -> UsersResponse:
         return UsersResponse(data=users)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
-
