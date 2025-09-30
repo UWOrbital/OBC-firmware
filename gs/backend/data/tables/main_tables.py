@@ -42,8 +42,11 @@ class MainCommand(BaseSQLModel, table=True):
     __tablename__ = MAIN_COMMAND_TABLE_NAME
 
     @model_validator(mode="after")
-    def validate_params_format(self):
-
+    def validate_params_format(self) -> "MainCommand":
+        """
+        Returns self if params and format are both None or have the same number of comma-separated values.
+        If one of params or format is missing, or the numbers of comma-separated values do not match, raise DatabaseError.
+        """
         if self.format is None and self.params is None:
             return self
         
