@@ -2,12 +2,13 @@ from fastapi import APIRouter, HTTPException, status
 
 from gs.backend.api.v1.aro.models.requests import ChangeUserInfo, CreateUser, GetUserData
 from gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper import add_user, get_user_by_id, modify_user
+from gs.backend.data.tables.aro_user_tables import AROUsers
 
 aro_user_router = APIRouter(tags=["ARO", "User Information"])
 
 
 @aro_user_router.post("/create_user/", status_code=status.HTTP_200_OK)
-def create_user(payload: CreateUser) -> dict:
+def create_user(payload: CreateUser) -> dict[str, AROUsers]:
     """
     :param payload: Payload of type CreateUser, contains first_name, last_name,
       call_sign, email, phone numer
@@ -28,7 +29,7 @@ def create_user(payload: CreateUser) -> dict:
 
 
 @aro_user_router.get("/", status_code=status.HTTP_200_OK)
-def get_user(payload: GetUserData) -> dict:
+def get_user(payload: GetUserData) -> dict[str, AROUsers]:
     """
     :param payload: Payload of type GetUserData, contains user_id of type str
     """
@@ -42,11 +43,11 @@ def get_user(payload: GetUserData) -> dict:
         return {"user": user}
 
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, details=f"User does not exist, {e}") from e
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User does not exist, {e}") from e
 
 
 @aro_user_router.put("/", status_code=status.HTTP_200_OK)
-def change_user_info(payload: ChangeUserInfo) -> dict:
+def change_user_info(payload: ChangeUserInfo) -> dict[str, AROUsers]:
     """
     :params payload: Payload of type ChangeUserInfo, contains user_id of type UUID, first_name,
       last_name, call_sign
@@ -61,7 +62,7 @@ def change_user_info(payload: ChangeUserInfo) -> dict:
     update_fields = {k: v for k, v in payload.model_dump().items() if v is not None and k in allowed_fields}
 
     try:
-        return modify_user(userid=user_id, **update_fields)
+        return {"data": modify_user(userid=user_id, **update_fields)}
 
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e

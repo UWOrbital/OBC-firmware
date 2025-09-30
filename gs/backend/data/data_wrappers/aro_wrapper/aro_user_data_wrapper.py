@@ -65,8 +65,8 @@ def delete_user_by_id(userid: UUID) -> list[AROUsers]:
         return get_all_users()
 
 
-# deletes the user with given id and returns the remaining users
-def get_user_by_id(userid: UUID) -> list[AROUsers]:
+# gets the user with given id
+def get_user_by_id(userid: UUID) -> AROUsers:
     """
     Use the user.id to delete a user from table
 
