@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import orbital_logo from "../assets/orbital_logo.png";
-import { CSS_VARIABLES } from "../utils/style-const";
+import { CSS_VARIABLES } from "../utils/themes";
 import { NAVIGATION_LINKS } from "../utils/nav-links";
 
 /**
@@ -8,6 +8,9 @@ import { NAVIGATION_LINKS } from "../utils/nav-links";
  * @return tsx element of Nav component
  */
 function Nav() {
+  // TODO: create user auth that checks if the user is logged in
+  const isLoggedIn = false;
+
   return (
     <nav className="m-7" style={{ color: CSS_VARIABLES["--color-font"] }}>
       {/* Logo */}
@@ -26,12 +29,20 @@ function Nav() {
         ))}
       </div>
 
-      {/* Login */}
-      <div className="absolute right-8 mt-2 border-1 border-white rounded-xl p-1 px-2 hover:bg-white hover:text-black">
-        <Link to="/login" className="">
-          Login
-        </Link>
-      </div>
+      {/* Profile or Login page, depending on authentication state */}
+      {isLoggedIn ? (
+        <div className="absolute right-8 mt-2 border-1 border-white rounded-xl p-1 px-2 hover:bg-white hover:text-black">
+          <Link to="/profile" className="">
+            Profile
+          </Link>
+        </div>
+      ) : (
+        <div className="absolute right-8 mt-2 border-1 border-white rounded-xl p-1 px-2 hover:bg-white hover:text-black">
+          <Link to="/login" className="">
+            Login
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }
