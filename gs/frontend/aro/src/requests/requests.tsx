@@ -61,7 +61,7 @@ const Requests = () => {
         </tr>
       </thead>
       <tbody>
-        {data.map((item: RequestItemData, key: number) => {
+        {data.map((item: RequestItemData) => {
           console.log(item);
           return (
           <tr key={item.id}>
