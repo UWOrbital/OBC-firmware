@@ -101,36 +101,40 @@ class CmdI2CProbeRes(CmdRes):
 
 
 @dataclass
-class CmdCmdArmRes(CmdRes):
+class CmdArmRes(CmdRes):
     """
     Class for storing the response to CMD_ARM
     """
 
     cmd_arm: int
-    arm_id: int
+    cmd_arm_id: int
 
     def __str__(self) -> str:
         """
         Overriding the str method for a better representation of what's happening
         """
         formatted_string = super().__str__()
+        formatted_string += f"cmd_arm: {self.cmd_arm}\n"
+        formatted_string += f"cmd_arm_id: {self.cmd_arm_id}\n"
         return formatted_string
 
 
 @dataclass
-class CmdCmdExecuteRes(CmdRes):
+class CmdExecuteRes(CmdRes):
     """
     Class for storing the response to CMD_EXECUTE
     """
 
     cmd_execute: int
-    exec_id: int
+    cmd_exec_id: int
 
     def __str__(self) -> str:
         """
         Overriding the str method for a better representation of what's happening
         """
         formatted_string = super().__str__()
+        formatted_string += f"cmd_execute: {self.cmd_execute}\n"
+        formatted_string += f"cmd_exec_id: {self.cmd_exec_id}\n"
         return formatted_string
 
 
