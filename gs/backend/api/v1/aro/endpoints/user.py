@@ -28,7 +28,7 @@ def create_user(payload: CreateUser) -> dict[str, AROUsers]:
     return {"user": user}
 
 
-@aro_user_router.get("/", status_code=status.HTTP_200_OK)
+@aro_user_router.get("/get_user/", status_code=status.HTTP_200_OK)
 def get_user(payload: GetUserData) -> dict[str, AROUsers]:
     """
     :param payload: Payload of type GetUserData, contains user_id of type str
@@ -46,7 +46,7 @@ def get_user(payload: GetUserData) -> dict[str, AROUsers]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User does not exist, {e}") from e
 
 
-@aro_user_router.put("/", status_code=status.HTTP_200_OK)
+@aro_user_router.put("/modify_user/", status_code=status.HTTP_200_OK)
 def change_user_info(payload: ChangeUserInfo) -> dict[str, AROUsers]:
     """
     :params payload: Payload of type ChangeUserInfo, contains user_id of type UUID, first_name,
