@@ -14,6 +14,7 @@ obc_error_code_t findBrightestPixelInPacket(image_t *packet, uint16_t *x, uint16
   if (packet == NULL || x == NULL || y == NULL || brightness == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+  *brightness = 0;
   for (uint16_t i = 0; i < packet->height; i++) {
     for (uint16_t j = 0; j < packet->width; j++) {
       uint8_t pixel = packet->data[(i * packet->width) + j];
