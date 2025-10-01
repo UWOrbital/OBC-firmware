@@ -1,25 +1,27 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "./app.css";
-import Navbar from "./common/navbar.tsx";
-import NotFound from "./common/not-found.tsx";
-import Home from "./home/home.tsx";
-import NewRequestForm from "./new-request/new-request-form.tsx";
-import Profile from "./profile/profile.tsx";
-import Requests from "./requests/requests.tsx";
+import { Routes } from "react-router-dom";
+import Nav from "./components/Nav";
+import Background from "./components/Background";
 
-
+/**
+ * @brief App component displaying the main application
+ * @return tsx element of App component
+ */
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      <Nav />
+      <Background />
       <Routes>
-        <Route path="*" element={<NotFound />} />
+        {/* uncomment these routes as the pages are created */}
+        {/* <Route path="*" element={<Dashboard />} />
         <Route path="/" element={<Home />} />
+        <Route path="/commands" element={<Commands />} />
         <Route path="/new-request" element={<NewRequestForm />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/login" element={<Login />} /> */}
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
 
