@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from sqlmodel import select
@@ -62,3 +63,38 @@ def delete_user_by_id(userid: UUID) -> list[AROUsers]:
             raise ValueError("User ID does not exist")
 
         return get_all_users()
+
+
+# gets the user with given id
+def get_user_by_id(userid: UUID) -> AROUsers:
+    """
+    Use the user.id to delete a user from table
+
+    :param userid: identifier unique to the user
+    """
+    with get_db_session() as session:
+        user = session.get(AROUsers, userid)
+
+        if user:
+            return user
+        else:
+            raise ValueError("User ID does not exist")
+
+
+def modify_user(userid: UUID, **kwargs: dict[str, Any]) -> AROUsers:
+    """
+    Modifies the target user
+
+    :param userid: identifier unique to the user
+    """
+    with get_db_session() as session:
+        user = session.get(AROUsers, userid)
+        if not user:
+            raise ValueError("User does not exist based on ID")
+
+        for field, value in kwargs.items():
+            setattr(user, field, value)
+
+        session.commit()
+        session.refresh(user)
+        return user
