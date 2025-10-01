@@ -84,13 +84,13 @@ function Logs() {
           style={{ marginRight: "1rem" }}
         />
       </div>
-      
+
       <Table responsive="sm">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th 
+                <th
                   key={header.id}
                   style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                   onClick={header.column.getToggleSortingHandler()}

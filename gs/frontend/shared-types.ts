@@ -1,26 +1,26 @@
 // Shared types based on database schema for ARO and MCC frontends
 
 // Enums matching database schema
-export type AROCommandStatus = 
-  | 'pending' 
-  | 'scheduled' 
-  | 'taken' 
-  | 'cancelled' 
-  | 'failed' 
+export type AROCommandStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'taken'
+  | 'cancelled'
+  | 'failed'
   | 'completed';
 
-export type CommandStatus = 
-  | 'pending' 
-  | 'scheduled' 
-  | 'ongoing' 
-  | 'cancelled' 
-  | 'failed' 
+export type CommandStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'ongoing'
+  | 'cancelled'
+  | 'failed'
   | 'completed';
 
-export type SessionStatus = 
-  | 'pending' 
-  | 'scheduled' 
-  | 'ongoing' 
+export type SessionStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'ongoing'
   | 'completed';
 
 export type MainPacketType = 'uplink' | 'downlink';

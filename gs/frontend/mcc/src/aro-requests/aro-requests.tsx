@@ -16,11 +16,11 @@ import { type AROCommandStatus } from "../shared-types.ts";
 
 type AROItemProps = {
   id: number;
-  aro_id?: number; 
+  aro_id?: number;
   latitude: number;
-  longitude: number; 
-  status: AROCommandStatus; 
-  created_on?: string; 
+  longitude: number;
+  status: AROCommandStatus;
+  created_on?: string;
   request_sent_to_obc_on?: string | null;
   pic_taken_on?: string | null;
   pic_transmitted_on?: string | null;
@@ -51,11 +51,11 @@ function ARORequests() {
     }),
     columnHelper.accessor("latitude", {
       header: "Latitude",
-      cell: (info) => info.getValue().toFixed(6), 
+      cell: (info) => info.getValue().toFixed(6),
     }),
     columnHelper.accessor("longitude", {
-      header: "Longitude", 
-      cell: (info) => info.getValue().toFixed(6), 
+      header: "Longitude",
+      cell: (info) => info.getValue().toFixed(6),
     }),
     columnHelper.accessor("status", {
       header: "Status",
@@ -65,12 +65,12 @@ function ARORequests() {
         const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
         const getStatusColor = (status: AROCommandStatus) => {
           switch (status) {
-            case 'pending': return '#ffc107'; 
-            case 'scheduled': return '#007bff'; 
-            case 'taken': return '#28a745'; 
-            case 'cancelled': return '#6c757d'; 
-            case 'failed': return '#dc3545'; 
-            case 'completed': return '#28a745'; 
+            case 'pending': return '#ffc107';
+            case 'scheduled': return '#007bff';
+            case 'taken': return '#28a745';
+            case 'cancelled': return '#6c757d';
+            case 'failed': return '#dc3545';
+            case 'completed': return '#28a745';
             default: return '#000';
           }
         };
@@ -116,13 +116,13 @@ function ARORequests() {
           Available statuses: pending, scheduled, taken, cancelled, failed, completed
         </small>
       </div>
-      
+
       <Table striped bordered hover variant="light">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th 
+                <th
                   key={header.id}
                   style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                   onClick={header.column.getToggleSortingHandler()}

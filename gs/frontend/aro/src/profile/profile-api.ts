@@ -13,11 +13,11 @@ export const getProfile = async (): Promise<ProfileData> => {
         // 'Authorization': `Bearer ${token}`
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -41,7 +41,7 @@ export const updateProfile = async (data: ProfileData): Promise<void> => {
       },
       body: JSON.stringify(data),
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
