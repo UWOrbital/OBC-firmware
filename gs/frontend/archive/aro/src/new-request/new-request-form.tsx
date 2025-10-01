@@ -14,14 +14,14 @@ const NewRequestForm = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     try {
       const submission = {
         latitude,
         longitude,
 
       };
-      
+
       const response = await fetch('http://localhost:5000/aro-request', {
         method: 'POST',
         headers: {
@@ -39,11 +39,11 @@ const NewRequestForm = () => {
 
       const result = await response.json();
       console.log('Request submitted successfully:', result);
-      
-      alert("Request submitted successfully! You can view it in your requests list.");
-      
 
-      
+      alert("Request submitted successfully! You can view it in your requests list.");
+
+
+
     } catch (error) {
       console.error('Error submitting request:', error);
       alert("Error submitting request. Please try again.");

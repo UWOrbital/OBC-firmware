@@ -17,7 +17,7 @@ const Requests = () => {
   const [data, setData] = useState<RequestItemData[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  
+
   useEffect(() => {
     const getRequestItemsRegular = async () => {
       const response = await getRequestItems();
@@ -38,7 +38,7 @@ const Requests = () => {
   };
 
   const columnHelper = createColumnHelper<RequestItemData>();
-  
+
   const columns = useMemo(() => [
     columnHelper.accessor("id", {
       header: "ID",
@@ -60,12 +60,12 @@ const Requests = () => {
         const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
         const getStatusColor = (status: AROCommandStatus) => {
           switch (status) {
-            case 'pending': return '#ffc107'; 
-            case 'scheduled': return '#007bff'; 
-            case 'taken': return '#28a745'; 
-            case 'cancelled': return '#6c757d'; 
-            case 'failed': return '#dc3545'; 
-            case 'completed': return '#28a745'; 
+            case 'pending': return '#ffc107';
+            case 'scheduled': return '#007bff';
+            case 'taken': return '#28a745';
+            case 'cancelled': return '#6c757d';
+            case 'failed': return '#dc3545';
+            case 'completed': return '#28a745';
             default: return '#000';
           }
         };
@@ -151,7 +151,7 @@ const Requests = () => {
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th 
+                <th
                   key={header.id}
                   style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                   onClick={header.column.getToggleSortingHandler()}

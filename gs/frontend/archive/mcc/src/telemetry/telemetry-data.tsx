@@ -24,11 +24,11 @@ function TelemetryData() {
       try {
         setLoading(true);
         const response = await fetch('http://localhost:5000/telemetry');
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const telemetryData = await response.json();
         setData(telemetryData);
       } catch (error) {
@@ -41,7 +41,7 @@ function TelemetryData() {
     };
 
     fetchTelemetryData();
-    
+
 
     const interval = setInterval(fetchTelemetryData, 30000); // Future code reader: This is optional btw and can be tweaked based on what you want
     return () => clearInterval(interval);
@@ -101,13 +101,13 @@ function TelemetryData() {
           onChange={e => table.getColumn("value")?.setFilterValue(e.target.value)}
         />
       </div>
-      
+
       <Table striped bordered hover>
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <th 
+                <th
                   key={header.id}
                   style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
                   onClick={header.column.getToggleSortingHandler()}

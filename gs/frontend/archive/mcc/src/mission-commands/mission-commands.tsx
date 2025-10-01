@@ -90,11 +90,11 @@ function MissionCommands() {
         </thead>
         <tbody>
           <tr>
-            {commandResponse && 
+            {commandResponse &&
               <td>
-                {filterText ? 
-                  commandResponse.toString().includes(filterText) ? 
-                    commandResponse : "No matching output" 
+                {filterText ?
+                  commandResponse.toString().includes(filterText) ?
+                    commandResponse : "No matching output"
                   : commandResponse}
               </td>
             }
