@@ -35,7 +35,7 @@ async def create_command(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 @commands_router.delete("/{command_id}")
-async def delete_command(command_id: int) -> dict:
+async def delete_command(command_id: UUID) -> dict[str, Any]:
     """
     Delete a command by ID.
 
