@@ -7,12 +7,17 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/common/obc_gs_crc.c
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/ina230/ina230.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424/tca6424.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46/obc_i2c_io.c
 )
 
 set(TEST_MOCKS
     ${CMAKE_SOURCE_DIR}/test/mocks/mock_logging.c
     ${CMAKE_SOURCE_DIR}/test/mocks/mock_fram.c
     ${CMAKE_SOURCE_DIR}/test/mocks/mock_crc.c
+    ${CMAKE_SOURCE_DIR}/test/mocks/mock_freertos.c
+    ${CMAKE_SOURCE_DIR}/test/mocks/mock_i2c_hal.c
 )
 
 set(TEST_SOURCES
@@ -21,6 +26,7 @@ set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_image_processing.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_vn100_unpack.cpp
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_obc_persistent.cpp
+    ${CMAKE_SOURCE_DIR}/test/test_obc/unit/test_ina230.cpp
 )
 
 set(TEST_SOURCES ${TEST_SOURCES} ${TEST_DEPENDENCIES} ${TEST_MOCKS})
@@ -45,6 +51,10 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
     ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/ina230
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46
+    ${CMAKE_SOURCE_DIR}/obc/shared/hal/obc_rev1/include
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424
 )
 
 target_link_libraries(${TEST_BINARY}

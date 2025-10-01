@@ -70,3 +70,4 @@ __pycache__/
 *.coverage
 .mypy_cache/
 .ruff_cache/
+obc_venv/

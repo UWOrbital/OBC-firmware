@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #pragma once
 
 #include "obc_errors.h"
@@ -11,3 +15,9 @@ obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage);
 obc_error_code_t getINA230ShuntVoltageForDevice(uint8_t deviceIndex, float* shuntVoltage);
 void main_usage();
 obc_error_code_t disableNoAlert(ina230_device_t device);
+obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage);
+obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVoltage);
+
+#ifdef __cplusplus
+}
+#endif

@@ -3,6 +3,7 @@
 #include "tca6424.h"
 #include "obc_logging.h"
 #include <stdio.h>
+#include <assert.h>
 
 #define INA230_I2C_ADDRESS_ONE 0b1000000U
 #define INA230_I2C_ADDRESS_TWO 0b1000001U
@@ -53,6 +54,8 @@
 
 // buffer sizes
 #define INA_REG_CONF_BUFF_SIZE 2
+
+#define I2C_TRANSFER_TIMEOUT_TICKS pdMS_TO_TICKS(100) // 100 ms in RTOS ticks
 
 // ------------------  INA230 Device Configuration ------------- //
 typedef struct {
@@ -214,7 +217,7 @@ obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) 
   if (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO) return OBC_ERR_CODE_INVALID_ARG;
 
   // Read the 16-bit shunt voltage register
-  errCode = i2cReadReg(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2, 2);  // last param not sure
+  errCode = i2cReadReg(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS);  // last param not sure
   if (errCode != OBC_ERR_CODE_SUCCESS) return errCode;
 
   // Combine the two bytes into a 16-bit value
@@ -276,7 +279,38 @@ obc_error_code_t disableNoAlert(ina230_device_t device) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
+// Notes (delete later)
+// Bus voltage register: 
+  // Address: 0x02
+  // Size: 16 bits (2 bytes)
+  // Each bit on the register represents 1.25 mV
+
+/**
+ * @brief Gets the bus voltage
+ * 
+ * @param i2cAddress The I2C address of the INA230 device
+ * @return OBC_ERR_CODE_SUCCESS if write is successful,
+ *         otherwise return an appropriate error code
+ */
 // function to get bus voltage
+obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage) {
+  if (busVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
+  if (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO) return OBC_ERR_CODE_INVALID_ARG;
+
+  obc_error_code_t errCode;
+  uint8_t busVoltageRaw[2] = {};
+  RETURN_IF_ERROR_CODE(i2cReadReg(i2cAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR, busVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
+  int16_t busVoltageValue = (busVoltageRaw[0] << 8) | busVoltageRaw[1];
+  *busVoltage = busVoltageValue * 0.00125f;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVoltage) {
+  if (busVoltage == NULL || deviceIndex >= INA230_DEVICE_COUNT) return OBC_ERR_CODE_INVALID_ARG;
+  uint8_t i2cAddress = ina230Devices[deviceIndex].i2cDeviceAddress;
+  return getINA230BusVoltage(i2cAddress, busVoltage);
+}
 
 // function to get power
 
