@@ -11,7 +11,7 @@
 #include <os_task.h>
 #include <os_timer.h>
 #include <sys_common.h>
-#include <os_queue.h>
+#include <stdint.h>
 
 #define LOCAL_TIME_SYNC_PERIOD_S 60UL
 
@@ -20,7 +20,7 @@
 
 QueueHandle_t rtcTempQueueHandle = NULL;
 static StaticQueue_t rtcTempQueue;
-static uint32_t rtcTempQueueStack[RTC_TEMP_QUEUE_LENGTH];
+static uint8_t rtcTempQueueStack[RTC_TEMP_QUEUE_LENGTH * RTC_TEMP_QUEUE_ITEM_SIZE];
 
 void obcTaskInitTimekeeper(void) {
   ASSERT((rtcTempQueueStack != NULL) && (&rtcTempQueue != NULL));
@@ -30,8 +30,11 @@ void obcTaskInitTimekeeper(void) {
   }
 }
 
-obc_error_code_t postRtcTempQueue(uint32_t value) {
-  if (xQueueOverwrite(rtcTempQueueHandle, &value) != pdPASS) {
+obc_error_code_t postRtcTempQueue() {
+  obc_error_code_t errCode;
+  float temp;
+  RETURN_IF_ERROR_CODE(getTemperatureRTC(&temp));
+  if (xQueueOverwrite(rtcTempQueueHandle, &temp) != pdPASS) {
     return OBC_ERR_CODE_UNKNOWN;
   }
   return OBC_ERR_CODE_INVALID_STATE;

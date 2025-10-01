@@ -15,6 +15,7 @@
 
 static obc_error_code_t collectThermalData(void);
 static obc_error_code_t readCC1120Temp(float* temp);
+static obc_error_code_t readRTCTemp(float* data);
 
 void obcTaskInitThermalMgr(void) {}
 
