@@ -1,26 +1,25 @@
-import { Routes } from "react-router-dom";
-import Nav from "./components/Nav";
-import Background from "./components/Background";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ARORequests from "./aro-requests/aro-requests.tsx";
+import Header from "./common/header.tsx";
+import Logs from "./common/logs.tsx";
+import NotFound from "./common/not-found.tsx";
+import Dashboard from "./dashboard/dashboard.tsx";
+import MissionCommands from "./mission-commands/mission-commands.tsx";
+import TelemetryData from "./telemetry/telemetry-data.tsx";
 
-/**
- * @brief App component displaying the main application
- * @return tsx element of App component
- */
 function App() {
   return (
-    <>
-      <Nav />
-      <Background />
+    <BrowserRouter>
+      <Header />
       <Routes>
-        {/* uncomment these routes as the pages are created */}
-        {/* <Route path="*" element={<Dashboard />} />
+        <Route path="*" element={<NotFound />} />
         <Route path="/" element={<Dashboard />} />
-        <Route path="/commands" element={<Commands />} />
-        <Route path="/aro-admin" element={<AROAdmin />} />
-        <Route path="/live-sessions" element={<LiveSessions />} />
-        <Route path="/login" element={<Login />} /> */}
+        <Route path="/mission-commands" element={<MissionCommands />} />
+        <Route path="/telemetry-data" element={<TelemetryData />} />
+        <Route path="/aro-requests" element={<ARORequests />} />
       </Routes>
-    </>
+      <Logs />
+    </BrowserRouter>
   );
 }
 
