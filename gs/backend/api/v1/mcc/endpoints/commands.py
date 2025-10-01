@@ -1,3 +1,6 @@
+from typing import Any
+from uuid import UUID
+
 from fastapi import APIRouter, HTTPException
 
 from gs.backend.data.data_wrappers.mcc_wrappers.commands_wrapper import (
@@ -10,7 +13,7 @@ commands_router = APIRouter(tags=["MCC", "Commands"])
 
 
 @commands_router.post("/")
-async def create_command(payload: dict) -> dict:
+async def create_command(payload: dict[str, Any]) -> dict[str, Any]:
     """
     Create a new command.
 
@@ -25,10 +28,10 @@ async def create_command(payload: dict) -> dict:
     """
     commands = get_all_commands()
 
-    if payload in commands:
+    if any(cmd == payload for cmd in commands):
         raise HTTPException(status_code=400, detail="Invalid command payload")
 
-    return create_commands(payload)
+    return create_commands(payload).model_dump()
 
 
 @commands_router.delete("/{command_id}")
@@ -46,10 +49,10 @@ async def delete_command(command_id: int) -> dict:
         FileNotFoundError: If no command exists with the given ID.
     """
     commands = get_all_commands()
-    command_to_delete = next((cmd for cmd in commands if cmd["id"] == command_id), None)
+    command_to_delete = next((cmd for cmd in commands if cmd.id == command_id), None)
 
     if not command_to_delete:
         raise FileNotFoundError(f"Command with id {command_id} not found")
 
-    delete_commands_by_id(command_id)
+    delete_commands_by_id(UUID(str(command_id)))
     return {"message": f"Command with id {command_id} deleted successfully"}
