@@ -8,12 +8,13 @@ from gs.backend.data.data_wrappers.mcc_wrappers.commands_wrapper import (
     delete_commands_by_id,
     get_all_commands,
 )
+from gs.backend.data.tables.transactional_tables import Commands
 
 commands_router = APIRouter(tags=["MCC", "Commands"])
 
 
 @commands_router.post("/")
-async def create_command(payload: dict[str, Any]) -> dict[str, Any]:
+async def create_command(payload: dict[str, Any]) -> Commands:
     """
     Create a new command.
 
@@ -31,7 +32,7 @@ async def create_command(payload: dict[str, Any]) -> dict[str, Any]:
     if any(cmd.model_dump() == payload for cmd in commands):
         raise HTTPException(status_code=400, detail="Invalid command payload")
 
-    return create_commands(payload).model_dump()
+    return create_commands(payload)
 
 
 @commands_router.delete("/{command_id}")
