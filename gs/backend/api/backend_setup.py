@@ -1,4 +1,7 @@
+import logging
+
 from fastapi import FastAPI
+from loguru import logger
 
 from gs.backend.api.middleware.auth_middleware import AuthMiddleware
 from gs.backend.api.middleware.cors_middleware import add_cors_middleware
@@ -33,3 +36,18 @@ def setup_middlewares(app: FastAPI) -> None:
     add_cors_middleware(app)  # Cors middleware should be added first
     app.add_middleware(AuthMiddleware)
     app.add_middleware(LoggerMiddleware, excluded_endpoints=[])
+
+
+def setup_logging() -> None:
+    """Sets all logs from SQLAlchemy to the custom logger level VERBOSE"""
+    verbose_level = 15  # DEBUG=10, INFO=20
+    logger.level("VERBOSE", no=verbose_level, color="<blue>")
+
+    class SQLAlchemyHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            logger.log("VERBOSE", record.getMessage())
+
+    sqlalchemy_logger = logging.getLogger("sqlalchemy.engine")
+    sqlalchemy_logger.setLevel(logging.INFO)
+    sqlalchemy_logger.addHandler(SQLAlchemyHandler())
+    sqlalchemy_logger.propagate = False
