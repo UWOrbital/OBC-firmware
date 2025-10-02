@@ -28,7 +28,7 @@ async def create_command(payload: dict[str, Any]) -> dict[str, Any]:
     """
     commands = get_all_commands()
 
-    if any(cmd == payload for cmd in commands):
+    if any(cmd.model_dump() == payload for cmd in commands):
         raise HTTPException(status_code=400, detail="Invalid command payload")
 
     return create_commands(payload).model_dump()
