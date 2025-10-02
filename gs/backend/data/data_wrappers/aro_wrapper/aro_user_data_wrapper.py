@@ -45,6 +45,39 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
         return user
 
 
+# updates user into database of type AROUser then fetches the user from database
+def update_user_by_id(
+    userid: UUID, call_sign: str, email: str, f_name: str, l_name: str, phone_number: str
+) -> AROUsers:
+    """
+    Update an existing user in the AROUser table in database
+
+    :param userid: the unique identifier of the user to be updated
+    :param call_sign: a 6 character string such as ABCDEF
+    :param email: unique email which is bound to the user
+    :param f_name: first name of user
+    :param l_name: last name of user
+    :param phone_numer: phone number of user
+    """
+    with get_db_session() as session:
+        # check if the user already exists with email as it is unique
+        user = session.exec(select(AROUsers).where(AROUsers.id == userid)).first()
+
+        if not user:
+            raise ValueError("User does not exist based on user ID")
+
+        user.call_sign = call_sign
+        user.email = email
+        user.first_name = f_name
+        user.last_name = l_name
+        user.phone_number = phone_number
+
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+
+
 # deletes the user with given id and returns the remaining users
 def delete_user_by_id(userid: UUID) -> list[AROUsers]:
     """
