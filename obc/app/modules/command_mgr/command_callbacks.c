@@ -116,18 +116,45 @@ static obc_error_code_t I2CProbeCmdCallback(cmd_msg_t *cmd, uint8_t *responseDat
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t cmdArmCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+static obc_error_code_t armCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+  // Parsing the cmdArm data into bytes
+  responseData[0] = cmd->cmdArm.cmdArm;
+  responseData[1] = cmd->cmdArm.cmdArm >> 8;
+  responseData[2] = cmd->cmdArm.cmdArm >> 16;
+  responseData[3] = cmd->cmdArm.cmdArm >> 24;
+
+  // Parsing the armId data into bytes
+  responseData[4] = cmd->cmdArm.armId;
+  responseData[5] = cmd->cmdArm.armId >> 8;
+  responseData[6] = cmd->cmdArm.armId >> 16;
+  responseData[7] = cmd->cmdArm.armId >> 24;
+
+  *responseDataLen = 8;
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t cmdExecuteCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+static obc_error_code_t executeCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
+
+  // Parsing the cmdExecute data into bytes
+  responseData[0] = cmd->cmdExecute.cmdExecute;
+  responseData[1] = cmd->cmdExecute.cmdExecute >> 8;
+  responseData[2] = cmd->cmdExecute.cmdExecute >> 16;
+  responseData[3] = cmd->cmdExecute.cmdExecute >> 24;
+
+  // Parsing the execId data into bytes
+  responseData[4] = cmd->cmdExecute.execId;
+  responseData[5] = cmd->cmdExecute.execId >> 8;
+  responseData[6] = cmd->cmdExecute.execId >> 16;
+  responseData[7] = cmd->cmdExecute.execId >> 24;
+
+  *responseDataLen = 8;
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -142,8 +169,8 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_I2C_PROBE] = {I2CProbeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_ARM] = {cmdArmCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_EXECUTE] = {cmdExecuteCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_ARM] = {armCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_EXECUTE] = {executeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
 };
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the
