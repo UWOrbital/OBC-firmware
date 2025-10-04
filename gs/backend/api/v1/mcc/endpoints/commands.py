@@ -29,7 +29,8 @@ async def create_command(payload: dict[str, Any]) -> Commands:
     """
     commands = get_all_commands()
 
-    if any(cmd.model_dump() == payload for cmd in commands):
+    # Check for duplicate commands by comparing business fields (excluding auto-generated id)
+    if any({k: v for k, v in cmd.model_dump().items() if k != "id"} == payload for cmd in commands):
         raise HTTPException(status_code=400, detail="Invalid command payload")
 
     return create_commands(payload)
