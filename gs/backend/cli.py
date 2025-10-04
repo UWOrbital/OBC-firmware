@@ -5,11 +5,15 @@ from textual.reactive import reactive
 
 class CliPanel(Static):
     def compose(self) -> ComposeResult:
-        yield Input("CLI")
+        yield Input(placeholder="Enter command here:")
 
 class CmdButton(HorizontalGroup):
+    def __init__(self, cmdname):
+        super().__init__()
+        self.cmdname = cmdname
+    
     def compose(self) -> ComposeResult:
-        yield Label("cmd_test1", id="button-label")
+        yield Label(f"{self.cmdname}", id="button-label")
         yield Button("Run")
 
 class LogsPanel(Static):
@@ -36,7 +40,7 @@ class CLIWindow(App):
         yield ScrollableContainer(LogsPanel("LOGS"), can_focus=True, id="logs")
         yield CliPanel("CLI", id="cli")
         # yield Input(compact=True)
-        yield VerticalScroll(Static("CMDS"), CmdButton(), CmdButton(), CmdButton(), id="cmd-panel")
+        yield VerticalScroll(Static("CMDS"), CmdButton("print_logs"), CmdButton("send_conn_request"), CmdButton("start_logging"), id="cmd-panel")
         yield Static("MISC", id="misc2")
 
 

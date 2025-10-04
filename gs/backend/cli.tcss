@@ -45,6 +45,7 @@ Input {
     background: $panel;   
     height: 1fr;
     padding-left: 1;
+    margin-right: 1;
     border: dodgerblue;
 }
 
