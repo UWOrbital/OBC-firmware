@@ -428,8 +428,8 @@ def create_cmd_arm(cmd_arm: c_uint, cmd_arm_id: c_uint32, unixtime_of_execution:
     """
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_ARM
-    cmd_msg.cmdArm.cmd_arm = c_uint(cmd_arm)
-    cmd_msg.cmdArm.cmd_arm_id = c_uint32(cmd_arm_id)
+    cmd_msg.cmdArm.cmd_arm = c_uint(cmd_arm.value)
+    cmd_msg.cmdArm.cmd_arm_id = c_uint32(cmd_arm_id.value)
     return cmd_msg
 
 
