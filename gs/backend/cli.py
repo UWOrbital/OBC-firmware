@@ -1,3 +1,4 @@
+from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import ScrollableContainer, VerticalScroll, HorizontalGroup
 from textual.widgets import Static, Input, Button, Label
@@ -9,27 +10,44 @@ from gs.backend.ground_station_cli import GroundStationShell
 COM_PORT = argv[1]
 
 class CliPanel(Static):
+    cli_output = reactive("")
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         shell = GroundStationShell(COM_PORT)
 
         #  buf creates a StringIO instance, which will store what is printed from the cli through a redirection of stdout (default is console)
-        buffer = io.StringIO()
+        self.buffer = io.StringIO()
 
         #  redirects the output stream (sys.stdout) to buf, meaning that anything printed will now be written to buf
-        sys.stdout = buffer
+        sys.stdout = self.buffer
 
         if shell.intro is not None:
             print(shell.intro)
         print(shell.prompt, end="")
 
         # buffer.getvalue() returns the contents of the string buffer as a str
-        self.intro_text = buffer.getvalue()
+        self.cli_output = self.buffer.getvalue()
+    
+    def on_mount(self) -> None:
+        self.output_refresh = self.set_interval(1 / 600, self.update_cli)
+    
+    def watch_cli_output(self, cli_output: str): 
+         self.update("CLI\n" + self.cli_output)
+
+    def update_cli(self) -> None:
+        self.cli_output = self.buffer.getvalue()
+
+    @on(Input.Submitted)
+    def submit_command(self) -> None:
+        cli_input = self.query_one(Input)
+
+        print(cli_input.value)
+        self.query_one(Input).value = ""
 
     def compose(self) -> ComposeResult:
-        self.update("CLI\n" + self.intro_text)
         yield Input(placeholder="Enter command here:")
-
+        
 
 class CmdButton(HorizontalGroup):
     def __init__(self, cmdname):
@@ -53,7 +71,6 @@ class LogsPanel(Static):
                 self.logs = logs.read()
         except FileNotFoundError:
             print("File unable to be found")
-        print(self.logs)
 
     def watch_logs(self, logs: str):
         self.update("LOGS\n\n" + self.logs)
