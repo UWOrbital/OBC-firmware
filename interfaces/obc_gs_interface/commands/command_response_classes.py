@@ -114,8 +114,8 @@ class CmdArmRes(CmdRes):
         Overriding the str method for a better representation of what's happening
         """
         formatted_string = super().__str__()
-        formatted_string += f"cmd_arm: {self.cmd_arm}\n"
-        formatted_string += f"cmd_arm_id: {self.cmd_arm_id}\n"
+        formatted_string += "Cmd Arm: " + str(self.cmd_arm) + "\n"
+        formatted_string += "Cmd Arm Id:" + str(self.cmd_arm_id) + "\n"
         return formatted_string
 
 
@@ -133,8 +133,8 @@ class CmdExecuteRes(CmdRes):
         Overriding the str method for a better representation of what's happening
         """
         formatted_string = super().__str__()
-        formatted_string += f"cmd_execute: {self.cmd_execute}\n"
-        formatted_string += f"cmd_exec_id: {self.cmd_exec_id}\n"
+        formatted_string += "Cmd Execute: " + str(self.cmd_execute) + "\n"
+        formatted_string += "Cmd Execute Id:" + str(self.cmd_exec_id) + "\n"
         return formatted_string
 
 
