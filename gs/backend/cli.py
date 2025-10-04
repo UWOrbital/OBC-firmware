@@ -3,6 +3,10 @@ from textual.containers import ScrollableContainer, VerticalScroll, HorizontalGr
 from textual.widgets import Static, Input, Button, Label
 from textual.reactive import reactive
 
+class CliPanel(Static):
+    def compose(self) -> ComposeResult:
+        yield Input("CLI")
+
 class CmdButton(HorizontalGroup):
     def compose(self) -> ComposeResult:
         yield Label("cmd_test1", id="button-label")
@@ -30,9 +34,9 @@ class CLIWindow(App):
 
     def compose(self) -> ComposeResult:
         yield ScrollableContainer(LogsPanel("LOGS"), can_focus=True, id="logs")
-        yield Static("CLI", id="cli")
-        yield Input(compact=True)
-        yield VerticalScroll(CmdButton(), CmdButton(), CmdButton(), id="cmd-panel")
+        yield CliPanel("CLI", id="cli")
+        # yield Input(compact=True)
+        yield VerticalScroll(Static("CMDS"), CmdButton(), CmdButton(), CmdButton(), id="cmd-panel")
         yield Static("MISC", id="misc2")
 
 
