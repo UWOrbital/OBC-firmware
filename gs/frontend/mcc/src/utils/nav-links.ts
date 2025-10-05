@@ -14,14 +14,14 @@ export const NAVIGATION_LINKS: NavLink[] = [
   },
   {
     text: "Commands",
-    url: "/mission-commands",
+    url: "/commands",
   },
   {
     text: "ARO Admin",
-    url: "/telemetry-data",
+    url: "/aro-admin",
   },
   {
     text: "Live Sessions",
-    url: "/aro-requests",
+    url: "/live-sessions",
   },
 ];

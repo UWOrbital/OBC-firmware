@@ -3,21 +3,34 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* default styling for entire webpage */
 @layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  *:focus {
+    outline: 2px solid rgba(var(--ring-rgb, 112, 112, 112), 0.5);
+    outline-offset: 2px;
+  }
+
   body {
     overflow: hidden;
     display: flex;
-    background-color: var(--color-background);
+    background-color: var(--background);
     font-family: var(--font-default);
+    color: var(--foreground);
   }
 
   #root {
     height: 100%;
     width: 100%;
+    margin: 10px;
     overflow: hidden;
   }
 }
 
+/* Defined Tailwind theme variables based on CSS custom properties */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -56,6 +69,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* CSS custom properties for light and dark themes */
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -89,12 +103,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --font-default: "Jaldi", sans-serif;
+  --font-weight-default: 400;
+  --font-weight-bold: 700;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: #040910; /* original: oklch(0.085 0 0) */
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: rgba(255, 255, 255, 0.1); /* original: oklch(0.205 0 0) */
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -123,13 +140,4 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }
