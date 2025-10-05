@@ -4,6 +4,8 @@ import App from "./App.tsx";
 import "./index.css"; // default styles are applied here
 import { BrowserRouter } from "react-router-dom";
 import { CSS_VARIABLES } from "./utils/themes.ts";
+import store from './store/store.ts'
+import { Provider } from 'react-redux'
 
 // Inject CSS variables from themes.ts into the document root
 Object.entries(CSS_VARIABLES).forEach(([property, value]) => {
@@ -16,8 +18,10 @@ Object.entries(CSS_VARIABLES).forEach(([property, value]) => {
  */
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
