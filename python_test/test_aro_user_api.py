@@ -35,7 +35,9 @@ def user2_data():
 # Test creating user1
 @pytest.fixture
 def test_user1_creation(client, user1_data):
-    response = client.post("/api/v1/aro/user/", json=user1_data, headers={"Content-Type": "application/json"})
+    response = client.post(
+        "/api/v1/aro/user/create_user", json=user1_data, headers={"Content-Type": "application/json"}
+    )
 
     assert response.status_code == 200
     user = response.json()["data"]
@@ -51,7 +53,9 @@ def test_user1_creation(client, user1_data):
 # Test creating user2
 @pytest.fixture
 def test_user2_creation(client, user2_data):
-    response = client.post("/api/v1/aro/user/", json=user2_data, headers={"Content-Type": "application/json"})
+    response = client.post(
+        "/api/v1/aro/user/create_user", json=user2_data, headers={"Content-Type": "application/json"}
+    )
 
     assert response.status_code == 200
     user = response.json()["data"]
@@ -75,7 +79,9 @@ def test_user1_update(client, test_user1_creation):
         "last_name": "Smith",
         "phone_number": "234567890",
     }
-    res = client.put(f"/api/v1/aro/user/{user_id}", json=update_data, headers={"Content-Type": "application/json"})
+    res = client.put(
+        f"/api/v1/aro/user/update_user/{user_id}", json=update_data, headers={"Content-Type": "application/json"}
+    )
 
     assert res.status_code == 200
     updated_user = res.json()["data"]
@@ -91,7 +97,7 @@ def test_user1_update(client, test_user1_creation):
 # Test getting all users (after creating user1 and user2, and updating user1 to ensure creation and update work oncorrect user objects)
 @pytest.fixture
 def test_get_users(client, test_user1_update, test_user2_creation):
-    res = client.get("/api/v1/aro/user/")
+    res = client.get("/api/v1/aro/user/get_all_users")
 
     assert res.status_code == 200
     all_users = res.json()["data"]
@@ -119,7 +125,7 @@ def test_get_users(client, test_user1_update, test_user2_creation):
 # Test deleting user1 (after test_get_users to ensure both users exist)
 def test_user1_deletion(client, test_user1_update, test_user2_creation, test_get_users):
     user_id = test_user1_update["id"]
-    res = client.delete(f"/api/v1/aro/user/{user_id}", headers={"Content-Type": "application/json"})
+    res = client.delete(f"/api/v1/aro/user/delete_user/{user_id}", headers={"Content-Type": "application/json"})
 
     assert res.status_code == 200
     all_users = res.json()["data"]
