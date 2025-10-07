@@ -51,6 +51,7 @@ class MainCommand(BaseSQLModel, table=True):
             self.format is None
             and self.params is None
             or (
+                # TODO: Check if the params have valid types
                 self.params is not None and self.format is not None and self.params.count(",") == self.format.count(",")
             )
         ):
