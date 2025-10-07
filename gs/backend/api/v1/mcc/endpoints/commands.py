@@ -18,14 +18,8 @@ async def create_command(payload: dict[str, Any]) -> Commands:
     """
     Create a new command.
 
-    Args:
-        payload: Dictionary containing command data.
-
-    Returns:
-        dict: The created command object.
-
-    Raises:
-        HTTPException: If the command payload already exists (400).
+    :param payload: The data used to create a command
+    :return: returns the created command object
     """
     commands = get_all_commands()
 
@@ -41,14 +35,8 @@ async def delete_command(command_id: UUID) -> dict[str, Any]:
     """
     Delete a command by ID.
 
-    Args:
-        command_id: The unique identifier of the command to delete.
-
-    Returns:
-        dict: Success message confirming deletion.
-
-    Raises:
-        FileNotFoundError: If no command exists with the given ID.
+    :param command_id: The id which is to be deleted.
+    :return: returns a dict giving confirmation that command with id of command_id has been deleted.
     """
     commands = get_all_commands()
     command_to_delete = next((cmd for cmd in commands if cmd.id == command_id), None)
