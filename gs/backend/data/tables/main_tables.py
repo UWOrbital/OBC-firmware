@@ -1,14 +1,12 @@
 from typing import Final, TypeAlias
 
 from sqlalchemy import Integer
-from sqlalchemy.schema import MetaData
 from sqlmodel import Field
 
 from gs.backend.data.tables.base_model import BaseSQLModel
 
 # Schema information
 MAIN_SCHEMA_NAME: Final[str] = "main"
-MAIN_SCHEMA_METADATA: Final[MetaData] = MetaData(MAIN_SCHEMA_NAME)
 
 # Table names in database
 MAIN_COMMAND_TABLE_NAME: Final[str] = "commands"
@@ -35,8 +33,8 @@ class MainCommand(BaseSQLModel, table=True):
     total_size: int = Field(gt=0)
 
     # table information
-    metadata = MAIN_SCHEMA_METADATA
     __tablename__ = MAIN_COMMAND_TABLE_NAME
+    __table_args__ = {"schema": MAIN_SCHEMA_NAME}
 
 
 class MainTelemetry(BaseSQLModel, table=True):
@@ -54,5 +52,5 @@ class MainTelemetry(BaseSQLModel, table=True):
     total_size: int = Field(gt=0)
 
     # table information
-    metadata = MAIN_SCHEMA_METADATA
     __tablename__ = MAIN_TELEMETRY_TABLE_NAME
+    __table_args__ = {"schema": MAIN_SCHEMA_NAME}

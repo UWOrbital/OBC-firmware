@@ -1,7 +1,7 @@
 import pytest
 from gs.backend.data.data_wrappers.mcc_wrappers import main_command_wrapper as wrapper
 from gs.backend.data.database import engine as prod_engine
-from gs.backend.data.tables.main_tables import MAIN_SCHEMA_METADATA, MainCommand
+from gs.backend.data.tables.main_tables import MainCommand
 from sqlmodel import Session, SQLModel, create_engine
 
 
