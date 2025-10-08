@@ -1,5 +1,5 @@
 #include "ina230.h"
-#include "obc_i2c_io.h"
+#include "obc_i2c_io.h" 
 #include "tca6424.h"
 #include "obc_logging.h"
 #include <stdio.h>
@@ -9,7 +9,7 @@
 #define INA230_I2C_ADDRESS_TWO 0b1000001U
 
 // ------------------  TCA6424 IC Related Pins ------------- //
-
+    
 // enable pins for device one
 #define INA230_ONE_ENABLE_PIN TCA6424A_PIN_03
 #define INA230_TWO_ENABLE_PIN TCA6424A_PIN_01

@@ -9,7 +9,7 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/ina230/ina230.c
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424/tca6424.c
-    ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46/obc_i2c_io.c
+    # ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46/obc_i2c_io.c
 )
 
 set(TEST_MOCKS
