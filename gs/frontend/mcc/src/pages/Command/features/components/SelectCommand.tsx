@@ -1,32 +1,41 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-
 import { mockCommandsList } from "../../../../utils/mock-data.ts" // temporary commands list
 import type { Command } from "../../../../utils/models.ts"
 import { selectCommand, setCommand } from "../selectCommandSlice.ts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks.ts";
+
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function SelectCommand() {
   const dispatch = useAppDispatch();
   const selectedCommand = useAppSelector(selectCommand);
 
   return (
-    // change select command to be a small round button at the left bottom corner
-    <Select value={selectedCommand} onValueChange={(value) => dispatch(setCommand(value))}>
-        <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select Command" />
-        </SelectTrigger>
-        <SelectContent>
-            {mockCommandsList.map((command: Command) => (
-                <SelectItem key={command.id} value={command.name}>{command.name}</SelectItem>
-            ))}
-        </SelectContent>
-    </Select>
+     <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Open</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Commands</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {mockCommandsList.map((command: Command) => (
+          <DropdownMenuCheckboxItem
+            key={command.id}
+            checked={selectedCommand === command.name}
+            onCheckedChange={() => dispatch(setCommand(command.name))}
+          >
+            {command.name}
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
