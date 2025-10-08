@@ -54,6 +54,24 @@ class SetProgrammingSessionCmdData(Structure):
     _fields_ = [("programmingSession", c_uint)]
 
 
+class CmdArmCmdData(Structure):
+    """
+    The python equivalent class for the cmd_arm_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("cmdArm", c_uint)]
+    _fields_ = [("armId", c_uint)]
+
+
+class CmdExecuteCmdData(Structure):
+    """
+    The python equivalent class for the cmd_execute_cmd_data_t structure in the C implementation
+    """
+
+    _fields_ = [("cmdExecute", c_uint)]
+    _fields_ = [("execId", c_uint)]
+
+
 # NOTE: When adding commands only add their data to the following union type as shown with RtcSyncCmdData and
 # DownlinkLogsNextPassCmdData
 class _U(Union):
@@ -66,6 +84,8 @@ class _U(Union):
         ("downlinkLogsNextPass", DownlinkLogsNextPassCmdData),
         ("downloadData", DownloadDataCmdData),
         ("setProgrammingSession", SetProgrammingSessionCmdData),
+        ("cmdArm", CmdArmCmdData),
+        ("cmdExecute", CmdExecuteCmdData),
     ]
 
 
@@ -159,7 +179,9 @@ class CmdCallbackId(IntEnum):
     CMD_DOWNLOAD_DATA = 10
     CMD_VERIFY_CRC = 11
     CMD_I2C_PROBE = 12
-    NUM_CMD_CALLBACKS = 13
+    CMD_ARM = 13
+    CMD_EXECUTE = 14
+    NUM_CMD_CALLBACKS = 15
 
 
 # Path to File: interfaces/obc_gs_interface/commands/obc_gs_commands_response.h
@@ -390,6 +412,43 @@ def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_I2C_PROBE
+    return cmd_msg
+
+
+def create_cmd_arm(cmd_arm_data: c_uint, cmd_arm_id_data: c_uint32, unixtime_of_execution: int | None = None) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_ARM
+
+    :param cmdArm: The ARM command callback struct ID
+    :param armId: The ID value associated to an arm command sent by an operator
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_ARM
+    """
+    cmd_msg = CmdMsg(unixtime_of_execution)
+    cmd_msg.id = CmdCallbackId.CMD_ARM
+    cmd_msg.cmdArm.cmd_arm_data = c_uint(cmd_arm_data.value)
+    cmd_msg.cmdArm.cmd_arm_id_data = c_uint32(cmd_arm_id_data.value)
+    return cmd_msg
+
+
+def create_cmd_execute(
+    cmd_execute_data: c_uint, cmd_exec_id_data: c_uint32, unixtime_of_execution: int | None = None
+) -> CmdMsg:
+    """
+    Function to create a CmdMsg structure for CMD_EXECUTE
+    :param cmdExecute: The EXECUTE command callback struct ID
+    :param execId: The ID value associated to an execute command sent by an operator
+    :param unixtime_of_execution: A time of when to execute a certain event,
+                                  by default, it is set to None (i.e. a specific
+                                  time is not needed)
+    :return: CmdMsg structure for CMD_EXECUTE
+    """
+    cmd_msg = CmdMsg(unixtime_of_execution)
+    cmd_msg.id = CmdCallbackId.CMD_EXECUTE
+    cmd_msg.cmdExecute.cmd_execute_data = c_uint(cmd_execute_data.value)
+    cmd_msg.execId.cmd_exec_id_data = c_uint32(cmd_exec_id_data.value)
     return cmd_msg
 
 
