@@ -12,11 +12,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
-<<<<<<< HEAD
-=======
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.8",
->>>>>>> 8d29b2b2 (feat: Add @tanstack/react-table dependency and implement table filtering/sorting)
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2",
@@ -38,11 +35,7 @@
     "jsdom": "^27.0.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-<<<<<<< HEAD
     "vite": "^7.1.2",
     "vitest": "^3.2.4"
-=======
-    "vite": "^7.1.5"
->>>>>>> 8d29b2b2 (feat: Add @tanstack/react-table dependency and implement table filtering/sorting)
   }
 }
