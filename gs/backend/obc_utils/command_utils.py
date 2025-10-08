@@ -224,6 +224,56 @@ def parse_cmd_downlink_logs_next_pass() -> ArgumentParser:
     return parser
 
 
+def parse_cmd_arm() -> ArgumentParser:
+    """
+    A function to parse the arguments for the arm command
+    """
+    parent_parser = arg_parse()
+    parser = ArgumentParser(parents=[parent_parser], add_help=False, exit_on_error=False)
+    parser.add_argument(
+        "-ad",
+        "--arm_data",
+        required=True,
+        dest="arg1",
+        type=int,
+        help="The arm data for the arm command",
+    )
+    parser.add_argument(
+        "-aid",
+        "--arm_id_data",
+        required=True,
+        dest="arg2",
+        type=int,
+        help="The arm id data for the arm command",
+    )
+    return parser
+
+
+def parse_cmd_execute() -> ArgumentParser:
+    """
+    A function to parse the arguments for the execute command
+    """
+    parent_parser = arg_parse()
+    parser = ArgumentParser(parents=[parent_parser], add_help=False, exit_on_error=False)
+    parser.add_argument(
+        "-ed",
+        "--execute_data",
+        required=True,
+        dest="arg1",
+        type=int,
+        help="The execute data for the execute command",
+    )
+    parser.add_argument(
+        "-eid",
+        "--execute_id_data",
+        required=True,
+        dest="arg2",
+        type=int,
+        help="The execute id data for the execute command",
+    )
+    return parser
+
+
 # End of specific command parsers
 
 
