@@ -1,6 +1,9 @@
 {
   "dependencies": {
-    "@tanstack/react-table": "^8.21.3",
+<<<<<<< HEAD
     "react-router-dom": "^7.9.2"
+=======
+    "@tanstack/react-table": "^8.21.3"
+>>>>>>> 8d29b2b2 (feat: Add @tanstack/react-table dependency and implement table filtering/sorting)
   }
 }
