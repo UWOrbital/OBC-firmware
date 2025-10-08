@@ -164,12 +164,12 @@ static void packI2CProbeCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg
 
 // CMD_ARM
 static void packCmdArmCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
-  packUint32(cmdMsg->cmdArm.cmdArm, buffer, offset);
-  packUint32(cmdMsg->cmdArm.armId, buffer, offset);
+  packUint32(cmdMsg->cmdArm.cmdArmData, buffer, offset);
+  packUint32(cmdMsg->cmdArm.armIdData, buffer, offset);
 }
 
 // CMD_EXECUTE
 static void packCmdExecuteCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
-  packUint32(cmdMsg->cmdExecute.cmdExecute, buffer, offset);
-  packUint32(cmdMsg->cmdExecute.execId, buffer, offset);
+  packUint32(cmdMsg->cmdExecute.cmdExecuteData, buffer, offset);
+  packUint32(cmdMsg->cmdExecute.execIdData, buffer, offset);
 }

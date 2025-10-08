@@ -120,17 +120,43 @@ static obc_error_code_t armCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, ui
   if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  // Parsing the cmdArm data into bytes
-  responseData[0] = cmd->cmdArm.cmdArm;
-  responseData[1] = cmd->cmdArm.cmdArm >> 8;
-  responseData[2] = cmd->cmdArm.cmdArm >> 16;
-  responseData[3] = cmd->cmdArm.cmdArm >> 24;
+  // Parsing the cmdArm data into bytes (Little Endian)
+  uint8_t b0 = cmd->cmdArm.cmdArmData <<= 24;
+  b0 >>= 24;
+
+  uint8_t b1 = cmd->cmdArm.cmdArmData <<= 16;
+  b1 >>= 24;
+
+  uint8_t b2 = cmd->cmdArm.cmdArmData <<= 8;
+  b2 >>= 24;
+
+  uint8_t b3 = cmd->cmdArm.cmdArmData;
+  b3 >>= 24;
+
+  // Set the first four bytes to the command data
+  responseData[0] = b0;
+  responseData[1] = b1;
+  responseData[2] = b2;
+  responseData[3] = b3;
+
+  // Parse the armId data into bytes (Little Endian)
+  b0 = cmd->cmdArm.armIdData <<= 24;
+  b0 >>= 24;
+
+  b1 = cmd->cmdArm.armIdData <<= 16;
+  b1 >>= 24;
+
+  b2 = cmd->cmdArm.armIdData <<= 8;
+  b2 >>= 24;
+
+  b3 = cmd->cmdArm.armIdData;
+  b3 >>= 24;
 
   // Parsing the armId data into bytes
-  responseData[4] = cmd->cmdArm.armId;
-  responseData[5] = cmd->cmdArm.armId >> 8;
-  responseData[6] = cmd->cmdArm.armId >> 16;
-  responseData[7] = cmd->cmdArm.armId >> 24;
+  responseData[4] = b0;
+  responseData[5] = b1;
+  responseData[6] = b2;
+  responseData[7] = b3;
 
   *responseDataLen = 8;
 
@@ -142,17 +168,42 @@ static obc_error_code_t executeCmdCallback(cmd_msg_t *cmd, uint8_t *responseData
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  // Parsing the cmdExecute data into bytes
-  responseData[0] = cmd->cmdExecute.cmdExecute;
-  responseData[1] = cmd->cmdExecute.cmdExecute >> 8;
-  responseData[2] = cmd->cmdExecute.cmdExecute >> 16;
-  responseData[3] = cmd->cmdExecute.cmdExecute >> 24;
+  // Parsing the cmdExecute data into bytes (Little Endian)
+  uint8_t b0 = cmd->cmdExecute.cmdExecuteData <<= 24;
+  b0 >>= 24;
 
-  // Parsing the execId data into bytes
-  responseData[4] = cmd->cmdExecute.execId;
-  responseData[5] = cmd->cmdExecute.execId >> 8;
-  responseData[6] = cmd->cmdExecute.execId >> 16;
-  responseData[7] = cmd->cmdExecute.execId >> 24;
+  uint8_t b1 = cmd->cmdExecute.cmdExecuteData <<= 16;
+  b1 >>= 24;
+
+  uint8_t b2 = cmd->cmdExecute.cmdExecuteData <<= 8;
+  b2 >>= 24;
+
+  uint8_t b3 = cmd->cmdExecute.cmdExecuteData;
+  b3 >>= 24;
+
+  // First four bytes are the cmdExecute data
+  responseData[0] = b0;
+  responseData[1] = b1;
+  responseData[2] = b2;
+  responseData[3] = b3;
+
+  b0 = cmd->cmdExecute.execIdData <<= 24;
+  b0 >>= 24;
+
+  b1 = cmd->cmdExecute.execIdData <<= 16;
+  b1 >>= 24;
+
+  b2 = cmd->cmdExecute.execIdData <<= 8;
+  b2 >>= 24;
+
+  b3 = cmd->cmdExecute.execIdData;
+  b3 >>= 24;
+
+  // Last four bytes are the execId data
+  responseData[4] = b0;
+  responseData[5] = b1;
+  responseData[6] = b2;
+  responseData[7] = b3;
 
   *responseDataLen = 8;
 

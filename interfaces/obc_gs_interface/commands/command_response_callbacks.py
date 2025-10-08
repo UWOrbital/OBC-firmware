@@ -85,15 +85,15 @@ def parse_cmd_arm(cmd_response: CmdRes, data: bytes) -> CmdArmRes:
     if cmd_response.cmd_id != CmdCallbackId.CMD_ARM:
         raise ValueError("Wrong command id for parsing the name command")
 
-    cmd_arm = int.from_bytes(data[0:3], "little")
-    cmd_arm_id = int.from_bytes(data[4:8], "little")
+    cmd_arm_data = int.from_bytes(data[:4], "little")
+    cmd_arm_id_data = int.from_bytes(data[4:9], "little")
 
     return CmdArmRes(
         cmd_response.cmd_id,
         cmd_response.error_code,
         cmd_response.response_length,
-        cmd_arm,
-        cmd_arm_id,
+        cmd_arm_data,
+        cmd_arm_id_data,
     )
 
 
@@ -107,15 +107,15 @@ def parse_cmd_execute(cmd_response: CmdRes, data: bytes) -> CmdExecuteRes:
     if cmd_response.cmd_id != CmdCallbackId.CMD_EXECUTE:
         raise ValueError("Wrong command id for parsing the name command")
 
-    cmd_execute = int.from_bytes(data[0:3], "little")
-    cmd_exec_id = int.from_bytes(data[4:8], "little")
+    cmd_execute_data = int.from_bytes(data[:4], "little")
+    cmd_exec_id_data = int.from_bytes(data[4:9], "little")
 
     return CmdExecuteRes(
         cmd_response.cmd_id,
         cmd_response.error_code,
         cmd_response.response_length,
-        cmd_execute,
-        cmd_exec_id,
+        cmd_execute_data,
+        cmd_exec_id_data,
     )
 
 

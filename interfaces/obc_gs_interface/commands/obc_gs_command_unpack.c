@@ -176,12 +176,12 @@ static void unpackI2CProbeCmdData(const uint8_t* buffer, uint32_t* offset, cmd_m
 
 // CMD_ARM
 static void unpackCmdArmCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
-  cmdMsg->cmdArm.cmdArm = unpackUint32(buffer, offset);
-  cmdMsg->cmdArm.armId = unpackUint32(buffer, offset);
+  cmdMsg->cmdArm.cmdArmData = unpackUint32(buffer, offset);
+  cmdMsg->cmdArm.armIdData = unpackUint32(buffer, offset);
 }
 
 // CMD_EXECUTE
 static void unpackCmdExecuteCmdData(const uint8_t* buffer, uint32_t* offset, cmd_msg_t* cmdMsg) {
-  cmdMsg->cmdExecute.cmdExecute = unpackUint32(buffer, offset);
-  cmdMsg->cmdExecute.execId = unpackUint32(buffer, offset);
+  cmdMsg->cmdExecute.cmdExecuteData = unpackUint32(buffer, offset);
+  cmdMsg->cmdExecute.execIdData = unpackUint32(buffer, offset);
 }

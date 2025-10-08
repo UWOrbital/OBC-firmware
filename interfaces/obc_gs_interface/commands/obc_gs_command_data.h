@@ -19,14 +19,14 @@ typedef struct {
 
 // CMD_ARM
 typedef struct {
-  cmd_callback_id_t cmdArm;
-  uint32_t armId;
+  cmd_callback_id_t cmdArmData;
+  uint32_t armIdData;
 } cmd_arm_cmd_data_t;
 
 // CMD_EXECUTE
 typedef struct {
-  cmd_callback_id_t cmdExecute;
-  uint32_t execId;
+  cmd_callback_id_t cmdExecuteData;
+  uint32_t execIdData;
 } cmd_execute_cmd_data_t;
 
 /* -------------------------- */

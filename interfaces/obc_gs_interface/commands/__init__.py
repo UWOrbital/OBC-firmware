@@ -415,7 +415,7 @@ def create_cmd_i2c_probe(unixtime_of_execution: int | None = None) -> CmdMsg:
     return cmd_msg
 
 
-def create_cmd_arm(cmd_arm: c_uint, cmd_arm_id: c_uint32, unixtime_of_execution: int | None = None) -> CmdMsg:
+def create_cmd_arm(cmd_arm_data: c_uint, cmd_arm_id_data: c_uint32, unixtime_of_execution: int | None = None) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_ARM
 
@@ -428,12 +428,14 @@ def create_cmd_arm(cmd_arm: c_uint, cmd_arm_id: c_uint32, unixtime_of_execution:
     """
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_ARM
-    cmd_msg.cmdArm.cmd_arm = c_uint(cmd_arm.value)
-    cmd_msg.cmdArm.cmd_arm_id = c_uint32(cmd_arm_id.value)
+    cmd_msg.cmdArm.cmd_arm_data = c_uint(cmd_arm_data.value)
+    cmd_msg.cmdArm.cmd_arm_id_data = c_uint32(cmd_arm_id_data.value)
     return cmd_msg
 
 
-def create_cmd_execute(cmd_execute: c_uint, cmd_exec_id: c_uint32, unixtime_of_execution: int | None = None) -> CmdMsg:
+def create_cmd_execute(
+    cmd_execute_data: c_uint, cmd_exec_id_data: c_uint32, unixtime_of_execution: int | None = None
+) -> CmdMsg:
     """
     Function to create a CmdMsg structure for CMD_EXECUTE
     :param cmdExecute: The EXECUTE command callback struct ID
@@ -445,8 +447,8 @@ def create_cmd_execute(cmd_execute: c_uint, cmd_exec_id: c_uint32, unixtime_of_e
     """
     cmd_msg = CmdMsg(unixtime_of_execution)
     cmd_msg.id = CmdCallbackId.CMD_EXECUTE
-    cmd_msg.cmdExecute.cmd_execute = c_uint(cmd_execute.value)
-    cmd_msg.execId.cmd_exec_id = c_uint32(cmd_exec_id.value)
+    cmd_msg.cmdExecute.cmd_execute_data = c_uint(cmd_execute_data.value)
+    cmd_msg.execId.cmd_exec_id_data = c_uint32(cmd_exec_id_data.value)
     return cmd_msg
 
 
