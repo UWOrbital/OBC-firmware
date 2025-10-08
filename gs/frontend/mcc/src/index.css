@@ -9,11 +9,6 @@
     border-color: var(--border);
   }
 
-  *:focus {
-    outline: 2px solid rgba(var(--ring-rgb, 112, 112, 112), 0.5);
-    outline-offset: 2px;
-  }
-
   body {
     overflow: hidden;
     display: flex;

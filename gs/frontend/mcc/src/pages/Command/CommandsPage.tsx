@@ -8,7 +8,7 @@ function Commands() {
   const selectedCommand = useAppSelector(selectCommand);
   return (
     <div className="min-h-screen w-full flex justify-center items-center space-x-10">
-      { selectedCommand != "" && <SideModal /> }
+      {selectedCommand != "" && <SideModal />}
       <Table />
       <SelectCommand />
     </div>
