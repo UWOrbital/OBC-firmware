@@ -6,6 +6,7 @@ from textual.reactive import reactive
 import io, sys
 from sys import argv
 from gs.backend.ground_station_cli import GroundStationShell
+from serial import Serial
 
 COM_PORT = argv[1]
 
@@ -14,26 +15,25 @@ class CliPanel(Static):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        shell = GroundStationShell(COM_PORT)
+        self.shell = GroundStationShell(COM_PORT)
 
-        #  buf creates a StringIO instance, which will store what is printed from the cli through a redirection of stdout (default is console)
+        #  Buf creates a StringIO instance, storing what is printed from the cli through a redirection of stdout
         self.buffer = io.StringIO()
 
-        #  redirects the output stream (sys.stdout) to buf, meaning that anything printed will now be written to buf
+        #  Redirects the output stream (sys.stdout) to buf, meaning that anything printed will now be written to buf
         sys.stdout = self.buffer
 
-        if shell.intro is not None:
-            print(shell.intro)
-        print(shell.prompt, end="")
+        if self.shell.intro is not None:
+            print(self.shell.intro)
 
-        # buffer.getvalue() returns the contents of the string buffer as a str
+        # Buffer.getvalue() returns the contents of the string buffer as a str
         self.cli_output = self.buffer.getvalue()
     
     def on_mount(self) -> None:
         self.output_refresh = self.set_interval(1 / 600, self.update_cli)
     
     def watch_cli_output(self, cli_output: str): 
-         self.update("CLI\n" + self.cli_output)
+        self.update(f"CLI - {COM_PORT}\n" + self.cli_output)
 
     def update_cli(self) -> None:
         self.cli_output = self.buffer.getvalue()
@@ -41,8 +41,23 @@ class CliPanel(Static):
     @on(Input.Submitted)
     def submit_command(self) -> None:
         cli_input = self.query_one(Input)
+        print(f"(UW Orbital): {cli_input.value}")
 
-        print(cli_input.value)
+        #  Splits the input into two parts: command name and args
+        command_parts = cli_input.value.strip().split(maxsplit= 1)
+        try: 
+            # Obtain function from gs shell instance based on inputted command
+            cmd_function = getattr(self.shell, f"do_{command_parts[0]}")
+            if len(command_parts) > 1 and command_parts[1] is not None: 
+                args = command_parts[1]
+            else:
+                args = ""
+
+            cmd_function(args)
+
+        except AttributeError:
+            print(f"*** Unknown syntax: {cli_input.value}")
+
         self.query_one(Input).value = ""
 
     def compose(self) -> ComposeResult:
@@ -53,6 +68,8 @@ class CmdButton(HorizontalGroup):
     def __init__(self, cmdname):
         super().__init__()
         self.cmdname = cmdname
+    
+    
     
     def compose(self) -> ComposeResult:
         yield Label(f"{self.cmdname}", id="button-label")
@@ -88,7 +105,11 @@ def main() -> None:
     if len(argv) != 2:
         print("One argument needed: Com Port")
         return
-
+    
+    ser = Serial(COM_PORT)
+    print("Comm port set to: " + str(ser.name))
+    ser.close()
+    
     app = CLIWindow()
     app.run()
 
