@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAppSelector } from '../../../../store/hooks';
-import { selectCommand } from '../selectCommandSlice';
+import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
+import { selectCommand, setCommand } from '../selectCommandSlice';
 import { mockCommandsList, type ExtendedCommand, type CommandParameter } from '../../../../utils/mock-data';
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +24,7 @@ interface ParameterValues {
  * @return tsx element of SendCommand component
  */
 function SendCommand() {
+  const dispatch = useAppDispatch();
   const selectedCommandName = useAppSelector(selectCommand);
   const [matchedCommand, setMatchedCommand] = useState<ExtendedCommand | null>(null);
   const [parameterValues, setParameterValues] = useState<ParameterValues>({});
@@ -326,7 +327,7 @@ function SendCommand() {
           </FieldSet>
           <Field orientation="horizontal">
             <Button type="submit" disabled={!isFormValid() || isSubmitting}>Submit</Button>
-            <Button variant="outline" type="button">
+            <Button variant="outline" type="button" onClick={() => dispatch(setCommand(""))} disabled={isSubmitting}>
               Cancel
             </Button>
           </Field>
