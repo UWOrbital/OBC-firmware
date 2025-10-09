@@ -15,18 +15,17 @@ Static {
 
 Input {
     column-span: 2; 
-    border: rgb(28, 28, 28);
+    border: blank rgb(28, 28, 28);
 }
 
 #logs {
     background: $panel;
     row-span: 3;
     height: auto;
-    scrollbar-color: dodgerblue;
-    scrollbar-color-hover: dodgerblue;
     scrollbar-size: 2 1;
-    border: dodgerblue;
+    border: round $text-primary 50%;
     height: 100%;
+    padding-left: 1;
 }
 
 #cli {
@@ -34,19 +33,18 @@ Input {
     background: $panel;  
     column-span: 2;
     height: 1fr;
-    border: white;
+    border: round $text-primary 50%;
     align: center bottom;
+    padding-left: 1;
 }
 
 #cmd-panel {
-    scrollbar-color: dodgerblue;
-    scrollbar-color-hover: dodgerblue;
     scrollbar-size: 2 1;
     background: $panel;   
     height: 1fr;
     padding-left: 1;
     margin-right: 1;
-    border: dodgerblue;
+    border: round $text-primary 50%;
 }
 
 #cmd-panel > Static {
@@ -73,9 +71,20 @@ Input {
     padding-bottom: 1;
 }
 
-#misc2 {
+#timetagged {
+    layout: grid;
     color: white;
     background: $panel;  
     height: 1fr;
-    border: dodgerblue;
+    border: round $text-primary 50%;
+    grid-rows: auto;
+    padding-left: 1;
+}
+
+#timetagged > Label {
+    padding-bottom: 1;
+}
+
+#timetagged > DataTable {
+    height: 100%;
 }

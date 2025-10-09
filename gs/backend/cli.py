@@ -1,7 +1,7 @@
 from textual import on
 from textual.app import App, ComposeResult
-from textual.containers import ScrollableContainer, VerticalScroll, HorizontalGroup
-from textual.widgets import Static, Input, Button, Label
+from textual.containers import ScrollableContainer, VerticalScroll, HorizontalGroup, HorizontalScroll
+from textual.widgets import Static, Input, Button, Label, DataTable
 from textual.reactive import reactive
 import io, sys
 from sys import argv
@@ -9,13 +9,14 @@ from gs.backend.ground_station_cli import GroundStationShell
 from serial import Serial
 
 COM_PORT = argv[1]
+shell = GroundStationShell(COM_PORT)
 
 class CliPanel(Static):
     cli_output = reactive("")
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.shell = GroundStationShell(COM_PORT)
+        self.shell = shell
 
         #  Buf creates a StringIO instance, storing what is printed from the cli through a redirection of stdout
         self.buffer = io.StringIO()
@@ -69,11 +70,39 @@ class CmdButton(HorizontalGroup):
         super().__init__()
         self.cmdname = cmdname
     
-    
-    
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        cmd_function = getattr(shell, f"do_{self.cmdname}")
+        cmd_function("")
+
     def compose(self) -> ComposeResult:
         yield Label(f"{self.cmdname}", id="button-label")
         yield Button("Run")
+
+
+class TimeTaggedLogs(HorizontalScroll):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.rows = [("CMD", "Time", "Cate1", "Cate2"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),
+                     ("ABC", "ABC", "ABC", "ABC"),]
+    
+    def compose(self) -> ComposeResult:
+        yield Label("TIME TAGGED CMDS")
+        yield DataTable()
+
+    def on_mount(self) -> None:
+        table = self.query_one(DataTable)
+        table.add_columns(*self.rows[0])
+        table.add_rows(self.rows[1:])
 
 
 class LogsPanel(Static):
@@ -92,14 +121,18 @@ class LogsPanel(Static):
     def watch_logs(self, logs: str):
         self.update("LOGS\n\n" + self.logs)
 
+
 class CLIWindow(App):
     CSS_PATH = "cli.tcss"
+    
+    def on_mount(self) -> None:
+        self.theme = "dracula"
 
     def compose(self) -> ComposeResult:
         yield ScrollableContainer(LogsPanel("LOGS"), can_focus=True, id="logs")
         yield CliPanel(id="cli")
         yield VerticalScroll(Static("CMDS"), CmdButton("print_logs"), CmdButton("send_conn_request"), CmdButton("start_logging"), id="cmd-panel")
-        yield Static("MISC", id="misc2")
+        yield TimeTaggedLogs(id="timetagged")
 
 def main() -> None:
     if len(argv) != 2:
