@@ -37,7 +37,7 @@ from interfaces.obc_gs_interface.commands.command_response_classes import CmdRes
 # receive. This must be followed or the obc will not function as expected
 _PADDING_REQUIRED: Final[int] = 300
 
-LOG_PATH: Path = (Path(__file__).parent / "../logs.txt").resolve()
+LOG_PATH: Path = (Path(__file__).parent / "../logs.log").resolve()
 
 
 def send_command(args: str, com_port: str, timeout: int = 0) -> CmdRes | type[CmdRes] | None:
@@ -366,5 +366,5 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
 
             file.write(data_string)
             file.flush()
-            if print_console and len(data_string) != 0:
-                print(data_string)
+            # if print_console and len(data_string) != 0:
+            #     # print(data_string) 

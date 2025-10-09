@@ -6,7 +6,10 @@ from textual.reactive import reactive
 import io, sys
 from sys import argv
 from gs.backend.ground_station_cli import GroundStationShell
+from gs.backend.obc_utils.command_utils import poll
 from serial import Serial
+import threading
+
 
 COM_PORT = argv[1]
 shell = GroundStationShell(COM_PORT)
@@ -38,6 +41,15 @@ class CliPanel(Static):
 
     def update_cli(self) -> None:
         self.cli_output = self.buffer.getvalue()
+    
+    # Use threads to ensure blocking commands don't block CLI
+    def run_cli_command_in_thread(self, cmd_function, args):
+        thread = threading.Thread(
+            target=cmd_function,
+            args=(args,),
+            daemon=True
+        )
+        thread.start()
 
     @on(Input.Submitted)
     def submit_command(self) -> None:
@@ -54,7 +66,12 @@ class CliPanel(Static):
             else:
                 args = ""
 
-            cmd_function(args)
+            # Make special exception for "exit" command
+            if(command_parts[0] == "exit"):
+                self.app.exit()
+                return
+                
+            self.run_cli_command_in_thread(cmd_function, args)
 
         except (AttributeError, IndexError):
             print(f"*** Unknown syntax: {cli_input.value}")
@@ -113,7 +130,7 @@ class LogsPanel(Static):
 
     def update_logs(self) -> None:
         try:
-            with open("gs/backend/logs.txt") as logs:
+            with open("gs/backend/logs.log") as logs:
                 self.logs = logs.read()
         except FileNotFoundError:
             print("File unable to be found")
