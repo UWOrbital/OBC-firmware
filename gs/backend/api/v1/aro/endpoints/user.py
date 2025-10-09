@@ -48,6 +48,7 @@ def create_user(payload: UserRequest) -> UserResponse:
 def update_user(userid: str, payload: UserRequest) -> UserResponse:
     """
     Modifies the user’s info based on the payload
+    :param userid: The unique identifier of the user to be updated
     :param payload: The data used to update a user
     :return: returns the user updated
     """
