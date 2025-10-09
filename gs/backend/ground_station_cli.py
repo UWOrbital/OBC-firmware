@@ -134,8 +134,8 @@ class GroundStationShell(Cmd):
         # Preliminary checks for the function to run
         # Write out the logs that we previously got
         with open(LOG_PATH) as file:
-            print(file.read())
-
+            print("Printing " + file.read())
+        
         if self.background_logging is not None:
             self.background_logging.kill()
 
