@@ -56,7 +56,7 @@ class CliPanel(Static):
 
             cmd_function(args)
 
-        except AttributeError:
+        except (AttributeError, IndexError):
             print(f"*** Unknown syntax: {cli_input.value}")
 
         self.query_one(Input).value = ""
