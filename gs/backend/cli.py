@@ -1,6 +1,6 @@
 from textual import on
 from textual.app import App, ComposeResult
-from textual.containers import ScrollableContainer, VerticalScroll, HorizontalGroup, HorizontalScroll
+from textual.containers import ScrollableContainer, VerticalScroll, HorizontalGroup, HorizontalScroll, Container
 from textual.widgets import Static, Input, Button, Label, DataTable
 from textual.reactive import reactive
 import io, sys
@@ -14,12 +14,13 @@ import threading
 COM_PORT = argv[1]
 shell = GroundStationShell(COM_PORT)
 
-class CliPanel(Static):
+class CliPanel(ScrollableContainer):
     cli_output = reactive("")
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.shell = shell
+        self.cli_output_panel = None
 
         #  Buf creates a StringIO instance, storing what is printed from the cli through a redirection of stdout
         self.buffer = io.StringIO()
@@ -29,15 +30,17 @@ class CliPanel(Static):
 
         if self.shell.intro is not None:
             print(self.shell.intro)
-
-        # Buffer.getvalue() returns the contents of the string buffer as a str
-        self.cli_output = self.buffer.getvalue()
     
     def on_mount(self) -> None:
         self.output_refresh = self.set_interval(1 / 600, self.update_cli)
+        self.cli_output_panel = self.query_one("#cli-output-panel", Static)
+
+        # buffer.getvalue() returns the contents of the string buffer as a str
+        self.cli_output = self.buffer.getvalue()
     
     def watch_cli_output(self, cli_output: str): 
-        self.update(f"CLI - {COM_PORT}\n" + self.cli_output)
+        if self.cli_output_panel:  # Defensive check
+           self.cli_output_panel.update(f"CLI - {COM_PORT}\n" + self.cli_output)
 
     def update_cli(self) -> None:
         self.cli_output = self.buffer.getvalue()
@@ -79,7 +82,8 @@ class CliPanel(Static):
         self.query_one(Input).value = ""
 
     def compose(self) -> ComposeResult:
-        yield Input(placeholder="Enter command here:")
+        yield Static("", id="cli-output-panel")
+        yield Input(placeholder="Enter command here:", id="cli-input")
         
 
 class CmdButton(HorizontalGroup):
