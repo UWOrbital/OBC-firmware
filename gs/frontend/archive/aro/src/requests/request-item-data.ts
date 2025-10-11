@@ -9,7 +9,7 @@ export type AROCommandStatus =
 
 export interface RequestItemData {
   id: number;
-  aro_id?: number;
+  aro_id: number;
   latitude: number;
   longitude: number;
   status: AROCommandStatus;
@@ -19,5 +19,4 @@ export interface RequestItemData {
   pic_transmitted_on: Date | null;
   packet_id?: number | null;
   cancellable_after: Date;
-  // Add more properties as needed
 }

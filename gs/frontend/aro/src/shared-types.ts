@@ -25,14 +25,14 @@ export type SessionStatus =
 
 export type MainPacketType = 'uplink' | 'downlink';
 
-
+// Database table interfaces
 export interface ARORequest {
   id: number;
   aro_id: number;
-  latitude: number;
-  longitude: number;
+  latitude: number; // decimal in DB, number in TS
+  longitude: number; // decimal in DB, number in TS
   status: AROCommandStatus;
-  created_on: string;
+  created_on: string; // ISO datetime string
   request_sent_to_obc_on: string | null;
   pic_taken_on: string | null;
   pic_transmitted_on: string | null;
@@ -41,7 +41,7 @@ export interface ARORequest {
 
 export interface Session {
   id: number;
-  start_time: string;
+  start_time: string; // ISO datetime string
   end_time: string | null;
   status: SessionStatus;
 }
