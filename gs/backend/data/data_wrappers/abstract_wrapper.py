@@ -11,17 +11,28 @@ T = TypeVar("T", bound=BaseSQLModel)
 
 
 class AbstractWrapper(ABC, Generic[T]):
-    """ """
+    """
+    An Abstract Base Class for all data wrappers.
+    """
 
     model: type[T]
 
     def get_all(self) -> list[T]:
-        """ """
+        """
+        Get all data wrapper for the unspecified model
+
+        :return: a list of all model instances
+        """
         with get_db_session() as session:
             return list(session.exec(select(self.model)).all())
 
     def create(self, data: dict[str, Any]) -> T:
-        """ """
+        """
+        Post data wrapper for the unspecified model
+
+        :param data: the JSON object of the model instance to be created
+        :return: the newly created instance
+        """
         with get_db_session() as session:
             obj = self.model(**data)
             session.add(obj)
@@ -30,7 +41,12 @@ class AbstractWrapper(ABC, Generic[T]):
             return obj
 
     def delete_by_id(self, obj_id: int | UUID) -> T:
-        """ """
+        """
+        Delete data wrapper for the unspecified model
+
+        :param telemetry_id: UUID or int of the model instance to be deleted
+        :return: the deleted instance
+        """
         with get_db_session() as session:
             obj = session.get(self.model, obj_id)
             if not obj:
