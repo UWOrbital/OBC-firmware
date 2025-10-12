@@ -1,5 +1,3 @@
-import React from 'react'
-
 function Table() {
   return (
     // A placeholder div for the table component
