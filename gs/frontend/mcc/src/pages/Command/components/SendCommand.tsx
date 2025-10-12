@@ -223,7 +223,7 @@ function SendCommand() {
   }
 
   return (
-    <div className="p-4 space-y-6 bg-card w-96 border rounded-md will-change-transform transition-all duration-500 ease-in-out animate-in zoom-in-75 duration-300 slide-in-from-left-10">
+    <div className="p-4 space-y-6 bg-card w-96 border rounded-md animate-in zoom-in-75 duration-300 slide-in-from-left-10">
         {submitCode !== 0 && (
             <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
         )}
