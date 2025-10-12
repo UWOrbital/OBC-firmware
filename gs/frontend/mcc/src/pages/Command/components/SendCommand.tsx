@@ -221,7 +221,7 @@ function SendCommand() {
   }
 
   return (
-    <div className="p-4 space-y-6 bg-card w-96 border rounded-md">
+    <div className="p-4 space-y-6 bg-card w-96 border rounded-md mr-10">
       {submitCode !== 0 && (
         <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
       )}
