@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { selectCommand, setCommand } from '../selectCommandSlice';
-import { mockCommandsList, type ExtendedCommand, type CommandParameter } from '../../../../utils/mock-data';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { selectCommand, setCommand } from '../features/selectCommandSlice';
+import { mockCommandsList, type ExtendedCommand, type CommandParameter } from '../../../utils/mock-data';
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -21,7 +21,7 @@ interface ParameterValues {
 
 const submitAlerts = {
   0: { destructive: false, title: "", description: "" },
-  1: { destructive: false, title: "Success — Command submitted!", description: "", timeout: 3000 },
+  1: { destructive: false, title: "Success — Command submitted!", description: "Success", timeout: 7000 },
   2: { destructive: true, title: "Form Invalid", description: "Please fill in all required fields with valid values.", timeout: null },
   3: { destructive: true, title: "Unknown Error", description: "An unknown error occurred. Please try again.", timeout: null },
 };
@@ -222,7 +222,7 @@ function SendCommand() {
   }
 
   return (
-    <div>
+    <div className="p-4 space-y-6 bg-card w-96 border rounded-md">
       {submitCode !== 0 && (
         <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
       )}

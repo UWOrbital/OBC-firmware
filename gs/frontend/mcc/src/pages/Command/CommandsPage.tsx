@@ -1,14 +1,14 @@
 import { useAppSelector } from "@/store/hooks";
-import SideModal from "./components/SideModal"
 import Table from "./components/Table"
 import SelectCommand from "./features/components/SelectCommand"
 import { selectCommand } from "./features/selectCommandSlice"
+import SendCommand from "./components/SendCommand";
 
 function Commands() {
   const selectedCommand = useAppSelector(selectCommand);
   return (
     <div className="min-h-screen w-full flex justify-center items-center space-x-10">
-      {selectedCommand != "" && <SideModal />}
+      {selectedCommand != "" && <SendCommand />}
       <Table />
       <SelectCommand />
     </div>
