@@ -29,7 +29,7 @@ function CustomAlert({ destructive = false, title = "", description = "", timeou
 
   return (
     <Alert variant={destructive ? "destructive" : "default"}
-    className={`mb-4 ${isVisible ? 'fade-in' : 'fade-out'} ${timeout ? 'transition-opacity duration-500' : ''} ${destructive ? 'bg-red-300/20 text-red-500' : 'bg-green-300/20 text-green-500'}`}>
+    className={`mb-4 ${destructive ? 'bg-red-300/20 text-red-500' : 'bg-green-300/20 text-green-500'} animate-in fade-in slide-in-from-top-5 duration-300`}>
         {destructive ? <AlertCircleIcon className="h-4 w-4" /> : <CheckCircle2Icon className="h-4 w-4" />}
         <AlertTitle>{title}</AlertTitle>
         {description != "" && (

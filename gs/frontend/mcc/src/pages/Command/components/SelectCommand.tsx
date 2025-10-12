@@ -22,7 +22,7 @@ function SelectCommand() {
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="fixed bottom-10 left-10 z-10 rounded-full w-15 h-15 flex items-center justify-center"><FontAwesomeIcon icon={faPlus} size="xl" /></Button>
+        <Button variant="outline" className="fixed bottom-10 left-10 z-10 rounded-full w-15 h-15 flex items-center justify-center hover:border-ring hover:ring-ring/50 hover:ring-[2px]"><FontAwesomeIcon icon={faPlus} size="xl" /></Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Commands</DropdownMenuLabel>

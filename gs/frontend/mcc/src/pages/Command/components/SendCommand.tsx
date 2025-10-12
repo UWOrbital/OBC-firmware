@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { selectCommand, setCommand } from '../features/selectCommandSlice';
 import { mockCommandsList, type ExtendedCommand, type CommandParameter } from '../../../utils/mock-data';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -221,10 +223,10 @@ function SendCommand() {
   }
 
   return (
-    <div className="p-4 space-y-6 bg-card w-96 border rounded-md">
-      {submitCode !== 0 && (
-        <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
-      )}
+    <div className="p-4 space-y-6 bg-card w-96 border rounded-md will-change-transform transition-all duration-500 ease-in-out animate-in zoom-in-75 duration-300 slide-in-from-left-10">
+        {submitCode !== 0 && (
+            <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
+        )}
       <form onSubmit={handleSubmit}>
         <FieldGroup>
           <FieldSet>
@@ -243,21 +245,28 @@ function SendCommand() {
                     {param.name}
                   </FieldLabel>
                   {renderParameterInput(param)}
-                  {!isValid && value && (
-                    <p className="text-sm text-red-600">
-                      Invalid {param.type} value
-                      {param.size && param.type === 'int' && (
-                        ` (must be 0-${Math.pow(2, param.size * 8) - 1})`
-                      )}
-                    </p>
-                  )}
+                  <div className="transition-all duration-300 overflow-hidden" style={{ maxHeight: !isValid && value ? '3rem' : '0' }}>
+                    {!isValid && value && (
+                      <p className="text-sm text-red-600 animate-in fade-in-50 duration-150">
+                        Invalid {param.type} value
+                        {param.size && param.type === 'int' && (
+                          ` (must be 0-${Math.pow(2, param.size * 8) - 1})`
+                        )}
+                      </p>
+                    )}
+                  </div>
                 </Field>
                 )
               })}
             </FieldGroup>
           </FieldSet>
           <Field orientation="horizontal">
-            <Button type="submit" disabled={!isFormValid() || isSubmitting}>Submit</Button>
+            <Button type="submit" disabled={!isFormValid() || isSubmitting}>
+              Submit
+              {isSubmitting && (
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+              )}
+            </Button>
             <Button variant="outline" type="button" onClick={() => dispatch(setCommand(""))} disabled={isSubmitting}>
               Cancel
             </Button>

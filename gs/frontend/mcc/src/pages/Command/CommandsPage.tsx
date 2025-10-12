@@ -8,8 +8,8 @@ function Commands() {
   const selectedCommand = useAppSelector(selectCommand);
   return (
     <div>
-      <div className="min-h-screen w-full flex justify-center items-center space-x-10 ">
-        {selectedCommand != "" && <SendCommand />}
+      <div className="min-h-screen w-full flex justify-center items-center space-x-10">
+          {selectedCommand !== "" && <SendCommand />}
         <Table />
       </div>
       <SelectCommand />
