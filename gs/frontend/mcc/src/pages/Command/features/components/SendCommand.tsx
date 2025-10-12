@@ -9,15 +9,22 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
-  // FieldSeparator,
   FieldSet,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import CustomAlert from '@/components/Alert';
 
 interface ParameterValues {
   [key: string]: string;
 }
+
+const submitAlerts = {
+  0: { destructive: false, title: "", description: "" },
+  1: { destructive: false, title: "Success — Command submitted!", description: "", timeout: 3000 },
+  2: { destructive: true, title: "Form Invalid", description: "Please fill in all required fields with valid values.", timeout: null },
+  3: { destructive: true, title: "Unknown Error", description: "An unknown error occurred. Please try again.", timeout: null },
+};
 
 /**
  * @brief SendCommand component for displaying and submitting command parameters
@@ -28,8 +35,8 @@ function SendCommand() {
   const selectedCommandName = useAppSelector(selectCommand);
   const [matchedCommand, setMatchedCommand] = useState<ExtendedCommand | null>(null);
   const [parameterValues, setParameterValues] = useState<ParameterValues>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [submitMessage, setSubmitMessage] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitCode, setSubmitCode] = useState<keyof typeof submitAlerts>(0);
 
   // Effect to detect selectedCommand changes and match to mock data
   useEffect(() => {
@@ -110,12 +117,11 @@ function SendCommand() {
     e.preventDefault();
 
     if (!matchedCommand || !isFormValid()) {
-      // setSubmitMessage('Please fill in all required fields with valid values.');
+      setSubmitCode(2); // Form invalid
       return;
     }
-
+    setSubmitCode(0);
     setIsSubmitting(true);
-    // setSubmitMessage('');
 
     try {
       // Prepare submission data
@@ -137,7 +143,7 @@ function SendCommand() {
       //   body: JSON.stringify(submissionData)
       // });
 
-      // setSubmitMessage(`Command "${matchedCommand.name}" submitted successfully!`);
+      setSubmitCode(1); // Success
 
       // Clear form after successful submission
       const initialValues: ParameterValues = {};
@@ -148,7 +154,7 @@ function SendCommand() {
 
     } catch (error) {
       console.error('Error submitting command:', error);
-      // setSubmitMessage('Error submitting command. Please try again.');
+      setSubmitCode(3); // Unknown error
     } finally {
       setIsSubmitting(false);
     }
@@ -216,84 +222,10 @@ function SendCommand() {
   }
 
   return (
-    // <div className="rounded-lg shadow-md p-6 w-2xl">
-    //   <h2 className="text-2xl font-bold mb-4 text-gray-800">
-    //     Configure Command: {matchedCommand.name}
-    //   </h2>
-
-    //   <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-    //     <h3 className="font-semibold text-gray-700 mb-2">Command Details:</h3>
-    //     <p><span className="font-medium">ID:</span> {matchedCommand.id}</p>
-    //     <p><span className="font-medium">Format:</span> {matchedCommand.format}</p>
-    //     <p><span className="font-medium">Data Size:</span> {matchedCommand.data_size} bytes</p>
-    //     <p><span className="font-medium">Total Size:</span> {matchedCommand.total_size} bytes</p>
-    //   </div>
-
-    //   <form onSubmit={handleSubmit} className="space-y-4">
-    //     <h3 className="text-lg font-semibold text-gray-700 mb-3">Parameters:</h3>
-
-    //     {matchedCommand.parameters.map((param, index) => {
-    //       const value = parameterValues[param.name] || '';
-    //       const isValid = validateParameter(param, value);
-
-    //       return (
-    //         <div key={index} className="space-y-2">
-    //           <label
-    //             htmlFor={`param-${param.name}`}
-    //             className="block text-sm font-medium text-gray-700"
-    //           >
-    //             {param.name}
-    //             {<span className="text-red-500 ml-1">*</span>}
-    //             <span className="text-gray-500 ml-2">({param.type})</span>
-    //             {param.size && (
-    //               <span className="text-gray-500 ml-1">
-    //                 - {param.size} byte{param.size !== 1 ? 's' : ''}
-    //               </span>
-    //             )}
-    //           </label>
-
-    //           {renderParameterInput(param)}
-
-    //           {!isValid && value && (
-    //             <p className="text-sm text-red-600">
-    //               Invalid {param.type} value
-    //               {param.size && param.type === 'int' && (
-    //                 ` (must be 0-${Math.pow(2, param.size * 8) - 1})`
-    //               )}
-    //             </p>
-    //           )}
-    //         </div>
-    //       );
-    //     })}
-
-    //     <div className="flex items-center justify-between pt-4">
-    //       <button
-    //         type="submit"
-    //         disabled={!isFormValid() || isSubmitting}
-    //         className={`
-    //           px-6 py-2 rounded-md font-medium transition-colors
-    //           ${isFormValid() && !isSubmitting
-    //             ? 'bg-blue-600 hover:bg-blue-700 text-white'
-    //             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-    //           }
-    //         `}
-    //       >
-    //         {isSubmitting ? 'Sending...' : 'Send Command'}
-    //       </button>
-
-    //       {submitMessage && (
-    //         <div className={`text-sm ${
-    //           submitMessage.includes('Error') || submitMessage.includes('Please fill')
-    //             ? 'text-red-600'
-    //             : 'text-green-600'
-    //         }`}>
-    //           {submitMessage}
-    //         </div>
-    //       )}
-    //     </div>
-    //   </form>
-    // </div>
     <div>
+      {submitCode !== 0 && (
+        <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
+      )}
       <form onSubmit={handleSubmit}>
         <FieldGroup>
           <FieldSet>
