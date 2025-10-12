@@ -8,7 +8,6 @@
   * {
     border-color: var(--border);
   }
-
   body {
     overflow: hidden;
     display: flex;

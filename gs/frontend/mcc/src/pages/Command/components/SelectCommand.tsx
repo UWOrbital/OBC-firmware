@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { mockCommandsList } from "../../../../utils/mock-data.ts" // temporary commands list
-import type { Command } from "../../../../utils/models.ts"
-import { selectCommand, setCommand } from "../selectCommandSlice.ts";
+import { mockCommandsList } from "../../../utils/mock-data.ts" // temporary commands list
+import type { Command } from "../../../utils/models.ts"
+import { selectCommand, setCommand } from "../features/selectCommandSlice.ts";
 import { useAppDispatch, useAppSelector } from "@/store/hooks.ts";
 
 import { Button } from "@/components/ui/button"

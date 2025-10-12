@@ -21,9 +21,9 @@ interface ParameterValues {
 
 const submitAlerts = {
   0: { destructive: false, title: "", description: "" },
-  1: { destructive: false, title: "Success — Command submitted!", description: "Success", timeout: 7000 },
-  2: { destructive: true, title: "Form Invalid", description: "Please fill in all required fields with valid values.", timeout: null },
-  3: { destructive: true, title: "Unknown Error", description: "An unknown error occurred. Please try again.", timeout: null },
+  1: { destructive: false, title: "Success — Command submitted!", description: "", timeout: 7000 },
+  2: { destructive: true, title: "Form Invalid. Please fill in all required fields with valid values.", description: "", timeout: null },
+  3: { destructive: true, title: "An unknown error occurred. Please try again.", description: "", timeout: null },
 };
 
 /**
@@ -38,7 +38,7 @@ function SendCommand() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitCode, setSubmitCode] = useState<keyof typeof submitAlerts>(0);
 
-  // Effect to detect selectedCommand changes and match to mock data
+  // Detect selectedCommandName changes and update states accordingly
   useEffect(() => {
     if (selectedCommandName != "") {
       const command = mockCommandsList.find(cmd => cmd.name === selectedCommandName);
@@ -60,7 +60,7 @@ function SendCommand() {
     }
   }, [selectedCommandName]);
 
-  // Handle input changes
+  // Handle changes to parameter input fields
   const handleParameterChange = (paramName: string, value: string) => {
     setParameterValues(prev => ({
       ...prev,
@@ -74,7 +74,7 @@ function SendCommand() {
       return false;
     }
 
-    if (!value.trim()) return true; // Optional empty fields are valid
+    if (!value.trim()) return true;
 
     switch (param.type) {
       case 'int': {
@@ -102,7 +102,7 @@ function SendCommand() {
     }
   };
 
-  // Check if all required parameters are valid
+  // Check if all required parameters are valid by running validateParameter on each parameter
   const isFormValid = (): boolean => {
     if (!matchedCommand) return false;
 
@@ -112,40 +112,39 @@ function SendCommand() {
     });
   };
 
-  // Handle form submission
+  // Handle command submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!matchedCommand || !isFormValid()) {
-      setSubmitCode(2); // Form invalid
+      setSubmitCode(2);
       return;
     }
     setSubmitCode(0);
     setIsSubmitting(true);
 
     try {
-      // Prepare submission data
+      // TODO: adapt data to actual request structure expected by backend
       const submissionData = {
         commandId: matchedCommand.id,
         commandName: matchedCommand.name,
         parameters: parameterValues
       };
 
-      // Simulate API call (replace with actual API call)
+      // Simulated API call (replace with actual API call)
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      console.log('Submitting command:', submissionData);
-
-      // TODO: Replace with actual API call
+      // TODO: Setup actual API call
       // const response = await fetch('/api/commands', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(submissionData)
       // });
 
+      console.log('Submitting command:', submissionData);
+
       setSubmitCode(1); // Success
 
-      // Clear form after successful submission
       const initialValues: ParameterValues = {};
       matchedCommand.parameters.forEach(param => {
         initialValues[param.name] = '';
@@ -160,7 +159,7 @@ function SendCommand() {
     }
   };
 
-  // Render parameter input based on type
+  // Render parameter input fields based on type
   const renderParameterInput = (param: CommandParameter) => {
     const value = parameterValues[param.name] || '';
     const isValid = validateParameter(param, value);

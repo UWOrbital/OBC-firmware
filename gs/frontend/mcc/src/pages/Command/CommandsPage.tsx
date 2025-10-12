@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/store/hooks";
 import Table from "./components/Table"
-import SelectCommand from "./features/components/SelectCommand"
+import SelectCommand from "./components/SelectCommand"
 import { selectCommand } from "./features/selectCommandSlice"
 import SendCommand from "./components/SendCommand";
 
