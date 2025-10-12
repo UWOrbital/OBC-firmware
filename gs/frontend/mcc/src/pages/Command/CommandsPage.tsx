@@ -7,9 +7,11 @@ import SendCommand from "./components/SendCommand";
 function Commands() {
   const selectedCommand = useAppSelector(selectCommand);
   return (
-    <div className="min-h-screen w-full flex justify-center items-center">
-      {selectedCommand != "" && <SendCommand />}
-      <Table />
+    <div>
+      <div className="min-h-screen w-full flex justify-center items-center space-x-10 ">
+        {selectedCommand != "" && <SendCommand />}
+        <Table />
+      </div>
       <SelectCommand />
     </div>
   )
