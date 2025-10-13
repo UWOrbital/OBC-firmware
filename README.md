@@ -16,16 +16,34 @@ On Error, call ```toastService.error()``` with an informative error message.
 
 ## Testing
 
-Try running the following code added to App.tsx.
+Try running the following code added to App.tsx. The dots ```...``` represents the rest of the code.
 
 ```TypeScript
-{/* --- TEST BUTTONS --- */}
- <div className="w-1/4 flex flex-row mt-[10%] ms-[34.5%]">
-     <h3>Toast Test Controls</h3>
-     <button onClick={showSuccess} className="bg-lime-400 w-1/2 cursor-pointer">Success</button>
-     <button onClick={showError} className="bg-red-400 btn w-1/2 cursor-pointer">Error</button>
- </div>
- {/* --- END --- */}
+...
+import toastService from './services/Toast.service'
+...
+
+function App() {
+ ...
+ const showSuccess = () => {
+     toastService.success("This is a success message for testing!");
+ };
+ 
+ const showError = () => {
+     toastService.error("This is an error message for testing.");
+ };
+ return (
+  ...
+  {/* --- TEST BUTTONS --- */}
+   <div className="w-1/4 flex flex-row mt-[10%] ms-[34.5%]">
+       <h3>Toast Test Controls</h3>
+       <button onClick={showSuccess} className="bg-lime-400 w-1/2 cursor-pointer">Success</button>
+       <button onClick={showError} className="bg-red-400 btn w-1/2 cursor-pointer">Error</button>
+   </div>
+  {/* --- END --- */}
+  ...
+ )
+}
 ```
 
 Clicking on the buttons should display the error messages respectively.
