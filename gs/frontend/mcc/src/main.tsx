@@ -3,12 +3,8 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css"; // default styles are applied here
 import { BrowserRouter } from "react-router-dom";
-import { CSS_VARIABLES } from "./utils/themes.ts";
-
-// Inject CSS variables from themes.ts into the document root
-Object.entries(CSS_VARIABLES).forEach(([property, value]) => {
-  document.documentElement.style.setProperty(property, value);
-});
+import store from './store/store.ts'
+import { Provider } from 'react-redux'
 
 /**
  * @brief Main component displaying the main application, which is linked to the index.html file
@@ -16,8 +12,10 @@ Object.entries(CSS_VARIABLES).forEach(([property, value]) => {
  */
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
