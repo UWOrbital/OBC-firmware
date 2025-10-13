@@ -26,6 +26,19 @@ class AbstractWrapper(ABC, Generic[T]):
         with get_db_session() as session:
             return list(session.exec(select(self.model)).all())
 
+    def get_by_id(self, obj_id: int | UUID) -> T:
+        """
+        Retrieve data wrapper for the unspecified model
+
+        :param obj_id: UUID or int of the model instance to be retrieved
+        :return: the retrieved instance
+        """
+        with get_db_session() as session:
+            obj = session.get(self.model, obj_id)
+            if not obj:
+                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            return obj
+
     def create(self, data: dict[str, Any]) -> T:
         """
         Post data wrapper for the unspecified model
@@ -44,7 +57,7 @@ class AbstractWrapper(ABC, Generic[T]):
         """
         Delete data wrapper for the unspecified model
 
-        :param telemetry_id: UUID or int of the model instance to be deleted
+        :param obj_id: UUID or int of the model instance to be deleted
         :return: the deleted instance
         """
         with get_db_session() as session:
