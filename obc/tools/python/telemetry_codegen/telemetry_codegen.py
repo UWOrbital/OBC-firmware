@@ -1,7 +1,12 @@
 import toml
 import re
+from typing import TypedDict, cast
 
-def generate_c_macros(messages):
+Signal = TypedDict('Signal', { 'name': str, 'bit_width': int, 'min_value': int, 'max_value': int, 'value_type': str })
+Message = TypedDict('Message', { 'id': int, 'name': str, 'signals': list[Signal] })
+Data = TypedDict('Data', { 'messages': list[Message] })
+
+def generate_c_macros(messages: list[Message]) -> str:
     c_code = []
     reg = re.compile(r"^[_a-z][0-9_a-z]+$", re.IGNORECASE)
 
@@ -22,7 +27,7 @@ def generate_c_macros(messages):
 
     return ''.join(c_code)
 
-def generate_c_code_msg_defs(messages):
+def generate_c_code_msg_defs(messages: list[Message]) -> str:
     c_code = []
 
     for message in messages:
@@ -45,7 +50,7 @@ def generate_c_code_msg_defs(messages):
 
     return ''.join(c_code)
 
-def generate_c_code_msg_mailboxes(messages):
+def generate_c_code_msg_mailboxes(messages: list[Message]) -> str:
     c_code = []
 
     for message in messages:
@@ -55,7 +60,7 @@ def generate_c_code_msg_mailboxes(messages):
 
     return ''.join(c_code)
 
-def generate_c_set_get_functions(messages):
+def generate_c_set_get_functions(messages: list[Message]) -> str:
     c_code = []
 
     for message in messages:
@@ -105,7 +110,7 @@ def generate_c_set_get_functions(messages):
 
     return ''.join(c_code)
 
-def generate_c_serialization_deserialization_functions(messages):
+def generate_c_serialization_deserialization_functions(messages: list[Message]) -> str:
     c_code = []
 
     for message in messages:
@@ -156,7 +161,7 @@ def generate_c_serialization_deserialization_functions(messages):
 
     return ''.join(c_code)
 
-def generate_c_code_with_struct_and_macros(data):
+def generate_c_code_with_struct_and_macros(data: Data) -> str:
     """Generate C code with advanced serialization, mailbox struct, and min/max macros."""
     c_code = []
 
@@ -169,7 +174,7 @@ def generate_c_code_with_struct_and_macros(data):
     return ''.join(c_code)
 
 # Generate the C code with advanced serialization for the non-standard TOML data
-c_module_code_advanced_serialization = generate_c_code_with_struct_and_macros(toml.load(open('telemetry_input.toml')))
+c_module_code_advanced_serialization = generate_c_code_with_struct_and_macros(cast(Data, toml.load(open('telemetry_input.toml'))))
 
 with open("telem.h", "w") as f:
     f.write("#pragma once\n\n")
