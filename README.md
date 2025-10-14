@@ -20,6 +20,10 @@ Try running the following code added to App.tsx. The dots ```...``` represents t
 
 ```TypeScript
 ...
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './styles/toasts.css';
+
 import toastService from './services/Toast.service'
 ...
 
@@ -40,6 +44,7 @@ function App() {
        <button onClick={showSuccess} className="bg-lime-400 w-1/2 cursor-pointer">Success</button>
        <button onClick={showError} className="bg-red-400 btn w-1/2 cursor-pointer">Error</button>
    </div>
+   <ToastContainer />
   {/* --- END --- */}
   ...
  )
