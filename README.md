@@ -14,7 +14,22 @@ The service should be used within logic that handles asynchronous operations, su
 On Success, call ```toastService.success()``` with a confirmation message.
 On Error, call ```toastService.error()``` with an informative error message.
 
-## Testing
+### Example Implementation for a Form
+Place a single <ToastContainer /> at the application root and trigger toasts from the API service layer.
+
+```TypeScript
+const handleFormSubmit = async (formData) => {
+  try {
+    await apiClient.saveData(formData);
+    toastService.success("Data saved successfully!");
+  } catch (err: any) {
+    const message = err.response?.data?.message || "An unexpected error occurred.";
+    toastService.error(`Failed to save: ${message}`);
+  }
+};
+```
+
+## Example in App.tsx
 
 Try running the following code added to App.tsx. The dots ```...``` represents the rest of the code.
 
