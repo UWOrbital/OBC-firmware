@@ -21,12 +21,17 @@ class CliPanel(ScrollableContainer):
         super().__init__(*args, **kwargs)
         self.shell = shell
         self.cli_output_panel = None
+        #  Hold the original output stream
+        self.sys_stdout = sys.stdout
 
         #  Buf creates a StringIO instance, storing what is printed from the cli through a redirection of stdout
         self.buffer = io.StringIO()
 
-        #  Redirects the output stream (sys.stdout) to buf, meaning that anything printed will now be written to buf
+        #  Redirects the output stream (sys.stdout) to buffer, meaning that anything printed will now be written to buffer
         sys.stdout = self.buffer
+
+        #  Redirects the output stream of the gs shell to buffer
+        self.shell.stdout = sys.stdout
 
         if self.shell.intro is not None:
             print(self.shell.intro)
@@ -35,11 +40,15 @@ class CliPanel(ScrollableContainer):
         self.output_refresh = self.set_interval(1 / 600, self.update_cli)
         self.cli_output_panel = self.query_one("#cli-output-panel", Static)
 
-        # buffer.getvalue() returns the contents of the string buffer as a str
+        # Buffer.getvalue() returns the contents of the string buffer as a str
         self.cli_output = self.buffer.getvalue()
     
+    def on_unmount(self) -> None:
+        #  Upon exitting the cli, restore the original output stream
+        sys.stdout = self.sys_stdout
+
     def watch_cli_output(self, cli_output: str): 
-        if self.cli_output_panel:  # Defensive check
+        if self.cli_output_panel:
            self.cli_output_panel.update(f"CLI - {COM_PORT}\n" + self.cli_output)
 
     def update_cli(self) -> None:
@@ -73,7 +82,7 @@ class CliPanel(ScrollableContainer):
             if(command_parts[0] == "exit"):
                 self.app.exit()
                 return
-                
+
             self.run_cli_command_in_thread(cmd_function, args)
 
         except (AttributeError, IndexError):
