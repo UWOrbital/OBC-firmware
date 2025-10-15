@@ -11,34 +11,38 @@ class _Signal(TypedDict):
     max_value: int
     value_type: str
 
+
 class _Message(TypedDict):
     id: int
     name: str
     signals: list[_Signal]
 
+
 class _Data(TypedDict):
     messages: list[_Message]
 
+
 def _generate_c_macros(messages: list[_Message]) -> str:
     c_code = []
-    reg = re.compile(r'^[_a-z][0-9_a-z]+$', re.IGNORECASE)
+    reg = re.compile(r"^[_a-z][0-9_a-z]+$", re.IGNORECASE)
 
     for message in messages:
-        if (reg.match(message['name']) is None):
-            raise Exception('Invalid message name')
+        if reg.match(message["name"]) is None:
+            raise Exception("Invalid message name")
 
         c_code.append(f'// {message['name']}\n')
         c_code.append(f'#define telemetry_{message['name']}_msg_id {message['id']}\n')
 
-        for signal in message['signals']:
-            if (reg.match(signal['name']) is None):
-                raise Exception('Invalid signal name')
+        for signal in message["signals"]:
+            if reg.match(signal["name"]) is None:
+                raise Exception("Invalid signal name")
             c_code.append(f'#define telemetry_{message['name']}_{signal['name']}_max {signal['max_value']}\n')
             c_code.append(f'#define telemetry_{message['name']}_{signal['name']}_min {signal['min_value']}\n')
 
         c_code.append("\n")
 
     return "".join(c_code)
+
 
 def _generate_c_code_msg_defs(messages: list[_Message]) -> str:
     c_code = []
@@ -63,6 +67,7 @@ def _generate_c_code_msg_defs(messages: list[_Message]) -> str:
 
     return "".join(c_code)
 
+
 def _generate_c_code_msg_mailboxes(messages: list[_Message]) -> str:
     c_code = []
 
@@ -73,13 +78,14 @@ def _generate_c_code_msg_mailboxes(messages: list[_Message]) -> str:
 
     return "".join(c_code)
 
+
 def _generate_c_set_get_functions(messages: list[_Message]) -> str:
     c_code = []
 
     for message in messages:
         for signal in message["signals"]:
             max_value = 2 ** signal["bit_width"] - 1
-            if (signal["max_value"] < signal["min_value"]):
+            if signal["max_value"] < signal["min_value"]:
                 raise Exception("Invalid min & max values")
             range_value = signal["max_value"] - signal["min_value"]
 
@@ -123,6 +129,7 @@ def _generate_c_set_get_functions(messages: list[_Message]) -> str:
 
     return "".join(c_code)
 
+
 def _generate_c_serialization_deserialization_functions(messages: list[_Message]) -> str:
     c_code = []
 
@@ -141,16 +148,16 @@ def _generate_c_serialization_deserialization_functions(messages: list[_Message]
         for signal in message["signals"]:
             serialize_func += (
                 f'    bit_stream |= ((uint64_t){message["name"]}_mailbox.{signal["name"]} & '
-                    f'{hex(2**signal["bit_width"] - 1)}) << bit_offset;\n'
+                f'{hex(2**signal["bit_width"] - 1)}) << bit_offset;\n'
                 f'    bit_offset += {signal["bit_width"]};\n'
             )
 
         # Add padding bits (if necessary) and convert bit stream to byte array
         serialize_func += (
-            f'    for (int i = 0; i < {total_bytes}; ++i) {{\n'
-            f'        buffer[i] = (bit_stream >> (8 * i)) & 0xFF;\n'
-            f'    }}\n'
-            f'}}\n\n'
+            f"    for (int i = 0; i < {total_bytes}; ++i) {{\n"
+            f"        buffer[i] = (bit_stream >> (8 * i)) & 0xFF;\n"
+            f"    }}\n"
+            f"}}\n\n"
         )
         c_code.append(serialize_func)
 
@@ -168,7 +175,7 @@ def _generate_c_serialization_deserialization_functions(messages: list[_Message]
         for signal in message["signals"]:
             deserialize_func += (
                 f'    {message["name"]}_mailbox.{signal["name"]} = '
-                    f'(bit_stream >> bit_offset) & {hex(2**signal["bit_width"] - 1)};\n'
+                f'(bit_stream >> bit_offset) & {hex(2**signal["bit_width"] - 1)};\n'
                 f'    bit_offset += {signal["bit_width"]};\n'
             )
         deserialize_func += "}}\n\n"
@@ -176,21 +183,23 @@ def _generate_c_serialization_deserialization_functions(messages: list[_Message]
 
     return "".join(c_code)
 
+
 def generate_c_code_with_struct_and_macros(data: _Data) -> str:
     """Generate C code with advanced serialization, mailbox struct, and min/max macros."""
-    c_code = ['#pragma once\n\n#include <stdint.h>\n\n']
+    c_code = ["#pragma once\n\n#include <stdint.h>\n\n"]
 
-    c_code.append(_generate_c_macros(data['messages']))
-    c_code.append(_generate_c_code_msg_defs(data['messages']))
-    c_code.append(_generate_c_code_msg_mailboxes(data['messages']))
-    c_code.append(_generate_c_set_get_functions(data['messages']))
-    c_code.append(_generate_c_serialization_deserialization_functions(data['messages']))
+    c_code.append(_generate_c_macros(data["messages"]))
+    c_code.append(_generate_c_code_msg_defs(data["messages"]))
+    c_code.append(_generate_c_code_msg_mailboxes(data["messages"]))
+    c_code.append(_generate_c_set_get_functions(data["messages"]))
+    c_code.append(_generate_c_serialization_deserialization_functions(data["messages"]))
 
-    return ''.join(c_code)
+    return "".join(c_code)
+
 
 # Generate the C code with advanced serialization for the non-standard TOML data
-with open('telemetry_input.toml') as f:
+with open("telemetry_input.toml") as f:
     c_module_code_advanced_serialization = generate_c_code_with_struct_and_macros(cast(_Data, toml.load(f)))
 
-with open('telem.h', 'w') as f:
+with open("telem.h", "w") as f:
     f.write(c_module_code_advanced_serialization)
