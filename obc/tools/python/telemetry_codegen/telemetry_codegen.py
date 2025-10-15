@@ -30,14 +30,14 @@ def _generate_c_macros(messages: list[_Message]) -> str:
         if reg.match(message["name"]) is None:
             raise Exception("Invalid message name")
 
-        c_code.append(f'// {message['name']}\n')
-        c_code.append(f'#define telemetry_{message['name']}_msg_id {message['id']}\n')
+        c_code.append(f'// {message["name"]}\n')
+        c_code.append(f'#define telemetry_{message["name"]}_msg_id {message["id"]}\n')
 
         for signal in message["signals"]:
             if reg.match(signal["name"]) is None:
                 raise Exception("Invalid signal name")
-            c_code.append(f'#define telemetry_{message['name']}_{signal['name']}_max {signal['max_value']}\n')
-            c_code.append(f'#define telemetry_{message['name']}_{signal['name']}_min {signal['min_value']}\n')
+            c_code.append(f'#define telemetry_{message["name"]}_{signal["name"]}_max {signal["max_value"]}\n')
+            c_code.append(f'#define telemetry_{message["name"]}_{signal["name"]}_min {signal["min_value"]}\n')
 
         c_code.append("\n")
 
