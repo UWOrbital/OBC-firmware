@@ -1,5 +1,5 @@
 Screen {
-    background: $panel;  
+    background: rgb(36, 36, 36);  
     overflow-y: auto;
     layout: grid;
     grid-size: 3 3;
@@ -14,37 +14,47 @@ Static {
 }
 
 #logs {
-    background: $panel;
+    background: rgb(36, 36, 36);
     row-span: 3;
     scrollbar-size: 2 1;
-    border: round $text-primary 50%;
+    scrollbar-color: rgb(85, 161, 232);
+    scrollbar-color-hover: rgb(64, 128, 188);
+    scrollbar-color-active: rgb(77, 161, 239);
+    border: round rgb(85, 161, 232) 60%;
     height: 100%;
     padding-left: 1;
 }
 
 #cli {
     row-span: 2;
-    background: $panel;  
+    background: rgb(36, 36, 36);
     column-span: 2;
     height: 1fr;
-    border: round white 50%;
+    border: round rgb(242, 97, 97) 60%;
     padding-left: 1;
     scrollbar-size: 2 1;
+    scrollbar-color: rgb(242, 97, 97);
+    scrollbar-color-hover: rgb(196, 79, 79);
+    scrollbar-color-active: rgb(254, 115, 115);
     overflow-y: auto;
 }
 
 #cli-input {
     dock: bottom;
     border: blank rgb(28, 28, 28);
+    background: rgb(42, 42, 42);
 }
 
 #cmd-panel {
     scrollbar-size: 2 1;
-    background: $panel;   
+    background: rgb(36, 36, 36);   
     height: 1fr;
     padding-left: 1;
     margin-right: 1;
-    border: round $text-primary 50%;
+    border: round rgb(85, 161, 232) 60%;
+    scrollbar-color: rgb(85, 161, 232);
+    scrollbar-color-hover: rgb(64, 128, 188);
+    scrollbar-color-active: rgb(77, 161, 239);
 }
 
 #cmd-panel > Static {
@@ -58,10 +68,12 @@ Static {
     color: auto;
     margin-bottom: 1;
     padding: 1;
-    padding-left: 2;
+    padding-left: 3;
+    margin-right: 2;
 }
 
 #cmd-panel > CmdButton > Button {
+    background: rgb(45,45,45);
     align: right middle;
     column-span: 1;
 }
@@ -74,9 +86,9 @@ Static {
 #timetagged {
     layout: grid;
     color: white;
-    background: $panel;  
+    background: rgb(36, 36, 36); 
     height: 1fr;
-    border: round $text-primary 50%;
+    border: round rgb(85, 161, 232) 60%;
     grid-rows: auto;
     padding-left: 1;
 }
@@ -87,4 +99,23 @@ Static {
 
 #timetagged > DataTable {
     height: 100%;
+    background: rgb(40,40,40);
+}
+
+DataTable > .datatable--header{
+    background: rgb(48, 48, 48);
+}
+
+DataTable > .datatable--header-hover {
+    background: $block-hover-background 30%;
+}
+
+DataTable:focus > .datatable--cursor {
+    background: dodgerblue; 
+}
+
+DataTable > .datatable--cursor {
+    background: $block-hover-background 10%;
+    color: $block-cursor-blurred-foreground;
+    text-style: $block-cursor-blurred-text-style;
 }

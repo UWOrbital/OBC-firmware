@@ -30,7 +30,7 @@ class CliPanel(ScrollableContainer):
         #  Redirects the output stream (sys.stdout) to buffer, meaning that anything printed will now be written to buffer
         sys.stdout = self.buffer
 
-        #  Redirects the output stream of the gs shell to buffer
+        #  Redirects the output stream of the gs shell to buffer, allowing help descriptions to be displayed
         self.shell.stdout = sys.stdout
 
         if self.shell.intro is not None:
@@ -54,7 +54,7 @@ class CliPanel(ScrollableContainer):
     def update_cli(self) -> None:
         self.cli_output = self.buffer.getvalue()
     
-    # Use threads to ensure blocking commands don't block CLI
+    #  Use threads to ensure blocking commands don't block CLI
     def run_cli_command_in_thread(self, cmd_function, args):
         thread = threading.Thread(
             target=cmd_function,
