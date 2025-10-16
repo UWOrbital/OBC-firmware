@@ -13,6 +13,11 @@ Static {
     text-style: bold;
 }
 
+Button.-style-default:focus {
+    text-style: none;
+    background-tint: red 0%;    
+}
+
 #logs {
     background: rgb(36, 36, 36);
     row-span: 3;

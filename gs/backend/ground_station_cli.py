@@ -20,6 +20,7 @@ class GroundStationShell(Cmd):
         self._com_port: str = com_port
         self._conn_request_sent: bool = False
         self.background_logging: Process | None = None
+        self.stop_printing = False
 
         # At the start of each command shell use, we clear the file and create a dated title
         with open(LOG_PATH, "w") as file:
@@ -131,6 +132,8 @@ class GroundStationShell(Cmd):
         """
         Prints out logs and polls for log_pathlogs that are comming in. Use a Keyboard Interupt to exit (e.g. Ctrl + C)
         """
+        self.stop_printing = False
+
         # Preliminary checks for the function to run
         # Write out the logs that we previously got
         with open(LOG_PATH) as file:
@@ -141,8 +144,11 @@ class GroundStationShell(Cmd):
 
         # Here we run the function and catch an interrupt if it is executed by the user
         try:
-            poll(self._com_port, LOG_PATH, 1, True)
+            # We use lambda so that the poll function can acquire updated stop_printing values later
+            poll(self._com_port, LOG_PATH, 1, True, lambda: self.stop_printing)
         except KeyboardInterrupt:
+            print("Exiting polling...")
+        finally: 
             print("Exiting polling...")
 
         self._restart_logging()

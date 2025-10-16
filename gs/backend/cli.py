@@ -102,8 +102,6 @@ class CmdButton(HorizontalGroup):
         self.shell = shell
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        event.button.disabled = True
-        print(f"(UW Orbital): {self.cmdname}")
         cmd_function = getattr(self.shell, f"do_{self.cmdname}")
         args = ""
 
@@ -112,7 +110,20 @@ class CmdButton(HorizontalGroup):
             args=(args,),
             daemon=True
         )
-        thread.start()
+
+        if event.button.label != "STOP":
+            print(f"(UW Orbital): {self.cmdname}")
+            thread.start()
+
+            if self.cmdname != "print_logs":
+                event.button.disabled = True
+
+        if self.cmdname == "print_logs":
+            if event.button.label == "Run":
+                event.button.label = "STOP"
+            else:
+                event.button.label = "Run"
+                self.shell.stop_printing = True
 
     def compose(self) -> ComposeResult:
         yield Label(f"{self.cmdname}", id="button-label")
