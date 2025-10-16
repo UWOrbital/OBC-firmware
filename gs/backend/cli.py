@@ -99,10 +99,20 @@ class CmdButton(HorizontalGroup):
     def __init__(self, cmdname):
         super().__init__()
         self.cmdname = cmdname
-    
+        self.shell = shell
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        cmd_function = getattr(shell, f"do_{self.cmdname}")
-        cmd_function("")
+        event.button.disabled = True
+        print(f"(UW Orbital): {self.cmdname}")
+        cmd_function = getattr(self.shell, f"do_{self.cmdname}")
+        args = ""
+
+        thread = threading.Thread(
+            target=cmd_function,
+            args=(args,),
+            daemon=True
+        )
+        thread.start()
 
     def compose(self) -> ComposeResult:
         yield Label(f"{self.cmdname}", id="button-label")
