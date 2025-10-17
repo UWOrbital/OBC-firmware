@@ -81,7 +81,7 @@ const Requests = () => {
       cell: (info) => info.getValue().toString(),
     }),
     columnHelper.accessor("request_sent_to_obc_on", {
-      header: "Request Sent to OBC On",
+      header: "Request Sent To OBC On",
       cell: (info) => info.getValue()?.toString() || "",
     }),
     columnHelper.accessor("pic_taken_on", {
@@ -89,7 +89,7 @@ const Requests = () => {
       cell: (info) => info.getValue()?.toString() || "",
     }),
     columnHelper.accessor("pic_transmitted_on", {
-      header: "Picture transmitted On",
+      header: "Picture Transmitted On",
       cell: (info) => info.getValue()?.toString() || "",
     }),
     columnHelper.display({
@@ -109,7 +109,7 @@ const Requests = () => {
       header: "Cancel Request",
       cell: ({ row }) => (
         <button
-          disabled={new Date() >= row.original.cancellable_after}
+          disabled={new Date() < row.original.cancellable_after}
           onClick={cancelRequest(row.original.id)}
         >
           Cancel Request {row.original.id}
@@ -160,7 +160,7 @@ const Requests = () => {
                     header.column.columnDef.header,
                     header.getContext()
                   )}
-                  {header.column.getIsSorted() === "asc" ? " ↑" : ""}
+                  {header.column.getIsSorted() === "asc" ? " ↑ " : ""}
                   {header.column.getIsSorted() === "desc" ? " ↓ " : ""}
                 </th>
               ))}

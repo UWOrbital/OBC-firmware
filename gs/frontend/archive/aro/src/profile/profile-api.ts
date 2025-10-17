@@ -10,7 +10,6 @@ export const getRequestItems = async (): Promise<RequestItemData[]> => {
 
     const data = await response.json();
 
-
     return data.map((item: any) => ({
       ...item,
       status: item.status.toLowerCase(),
@@ -21,7 +20,8 @@ export const getRequestItems = async (): Promise<RequestItemData[]> => {
       cancellable_after: item.cancellable_after ? new Date(item.cancellable_after) : new Date(),
     }));
   } catch (error) {
-    console.error('Error fetching ARO requests:', error);
+    console.error('Error fetching ARO requests: ', error);
     throw error;
   }
 };
+
