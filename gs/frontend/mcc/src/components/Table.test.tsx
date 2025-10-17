@@ -46,14 +46,10 @@ describe("Table Component", () => {
     render(<Table data={testData} columns={columns} showFilters={true} />);
 
     const filterInputs = screen.getAllByRole("textbox");
-    expect(filterInputs).toHaveLength(2);
+    expect(filterInputs).toHaveLength(1);
     expect(filterInputs[0]).toHaveAttribute(
       "placeholder",
-      "Filter a column..."
-    );
-    expect(filterInputs[1]).toHaveAttribute(
-      "placeholder",
-      "Filtered item name"
+      "Search..."
     );
   });
 
