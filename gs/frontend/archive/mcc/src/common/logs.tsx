@@ -1,40 +1,27 @@
 import Table from "react-bootstrap/Table";
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 
-function LogItem() {
-  const [date, setDate] = useState(Date.now());
-  const [log, setLog] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  const fetchLogData = async () => {
-    const response = await fetch(`http://localhost:5000/recent-logs/`);
-    const data = await response.json();
-    setDate(data.date);
-    setLog(data.log);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchLogData();
-    const interval = setInterval(fetchLogData, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
+function LogItem({ log }: { log: any }) {
   return (
     <tr>
-      {loading ? <td>Loading...</td> : (
-        <>
-          <td>{date}</td>
-          <td>{log}</td>
-          {" "}
-        </>
-      )}
+      <td>{log.date}</td>
+      <td>{log.log}</td>
     </tr>
   );
 }
 
 function Logs() {
-  const count = 5;
+  const { data, isLoading} = useQuery({
+    queryKey: ["logData"],
+    queryFn: async () => {
+      const response = await fetch("http://localhost:8000/api/v1/mcc/logs/");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    },
+  });
+
   return (
     <div className="logs layout">
       <Table responsive="sm">
@@ -45,7 +32,11 @@ function Logs() {
           </tr>
         </thead>
         <tbody>
-          {[...Array(count).keys()].map((key) => <LogItem key={key} />)}
+          {isLoading ? (
+            <tr><td colSpan={2}>Loading...</td></tr>
+          ) : (
+            data?.map((log: any, idx: number) => <LogItem key={idx} log={log} />)
+          )}
         </tbody>
       </Table>
     </div>
