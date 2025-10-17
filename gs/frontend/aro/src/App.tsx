@@ -2,6 +2,9 @@ import { Routes } from "react-router-dom";
 import Nav from "./components/Nav";
 import Background from "./components/Background";
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 /**
  * @brief App component displaying the main application
  * @return tsx element of App component
@@ -21,6 +24,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} /> */}
       </Routes>
+      <ToastContainer />
     </>
   );
 }
