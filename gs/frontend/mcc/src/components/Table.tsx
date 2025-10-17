@@ -32,7 +32,6 @@ function Table<T>({
   showFilters = true,
   containerClassName = "w-full max-w-5xl",
 }: TableProps<T>) {
-  const [columnFilters, setColumnFilters] = useState("");
   const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
@@ -54,14 +53,7 @@ function Table<T>({
         <div className="flex justify-between mb-6 gap-4">
           <input
             type="text"
-            placeholder="Filter a column..."
-            value={columnFilters}
-            onChange={(e) => setColumnFilters(e.target.value)}
-            className="flex-1 bg-gray-800/50 text-white px-4 py-2 rounded-lg border border-gray-600/50 focus:outline-none focus:border-gray-500"
-          />
-          <input
-            type="text"
-            placeholder="Filtered item name"
+            placeholder="Search..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="flex-1 bg-gray-800/50 text-white px-4 py-2 rounded-lg border border-gray-600/50 focus:outline-none focus:border-gray-500"

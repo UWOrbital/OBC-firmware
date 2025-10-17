@@ -1,14 +1,6 @@
-// Shared types based on database schema for ARO and MCC frontends
+// Types for MCC frontend based on database schema
 
 // Enums matching database schema
-export type AROCommandStatus =
-  | 'pending'
-  | 'scheduled'
-  | 'taken'
-  | 'cancelled'
-  | 'failed'
-  | 'completed';
-
 export type CommandStatus =
   | 'pending'
   | 'scheduled'
@@ -26,19 +18,6 @@ export type SessionStatus =
 export type MainPacketType = 'uplink' | 'downlink';
 
 // Database table interfaces
-export interface ARORequest {
-  id: number;
-  aro_id: number;
-  latitude: number; // decimal in DB, number in TS
-  longitude: number; // decimal in DB, number in TS
-  status: AROCommandStatus;
-  created_on: string; // ISO datetime string
-  request_sent_to_obc_on: string | null;
-  pic_taken_on: string | null;
-  pic_transmitted_on: string | null;
-  packet_id: number | null;
-}
-
 export interface Session {
   id: number;
   start_time: string; // ISO datetime string

@@ -85,7 +85,6 @@ const data: CommandData[] = [
  */
 function Commands() {
   const handleCommandSelect = (command: CommandData) => {
-    // TODO: Handle command selection (e.g., show details in a modal)
     console.log("Selected command:", command.command);
   };
 
