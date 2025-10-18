@@ -1,8 +1,8 @@
 import "./new-request-form.css";
 import InputForm from "./input-form";
 import MapView from "./map-view";
-import { useQuery } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import  React, { useEffect } from "react";
 
 export function isInvalidCoordinate(lat: number, lng: number) {
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
@@ -34,6 +34,10 @@ export async function getUserLocation(): Promise<{ latitude: number; longitude: 
 }
 
 const NewRequestForm = () => {
+  useEffect(() => {
+    alert('Welcome to the new request form! Enter your coordinates on the left or select them on the map by holding Shift and clicking your desired location.');
+  }, []);
+
   const queryClient = useQueryClient();
   const { data: location, isLoading, isError } = useQuery({
     queryKey: ["coords"],
