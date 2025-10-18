@@ -26,7 +26,7 @@ export async function getUserLocation(): Promise<{ latitude: number; longitude: 
         });
       },
       (error) => {
-        console.error("Geolocation error:", error); // 👈 Add this
+        console.error("Geolocation error:", error);
         reject(error);
       }
     );
