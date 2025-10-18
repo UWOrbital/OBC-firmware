@@ -1,66 +1,10 @@
 import "./new-request-form.css";
-import React, { useState, useEffect} from "react";
 import InputForm from "./input-form";
 import MapView from "./map-view";
+import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-const NewRequestForm = () => {
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude);
-        setLongitude(position.coords.longitude);
-      }
-    );
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newLatitude = parseFloat(formData.get("latitude") as string);
-    const newLongitude = parseFloat(formData.get("longitude") as string);
-
-    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLInputElement;
-    const action = submitter?.value;
-
-    if (newLatitude !== null && !isNaN(newLatitude) &&
-      newLongitude !== null && !isNaN(newLongitude)) {
-
-      if (isInvalidCoordinate(newLatitude, newLongitude)) alert("Please enter valid coordinates!");
-      else {
-        setLatitude(newLatitude);
-        setLongitude(newLongitude);
-        if (action === "Submit") {
-          // TODO: Submit coordiantes to backend
-          alert(`Request submitted at (${newLatitude}, ${newLongitude})`);
-        }
-      }
-    }
-  };
-
-  const handleCoordinateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const name = e.target.name;
-    if (name == "latitude") {
-        if (value === "") {
-          setLatitude(null);
-        } else {
-          const num = parseFloat(value);
-          if (!isNaN(num)) setLatitude(num);
-        }
-    } else {
-        if (value === "") {
-          setLongitude(null);
-        } else {
-          const num = parseFloat(value);
-          if (!isNaN(num)) setLongitude(num);
-        }
-    }
-  };
-
-  function isInvalidCoordinate(lat: number, lng: number) {
+export function isInvalidCoordinate(lat: number, lng: number) {
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
       return true;
     } else {
@@ -68,25 +12,87 @@ const NewRequestForm = () => {
     }
   }
 
+export async function getUserLocation(): Promise<{ latitude: number; longitude: number }> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation not supported"));
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.error("Geolocation error:", error); // 👈 Add this
+        reject(error);
+      }
+    );
+  });
+}
+
+const NewRequestForm = () => {
+  const queryClient = useQueryClient();
+  const { data: location, isLoading, isError } = useQuery({
+    queryKey: ["coords"],
+    queryFn: getUserLocation,
+    staleTime: Infinity,
+    retry: false,
+  });
+
+  const latitude = location?.latitude ?? null;
+  const longitude = location?.longitude ?? null;
+
+const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  const formData = new FormData(e.currentTarget);
+  const newLatitude = parseFloat(formData.get("latitude") as string);
+  const newLongitude = parseFloat(formData.get("longitude") as string);
+
+  const nativeEvent = e.nativeEvent as SubmitEvent;
+  const submitter = nativeEvent.submitter as HTMLButtonElement | null;
+  const action = submitter?.value;
+
+  if (isNaN(newLatitude) || isNaN(newLongitude)) return;
+
+  if (isInvalidCoordinate(newLatitude, newLongitude)) {
+    alert("Please enter valid coordinates!");
+    return;
+  }
+
+  queryClient.setQueryData(["coords"], {
+    latitude: newLatitude,
+    longitude: newLongitude,
+  });
+
+  if (action === "Validate") {
+    alert("Coordinates validated and saved!");
+  } else if (action === "Submit") {
+    alert(`Request submitted at (${newLatitude}, ${newLongitude})`);
+  }
+};
+
+  if (isLoading) {
+    return <div className="p-4 text-gray-600">Fetching your location...</div>;
+  }
+
+  if (isError) {
+    return <div className="p-4 text-red-600">Failed to get your location.</div>;
+  }
+
   return (
     <div className = "form-container flex mt-25">
       <div className="w-1/4 max-h-500 overflow-auto">
         <InputForm
-          latitude={latitude}
-          longitude={longitude}
           handleSubmit={handleSubmit}
-          handleLatitudeChange={handleCoordinateChange}
-          handleLongitudeChange={handleCoordinateChange}
         />
       </div>
   {latitude !== null && longitude !== null && (
     <div className="flex-1">
-      <MapView
-        latitude={latitude}
-        longitude={longitude}
-        setLatitude={setLatitude}
-        setLongitude={setLongitude}
-      />
+      <MapView/>
     </div>
   )}
   </div>  );
