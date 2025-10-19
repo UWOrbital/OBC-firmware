@@ -1,6 +1,9 @@
-import { Routes } from "react-router-dom";
 import Nav from "./components/Nav";
+import { Routes } from "react-router-dom";
 import Background from "./components/Background";
+
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 /**
  * @brief App component displaying the main application
@@ -20,6 +23,7 @@ function App() {
         <Route path="/live-sessions" element={<LiveSessions />} />
         <Route path="/login" element={<Login />} /> */}
       </Routes>
+      <ToastContainer />
     </>
   );
 }
