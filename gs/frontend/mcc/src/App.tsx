@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Nav from "./components/Nav";
 import Background from "./components/Background";
-import Commands from "./pages/Command/CommandsPage";
+import Commands from "./pages/Command/Commands";
 import Dashboard from "./pages/Dashboard";
 // import Commands from "./pages/Commands";
 import AROAdmin from "./pages/AROAdmin";
