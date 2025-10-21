@@ -38,9 +38,19 @@ export interface Packet {
 
 export interface Command {
   id: number;
-  status: CommandStatus;
-  type: number; // References master.commands.id
   params: string;
+  format: string;
+  data_size: number;
+  total_size: number;
+}
+
+export interface AvailableCommand extends Command {
+  name: string;
+}
+
+export interface SentCommand extends Command {
+  type: number; // References master.commands.id
+  status: CommandStatus;
 }
 
 export interface Telemetry {
