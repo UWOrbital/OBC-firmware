@@ -187,7 +187,7 @@ class TimeTaggedLogs(HorizontalScroll):
     A horizontal scrollable widget displaying time-tagged command logs
     """
 
-    def __init__(self, *args: Widget, **kwargs: str) -> None:
+    def __init__(self, *args: Widget, **kwargs: bool | str | None) -> None:
         """
         Initialize the time-tagged logs table with sample data
         """
