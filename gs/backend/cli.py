@@ -26,11 +26,11 @@ class CliPanel(ScrollableContainer):
 
     cli_output = reactive("")
 
-    def __init__(self, *widgets: Widget, id: str | None) -> None:
+    def __init__(self, *widgets: Widget, widgetID: str | None) -> None:
         """
         Initialize the CLI panel and set up output redirection
         """
-        super().__init__(*widgets, id=id)
+        super().__init__(*widgets, id=widgetID)
         self.shell = shell
         self.cli_output_panel: Static | None = None
         #  Hold the original output stream
@@ -187,11 +187,11 @@ class TimeTaggedLogs(HorizontalScroll):
     A horizontal scrollable widget displaying time-tagged command logs
     """
 
-    def __init__(self, *widgets: Widget, id: str | None) -> None:
+    def __init__(self, *widgets: Widget, widgetID: str | None) -> None:
         """
         Initialize the time-tagged logs table with sample data
         """
-        super().__init__(*widgets, id=id)
+        super().__init__(*widgets, id=widgetID)
         self.rows = [
             ("CMD", "Time", "Cate1", "Cate2"),
             ("ABC", "ABC", "ABC", "ABC"),
