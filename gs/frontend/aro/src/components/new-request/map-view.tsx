@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, useMap, Marker, Popup, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient} from "@tanstack/react-query";
 import React from "react";
 
 function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
@@ -30,10 +30,15 @@ function LocationSelector() {
 }
 
 const MapView: React.FC = () => {
+  const queryClient = useQueryClient();
 
   const { data } = useQuery<{ latitude: number; longitude: number }>({
     queryKey: ["coords"],
-    initialData: { latitude: 0, longitude: 0 },
+    queryFn: async () => {
+      const cached = queryClient.getQueryData<{ latitude: number; longitude: number }>(["coords"]);
+      if (!cached) throw new Error("No coordinates yet");
+      return cached;
+    },
     staleTime: Infinity,
   });
 

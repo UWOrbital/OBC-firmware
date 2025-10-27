@@ -5,12 +5,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import  React, { useEffect } from "react";
 
 export function isInvalidCoordinate(lat: number, lng: number) {
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      return true;
-    } else {
-      return false;
-    }
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return true;
+  } else {
+    return false;
   }
+}
 
 export async function getUserLocation(): Promise<{ latitude: number; longitude: number }> {
   return new Promise((resolve, reject) => {
@@ -49,35 +49,35 @@ const NewRequestForm = () => {
   const latitude = location?.latitude ?? null;
   const longitude = location?.longitude ?? null;
 
-const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  const formData = new FormData(e.currentTarget);
-  const newLatitude = parseFloat(formData.get("latitude") as string);
-  const newLongitude = parseFloat(formData.get("longitude") as string);
+    const formData = new FormData(e.currentTarget);
+    const newLatitude = parseFloat(formData.get("latitude") as string);
+    const newLongitude = parseFloat(formData.get("longitude") as string);
 
-  const nativeEvent = e.nativeEvent as SubmitEvent;
-  const submitter = nativeEvent.submitter as HTMLButtonElement | null;
-  const action = submitter?.value;
+    const nativeEvent = e.nativeEvent as SubmitEvent;
+    const submitter = nativeEvent.submitter as HTMLButtonElement | null;
+    const action = submitter?.value;
 
-  if (isNaN(newLatitude) || isNaN(newLongitude)) return;
+    if (isNaN(newLatitude) || isNaN(newLongitude)) return;
 
-  if (isInvalidCoordinate(newLatitude, newLongitude)) {
-    alert("Please enter valid coordinates!");
-    return;
-  }
+    if (isInvalidCoordinate(newLatitude, newLongitude)) {
+      alert("Please enter valid coordinates!");
+      return;
+    }
 
-  queryClient.setQueryData(["coords"], {
-    latitude: newLatitude,
-    longitude: newLongitude,
-  });
+    queryClient.setQueryData(["coords"], {
+      latitude: newLatitude,
+      longitude: newLongitude,
+    });
 
-  if (action === "Validate") {
-    alert("Coordinates validated and saved!");
-  } else if (action === "Submit") {
-    alert(`Request submitted at (${newLatitude}, ${newLongitude})`);
-  }
-};
+    if (action === "Validate") {
+      alert("Coordinates validated and saved!");
+    } else if (action === "Submit") {
+      alert(`Request submitted at (${newLatitude}, ${newLongitude})`);
+    }
+  };
 
   if (isLoading) {
     return <div className="p-4 text-gray-600">Fetching your location...</div>;
@@ -94,11 +94,13 @@ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
           handleSubmit={handleSubmit}
         />
       </div>
-  {latitude !== null && longitude !== null && (
-    <div className="flex-1">
-      <MapView/>
-    </div>
-  )}
-  </div>  );
+    {latitude !== null && longitude !== null && (
+      <div className="flex-1">
+        <MapView/>
+      </div>
+    )}
+  </div>
+  );
 };
+
 export default NewRequestForm;
