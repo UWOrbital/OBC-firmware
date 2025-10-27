@@ -237,7 +237,7 @@ class LogsPanel(Static):
 
     def update_logs(self) -> None:
         """
-        Read and update the logs from the log file
+        Read and update logs from the log file
         """
         try:
             with open("gs/backend/logs.log") as logs:
