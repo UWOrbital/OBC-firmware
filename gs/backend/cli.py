@@ -82,7 +82,7 @@ class CliPanel(ScrollableContainer):
         self.cli_output = self.buffer.getvalue()
 
     #  Use threads to ensure blocking commands don't block CLI
-    def run_cli_command_in_thread(self, cmd_function: Callable[[str, None]], args: str) -> None:
+    def run_cli_command_in_thread(self, cmd_function: Callable[[str], None], args: str) -> None:
         """
         Run a CLI command in a separate thread to avoid blocking the UI
         """
