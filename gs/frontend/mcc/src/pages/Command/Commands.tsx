@@ -1,5 +1,8 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import Table from "../components/Table";
+import Table from "../../components/Table";
+import SelectCommand from "./components/SelectCommand";
+import SendCommand from "./components/SendCommand";
+import { useState } from "react";
 
 type CommandData = {
   session: string;
@@ -84,18 +87,22 @@ const data: CommandData[] = [
  * @return tsx element of Commands component
  */
 function Commands() {
+  const [selectedCommand, setSelectedCommand] = useState<string>("");
   const handleCommandSelect = (command: CommandData) => {
     console.log("Selected command:", command.command);
   };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 pt-32">
-      <Table
-        data={data}
-        columns={columns}
-        onRowClick={handleCommandSelect}
-        showFilters={true}
-      />
+    <div>
+      <div className="min-h-screen w-full flex justify-center items-center space-x-10">
+          {selectedCommand !== "" && <SendCommand selectedCommandName={selectedCommand} setCommand={setSelectedCommand} />}
+        <Table
+          data={data}
+          columns={columns}
+          onRowClick={handleCommandSelect}
+          showFilters={true}
+        />
+      </div>
+      <SelectCommand selectedCommand={selectedCommand} setCommand={setSelectedCommand} />
     </div>
   );
 }
