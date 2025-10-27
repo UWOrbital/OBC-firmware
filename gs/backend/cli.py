@@ -118,7 +118,7 @@ class CliPanel(ScrollableContainer):
 
             # Disable send_conn_request cmd btn if manually typed in
             if command_parts[0] == "send_conn_request":
-                btn = self.app.query_one("#btn-send_conn_request")
+                btn = cast(Button, self.app.query_one("#btn-send_conn_request"))
                 btn.disabled = True
 
             self.run_cli_command_in_thread(cmd_function, args)
