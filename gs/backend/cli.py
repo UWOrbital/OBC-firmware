@@ -21,7 +21,7 @@ shell = GroundStationShell(COM_PORT)
 
 class CliPanel(ScrollableContainer):
     """
-    CLI panel class, handling command input and output display
+    CLI panel class, handling command input and output displays
     """
 
     cli_output = reactive("")
