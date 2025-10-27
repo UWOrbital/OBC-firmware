@@ -75,6 +75,7 @@ function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName:
     }));
   };
 
+  // TODO: Replace validateParameter with command-specific data validation
   // Validate input based on parameter type
   const validateParameter = (param: CommandParameter, value: string): boolean => {
     if (!value.trim()) {

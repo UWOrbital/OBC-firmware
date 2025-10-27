@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { mockCommandsList } from "../../../utils/mock-data.ts" // temporary commands list
-import type { AvailableCommand } from "../../../utils/types.ts"
+import type { Command } from "../../../utils/types.ts"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -22,7 +22,7 @@ function SelectCommand({selectedCommand, setCommand}: {selectedCommand: string; 
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Commands</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {mockCommandsList.map((command: AvailableCommand) => (
+        {mockCommandsList.map((command: Command) => (
           <DropdownMenuCheckboxItem
             key={command.id}
             checked={selectedCommand === command.name}
