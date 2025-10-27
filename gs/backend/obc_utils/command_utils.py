@@ -319,10 +319,10 @@ def generate_command(args: str) -> tuple[CmdMsg | None, bool]:
 
 
 def poll(
-        com_port: str, 
-        file_path: str | Path, 
-        timeout: int = 0, 
-        print_console: bool = False, 
+        com_port: str,
+        file_path: str | Path,
+        timeout: int = 0,
+        print_console: bool = False,
         stop_flag: Callable[[], bool] | None = None
         ) -> None:
     """

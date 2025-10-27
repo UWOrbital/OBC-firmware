@@ -26,7 +26,7 @@ class CliPanel(ScrollableContainer):
 
     cli_output = reactive("")
 
-    def __init__(self, *args: Widget, **kwargs: bool | str | None) -> None:
+    def __init__(self, *args: Widget, **kwargs: dict[str, bool | str | None]) -> None:
         """
         Initialize the CLI panel and set up output redirection
         """
@@ -244,7 +244,7 @@ class LogsPanel(Static):
             with open("gs/backend/logs.log") as logs:
                 self.logs = logs.read()
         except FileNotFoundError:
-            print("File unable to be found")
+            print("Logs file not found. Try running interface from root directory (OBC-Firmware)?")
 
     def watch_logs(self, logs: str) -> None:
         """
