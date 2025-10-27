@@ -1,5 +1,5 @@
 Screen {
-    background: rgb(36, 36, 36);  
+    background: rgb(36, 36, 36);
     overflow-y: auto;
     layout: grid;
     grid-size: 3 3;
@@ -15,7 +15,7 @@ Static {
 
 Button.-style-default:focus {
     text-style: none;
-    background-tint: red 0%;    
+    background-tint: red 0%;
 }
 
 #logs {
@@ -52,7 +52,7 @@ Button.-style-default:focus {
 
 #cmd-panel {
     scrollbar-size: 2 1;
-    background: rgb(36, 36, 36);   
+    background: rgb(36, 36, 36);
     height: 1fr;
     padding-left: 1;
     border: round rgb(85, 161, 232) 60%;
@@ -90,7 +90,7 @@ Button.-style-default:focus {
 #timetagged {
     layout: grid;
     color: white;
-    background: rgb(36, 36, 36); 
+    background: rgb(36, 36, 36);
     height: 1fr;
     border: round rgb(85, 161, 232) 60%;
     grid-rows: auto;
@@ -115,7 +115,7 @@ DataTable > .datatable--header-hover {
 }
 
 DataTable:focus > .datatable--cursor {
-    background: dodgerblue; 
+    background: dodgerblue;
 }
 
 DataTable > .datatable--cursor {
