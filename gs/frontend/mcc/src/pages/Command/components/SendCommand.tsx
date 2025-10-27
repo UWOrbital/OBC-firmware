@@ -19,11 +19,20 @@ interface ParameterValues {
   [key: string]: string;
 }
 
-const submitAlerts = {
-  0: { destructive: false, title: "", description: "" },
-  1: { destructive: false, title: "Success — Command submitted!", description: "", timeout: 7000 },
-  2: { destructive: true, title: "Form Invalid. Please fill in all required fields with valid values.", description: "", timeout: null },
-  3: { destructive: true, title: "An unknown error occurred. Please try again.", description: "", timeout: null },
+const SubmitStatus = {
+  None: 'NONE',
+  Success: 'SUCCESS',
+  InvalidForm: 'INVALID_FORM',
+  UnknownError: 'UNKNOWN_ERROR'
+} as const;
+
+type SubmitStatus = typeof SubmitStatus[keyof typeof SubmitStatus];
+
+const submitAlerts: Record<SubmitStatus, { destructive: boolean; title: string; description: string; timeout?: number | null }> = {
+  [SubmitStatus.None]: { destructive: false, title: "", description: "" },
+  [SubmitStatus.Success]: { destructive: false, title: "Success — Command submitted!", description: "", timeout: 7000 },
+  [SubmitStatus.InvalidForm]: { destructive: true, title: "Form Invalid. Please fill in all required fields with valid values.", description: "", timeout: null },
+  [SubmitStatus.UnknownError]: { destructive: true, title: "An unknown error occurred. Please try again.", description: "", timeout: null },
 };
 
 /**
@@ -34,7 +43,7 @@ function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName:
   const [matchedCommand, setMatchedCommand] = useState<ExtendedCommand | null>(null);
   const [parameterValues, setParameterValues] = useState<ParameterValues>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [submitCode, setSubmitCode] = useState<keyof typeof submitAlerts>(0);
+  const [currentSubmitStatus, setCurrentSubmitStatus] = useState<SubmitStatus>(SubmitStatus.None);
 
   // Detect selectedCommandName changes and update states accordingly
   useEffect(() => {
@@ -115,10 +124,10 @@ function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName:
     e.preventDefault();
 
     if (!matchedCommand || !isFormValid()) {
-      setSubmitCode(2);
+      setCurrentSubmitStatus(SubmitStatus.InvalidForm);
       return;
     }
-    setSubmitCode(0);
+    setCurrentSubmitStatus(SubmitStatus.None);
     setIsSubmitting(true);
 
     try {
@@ -141,7 +150,7 @@ function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName:
 
       console.log('Submitting command:', submissionData);
 
-      setSubmitCode(1); // Success
+      setCurrentSubmitStatus(SubmitStatus.Success);
 
       const initialValues: ParameterValues = {};
       matchedCommand.parameters.forEach(param => {
@@ -151,7 +160,7 @@ function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName:
 
     } catch (error) {
       console.error('Error submitting command:', error);
-      setSubmitCode(3); // Unknown error
+      setCurrentSubmitStatus(SubmitStatus.UnknownError);
     } finally {
       setIsSubmitting(false);
     }
@@ -220,8 +229,8 @@ function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName:
 
   return (
     <div className="p-4 space-y-6 bg-card w-96 border rounded-md animate-in zoom-in-75 duration-300 slide-in-from-left-10">
-        {submitCode !== 0 && (
-            <CustomAlert destructive={submitAlerts[submitCode].destructive} title={submitAlerts[submitCode].title} description={submitAlerts[submitCode].description} timeout={submitAlerts[submitCode].timeout} />
+        {currentSubmitStatus !== SubmitStatus.None && (
+            <CustomAlert destructive={submitAlerts[currentSubmitStatus].destructive} title={submitAlerts[currentSubmitStatus].title} description={submitAlerts[currentSubmitStatus].description} timeout={submitAlerts[currentSubmitStatus].timeout} />
         )}
       <form onSubmit={handleSubmit}>
         <FieldGroup>

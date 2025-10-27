@@ -1,4 +1,4 @@
-import type { AvailableCommand } from "./types";
+import type { Command } from "./types";
 
 // Extended command interface with parameter details
 export interface CommandParameter {
@@ -7,7 +7,7 @@ export interface CommandParameter {
   size?: number; // size in bytes for int/float
 }
 
-export interface ExtendedCommand extends AvailableCommand {
+export interface ExtendedCommand extends Command {
   parameters: CommandParameter[];
 }
 

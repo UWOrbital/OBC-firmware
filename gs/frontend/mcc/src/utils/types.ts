@@ -37,15 +37,12 @@ export interface Packet {
 }
 
 export interface Command {
+  name: string;
   id: number;
   params: string;
   format: string;
   data_size: number;
   total_size: number;
-}
-
-export interface AvailableCommand extends Command {
-  name: string;
 }
 
 export interface SentCommand extends Command {
