@@ -3,7 +3,7 @@ import type { AvailableCommand } from "./types";
 // Extended command interface with parameter details
 export interface CommandParameter {
   name: string;
-  type: 'int' | 'float' | 'string' | 'boolean'; // this needs to be confirmed with actual types used
+  type: 'int' | 'float' | 'string' | 'boolean'; // TODO: this needs to be confirmed with actual types used
   size?: number; // size in bytes for int/float
 }
 
