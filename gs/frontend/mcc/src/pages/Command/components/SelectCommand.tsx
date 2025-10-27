@@ -2,8 +2,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { mockCommandsList } from "../../../utils/mock-data.ts" // temporary commands list
 import type { AvailableCommand } from "../../../utils/types.ts"
-import { selectCommand, setCommand } from "../features/selectCommandSlice.ts";
-import { useAppDispatch, useAppSelector } from "@/store/hooks.ts";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,10 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-function SelectCommand() {
-  const dispatch = useAppDispatch();
-  const selectedCommand = useAppSelector(selectCommand);
-
+function SelectCommand({selectedCommand, setCommand}: {selectedCommand: string; setCommand: (cmd: string) => void;}) {
   return (
      <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -31,7 +26,7 @@ function SelectCommand() {
           <DropdownMenuCheckboxItem
             key={command.id}
             checked={selectedCommand === command.name}
-            onCheckedChange={() => dispatch(setCommand(command.name))}
+            onCheckedChange={() => setCommand(command.name)}
           >
             {command.name}
           </DropdownMenuCheckboxItem>

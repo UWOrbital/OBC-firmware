@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { selectCommand, setCommand } from '../features/selectCommandSlice';
 import { mockCommandsList, type ExtendedCommand, type CommandParameter } from '../../../utils/mock-data';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -32,9 +30,7 @@ const submitAlerts = {
  * @brief SendCommand component for displaying and submitting command parameters
  * @return tsx element of SendCommand component
  */
-function SendCommand() {
-  const dispatch = useAppDispatch();
-  const selectedCommandName = useAppSelector(selectCommand);
+function SendCommand({ selectedCommandName, setCommand }: { selectedCommandName: string; setCommand: (cmd: string) => void; }) {
   const [matchedCommand, setMatchedCommand] = useState<ExtendedCommand | null>(null);
   const [parameterValues, setParameterValues] = useState<ParameterValues>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -267,7 +263,7 @@ function SendCommand() {
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
               )}
             </Button>
-            <Button variant="outline" type="button" onClick={() => dispatch(setCommand(""))} disabled={isSubmitting}>
+            <Button variant="outline" type="button" onClick={() => setCommand("")} disabled={isSubmitting}>
               Cancel
             </Button>
           </Field>
