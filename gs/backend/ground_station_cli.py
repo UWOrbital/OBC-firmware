@@ -34,7 +34,7 @@ class GroundStationShell(Cmd):
     ██║   ██║██║███╗██║    ██║   ██║██╔══██╗██╔══██╗██║   ██║   ██╔══██║██║
     ╚██████╔╝╚███╔███╔╝    ╚██████╔╝██║  ██║██████╔╝██║   ██║   ██║  ██║███████╗
      ╚═════╝  ╚══╝╚══╝      ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
-  Welcome to the UW Orbital Command Line Inteface! Type help or ? to list commands.\n
+  Welcome to the UW Orbital Command Line Interface! Type help or ? to list commands.\n
     """
     prompt = "(UW Orbital): "
     file = None
@@ -73,6 +73,7 @@ class GroundStationShell(Cmd):
         finally:
             self._restart_logging()
 
+        print("Connection request successfully sent.")
         self._conn_request_sent = True
 
     def do_send_command(self, line: str) -> None:
