@@ -3,7 +3,11 @@ import sys
 import threading
 from sys import argv
 
+<<<<<<< HEAD
 from typing import Optional, Callable, cast, Any
+=======
+from typing import Optional, Callable, cast
+>>>>>>> f74176befe927cd0ed79c7e41a46cf28950d07f8
 from serial import Serial
 from textual import on
 from textual.app import App, ComposeResult
