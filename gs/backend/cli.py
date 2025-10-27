@@ -1,15 +1,16 @@
 import io
 import sys
 import threading
+from collections.abc import Callable
 from sys import argv
+from typing import cast
 
-from typing import Optional, Callable, cast, Any
 from serial import Serial
 from textual import on
 from textual.app import App, ComposeResult
-from textual.widget import Widget
 from textual.containers import HorizontalGroup, HorizontalScroll, ScrollableContainer, VerticalScroll
 from textual.reactive import reactive
+from textual.widget import Widget
 from textual.widgets import Button, DataTable, Input, Label, Static
 
 from gs.backend.ground_station_cli import GroundStationShell
@@ -25,13 +26,13 @@ class CliPanel(ScrollableContainer):
 
     cli_output = reactive("")
 
-    def __init__(self, *args: Widget, **kwargs: Any) -> None:
+    def __init__(self, *args: Widget, **kwargs: str) -> None:
         """
         Initialize the CLI panel and set up output redirection
         """
         super().__init__(*args, **kwargs)
         self.shell = shell
-        self.cli_output_panel: Optional[Static] = None
+        self.cli_output_panel: Static | None = None
         #  Hold the original output stream
         self.sys_stdout = sys.stdout
 
@@ -186,7 +187,7 @@ class TimeTaggedLogs(HorizontalScroll):
     A horizontal scrollable widget displaying time-tagged command logs
     """
 
-    def __init__(self, *args: Widget, **kwargs: Any) -> None:
+    def __init__(self, *args: Widget, **kwargs: str) -> None:
         """
         Initialize the time-tagged logs table with sample data
         """
