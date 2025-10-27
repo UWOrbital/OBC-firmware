@@ -3,9 +3,11 @@ import sys
 import threading
 from sys import argv
 
+from typing import Optional, Callable, cast
 from serial import Serial
 from textual import on
 from textual.app import App, ComposeResult
+from textual.widget import Widget
 from textual.containers import HorizontalGroup, HorizontalScroll, ScrollableContainer, VerticalScroll
 from textual.reactive import reactive
 from textual.widgets import Button, DataTable, Input, Label, Static
@@ -23,13 +25,13 @@ class CliPanel(ScrollableContainer):
 
     cli_output = reactive("")
 
-    def __init__(self, *args: str, **kwargs: str) -> None:
+    def __init__(self, *args: Widget, **kwargs: any) -> None:
         """
         Initialize the CLI panel and set up output redirection
         """
         super().__init__(*args, **kwargs)
         self.shell = shell
-        self.cli_output_panel = None
+        self.cli_output_panel: Optional[Static] = None
         #  Hold the original output stream
         self.sys_stdout = sys.stdout
 
@@ -80,7 +82,7 @@ class CliPanel(ScrollableContainer):
         self.cli_output = self.buffer.getvalue()
 
     #  Use threads to ensure blocking commands don't block CLI
-    def run_cli_command_in_thread(self, cmd_function: callable, args: str) -> None:
+    def run_cli_command_in_thread(self, cmd_function: Callable, args: str) -> None:
         """
         Run a CLI command in a separate thread to avoid blocking the UI
         """
@@ -110,7 +112,8 @@ class CliPanel(ScrollableContainer):
             # Change print_logs cmd button status to STOP if manually typed in
             if command_parts[0] == "print_logs":
                 print("[yellow]Use print_logs button below CMDS to exit polling.[/yellow]")
-                btn = self.app.query_one("#btn-print_logs")
+                # Query_one("#btn-print_logs") returns a widget, so type cast widget to button
+                btn = cast(Button, self.app.query_one("#btn-print_logs"))
                 btn.label = "STOP"
 
             # Disable send_conn_request cmd btn if manually typed in
@@ -183,7 +186,7 @@ class TimeTaggedLogs(HorizontalScroll):
     A horizontal scrollable widget displaying time-tagged command logs
     """
 
-    def __init__(self, *args: str, **kwargs: str) -> None:
+    def __init__(self, *args: Widget, **kwargs: any) -> None:
         """
         Initialize the time-tagged logs table with sample data
         """
@@ -249,7 +252,7 @@ class LogsPanel(Static):
         self.update("LOGS\n\n" + self.logs)
 
 
-class CLIWindow(App):
+class CLIWindow(App[None]):
     """
     Main Textual application window for the CLI interface
     """
