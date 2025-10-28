@@ -149,7 +149,7 @@ class GroundStationShell(Cmd):
             poll(self._com_port, LOG_PATH, 1, True, lambda: self.stop_printing)
         except KeyboardInterrupt:
             print("Exiting polling...")
-        finally: 
+        finally:
             print("Exiting polling...")
 
         self._restart_logging()
