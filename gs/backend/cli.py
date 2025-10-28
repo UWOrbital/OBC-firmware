@@ -26,7 +26,7 @@ class CliPanel(ScrollableContainer):
 
     cli_output = reactive("")
 
-    def __init__(self, *widgets: Widget, id: str | None = None) -> None:
+    def __init__(self, *widgets: Widget, id: str | None = None) -> None: # noqa: A002
         """
         Initialize the CLI panel and set up output redirection
         """
@@ -187,7 +187,7 @@ class TimeTaggedLogs(HorizontalScroll):
     A horizontal scrollable widget displaying time-tagged command logs
     """
 
-    def __init__(self, *widgets: Widget, id: str | None = None) -> None:
+    def __init__(self, *widgets: Widget, id: str | None = None) -> None: # noqa: A002
         """
         Initialize the time-tagged logs table with sample data
         """
