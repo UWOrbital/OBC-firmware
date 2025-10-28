@@ -323,7 +323,7 @@ def poll(
     file_path: str | Path,
     timeout: int = 0,
     print_console: bool = False,
-    stop_flag: Callable[[], bool] | None = None
+    stop_flag: Callable[[], bool] | None = None,
 ) -> None:
     """
     A function that is supposed to run in the background to keep receiving logs from the board
