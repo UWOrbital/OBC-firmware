@@ -30,4 +30,4 @@ pytest-cov==4.1.0
 mypy==1.8.0
 ruff==0.2.0
 psycopg[binary]==3.2.6 # Must be installed before `pytest-postgresql`
-pytest-postgresql==7.0.1 
+pytest-postgresql==7.0.1
