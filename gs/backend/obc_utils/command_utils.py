@@ -377,4 +377,4 @@ def poll(
             file.write(data_string)
             file.flush()
             # if print_console and len(data_string) != 0:
-            #     # print(data_string) 
+            #     # print(data_string)
