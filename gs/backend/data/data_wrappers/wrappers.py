@@ -1,4 +1,5 @@
 from gs.backend.data.data_wrappers.abstract_wrapper import AbstractWrapper  # SEE abstract_wrapper.py FOR LOGIC
+from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.aro_user_tables import AROUserAuthToken, AROUserLogin, AROUsers
 from gs.backend.data.tables.main_tables import MainCommand, MainTelemetry
 from gs.backend.data.tables.transactional_tables import (
@@ -51,6 +52,34 @@ class MainCommandWrapper(AbstractWrapper[MainCommand]):
 
     model = MainCommand
 
+    def get_by_id(self, obj_id: int) -> MainCommand:
+        """
+        Retrieve data wrapper for MainCommand
+
+        :param obj_id: int of the model instance to be retrieved
+        :return: the retrieved instance
+        """
+        with get_db_session() as session:
+            obj = session.get(self.model, obj_id)
+            if not obj:
+                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            return obj
+
+    def delete_by_id(self, obj_id: int) -> MainCommand:
+        """
+        Delete data wrapper for MainCommand
+
+        :param obj_id: int of the model instance to be deleted
+        :return: the deleted instance
+        """
+        with get_db_session() as session:
+            obj = session.get(self.model, obj_id)
+            if not obj:
+                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            session.delete(obj)
+            session.commit()
+            return obj
+
 
 class MainTelemetryWrapper(AbstractWrapper[MainTelemetry]):
     """
@@ -58,6 +87,34 @@ class MainTelemetryWrapper(AbstractWrapper[MainTelemetry]):
     """
 
     model = MainTelemetry
+
+    def get_by_id(self, obj_id: int) -> MainTelemetry:
+        """
+        Retrieve data wrapper for MainTelemetry
+
+        :param obj_id: int of the model instance to be retrieved
+        :return: the retrieved instance
+        """
+        with get_db_session() as session:
+            obj = session.get(self.model, obj_id)
+            if not obj:
+                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            return obj
+
+    def delete_by_id(self, obj_id: int) -> MainTelemetry:
+        """
+        Delete data wrapper for MainTelemetry
+
+        :param obj_id: int of the model instance to be deleted
+        :return: the deleted instance
+        """
+        with get_db_session() as session:
+            obj = session.get(self.model, obj_id)
+            if not obj:
+                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            session.delete(obj)
+            session.commit()
+            return obj
 
 
 class CommsSessionWrapper(AbstractWrapper[CommsSession]):
