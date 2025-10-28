@@ -1,12 +1,9 @@
 import os
 from logging.config import fileConfig
-from typing import Any
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, event, pool
-from sqlalchemy.dialects.postgresql import ENUM
-from sqlalchemy.engine import Connection
+from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 load_dotenv()
@@ -18,18 +15,6 @@ GS_DATABASE_PORT = os.getenv("GS_DATABASE_PORT")
 GS_DATABASE_NAME = os.getenv("GS_DATABASE_NAME")
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{GS_DATABASE_USER}:{GS_DATABASE_PASSWORD}@{GS_DATABASE_LOCATION}:{GS_DATABASE_PORT}/{GS_DATABASE_NAME}"
-
-
-@event.listens_for(ENUM, "before_create")
-def skip_existing_enum(target: ENUM, connection: Connection, **kw: dict[str, Any]) -> None:
-    """
-    Ensures ENUM types are only created if they don't already exist
-
-    This prevents Alembic migrations from failing when applying an initial
-    migration on a database that already contains the ENUM type.
-
-    """
-    target.create(connection, checkfirst=True)
 
 
 # this is the Alembic Config object, which provides
