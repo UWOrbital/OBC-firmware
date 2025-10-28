@@ -8,6 +8,7 @@ const MISSON_COMMAND_PREFIX = "MCC_";
 function MissionCommands() {
   const [commands, setCommands] = useState("");
   const [commandResponse, setCommandResponse] = useState("");
+  const [filterText, setFilterText] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -73,6 +74,14 @@ function MissionCommands() {
           ref={inputRef}
         />
       </InputGroup>
+      <div style={{ marginBottom: "1rem" }}>
+        <input
+          placeholder="Filter output..."
+          value={(commandResponse && commandResponse.toString().includes(filterText || "")) ? commandResponse : ""}
+          onChange={(e) => setFilterText(e.target.value)}
+          style={{ marginRight: "1rem" }}
+        />
+      </div>
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -80,7 +89,16 @@ function MissionCommands() {
           </tr>
         </thead>
         <tbody>
-          <tr>{commandResponse && <td>{commandResponse}</td>}</tr>
+          <tr>
+            {commandResponse &&
+              <td>
+                {filterText ?
+                  commandResponse.toString().includes(filterText) ?
+                    commandResponse : "No matching output"
+                  : commandResponse}
+              </td>
+            }
+          </tr>
         </tbody>
       </Table>
       <button onClick={clear}>Clear</button>
