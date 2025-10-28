@@ -26,6 +26,7 @@
 #include <string.h>
 
 #define TASK_STACK_SIZE 1024
+#define OBC_REVISION_1 0
 
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[TASK_STACK_SIZE];
