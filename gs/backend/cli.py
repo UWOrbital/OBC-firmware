@@ -26,7 +26,7 @@ class CliPanel(ScrollableContainer):
 
     cli_output = reactive("")
 
-    def __init__(self, *widgets: Widget, id: str | None = None) -> None:  # noqa: A002
+    def __init__(self, *widgets: Widget, id: str | None = None) -> None:   # noqa: A002
         """
         Initialize the CLI panel and set up output redirection
         """
