@@ -244,7 +244,7 @@ class LogsPanel(Static):
             with open("gs/backend/logs.log") as logs:
                 self.logs = logs.read()
         except FileNotFoundError:
-            print("Logs file not found. Try running interface from root directory (OBC-Firmware)?")
+            print("[red]Logs file not found. Try running interface from root directory (OBC-Firmware)?[/red]")
 
     def watch_logs(self, logs: str) -> None:
         """
