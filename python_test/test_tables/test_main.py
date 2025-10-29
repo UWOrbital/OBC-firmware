@@ -61,7 +61,7 @@ def test_main_command_no_params_and_no_format():
 
 
 def test_main_command_no_format(db_session):
-    with pytest.raises(DatabaseError):
+    with pytest.raises(DatabaseError, match="Missing format"):
         db_session.add(
             MainCommand(
                 id=1,
@@ -75,7 +75,7 @@ def test_main_command_no_format(db_session):
 
 
 def test_main_command_no_params(db_session):
-    with pytest.raises(DatabaseError):
+    with pytest.raises(DatabaseError, match="Missing params"):
         db_session.add(
             MainCommand(
                 id=1,
@@ -89,7 +89,7 @@ def test_main_command_no_params(db_session):
 
 
 def test_main_command_params_format_mismatch(db_session):
-    with pytest.raises(DatabaseError):
+    with pytest.raises(DatabaseError, match="Params and format do not have the same number of values"):
         db_session.add(
             MainCommand(
                 id=1,
