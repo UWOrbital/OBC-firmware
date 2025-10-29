@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "react-toastify": "^11.0.5"
+  }
+}
