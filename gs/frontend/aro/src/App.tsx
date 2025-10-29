@@ -1,4 +1,6 @@
 import { Routes } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Nav from "./components/Nav";
 import Background from "./components/Background";
 
@@ -21,6 +23,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} /> */}
       </Routes>
+      <ToastContainer />
     </>
   );
 }
