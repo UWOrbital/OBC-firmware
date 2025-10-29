@@ -1,5 +1,6 @@
+from uuid import UUID
+
 from gs.backend.data.data_wrappers.abstract_wrapper import AbstractWrapper  # SEE abstract_wrapper.py FOR LOGIC
-from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.aro_user_tables import AROUserAuthToken, AROUserLogin, AROUsers
 from gs.backend.data.tables.main_tables import MainCommand, MainTelemetry
 from gs.backend.data.tables.transactional_tables import (
@@ -13,7 +14,7 @@ from gs.backend.data.tables.transactional_tables import (
 )
 
 
-class AROUsersWrapper(AbstractWrapper[AROUsers]):
+class AROUsersWrapper(AbstractWrapper[AROUsers, UUID]):
     """
     Data wrapper for AROUsers table.
     """
@@ -21,7 +22,7 @@ class AROUsersWrapper(AbstractWrapper[AROUsers]):
     model = AROUsers
 
 
-class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken]):
+class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken, UUID]):
     """
     Data wrapper for AROUserAuthToken table.
     """
@@ -29,7 +30,7 @@ class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken]):
     model = AROUserAuthToken
 
 
-class AROUserLoginWrapper(AbstractWrapper[AROUserLogin]):
+class AROUserLoginWrapper(AbstractWrapper[AROUserLogin, UUID]):
     """
     Data wrapper for AROUserLogin table.
     """
@@ -37,7 +38,7 @@ class AROUserLoginWrapper(AbstractWrapper[AROUserLogin]):
     model = AROUserLogin
 
 
-class ARORequestWrapper(AbstractWrapper[ARORequest]):
+class ARORequestWrapper(AbstractWrapper[ARORequest, UUID]):
     """
     Data wrapper for ARORequest table.
     """
@@ -45,79 +46,23 @@ class ARORequestWrapper(AbstractWrapper[ARORequest]):
     model = ARORequest
 
 
-class MainCommandWrapper(AbstractWrapper[MainCommand]):
+class MainCommandWrapper(AbstractWrapper[MainCommand, int]):
     """
     Data wrapper for MainCommand table.
     """
 
     model = MainCommand
 
-    def get_by_id(self, obj_id: int) -> MainCommand:
-        """
-        Retrieve data wrapper for MainCommand
 
-        :param obj_id: int of the model instance to be retrieved
-        :return: the retrieved instance
-        """
-        with get_db_session() as session:
-            obj = session.get(self.model, obj_id)
-            if not obj:
-                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
-            return obj
-
-    def delete_by_id(self, obj_id: int) -> MainCommand:
-        """
-        Delete data wrapper for MainCommand
-
-        :param obj_id: int of the model instance to be deleted
-        :return: the deleted instance
-        """
-        with get_db_session() as session:
-            obj = session.get(self.model, obj_id)
-            if not obj:
-                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
-            session.delete(obj)
-            session.commit()
-            return obj
-
-
-class MainTelemetryWrapper(AbstractWrapper[MainTelemetry]):
+class MainTelemetryWrapper(AbstractWrapper[MainTelemetry, int]):
     """
     Data wrapper for MainTelemetry table.
     """
 
     model = MainTelemetry
 
-    def get_by_id(self, obj_id: int) -> MainTelemetry:
-        """
-        Retrieve data wrapper for MainTelemetry
 
-        :param obj_id: int of the model instance to be retrieved
-        :return: the retrieved instance
-        """
-        with get_db_session() as session:
-            obj = session.get(self.model, obj_id)
-            if not obj:
-                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
-            return obj
-
-    def delete_by_id(self, obj_id: int) -> MainTelemetry:
-        """
-        Delete data wrapper for MainTelemetry
-
-        :param obj_id: int of the model instance to be deleted
-        :return: the deleted instance
-        """
-        with get_db_session() as session:
-            obj = session.get(self.model, obj_id)
-            if not obj:
-                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
-            session.delete(obj)
-            session.commit()
-            return obj
-
-
-class CommsSessionWrapper(AbstractWrapper[CommsSession]):
+class CommsSessionWrapper(AbstractWrapper[CommsSession, UUID]):
     """
     Data wrapper for CommsSession table.
     """
@@ -125,7 +70,7 @@ class CommsSessionWrapper(AbstractWrapper[CommsSession]):
     model = CommsSession
 
 
-class PacketWrapper(AbstractWrapper[Packet]):
+class PacketWrapper(AbstractWrapper[Packet, UUID]):
     """
     Data wrapper for Packet table.
     """
@@ -133,7 +78,7 @@ class PacketWrapper(AbstractWrapper[Packet]):
     model = Packet
 
 
-class PacketCommandsWrapper(AbstractWrapper[PacketCommands]):
+class PacketCommandsWrapper(AbstractWrapper[PacketCommands, UUID]):
     """
     Data wrapper for PacketCommands table.
     """
@@ -141,7 +86,7 @@ class PacketCommandsWrapper(AbstractWrapper[PacketCommands]):
     model = PacketCommands
 
 
-class PacketTelemetryWrapper(AbstractWrapper[PacketTelemetry]):
+class PacketTelemetryWrapper(AbstractWrapper[PacketTelemetry, UUID]):
     """
     Data wrapper for PacketTelemetry table.
     """
@@ -149,7 +94,7 @@ class PacketTelemetryWrapper(AbstractWrapper[PacketTelemetry]):
     model = PacketTelemetry
 
 
-class CommandsWrapper(AbstractWrapper[Commands]):
+class CommandsWrapper(AbstractWrapper[Commands, UUID]):
     """
     Data wrapper for Commands table.
     """
@@ -157,7 +102,7 @@ class CommandsWrapper(AbstractWrapper[Commands]):
     model = Commands
 
 
-class TelemetryWrapper(AbstractWrapper[Telemetry]):
+class TelemetryWrapper(AbstractWrapper[Telemetry, UUID]):
     """
     Data wrapper for Telemetry table.
     """
