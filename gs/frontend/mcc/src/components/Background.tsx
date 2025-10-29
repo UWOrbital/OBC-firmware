@@ -9,7 +9,7 @@ function Background() {
     <img
       src={background}
       alt="background-image"
-      className="absolute bottom-0 -z-10 opacity-40"
+      className="fixed bottom-0 left-0 w-full object-cover -z-10 opacity-40"
     />
   );
 }
