@@ -49,7 +49,7 @@ const InputForm: React.FC<MapViewProps> = ({handleSubmit}) => {
             <input
               type="number"
               name="latitude"
-              placeholder="Enter your coordinates"
+              placeholder="Enter latitude"
               value={localLat}
               onChange={handleLatitudeChange}
               required
@@ -62,7 +62,7 @@ const InputForm: React.FC<MapViewProps> = ({handleSubmit}) => {
             <input
               type="number"
               name="longitude"
-              placeholder="Enter your coordinates"
+              placeholder="Enter longitude"
               value={localLng}
               onChange={handleLongitudeChange}
               required
