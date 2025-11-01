@@ -11,7 +11,7 @@ from textual.app import App, ComposeResult
 from textual.containers import HorizontalGroup, HorizontalScroll, ScrollableContainer, VerticalScroll
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, DataTable, Input, Label, Static
+from textual.widgets import Button, DataTable, Input, Label, Static, Log
 
 from gs.backend.ground_station_cli import GroundStationShell
 
@@ -127,7 +127,14 @@ class CliPanel(ScrollableContainer):
         except (AttributeError, IndexError):
             print(f"*** Unknown syntax: {cli_input.value}")
 
+        self.scroll_to_bottom()
         self.query_one(Input).value = ""
+    
+    def scroll_to_bottom(self) -> None:
+        """
+        Auto-scroll to bottom of cli panel
+        """
+        self.scroll_end()
 
     def compose(self) -> ComposeResult:
         """
@@ -251,6 +258,18 @@ class LogsPanel(Static):
         Update logs panel with the latest logs
         """
         self.update("LOGS\n\n" + self.logs)
+        try:
+            self.scroll_to_bottom()
+        except Exception as e:
+            print(e)
+
+    def scroll_to_bottom(self) -> None:
+        """
+        Auto-scroll to bottom of logs panel
+        """
+        scrollable_container = self.app.query_one("#logs")
+        if scrollable_container:
+            scrollable_container.scroll_end()
 
 
 class CLIWindow(App[None]):
