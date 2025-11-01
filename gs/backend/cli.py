@@ -146,7 +146,7 @@ class CliPanel(ScrollableContainer):
 
 class CmdButton(HorizontalGroup):
     """
-    A horizontal group containing a command button for the CLI
+    A horizontal group containing command buttons for the CLI
     """
 
     def __init__(self, cmdname: str) -> None:
