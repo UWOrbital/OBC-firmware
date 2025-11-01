@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
-    "@tanstack/react-query": "^5.87.4",
+    "@tanstack/react-query": "^5.90.2",
+    "leaflet": "^1.9.4",
     "@tanstack/react-table": "^8.21.3",
     "@types/react-router-dom": "^5.3.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.2",
     "tailwindcss": "^4.1.13"
   },
@@ -26,6 +28,7 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/leaflet": "^1.9.20",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
