@@ -20,6 +20,7 @@
     "react-dom": "^19.1.1",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.2",
+    "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
