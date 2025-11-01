@@ -11,7 +11,7 @@ from textual.app import App, ComposeResult
 from textual.containers import HorizontalGroup, HorizontalScroll, ScrollableContainer, VerticalScroll
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, DataTable, Input, Label, Static, Log
+from textual.widgets import Button, DataTable, Input, Label, Static
 
 from gs.backend.ground_station_cli import GroundStationShell
 
@@ -129,7 +129,7 @@ class CliPanel(ScrollableContainer):
 
         self.scroll_to_bottom()
         self.query_one(Input).value = ""
-    
+
     def scroll_to_bottom(self) -> None:
         """
         Auto-scroll to bottom of cli panel
