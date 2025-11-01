@@ -3,7 +3,7 @@ Screen {
     overflow-y: auto;
     layout: grid;
     grid-size: 3 3;
-    grid-columns: 1fr 1fr 2fr;
+    grid-columns: 1fr 2fr 1fr;
     grid-rows: 2fr auto 1fr;
 }
 
@@ -33,7 +33,7 @@ Button.-style-default:focus {
 #cli {
     row-span: 2;
     background: rgb(36, 36, 36);
-    column-span: 2;
+    column-span: 1;
     height: 1fr;
     border: round rgb(242, 97, 97) 60%;
     padding-left: 1;
@@ -51,6 +51,8 @@ Button.-style-default:focus {
 }
 
 #cmd-panel {
+    column-span: 1;
+    row-span: 3;
     scrollbar-size: 2 1;
     background: rgb(36, 36, 36);
     height: 1fr;
@@ -95,6 +97,7 @@ Button.-style-default:focus {
     border: round rgb(85, 161, 232) 60%;
     grid-rows: auto;
     padding-left: 1;
+    column-span: 1;
 }
 
 #timetagged > Label {
