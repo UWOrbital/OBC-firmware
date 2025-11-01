@@ -1,3 +1,5 @@
+import os
+import subprocess
 from datetime import datetime
 
 import pytest
@@ -25,6 +27,13 @@ def db_session(db_engine: Engine) -> Session:
     """
     with Session(db_engine) as session:
         setup_database(session)
+
+        # Run Alembic migrations to create tables
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        env = os.environ.copy()
+        env["SQLALCHEMY_DATABASE_URL"] = str(db_engine.url)
+        subprocess.run(["alembic", "upgrade", "head"], cwd=repo_root, env=env, check=True, capture_output=True)
+
         return session
 
 
