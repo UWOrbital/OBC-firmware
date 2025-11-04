@@ -10,8 +10,8 @@ beforeAll(() => {
       matches: false,
       media: query,
       onchange: null,
-      addListener: () => {}, 
-      removeListener: () => {}, 
+      addListener: () => {}, // deprecated
+      removeListener: () => {}, // deprecated
       addEventListener: () => {},
       removeEventListener: () => {},
       dispatchEvent: () => {},
