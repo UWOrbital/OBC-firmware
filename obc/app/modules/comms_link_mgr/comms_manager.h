@@ -72,6 +72,11 @@ typedef enum {
 } comms_state_t;
 
 /**
+ * @brief Post temperature
+ */
+obc_error_code_t postCommsManagerTempQueue();
+
+/**
  * @brief	Send an event to the Comms Manager queue.
  * @param	event	Event to send.
  * @return The error code

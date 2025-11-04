@@ -70,7 +70,11 @@ void obcTaskFunctionTimekeeper(void *pvParameters) {
       vPortExitCritical();
     }
 
-    // Send Unix time to fram
+    // Post temperature into mailbox queue
+
+    postRtcTempQueue();
+
+    // Send Unix time to frame
     unixTime.unixTime = getCurrentUnixTime();
     LOG_IF_ERROR_CODE(
         setPersistentData(OBC_PERSIST_SECTION_ID_OBC_TIME, (uint8_t *)&unixTime, sizeof(obc_time_persist_data_t)));

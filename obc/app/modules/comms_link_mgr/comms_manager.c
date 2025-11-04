@@ -42,7 +42,7 @@
 /* Comms Manager event queue config */
 #define COMMS_MANAGER_QUEUE_LENGTH 10U
 #define COMMS_MANAGER_QUEUE_ITEM_SIZE sizeof(comms_event_t)
-#define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(10)
+#define COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD pdMS_TO_TICKS(1000)
 #define COMMS_MANAGER_QUEUE_TX_WAIT_PERIOD pdMS_TO_TICKS(10)
 
 static QueueHandle_t commsQueueHandle = NULL;
@@ -332,6 +332,7 @@ void obcTaskFunctionCommsMgr(void *pvParameters) {
     comms_event_t queueMsg;
 
     if (xQueueReceive(commsQueueHandle, &queueMsg, COMMS_MANAGER_QUEUE_RX_WAIT_PERIOD) != pdPASS) {
+      postCommsManagerTempQueue();
       continue;
     }
 

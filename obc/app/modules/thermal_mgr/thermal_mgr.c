@@ -6,6 +6,7 @@
 #include "obc_logging.h"
 #include "obc_scheduler_config.h"
 #include "comms_manager.h"
+#include "timekeeper.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -48,14 +49,14 @@ static obc_error_code_t collectThermalData(void) {
 }
 
 static obc_error_code_t readCC1120Temp(float* data) {
-  if (xQueuePeek(cc1120TempQueueHandle, data, 0) != pdPASS) {
+  if (xQueuePeek(cc1120TempQueueHandle, data, pdMS_TO_TICKS(1000)) != pdPASS) {
     return OBC_ERR_CODE_QUEUE_EMPTY;
   }
   return OBC_ERR_CODE_SUCCESS;
 }
 
 static obc_error_code_t readRTCTemp(float* data) {
-  if (xQueuePeek(cc1120TempQueueHandle, data, 0) != pdPASS) {
+  if (xQueuePeek(rtcTempQueueHandle, data, 0) != pdPASS) {
     return OBC_ERR_CODE_QUEUE_EMPTY;
   }
   return OBC_ERR_CODE_SUCCESS;
