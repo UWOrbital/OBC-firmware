@@ -21,7 +21,7 @@ function Background() {
         className={`fixed inset-0 -z-10 transition-colors duration-300 ${
           theme === "dark"
             ? "bg-gradient-to-b from-gray-950/90 via-gray-950/70 to-transparent"
-            : "bg-gradient-to-b from-white/95 via-white/80 to-transparent"
+            : "bg-gradient-to-b from-slate-100/80 via-slate-100/50 to-transparent"
         }`}
       />
     </>
