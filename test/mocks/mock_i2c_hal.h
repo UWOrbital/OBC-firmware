@@ -6,6 +6,7 @@ extern "C" {
 void setMockBusVoltageValue(float expectedVoltage);
 void setMockCurrentValue(float expectedCurrent);
 void setMockPowerValue(float expectedPower);
+void setMockShuntVoltageValue(float expectedPower);
 
 #ifdef __cplusplus
 }

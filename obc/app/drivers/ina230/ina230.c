@@ -224,12 +224,8 @@ obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) 
   // Combine the two bytes into a 16-bit value
   int16_t shuntVoltageValue = (shuntVoltageRaw[0] << 8) | shuntVoltageRaw[1];
 
-  // Check if the value is negative (MSB is set)
-  if (shuntVoltageValue & 0x8000) {                        // if MSB is 1
-    shuntVoltageValue = (shuntVoltageValue ^ 0xFFFF) + 1;  // Convert to two's complement
-  }
 
-  // Convert to actual voltage
+  // Convert to actual voltage (signed value)
   *shuntVoltage = shuntVoltageValue * INA230_SHUNT_VOLTAGE_LSB;
 
   return OBC_ERR_CODE_SUCCESS;

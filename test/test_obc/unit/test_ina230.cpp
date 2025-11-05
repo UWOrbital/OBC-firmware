@@ -29,6 +29,19 @@ TEST(TestINA230, ReadAndDisableIfAlert) {
   EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
 }
 
+// --------- SHUNT VOLTAGE TESTS ---------
+
+TEST(TestINA230, ShuntVoltageMaxRegisterVal) {
+  // bus voltage register is 16-bits, so max value is 0xFFFF
+  // 0xFFFF = -1 since the register stores signed values
+  // since each bit is 2.5 μV, the max voltage is -1 * 0.0000025 = -0.0000025 V
+  // in mock_i2c_hal.c, i2cReadReg() returns 0xFFFF
+  float voltage = 0;
+  setMockShuntVoltageValue(-0.0000025);
+  obc_error_code_t err = getINA230ShuntVoltage(INA230_I2C_ADDRESS_ONE, &voltage);
+  EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+  EXPECT_FLOAT_EQ(voltage, -0.0000025); }
+
 // --------- BUS VOLTAGE TESTS ---------
 
 TEST(TestINA230, GetBusVoltageSuccess) {
