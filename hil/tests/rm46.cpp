@@ -25,7 +25,20 @@ and passes for main.
 #define LOG_FILE "foo.txt" /* some log file*/
 #define DELAY_PERIOD_SECONDS 90
 
-TEST(/* some task */) {
+/**
+ * TODO: Implement this function
+ * @brief Parses rm46 log line for timestamp using regex.
+ *
+ * @param line - line to parse.
+ * @return Returns the timestamp in seconds.
+ */
+unsigned int parseTimeStamp(std::string line) {
+  // some regex stuff
+  unsigned int timeStampSeconds = 69;
+  return timeStampSeconds;
+}
+
+TEST(/*FaultMonitorTask, rm46_logs*/) {
   std::ifstream read;
   read.open(LOG_FILE);
   ASSERT_TRUE(read.is_open()); /* log must open */
@@ -35,7 +48,7 @@ TEST(/* some task */) {
   ASSERT_FALSE(line.empty()); /* log must be non-empty */
 
   // TO DO: Implement a parse time function from logs
-  unsigned int initialTime = 0; /* some time */
+  unsigned int initialTime = parseTimeStamp(line); /* some time */
 
   read.close();
 
@@ -45,14 +58,16 @@ TEST(/* some task */) {
   ASSERT_TRUE(read.is_open());
 
   bool passed{false};
+  while (std::getline(read, line)) {
+    unsigned int finalTime = parseTimeStamp(line);
+    if (finalTime - initialTime >= 60) {
+      passed = true;
+      break;
+    }
+    // automatically terminates if we reach the end.
+  };
 
-  std::getline(read, line) unsigned int finalTime = 67;
-  if (finalTime - initialTime >= 60) {
-    passed = true;
-    break;
-  }
-
-  EXPECT_TRUE(passed)
+  EXPECT_TRUE(passed);
 
   read.close();
 }
