@@ -73,14 +73,14 @@ TEST(TestINA230, PowerSuccess) {
 }
 
 TEST(TestINA230, GetPower_NullBufferPointer) {
-  float voltage = 0;
+  float power = 0;
   obc_error_code_t err = getINA230Power(INA230_I2C_ADDRESS_ONE, NULL);
   EXPECT_EQ(err, OBC_ERR_CODE_INVALID_ARG);
 }
 
 TEST(TestINA230, GetPower_InvalidI2CAddress) {
-  float voltage = 0;
-  obc_error_code_t err = getINA230Power(0b1010110, voltage);
+  float power = 0;
+  obc_error_code_t err = getINA230Power(0b1010110, &power);
   EXPECT_EQ(err, OBC_ERR_CODE_INVALID_ARG);
 }
 
@@ -92,14 +92,23 @@ TEST(TestINA230, CurrentSuccess) {
   EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
 }
 
-TEST(TestINA230, GetPower_NullBufferPointer) {
+TEST(TestINA230, GetCurrent_NullBufferPointer) {
   float power = 0;
   obc_error_code_t err = getINA230Current(INA230_I2C_ADDRESS_ONE, NULL);
   EXPECT_EQ(err, OBC_ERR_CODE_INVALID_ARG);
 }
 
-TEST(TestINA230, GetPower_InvalidI2CAddress) {
+TEST(TestINA230, GetCurrent_InvalidI2CAddress) {
   float power = 0;
-  obc_error_code_t err = getINA230Current(0b1010110, power);
+  obc_error_code_t err = getINA230Current(0b1010110, &power);
   EXPECT_EQ(err, OBC_ERR_CODE_INVALID_ARG);
+}
+
+TEST(TestINA230, CurrentMultipleCalls) {
+  float power = 0;
+  obc_error_code_t err;
+  for (int i = 0; i < 4; ++i) {
+    err = getINA230CurrentForDevice(0, &power);
+    EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+  }
 }
