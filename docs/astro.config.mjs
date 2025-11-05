@@ -56,6 +56,14 @@ export default defineConfig({
           autogenerate: { directory: 'builds' },
         },
         {
+          label: 'Frontend Docs',
+          autogenerate: { directory: 'frontend' },
+        },
+        {
+          label: 'Backend Docs',
+          autogenerate: { directory: 'backend' },
+        },
+        {
           label: 'Comms Guides',
           autogenerate: { directory: 'comms' },
         },
