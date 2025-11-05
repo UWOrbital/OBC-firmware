@@ -46,13 +46,10 @@ TEST(/* some task */) {
 
   bool passed{false};
 
-  std::getline(read, line) {
-    // Parse timestamp function here too
-    unsigned int finalTime = 67;
-    if (finalTime - initialTime >= 60) {
-      passed = true;
-      break;
-    }
+  std::getline(read, line) unsigned int finalTime = 67;
+  if (finalTime - initialTime >= 60) {
+    passed = true;
+    break;
   }
 
   EXPECT_TRUE(passed)
