@@ -17,6 +17,8 @@ void main_usage();
 obc_error_code_t disableNoAlert(ina230_device_t device);
 obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage);
 obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVoltage);
+obc_error_code_t getINA230Power(uint8_t i2cAddress, float* power);
+obc_error_code_t getINA230PowerForDevice(uint8_t deviceIndex, float* power);
 
 #ifdef __cplusplus
 }
