@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import AROAdmin from "./pages/AROAdmin";
 import LiveSession from "./pages/LiveSession";
 import Login from "./pages/Login";
+import WebsocketTerminal from "./pages/WebsocketTerminal";
 
 /**
  * @brief App component displaying the main application
@@ -22,6 +23,7 @@ function App() {
         <Route path="/telemetry-data" element={<AROAdmin />} />
         <Route path="/aro-requests" element={<LiveSession />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/websocket-terminal" element={<WebsocketTerminal />} />
       </Routes>
     </>
   );
