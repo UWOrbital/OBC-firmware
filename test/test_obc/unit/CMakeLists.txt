@@ -55,6 +55,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46
     ${CMAKE_SOURCE_DIR}/obc/shared/hal/obc_rev1/include
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424
+    ${CMAKE_SOURCE_DIR}/test/mocks
 )
 
 target_link_libraries(${TEST_BINARY}

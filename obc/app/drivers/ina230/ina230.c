@@ -302,7 +302,7 @@ obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage) {
   uint8_t busVoltageRaw[2] = {};
   RETURN_IF_ERROR_CODE(
       i2cReadReg(i2cAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR, busVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
-  int16_t busVoltageValue = (busVoltageRaw[0] << 8) | busVoltageRaw[1];
+  uint16_t busVoltageValue = (busVoltageRaw[0] << 8) | busVoltageRaw[1];
   *busVoltage = busVoltageValue * 0.00125f;
 
   return OBC_ERR_CODE_SUCCESS;
@@ -320,7 +320,7 @@ obc_error_code_t getINA230Power(uint8_t i2cAddress, float* power) {
   uint8_t powerRaw[INA_REG_CONF_BUFF_SIZE] = {}; 
   RETURN_IF_ERROR_CODE(
       i2cReadReg(i2cAddress, INA230_POWER_REGISTER_ADDR, powerRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
-  int16_t powerValue = (powerRaw[0] << 8) | powerRaw[1];
+  uint16_t powerValue = (powerRaw[0] << 8) | powerRaw[1];
   *power = powerValue * (INA230_CURRENT_LSB * 25);
   return OBC_ERR_CODE_SUCCESS;
 }

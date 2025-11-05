@@ -4,6 +4,7 @@
 
 #include "obc_errors.h"
 #include "ina230.h"
+#include "mock_i2c_hal.h" // included to manually choose values mock i2c for different test cases
 #include <assert.h>
 #include <gtest/gtest.h>
 
@@ -14,6 +15,19 @@
 //   OBC_ERR_CODE_INVALID_ARG = 2
 //   OBC_ERR_CODE_MUTEX_TIMEOUT = 4,
 //   OBC_ERR_CODE_FAILED_FILE_READ = 704,
+
+// --------- INIT TESTS ---------
+
+TEST(TestINA230, InitSuccess) {
+  obc_error_code_t err = initINA230();
+  EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+}
+
+TEST(TestINA230, ReadAndDisableIfAlert) {
+  ina230_device_t device;
+  obc_error_code_t err = readAndDisableIfAlert(device);
+  EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+}
 
 // --------- BUS VOLTAGE TESTS ---------
 
@@ -31,7 +45,7 @@ TEST(TestINA230, GetBusVoltage_NullBufferPointer) {
 
 TEST(TestINA230, GetBusVoltage_InvalidI2CAddress) {
   float voltage = 0;
-  obc_error_code_t err = getINA230BusVoltage(0b1010110, NULL);
+  obc_error_code_t err = getINA230BusVoltage(0b1010110, &voltage);
   EXPECT_EQ(err, OBC_ERR_CODE_INVALID_ARG);
 }
 
@@ -49,6 +63,7 @@ TEST(TestINA230, GetBusVoltage_I2CAddressOutOfRange) {
 
 TEST(TestINA230, GetBusVoltage_CorrectVoltage) {
   float voltage = 0;
+  setMockBusVoltageValue(5.12f);
   obc_error_code_t err = getINA230BusVoltage(INA230_I2C_ADDRESS_ONE, &voltage);
   EXPECT_FLOAT_EQ(voltage, 5.12f);
   EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);  // 0x1000 = 4096, voltage = 4096 * 0.00125 = 5.12
@@ -57,12 +72,23 @@ TEST(TestINA230, GetBusVoltage_CorrectVoltage) {
 TEST(TestINA230, GetBusVoltage_MultipleFunctionCalls) {
   for (int i = 0; i < 5; ++i) {
     float voltage = 0;
+    setMockBusVoltageValue(5.12f);
     obc_error_code_t err = getINA230BusVoltage(INA230_I2C_ADDRESS_ONE, &voltage);
     EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
     EXPECT_FLOAT_EQ(voltage, 5.12f);
   }
 }
 
+TEST(TestINA230, MaxRegisterVal) {
+  // bus voltage register is 16-bits, so max value is 0xFFFF
+  // since each bit is 1.25 mV, the max voltage is 65535 * 0.00125 = 81.91875 V
+  // in mock_i2c_hal.c, i2cReadReg() returns 0xFFFF
+  float voltage = 0;
+  setMockBusVoltageValue(81.91875f);
+  obc_error_code_t err = getINA230BusVoltage(INA230_I2C_ADDRESS_ONE, &voltage);
+  EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+  EXPECT_FLOAT_EQ(voltage, 81.91875f);
+}
 
 // --------- POWER TESTS ---------
 
