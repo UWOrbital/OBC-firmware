@@ -4,6 +4,8 @@ extern "C" {
 
 // for choosing the value read from the i2c register for test cases
 void setMockBusVoltageValue(float expectedVoltage);
+void setMockCurrentValue(float expectedCurrent);
+void setMockPowerValue(float expectedPower);
 
 #ifdef __cplusplus
 }

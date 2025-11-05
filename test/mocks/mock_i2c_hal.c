@@ -21,9 +21,17 @@ obc_error_code_t i2cWriteReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t
 
 
 obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t numBytes, TickType_t transferTimeoutTicks) {
-    if ((sAddr == 0b1000000U || sAddr == 0b1000001U) && reg == 0x02 && numBytes == 2) { // Bus voltage register
-        data[0] = mockData[0]; // High byte
-        data[1] = mockData[1]; // Low byte
+    if ((sAddr == 0b1000000U || sAddr == 0b1000001U) && numBytes == 2) { 
+        if (reg == 0x02 ) { // Bus voltage register
+            data[0] = mockData[0]; // High byte
+            data[1] = mockData[1]; // Low byte
+        } else if (reg == 0x04) { // Current register
+            data[0] = mockData[0]; 
+            data[1] = mockData[1];
+        } else if (reg == 0x03) { // Power register
+            data[0] = mockData[0]; 
+            data[1] = mockData[1];
+        }
         return OBC_ERR_CODE_SUCCESS;
     }
     // Default mock behavior
@@ -32,6 +40,18 @@ obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t 
 
 void setMockBusVoltageValue(float expectedVoltage) {
     uint16_t expectedVal = expectedVoltage / 0.00125f;
+    mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
+    mockData[1] = 0xFF & expectedVal;           // Low bytes
+}
+
+void setMockCurrentValue(float expectedCurrent) {
+    uint16_t expectedVal = expectedCurrent / 0.001f;
+    mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
+    mockData[1] = 0xFF & expectedVal;           // Low bytes
+}
+
+void setMockPowerValue(float expectedPower) {
+    uint16_t expectedVal = expectedPower / 0.025f;
     mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
     mockData[1] = 0xFF & expectedVal;           // Low bytes
 }

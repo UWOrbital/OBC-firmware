@@ -79,7 +79,7 @@ TEST(TestINA230, GetBusVoltage_MultipleFunctionCalls) {
   }
 }
 
-TEST(TestINA230, MaxRegisterVal) {
+TEST(TestINA230, BusVoltageMaxRegisterVal) {
   // bus voltage register is 16-bits, so max value is 0xFFFF
   // since each bit is 1.25 mV, the max voltage is 65535 * 0.00125 = 81.91875 V
   // in mock_i2c_hal.c, i2cReadReg() returns 0xFFFF
@@ -110,6 +110,18 @@ TEST(TestINA230, GetPower_InvalidI2CAddress) {
   EXPECT_EQ(err, OBC_ERR_CODE_INVALID_ARG);
 }
 
+TEST(TestINA230, PowerMaxRegisterVal) {
+  // bus voltage register is 16-bits, so max value is 0xFFFF (unsigned)
+  // power LSB = 25 * current LSB = 25 * 0.001f = 0.025f
+  // since each bit is 2.5 mW, the max power is 65535 * 0.025 = 1638.375 W
+  // in mock_i2c_hal.c, i2cReadReg() returns 0xFFFF (power is unsigned)
+  float power = 0;
+  setMockPowerValue(1638.375f);
+  obc_error_code_t err = getINA230Power(INA230_I2C_ADDRESS_ONE, &power);
+  EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+  EXPECT_FLOAT_EQ(power, 1638.375f);
+}
+
 // --------- CURRENT TESTS ---------
 
 TEST(TestINA230, CurrentSuccess) {
@@ -137,4 +149,16 @@ TEST(TestINA230, CurrentMultipleCalls) {
     err = getINA230CurrentForDevice(0, &power);
     EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
   }
+}
+
+TEST(TestINA230, CurrentMaxRegisterVal) {
+  // current register is 16-bits, so max value is 0xFFFF
+  // 0xFFFF = -1 since the current register holds signed values
+  // since each bit is 1 mA, -1 * 0.001 = -0.001
+  // in mock_i2c_hal.c, i2cReadReg() returns -1
+  float current = 0;
+  setMockCurrentValue(-0.001);
+  obc_error_code_t err = getINA230Current(INA230_I2C_ADDRESS_ONE, &current);
+  EXPECT_EQ(err, OBC_ERR_CODE_SUCCESS);
+  EXPECT_FLOAT_EQ(current, -0.001);
 }
