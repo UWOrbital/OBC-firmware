@@ -1,10 +1,42 @@
 # TODO:(335) Improve loading the configuration
 from os import environ
-from typing import Final
+from typing import Any, Final, Self
 
 from dotenv import load_dotenv
 
+from .cors_config import CORSConfig
+from .logger_config import LoggerConfig
+
 load_dotenv()
+
+
+class SingletonMeta(type):
+    """
+    singleton metaclass used for defining BackendConfiguration class
+    """
+
+    _instances: dict = {}
+
+    def __call__(cls, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> Self:
+        """Return the singleton instance of the class, creating it if it does not exist."""
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        else:
+            instance = cls._instances[cls]
+
+        return instance
+
+
+class BackendConfiguration(metaclass=SingletonMeta):
+
+    """
+    Class for storing backend configuration settings
+    """
+
+    def __init__(self) -> None:
+        self.cors_config = CORSConfig()
+        self.logger_config = LoggerConfig()
 
 
 # TODO: Make these throw an exception if they are None
