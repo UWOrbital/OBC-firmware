@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from gs.backend.config.config import BackendConfiguration
+
+backend_config = BackendConfiguration()
+
 
 def add_cors_middleware(app: FastAPI) -> None:
     """
@@ -10,8 +14,8 @@ def add_cors_middleware(app: FastAPI) -> None:
     """
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=backend_config.cors_config.allow_origins,
+        allow_credentials=backend_config.cors_config.allow_credentials,
+        allow_methods=backend_config.cors_config.allow_methods,
+        allow_headers=backend_config.cors_config.allow_headers,
     )
