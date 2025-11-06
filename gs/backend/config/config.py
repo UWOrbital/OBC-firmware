@@ -1,6 +1,6 @@
 # TODO:(335) Improve loading the configuration
 from os import environ
-from typing import Any, Final, Self
+from typing import Any, Final, TypeVar
 
 from dotenv import load_dotenv
 
@@ -9,15 +9,17 @@ from .logger_config import LoggerConfig
 
 load_dotenv()
 
+T = TypeVar("T")
+
 
 class SingletonMeta(type):
     """
     singleton metaclass used for defining BackendConfiguration class
     """
 
-    _instances: dict = {}
+    _instances: dict[type, Any] = {}
 
-    def __call__(cls, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> Self:
+    def __call__(cls: type[T], *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> T:
         """Return the singleton instance of the class, creating it if it does not exist."""
         if cls not in cls._instances:
             instance = super().__call__(*args, **kwargs)
