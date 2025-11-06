@@ -107,7 +107,7 @@ class CommandsWrapper(AbstractWrapper[Commands]):
         does not match with any command_id in the packet_commands table
         """
         packet_commands = PacketCommandsWrapper().get_all()
-        packet_ids = [packet_command.command_id for packet_command in packet_commands]
+        packet_ids = {packet_command.command_id for packet_command in packet_commands}
 
         commands = self.get_all()
         floating_commands = [fc for fc in commands if fc.id not in packet_ids]

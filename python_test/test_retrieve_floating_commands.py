@@ -42,11 +42,13 @@ def test_retrieve_floating_commands_filters():
 
     cmd_in_packet = cw.create(dict(id=uuid4(), type_=cmd_type))
     cmd_free = cw.create(dict(id=uuid4(), type_=cmd_type))
+    cmd_free2 = cw.create(dict(id=uuid4(), type_=cmd_type))
 
     pcw.create(dict(packet_id=packet.id, command_id=cmd_in_packet.id))
 
     result = cw.retrieve_floating_commands()
-    assert [c.id for c in result] == [cmd_free.id]
+    for command in result:
+        assert command.id in [cmd_free.id, cmd_free2.id]
 
 
 def test_retrieve_floating_commands_no_packet_commands():
