@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-if(APPLE)
-    find_library(COREFOUNDATION CoreFoundation)
-    find_library(IOKIT IOKit)
-endif()
-
 # Set default values for firmware build options
 include(${CMAKE_SOURCE_DIR}/cmake/obc_build_options.cmake)
 
@@ -74,6 +69,9 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
     target_include_directories (${OUT_FILE_NAME} PRIVATE examples/test_app_cc1120_spi)
   elseif(${EXAMPLE_TYPE} MATCHES RS)
     add_executable(${OUT_FILE_NAME} examples/test_app_rs/main.c)
+  elseif(${EXAMPLE_TYPE} MATCHES CC1120_TEMP)
+    add_executable(${OUT_FILE_NAME} examples/test_app_cc1120_temp/main.c)
+
 
   # ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()

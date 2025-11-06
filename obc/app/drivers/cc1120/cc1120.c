@@ -3,6 +3,7 @@
 #include "cc1120_mcu.h"
 #include "obc_logging.h"
 #include "obc_board_config.h"
+#include "obc_adc.h"
 
 #define READ_BIT 1 << 7
 #define BURST_BIT 1 << 6
@@ -472,5 +473,67 @@ obc_error_code_t cc1120Rng(uint8_t *randomValue) {
   RETURN_IF_ERROR_CODE(cc1120ReadFifo(&receivedData, 1));
   (*randomValue) &= ~(1 << 7);
   (*randomValue) ^= receivedData;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Read temperature from the CC1120
+ * 
+ * This function reads the analog voltage from GPIO1 (via ADC) and converts
+ * it to temperature in Celsius. 
+ * 
+ * @param temperature - Pointer to float where temperature will be stored
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS or error code
+ */
+obc_error_code_t cc1120ReadTemp(float *temperature) {
+  uint8_t temp_val;
+  obc_error_code_t errCode;
+
+  if (temperature == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // idle state 
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SIDLE));
+  vTaskDelay(pdMS_TO_TICKS(1));
+
+  // change to output analog voltage
+  temp_val = 0x80U;
+  RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG1, &temp_val, 1));
+
+  // internal signals now are output
+  temp_val = 0x2AU;
+  RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST, &temp_val, 1));
+
+  // changes mode to temperature mode
+  temp_val = 0x0CU;
+  RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST_MODE, &temp_val, 1));
+
+  // set bias of transmitter to analog circuits
+  temp_val = 0x07U;
+  RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_GBIAS1, &temp_val, 1));
+
+  // wait for analog signal to stabilize
+  vTaskDelay(pdMS_TO_TICKS(2));
+
+
+  float temperature_cc1120 = 0.0f;
+
+  uint16_t adcReading = 0;
+
+  for (int i = 0; i < 16; i++) {
+    RETURN_IF_ERROR_CODE(adcGetSingleData(ADC_MODULE_1, ADC_CHANNEL_1, ADC_GROUP_1, &adcReading, pdMS_TO_TICKS(10)));
+    temperature_cc1120 += (adcReading * 3.0f) / 4095.0f; // <- assuming 3V
+  }
+
+  temperature_cc1120 /= 16.0f;
+  
+  // temp = 25.0C + (pin_voltage - V_at_25C) / temperature_coefficient <- assuming 3V
+  *temperature = 25.0f + (temperature_cc1120 - 0.79478f) / 0.0026733f;
+
+  // restore MISO mode
+  temp_val = 0x30U;
+  RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG1, &temp_val, 1));
+
   return OBC_ERR_CODE_SUCCESS;
 }

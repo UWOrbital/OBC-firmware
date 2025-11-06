@@ -180,3 +180,14 @@ obc_error_code_t cc1120Init(void);
  * @return obc_error_code_t - Whether or not the register read was successful
  */
 obc_error_code_t cc1120Rng(uint8_t *randomValue);
+
+/**
+ * @brief Read temperature from the CC1120
+ * 
+ * This function reads the analog voltage from GPIO1 (via ADC) and converts
+ * it to temperature in Celsius. 
+ * 
+ * @param temperature - Pointer to float where temperature will be stored
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS or error code
+ */
+obc_error_code_t cc1120ReadTemp(float *temperature);

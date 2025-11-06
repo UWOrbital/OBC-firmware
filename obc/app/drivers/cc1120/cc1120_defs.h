@@ -226,6 +226,8 @@
 
 #define CC1120_REGS_EXT_SPACE_END 0xD9U
 
+#define CC1120_STATE_IDLE 0x01
+
 /* Standard register space defaults */
 #define CC1120_DEFAULTS_IOCFG3 0x06U
 #define CC1120_DEFAULTS_IOCFG2 0x07U
