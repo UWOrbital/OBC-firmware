@@ -1,6 +1,6 @@
 # TODO:(335) Improve loading the configuration
 from os import environ
-from typing import Final, object
+from typing import Final
 
 from dotenv import load_dotenv
 
