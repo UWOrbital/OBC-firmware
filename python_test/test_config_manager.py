@@ -26,7 +26,7 @@ def test_singleton_meta():
 
     first = Singleton()
     second = Singleton()
-    assert first == second
+    assert first is second
 
 
 def test_backend_configuration_from_env(monkeypatch):
