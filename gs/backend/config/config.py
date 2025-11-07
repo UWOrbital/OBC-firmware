@@ -10,28 +10,7 @@ from .logger_config import LoggerConfig
 load_dotenv()
 
 
-class SingletonMeta(type):
-    """
-    Singleton metaclass used for defining the BackendConfiguration class
-    """
-
-    _instances: dict[type, object] = {}
-
-    def __call__(cls, *args: object, **kwargs: object) -> object:
-        """
-        Returns the singleton instance of the class, creating it if it does not exist
-        """
-
-        if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
-            cls._instances[cls] = instance
-        else:
-            instance = cls._instances[cls]
-
-        return instance
-
-
-class BackendConfiguration(metaclass=SingletonMeta):
+class BackendConfiguration:
     """
     Class for storing backend configuration settings
     """
@@ -40,6 +19,8 @@ class BackendConfiguration(metaclass=SingletonMeta):
         self.cors_config = CORSConfig()
         self.logger_config = LoggerConfig()
 
+
+backend_config = BackendConfiguration()
 
 # TODO: Make these throw an exception if they are None
 GS_DATABASE_USER = environ.get("GS_DATABASE_USER")
