@@ -1,9 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from gs.backend.config.config import BackendConfiguration
-
-backend_config = BackendConfiguration()
+from gs.backend.config.config import backend_config
 
 
 def add_cors_middleware(app: FastAPI) -> None:

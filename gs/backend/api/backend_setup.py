@@ -9,9 +9,7 @@ from gs.backend.api.v1.mcc.endpoints.aro_requests import aro_requests_router
 from gs.backend.api.v1.mcc.endpoints.commands import commands_router
 from gs.backend.api.v1.mcc.endpoints.main_commands import main_commands_router
 from gs.backend.api.v1.mcc.endpoints.telemetry import telemetry_router
-from gs.backend.config.config import BackendConfiguration
-
-backend_config = BackendConfiguration()
+from gs.backend.config.config import backend_config
 
 
 def setup_routes(app: FastAPI) -> None:
