@@ -8,7 +8,7 @@ sidebar:
 ---
 The following outlines the benefits of caching in FastAPI, when to use it, and how to implement it.
 
-## Observed Performance Gains
+## Observed performance gains
 We built a minimal FastAPI app with two endpoints performing the same recursive Fibonacci calculation, one cached and one uncached, to demonstrate efficiency improvements. Using a TestClient, we ran repeated requests to both endpoints and measured response times.
 
 For the uncached endpoint, each request triggers a full recalculation, causing computation times to grow exponentially with input size. In contrast, the cached endpoint computes the result only once on a cache miss, then serves subsequent cache hits within the 60-second cache window almost instantly, clearly illustrating the performance benefits of caching.
@@ -78,7 +78,7 @@ Results for fibonacci(35):
 ```
 Through testing, we observed that caching yields exponentially greater speed improvements as computational complexity increases. Uncached response times rose from 1 ms to 843 ms, while successive cached requests (cache hits) consistently remained under 1 ms. This performance gain occurs because cached endpoints retrieve pre-computed results directly from memory instead of re-executing the expensive Fibonacci calculation.
 
-## Selecting Endpoints for Caching
+## Selecting endpoints for caching
 In-memory caching is best suited for endpoints that are called frequently within short intervals and return identical responses for the same input parameters. As shown in our test case, caching converts expensive computations into fast memory lookups. This principle also applies to database queries, frequently repeated queries can be cached to significantly reduce response times.
 
 However, not all endpoints benefit equally from caching. For endpoints with inherently fast execution times, caching overhead may offset any performance gains, making improvements negligible.
@@ -87,12 +87,12 @@ The cache hit ratio is another critical factor. A hit ratio of at least 30%, mea
 
 Finally, in-memory caching should be avoided for endpoints returning large payloads (e.g., images, videos, or datasets exceeding 5–10 MB). Since in-memory caches store data directly in application RAM, large responses can quickly exhaust available memory and degrade system stability.
 
-#### Good Use Cases for Caching
+#### Good use cases for caching
 - Endpoints with high request frequency with the same parameters
 - Computationally expensive operations
 - Static Data Lookups
 
-#### Bad Use Cases for Caching
+#### Bad use cases for caching
 - User-specific Data
 - Real-time Data
 - Endpoints with low request frequency
@@ -100,7 +100,7 @@ Finally, in-memory caching should be avoided for endpoints returning large paylo
 - Endpoints with fast execution
 - Endpoints with high cardinality inputs (a lot of unique parameters)
 
-## Implementation Guide
+## Implementation guide
 Import FastAPICache classes and initialize the cache in lifespan.py
 ```python
 ...
