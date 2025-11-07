@@ -1,3 +1,6 @@
+import importlib
+
+from gs.backend.config import config
 from gs.backend.config.config import BackendConfiguration, SingletonMeta
 from gs.backend.config.cors_config import CORSConfig
 from gs.backend.config.logger_config import LoggerConfig
@@ -30,6 +33,7 @@ def test_backend_configuration_from_env(monkeypatch):
     monkeypatch.setenv("LOGGER_EXCLUDED_ENDPOINTS", '["/test"]')
     monkeypatch.setenv("CORS_ALLOW_ORIGINS", '["http://test.com"]')
 
-    cfg = BackendConfiguration()
+    importlib.reload(config)
+    cfg = config.BackendConfiguration()
     assert "/test" in cfg.logger_config.excluded_endpoints
     assert "http://test.com" in cfg.cors_config.allow_origins
