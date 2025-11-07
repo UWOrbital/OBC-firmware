@@ -55,17 +55,24 @@ def test_create_command_success(client):
 
 
 def test_create_command_duplicate(client):
-    """Test that creating a duplicate command returns 400 error"""
+    """Test that creating a duplicate command is allowed and succeeds"""
     payload = {"status": CommandStatus.PENDING, "type_": 2, "params": "duplicate_test"}
 
     # Create the first command
     response1 = client.post("/api/v1/mcc/commands/", json=payload)
     assert response1.status_code == 200
+    command1_id = response1.json()["id"]
 
-    # Attempt to create duplicate command (same payload except id)
+    # Create duplicate command (same payload except id will be different)
     response2 = client.post("/api/v1/mcc/commands/", json=payload)
-    assert response2.status_code == 400
-    assert response2.json()["detail"] == "Invalid command payload"
+    assert response2.status_code == 200
+    command2_id = response2.json()["id"]
+
+    # Both commands should exist but have different IDs
+    assert command1_id != command2_id
+    assert response2.json()["status"] == CommandStatus.PENDING
+    assert response2.json()["type_"] == 2
+    assert response2.json()["params"] == "duplicate_test"
 
 
 def test_create_command_with_null_params(client):
@@ -117,13 +124,13 @@ def test_delete_command_success(client):
 
 
 def test_delete_command_not_found(client):
-    """Test deleting a non-existent command raises FileNotFoundError (unhandled exception)"""
+    """Test deleting a non-existent command raises ValueError (unhandled exception)"""
     # Generate a random UUID that doesn't exist
     non_existent_id = uuid4()
 
-    # The endpoint raises FileNotFoundError which is not caught by FastAPI
+    # The endpoint raises ValueError which is not caught by FastAPI
     # This causes the test client to raise an exception
-    with pytest.raises(FileNotFoundError, match=f"Command with id {non_existent_id} not found"):
+    with pytest.raises(ValueError, match="Command not found."):
         client.delete(f"/api/v1/mcc/commands/{non_existent_id}")
 
 
@@ -149,6 +156,6 @@ def test_delete_command_twice(client):
     delete_response1 = client.delete(f"/api/v1/mcc/commands/{command_id}")
     assert delete_response1.status_code == 200
 
-    # Second deletion should raise FileNotFoundError
-    with pytest.raises(FileNotFoundError, match=f"Command with id {command_id} not found"):
+    # Second deletion should raise ValueError
+    with pytest.raises(ValueError, match="Command not found."):
         client.delete(f"/api/v1/mcc/commands/{command_id}")
