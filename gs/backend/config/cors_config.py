@@ -2,7 +2,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class CORSConfig(BaseSettings):
-
     """
     Pydantic class for storing CORS middleware configuration settings
     """

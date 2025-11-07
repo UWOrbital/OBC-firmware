@@ -12,13 +12,16 @@ load_dotenv()
 
 class SingletonMeta(type):
     """
-    singleton metaclass used for defining BackendConfiguration class
+    Singleton metaclass used for defining the BackendConfiguration class
     """
 
     _instances: dict[type, object] = {}
 
     def __call__(cls, *args: object, **kwargs: object) -> object:
-        """Return the singleton instance of the class, creating it if it does not exist."""
+        """
+        Returns the singleton instance of the class, creating it if it does not exist
+        """
+
         if cls not in cls._instances:
             instance = super().__call__(*args, **kwargs)
             cls._instances[cls] = instance
@@ -29,7 +32,6 @@ class SingletonMeta(type):
 
 
 class BackendConfiguration(metaclass=SingletonMeta):
-
     """
     Class for storing backend configuration settings
     """
