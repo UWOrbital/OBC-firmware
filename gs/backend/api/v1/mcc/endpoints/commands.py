@@ -12,7 +12,7 @@ from gs.backend.data.tables.transactional_tables import Commands
 commands_router = APIRouter(tags=["MCC", "Commands"])
 
 
-@commands_router.post("/")
+@commands_router.post("/create")
 async def create_command(payload: dict[str, Any]) -> Commands:
     """
     Create a new command.
@@ -23,7 +23,7 @@ async def create_command(payload: dict[str, Any]) -> Commands:
     return create_commands(payload)
 
 
-@commands_router.delete("/{command_id}")
+@commands_router.delete("/delete/{command_id}")
 async def delete_command(command_id: UUID) -> dict[str, Any]:
     """
     Delete a command by ID.
