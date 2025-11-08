@@ -42,7 +42,7 @@ def test_create_command_success(client):
         "params": "test_params",
     }
 
-    response = client.post("/api/v1/mcc/commands/", json=payload)
+    response = client.post("/api/v1/mcc/commands/create", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -59,12 +59,12 @@ def test_create_command_duplicate(client):
     payload = {"status": CommandStatus.PENDING, "type_": 2, "params": "duplicate_test"}
 
     # Create the first command
-    response1 = client.post("/api/v1/mcc/commands/", json=payload)
+    response1 = client.post("/api/v1/mcc/commands/create", json=payload)
     assert response1.status_code == 200
     command1_id = response1.json()["id"]
 
     # Create duplicate command (same payload except id will be different)
-    response2 = client.post("/api/v1/mcc/commands/", json=payload)
+    response2 = client.post("/api/v1/mcc/commands/create", json=payload)
     assert response2.status_code == 200
     command2_id = response2.json()["id"]
 
@@ -79,7 +79,7 @@ def test_create_command_with_null_params(client):
     """Test creating a command with null params"""
     payload = {"status": CommandStatus.SCHEDULED, "type_": 3, "params": None}
 
-    response = client.post("/api/v1/mcc/commands/", json=payload)
+    response = client.post("/api/v1/mcc/commands/create", json=payload)
 
     assert response.status_code == 200
     data = response.json()
@@ -98,7 +98,7 @@ def test_create_command_different_status(client):
             "params": f"params_{status}",
         }
 
-        response = client.post("/api/v1/mcc/commands/", json=payload)
+        response = client.post("/api/v1/mcc/commands/create", json=payload)
         assert response.status_code == 200
         assert response.json()["status"] == status
 
@@ -111,12 +111,12 @@ def test_delete_command_success(client):
     # First create a command to delete
     payload = {"status": CommandStatus.PENDING, "type_": 10, "params": "to_be_deleted"}
 
-    create_response = client.post("/api/v1/mcc/commands/", json=payload)
+    create_response = client.post("/api/v1/mcc/commands/create", json=payload)
     assert create_response.status_code == 200
     command_id = create_response.json()["id"]
 
     # Delete the command
-    delete_response = client.delete(f"/api/v1/mcc/commands/{command_id}")
+    delete_response = client.delete(f"/api/v1/mcc/commands/delete/{command_id}")
 
     assert delete_response.status_code == 200
     data = delete_response.json()
@@ -131,14 +131,14 @@ def test_delete_command_not_found(client):
     # The endpoint raises ValueError which is not caught by FastAPI
     # This causes the test client to raise an exception
     with pytest.raises(ValueError, match="Command not found."):
-        client.delete(f"/api/v1/mcc/commands/{non_existent_id}")
+        client.delete(f"/api/v1/mcc/commands/delete/{non_existent_id}")
 
 
 def test_delete_command_invalid_uuid(client):
     """Test deleting with an invalid UUID format returns 422 error"""
     invalid_uuid = "not-a-valid-uuid"
 
-    response = client.delete(f"/api/v1/mcc/commands/{invalid_uuid}")
+    response = client.delete(f"/api/v1/mcc/commands/delete/{invalid_uuid}")
 
     # FastAPI validation error for invalid UUID format
     assert response.status_code == 422
@@ -149,13 +149,13 @@ def test_delete_command_twice(client):
     # Create a command
     payload = {"status": CommandStatus.PENDING, "type_": 11, "params": "delete_twice_test"}
 
-    create_response = client.post("/api/v1/mcc/commands/", json=payload)
+    create_response = client.post("/api/v1/mcc/commands/create", json=payload)
     command_id = create_response.json()["id"]
 
     # First deletion should succeed
-    delete_response1 = client.delete(f"/api/v1/mcc/commands/{command_id}")
+    delete_response1 = client.delete(f"/api/v1/mcc/commands/delete/{command_id}")
     assert delete_response1.status_code == 200
 
     # Second deletion should raise ValueError
     with pytest.raises(ValueError, match="Command not found."):
-        client.delete(f"/api/v1/mcc/commands/{command_id}")
+        client.delete(f"/api/v1/mcc/commands/delete/{command_id}")
