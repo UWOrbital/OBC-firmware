@@ -112,7 +112,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(UnknownError)
-    async def unknown_exception_handler(request: Request, exc: UnknownError) -> HTTPException:
+    async def unknown_exception_handler(request: Request, exc: UnknownError) -> JSONResponse:
         """
         @brief handle all UnknownError exceptions with HTTPException
         @attribute request (Request) - The request that caused the exception
