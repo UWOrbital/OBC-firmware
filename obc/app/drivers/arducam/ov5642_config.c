@@ -1,5 +1,6 @@
-#include <stdlib.h>
 #include "ov5642_config.h"
+
+#include <stdlib.h>
 
 // Configuration for the host preview
 static sensor_config_t OV5642_QVGA_Preview[PREVIEW_CONFIG_LEN] = {

@@ -32,6 +32,7 @@ SET(SOURCES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/arducam.c
     ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642_config.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/arducam/ov5642.c
     ${CMAKE_CURRENT_SOURCE_DIR}/tca9458a/tca9458a.c
 
     ${CMAKE_CURRENT_SOURCE_DIR}/cc1120/cc1120_mcu.c

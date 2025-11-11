@@ -17,20 +17,18 @@ typedef struct {
 
 /**
  * @brief Access camera preview configuration arrays
- * @param config  Camera config array name
  * @return Pointer to config array
  */
 sensor_config_t* getCamPreviewConfig(void);
 
 /**
  * @brief Access camera capture configuration arrays
- * @param config  Camera config array name
  * @return Pointer to config array
  */
 sensor_config_t* getCamCaptureConfig(void);
+
 /**
  * @brief Access camera resolution configuration arrays
- * @param config  Camera config array name
  * @return Pointer to config array
  */
 sensor_config_t* getCamResolutionConfig(void);

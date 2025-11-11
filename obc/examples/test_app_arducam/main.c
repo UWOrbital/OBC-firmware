@@ -25,8 +25,8 @@ static StackType_t taskStack[TASK_STACK_SIZE];
 
 void vTask1(void *pvParameters) {
   sciPrintf("Starting Arducam Demo\r\n");
-  selectCamera(PRIMARY);
-  initCamera();
+  camera_id_t selectedCamera = PRIMARY;
+  initCamera(selectedCamera);
   uint8_t temp;
   arducamReadSensorPowerControlReg(&temp);
   sciPrintf("Power Control Reg:0x%X\r\n", temp);
@@ -51,14 +51,14 @@ void vTask1(void *pvParameters) {
   while (1) {
     // Capture
     sciPrintf("Starting Image Capture\r\n");
-    startImageCapture();
-    while (isCaptureDone() == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
+    startImageCapture(selectedCamera);
+    while (isCaptureDone(selectedCamera) == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
       ;
     sciPrintf("Image Capture Done ^_^\r\n");
 
     // Read image size
     uint32_t img_len = 0;
-    arducamReadFIFOSize(&img_len);
+    arducamReadFIFOSize(selectedCamera, &img_len);
     sciPrintf("image len: %d \r\n", img_len);
 
     // Read image from FIFO
@@ -67,7 +67,7 @@ void vTask1(void *pvParameters) {
     size_t bytesRead = 0;
     obc_error_code_t ret;
     do {
-      ret = readImage(imgBuffer, BUFFER_SIZE, &bytesRead);
+      ret = readImage(selectedCamera, imgBuffer, BUFFER_SIZE, &bytesRead);
       for (size_t index = 0; index < bytesRead; index++) {
         sciPrintf("0x%X,", imgBuffer[index]);
       }
@@ -76,7 +76,7 @@ void vTask1(void *pvParameters) {
   }
 
   // Put Camera on standby (gets pretty hot if left powered on for too long)
-  standbyCamera();
+  standbyCamera(selectedCamera);
   while (1)
     ;
 }
