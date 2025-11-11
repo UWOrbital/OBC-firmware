@@ -123,7 +123,6 @@ def setup_exception_handlers(app: FastAPI) -> None:
             content={"detail": exc.message},
         )
 
-
     @app.exception_handler(SunPositionError)
     async def sun_position_exception_handler(request: Request, exc: SunPositionError) -> JSONResponse:
         """
