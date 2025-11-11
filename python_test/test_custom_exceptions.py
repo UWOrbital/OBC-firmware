@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+import pytest
 from gs.backend.exceptions.exception_handlers import setup_exception_handlers
 from gs.backend.exceptions.exceptions import (
     BaseOrbitalError,
