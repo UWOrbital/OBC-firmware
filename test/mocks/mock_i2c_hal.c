@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 #include "obc_errors.h"
 #include "os_portmacro.h"
 
@@ -37,7 +38,7 @@ obc_error_code_t i2cReadReg(uint8_t sAddr, uint8_t reg, uint8_t *data, uint16_t 
 }
 
 void setMockBusVoltageValue(float expectedVoltage) {
-    uint16_t expectedVal = expectedVoltage / 0.00125f;
+    uint16_t expectedVal = (uint16_t)((expectedVoltage / 0.00125f) + 0.5f);
     mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
     mockData[1] = 0xFF & expectedVal;           // Low bytes
 }
@@ -49,13 +50,18 @@ void setMockCurrentValue(float expectedCurrent) {
 }
 
 void setMockPowerValue(float expectedPower) {
-    uint16_t expectedVal = expectedPower / 0.025f;
+    // add 0.5 to round to the nearest integer (ensures that .5-.9 rounds up instead of truncating the decimal)
+    uint16_t expectedVal = (uint16_t)((expectedPower / 0.025f) + 0.5f);
     mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
     mockData[1] = 0xFF & expectedVal;           // Low bytes
+    printf("mockData[0]: %u\n", mockData[0]);
+    printf("mockData[1]: %u\n", mockData[1]);
 }
 
 void setMockShuntVoltageValue(float expectedShuntVoltage) {
-    uint16_t expectedVal = expectedShuntVoltage / 0.0000025f;
-    mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
-    mockData[1] = 0xFF & expectedVal;           // Low bytes
+    // if expected value is positive, add 0.5; if negative, subtract 0.5
+    int32_t raw = (int32_t)((expectedShuntVoltage / 0.0000025f) + (expectedShuntVoltage >= 0 ? 0.5f : -0.5f));
+    uint16_t expectedVal = (uint16_t)raw; // two's complement encoding for negative values
+    mockData[0] = (expectedVal >> 8) & 0xFF;  // High byte
+    mockData[1] = expectedVal & 0xFF;         // Low byte
 }
