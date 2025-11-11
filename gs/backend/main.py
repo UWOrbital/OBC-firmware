@@ -6,3 +6,4 @@ from gs.backend.api.lifespan import lifespan
 app = FastAPI(lifespan=lifespan)
 setup_routes(app)
 setup_middlewares(app)
+setup_exception_handlers(app)
