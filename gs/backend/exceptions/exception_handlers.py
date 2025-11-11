@@ -120,7 +120,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         """
         return JSONResponse(
             status_code=HTTP_400_BAD_REQUEST,
-            detail=exc.message,
+            content={"detail": exc.message},
         )
 
 
