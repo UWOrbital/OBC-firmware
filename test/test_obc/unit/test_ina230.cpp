@@ -1,12 +1,28 @@
-// When testing:
-// Comment out obc_i2c_io.c from test/test_obc/unit/CMakeLists.txt
-// Put it back when done testing
+
 
 #include "obc_errors.h"
 #include "ina230.h"
 #include "mock_i2c_hal.h" 
 #include <assert.h>
 #include <gtest/gtest.h>
+
+// include C functions in C++ file
+extern "C" {
+    obc_error_code_t i2cReadReg(uint8_t, uint8_t, uint8_t*, uint16_t, TickType_t);
+    obc_error_code_t i2cWriteReg(uint8_t, uint8_t, uint8_t*, uint16_t);
+}
+
+// Google Test test environment class configuration
+class INA230TestEnvironment : public ::testing::Environment {
+public:
+    void SetUp() override {
+        i2cReadRegFuncPtr = i2cReadReg;   
+        i2cWriteRegFuncPtr = i2cWriteReg; 
+    }
+};
+
+static ::testing::Environment* const ina230_env = ::testing::AddGlobalTestEnvironment(new INA230TestEnvironment());
+
 
 #define INA230_I2C_ADDRESS_ONE 0b1000000U
 #define INA230_I2C_ADDRESS_TWO 0b1000001U

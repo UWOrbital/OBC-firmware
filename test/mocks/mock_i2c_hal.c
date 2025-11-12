@@ -54,8 +54,6 @@ void setMockPowerValue(float expectedPower) {
     uint16_t expectedVal = (uint16_t)((expectedPower / 0.025f) + 0.5f);
     mockData[0] = (0xFF00 & expectedVal) >> 8;  // High byte    
     mockData[1] = 0xFF & expectedVal;           // Low bytes
-    printf("mockData[0]: %u\n", mockData[0]);
-    printf("mockData[1]: %u\n", mockData[1]);
 }
 
 void setMockShuntVoltageValue(float expectedShuntVoltage) {

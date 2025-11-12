@@ -7,7 +7,19 @@ extern "C" {
 #include "obc_errors.h"
 #include <stdint.h>
 
+#ifdef USE_MOCK_I2C
+    #ifndef TICK_TYPE_H
+        typedef uint32_t TickType_t;
+    #endif
+#else
+    #include "os_portmacro.h"
+#endif
+
 typedef enum { INA230_DEVICE_ONE = 0x00, INA230_DEVICE_TWO, INA230_DEVICE_COUNT } ina230_device_t;
+
+// function pointers to switch between mock and real data
+extern obc_error_code_t (*i2cReadRegFuncPtr)(uint8_t, uint8_t, uint8_t*, uint16_t, TickType_t);
+extern obc_error_code_t (*i2cWriteRegFuncPtr)(uint8_t, uint8_t, uint8_t*, uint16_t);
 
 obc_error_code_t initINA230();
 obc_error_code_t readAndDisableIfAlert(ina230_device_t device);
