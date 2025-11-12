@@ -2,11 +2,12 @@ import os
 import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
+from typing import Any
 
 # Load environment variables from .env file
 load_dotenv()
 
-def require_env(name: str) -> any:
+def require_env(name: str) -> Any:
     value = os.getenv(name)
     if not value:
         raise RuntimeError(f"Missing required environment variable: {name}")
