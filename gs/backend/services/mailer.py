@@ -6,19 +6,18 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-def require_env(name: str) -> str:
+def require_env(name: str) -> any:
     value = os.getenv(name)
     if not value:
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
 
-smtp_host: str = "mail.smtp2go.com"
-smtp_port: int = 587
-
 # Set up in http://smtp2go.com/
 sender_email: str = require_env("sender_email")
 smtp_user: str = require_env("smtp_user")
 smtp_password: str = require_env("smtp_password")
+smtp_host: str = require_env("smtp_host")
+smtp_port: int = require_env("smtp_port")
 
 def send_verification_email(recipient: str, first_name: str) -> None:
     """
