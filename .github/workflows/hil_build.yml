@@ -1,29 +1,55 @@
-name: HIL Build
+name: HIL Build (Manual / Fallback)
+
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
+concurrency:
+  group: hil-manual
+  cancel-in-progress: true
 
 jobs:
-  build-linux:
-    runs-on: self-hosted
+  hil-on-pi:
+    runs-on: [self-hosted, linux, arm64, pi, hil]
 
     defaults:
       run:
         shell: bash
+
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install build-essential cmake
-    - name: Create binary directory
-      run: |
-        mkdir build_hil
-    - name: Build
-      run: |
-        cd build_hil
-        #Seems like we need to force the cxx standard here for it to be set in actions
-        cmake .. -DCMAKE_BUILD_TYPE=HIL -DCMAKE_CXX_STANDARD=20
-        make
+      - uses: actions/checkout@v4
+
+      - name: Install deps on Pi
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install python3-venv build-essential cmake
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt || true
+          python3 -m pip install -r obc/tools/python/requirements.txt || true
+          python3 -m pip install -e .
+
+      - name: Build Ground Station (optional)
+        run: |
+          cmake -S . -B build_gs -DCMAKE_BUILD_TYPE=GS
+          cmake --build build_gs -j
+
+      - name: Build OBC firmware (Rev1 with CRC)
+        run: |
+          cmake -S . -B build_arm -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
+          cmake --build build_arm -j
+          test -f build_arm/OBC-firmware-crc.bin
+
+      - name: Flash & Run HIL (local build)
+        env:
+          PORT: /dev/serial0   # change if your UART device differs
+        run: |
+          source .venv/bin/activate
+          python3 hil/hil_main.py "$PORT" "$(pwd)/build_arm/OBC-firmware-crc.bin"
+
+      - name: Upload HIL logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hil-logs
+          path: hil_logs/**
