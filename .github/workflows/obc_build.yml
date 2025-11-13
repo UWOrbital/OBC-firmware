@@ -1,138 +1,147 @@
-name: OBC Build / HIL
-on: [push, pull_request]
+name: OBC Build + HIL (PR)
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: obc-hil-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   OBC_BUILD:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Setup
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install build-essential cmake
+      - name: Setup toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential cmake python3-venv
 
-    - name: Install requirements
-      run: |
-        python3 -m pip install -r requirements.txt
+      - name: Install Python reqs (project)
+        run: |
+          python3 -m pip install --upgrade pip
+          # Install both if they exist; don't fail the build if one is missing
+          python3 -m pip install -r requirements.txt || true
+          python3 -m pip install -r obc/tools/python/requirements.txt || true
 
-    - name: Create binary directory
-      run: |
-        mkdir build
-        cd build
-        export REPO_ROOT=$(git rev-parse --show-toplevel)
+      - name: Configure build directory
+        run: |
+          cmake -S . -B build -G "Unix Makefiles"
 
-    - name: Build (Release-Launchpad)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=0
-        make
+      # --- Build all targets you already had ---
 
-    - name: Upload CRC Binary (Release-Launchpad)
-      uses: actions/upload-artifact@v4
-      with:
-        name: launchpad-bin
-        path: build/OBC-firmware-crc.bin
+      - name: Build (Release - Launchpad)
+        run: |
+          cmake --build build --clean-first -- -j
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=0
+          cmake --build build -j
+      - name: Upload CRC Binary (Release - Launchpad)
+        uses: actions/upload-artifact@v4
+        with:
+          name: launchpad-bin
+          path: build/OBC-firmware-crc.bin
 
-    - name: Build (Release-OBC Rev1)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
-        make
+      - name: Build (Release - OBC Rev1)
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
+          cmake --build build -j
+          test -f build/OBC-firmware-crc.bin
+      - name: Upload CRC Binary (Release - OBC Rev1)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev1-bin
+          path: build/OBC-firmware-crc.bin
 
-    - name: Upload CRC Binary (Release-OBC Rev1)
-      uses: actions/upload-artifact@v4
-      with:
-        name: rev1-bin
-        path: build/OBC-firmware-crc.bin
+      - name: Build (Release - OBC Rev2)
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=0
+          cmake --build build -j
+      - name: Upload CRC Binary (Release - OBC Rev2)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rev2-bin
+          path: build/OBC-firmware-crc.bin
 
-    - name: Build (Release-OBC Rev2)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=0
-        make
+      - name: Build (Debug - Launchpad)
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
+          cmake --build build -j
 
-    - name: Upload CRC Binary (Release-OBC Rev2)
-      uses: actions/upload-artifact@v4
-      with:
-        name: rev2-bin
-        path: build/OBC-firmware-crc.bin
+      - name: Build (Debug - OBC Rev1)
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=1
+          cmake --build build -j
 
-    - name: Build (Debug-Launchpad)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=RM46_LAUNCHPAD -DDEBUG=1
-        make
+      - name: Build (Debug - OBC Rev2)
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=1
+          cmake --build build -j
 
-    - name: Build (Debug-OBC Rev1)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=1
-        make
-
-    - name: Build (Debug-OBC Rev2)
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=OBC -G"Unix Makefiles" -DBOARD_TYPE=OBC_REVISION_2 -DDEBUG=1
-        make
-
-    - name: Upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: bin-file
-        path: build/OBC-firmware.bin
+      - name: Upload raw binary (latest build dir)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bin-file
+          path: build/OBC-firmware.bin
 
   CRC:
     needs: OBC_BUILD
     runs-on: ubuntu-latest
     steps:
-    - name: Download binary
-      uses: actions/download-artifact@v4
-      with:
-        name: bin-file
-        path: .
-
-    - name: Display CRC
-      run: |
-        echo "CRC checksum:"
-        cksum OBC-firmware.bin
+      - name: Download binary
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-file
+          path: .
+      - name: Display CRC
+        run: |
+          echo "CRC checksum:"
+          cksum OBC-firmware.bin
 
   OBC_HIL:
     needs: OBC_BUILD
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, arm64, pi, hil]
 
     defaults:
       run:
         shell: bash
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Install Dependencies
-      run: |
-        sudo apt-get -y install python3-venv build-essential cmake
-        python3 -m venv venv/
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -e .
+      - uses: actions/checkout@v4
 
-    - name: Create Ground Station Binary Directory
-      run: |
-        mkdir build_gs
-        cd build_gs
-        cmake .. -DCMAKE_BUILD_TYPE=GS
+      - name: Prepare Python env on Pi
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt || true
+          python3 -m pip install -r obc/tools/python/requirements.txt || true
+          python3 -m pip install -e .
 
-    - name: Build
-      run: |
-        cd build_gs
-        cmake --build .
+      - name: Build Ground Station (optional)
+        run: |
+          cmake -S . -B build_gs -DCMAKE_BUILD_TYPE=GS
+          cmake --build build_gs -j
 
-    - name: Download binary wiht CRC
-      uses: actions/download-artifact@v4
-      with:
-        name: launchpad-bin
+      - name: Download firmware with CRC (Rev1)
+        uses: actions/download-artifact@v4
+        with:
+          name: rev1-bin
+          path: artifacts
 
-    - name: Run HIL
-      run: |
-          source venv/bin/activate
-          python hil/hil_main.py /dev/ttyACM0 OBC-firmware-crc.bin
+      - name: Flash & Run HIL
+        env:
+          PORT: /dev/ttyUSB0
+        run: |
+          source .venv/bin/activate
+          ls -l artifacts
+          python3 hil/hil_main.py "$PORT" "$(pwd)/artifacts/OBC-firmware-crc.bin"
+
+      - name: Upload HIL logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hil-logs
+          path: hil_logs/**
