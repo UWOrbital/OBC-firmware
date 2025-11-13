@@ -2,9 +2,9 @@
  * @brief Verify Component showing ARO OTP verificataion form
  * @return tsx element of Verify component
  */
-const email = "johndoe@gmail.com";
-
 function Verify() {
+    const email = "johndoe@gmail.com";
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-4 ">
             <div className="w-full max-w-xl bg-white rounded-lg p-6 pt-6">
