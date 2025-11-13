@@ -1,18 +1,19 @@
-import "./login.css"
 /**
- * @brief Verify Component showing OTP verificataion form
+ * @brief Verify Component showing ARO OTP verificataion form
  * @return tsx element of Verify component
  */
+const email = "johndoe@gmail.com";
+
 function Verify() {
     return (
-        <div className="geist-text flex flex-col items-center justify-center min-h-screen px-4 ">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 ">
             <div className="w-full max-w-xl bg-white rounded-lg p-6 pt-6">
                 <div className="flex flex-col gap-y-1 mb-8">
                     <h1 className="text-black text-lg font-medium text-center">
                         Verify Your Account
                     </h1>
                     <h2 className="text-gray-500 text-center">
-                        Please Enter the verification code that we sent to johndoe@gmail.com in order to verify your account
+                        Please Enter the verification code that we sent to {email} in order to verify your account
                     </h2>
                 </div>
                 <form className="space-y-6">
