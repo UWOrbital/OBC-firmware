@@ -13,6 +13,8 @@
 #define U_FRAME_COMMS_RECV_SIZE 30
 #define I_FRAME_COMMS_RECV_SIZE 300
 
+extern QueueHandle_t cc1120TempQueueHandle;
+
 /**
  * @enum	comms_event_id_t
  * @brief	comms event ID enum.
@@ -68,6 +70,11 @@ typedef enum {
   COMMS_STATE_ENTERING_EMERGENCY,
   COMMS_STATE_EMERGENCY_UPLINK,
 } comms_state_t;
+
+/**
+ * @brief Post temperature
+ */
+obc_error_code_t postCommsManagerTempQueue();
 
 /**
  * @brief	Send an event to the Comms Manager queue.
