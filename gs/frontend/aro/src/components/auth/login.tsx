@@ -1,18 +1,16 @@
-import "./login.css"
-
 /**
- * @brief Login component displaying the login page
+ * @brief Login component for ARO
  * @return tsx element of Login component
  */
 function Login() {
     return (
-        <div className="geist-text flex flex-col items-center justify-center min-h-screen px-4">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4">
             <div className="w-full max-w-xl bg-white rounded-lg p-6 pt-6">
                 <div className="flex flex-col gap-y-1 mb-8">
-                    <h1 className="text-black text-lg font-medium text-left">
+                    <h1 className="text-black text-lg font-medium text-center">
                         Login to your ARO Account
                     </h1>
-                    <h2 className="text-gray-500 text-left">
+                    <h2 className="text-gray-500 text-center">
                         Enter your email below to login to your account
                     </h2>
                 </div>

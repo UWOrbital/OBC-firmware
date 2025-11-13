@@ -1,12 +1,10 @@
-import "./login.css"
-
 /**
- * @brief Signup component displaying sign up page
+ * @brief Signup component for ARO
  * @return tsx element of Signup component
  */
 function Signup() {
     return (
-        <div className="geist-text flex flex-col items-center justify-center min-h-screen px-4 ">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 ">
             <div className="w-full max-w-xl bg-white rounded-lg p-6 pt-6">
                 <div className="flex flex-col gap-y-1 mb-7">
                     <h1 className="text-black text-lg font-medium text-center">
