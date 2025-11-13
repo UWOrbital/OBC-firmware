@@ -1,4 +1,6 @@
 import { Route, Routes } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Nav from "./components/Nav";
 import Background from "./components/Background";
 import NewRequestForm from "./components/new-request/new-request-form.tsx";
@@ -28,6 +30,7 @@ function App() {
         <Route path="/sign-up" element={<Signup />} />
         <Route path="/new-request" element={<NewRequestForm />} />
       </Routes>
+      <ToastContainer />
     </>
   );
 }
