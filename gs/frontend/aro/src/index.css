@@ -1,16 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+@theme inline {
+  --font-geist: var(--font-geist)
+}
 
 @layer base {
   body {
     overflow: hidden;
     display: flex;
-    font-family: var(--font-default);
+    font-family: var(--font-geist);
   }
 
   #root {
     height: 100%;
     width: 100%;
     overflow: hidden;
+    --font-geist: 'Geist', sans-serif;
   }
 }
