@@ -1,19 +1,14 @@
-from pydantic import BaseModel
+# class AllUsersResponse(BaseModel):
+#     """
+#     The users response model.
+#     """
 
-from gs.backend.data.tables.aro_user_tables import AROUsers
-
-
-class AllUsersResponse(BaseModel):
-    """
-    The users response model.
-    """
-
-    data: list[AROUsers]
+#     data: list[AROUsers]
 
 
-class UserResponse(BaseModel):
-    """
-    Single user response model.
-    """
+# class UserResponse(BaseModel):
+#     """
+#     Single user response model.
+#     """
 
-    data: AROUsers
+#     data: AROUsers
