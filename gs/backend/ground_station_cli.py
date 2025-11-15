@@ -20,6 +20,7 @@ class GroundStationShell(Cmd):
         self._com_port: str = com_port
         self._conn_request_sent: bool = False
         self.background_logging: Process | None = None
+        self.stop_printing = False
 
         # At the start of each command shell use, we clear the file and create a dated title
         with open(LOG_PATH, "w") as file:
@@ -33,7 +34,7 @@ class GroundStationShell(Cmd):
     ██║   ██║██║███╗██║    ██║   ██║██╔══██╗██╔══██╗██║   ██║   ██╔══██║██║
     ╚██████╔╝╚███╔███╔╝    ╚██████╔╝██║  ██║██████╔╝██║   ██║   ██║  ██║███████╗
      ╚═════╝  ╚══╝╚══╝      ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
-  Welcome to the UW Orbital Command Line Inteface! Type help or ? to list commands.\n
+  Welcome to the UW Orbital Command Line Interface! Type help or ? to list commands.\n
     """
     prompt = "(UW Orbital): "
     file = None
@@ -72,6 +73,7 @@ class GroundStationShell(Cmd):
         finally:
             self._restart_logging()
 
+        print("Connection request successfully sent.")
         self._conn_request_sent = True
 
     def do_send_command(self, line: str) -> None:
@@ -131,18 +133,23 @@ class GroundStationShell(Cmd):
         """
         Prints out logs and polls for log_pathlogs that are comming in. Use a Keyboard Interupt to exit (e.g. Ctrl + C)
         """
+        self.stop_printing = False
+
         # Preliminary checks for the function to run
         # Write out the logs that we previously got
         with open(LOG_PATH) as file:
-            print(file.read())
+            print("Printing " + file.read())
 
         if self.background_logging is not None:
             self.background_logging.kill()
 
         # Here we run the function and catch an interrupt if it is executed by the user
         try:
-            poll(self._com_port, LOG_PATH, 1, True)
+            # We use lambda so that the poll function can acquire updated stop_printing values later
+            poll(self._com_port, LOG_PATH, 1, True, lambda: self.stop_printing)
         except KeyboardInterrupt:
+            print("Exiting polling...")
+        finally:
             print("Exiting polling...")
 
         self._restart_logging()

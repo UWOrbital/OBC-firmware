@@ -318,7 +318,13 @@ def generate_command(args: str) -> tuple[CmdMsg | None, bool]:
     return command, is_timetagged
 
 
-def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: bool = False) -> None:
+def poll(
+    com_port: str,
+    file_path: str | Path,
+    timeout: int = 0,
+    print_console: bool = False,
+    stop_flag: Callable[[], bool] | None = None,
+) -> None:
     """
     A function that is supposed to run in the background to keep receiving logs from the board
 
@@ -340,6 +346,10 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
         open(file_path, "a") as file,
     ):
         while True:
+            # We use a stop flag here in order to break the loop without raising KeyboardInterrupt
+            if stop_flag and stop_flag():
+                break
+
             data = ser.read(100000)
             start_index = data.find(b"\x7e")
             end_index = data.rfind(b"\x7e")
@@ -366,5 +376,5 @@ def poll(com_port: str, file_path: str | Path, timeout: int = 0, print_console: 
 
             file.write(data_string)
             file.flush()
-            if print_console and len(data_string) != 0:
-                print(data_string)
+            # if print_console and len(data_string) != 0:
+            #     # print(data_string)
