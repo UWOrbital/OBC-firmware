@@ -22,7 +22,7 @@ async def get_all_users() -> AllUsersResponse:
     """
     # users = get_all_db_users()
     # return AllUsersResponse(data=users)
-    pass
+    return None
 
 
 @aro_user_router.post("/create_user", response_model=UserResponse)
@@ -42,7 +42,7 @@ def create_user(payload: UserRequest) -> UserResponse:
     # )
 
     # return UserResponse(data=user)
-    pass
+    return None
 
 
 @aro_user_router.put("/update_user/{userid}", response_model=UserResponse)
@@ -65,7 +65,7 @@ def update_user(userid: str, payload: UserRequest) -> UserResponse:
     #     return UserResponse(data=user)
     # except ValueError as e:
     #     raise HTTPException(status_code=404, detail=str(e)) from e
-    pass
+    return None
 
 
 @aro_user_router.delete("/delete_user/{userid}", response_model=AllUsersResponse)
@@ -80,4 +80,4 @@ def delete_user(userid: str) -> AllUsersResponse:
     #     return AllUsersResponse(data=users)
     # except ValueError as e:
     #     raise HTTPException(status_code=404, detail=str(e)) from e
-    pass
+    return None
