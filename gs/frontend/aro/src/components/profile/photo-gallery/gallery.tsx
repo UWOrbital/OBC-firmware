@@ -1,11 +1,12 @@
 import * as React from "react";
 import GallerySection from "./GallerySection";
 import { pinnedSlides, getSortedMonthSections, monthSections } from "./galleryData";
+import "./gallery.css";
 
 export default function Gallery() {
   const [order, setOrder] = React.useState<"asc" | "desc">("desc");
 
-  // Group month sections by year in case of future expansion
+  {/* TODO: Fetch photos from DB rather than using dummy data */}
   const groupedByYear = React.useMemo(() => {
     const groups: Record<number, typeof monthSections> = {};
     monthSections.forEach((m) => {
@@ -15,12 +16,9 @@ export default function Gallery() {
   }, []);
 
   return (
-    <div className="w-full max-w-screen-xl mx-auto px-4 mt-24">
-      {/* Card container: make inner content scrollable while keeping pinned & controls fixed at top */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden pt-10 pb-6 px-10 relative flex flex-col">
-        {/* Top row: Pinned title + sort toggle */}
-        <div className="mb-4 flex items-center justify-between shrink-0">
-          <h2 className="text-2xl font-bold text-gray-900">Pinned</h2>
+    <div className="w-full max-w-screen-xl mx-auto px-4 mt-24 mb-24">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden pt-10 pb-6 px-10 relative flex flex-col" style={{ maxHeight: "calc(100vh - 8rem)" }}>
+        <div className="mb-1 flex items-center justify-center shrink-0">
           <div className="inline-flex rounded-lg border border-gray-300 bg-white shadow-sm p-1">
             <button
               type="button"
@@ -47,34 +45,30 @@ export default function Gallery() {
           </div>
         </div>
 
-        {/* Scrollable area for pinned + year groups. Height accounts for card padding & top controls */}
-        <div className="overflow-y-auto mt-2 pr-4 md:pr-6" style={{ maxHeight: "calc(100vh - 11rem)" }}>
-          {/* Pinned section without duplicate heading */}
-          <GallerySection
-            title="Pinned"
-            hideTitle
+        <div
+          className="overflow-y-auto mt-2 gallery-scroll flex flex-col items-center"
+          style={{ maxHeight: "calc(100vh - 11rem)" }}
+        >
+          {/* TODO: Fetch pinned photos from DB rather than using dummy data */}
+                    <GallerySection
+            title={"Pinned"}
             photos={pinnedSlides}
-            targetRowHeight={90}
-            spacing={16}
-            showDivider
           />
 
+          {/* TODO: Fetch photos from DB rather than using dummy data */}
           {Object.keys(groupedByYear)
             .sort((a, b) => (order === "asc" ? Number(a) - Number(b) : Number(b) - Number(a)))
             .map((yearKey) => {
               const year = Number(yearKey);
               const sortedMonths = getSortedMonthSections(order).filter((m) => m.year === year);
               return (
-                <div key={year} className="mt-10">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">{year}</h2>
-                  {sortedMonths.map((m, idx) => (
+                <div key={year} className="mt-10 w-full">
+                  <h2 className="text-5xl font-bold text-gray-900 mb-2 text-center">{year}</h2>
+                  {sortedMonths.map((m) => (
                     <GallerySection
                       key={m.title}
                       title={m.title}
                       photos={m.slides}
-                      targetRowHeight={90}
-                      spacing={16}
-                      showDivider={idx !== sortedMonths.length - 1}
                     />
                   ))}
                 </div>
