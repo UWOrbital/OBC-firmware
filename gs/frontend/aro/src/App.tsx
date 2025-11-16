@@ -7,6 +7,7 @@ import NewRequestForm from "./components/new-request/new-request-form.tsx";
 import Login from "./components/auth/login.tsx"
 import Signup from "./components/auth/sign-up.tsx"
 import Verify from "./components/auth/verify.tsx"
+import PageNotFound from "./components/PageNotFound.tsx";
 
 /**
  * @brief App component displaying the main application
@@ -29,6 +30,7 @@ function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/sign-up" element={<Signup />} />
         <Route path="/new-request" element={<NewRequestForm />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
       <ToastContainer />
     </>
