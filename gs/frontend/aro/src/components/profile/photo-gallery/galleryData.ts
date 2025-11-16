@@ -16,7 +16,7 @@ export function generateSlides(src: string, count = 20): Slide[] {
   return slides;
 }
 
-export const pinnedSlides = generateSlides(spaceImage, 19);
+export const pinnedSlides = generateSlides(spaceImage, 4);
 
 export type MonthSection = {
   title: string;

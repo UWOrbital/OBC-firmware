@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Pin } from "lucide-react";
 
 export type Slide = {
   src: string;
@@ -175,14 +175,26 @@ export default function GallerySection({
                 </div>
               )}
             </div>
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="rounded-full border border-gray-600 bg-gray-800 p-3 shadow hover:bg-gray-700 transition-colors"
-              aria-label="Download"
-            >
-              <Download className="w-6 h-6" color="white" />
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  // TODO: Implement pinning functionality
+                }}
+                className="rounded-full border border-gray-600 bg-gray-800 p-3 shadow hover:bg-gray-700 transition-colors"
+                aria-label="Pin"
+              >
+                <Pin className="w-6 h-6" color="white" />
+              </button>
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="rounded-full border border-gray-600 bg-gray-800 p-3 shadow hover:bg-gray-700 transition-colors"
+                aria-label="Download"
+              >
+                <Download className="w-6 h-6" color="white" />
+              </button>
+            </div>
           </div>
         </div>
       )}
