@@ -1,31 +1,45 @@
 #pragma once
 
-#include "ov5642_config.h"
 #include "obc_errors.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
 /**
+ * @brief Initializes mutex for ov5642
+ *
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t initOV5642(void);
+
+/**
  * @brief Applies camera preview configuration array
  *
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t applyCamPreviewConfig();
+obc_error_code_t applyCamPreviewConfig(void);
 
 /**
  * @brief Applies camera capture configuration array
  *
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t applyCamCaptureConfig();
+obc_error_code_t applyCamCaptureConfig(void);
 
 /**
  * @brief Applies camera resolution configuration array
  *
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t applyCamResolutionConfig();
+obc_error_code_t applyCamResolutionConfig(void);
+
+/**
+ * @brief Packs ChipID into provided buffer
+ *
+ * @param buffer The buffer to pack the value into.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t ov5642GetChipID(uint16_t* buffer);
 
 /**
  * @brief Resets ov5642.

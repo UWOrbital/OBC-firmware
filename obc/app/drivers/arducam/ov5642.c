@@ -12,6 +12,8 @@
 #define I2C_TRANSFER_TIMEOUT pdMS_TO_TICKS(100)
 #define OV5642_REG_MUTEX_TIMEOUT portMAX_DELAY
 
+#define CHIP_ID_HIGH_BYTE 0x300A
+#define CHIP_ID_LOW_BYTE 0x300B
 #define SYSTEM_CONTROL00_REG 0x3008
 #define TIMING_CONTROL_18_REG 0x3818
 #define TIMING_HS_HIGH_REG 0x3800
@@ -22,7 +24,7 @@
 // Need a mutex because some registers are multipurpose and require reading and writing to be atomic
 static SemaphoreHandle_t ov5642RegMutex = NULL;
 
-obc_error_code_t initOV5642() {
+obc_error_code_t initOV5642(void) {
   ov5642RegMutex = xSemaphoreCreateMutex();
 
   return OBC_ERR_CODE_SUCCESS;
@@ -74,21 +76,36 @@ static obc_error_code_t camWriteSensorRegs16_8(const sensor_config_t reglist[], 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t applyCamPreviewConfig() { return camWriteSensorRegs16_8(getCamPreviewConfig(), PREVIEW_CONFIG_LEN); }
+obc_error_code_t applyCamPreviewConfig(void) {
+  return camWriteSensorRegs16_8(getCamPreviewConfig(), PREVIEW_CONFIG_LEN);
+}
 
-obc_error_code_t applyCamCaptureConfig() { return camWriteSensorRegs16_8(getCamCaptureConfig(), JPEG_CONFIG_LEN); }
+obc_error_code_t applyCamCaptureConfig(void) { return camWriteSensorRegs16_8(getCamCaptureConfig(), JPEG_CONFIG_LEN); }
 
-obc_error_code_t applyCamResolutionConfig() {
+obc_error_code_t applyCamResolutionConfig(void) {
   return camWriteSensorRegs16_8(getCamResolutionConfig(), RES_320_240_CONFIG_LEN);
 }
 
-obc_error_code_t ov5642Reset(void) {
-  obc_error_code_t errCode;
-
+obc_error_code_t ov5642GetChipID(uint16_t* buffer) {
   if (xSemaphoreTake(ov5642RegMutex, OV5642_REG_MUTEX_TIMEOUT) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
+  obc_error_code_t errCode;
+  uint8_t cam_id[2] = {0};
+  RETURN_AND_GIVE_IF_ERROR_CODE(camReadSensorReg16_8(CHIP_ID_HIGH_BYTE, &cam_id[0]), ov5642RegMutex);
+  RETURN_AND_GIVE_IF_ERROR_CODE(camReadSensorReg16_8(CHIP_ID_LOW_BYTE, &cam_id[1]), ov5642RegMutex);
+
+  xSemaphoreGive(ov5642RegMutex);
+  return ((uint16_t)cam_id[0] << 8) | cam_id[1];
+}
+
+obc_error_code_t ov5642Reset(void) {
+  if (xSemaphoreTake(ov5642RegMutex, OV5642_REG_MUTEX_TIMEOUT) != pdTRUE) {
+    return OBC_ERR_CODE_MUTEX_TIMEOUT;
+  }
+
+  obc_error_code_t errCode;
   RETURN_AND_GIVE_IF_ERROR_CODE(camWriteSensorReg16_8(SYSTEM_CONTROL00_REG, 0x80), ov5642RegMutex);
 
   xSemaphoreGive(ov5642RegMutex);
@@ -96,12 +113,11 @@ obc_error_code_t ov5642Reset(void) {
 }
 
 obc_error_code_t ov5642SetMirror(bool enabled) {
-  obc_error_code_t errCode;
-
   if (xSemaphoreTake(ov5642RegMutex, OV5642_REG_MUTEX_TIMEOUT) != pdTRUE) {
     return OBC_ERR_CODE_MUTEX_TIMEOUT;
   }
 
+  obc_error_code_t errCode;
   uint8_t timingControl18;
   RETURN_AND_GIVE_IF_ERROR_CODE(camReadSensorReg16_8(TIMING_CONTROL_18_REG, &timingControl18), ov5642RegMutex);
   timingControl18 &= 0xBF;  // clear mirror bit

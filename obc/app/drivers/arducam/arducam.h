@@ -51,6 +51,55 @@ typedef enum {
 obc_error_code_t arducamReadFWVersion(camera_id_t cameraID, uint8_t* version);
 
 /**
+ * @brief Read Arducam's Test Register
+ *
+ * @param cameraID Camera ID of camera
+ * @param buffer 1 byte buffer to store value read.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t arducamReadTestReg(camera_id_t cameraID, uint8_t* buffer);
+
+/**
+ * @brief Write a value to Arducam's Test Register
+ *
+ * @param cameraID Camera ID of camera
+ * @param value 1 byte value to be written.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t arducamWriteTestReg(camera_id_t cameraID, uint8_t value);
+
+/**
+ * @brief Read Arducam's Sensor Power Control Register
+ *        Bit[0]: Reset Sensor?
+ *        Bit[1]: Standby Sensor 0 = out of standby, 1 = in standby;
+ *        Bit[2]: Power Down Sensor 0 = disable power, 1 = enable power;
+ *        Note: After Power Down, Sensor will need to be reinitialized
+ *
+ * @param cameraID Camera ID of camera
+ * @param buffer 1 byte buffer to store value read.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ * @return obc_error_code_t
+ */
+obc_error_code_t arducamReadSensorPowerControlReg(camera_id_t cameraID, uint8_t* buffer);
+
+/**
+ * @brief Read Arducam's Test Register
+ *
+ * @param cameraID Camera ID of camera
+ * @param buffer 1 byte buffer to store value read.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t arducamReadTestReg(camera_id_t cameraID, uint8_t* buffer);
+
+/**
+ * @brief Write a value to Arducam's Test Register
+ *
+ * @param cameraID Camera ID of camera
+ * @param value 1 byte value to be written.
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t arducamWriteTestReg(camera_id_t cameraID, uint8_t value);
+/**
  * @brief Read the size of the Write FIFO
  *
  * @param fifoSize uint32_t buffer to store value

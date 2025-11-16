@@ -28,21 +28,20 @@ void vTask1(void *pvParameters) {
   camera_id_t selectedCamera = PRIMARY;
   initCamera(selectedCamera);
   uint8_t temp;
-  arducamReadSensorPowerControlReg(&temp);
+  arducamReadSensorPowerControlReg(selectedCamera, &temp);
   sciPrintf("Power Control Reg:0x%X\r\n", temp);
 
   // Read Camera Sensor ID
-  uint8_t cam_id[2] = {0};
-  camReadSensorReg16_8(0x300A, &cam_id[0]);
-  camReadSensorReg16_8(0x300B, &cam_id[1]);
-  sciPrintf("Sensor ID: %X%X\r\n", cam_id[0], cam_id[1]);
+  uint16_t cam_id;
+  ov5642GetChipID(&cam_id);
+  sciPrintf("Sensor ID: %X\r\n", cam_id);
 
   // Test Reg operations
   uint8_t byte = 0x55;
   sciPrintf("Writing %d to test reg\r\n", byte);
-  arducamWriteTestReg(byte);
+  arducamWriteTestReg(selectedCamera, byte);
   byte = 0;
-  arducamReadTestReg(&byte);
+  arducamReadTestReg(selectedCamera, &byte);
   sciPrintf("Read %d from test reg\r\n", byte);
 
   // Camera Configuration
@@ -91,6 +90,8 @@ int main(void) {
   initSciPrint();
   initSpiMutex();
   initI2CMutex();
+
+  initOV5642();
 
   xTaskCreateStatic(vTask1, "Arducam", TASK_STACK_SIZE, NULL, 1, taskStack, &taskBuffer);
 

@@ -14,4 +14,4 @@ obc_error_code_t selectCamera(camera_id_t camID);
  *
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-obc_error_code_t configureSensor(void);
+obc_error_code_t camConfigureSensor(void);

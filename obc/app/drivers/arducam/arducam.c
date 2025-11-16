@@ -25,24 +25,19 @@ static uint32_t totalBytesToRead[CAMERA_COUNT] = {0};
 static uint32_t FIFOReadPtr[CAMERA_COUNT] = {0};
 
 typedef enum opcode {
-  ARDUCAM_READ_TEST_REG = 0x00,
-  ARDUCAM_WRITE_TEST_REG = (0x00 | 0x80),
-  ARDUCAM_READ_CAPTURE_CONTROL_REG = 0x01,
-  ARDUCAM_WRITE_CAPTURE_CONTROL_REG = (0x01 | 0x80),
-  ARDUCAM_READ_SENSOR_TIMING_CONTROL_REG = 0x03,
-  ARDUCAM_WRITE_SENSOR_TIMING_CONTROL_REG = (0x03 | 0x80),
-  ARDUCAM_READ_FIFO_CONTROL_REG = 0x04,
-  ARDUCAM_WRITE_FIFO_CONTROL_REG = (0x04 | 0x80),
-  ARDUCAM_READ_SENSOR_POWER_CONTROL_REG = 0x06,
-  ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG = (0x06 | 0x80),
+  ARDUCAM_TEST_REG = 0x00,
+  ARDUCAM_CAPTURE_CONTROL_REG = 0x01,
+  ARDUCAM_SENSOR_TIMING_CONTROL_REG = 0x03,
+  ARDUCAM_FIFO_CONTROL_REG = 0x04,
+  ARDUCAM_SENSOR_POWER_CONTROL_REG = 0x06,
   ARDUCAM_FIFO_BURST_READ = 0x3C,
   ARDUCAM_FIFO_READ = 0x3D,
-  ARDUCAM_READ_FW_VERSION = 0x40,
-  ARDUCAM_READ_CAPTURE_STATUS_REG = 0x41,
-  ARDUCAM_READ_FIFO_SIZE_LOWER = 0x42,
-  ARDUCAM_READ_FIFO_SIZE_MIDDLE = 0x43,
-  ARDUCAM_READ_FIFO_SIZE_UPPER = 0x44,
-  ARDUCAM_RESET_CPLD = (0x07 | 0x80),
+  ARDUCAM_FW_VERSION = 0x40,
+  ARDUCAM_CAPTURE_STATUS_REG = 0x41,
+  ARDUCAM_FIFO_SIZE_LOWER = 0x42,
+  ARDUCAM_FIFO_SIZE_MIDDLE = 0x43,
+  ARDUCAM_FIFO_SIZE_UPPER = 0x44,
+  ARDUCAM_RESET_CPLD = 0x07,
 } opcode_t;
 
 /**
@@ -54,24 +49,6 @@ typedef enum opcode {
  */
 
 static obc_error_code_t arducamResetCPLD(camera_id_t cameraID);
-
-/**
- * @brief Read Arducam's Test Register
- *
- * @param cameraID Camera ID of camera
- * @param buffer 1 byte buffer to store value read.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- */
-// static obc_error_code_t arducamReadTestReg(camera_id_t cameraID, uint8_t* buffer);
-
-/**
- * @brief Write a value to Arducam's Test Register
- *
- * @param cameraID Camera ID of camera
- * @param value 1 byte value to be written.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- */
-// static obc_error_code_t arducamWriteTestReg(camera_id_t cameraID, uint8_t value);
 
 /**
  * @brief Read Arducam's Capture Control Register
@@ -149,20 +126,6 @@ static obc_error_code_t arducamWriteSensorTimingControlReg(camera_id_t cameraID,
 static obc_error_code_t arducamWriteFIFOControlReg(camera_id_t cameraID, uint8_t value);
 
 /**
- * @brief Read Arducam's Sensor Power Control Register
- *        Bit[0]: Reset Sensor?
- *        Bit[1]: Standby Sensor 0 = out of standby, 1 = in standby;
- *        Bit[2]: Power Down Sensor 0 = disable power, 1 = enable power;
- *        Note: After Power Down, Sensor will need to be reinitialized
- *
- * @param cameraID Camera ID of camera
- * @param buffer 1 byte buffer to store value read.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- * @return obc_error_code_t
- */
-static obc_error_code_t arducamReadSensorPowerControlReg(camera_id_t cameraID, uint8_t *buffer);
-
-/**
  * @brief Write a value to Arducam's Sensor Power Control Register
  *        Bit[0]: Reset Sensor: 0 = reset sensor, 1 = out of reset;
  *        Bit[1]: Standby Sensor 0 = out of standby, 1 = in standby;
@@ -224,7 +187,7 @@ static obc_error_code_t arducamWriteRegister(camera_id_t cameraID, opcode_t opco
   obc_error_code_t prevCode;
 
   RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[cameraID]));
-  LOG_IF_ERROR_CODE(arducamTransmitOpcode(opcode));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(opcode | 0x80));  // first bit is R/W
   if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(spiTransmitByte(CAM_SPI_REG, &arducamSPIDataFmt, value));
   }
@@ -244,7 +207,7 @@ static obc_error_code_t arducamReadRegister(camera_id_t cameraID, opcode_t opcod
   }
 
   RETURN_IF_ERROR_CODE(assertChipSelect(CAM_SPI_PORT, cameraCS[cameraID]));
-  LOG_IF_ERROR_CODE(arducamTransmitOpcode(opcode));
+  LOG_IF_ERROR_CODE(arducamTransmitOpcode(opcode & 0x7F));  // first bit is R/W
   if (errCode == OBC_ERR_CODE_SUCCESS) {
     LOG_IF_ERROR_CODE(spiReceiveByte(CAM_SPI_REG, &arducamSPIDataFmt, buffer));
   }
@@ -256,47 +219,47 @@ static obc_error_code_t arducamReadRegister(camera_id_t cameraID, opcode_t opcod
   return errCode;
 }
 
-// static obc_error_code_t arducamReadTestReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_READ_TEST_REG, buffer);
-// }
+obc_error_code_t arducamReadTestReg(camera_id_t cameraID, uint8_t *buffer) {
+  return arducamReadRegister(cameraID, ARDUCAM_TEST_REG, buffer);
+}
 
-// static obc_error_code_t arducamWriteTestReg(camera_id_t cameraID, uint8_t value) {
-//   return arducamWriteRegister(cameraID, ARDUCAM_WRITE_TEST_REG, value);
-// }
+obc_error_code_t arducamWriteTestReg(camera_id_t cameraID, uint8_t value) {
+  return arducamWriteRegister(cameraID, ARDUCAM_TEST_REG, value);
+}
 
 // static obc_error_code_t arducamReadCaptureControlReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_READ_CAPTURE_CONTROL_REG, buffer);
+//   return arducamReadRegister(cameraID, ARDUCAM_CAPTURE_CONTROL_REG, buffer);
 // }
 
 // static obc_error_code_t arducamWriteCaptureControlReg(camera_id_t cameraID, uint8_t value) {
 //   if (value > 7) {
 //     return OBC_ERR_CODE_INVALID_ARG;
 //   }
-//   return arducamWriteRegister(cameraID, ARDUCAM_WRITE_CAPTURE_CONTROL_REG, value);
+//   return arducamWriteRegister(cameraID, ARDUCAM_CAPTURE_CONTROL_REG, value);
 // }
 
 // static obc_error_code_t arducamReadSensorTimingControlReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_READ_SENSOR_TIMING_CONTROL_REG, buffer);
+//   return arducamReadRegister(cameraID, ARDUCAM_SENSOR_TIMING_CONTROL_REG, buffer);
 // }
 
 static obc_error_code_t arducamWriteSensorTimingControlReg(camera_id_t cameraID, uint8_t value) {
-  return arducamWriteRegister(cameraID, ARDUCAM_WRITE_SENSOR_TIMING_CONTROL_REG, value);
+  return arducamWriteRegister(cameraID, ARDUCAM_SENSOR_TIMING_CONTROL_REG, value);
 }
 
 // static obc_error_code_t arducamReadFIFOControlReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_READ_FIFO_CONTROL_REG, buffer);
+//   return arducamReadRegister(cameraID, ARDUCAM_FIFO_CONTROL_REG, buffer);
 // }
 
 static obc_error_code_t arducamWriteFIFOControlReg(camera_id_t cameraID, uint8_t value) {
-  return arducamWriteRegister(cameraID, ARDUCAM_WRITE_FIFO_CONTROL_REG, value);
+  return arducamWriteRegister(cameraID, ARDUCAM_FIFO_CONTROL_REG, value);
 }
 
-static obc_error_code_t arducamReadSensorPowerControlReg(camera_id_t cameraID, uint8_t *buffer) {
-  return arducamReadRegister(cameraID, ARDUCAM_READ_SENSOR_POWER_CONTROL_REG, buffer);
+obc_error_code_t arducamReadSensorPowerControlReg(camera_id_t cameraID, uint8_t *buffer) {
+  return arducamReadRegister(cameraID, ARDUCAM_SENSOR_POWER_CONTROL_REG, buffer);
 }
 
 static obc_error_code_t arducamWriteSensorPowerControlReg(camera_id_t cameraID, uint8_t value) {
-  return arducamWriteRegister(cameraID, ARDUCAM_WRITE_SENSOR_POWER_CONTROL_REG, value);
+  return arducamWriteRegister(cameraID, ARDUCAM_SENSOR_POWER_CONTROL_REG, value);
 }
 
 // static obc_error_code_t arducamReadFIFO(camera_id_t cameraID, uint8_t *buffer) {
@@ -325,7 +288,7 @@ static obc_error_code_t arducamBurstReadFIFO(camera_id_t cameraID, uint8_t *buff
 }
 
 static obc_error_code_t arducamReadCaptureStatusReg(camera_id_t cameraID, uint8_t *status) {
-  return arducamReadRegister(cameraID, ARDUCAM_READ_CAPTURE_STATUS_REG, status);
+  return arducamReadRegister(cameraID, ARDUCAM_CAPTURE_STATUS_REG, status);
 }
 
 static obc_error_code_t arducamResetCPLD(camera_id_t cameraID) {
@@ -337,7 +300,7 @@ static obc_error_code_t arducamResetCPLD(camera_id_t cameraID) {
 }
 
 obc_error_code_t arducamReadFWVersion(camera_id_t cameraID, uint8_t *version) {
-  return arducamReadRegister(cameraID, ARDUCAM_READ_FW_VERSION, version);
+  return arducamReadRegister(cameraID, ARDUCAM_FW_VERSION, version);
 }
 
 obc_error_code_t arducamReadFIFOSize(camera_id_t cameraID, uint32_t *fifoSize) {
@@ -352,11 +315,11 @@ obc_error_code_t arducamReadFIFOSize(camera_id_t cameraID, uint32_t *fifoSize) {
   *fifoSize = 0;
 
   // Get upper bits
-  RETURN_IF_ERROR_CODE(arducamReadRegister(cameraID, ARDUCAM_READ_FIFO_SIZE_UPPER, &upper));
+  RETURN_IF_ERROR_CODE(arducamReadRegister(cameraID, ARDUCAM_FIFO_SIZE_UPPER, &upper));
   // Get middle bits
-  RETURN_IF_ERROR_CODE(arducamReadRegister(cameraID, ARDUCAM_READ_FIFO_SIZE_MIDDLE, &middle));
+  RETURN_IF_ERROR_CODE(arducamReadRegister(cameraID, ARDUCAM_FIFO_SIZE_MIDDLE, &middle));
   // Get lower bits
-  RETURN_IF_ERROR_CODE(arducamReadRegister(cameraID, ARDUCAM_READ_FIFO_SIZE_LOWER, &lower));
+  RETURN_IF_ERROR_CODE(arducamReadRegister(cameraID, ARDUCAM_FIFO_SIZE_LOWER, &lower));
 
   *fifoSize = upper;
   *fifoSize = (*fifoSize << 8) | middle;
