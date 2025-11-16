@@ -9,7 +9,7 @@ import Astronaut from "../assets/astronaut.svg"
 function PageNotFound() {
   return (
     <div className="flex items-center justify-center min-h-screen pb-48">
-        <div class="w-64 h-64 relative">
+        <div className="w-64 h-64 relative">
             <img src={Astronaut} />
         </div>
         <div className="space-y-1">
