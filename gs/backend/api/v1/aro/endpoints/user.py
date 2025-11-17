@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from gs.backend.api.v1.aro.models.requests import UserRequest
 from gs.backend.api.v1.aro.models.responses import AllUsersResponse, UserResponse
