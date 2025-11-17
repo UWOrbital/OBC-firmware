@@ -27,7 +27,7 @@ def hil_test(port: str) -> None:
         ser.reset_input_buffer()
         ser.reset_output_buffer()
 
-        ser.write(b"Hello OBC\n")
+        ser.write(b"Test OBC\n")
         line = ser.readline()
         print(f"Response {line.decode('utf-8', errors='replace').rstrip()}")
 
@@ -35,23 +35,23 @@ def hil_test(port: str) -> None:
 def main() -> None:
     "Main String DocString"
     p = argparse.ArgumentParser(description="Flash OBC via bootloader, then run HIL smoke test.")
-    p.add_argument("port", help="Serial port (e.g., /dev/serial0, /dev/ttyUSB0, /dev/ttyACM0, COM5)")
-    p.add_argument("bin_path", help="Absolute or relative path to OBC-firmware-crc.bin")
+    p.add_argument("port", help="Serial port")
+    p.add_argument("bin_path", help="Path to OBC-firmware-crc.bin")
     args = p.parse_args()
 
     # 1) Flash the app via bootloader (bootloader uses 115200, 8N2 inside send_bin)
-    print(f"[HIL] Flashing {args.bin_path} over {args.port} ...")
+    print(f"[HIL] Flashing {args.bin_path} over {args.port}")
     send_bin(args.bin_path, args.port)
 
     # 2) Let bootloader jump to application
-    print(f"[HIL] Waiting {POST_FLASH_DELAY_S:.1f}s for app to start...")
+    print(f"[HIL] Waiting {POST_FLASH_DELAY_S:.1f}s for app to start")
     time.sleep(POST_FLASH_DELAY_S)
 
     # 3) Run a simple UART test against the app
-    print("[HIL] Running smoke test ...")
+    print("[HIL] Running smoke test")
     try:
         hil_test(args.port)
-        print("[HIL] Smoke test complete ✅")
+        print("[HIL] Smoke test complete")
     except serial.SerialException as e:
         print(f"[HIL] Serial error: {e}", file=sys.stderr)
         sys.exit(2)
