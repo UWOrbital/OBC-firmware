@@ -89,7 +89,25 @@ def test_get_all_users(client, test_user1_creation, test_user2_creation):
     res = client.get("/api/v1/aro/user/get_all_users")
     assert res.status_code == 200
     all_users = res.json()["data"]
-    assert len(all_users) >= 2
+    assert len(all_users) == 2
+
+    # Check user1
+    user1_id = test_user1_creation["id"]
+    user1_from_response = next(user for user in all_users if user["id"] == user1_id)
+    assert user1_from_response["call_sign"] == test_user1_creation["call_sign"]
+    assert user1_from_response["email"] == test_user1_creation["email"]
+    assert user1_from_response["first_name"] == test_user1_creation["first_name"]
+    assert user1_from_response["last_name"] == test_user1_creation["last_name"]
+    assert user1_from_response["phone_number"] == test_user1_creation["phone_number"]
+
+    # Check user2
+    user2_id = test_user2_creation["id"]
+    user2_from_response = next(user for user in all_users if user["id"] == user2_id)
+    assert user2_from_response["email"] == test_user2_creation["email"]
+    assert user2_from_response["call_sign"] == test_user2_creation["call_sign"]
+    assert user2_from_response["first_name"] == test_user2_creation["first_name"]
+    assert user2_from_response["last_name"] == test_user2_creation["last_name"]
+    assert user2_from_response["phone_number"] == test_user2_creation["phone_number"]
 
 
 # Test deleting user1
@@ -98,14 +116,10 @@ def test_user1_deletion(client, test_user1_creation, test_user2_creation):
     res = client.delete(f"/api/v1/aro/user/delete_user/{user_id}", headers={"Content-Type": "application/json"})
 
     assert res.status_code == 200
-    all_users = res.json()["data"]
-    assert len(all_users) == 1
-    assert all_users[0]["id"] != user_id  # Ensure user1 is deleted
-    assert all_users[0]["id"] == test_user2_creation["id"]
-    assert all_users[0]["email"] == test_user2_creation["email"]
-    assert all_users[0]["call_sign"] == test_user2_creation["call_sign"]
-    assert all_users[0]["first_name"] == test_user2_creation["first_name"]
-    assert all_users[0]["last_name"] == test_user2_creation["last_name"]
-    assert all_users[0]["phone_number"] == test_user2_creation["phone_number"]
-
-    return all_users
+    deleted_user = res.json()["data"]
+    assert deleted_user["id"] == user_id
+    assert deleted_user["email"] == test_user1_creation["email"]
+    assert deleted_user["call_sign"] == test_user1_creation["call_sign"]
+    assert deleted_user["first_name"] == test_user1_creation["first_name"]
+    assert deleted_user["last_name"] == test_user1_creation["last_name"]
+    assert deleted_user["phone_number"] == test_user1_creation["phone_number"]

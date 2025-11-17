@@ -28,11 +28,8 @@ def get_user(userid: str) -> UserResponse:
     :param userid: The unique identifier of the user
     :return: the user
     """
-    try:
-        user = AROUsersWrapper().get_by_id(UUID(userid))
-        return UserResponse(data=user)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e)) from e
+    user = AROUsersWrapper().get_by_id(UUID(userid))
+    return UserResponse(data=user)
 
 
 @aro_user_router.post("/create_user", response_model=UserResponse)
@@ -56,17 +53,12 @@ def create_user(payload: UserRequest) -> UserResponse:
     return UserResponse(data=user)
 
 
-@aro_user_router.delete("/delete_user/{userid}", response_model=AllUsersResponse)
-def delete_user(userid: str) -> AllUsersResponse:
+@aro_user_router.delete("/delete_user/{userid}", response_model=UserResponse)
+def delete_user(userid: str) -> UserResponse:
     """
     Deletes a user based on the user ID
     :param userid: The unique identifier of the user to be deleted
-    :return: returns all remaining users
+    :return: returns the deleted user
     """
-    try:
-        wrapper = AROUsersWrapper()
-        wrapper.delete_by_id(UUID(userid))
-        users = wrapper.get_all()
-        return AllUsersResponse(data=users)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e)) from e
+    deleted_user = AROUsersWrapper().delete_by_id(UUID(userid))
+    return UserResponse(data=deleted_user)
