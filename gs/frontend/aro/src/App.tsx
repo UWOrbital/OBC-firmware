@@ -7,6 +7,7 @@ import NewRequestForm from "./components/new-request/new-request-form.tsx";
 import Login from "./components/auth/login.tsx"
 import Signup from "./components/auth/sign-up.tsx"
 import Verify from "./components/auth/verify.tsx"
+import Hero from "./components/Hero.tsx"
 
 /**
  * @brief App component displaying the main application
@@ -17,6 +18,7 @@ function App() {
     <>
       <Nav />
       <Background />
+      <Hero></Hero>
       <Routes>
         {/* uncomment these routes as the pages are created */}
         {/* <Route path="*" element={<Dashboard />} />
