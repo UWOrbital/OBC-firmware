@@ -18,15 +18,14 @@ function App() {
     <>
       <Nav />
       <Background />
-      <Hero></Hero>
       <Routes>
         {/* uncomment these routes as the pages are created */}
         {/* <Route path="*" element={<Dashboard />} />
-        <Route path="/" element={<Home />} />
         <Route path="/commands" element={<Commands />} />
         <Route path="/new-request" element={<NewRequestForm />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/profile" element={<Profile />} />*/}
+        <Route path="/" element={<Hero/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/sign-up" element={<Signup />} />
