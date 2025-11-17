@@ -7,20 +7,20 @@ import { Link } from "react-router-dom";
  * @return tsx element of Logo component
 */
 
-function Logo() {
+function Home() {
     return (
         <div className="pt-8 w-full flex flex-col items-center">
             <img
              src={logo}
              alt="aro-logo"
              className="w-3xs md:w-xs lg:w-xs"></img>
-            <h1 className="font-[Raleway] font-bold -mt-5 md:-mt-9 lg:-mt-9 text-4xl md:text-6xl lg:text-7xl">Amateur Radio Operator</h1>
-            <p className="font-[Raleway] font-light mt-4 text-1xl md:text-2xl lg:text-3xl">Please login to make a request.</p>
-            <div className="flex gap-50 mt-10">
-                <Button size="lg" variant="outline" className="bg-transparent font-[Raleway] font-bold" asChild>
+            <h1 className="font-[Jaldi] font-bold -mt-5 md:-mt-9 lg:-mt-9 text-5xl md:text-6xl lg:text-8xl">Amateur Radio Operator</h1>
+            <p className="font-[Jaldi] font-light mt-4 text-2xl md:text-2xl lg:text-3xl">Please sign up/login to make a request.</p>
+            <div className="flex gap-20 mt-10">
+                <Button size="lg" variant="outline" className="bg-transparent font-[Jaldi] font-bold" asChild>
                     <Link to="/sign-up">Sign Up</Link>
                 </Button>
-                <Button size="lg" variant="outline" className="bg-transparent font-[Raleway] font-bold" asChild>
+                <Button size="lg" variant="outline" className="bg-transparent font-[Jaldi] font-bold" asChild>
                     <Link to="/login">Login</Link>
                 </Button>
             </div>
@@ -28,4 +28,4 @@ function Logo() {
     )
 }
 
-export default Logo
+export default Home
