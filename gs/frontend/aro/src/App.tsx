@@ -7,6 +7,7 @@ import NewRequestForm from "./components/new-request/new-request-form.tsx";
 import Login from "./components/auth/login.tsx"
 import Signup from "./components/auth/sign-up.tsx"
 import Verify from "./components/auth/verify.tsx"
+import Home from "./components/Home.tsx"
 import PageNotFound from "./components/PageNotFound.tsx";
 
 /**
@@ -21,11 +22,11 @@ function App() {
       <Routes>
         {/* uncomment these routes as the pages are created */}
         {/* <Route path="*" element={<Dashboard />} />
-        <Route path="/" element={<Home />} />
         <Route path="/commands" element={<Commands />} />
         <Route path="/new-request" element={<NewRequestForm />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/profile" element={<Profile />} />*/}
+        <Route path="/" element={<Home/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/sign-up" element={<Signup />} />
