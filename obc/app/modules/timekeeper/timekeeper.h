@@ -6,4 +6,9 @@
 
 extern QueueHandle_t rtcTempQueueHandle;
 
-obc_error_code_t postRtcTempQueue();
+/**
+ * @brief Get the temperature from the mailbox temperature queue of the ds3232
+ * @param temp The memory address that stores the temperature in the mailbox queue
+ * @return The error code
+ */
+obc_error_code_t readRTCTemp(float* data);

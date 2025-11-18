@@ -15,8 +15,6 @@
 #define HEALTH_COLLECTION_PERIOD_MS 60000UL
 
 static obc_error_code_t collectThermalData(void);
-// static obc_error_code_t readCC1120Temp(float* temp);
-static obc_error_code_t readRTCTemp(float* data);
 
 void obcTaskInitThermalMgr(void) {}
 
@@ -45,19 +43,5 @@ static obc_error_code_t collectThermalData(void) {
 
   RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
 
-  return OBC_ERR_CODE_SUCCESS;
-}
-/*
-static obc_error_code_t readCC1120Temp(float* data) {
-  if (xQueuePeek(cc1120TempQueueHandle, data, pdMS_TO_TICKS(1000)) != pdPASS) {
-    return OBC_ERR_CODE_QUEUE_EMPTY;
-  }
-  return OBC_ERR_CODE_SUCCESS;
-}
-*/
-static obc_error_code_t readRTCTemp(float* data) {
-  if (xQueuePeek(rtcTempQueueHandle, data, 0) != pdPASS) {
-    return OBC_ERR_CODE_QUEUE_EMPTY;
-  }
   return OBC_ERR_CODE_SUCCESS;
 }

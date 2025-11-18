@@ -30,12 +30,19 @@ void obcTaskInitTimekeeper(void) {
   }
 }
 
-obc_error_code_t postRtcTempQueue() {
+static obc_error_code_t postRtcTempQueue() {
   obc_error_code_t errCode;
   float temp;
   RETURN_IF_ERROR_CODE(getTemperatureRTC(&temp));
   if (xQueueOverwrite(rtcTempQueueHandle, &temp) != pdPASS) {
     return OBC_ERR_CODE_UNKNOWN;
+  }
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t readRTCTemp(float* data) {
+  if (xQueuePeek(rtcTempQueueHandle, data, 0) != pdPASS) {
+    return OBC_ERR_CODE_QUEUE_EMPTY;
   }
   return OBC_ERR_CODE_SUCCESS;
 }

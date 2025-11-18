@@ -72,16 +72,18 @@ typedef enum {
 } comms_state_t;
 
 /**
- * @brief Post temperature
- */
-obc_error_code_t postCommsManagerTempQueue();
-
-/**
  * @brief	Send an event to the Comms Manager queue.
  * @param	event	Event to send.
  * @return The error code
  */
 obc_error_code_t sendToCommsManagerQueue(comms_event_t *event);
+
+/**
+ * @brief Get the temperature from the mailbox temperature queue of the CC1120
+ * @param temp The memory address that stores the temperature in the mailbox queue
+ * @return The error code
+ */
+obc_error_code_t readCC1120Temp(float* temp);
 
 /**
  * @brief Send an event to the front of the Comms Manager queue
