@@ -15,7 +15,7 @@
 #define HEALTH_COLLECTION_PERIOD_MS 60000UL
 
 static obc_error_code_t collectThermalData(void);
-static obc_error_code_t readCC1120Temp(float* temp);
+// static obc_error_code_t readCC1120Temp(float* temp);
 static obc_error_code_t readRTCTemp(float* data);
 
 void obcTaskInitThermalMgr(void) {}
@@ -35,8 +35,8 @@ static obc_error_code_t collectThermalData(void) {
   float lm75bdTemp = 0.0f;
   RETURN_IF_ERROR_CODE(readTempLM75BD(LM75BD_OBC_I2C_ADDR, &lm75bdTemp));
 
-  float cc1120Temp = 0.0f;
-  RETURN_IF_ERROR_CODE(readCC1120Temp(&cc1120Temp));
+  // float cc1120Temp = 0.0f;
+  // RETURN_IF_ERROR_CODE(readCC1120Temp(&cc1120Temp));
 
   float rtcTemp = 0.0f;
   RETURN_IF_ERROR_CODE(readRTCTemp(&rtcTemp));
@@ -47,14 +47,14 @@ static obc_error_code_t collectThermalData(void) {
 
   return OBC_ERR_CODE_SUCCESS;
 }
-
+/*
 static obc_error_code_t readCC1120Temp(float* data) {
   if (xQueuePeek(cc1120TempQueueHandle, data, pdMS_TO_TICKS(1000)) != pdPASS) {
     return OBC_ERR_CODE_QUEUE_EMPTY;
   }
   return OBC_ERR_CODE_SUCCESS;
 }
-
+*/
 static obc_error_code_t readRTCTemp(float* data) {
   if (xQueuePeek(rtcTempQueueHandle, data, 0) != pdPASS) {
     return OBC_ERR_CODE_QUEUE_EMPTY;

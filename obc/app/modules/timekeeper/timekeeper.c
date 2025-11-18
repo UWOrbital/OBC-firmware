@@ -37,7 +37,7 @@ obc_error_code_t postRtcTempQueue() {
   if (xQueueOverwrite(rtcTempQueueHandle, &temp) != pdPASS) {
     return OBC_ERR_CODE_UNKNOWN;
   }
-  return OBC_ERR_CODE_INVALID_STATE;
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 void obcTaskFunctionTimekeeper(void *pvParameters) {
