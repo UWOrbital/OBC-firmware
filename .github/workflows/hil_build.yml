@@ -1,4 +1,4 @@
-name: HIL Build (Manual / Fallback)
+name: HIL Build
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   hil-on-pi:
-    runs-on: [self-hosted, linux, arm64, pi, hil]
+    runs-on: [self-hosted]
 
     defaults:
       run:
@@ -29,27 +29,20 @@ jobs:
           python3 -m pip install -r obc/tools/python/requirements.txt || true
           python3 -m pip install -e .
 
-      - name: Build Ground Station (optional)
+      - name: Build GS
         run: |
           cmake -S . -B build_gs -DCMAKE_BUILD_TYPE=GS
           cmake --build build_gs -j
 
-      - name: Build OBC firmware (Rev1 with CRC)
+      - name: Build OBC Firmware
         run: |
           cmake -S . -B build_arm -DCMAKE_BUILD_TYPE=OBC -DBOARD_TYPE=OBC_REVISION_1 -DDEBUG=0
           cmake --build build_arm -j
-          test -f build_arm/OBC-firmware-crc.bin
 
-      - name: Flash & Run HIL (local build)
+      - name: Flash & Run HIL
         env:
-          PORT: /dev/serial0   # change if your UART device differs
+          PORT: /dev/ttyUSB0  # this will be the UART port for pi
         run: |
           source .venv/bin/activate
-          python3 hil/hil_main.py "$PORT" "$(pwd)/build_arm/OBC-firmware-crc.bin"
-
-      - name: Upload HIL logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hil-logs
-          path: hil_logs/**
+          python3 obc/tools/python/app_update.py "$PORT" ~/OBC-firmware/build_arm/OBC-firmware.bin
+          python3 hil/hil_main.py "$PORT" ~/OBC-firmware/build_arm/OBC-firmware.bin

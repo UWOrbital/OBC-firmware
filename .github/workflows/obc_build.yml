@@ -1,4 +1,4 @@
-name: OBC Build + HIL (PR)
+name: OBC Build + HIL
 
 on:
   pull_request:
@@ -20,18 +20,15 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install build-essential cmake python3-venv
 
-      - name: Install Python reqs (project)
+      - name: Install Python reqs
         run: |
           python3 -m pip install --upgrade pip
-          # Install both if they exist; don't fail the build if one is missing
           python3 -m pip install -r requirements.txt || true
           python3 -m pip install -r obc/tools/python/requirements.txt || true
 
       - name: Configure build directory
         run: |
           cmake -S . -B build -G "Unix Makefiles"
-
-      # --- Build all targets you already had ---
 
       - name: Build (Release - Launchpad)
         run: |
@@ -102,7 +99,7 @@ jobs:
 
   OBC_HIL:
     needs: OBC_BUILD
-    runs-on: [self-hosted, linux, arm64, pi, hil]
+    runs-on: [self-hosted]
 
     defaults:
       run:
@@ -120,7 +117,7 @@ jobs:
           python3 -m pip install -r obc/tools/python/requirements.txt || true
           python3 -m pip install -e .
 
-      - name: Build Ground Station (optional)
+      - name: Build Ground Station
         run: |
           cmake -S . -B build_gs -DCMAKE_BUILD_TYPE=GS
           cmake --build build_gs -j
@@ -138,10 +135,3 @@ jobs:
           source .venv/bin/activate
           ls -l artifacts
           python3 hil/hil_main.py "$PORT" "$(pwd)/artifacts/OBC-firmware-crc.bin"
-
-      - name: Upload HIL logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hil-logs
-          path: hil_logs/**
