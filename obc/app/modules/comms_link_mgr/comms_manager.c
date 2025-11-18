@@ -103,6 +103,13 @@ static obc_error_code_t handleEnterEmergencyState(void);
 static obc_error_code_t handleEmergUplinkState(void);
 /* COMMS STATE HANDLER FUNCTIONS END */
 
+/**
+ * @brief Reading the temperature using driver functions and adding that temperature to
+ * the mailbox temperature queue
+ * @return error code
+ */
+static obc_error_code_t postCommsManagerTempQueue();
+
 typedef obc_error_code_t (*comms_state_func_t)(void);
 
 static const comms_state_func_t commsStateFns[] = {
@@ -317,7 +324,7 @@ static obc_error_code_t postCommsManagerTempQueue() {
   if (xQueueOverwrite(cc1120TempQueueHandle, &value) != pdPASS) {
     return OBC_ERR_CODE_UNKNOWN;
   }
-  return OBC_ERR_CODE_INVALID_STATE;
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 /*

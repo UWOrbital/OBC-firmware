@@ -22,6 +22,13 @@ QueueHandle_t rtcTempQueueHandle = NULL;
 static StaticQueue_t rtcTempQueue;
 static uint8_t rtcTempQueueStack[RTC_TEMP_QUEUE_LENGTH * RTC_TEMP_QUEUE_ITEM_SIZE];
 
+/**
+ * @brief Reading the temperature using driver functions and adding that temperature to
+ * the mailbox temperature queue
+ * @return error code
+ */
+static obc_error_code_t postRtcTempQueue();
+
 void obcTaskInitTimekeeper(void) {
   ASSERT((rtcTempQueueStack != NULL) && (&rtcTempQueue != NULL));
   if (rtcTempQueueHandle == NULL) {
@@ -40,7 +47,7 @@ static obc_error_code_t postRtcTempQueue() {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-obc_error_code_t readRTCTemp(float* data) {
+obc_error_code_t readRTCTemp(float *data) {
   if (xQueuePeek(rtcTempQueueHandle, data, 0) != pdPASS) {
     return OBC_ERR_CODE_QUEUE_EMPTY;
   }

@@ -83,7 +83,7 @@ obc_error_code_t sendToCommsManagerQueue(comms_event_t *event);
  * @param temp The memory address that stores the temperature in the mailbox queue
  * @return The error code
  */
-obc_error_code_t readCC1120Temp(float* temp);
+// obc_error_code_t readCC1120Temp(float* temp);
 
 /**
  * @brief Send an event to the front of the Comms Manager queue
