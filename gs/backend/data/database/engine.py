@@ -43,6 +43,21 @@ def _create_schemas(session: Session) -> None:
     connection.commit()
 
 
+'''Deprecated method to create tables, now handled by Alembic migrations
+def _create_tables(session: Session) -> None:
+    """
+    Creates the tables.
+    :warning: This assumes the relevant schemas were already created
+    :param session: The session for which to create the schemas
+    """
+    metadatas = [MAIN_SCHEMA_METADATA, ARO_USER_SCHEMA_METADATA, TRANSACTIONAL_SCHEMA_METADATA]
+    connection = session.connection()
+    for metadata in metadatas:
+        metadata.create_all(connection)
+        connection.commit()
+'''
+
+
 def setup_database(session: Session) -> None:
     """
     Creates the schemas for the session.
