@@ -41,6 +41,7 @@ def setup_middlewares(app: FastAPI) -> None:
         excluded_endpoints=backend_config.logger_config.excluded_endpoints,
     )
 
+
 def setup_logging() -> None:
     """Sets all logs from SQLAlchemy to the custom logger level VERBOSE"""
     verbose_level = 15  # DEBUG=10, INFO=20
