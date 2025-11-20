@@ -2,6 +2,7 @@ import * as React from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Captions from "yet-another-react-lightbox/plugins/captions";
+import { Download, Pin } from "lucide-react";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 
@@ -46,6 +47,18 @@ export default function GallerySection({
   spacing = 12,
 }: GallerySectionProps) {
   const [index, setIndex] = React.useState(-1);
+
+  const handleDownload = React.useCallback(() => {
+    if (index < 0 || !photos[index]) return;
+    const link = document.createElement("a");
+    link.href = photos[index].src;
+    link.download = `photo-${formatTimestamp(photos[index].date)}.jpg`;
+    link.click();
+  }, [index, photos]);
+
+  const handlePin = React.useCallback(() => {
+    // TODO: Implement pin functionality
+  }, [index]);
 
   const slidesWithCaptions = React.useMemo(() =>
     photos.map(photo => ({
@@ -107,6 +120,29 @@ export default function GallerySection({
         captions={{
           showToggle: true,
           descriptionTextAlign: "start",
+        }}
+        toolbar={{
+          buttons: [
+            <button
+              key="pin"
+              type="button"
+              onClick={handlePin}
+              className="yarl__button"
+              aria-label="Pin photo"
+            >
+              <Pin className="w-5 h-5" />
+            </button>,
+            <button
+              key="download"
+              type="button"
+              onClick={handleDownload}
+              className="yarl__button"
+              aria-label="Download photo"
+            >
+              <Download className="w-5 h-5" />
+            </button>,
+            "close",
+          ],
         }}
       />
     </section>
