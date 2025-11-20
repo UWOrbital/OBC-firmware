@@ -26,15 +26,28 @@ endif()
 # Define the bootloader bypass option
 option(ENABLE_BL_BYPASS "Write directly to 0x0 and overwrite the bootloader" ON)
 
+# Define the build app B option
+option(APP_B "Set the starting address to 0x000C0000 to flash app B" ON)
+
 # Set the custom address based on the option
 if(ENABLE_BL_BYPASS)
     set(CUSTOM_START_ADDRESS 0)
+elseif(APP_B)
+    set(CUSTOM_START_ADDRESS 0x000C0000)
 else()
     set(CUSTOM_START_ADDRESS 0x00040000)
 endif()
 
+# Set a bootloader zero bypass so bootloader can work without BL zero
+if (ENABLE_BL_ZERO_BYPASS)
+  set(BOOTLOADER_ADDRESS 0)
+else()
+  set(BOOTLOADER_ADDRESS 0x00020000)
+endif()
+
 # Pass the address to the linker
 add_link_options(-Wl,--defsym,CUSTOM_START_ADDRESS=${CUSTOM_START_ADDRESS})
+add_link_options(-Wl,--defsym,BOOTLOADER_ADDRESS=${BOOTLOADER_ADDRESS})
 
 # Select main for build
 if(${CMAKE_BUILD_TYPE} MATCHES OBC)
