@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from pydantic import EmailStr
 from sqlalchemy import Enum
 from sqlalchemy.dialects.postgresql import UUID as DB_UUID
-from sqlalchemy.schema import Column, ForeignKey, MetaData
+from sqlalchemy.schema import Column, ForeignKey
 from sqlmodel import Field
 
 from gs.backend.config.data_config import (
@@ -20,7 +20,6 @@ from gs.backend.data.tables.base_model import BaseSQLModel
 
 # Schema information
 ARO_USER_SCHEMA_NAME: Final[str] = "aro_users"
-ARO_USER_SCHEMA_METADATA: Final[MetaData] = MetaData(ARO_USER_SCHEMA_NAME)
 
 # Table names in database
 ARO_USER_TABLE_NAME: Final[str] = "users_data"
@@ -55,8 +54,8 @@ class AROUsers(BaseSQLModel, table=True):
     phone_number: str
 
     # table information
-    metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_USER_TABLE_NAME
+    __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
 
 
 class AROUserCallsigns(BaseSQLModel, table=True):
@@ -69,8 +68,8 @@ class AROUserCallsigns(BaseSQLModel, table=True):
 
     call_sign: str = Field(primary_key=True, min_length=CALL_SIGN_MIN_LENGTH, max_length=CALL_SIGN_MAX_LENGTH)
 
-    metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_USER_CALLSIGNS
+    __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
 
 
 class AROUserLogin(BaseSQLModel, table=True):
@@ -96,8 +95,8 @@ class AROUserLogin(BaseSQLModel, table=True):
     user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))  # type: ignore
     email_verification_token: str = Field(min_length=1, max_length=200)
 
-    metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_USER_LOGIN
+    __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
 
 
 class AROUserAuthToken(BaseSQLModel, table=True):
@@ -119,5 +118,5 @@ class AROUserAuthToken(BaseSQLModel, table=True):
     expiry: datetime = Field()
     auth_type: AROAuthToken = Field(sa_column=Column(Enum(AROAuthToken, name="auth_type"), nullable=False))
 
-    metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_AUTH_TOKEN
+    __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
