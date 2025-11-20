@@ -68,8 +68,8 @@ class AROUserCallsigns(BaseSQLModel, table=True):
 
     call_sign: str = Field(primary_key=True, min_length=CALL_SIGN_MIN_LENGTH, max_length=CALL_SIGN_MAX_LENGTH)
 
-    metadata = ARO_USER_SCHEMA_METADATA
     __tablename__ = ARO_USER_CALLSIGNS
+    __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
 
 
 class AROUserLogin(BaseSQLModel, table=True):
