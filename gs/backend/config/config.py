@@ -4,8 +4,23 @@ from typing import Final
 
 from dotenv import load_dotenv
 
+from .cors_config import CORSConfig
+from .logger_config import LoggerConfig
+
 load_dotenv()
 
+
+class BackendConfiguration:
+    """
+    Class for storing backend configuration settings
+    """
+
+    def __init__(self) -> None:
+        self.cors_config = CORSConfig()
+        self.logger_config = LoggerConfig()
+
+
+backend_config = BackendConfiguration()
 
 # TODO: Make these throw an exception if they are None
 GS_DATABASE_USER = environ.get("GS_DATABASE_USER")

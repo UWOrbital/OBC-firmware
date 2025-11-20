@@ -58,6 +58,7 @@ def test_get_db_session(monkeypatch, db_session: Session):
     When testing any database function that requires the `get_db_session()` function, you must add the module path to the list below.
     """
     path_list: list[str] = [
+        "gs.backend.data.data_wrappers.abstract_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_request_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_auth_token_wrapper",

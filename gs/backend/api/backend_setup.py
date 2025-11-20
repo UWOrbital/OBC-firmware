@@ -12,6 +12,7 @@ from gs.backend.api.v1.mcc.endpoints.aro_requests import aro_requests_router
 from gs.backend.api.v1.mcc.endpoints.commands import commands_router
 from gs.backend.api.v1.mcc.endpoints.main_commands import main_commands_router
 from gs.backend.api.v1.mcc.endpoints.telemetry import telemetry_router
+from gs.backend.config.config import backend_config
 
 
 def setup_routes(app: FastAPI) -> None:
@@ -35,8 +36,10 @@ def setup_middlewares(app: FastAPI) -> None:
     """Adds the middlewares to the app"""
     add_cors_middleware(app)  # Cors middleware should be added first
     app.add_middleware(AuthMiddleware)
-    app.add_middleware(LoggerMiddleware, excluded_endpoints=[])
-
+    app.add_middleware(
+        LoggerMiddleware,
+        excluded_endpoints=backend_config.logger_config.excluded_endpoints,
+    )
 
 def setup_logging() -> None:
     """Sets all logs from SQLAlchemy to the custom logger level VERBOSE"""

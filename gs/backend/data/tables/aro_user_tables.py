@@ -23,6 +23,7 @@ ARO_USER_SCHEMA_NAME: Final[str] = "aro_users"
 
 # Table names in database
 ARO_USER_TABLE_NAME: Final[str] = "users_data"
+ARO_USER_CALLSIGNS: Final[str] = "callsigns"
 ARO_USER_LOGIN: Final[str] = "user_login"
 ARO_AUTH_TOKEN: Final[str] = "auth_tokens"
 
@@ -55,6 +56,20 @@ class AROUsers(BaseSQLModel, table=True):
     # table information
     __tablename__ = ARO_USER_TABLE_NAME
     __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
+
+
+class AROUserCallsigns(BaseSQLModel, table=True):
+    """
+    Stores all valid callsigns (as of Sept. 6, 2025)
+
+    :param call_sign: a valid callsign
+    :type call_sign: str
+    """
+
+    call_sign: str = Field(primary_key=True, min_length=CALL_SIGN_MIN_LENGTH, max_length=CALL_SIGN_MAX_LENGTH)
+
+    metadata = ARO_USER_SCHEMA_METADATA
+    __tablename__ = ARO_USER_CALLSIGNS
 
 
 class AROUserLogin(BaseSQLModel, table=True):

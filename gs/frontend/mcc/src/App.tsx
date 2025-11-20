@@ -1,25 +1,34 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import ARORequests from "./aro-requests/aro-requests.tsx";
-import Header from "./common/header.tsx";
-import Logs from "./common/logs.tsx";
-import NotFound from "./common/not-found.tsx";
-import Dashboard from "./dashboard/dashboard.tsx";
-import MissionCommands from "./mission-commands/mission-commands.tsx";
-import TelemetryData from "./telemetry/telemetry-data.tsx";
+import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Nav from "./components/Nav";
+import Background from "./components/Background";
+import Commands from "./pages/Command/Commands";
+import Dashboard from "./pages/Dashboard";
+import AROAdmin from "./pages/AROAdmin";
+import LiveSession from "./pages/LiveSession";
+import Login from "./pages/Login";
+import PageNotFound from "./components/PageNotFound";
 
+/**
+ * @brief App component displaying the main application
+ * @return tsx element of App component
+ */
 function App() {
   return (
-    <BrowserRouter>
-      <Header />
+    <>
+      <Nav />
+      <Background />
       <Routes>
-        <Route path="*" element={<NotFound />} />
         <Route path="/" element={<Dashboard />} />
-        <Route path="/mission-commands" element={<MissionCommands />} />
-        <Route path="/telemetry-data" element={<TelemetryData />} />
-        <Route path="/aro-requests" element={<ARORequests />} />
+        <Route path="/commands" element={<Commands />} />
+        <Route path="/telemetry-data" element={<AROAdmin />} />
+        <Route path="/aro-requests" element={<LiveSession />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
-      <Logs />
-    </BrowserRouter>
+      <ToastContainer />
+    </>
   );
 }
 
