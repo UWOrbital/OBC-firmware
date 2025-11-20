@@ -8,17 +8,16 @@ from sqlmodel import SQLModel
 
 load_dotenv()
 
-GS_DATABASE_USER = os.getenv("GS_DATABASE_USER")
-GS_DATABASE_PASSWORD = os.getenv("GS_DATABASE_PASSWORD")
-GS_DATABASE_LOCATION = os.getenv("GS_DATABASE_LOCATION")
-GS_DATABASE_PORT = os.getenv("GS_DATABASE_PORT")
-GS_DATABASE_NAME = os.getenv("GS_DATABASE_NAME")
+SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
+if not SQLALCHEMY_DATABASE_URL:
+    GS_DATABASE_USER = os.getenv("GS_DATABASE_USER")
+    GS_DATABASE_PASSWORD = os.getenv("GS_DATABASE_PASSWORD")
+    GS_DATABASE_LOCATION = os.getenv("GS_DATABASE_LOCATION")
+    GS_DATABASE_PORT = os.getenv("GS_DATABASE_PORT")
+    GS_DATABASE_NAME = os.getenv("GS_DATABASE_NAME")
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{GS_DATABASE_USER}:{GS_DATABASE_PASSWORD}@{GS_DATABASE_LOCATION}:{GS_DATABASE_PORT}/{GS_DATABASE_NAME}"
+    SQLALCHEMY_DATABASE_URL = f"postgresql://{GS_DATABASE_USER}:{GS_DATABASE_PASSWORD}@{GS_DATABASE_LOCATION}:{GS_DATABASE_PORT}/{GS_DATABASE_NAME}"
 
-
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
 config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
