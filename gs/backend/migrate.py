@@ -5,7 +5,7 @@ from gs.backend.data.resources.utils import add_callsigns, add_main_commands
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
-        print("Invalid input. ")
+        raise ValueError(f"Invalid input. Expected at most 1 argument, received {len(sys.argv)}")
     elif len(sys.argv[1:]) == 0:
         print("Migrating callsign data...")
         add_callsigns(get_db_session())
@@ -18,4 +18,4 @@ if __name__ == "__main__":
         print("Migrating main command data...")
         add_main_commands(get_db_session())
     else:
-        print("Invalid input. Optional arguments include 'callsigns' or 'commands'.")
+        raise ValueError("Invalid input. Optional arguments include 'callsigns' or 'commands'.")
