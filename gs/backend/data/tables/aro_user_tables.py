@@ -73,11 +73,11 @@ class AROUserCallsigns(BaseSQLModel, table=True):
     personal_city: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
     personal_province: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
     personal_postal_code: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
-    qual_level_a: bool
-    qual_level_b: bool
-    qual_level_c: bool
-    qual_level_d: bool
-    qual_level_e: bool
+    qual_level_a: bool = Field()
+    qual_level_b: bool = Field()
+    qual_level_c: bool = Field()
+    qual_level_d: bool = Field()
+    qual_level_e: bool = Field()
     club_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
     second_club_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
     club_address: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
