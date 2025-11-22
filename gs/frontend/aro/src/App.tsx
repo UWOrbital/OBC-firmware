@@ -9,6 +9,7 @@ import Signup from "./components/auth/sign-up.tsx"
 import Verify from "./components/auth/verify.tsx"
 import Home from "./components/Home.tsx"
 import PageNotFound from "./components/PageNotFound.tsx";
+import Gallery from "./components/profile/photo-gallery/gallery.tsx";
 
 /**
  * @brief App component displaying the main application
@@ -32,6 +33,7 @@ function App() {
         <Route path="/sign-up" element={<Signup />} />
         <Route path="/new-request" element={<NewRequestForm />} />
         <Route path="*" element={<PageNotFound />} />
+        <Route path="/profile/gallery" element={<Gallery />} />
       </Routes>
       <ToastContainer />
     </>
