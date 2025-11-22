@@ -103,3 +103,5 @@ lerna-debug.log*
 *dist-ssr
 *.local
 *.vite
+
+.DS_Store
