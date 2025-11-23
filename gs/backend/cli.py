@@ -18,7 +18,7 @@ from gs.backend.ground_station_cli import GroundStationShell
 if len(argv) == 2:
     COM_PORT = argv[1]
     shell = GroundStationShell(COM_PORT)
-    
+
 
 class CliPanel(ScrollableContainer):
     """

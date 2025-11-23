@@ -146,7 +146,7 @@ class GroundStationShell(Cmd):
         # Here we run the function and catch an interrupt if it is executed by the user
         try:
             # We use lambda so that the poll function can acquire updated stop_printing values later
-            poll(self._com_port, LOG_PATH, 1, True, lambda: self.stop_printing)
+            poll(self._com_port, LOG_PATH, 1, lambda: self.stop_printing)
         except KeyboardInterrupt:
             print("Exiting polling...")
         finally:
