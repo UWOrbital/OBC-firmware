@@ -322,15 +322,12 @@ def poll(
     com_port: str,
     file_path: str | Path,
     timeout: int = 0,
-    print_console: bool = False,
     stop_flag: Callable[[], bool] | None = None,
 ) -> None:
     """
     A function that is supposed to run in the background to keep receiving logs from the board
 
     :param com_port: The port that the board is connected to so it can poll
-    :param print_console: Whether the function should print to console or not. By default, this is set to False. This is
-                          useful for the CLI where sometimes we want to print out the received logs from the board
     """
 
     comms = CommsPipeline()
@@ -376,5 +373,3 @@ def poll(
 
             file.write(data_string)
             file.flush()
-            # if print_console and len(data_string) != 0:
-            #     # print(data_string)

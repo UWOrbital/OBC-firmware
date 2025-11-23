@@ -15,8 +15,9 @@ from textual.widgets import Button, DataTable, Input, Label, Static
 
 from gs.backend.ground_station_cli import GroundStationShell
 
-COM_PORT = argv[1]
-shell = GroundStationShell(COM_PORT)
+if len(argv) == 2:
+    COM_PORT = argv[1]
+    shell = GroundStationShell(COM_PORT)
 
 
 class CliPanel(ScrollableContainer):
@@ -54,7 +55,7 @@ class CliPanel(ScrollableContainer):
         """
         Set up periodic CLI output refresh and initialize the output panel
         """
-        self.output_refresh = self.set_interval(1 / 600, self.update_cli)
+        self.output_refresh = self.set_interval(1 / 120, self.update_cli)
         self.cli_output_panel = self.query_one("#cli-output-panel", Static)
 
         # Buffer.getvalue() returns the contents of the string buffer as a str
@@ -251,17 +252,14 @@ class LogsPanel(Static):
             with open("gs/backend/logs.log") as logs:
                 self.logs = logs.read()
         except FileNotFoundError:
-            print("[red]Logs file not found. Try running interface from root directory (OBC-Firmware)?[/red]")
+            self.update("[red]Logs file not found. Try running interface from root directory (OBC-Firmware)[/red]")
 
     def watch_logs(self, logs: str) -> None:
         """
         Update logs panel with the latest logs
         """
         self.update("LOGS\n\n" + self.logs)
-        try:
-            self.scroll_to_bottom()
-        except Exception as e:
-            print(e)
+        self.scroll_to_bottom()
 
     def scroll_to_bottom(self) -> None:
         """
@@ -303,7 +301,7 @@ class CLIWindow(App[None]):
 
 def main() -> None:
     """
-    Entry point for the CLI application, sets up serial and runs the app
+    Usage: Entry point for the CLI application; opens the serial port at the com port and runs the ground station cli.
     """
     if len(argv) != 2:
         print("One argument needed: Com Port")

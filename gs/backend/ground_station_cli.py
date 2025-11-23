@@ -131,7 +131,7 @@ class GroundStationShell(Cmd):
 
     def do_print_logs(self, line: str) -> None:
         """
-        Prints out logs and polls for log_pathlogs that are comming in. Use a Keyboard Interupt to exit (e.g. Ctrl + C)
+        Prints out logs and polls for log_pathlogs that are coming in. Use a Keyboard Interupt to exit (e.g. Ctrl + C)
         """
         self.stop_printing = False
 
