@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from sqlalchemy import MetaData, Table, engine_from_config, pool
 from sqlmodel import SQLModel
 
+from gs.backend.data.tables import aro_user_tables, main_tables, transactional_tables  # noqa: F401
+
 load_dotenv()
 
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
