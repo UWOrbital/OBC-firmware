@@ -3,7 +3,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from dotenv import load_dotenv
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import MetaData, Table, engine_from_config, pool
 from sqlmodel import SQLModel
 
 load_dotenv()
@@ -30,6 +30,37 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = SQLModel.metadata
 
+
+def ensure_unique_tables(metadata: MetaData) -> MetaData:
+    """
+    Return a new MetaData containing one copy of each table found in
+    `metadata`, deduplicated by (schema, name).
+    This is to work around an Alembic issue where it tries to emit
+    multiple CREATE TABLE statements for existing tables
+    """
+    new_meta = MetaData()
+    seen = set()
+
+    tables = getattr(metadata, "sorted_tables", None)
+    if tables is None:
+        tables = list(getattr(metadata, "tables", {}).values())
+
+    for table in tables:
+        if not isinstance(table, Table):
+            # some SQLModel/ORM shims may expose table-like objects; skip those
+            continue
+
+        key = (table.schema, table.name)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        if hasattr(table, "tometadata"):
+            table.tometadata(new_meta)
+
+    return new_meta
+
+
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -52,9 +83,10 @@ def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
-        target_metadata=target_metadata,
+        target_metadata=ensure_unique_tables(target_metadata),
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -76,7 +108,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=ensure_unique_tables(target_metadata),
+            include_schemas=True,
+        )
 
         with context.begin_transaction():
             context.run_migrations()
