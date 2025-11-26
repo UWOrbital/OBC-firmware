@@ -1,30 +1,3 @@
-"""
-Background
-We need a way to retrieve ARO requests in our MCC.
-
-Requirements
-Create the following endpoints in gs/backend/api/v1/mcc/endpoints/aro_requests.py
-
-Get /
-Returns the aro requests. The response should be under the data field.
-
-Parameters:
-
-count
-type: int
-optional with default: 100
-Gets the count most recent commands
-If count ≤ 0, return all data
-offset
-type: int
-optional with default of 0
-Starting point to get the most recent commands at (used for paging)
-filters
-type: list of aro request type
-Returns the aro requests that match any if the request types
-If the list is empty, apply no filtering
-"""
-
 from fastapi import APIRouter, Query
 from sqlmodel import select
 
