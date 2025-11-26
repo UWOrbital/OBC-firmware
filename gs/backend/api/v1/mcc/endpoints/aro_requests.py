@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Query
+from sqlalchemy import desc
 from sqlmodel import select
 
 from gs.backend.api.v1.mcc.models.responses import ARORequestsResponse
@@ -24,10 +25,10 @@ async def get_aro_requests(
     :return: ARO requests matching the criteria
     """
     with get_db_session() as session:
-        query = select(ARORequest).order_by(ARORequest.created_on.desc())
+        query = select(ARORequest).order_by(desc(ARORequest.created_on))
 
         if filters:
-            query = query.where(ARORequest.status.in_(filters))
+            query = query.where(ARORequest.status.in_(filters))  # type: ignore
         if offset > 0:
             query = query.offset(offset)
         if count > 0:
