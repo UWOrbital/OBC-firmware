@@ -25,7 +25,7 @@ async def get_aro_requests(
     :return: ARO requests matching the criteria
     """
     with get_db_session() as session:
-        query = select(ARORequest).order_by(desc(ARORequest.created_on))
+        query = select(ARORequest).order_by(desc(ARORequest.created_on))  # type: ignore
 
         if filters:
             query = query.where(ARORequest.status.in_(filters))  # type: ignore
