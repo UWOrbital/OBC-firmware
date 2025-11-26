@@ -61,6 +61,7 @@ def test_get_db_session(monkeypatch, db_session: Session):
         "gs.backend.data.data_wrappers.mcc_wrappers.packet_telemetry_wrapper",
         "gs.backend.data.data_wrappers.mcc_wrappers.packet_wrapper",
         "gs.backend.data.data_wrappers.mcc_wrappers.telemetry_wrapper",
+        "gs.backend.api.v1.mcc.endpoints.aro_requests",
     ]
 
     for path in path_list:
