@@ -46,6 +46,9 @@ static void packVerifyCrcCmdData(uint8_t* buffer, uint32_t* offset, const cmd_ms
 // CMD_I2C_PROBE
 static void packI2CProbeCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
 
+// CMD_RTC_TESTS
+static void packRTCTestData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
 typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);
 
 static const pack_func_t packFns[] = {
@@ -151,5 +154,10 @@ static void packVerifyCrcCmdData(uint8_t* buffer, uint32_t* offset, const cmd_ms
 
 // CMD_I2C_PROBE
 static void packI2CProbeCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+  // No data to pack
+}
+
+// CMD_RTC_TESTS
+static void packRTCTestData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
   // No data to pack
 }

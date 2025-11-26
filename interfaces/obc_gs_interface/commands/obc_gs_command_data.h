@@ -37,6 +37,11 @@ typedef struct {
   programming_session_t programmingSession;
 } set_programming_session_cmd_data_t;
 
+// CMD_RTC_TESTS
+typedef struct {
+  programming_session_t programmingSession;
+} packRTCTestData_t;
+
 /* -------------------------- */
 /*   Command Message Struct   */
 /* -------------------------- */
@@ -47,6 +52,7 @@ typedef struct {
     downlink_logs_next_pass_cmd_data_t downlinkLogsNextPass;
     download_data_cmd_data_t downloadData;
     set_programming_session_cmd_data_t setProgrammingSession;
+    packRTCTestData_t packRTCTestData;
   };
 
   uint32_t timestamp;  // Unix timestamp in seconds
