@@ -143,7 +143,7 @@ void sciInit(void)
                    | (uint32)((uint32)1U << 0U);  /* Break detect */
 
     /** - initialize global transfer variables */
-    g_sciTransfer_t[0U].mode   = (uint32)0U << 8U;
+    g_sciTransfer_t[0U].mode   = (uint32)1U << 8U;
     g_sciTransfer_t[0U].tx_length = 0U;
 	g_sciTransfer_t[0U].rx_length = 0U;
 
@@ -225,7 +225,7 @@ void sciInit(void)
                       | (uint32)((uint32)1U);  /* Break detect */
 
     /** - initialize global transfer variables */
-    g_sciTransfer_t[1U].mode   = (uint32)0U << 8U;
+    g_sciTransfer_t[1U].mode   = (uint32)1U << 8U;
     g_sciTransfer_t[1U].tx_length = 0U;
 	g_sciTransfer_t[1U].rx_length = 0U;
 

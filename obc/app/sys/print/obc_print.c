@@ -39,7 +39,7 @@ obc_error_code_t sciPrintText(unsigned char *text, uint32_t length, TickType_t u
   if (text == NULL || length == 0) return OBC_ERR_CODE_INVALID_ARG;
 
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(sciSendBytes(text, length, uartMutexTimeoutTicks, UART_PRINT_REG));
+  RETURN_IF_ERROR_CODE(sciSendBytes(text, length, uartMutexTimeoutTicks, pdMS_TO_TICKS(100), UART_PRINT_REG));
   return OBC_ERR_CODE_SUCCESS;
 }
 
