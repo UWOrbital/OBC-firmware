@@ -22,12 +22,27 @@ class BackendConfiguration:
 
 backend_config = BackendConfiguration()
 
-# TODO: Make these throw an exception if they are None
-GS_DATABASE_USER = environ.get("GS_DATABASE_USER")
-GS_DATABASE_PASSWORD = environ.get("GS_DATABASE_PASSWORD")
-GS_DATABASE_LOCATION = environ.get("GS_DATABASE_LOCATION")
-GS_DATABASE_PORT = environ.get("GS_DATABASE_PORT")
-GS_DATABASE_NAME = environ.get("GS_DATABASE_NAME")
+
+def getenv(config: str) -> str:
+    """
+    Validates whether or not database env values exist in .env. If not, throws a value error.
+
+    :param config: Variable in .env
+    :type config: str
+    :return: Value of variable in .env
+    :rtype: str
+    """
+    value = environ.get(config)
+    if not value:
+        raise ValueError(f"{config} is missing from .env.")
+    return value
+
+
+GS_DATABASE_USER = getenv("GS_DATABASE_USER")
+GS_DATABASE_PASSWORD = getenv("GS_DATABASE_PASSWORD")
+GS_DATABASE_LOCATION = getenv("GS_DATABASE_LOCATION")
+GS_DATABASE_PORT = getenv("GS_DATABASE_PORT")
+GS_DATABASE_NAME = getenv("GS_DATABASE_NAME")
 
 DATABASE_CONNECTION_STRING: Final[
     str
