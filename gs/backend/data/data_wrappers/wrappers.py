@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from gs.backend.data.data_wrappers.abstract_wrapper import AbstractWrapper  # SEE abstract_wrapper.py FOR LOGIC
 from gs.backend.data.tables.aro_user_tables import AROUserAuthToken, AROUserLogin, AROUsers
 from gs.backend.data.tables.main_tables import MainCommand, MainTelemetry
@@ -12,7 +14,7 @@ from gs.backend.data.tables.transactional_tables import (
 )
 
 
-class AROUsersWrapper(AbstractWrapper[AROUsers]):
+class AROUsersWrapper(AbstractWrapper[AROUsers, UUID]):
     """
     Data wrapper for AROUsers table.
     """
@@ -20,7 +22,7 @@ class AROUsersWrapper(AbstractWrapper[AROUsers]):
     model = AROUsers
 
 
-class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken]):
+class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken, UUID]):
     """
     Data wrapper for AROUserAuthToken table.
     """
@@ -28,7 +30,7 @@ class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken]):
     model = AROUserAuthToken
 
 
-class AROUserLoginWrapper(AbstractWrapper[AROUserLogin]):
+class AROUserLoginWrapper(AbstractWrapper[AROUserLogin, UUID]):
     """
     Data wrapper for AROUserLogin table.
     """
@@ -36,7 +38,7 @@ class AROUserLoginWrapper(AbstractWrapper[AROUserLogin]):
     model = AROUserLogin
 
 
-class ARORequestWrapper(AbstractWrapper[ARORequest]):
+class ARORequestWrapper(AbstractWrapper[ARORequest, UUID]):
     """
     Data wrapper for ARORequest table.
     """
@@ -44,7 +46,7 @@ class ARORequestWrapper(AbstractWrapper[ARORequest]):
     model = ARORequest
 
 
-class MainCommandWrapper(AbstractWrapper[MainCommand]):
+class MainCommandWrapper(AbstractWrapper[MainCommand, int]):
     """
     Data wrapper for MainCommand table.
     """
@@ -52,7 +54,7 @@ class MainCommandWrapper(AbstractWrapper[MainCommand]):
     model = MainCommand
 
 
-class MainTelemetryWrapper(AbstractWrapper[MainTelemetry]):
+class MainTelemetryWrapper(AbstractWrapper[MainTelemetry, int]):
     """
     Data wrapper for MainTelemetry table.
     """
@@ -60,7 +62,7 @@ class MainTelemetryWrapper(AbstractWrapper[MainTelemetry]):
     model = MainTelemetry
 
 
-class CommsSessionWrapper(AbstractWrapper[CommsSession]):
+class CommsSessionWrapper(AbstractWrapper[CommsSession, UUID]):
     """
     Data wrapper for CommsSession table.
     """
@@ -68,7 +70,7 @@ class CommsSessionWrapper(AbstractWrapper[CommsSession]):
     model = CommsSession
 
 
-class PacketWrapper(AbstractWrapper[Packet]):
+class PacketWrapper(AbstractWrapper[Packet, UUID]):
     """
     Data wrapper for Packet table.
     """
@@ -76,7 +78,7 @@ class PacketWrapper(AbstractWrapper[Packet]):
     model = Packet
 
 
-class PacketCommandsWrapper(AbstractWrapper[PacketCommands]):
+class PacketCommandsWrapper(AbstractWrapper[PacketCommands, UUID]):
     """
     Data wrapper for PacketCommands table.
     """
@@ -84,7 +86,7 @@ class PacketCommandsWrapper(AbstractWrapper[PacketCommands]):
     model = PacketCommands
 
 
-class PacketTelemetryWrapper(AbstractWrapper[PacketTelemetry]):
+class PacketTelemetryWrapper(AbstractWrapper[PacketTelemetry, UUID]):
     """
     Data wrapper for PacketTelemetry table.
     """
@@ -92,15 +94,30 @@ class PacketTelemetryWrapper(AbstractWrapper[PacketTelemetry]):
     model = PacketTelemetry
 
 
-class CommandsWrapper(AbstractWrapper[Commands]):
+class CommandsWrapper(AbstractWrapper[Commands, UUID]):
     """
     Data wrapper for Commands table.
     """
 
     model = Commands
 
+    def retrieve_floating_commands(self) -> list[Commands]:
+        """
+        Retrieves all commands which do not have a valid entry in
+        the packet_commands table.
+        A command which is not valid is considered as any command whose ID
+        does not match with any command_id in the packet_commands table
+        """
+        packet_commands = PacketCommandsWrapper().get_all()
+        packet_ids = {packet_command.command_id for packet_command in packet_commands}
 
-class TelemetryWrapper(AbstractWrapper[Telemetry]):
+        commands = self.get_all()
+        floating_commands = [fc for fc in commands if fc.id not in packet_ids]
+
+        return floating_commands
+
+
+class TelemetryWrapper(AbstractWrapper[Telemetry, UUID]):
     """
     Data wrapper for Telemetry table.
     """

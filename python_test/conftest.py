@@ -1,3 +1,5 @@
+import os
+import subprocess
 from datetime import datetime
 
 import pytest
@@ -25,6 +27,13 @@ def db_session(db_engine: Engine) -> Session:
     """
     with Session(db_engine) as session:
         setup_database(session)
+
+        # Run Alembic migrations to create tables
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        env = os.environ.copy()
+        env["SQLALCHEMY_DATABASE_URL"] = str(db_engine.url)
+        subprocess.run(["alembic", "upgrade", "head"], cwd=repo_root, env=env, check=True, capture_output=True)
+
         return session
 
 
@@ -49,6 +58,7 @@ def test_get_db_session(monkeypatch, db_session: Session):
     When testing any database function that requires the `get_db_session()` function, you must add the module path to the list below.
     """
     path_list: list[str] = [
+        "gs.backend.data.data_wrappers.abstract_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_request_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_data_wrapper",
         "gs.backend.data.data_wrappers.aro_wrapper.aro_user_auth_token_wrapper",
