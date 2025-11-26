@@ -8,9 +8,10 @@ from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.base_model import BaseSQLModel
 
 T = TypeVar("T", bound=BaseSQLModel)
+PK = TypeVar("PK", int, UUID)
 
 
-class AbstractWrapper(ABC, Generic[T]):
+class AbstractWrapper(ABC, Generic[T, PK]):
     """
     An Abstract Base Class for all data wrappers.
     """
@@ -26,11 +27,11 @@ class AbstractWrapper(ABC, Generic[T]):
         with get_db_session() as session:
             return list(session.exec(select(self.model)).all())
 
-    def get_by_id(self, obj_id: int | UUID) -> T:
+    def get_by_id(self, obj_id: PK) -> T:
         """
         Retrieve data wrapper for the unspecified model
 
-        :param obj_id: UUID or int of the model instance to be retrieved
+        :param obj_id: PK of the model instance to be retrieved
         :return: the retrieved instance
         """
         with get_db_session() as session:
@@ -53,11 +54,11 @@ class AbstractWrapper(ABC, Generic[T]):
             session.refresh(obj)
             return obj
 
-    def delete_by_id(self, obj_id: int | UUID) -> T:
+    def delete_by_id(self, obj_id: PK) -> T:
         """
         Delete data wrapper for the unspecified model
 
-        :param obj_id: UUID or int of the model instance to be deleted
+        :param obj_id: PK of the model instance to be deleted
         :return: the deleted instance
         """
         with get_db_session() as session:
