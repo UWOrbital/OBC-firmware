@@ -1,3 +1,7 @@
+// Mock telemetry data for testing and developing the telemetry page.
+// This includes telemetry types, subtypes, and sample data points.
+// Currently, format of this data may not match real telemetry data structure - refactor as needed.
+
 export const telemetryTypes = ["Current", "Voltage", "Motor"];
 
 export const currentSubtypes = ["3v3", "5v", "12v"];

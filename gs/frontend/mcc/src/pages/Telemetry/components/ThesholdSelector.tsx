@@ -3,6 +3,9 @@ type ThesholdSelectorProps = {
   setThreshold: (value: string | number) => void;
 };
 
+/*
+* @brief Component for selecting threshold value
+*/
 function ThesholdSelector({ threshold, setThreshold }: ThesholdSelectorProps) {
   return (
     <div className='bg-card p-2 gap-x-2 w-fit rounded-lg text-lg flex items-center'>

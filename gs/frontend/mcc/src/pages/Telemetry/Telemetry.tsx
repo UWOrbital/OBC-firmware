@@ -4,7 +4,7 @@ import {
   telemetrySubtypes,
   telemetryData,
   type TelemetryDataType,
-} from "../../utils/mockTelemetryData";
+} from "../../utils/mockTelemetryData"; // TODO: Create API to fetch real telemetry data
 import TypeSelector from "./components/TypeSelector";
 import SubtypeSelector from "./components/SubtypeSelector";
 import Table from "../../components/Table";
@@ -14,6 +14,7 @@ import ThesholdSelector from "./components/ThesholdSelector";
 
 const columnHelper = createColumnHelper<TelemetryDataType>();
 
+// TODO: Update columns as per real telemetry data structure when available
 const columns = [
   columnHelper.accessor("session", {
     header: "Session",
@@ -33,6 +34,9 @@ const columns = [
   }),
 ];
 
+/**
+ * @brief Page for displaying telemetry data in a table and chart with options to select telemetry type, subtype, and threshold.
+ */
 function Telemetry() {
   const [type, setType] = React.useState(`${telemetryTypes[0]}`);
   const [subTypeList, setSubTypeList] = React.useState<string[]>(
@@ -41,10 +45,6 @@ function Telemetry() {
   const [threshold, setThreshold] = React.useState<string | number>(0);
   const [selectedSubTypeList, setSelectedSubTypeList] =
     React.useState<string[]>(subTypeList);
-
-  function handleCommandSelect(row: TelemetryDataType) {
-    console.log("Selected Telemetry Row:", row);
-  }
 
   const selectedData = telemetryData[type].filter((row) => selectedSubTypeList.includes(row.type));
 
@@ -69,7 +69,6 @@ function Telemetry() {
           <Table
             data={selectedData}
             columns={columns}
-            onRowClick={handleCommandSelect}
             showFilters={true}
           />
         </div>

@@ -28,7 +28,9 @@ const COLORS = [
   'rgba(255, 159, 64, 1)',
 ];
 
-
+/**
+ * @brief Component for displaying selected telemetry data of the as a line chart.
+ */
 function TelemetryChart({ type, telemetryData }: TelemetryChartProps) {
   const allTimestamps = telemetryData[0]?.datapoints.map(d => d.timestamp) || [];
 
@@ -53,6 +55,7 @@ function TelemetryChart({ type, telemetryData }: TelemetryChartProps) {
       legend: { position: 'top' as const },
       title: { display: true, text: `${type} Telemetry` },
     },
+    // TODO: Update axes titles and formatting to match real telemetry data
     scales: {
       x: { title: { display: true, text: 'Timestamp' } },
       y: { title: { display: true, text: 'Value' } },

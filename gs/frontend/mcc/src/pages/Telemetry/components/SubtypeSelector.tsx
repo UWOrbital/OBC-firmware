@@ -1,3 +1,6 @@
+/**
+ * @brief Component for selecting telemetry subtype(s) available for a given telemetry type
+ */
 function SubtypeSelector({
   subTypeList,
   selectedSubTypeList,
