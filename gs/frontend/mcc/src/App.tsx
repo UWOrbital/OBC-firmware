@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import AROAdmin from "./pages/AROAdmin";
 import LiveSession from "./pages/LiveSession";
 import Login from "./pages/Login";
+import Telemetry from "./pages/Telemetry/Telemetry";
 import PageNotFound from "./components/PageNotFound";
 
 /**
@@ -25,6 +26,7 @@ function App() {
         <Route path="/telemetry-data" element={<AROAdmin />} />
         <Route path="/aro-requests" element={<LiveSession />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/telemetry" element={<Telemetry />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
       <ToastContainer />
