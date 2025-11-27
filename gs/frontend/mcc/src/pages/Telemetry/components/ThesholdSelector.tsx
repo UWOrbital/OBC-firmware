@@ -1,6 +1,3 @@
-import React from 'react'
-
-
 type ThesholdSelectorProps = {
   threshold: string | number;
   setThreshold: (value: string | number) => void;
