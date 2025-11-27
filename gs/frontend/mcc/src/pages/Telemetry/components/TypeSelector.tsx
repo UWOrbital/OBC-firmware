@@ -4,8 +4,9 @@ import {
 } from "../../../utils/mockTelemetryData";
 
 /**
- * 
+ *
  * @brief Component for selecting telemetry type, and updates subtype list accordingly
+ *
  */
 function TypeSelector({
   type,
