@@ -16,7 +16,7 @@ function TypeSelector({
   setSelectedSubTypeList: (selectedSubTypeList: string[]) => void;
 }) {
   return (
-    <div className="m-10 mt-25 p-2 bg-card w-fit rounded-lg">
+    <div className="p-2 bg-card w-fit rounded-lg">
       <div className="flex gap-x-2 text-lg">
         {telemetryTypes.map((t, i) => (
           <>

@@ -10,6 +10,7 @@ import SubtypeSelector from "./components/SubtypeSelector";
 import Table from "../../components/Table";
 import { createColumnHelper } from "@tanstack/react-table";
 import TelemetryChart from "./components/TelemetryChart";
+import ThesholdSelector from "./components/ThesholdSelector";
 
 const columnHelper = createColumnHelper<TelemetryDataType>();
 
@@ -37,6 +38,7 @@ function Telemetry() {
   const [subTypeList, setSubTypeList] = React.useState<string[]>(
     telemetrySubtypes[type]
   );
+  const [threshold, setThreshold] = React.useState<string | number>(0);
   const [selectedSubTypeList, setSelectedSubTypeList] =
     React.useState<string[]>(subTypeList);
 
@@ -47,14 +49,17 @@ function Telemetry() {
   const selectedData = telemetryData[type].filter((row) => selectedSubTypeList.includes(row.type));
 
   return (
-    <div className="mt-20">
-      <TypeSelector
-        type={type}
-        setType={setType}
-        setSubType={setSubTypeList}
-        setSelectedSubTypeList={setSelectedSubTypeList}
-      />
-      <div className="flex m-10 gap-x-7">
+    <div className="mt-30 mx-8">
+      <div className="gap-x-6 flex items-center justify-start">
+        <TypeSelector
+          type={type}
+          setType={setType}
+          setSubType={setSubTypeList}
+          setSelectedSubTypeList={setSelectedSubTypeList}
+        />
+        <ThesholdSelector threshold={threshold} setThreshold={setThreshold} />
+      </div>
+      <div className="flex my-10 gap-x-7">
         <SubtypeSelector
           subTypeList={subTypeList}
           selectedSubTypeList={selectedSubTypeList}
