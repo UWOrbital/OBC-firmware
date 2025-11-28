@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from uuid import UUID
 
@@ -44,16 +44,19 @@ def test_user2():
 # Test data for request 1
 @pytest.fixture
 def request1_data(test_user1):
-    dt_str = "2021-01-01T00:00:00Z"
-    dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
+    created_on = datetime.now() + timedelta(minutes=4)
+    request_sent_obc = created_on + timedelta(minutes=5)
+    taken_date = created_on + timedelta(minutes=6)
+    transmission = created_on + timedelta(minutes=7)
+
     return {
         "aro_id": test_user1.id,
         "long": Decimal("123.456"),
         "lat": Decimal("49.282"),
-        "created_on": dt,
-        "request_sent_obc": dt,
-        "taken_date": dt,
-        "transmission": dt,
+        "created_on": created_on,
+        "request_sent_obc": request_sent_obc,
+        "taken_date": taken_date,
+        "transmission": transmission,
         "status": ARORequestStatus.PENDING,
     }
 
@@ -61,16 +64,19 @@ def request1_data(test_user1):
 # Test data for request 2
 @pytest.fixture
 def request2_data(test_user2):
-    dt_str = "2021-01-01T00:00:00Z"
-    dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
+    created_on = datetime.now()
+    request_sent_obc = created_on + timedelta(minutes=1)
+    taken_date = created_on + timedelta(minutes=2)
+    transmission = created_on + timedelta(minutes=3)
+
     return {
         "aro_id": test_user2.id,
         "long": Decimal("123.456"),
         "lat": Decimal("49.282"),
-        "created_on": dt,
-        "request_sent_obc": dt,
-        "taken_date": dt,
-        "transmission": dt,
+        "created_on": created_on,
+        "request_sent_obc": request_sent_obc,
+        "taken_date": taken_date,
+        "transmission": transmission,
         "status": ARORequestStatus.COMPLETED,
     }
 
@@ -107,7 +113,7 @@ def test_request2_creation(client, request2_data):
     return request
 
 
-def test_get_all_requests(client, request1_data, request2_data, test_request1_creation, test_request2_creation):
+def test_get_all_requests(client, test_request1_creation, test_request2_creation):
     response = client.get(
         "/api/v1/mcc/requests?count=2&offset=0&filters=pending&filters=completed",
         headers={"Content-Type": "application/json"},
@@ -117,21 +123,21 @@ def test_get_all_requests(client, request1_data, request2_data, test_request1_cr
     assert len(requests) == 2
 
     request1_response = requests[0]
-    assert request1_response["aro_id"] == request1_data["aro_id"]
-    assert request1_response["long"] == request1_data["long"]
-    assert request1_response["lat"] == request1_data["lat"]
-    assert request1_response["created_on"] == request1_data["created_on"]
-    assert request1_response["request_sent_obc"] == request1_data["request_sent_obc"]
-    assert request1_response["taken_date"] == request1_data["taken_date"]
-    assert request1_response["transmission"] == request1_data["transmission"]
-    assert request1_response["status"] == request1_data["status"].value
+    assert request1_response["aro_id"] == str(test_request1_creation.aro_id)
+    assert request1_response["longitude"] == str(test_request1_creation.longitude)
+    assert request1_response["latitude"] == str(test_request1_creation.latitude)
+    assert request1_response["created_on"] == test_request1_creation.created_on.isoformat()
+    assert request1_response["request_sent_to_obc_on"] == test_request1_creation.request_sent_to_obc_on.isoformat()
+    assert request1_response["pic_taken_on"] == test_request1_creation.pic_taken_on.isoformat()
+    assert request1_response["pic_transmitted_on"] == test_request1_creation.pic_transmitted_on.isoformat()
+    assert request1_response["status"] == test_request1_creation.status.value
 
     request2_response = requests[1]
-    assert request2_response["aro_id"] == request2_data["aro_id"]
-    assert request2_response["long"] == request2_data["long"]
-    assert request2_response["lat"] == request2_data["lat"]
-    assert request2_response["created_on"] == request2_data["created_on"].isoformat()
-    assert request2_response["request_sent_obc"] == request2_data["request_sent_obc"].isoformat()
-    assert request2_response["taken_date"] == request2_data["taken_date"].isoformat()
-    assert request2_response["transmission"] == request2_data["transmission"].isoformat()
-    assert request2_response["status"] == request2_data["status"].value
+    assert request2_response["aro_id"] == str(test_request2_creation.aro_id)
+    assert request2_response["longitude"] == str(test_request2_creation.longitude)
+    assert request2_response["latitude"] == str(test_request2_creation.latitude)
+    assert request2_response["created_on"] == test_request2_creation.created_on.isoformat()
+    assert request2_response["request_sent_to_obc_on"] == test_request2_creation.request_sent_to_obc_on.isoformat()
+    assert request2_response["pic_taken_on"] == test_request2_creation.pic_taken_on.isoformat()
+    assert request2_response["pic_transmitted_on"] == test_request2_creation.pic_transmitted_on.isoformat()
+    assert request2_response["status"] == test_request2_creation.status.value

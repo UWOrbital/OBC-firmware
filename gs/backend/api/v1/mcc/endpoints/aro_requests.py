@@ -1,11 +1,8 @@
 from fastapi import APIRouter, Query
-from sqlalchemy import desc
-from sqlmodel import select
 
 from gs.backend.api.v1.mcc.models.responses import ARORequestsResponse
-from gs.backend.data.database.engine import get_db_session
+from gs.backend.data.data_wrappers.aro_wrapper.aro_request_wrapper import get_all_requests
 from gs.backend.data.enums.aro_requests import ARORequestStatus
-from gs.backend.data.tables.transactional_tables import ARORequest
 
 aro_requests_router = APIRouter(tags=["MCC", "ARO Requests"])
 
@@ -24,16 +21,5 @@ async def get_aro_requests(
     :param filters: List of request statuses to filter by. If empty, no filtering is applied
     :return: ARO requests matching the criteria
     """
-    with get_db_session() as session:
-        query = select(ARORequest).order_by(desc(ARORequest.created_on))  # type: ignore
-
-        if filters:
-            query = query.where(ARORequest.status.in_(filters))  # type: ignore
-        if offset > 0:
-            query = query.offset(offset)
-        if count > 0:
-            query = query.limit(count)
-
-        requests = list(session.exec(query).all())
-
-        return ARORequestsResponse(data=requests)
+    requests = get_all_requests(count, offset, filters)
+    return ARORequestsResponse(data=requests)
