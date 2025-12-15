@@ -24,40 +24,43 @@ static StaticTask_t taskBuffer;
 static StackType_t taskStack[TASK_STACK_SIZE];
 
 void vTask1(void *pvParameters) {
+  obc_error_code_t errCode;
   sciPrintf("Starting Arducam Demo\r\n");
   camera_id_t selectedCamera = PRIMARY;
-  initCamera(selectedCamera);
+  LOG_IF_ERROR_CODE(initCamera(selectedCamera));
   uint8_t temp;
-  arducamReadSensorPowerControlReg(selectedCamera, &temp);
+  LOG_IF_ERROR_CODE(arducamReadSensorPowerControlReg(selectedCamera, &temp));
   sciPrintf("Power Control Reg:0x%X\r\n", temp);
 
   // Read Camera Sensor ID
   uint16_t cam_id;
-  ov5642GetChipID(&cam_id);
+  LOG_IF_ERROR_CODE(ov5642GetChipID(&cam_id));
   sciPrintf("Sensor ID: %X\r\n", cam_id);
 
   // Test Reg operations
   uint8_t byte = 0x55;
   sciPrintf("Writing %d to test reg\r\n", byte);
-  arducamWriteTestReg(selectedCamera, byte);
+  LOG_IF_ERROR_CODE(arducamWriteTestReg(selectedCamera, byte));
   byte = 0;
-  arducamReadTestReg(selectedCamera, &byte);
+  LOG_IF_ERROR_CODE(arducamReadTestReg(selectedCamera, &byte));
   sciPrintf("Read %d from test reg\r\n", byte);
 
   // Camera Configuration
   sciPrintf("Configuring Camera\r\n");
-  camConfigureSensor();
+  LOG_IF_ERROR_CODE(camConfigureSensor());
   while (1) {
     // Capture
     sciPrintf("Starting Image Capture\r\n");
-    startImageCapture(selectedCamera);
+    LOG_IF_ERROR_CODE(startImageCapture(selectedCamera));
+    sciPrintf("Image Capture Started\r\n");
+
     while (isCaptureDone(selectedCamera) == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
       ;
     sciPrintf("Image Capture Done ^_^\r\n");
 
     // Read image size
     uint32_t img_len = 0;
-    arducamReadFIFOSize(selectedCamera, &img_len);
+    LOG_IF_ERROR_CODE(arducamReadFIFOSize(selectedCamera, &img_len));
     sciPrintf("image len: %d \r\n", img_len);
 
     // Read image from FIFO
@@ -72,10 +75,12 @@ void vTask1(void *pvParameters) {
       }
     } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
     sciPrintf("\r\n");
+
+    return;
   }
 
   // Put Camera on standby (gets pretty hot if left powered on for too long)
-  standbyCamera(selectedCamera);
+  LOG_IF_ERROR_CODE(standbyCamera(selectedCamera));
   while (1)
     ;
 }
