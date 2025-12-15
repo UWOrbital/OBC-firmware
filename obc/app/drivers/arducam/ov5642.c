@@ -96,8 +96,10 @@ obc_error_code_t ov5642GetChipID(uint16_t* buffer) {
   RETURN_AND_GIVE_IF_ERROR_CODE(camReadSensorReg16_8(CHIP_ID_HIGH_BYTE, &cam_id[0]), ov5642RegMutex);
   RETURN_AND_GIVE_IF_ERROR_CODE(camReadSensorReg16_8(CHIP_ID_LOW_BYTE, &cam_id[1]), ov5642RegMutex);
 
+  *buffer = ((uint16_t)cam_id[0] << 8) | cam_id[1];
+
   xSemaphoreGive(ov5642RegMutex);
-  return ((uint16_t)cam_id[0] << 8) | cam_id[1];
+  return OBC_ERR_CODE_SUCCESS;
 }
 
 obc_error_code_t ov5642Reset(void) {
