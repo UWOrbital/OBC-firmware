@@ -87,3 +87,11 @@ obc_error_code_t ov5642SetQuantizationScale(uint8_t quantizationScale);
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 obc_error_code_t ov5642SetLencCorrection(bool enabled);
+
+/**
+ * @brief Sets the OV5642 Lenc Brv Scale registry settings.
+ *
+ * @param lencBrvScale Reciprocal of vertical step at B/R channel
+ * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
+ */
+obc_error_code_t ov5642SetLencBrvScale(uint16_t lencBrvScale);

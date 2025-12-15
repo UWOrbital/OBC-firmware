@@ -33,7 +33,7 @@ obc_error_code_t camConfigureSensor(void) {
   // Image compression
   RETURN_IF_ERROR_CODE(ov5642SetQuantizationScale(0x08));
   // Lens correction
-  // RETURN_IF_ERROR_CODE(camWriteSensorReg16_8(0x5888, 0x00));
+  RETURN_IF_ERROR_CODE(ov5642SetLencBrvScale(0x0C));
   // Image processor setup
   RETURN_IF_ERROR_CODE(ov5642SetLencCorrection(true));
 
