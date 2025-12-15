@@ -76,7 +76,7 @@ void vTask1(void *pvParameters) {
     } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
     sciPrintf("\r\n");
 
-    return;
+    break;
   }
 
   // Put Camera on standby (gets pretty hot if left powered on for too long)
