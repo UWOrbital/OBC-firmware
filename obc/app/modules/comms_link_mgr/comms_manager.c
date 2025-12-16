@@ -327,14 +327,14 @@ static obc_error_code_t postCommsManagerTempQueue() {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-/*
+
 obc_error_code_t readCC1120Temp(float* temp) {
   if (xQueuePeek(cc1120TempQueueHandle, temp, pdMS_TO_TICKS(1000)) != pdPASS) {
     return OBC_ERR_CODE_QUEUE_EMPTY;
   }
   return OBC_ERR_CODE_SUCCESS;
 }
-*/
+
 
 // NOTE: This is created on startup
 void obcTaskFunctionCommsMgr(void *pvParameters) {
