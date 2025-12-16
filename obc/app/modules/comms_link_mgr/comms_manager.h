@@ -101,3 +101,11 @@ obc_error_code_t sendToFrontCommsManagerQueue(comms_event_t *event);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if the packet was sent to the queue
  */
 obc_error_code_t sendToCC1120TransmitQueue(transmit_event_t *event);
+
+/**
+ * @brief Reads temperature from the CC1120 Temperature Queue
+ *
+ * @param temp - Pointer to the variable that will store the temperature.
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if data was retrieved from queue successfully.
+ */
+obc_error_code_t readCC1120Temp(float *temp);
