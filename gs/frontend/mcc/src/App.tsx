@@ -6,6 +6,7 @@ import Background from "./components/Background";
 import Commands from "./pages/Command/Commands";
 import Dashboard from "./pages/Dashboard";
 import AROAdmin from "./pages/AROAdmin";
+import AROUserAdmin from "./pages/AROUserAdmin/AROUserAdmin";
 import LiveSession from "./pages/LiveSession";
 import Login from "./pages/Login";
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/commands" element={<Commands />} />
         <Route path="/telemetry-data" element={<AROAdmin />} />
+        <Route path="/aro-user-admin" element={<AROUserAdmin />}/>
         <Route path="/aro-requests" element={<LiveSession />} />
         <Route path="/login" element={<Login />} />
       </Routes>
