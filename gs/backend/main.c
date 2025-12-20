@@ -1,22 +1,26 @@
-#include "obc_gs_command_pack.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
+#include "obc_gs_command_pack.h"
 
-#include "obc_gs_errors.h"
 #include "gs_errors.h"
+#include "obc_gs_errors.h"
 
+#include "obc_gs_aes128.h"
 #include "obc_gs_ax25.h"
 #include "obc_gs_fec.h"
-#include "obc_gs_aes128.h"
 
-#include <cserialport.h>
 #include <aes.h>
+#include <cserialport.h>
 
-#include <stdio.h>
-#include <string.h>
+#ifdef __APPLE__
+#ifdef TARGET_OS_MAC
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+#endif
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <string.h>
 #include <time.h>
 
 const uint8_t TEMP_STATIC_KEY[AES_KEY_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -48,7 +52,8 @@ int main(void) {
     printf("Invalid input. Please enter a number between 0 and 2.\n");
   }
 
-  /* ----------------------------------- Begin CSerialPort setup ------------------------------------------- */
+  /* ----------------------------------- Begin CSerialPort setup
+   * ------------------------------------------- */
 
   void *pSerialPort = NULL;
 
@@ -97,9 +102,11 @@ int main(void) {
     );
 
     if (demoNum == 2) {
-      CSerialPortSetReadIntervalTimeout(pSerialPort, 30000);  // read interval timeout
+      CSerialPortSetReadIntervalTimeout(pSerialPort,
+                                        30000);  // read interval timeout
     } else {
-      CSerialPortSetReadIntervalTimeout(pSerialPort, 2500);  // read interval timeout
+      CSerialPortSetReadIntervalTimeout(pSerialPort,
+                                        2500);  // read interval timeout
     }
 
     CSerialPortOpen(pSerialPort);
@@ -110,7 +117,8 @@ int main(void) {
 
   printf("Serial port configured!\n");
 
-  /* ------------------------------------------- Demo Code ----------------------------------------------------- */
+  /* ------------------------------------------- Demo Code
+   * ----------------------------------------------------- */
 
   /* Construct packet */
 
@@ -176,7 +184,7 @@ int main(void) {
     unstuffed_ax25_i_frame_t unstuffedAx25Pkt = {0};
 
     // Perform AX.25 framing
-    setCurrentLinkDestAddress(&groundStationCallsign);
+    setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
     obcGsErrCode = ax25SendIFrame(encryptedCmd, RS_DECODED_SIZE, &unstuffedAx25Pkt);
     if (obcGsErrCode != OBC_GS_ERR_CODE_SUCCESS) {
       printf("Failed to send AX.25 I-Frame!");
@@ -234,9 +242,9 @@ int main(void) {
     if (byte == AX25_FLAG) {
       axData.data[axDataIndex++] = byte;
 
-      // Decode packet if we have start flag, end flag, and at least 1 byte of data
-      // During idling, multiple AX25_FLAGs may be sent in a row, so we enforce that
-      // axData.data[1] must be something other than AX25_FLAG
+      // Decode packet if we have start flag, end flag, and at least 1 byte of
+      // data During idling, multiple AX25_FLAGs may be sent in a row, so we
+      // enforce that axData.data[1] must be something other than AX25_FLAG
       if (axDataIndex > 2) {
         axData.length = axDataIndex;
 
@@ -264,7 +272,8 @@ int main(void) {
     }
   }
 
-  /* ----------------------------- Disconnect from the Serial Port ----------------------------- */
+  /* ----------------------------- Disconnect from the Serial Port
+   * ----------------------------- */
 
   CSerialPortFree(pSerialPort);
 }

@@ -28,6 +28,24 @@ static void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* 
 // CMD_DOWNLINK_TELEM
 static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
 
+// CMD_UPLINK_DISC
+static void packUplinkDisconnectCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_SET_PROGRAMMING_SESSION
+static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_DOWNLOAD_DATA
+static void packDownloadDataCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_ERASE_APP
+static void packEraseAppCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_VERIFY_CRC
+static void packVerifyCrcCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
+// CMD_I2C_PROBE
+static void packI2CProbeCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg);
+
 typedef void (*pack_func_t)(uint8_t*, uint32_t*, const cmd_msg_t*);
 
 static const pack_func_t packFns[] = {
@@ -37,6 +55,12 @@ static const pack_func_t packFns[] = {
     [CMD_MICRO_SD_FORMAT] = packMicroSdFormat,
     [CMD_PING] = packPingCmdData,
     [CMD_DOWNLINK_TELEM] = packDownlinkTelemCmdData,
+    [CMD_UPLINK_DISC] = packUplinkDisconnectCmdData,
+    [CMD_SET_PROGRAMMING_SESSION] = packSetProgrammingSessionCmdData,
+    [CMD_DOWNLOAD_DATA] = packDownloadDataCmdData,
+    [CMD_ERASE_APP] = packEraseAppCmdData,
+    [CMD_VERIFY_CRC] = packVerifyCrcCmdData,
+    [CMD_I2C_PROBE] = packI2CProbeCmdData,
     // Add more functions for other commands as needed
 };
 
@@ -95,5 +119,37 @@ static void packPingCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* 
 
 // CMD_DOWNLINK_TELEM
 static void packDownlinkTelemCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+  // No data to pack
+}
+
+// CMD_UPLINK
+static void packUplinkDisconnectCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
+  // No data to pack
+}
+
+// CMD_SET_PROGRAMMING_SESSION
+static void packSetProgrammingSessionCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  packUint8((uint8_t)cmdMsg->setProgrammingSession.programmingSession, buffer, offset);
+}
+
+// CMD_DOWNLOAD_DATA
+static void packDownloadDataCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  packUint8((uint8_t)cmdMsg->downloadData.programmingSession, buffer, offset);
+  packUint16(cmdMsg->downloadData.length, buffer, offset);
+  packUint32(cmdMsg->downloadData.address, buffer, offset);
+}
+
+// CMD_ERASE_APP
+static void packEraseAppCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  // No data to pack
+}
+
+// CMD_VERIFY_CRC
+static void packVerifyCrcCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* cmdMsg) {
+  // No data to pack
+}
+
+// CMD_I2C_PROBE
+static void packI2CProbeCmdData(uint8_t* buffer, uint32_t* offset, const cmd_msg_t* msg) {
   // No data to pack
 }

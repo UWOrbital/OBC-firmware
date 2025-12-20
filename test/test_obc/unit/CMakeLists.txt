@@ -29,10 +29,10 @@ add_executable(${TEST_BINARY} ${TEST_SOURCES})
 
 target_include_directories(${TEST_BINARY}
     PRIVATE
-    ${CMAKE_SOURCE_DIR}/obc/app/sys
+    ${CMAKE_SOURCE_DIR}/obc/shared/obc_errors
     ${CMAKE_SOURCE_DIR}/obc/app/sys/time
     ${CMAKE_SOURCE_DIR}/obc/app/sys/utils
-    ${CMAKE_SOURCE_DIR}/obc/app/sys/logging
+    ${CMAKE_SOURCE_DIR}/obc/shared/logging
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/ds3232
     ${CMAKE_SOURCE_DIR}/obc/app/modules/camera_mgr
@@ -45,6 +45,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/modules/alarm_mgr
     ${CMAKE_SOURCE_DIR}/obc/app/modules/command_mgr
     ${CMAKE_SOURCE_DIR}/interfaces/obc_gs_interface/commands
+    ${CMAKE_SOURCE_DIR}/obc/shared/commands
 )
 
 # Add peripheral configs

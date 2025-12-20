@@ -8,6 +8,7 @@ _Min_Heap_Size = 0x400;      /* required amount of heap  */
 
 SECTIONS
 {
+
   /* The ISR vector goes first into RAM */
   .intvecs :
   {
@@ -16,7 +17,13 @@ SECTIONS
     . = ALIGN(4);
   } >APP_VECTORS
 
- /* FreeRTOS Kernel in protected region of Flash */
+  .metadata :
+  {
+    KEEP(*(.metadata))
+    . = ALIGN(32);
+  } >APP_METADATA
+
+   /* FreeRTOS Kernel in protected region of Flash */
   .kernelTEXT :
   {
     . = ALIGN(4);
@@ -119,11 +126,12 @@ SECTIONS
     . = ALIGN(4);
     _kedata = .;        /* define a global symbol at data end */
   } >RAM AT> APP_FLASH
-  
-  .metadata_section :
+ 
+  .crc :
   {
-    __metadata_start__ = ORIGIN(METADATA_FLASH);
-  } >METADATA_FLASH
+    . = ALIGN(8);
+    __crc_addr = .;
+  } > APP_FLASH
 
   .kernelHEAP : {} >RAM
 

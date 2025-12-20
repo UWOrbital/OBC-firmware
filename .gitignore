@@ -55,6 +55,7 @@ dkms.conf
 .vscode/
 .idea/
 compile_commands.json
+*.clangd
 .cache/
 *.suo
 *.ntvs*
@@ -63,6 +64,8 @@ compile_commands.json
 *.sw?
 
 .env
+.*.env
+*.db
 
 /build*
 
@@ -71,6 +74,7 @@ compile_commands.json
 venv/
 __pycache__/
 .pytest_cache/
+.hypothesis/
 
 #matlab
 /matlab
@@ -99,3 +103,5 @@ lerna-debug.log*
 *dist-ssr
 *.local
 *.vite
+
+.DS_Store

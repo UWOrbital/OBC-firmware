@@ -12,8 +12,10 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERRO
 
 class LoggerMiddleware(BaseHTTPMiddleware):
     """
-    @breif Middleware that logs the request and response
-    @attribute excluded_endpoints (Sequence[str]) - endpoints that won't be logged
+    Middleware that logs the request and response
+
+    :param excluded_endpoints: endpoints that won't be logged
+    :type excluded_endpoints: Sequence[str]
     """
 
     def __init__(self, app: FastAPI, excluded_endpoints: Sequence[str] = ()) -> None:
@@ -23,15 +25,14 @@ class LoggerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """Logs the request and response"""
         request_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        start_time = perf_counter()
-        response = await call_next(request)
-        process_time = perf_counter() - start_time
-
-        if request.url.path in self.excluded_endpoints:
-            return response
 
         request_body = await request.body()
+        body_text = request_body.decode()
+        if not body_text:
+            body_text = "None"
+
         request_size = getsizeof(request_body)
+
         # TODO: update this based on userID header name
         request_user_id = request.headers.get("user_id", "Anonymous")
         request_params = dict(request.query_params)
@@ -44,12 +45,20 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                     f"Request ID: {request_id}",
                     f"URL: {request.url.path}",
                     f"User id: {request_user_id}",
+                    f"Request Body: {body_text}",
                     f"Params: {request_params}",
                     f"Time: {request_time}",
                     f"Bytes: {request_size}.",
                 ]
             )
         )
+
+        start_time = perf_counter()
+        response = await call_next(request)
+        process_time = perf_counter() - start_time
+
+        if request.url.path in self.excluded_endpoints:
+            return response
 
         if response.status_code >= HTTP_500_INTERNAL_SERVER_ERROR:
             logger_severity = logger.critical
@@ -76,7 +85,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                     f"Request ID: {request_id}",
                     f"Response: {response_body}",
                     f"Bytes: {response_size}",
-                    f"Seconds Elasped: {process_time:.3f}.",
+                    f"Seconds Elapsed: {process_time:.3f}.",
                 ]
             )
         )
