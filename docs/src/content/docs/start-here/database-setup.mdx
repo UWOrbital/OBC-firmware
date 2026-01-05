@@ -61,5 +61,11 @@ Make sure you follow the [Initial setup](/OBC-firmware/start-here/initial-setup)
 
 6. Edit the `.env` file to add your login details in the quotes. In Linux/WSL, you can use `vim` or `nano`.
 
-7. Ensure that your Python virtual environment is activated. If not, follow [Initial setup](/OBC-firmware/start-here/initial-setup). Start the backend in development mode by running `fastapi dev gs/backend/main.py` from the root directory. This will also initialize the database.
+7. From the root directory, run the following command to initialize your database with the correct schema:
+
+    ```shell
+    alembic upgrade head
+    ```
+
+8. Ensure that your Python virtual environment is activated. If not, follow [Initial setup](/OBC-firmware/start-here/initial-setup). Start the backend in development mode by running `fastapi dev gs/backend/main.py` from the root directory. This will also initialize the database.
 </Steps>
