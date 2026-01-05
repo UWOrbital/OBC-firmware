@@ -311,10 +311,9 @@ def main() -> None:
         ser = Serial(COM_PORT)
         print("Comm port set to: " + str(ser.name))
         ser.close()
-    
+
     except SerialException as e:
         print(f"An error occurred while opening the serial port: {e}")
-    
 
     app = CLIWindow()
     app.run()
