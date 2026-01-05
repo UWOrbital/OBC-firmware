@@ -5,7 +5,7 @@ from collections.abc import Callable
 from sys import argv
 from typing import cast
 
-from serial import Serial
+from serial import Serial, SerialException
 from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import HorizontalGroup, HorizontalScroll, ScrollableContainer, VerticalScroll
@@ -13,7 +13,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Button, DataTable, Input, Label, Static
 
-from gs.backend.ground_station_cli import GroundStationShell
+from gs.backend.gs_cli.ground_station_cli import GroundStationShell
 
 if len(argv) == 2:
     COM_PORT = argv[1]
@@ -301,15 +301,20 @@ class CLIWindow(App[None]):
 
 def main() -> None:
     """
-    Usage: Entry point for the CLI application; opens the serial port at the com port and runs the ground station cli.
+    Entry point for the CLI application; opens the serial port at the com port and runs the ground station cli.
     """
     if len(argv) != 2:
         print("One argument needed: Com Port")
         return
 
-    ser = Serial(COM_PORT)
-    print("Comm port set to: " + str(ser.name))
-    ser.close()
+    try:
+        ser = Serial(COM_PORT)
+        print("Comm port set to: " + str(ser.name))
+        ser.close()
+    
+    except SerialException as e:
+        print(f"An error occurred while opening the serial port: {e}")
+    
 
     app = CLIWindow()
     app.run()
