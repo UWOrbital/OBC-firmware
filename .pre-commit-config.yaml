@@ -9,7 +9,7 @@ repos:
       - id: end-of-file-fixer
         exclude: '((libs|hal)/.*|\.(ts|tsx|css|html|json|md|yaml|yml|ipynb)$)'
       - id: check-added-large-files
-        exclude: "(libs|hal)/.*"
+        exclude: "(libs|hal)/.*|gs/backend/data/resources/callsigns\\.csv$"
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v17.0.6
     hooks:
