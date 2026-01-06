@@ -74,6 +74,8 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
     target_include_directories (${OUT_FILE_NAME} PRIVATE examples/test_app_cc1120_spi)
   elseif(${EXAMPLE_TYPE} MATCHES RS)
     add_executable(${OUT_FILE_NAME} examples/test_app_rs/main.c)
+  elseif(${EXAMPLE_TYPE} MATCHES MAX17320)
+    add_executable(${OUT_FILE_NAME} examples/test_max17320/main.c)
 
   # ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()
