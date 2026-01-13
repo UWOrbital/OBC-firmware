@@ -19,6 +19,8 @@ obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage);
 obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVoltage);
 obc_error_code_t getINA230Power(uint8_t i2cAddress, float* power);
 obc_error_code_t getINA230PowerForDevice(uint8_t deviceIndex, float* power);
+obc_error_code_t getINA230Current(uint8_t i2cAddress, float* power);
+obc_error_code_t getINA230CurrentForDevice(uint8_t deviceIndex, float* power);
 
 #ifdef __cplusplus
 }
