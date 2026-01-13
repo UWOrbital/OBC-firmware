@@ -9,7 +9,6 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/ina230/ina230.c
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424/tca6424.c
-    # ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46/obc_i2c_io.c
 )
 
 set(TEST_MOCKS
@@ -17,8 +16,15 @@ set(TEST_MOCKS
     ${CMAKE_SOURCE_DIR}/test/mocks/mock_fram.c
     ${CMAKE_SOURCE_DIR}/test/mocks/mock_crc.c
     ${CMAKE_SOURCE_DIR}/test/mocks/mock_freertos.c
-    ${CMAKE_SOURCE_DIR}/test/mocks/mock_i2c_hal.c
 )
+
+option(USE_MOCK_I2C "Use mock I2C for testing" ON)
+
+if(USE_MOCK_I2C)
+    list(APPEND TEST_MOCKS ${CMAKE_SOURCE_DIR}/test/mocks/mock_i2c_hal.c)
+else()
+    list(APPEND TEST_DEPENDENCIES ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46/obc_i2c_io.c)
+endif()
 
 set(TEST_SOURCES
     ${CMAKE_SOURCE_DIR}/test/test_obc/unit/main.cpp
@@ -55,6 +61,7 @@ target_include_directories(${TEST_BINARY}
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/rm46
     ${CMAKE_SOURCE_DIR}/obc/shared/hal/obc_rev1/include
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424
+    ${CMAKE_SOURCE_DIR}/test/mocks
 )
 
 target_link_libraries(${TEST_BINARY}
@@ -63,3 +70,7 @@ target_link_libraries(${TEST_BINARY}
 )
 
 add_test(${TEST_BINARY} ${TEST_BINARY})
+
+if(USE_MOCK_I2C)
+    target_compile_definitions(${TEST_BINARY} PRIVATE USE_MOCK_I2C)
+endif()
