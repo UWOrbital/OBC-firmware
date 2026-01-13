@@ -102,10 +102,10 @@ static obc_error_code_t initTca6424PinState();
  *         otherwise returns an appropriate error code
  */
 obc_error_code_t initINA230() {
-  #ifndef USE_MOCK_I2C
-    i2cReadRegFuncPtr = i2cReadReg;
-    i2cWriteRegFuncPtr = i2cWriteReg;
-  #endif
+#ifndef USE_MOCK_I2C
+  i2cReadRegFuncPtr = i2cReadReg;
+  i2cWriteRegFuncPtr = i2cWriteReg;
+#endif
   obc_error_code_t errCode;
   for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
     const ina230_config_t device = ina230Devices[i];
@@ -226,12 +226,11 @@ obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) 
 
   // Read the 16-bit shunt voltage register
   errCode = i2cReadRegFuncPtr(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2,
-                       I2C_TRANSFER_TIMEOUT_TICKS);  // last param not sure
+                              I2C_TRANSFER_TIMEOUT_TICKS);  // last param not sure
   if (errCode != OBC_ERR_CODE_SUCCESS) return errCode;
 
   // Combine the two bytes into a 16-bit value
   int16_t shuntVoltageValue = (shuntVoltageRaw[0] << 8) | shuntVoltageRaw[1];
-
 
   // Convert to actual voltage (signed value)
   *shuntVoltage = shuntVoltageValue * INA230_SHUNT_VOLTAGE_LSB;
@@ -320,8 +319,9 @@ obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVol
 
 obc_error_code_t getINA230Power(uint8_t i2cAddress, float* power) {
   obc_error_code_t errCode;
-  if (power == NULL || (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO)) return OBC_ERR_CODE_INVALID_ARG;
-  uint8_t powerRaw[INA_REG_CONF_BUFF_SIZE] = {}; 
+  if (power == NULL || (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO))
+    return OBC_ERR_CODE_INVALID_ARG;
+  uint8_t powerRaw[INA_REG_CONF_BUFF_SIZE] = {};
   RETURN_IF_ERROR_CODE(
       i2cReadRegFuncPtr(i2cAddress, INA230_POWER_REGISTER_ADDR, powerRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t powerValue = (powerRaw[0] << 8) | powerRaw[1];
@@ -338,7 +338,8 @@ obc_error_code_t getINA230PowerForDevice(uint8_t deviceIndex, float* power) {
 // function to get current
 obc_error_code_t getINA230Current(uint8_t i2cAddress, float* current) {
   obc_error_code_t errCode;
-  if (current == NULL || (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO)) return OBC_ERR_CODE_INVALID_ARG;
+  if (current == NULL || (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO))
+    return OBC_ERR_CODE_INVALID_ARG;
   uint8_t currentRaw[INA_REG_CONF_BUFF_SIZE] = {};
   RETURN_IF_ERROR_CODE(
       i2cReadRegFuncPtr(i2cAddress, INA230_CURRENT_REGISTER_ADDR, currentRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));

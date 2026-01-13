@@ -8,11 +8,11 @@ extern "C" {
 #include <stdint.h>
 
 #ifdef USE_MOCK_I2C
-    #ifndef TICK_TYPE_H
-        typedef uint32_t TickType_t;
-    #endif
+#ifndef TICK_TYPE_H
+typedef uint32_t TickType_t;
+#endif
 #else
-    #include "os_portmacro.h"
+#include "os_portmacro.h"
 #endif
 
 typedef enum { INA230_DEVICE_ONE = 0x00, INA230_DEVICE_TWO, INA230_DEVICE_COUNT } ina230_device_t;
