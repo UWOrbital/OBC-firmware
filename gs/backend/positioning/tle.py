@@ -180,8 +180,6 @@ def get_tle_data(object_id: int) -> TLEData:
 
 
 
-# Testing section
-
 
 def id_from_user() -> int:
     """

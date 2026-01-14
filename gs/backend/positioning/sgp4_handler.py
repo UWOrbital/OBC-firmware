@@ -53,7 +53,7 @@ def setup_sgp4(tle: TLEData) -> Satrec:
         tle.mean_motion * (2 * 3.141592653589793 / 1440.0),  # mean motion (radians/min)
         radians(tle.right_ascension),  # RA of ascending node (radians)
     )
-    """
+    """  These values where used for debugging to find source of eccentricity value, can use to test if issue is fixed
     sat.sgp4init(
         GRAVITY_MODEL,                # gravity model
         'i',                  # 'a' = old AFSPC mode, 'i' = improved mode
@@ -70,6 +70,8 @@ def setup_sgp4(tle: TLEData) -> Satrec:
         3.686137125541276,    # nodeo: R.A. of ascending node (radians)
     )
     """
+
+    """
     print("GRAVITY_MODEL:", GRAVITY_MODEL)
     print("Propagation mode:", AFSPC_MODE_IMPROVED)
     print("Satellite number:", tle.satellite_number)
@@ -83,6 +85,8 @@ def setup_sgp4(tle: TLEData) -> Satrec:
     print("Mean anomaly (rad):", radians(tle.mean_anomaly))
     print("Mean motion (rad/min):", tle.mean_motion * (2 * 3.141592653589793 / 1440.0))
     print("RA of ascending node (rad):", radians(tle.right_ascension))
+    """
+
     return sat
 
 

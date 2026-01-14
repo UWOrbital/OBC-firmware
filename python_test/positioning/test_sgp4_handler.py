@@ -30,7 +30,8 @@ def test_get_sat_position(): #test that output has expected structure and data t
         "1 54216U 22143A   25308.16010129  .00032649  00000-0  38953-3 0  9993\n"
         "2 54216  41.4668 251.0039 0006377 319.7576  40.2790 15.60341380158647"
     )
-
+    #Note that the above tle causes eccentricity out of range bug, while tle_str2 does not. 
+    #Current implementation causes error when tle.eccentricity is low while tle.drag_term is high
     tle_str2 = (
         "ISS (ZARYA)\n"
         "1 25544U 98067A   25308.35786713  .00010709  00000-0  19707-3 0  9992\n"  
@@ -38,10 +39,14 @@ def test_get_sat_position(): #test that output has expected structure and data t
 
     )
     tle = parse_tle_data(tle_str)
-    #sat = setup_sgp4(tle)
-    #stdout.writelines(dump_satrec(sat))
-    # ensure it's between 0 and 1
-    #assert 0.0 <= tle.eccentricity < 1.0, "parsed eccentricity out of range!"
+
+    """
+    sat = setup_sgp4(tle)
+    stdout.writelines(dump_satrec(sat))
+    assert 0.0 <= tle.eccentricity < 1.0, "parsed eccentricity out of range!" #attempt to test via direct check rather than built in error handling
+    """
+
+
     dt = datetime(2025, 11, 12, 12, 0, 0)
     data = get_sat_position(tle, dt)
     assert isinstance(data, SGP4Data) 
