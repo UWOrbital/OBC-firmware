@@ -63,6 +63,8 @@ class TLEData:
         )
         first_line += str(calculate_checksum(first_line))
         second_line += str(calculate_checksum(second_line))
+        #print("hi!")
+        #print(f"{first_line}\n{second_line}")
         return f"{first_line}\n{second_line}"
 
     def format_epoch_to_date(self, epoch_year: int, epoch_day: float) -> str:
@@ -175,6 +177,7 @@ def get_tle_data(object_id: int) -> TLEData:
     response = requests.get(url)
     output = response.text
     return parse_tle_data(output)
+
 
 
 # Testing section
