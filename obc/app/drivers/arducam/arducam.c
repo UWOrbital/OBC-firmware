@@ -47,44 +47,7 @@ typedef enum opcode {
  * @param cameraID Camera ID of camera
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
-
 static obc_error_code_t arducamResetCPLD(camera_id_t cameraID);
-
-/**
- * @brief Read Arducam's Capture Control Register
- *        Value determines number of frames captured.
- *        0 -> 6 = 1 -> 7 frames captured; 7 = keep capturing
- *        until FIFO is full.
- *
- * @param cameraID Camera ID of camera
- * @param buffer 1 byte buffer to store value read.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- */
-// static obc_error_code_t arducamReadCaptureControlReg(camera_id_t cameraID, uint8_t* buffer);
-
-/**
- * @brief Write a value to Arducam's Capture Control Register
- *        Value determines number of frames captured.
- *        0 -> 6 = 1 -> 7 frames captured; 7 = keep capturing
- *        until FIFO is full.
- *
- * @param cameraID Camera ID of camera
- * @param value 1 byte value to be written.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- */
-// static obc_error_code_t arducamWriteCaptureControlReg(camera_id_t cameraID, uint8_t value);
-
-/**
- * @brief Read Arducam's Sensor Timing Control Register
- *        Bit[0] Hsync Polarity: 0 = Active High, 1 = Active Low;
- *        Bit[1] Vsync Polarity: 0 = Active High, 1 = Active Low;
- *        Bit[3] Sensor PCLK reverse: 0 = normal, 1 = reversed PCLK
- *
- * @param cameraID Camera ID of camera
- * @param buffer 1 byte buffer to store value read.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- */
-// static obc_error_code_t arducamReadSensorTimingControlReg(camera_id_t cameraID, uint8_t* buffer);
 
 /**
  * @brief Write a value to Arducam's Sensor Timing Control Register
@@ -97,19 +60,6 @@ static obc_error_code_t arducamResetCPLD(camera_id_t cameraID);
  * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
  */
 static obc_error_code_t arducamWriteSensorTimingControlReg(camera_id_t cameraID, uint8_t value);
-
-/**
- * @brief Read Arducam's FIFO Control Register
- *        Bit[0]: clear FIFO write/capture done flag;
- *        Bit[1]: start capture;
- *        Bit[4]: reset FIFO write pointer;
- *        Bit[5]: reset FIFO read pointer
- *
- * @param cameraID Camera ID of camera
- * @param buffer 1 byte buffer to store value read.
- * @return Error code. OBC_ERR_CODE_SUCCESS if successful.
- */
-// static obc_error_code_t arducamReadFIFOControlReg(camera_id_t cameraID, uint8_t* buffer);
 
 /**
  * @brief Write a value to Arducam's FIFO Control Register
@@ -227,28 +177,9 @@ obc_error_code_t arducamWriteTestReg(camera_id_t cameraID, uint8_t value) {
   return arducamWriteRegister(cameraID, ARDUCAM_TEST_REG, value);
 }
 
-// static obc_error_code_t arducamReadCaptureControlReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_CAPTURE_CONTROL_REG, buffer);
-// }
-
-// static obc_error_code_t arducamWriteCaptureControlReg(camera_id_t cameraID, uint8_t value) {
-//   if (value > 7) {
-//     return OBC_ERR_CODE_INVALID_ARG;
-//   }
-//   return arducamWriteRegister(cameraID, ARDUCAM_CAPTURE_CONTROL_REG, value);
-// }
-
-// static obc_error_code_t arducamReadSensorTimingControlReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_SENSOR_TIMING_CONTROL_REG, buffer);
-// }
-
 static obc_error_code_t arducamWriteSensorTimingControlReg(camera_id_t cameraID, uint8_t value) {
   return arducamWriteRegister(cameraID, ARDUCAM_SENSOR_TIMING_CONTROL_REG, value);
 }
-
-// static obc_error_code_t arducamReadFIFOControlReg(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_FIFO_CONTROL_REG, buffer);
-// }
 
 static obc_error_code_t arducamWriteFIFOControlReg(camera_id_t cameraID, uint8_t value) {
   return arducamWriteRegister(cameraID, ARDUCAM_FIFO_CONTROL_REG, value);
@@ -261,10 +192,6 @@ obc_error_code_t arducamReadSensorPowerControlReg(camera_id_t cameraID, uint8_t 
 static obc_error_code_t arducamWriteSensorPowerControlReg(camera_id_t cameraID, uint8_t value) {
   return arducamWriteRegister(cameraID, ARDUCAM_SENSOR_POWER_CONTROL_REG, value);
 }
-
-// static obc_error_code_t arducamReadFIFO(camera_id_t cameraID, uint8_t *buffer) {
-//   return arducamReadRegister(cameraID, ARDUCAM_FIFO_READ, buffer);
-// }
 
 static obc_error_code_t arducamBurstReadFIFO(camera_id_t cameraID, uint8_t *buffer, size_t bufferSize) {
   obc_error_code_t errCode;
