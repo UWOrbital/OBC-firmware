@@ -48,7 +48,7 @@ void vTask1(void *pvParameters) {
   // Camera Configuration
   sciPrintf("Configuring Camera\r\n");
   LOG_IF_ERROR_CODE(camConfigureSensor());
-  while (1) {
+  for (int i = 0; i < 10; i++) {
     // Capture
     sciPrintf("Starting Image Capture\r\n");
     LOG_IF_ERROR_CODE(startImageCapture(selectedCamera));
@@ -75,8 +75,6 @@ void vTask1(void *pvParameters) {
       }
     } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
     sciPrintf("\r\n");
-
-    break;
   }
 
   // Put Camera on standby (gets pretty hot if left powered on for too long)
