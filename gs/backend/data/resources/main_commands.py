@@ -14,8 +14,8 @@ def main_commands() -> list[MainCommand]:
             MainCommand(
                 id=int(row[0]),
                 name=row[1],
-                params=row[2],
-                format=row[3],
+                params=row[2].strip() or None,
+                format=row[3].strip() or None,
                 data_size=int(row[4]),
                 total_size=int(row[5]),
             )
