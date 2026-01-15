@@ -32,17 +32,19 @@ static obc_error_code_t collectThermalData(void) {
 
   float lm75bdTemp = 0.0f;
   RETURN_IF_ERROR_CODE(readTempLM75BD(LM75BD_OBC_I2C_ADDR, &lm75bdTemp));
+  telemetry_data_t lm75bdTempVal = {.obcTemp = lm75bdTemp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  RETURN_IF_ERROR_CODE(addTelemetryData(&lm75bdTempVal));
 
-  // Uncomment this if comms manager task being suspened issue is fixed.
-  //  float cc1120Temp = 0.0f;
-  //  RETURN_IF_ERROR_CODE(readCC1120Temp(&cc1120Temp));
-
+  /* Uncomment this if comms manager task being suspened issue is fixed.
+  float cc1120Temp = 0.0f;
+  RETURN_IF_ERROR_CODE(readCC1120Temp(&cc1120Temp));
+  telemetry_data_t cc1120TempVal = {.obcTemp = lm75bdTemp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  RETURN_IF_ERROR_CODE(addTelemetryData(&cc1120TempVal));
+  */
   float rtcTemp = 0.0f;
   RETURN_IF_ERROR_CODE(readRTCTemp(&rtcTemp));
-
-  telemetry_data_t obcTempVal = {.obcTemp = lm75bdTemp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
-
-  RETURN_IF_ERROR_CODE(addTelemetryData(&obcTempVal));
+  telemetry_data_t rtcTempVal = {.obcTemp = lm75bdTemp, .id = TELEM_OBC_TEMP, .timestamp = getCurrentUnixTime()};
+  RETURN_IF_ERROR_CODE(addTelemetryData(&rtcTempVal));
 
   return OBC_ERR_CODE_SUCCESS;
 }
