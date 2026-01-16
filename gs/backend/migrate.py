@@ -1,7 +1,7 @@
 import sys
 
 from gs.backend.data.database.engine import get_db_session
-from gs.backend.data.resources.utils import add_callsigns, add_main_commands
+from gs.backend.data.resources.utils import add_callsigns, add_main_commands, add_telemetry
 
 """
 To migrate pre-determined datainto your local database,
@@ -21,6 +21,8 @@ if __name__ == "__main__":
         add_callsigns(get_db_session())
         print("Migrating main command data...")
         add_main_commands(get_db_session())
+        print("Migrating telemetry data...")
+        add_telemetry(get_db_session())
     elif sys.argv[1] == "callsigns":
         print("Migrating callsign data...")
         add_callsigns(get_db_session())
