@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define INA230_I2C_ADDRESS_ONE 0b1000000U
-#define INA230_I2C_ADDRESS_TWO 0b1000001U
 
 // ------------------  TCA6424 IC Related Pins ------------- //
 
@@ -21,36 +19,6 @@
 #define INA230_ENABLE_LOAD TCA6424A_GPIO_HIGH
 #define INA230_DISABLE_LOAD TCA6424A_GPIO_LOW
 #define INA230_ALERT_HIGH TCA6424A_GPIO_HIGH
-
-// ------------------  INA230 IC Related General Configuration Addresses/Bitfields ------------- //
-#define INA230_CONFIG_REGISTER_ADDR 0x00U
-#define INA230_MASK_ENABLE_REGISTER_ADDR 0x06U
-#define INA230_ALERT_LIMIT_REGISTER_ADDR 0x07U
-#define INA230_CALIBRATION_REGISTER_ADDR 0x05U
-#define INA230_SHUNT_VOLTAGE_REGISTER_ADDR 0x01U
-#define INA230_BUS_VOLTAGE_REGISTER_ADDR 0x02U
-#define INA230_POWER_REGISTER_ADDR 0x03U
-#define INA230_CURRENT_REGISTER_ADDR 0x04U
-
-#define INA230_CONFIG_MODE_SHIFT 0U
-#define INA230_CONFIG_SHU_SHIFT 3U
-#define INA230_CONFIG_AVG_SHIFT 9U
-#define INA230_CONFIG_BUS_SHIFT 6U
-
-// ------------------  INA230 IC Configuration Masks/Flags ------------- //
-#define INA230_MASK_ENABLE_SHUNT_OVER_ALERT_MASK (0b1 << 15)
-#define INA230_MASK_ENABLE_SHUNT_UNDER_ALERT_MASK (0b1 << 14)
-#define INA230_MASK_ENABLE_BUS_OVER_ALERT_MASK (0b1 << 13)
-#define INA230_MASK_ENABLE_BUS_UNDER_ALERT_MASK (0b1 << 12)
-#define INA230_MASK_ENABLE_POWER_OVER_ALERT_MASK (0b1 << 11)
-
-#define INA230_MASK_ENABLE_TRANSPARENT_MODE_SET_MASK 1U
-
-// macros for lsb, shunt resistor, and calibration value
-#define INA230_SHUNT_VOLTAGE_LSB 0.0000025f
-#define INA230_CURRENT_LSB 0.001f   // 1 mA, current least significant bit
-#define INA230_SHUNT_RESISTOR 0.1f  // 0.1 ohms, shunt resistor value
-#define INA230_CALIBRATION_VALUE (uint16_t)(0.00512 / (INA230_CURRENT_LSB * INA230_SHUNT_RESISTOR))
 
 // buffer sizes
 #define INA_REG_CONF_BUFF_SIZE 2
@@ -114,10 +82,10 @@ obc_error_code_t initINA230() {
                                            (device.configurationAvg << INA230_CONFIG_AVG_SHIFT) |
                                            (device.configurationBus << INA230_CONFIG_BUS_SHIFT);
 
-    uint8_t configRegisterUnpacked[] = {configurationRegister & 0xFF, configurationRegister >> 8};
-    uint8_t maskEnRegisterUnpacked[] = {device.maskEnableRegister & 0xFF, device.maskEnableRegister >> 8};
-    uint8_t alertRegisterUnpacked[] = {device.alertRegister & 0xFF, device.alertRegister >> 8};
-    uint8_t calibrationRegisterUnpacked[] = {device.calibrationRegister & 0xFF, device.calibrationRegister >> 8};
+    uint8_t configRegisterUnpacked[] = {configurationRegister >> 8, configurationRegister & 0xFF};
+    uint8_t maskEnRegisterUnpacked[] = {device.maskEnableRegister >> 8, device.maskEnableRegister & 0xFF};
+    uint8_t alertRegisterUnpacked[] = {device.alertRegister >> 8, device.alertRegister & 0xFF};
+    uint8_t calibrationRegisterUnpacked[] = {device.calibrationRegister >> 8, device.calibrationRegister & 0xFF};
 
     uint8_t deviceAddress = device.i2cDeviceAddress;
     RETURN_IF_ERROR_CODE(writeINA230Register(INA230_CONFIG_REGISTER_ADDR, configRegisterUnpacked,
@@ -147,7 +115,7 @@ obc_error_code_t initINA230() {
  * This function reads the complete input from the TCA6424 and checks for alerts
  * on the INA230 devices. If an alert is detected, it disables the corresponding device.
  *
- * @param device The INA230 device to check (currently unused in the function)
+ * @param device The INA230 device to check
  * @return OBC_ERR_CODE_SUCCESS if operation is successful,
  *         otherwise returns an appropriate error code
  */
@@ -155,16 +123,11 @@ inline obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
   uint32_t IOPortValue = 0;
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(readTCA642CompleteInput(&IOPortValue));  // reads 24 bit input of TCA GPIO Expander
-
-  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
-    uint8_t pinLocation =
-        ina230Devices[i].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
-    uint8_t index = ((pinLocation & 0x0F) +
-                     ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
-    if (IOPortValue & (0b1 << index)) {             // if it's high
-      uint8_t drivePort = INA230_DISABLE_LOAD;
-      RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
-    }
+  uint8_t pinLocation = ina230Devices[device].tcaAlertPort;
+  uint8_t index = ((pinLocation & 0x0F) + ((pinLocation >> 1) & 0x18));
+  if (IOPortValue & (0b1 << index)) {
+    uint8_t drivePort = INA230_DISABLE_LOAD;
+    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -183,8 +146,16 @@ inline obc_error_code_t readAndDisableIfAlert(ina230_device_t device) {
 
 static obc_error_code_t writeINA230Register(uint8_t regAddress, uint8_t* data, uint8_t size, uint8_t i2cAddress) {
   if (data == NULL) return OBC_ERR_CODE_INVALID_ARG;
-  if (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO) return OBC_ERR_CODE_INVALID_ARG;
-
+  bool found = false;
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+      if(i2cAddress == ina230Devices[i].i2cDeviceAddress) {
+        found = true;
+        break;
+      }
+  }
+  if(!found) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
   obc_error_code_t errCode;
   RETURN_IF_ERROR_CODE(i2cWriteRegFuncPtr(i2cAddress, regAddress, data, size));
   return OBC_ERR_CODE_SUCCESS;
@@ -216,13 +187,32 @@ static obc_error_code_t initTca6424PinState() {
 // i2cAddress = ina230 device address
 // shuntVoltage = pointer to store shuntVoltage
 
+/**
+ * @brief Gets INA230 shunt voltage
+ *
+ * This function reads  the value from the shunt voltage register of a device at the specificed I2C address. It converts the raw value to a signed voltage value in volts.
+ *
+ * @param i2cAddress The I2C address of the INA230 device
+ * @param shuntVoltage Pointer to store the shunt voltage in volts
+ * @return OBC_ERR_CODE_SUCCESS if operation is successful,
+ *         otherwise returns an appropriate error code
+ */
 obc_error_code_t getINA230ShuntVoltage(uint8_t i2cAddress, float* shuntVoltage) {
   if (shuntVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
 
   uint8_t shuntVoltageRaw[INA_REG_CONF_BUFF_SIZE] = {0};  // store 2 bytes of shunt voltage
   obc_error_code_t errCode;
 
-  if (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO) return OBC_ERR_CODE_INVALID_ARG;
+  bool found = false;
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+      if(i2cAddress == ina230Devices[i].i2cDeviceAddress) {
+        found = true;
+        break;
+      }
+  }
+  if(!found) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
 
   // Read the 16-bit shunt voltage register
   errCode = i2cReadRegFuncPtr(i2cAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2,
@@ -299,8 +289,16 @@ obc_error_code_t disableNoAlert(ina230_device_t device) {
 // function to get bus voltage
 obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage) {
   if (busVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
-  if (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO) return OBC_ERR_CODE_INVALID_ARG;
-
+  bool found = false;
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+      if(i2cAddress == ina230Devices[i].i2cDeviceAddress) {
+        found = true;
+        break;
+      }
+  }
+  if(!found) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
   obc_error_code_t errCode;
   uint8_t busVoltageRaw[2] = {};
   RETURN_IF_ERROR_CODE(
@@ -310,6 +308,7 @@ obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage) {
 
   return OBC_ERR_CODE_SUCCESS;
 }
+
 
 obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVoltage) {
   if (busVoltage == NULL || deviceIndex >= INA230_DEVICE_COUNT) return OBC_ERR_CODE_INVALID_ARG;
@@ -325,7 +324,7 @@ obc_error_code_t getINA230Power(uint8_t i2cAddress, float* power) {
   RETURN_IF_ERROR_CODE(
       i2cReadRegFuncPtr(i2cAddress, INA230_POWER_REGISTER_ADDR, powerRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t powerValue = (powerRaw[0] << 8) | powerRaw[1];
-  *power = powerValue * (INA230_CURRENT_LSB * 25);
+  *power = powerValue * (INA230_CURRENT_LSB * INA230_POWER_LSB_MULTIPLIER);
   return OBC_ERR_CODE_SUCCESS;
 }
 
