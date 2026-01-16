@@ -69,7 +69,7 @@ Now, you can start the backend as by running `fastapi dev gs/backend/main.py` fr
 
 To migrate pre-determined datainto your local database, you can run `python3 gs/backend/migrate.py` from the top level directory.
 
-Alternatively, you can include `callsigns` or `commands` as command arguments to migrate those respective datasets individually.
+Alternatively, you can include `callsigns`, `commands`, or `telemetries` as command arguments to migrate those respective datasets individually.
 
 **[Back to top](#table-of-contents)**
 
