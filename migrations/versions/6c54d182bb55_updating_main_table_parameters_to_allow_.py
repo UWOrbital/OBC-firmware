@@ -22,9 +22,10 @@ def upgrade() -> None:
     Allow the data size of main commands to be 0
     """
     op.create_check_constraint(
-        "ck_main_commands_data_size_ge_0",
-        "main_commands",
+        "ck_main_commands_data_size_ge_0",  # OK
+        "commands",
         "data_size >= 0",
+        schema="main",
     )
 
 
@@ -34,6 +35,7 @@ def downgrade() -> None:
     """
     op.drop_constraint(
         "ck_main_commands_data_size_ge_0",
-        "main_commands",
+        "commands",
         type_="check",
+        schema="main",
     )
