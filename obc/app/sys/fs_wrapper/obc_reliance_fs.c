@@ -167,3 +167,12 @@ obc_error_code_t openFile(const char *filePath, uint32_t openMode, int32_t *file
 
   return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t deleteFile(const char *filePath) {
+  int32_t ret = red_unlink(filePath);
+  if (ret < 0) {
+    return OBC_ERR_CODE_FAILED_FILE_DELETE;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
+}
