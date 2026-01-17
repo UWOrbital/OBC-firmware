@@ -38,7 +38,7 @@ static ::testing::Environment* const ina230_env = ::testing::AddGlobalTestEnviro
 TEST(TestINA230, InitSuccess) { EXPECT_EQ(initINA230(), OBC_ERR_CODE_SUCCESS); }
 
 TEST(TestINA230, ReadAndDisableIfAlert) {
-  ina230_device_t device;
+  ina230_device_t device = INA230_DEVICE_ONE;
   EXPECT_EQ(readAndDisableIfAlert(device), OBC_ERR_CODE_SUCCESS);
 }
 

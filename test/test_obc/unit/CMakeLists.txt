@@ -8,6 +8,7 @@ set(TEST_DEPENDENCIES
     ${CMAKE_SOURCE_DIR}/interfaces/data_pack_unpack/data_unpack_utils.c
     ${CMAKE_SOURCE_DIR}/obc/app/sys/persistent/obc_persistent.c
     ${CMAKE_SOURCE_DIR}/obc/app/drivers/ina230/ina230.c
+    ${CMAKE_SOURCE_DIR}/obc/app/drivers/tca6424/tca6424.c
 )
 
 set(TEST_MOCKS
