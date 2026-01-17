@@ -183,14 +183,11 @@ static obc_error_code_t initTca6424PinState() {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// function to get shunt voltage
-// i2cAddress = ina230 device address
-// shuntVoltage = pointer to store shuntVoltage
-
 /**
  * @brief Gets INA230 shunt voltage
- *
- * This function reads  the value from the shunt voltage register of a device at the specificed I2C address. It converts the raw value to a signed voltage value in volts.
+ * 
+ * Reads the 16-bit shunt voltage register (MSB first) from the specified INA230 device.
+ * Converts the raw register value to a signed voltage in volts (LSB = 2.5μV).
  *
  * @param i2cAddress The I2C address of the INA230 device
  * @param shuntVoltage Pointer to store the shunt voltage in volts
@@ -240,20 +237,6 @@ obc_error_code_t getINA230ShuntVoltageForDevice(uint8_t deviceIndex, float* shun
   return getINA230ShuntVoltage(i2cAddress, shuntVoltage);
 }
 
-void main_usage() {
-  float shuntVoltage = 0;
-
-  // Call the function for INA230 device 1 (index 0)
-  obc_error_code_t errCode = getINA230ShuntVoltageForDevice(0, &shuntVoltage);
-  // print shunt volatge
-  printf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
-
-  if (errCode == OBC_ERR_CODE_SUCCESS) {
-    printf("Shunt Voltage for INA230 Device 1: %f V\n", shuntVoltage);
-  } else {
-    printf("Error reading shunt voltage for INA230 Device 1\n");
-  }
-}
 
 // general disable function for ina230 device
 
@@ -273,20 +256,17 @@ obc_error_code_t disableNoAlert(ina230_device_t device) {
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// Notes (delete later)
-// Bus voltage register:
-// Address: 0x02
-// Size: 16 bits (2 bytes)
-// Each bit on the register represents 1.25 mV
-
 /**
- * @brief Gets the bus voltage
+ * @brief Gets INA230 bus voltage
+ * 
+ * Reads the 16-bit bus voltage register (MSB first) from the specified INA230 device.
+ * Converts the raw register value to a signed voltage in volts (LSB = 1.25mV).
  *
  * @param i2cAddress The I2C address of the INA230 device
+ * @param busVoltage Pointer to store the bus voltage in volts
  * @return OBC_ERR_CODE_SUCCESS if write is successful,
  *         otherwise return an appropriate error code
  */
-// function to get bus voltage
 obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage) {
   if (busVoltage == NULL) return OBC_ERR_CODE_INVALID_ARG;
   bool found = false;
@@ -304,7 +284,7 @@ obc_error_code_t getINA230BusVoltage(uint8_t i2cAddress, float* busVoltage) {
   RETURN_IF_ERROR_CODE(
       i2cReadRegFuncPtr(i2cAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR, busVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t busVoltageValue = (busVoltageRaw[0] << 8) | busVoltageRaw[1];
-  *busVoltage = busVoltageValue * 0.00125f;
+  *busVoltage = busVoltageValue * INA230_BUS_VOLTAGE_LSB;
 
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -316,10 +296,32 @@ obc_error_code_t getINA230BusVoltageForDevice(uint8_t deviceIndex, float* busVol
   return getINA230BusVoltage(i2cAddress, busVoltage);
 }
 
+/**
+ * @brief Gets INA230 power
+ * 
+ * Reads the 16-bit power register (MSB first) from the specified INA230 device.
+ * Converts the raw register value to an unsigned power in watts (LSB = 25mW).
+ *
+ * @param i2cAddress The I2C address of the INA230 device
+ * @param busVoltage Pointer to store the power in watts
+ * @return OBC_ERR_CODE_SUCCESS if write is successful,
+ *         otherwise return an appropriate error code
+ */
 obc_error_code_t getINA230Power(uint8_t i2cAddress, float* power) {
   obc_error_code_t errCode;
-  if (power == NULL || (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO))
+  if (power == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
+  }
+  bool found = false;
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+      if(i2cAddress == ina230Devices[i].i2cDeviceAddress) {
+        found = true;
+        break;
+      }
+  }
+  if(!found) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
   uint8_t powerRaw[INA_REG_CONF_BUFF_SIZE] = {};
   RETURN_IF_ERROR_CODE(
       i2cReadRegFuncPtr(i2cAddress, INA230_POWER_REGISTER_ADDR, powerRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
@@ -334,11 +336,32 @@ obc_error_code_t getINA230PowerForDevice(uint8_t deviceIndex, float* power) {
   return getINA230Power(i2cAddress, power);
 }
 
-// function to get current
+/**
+ * @brief Gets INA230 current
+ * 
+ * Reads the 16-bit current register (MSB first) from the specified INA230 device.
+ * Converts the raw register value to a signed current in watts (LSB = 1mA).
+ *
+ * @param i2cAddress The I2C address of the INA230 device
+ * @param busVoltage Pointer to store the current in amperes
+ * @return OBC_ERR_CODE_SUCCESS if write is successful,
+ *         otherwise return an appropriate error code
+ */
 obc_error_code_t getINA230Current(uint8_t i2cAddress, float* current) {
   obc_error_code_t errCode;
-  if (current == NULL || (i2cAddress != INA230_I2C_ADDRESS_ONE && i2cAddress != INA230_I2C_ADDRESS_TWO))
+  if (current == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
+  }
+  bool found = false;
+  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+      if(i2cAddress == ina230Devices[i].i2cDeviceAddress) {
+        found = true;
+        break;
+      }
+  }
+  if(!found) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }    
   uint8_t currentRaw[INA_REG_CONF_BUFF_SIZE] = {};
   RETURN_IF_ERROR_CODE(
       i2cReadRegFuncPtr(i2cAddress, INA230_CURRENT_REGISTER_ADDR, currentRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
@@ -353,4 +376,3 @@ obc_error_code_t getINA230CurrentForDevice(uint8_t deviceIndex, float* current) 
   return getINA230Current(i2cAddress, current);
 }
 
-// allow loop through

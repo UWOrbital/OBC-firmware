@@ -43,6 +43,7 @@ typedef uint32_t TickType_t;
 
 // macros for LSB, shunt resistor, and calibration value
 #define INA230_SHUNT_VOLTAGE_LSB 0.0000025f
+#define INA230_BUS_VOLTAGE_LSB 0.00125f
 #define INA230_CURRENT_LSB 0.001f   // 1 mA, current least significant bit
 #define INA230_SHUNT_RESISTOR 0.1f  // 0.1 ohms, shunt resistor value
 #define INA230_CALIBRATION_VALUE (uint16_t)(0.00512 / (INA230_CURRENT_LSB * INA230_SHUNT_RESISTOR))
