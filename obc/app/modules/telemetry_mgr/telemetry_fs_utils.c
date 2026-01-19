@@ -148,3 +148,16 @@ obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t
 
   return OBC_ERR_CODE_SUCCESS;
 }
+
+obc_error_code_t deleteSelectedTelemetryFromFile(const char *filePath) {
+  // Assume file exists and valid
+  obc_error_code_t errCode;
+
+  if (filePath == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  RETURN_IF_ERROR_CODE(deleteFile(filePath));
+
+  return OBC_ERR_CODE_SUCCESS;
+}

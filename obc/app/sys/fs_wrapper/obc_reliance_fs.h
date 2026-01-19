@@ -76,3 +76,11 @@ obc_error_code_t getFileSize(int32_t fileId, size_t *fileSize);
  * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
  */
 obc_error_code_t openFile(const char *filePath, uint32_t openMode, int32_t *fileId);
+
+/**
+ * @brief Deletes a file
+ *
+ * @param filePath Path to the file
+ * @return obc_error_code_t OBC_ERR_CODE_SUCCESS if successful, otherwise error code
+ */
+obc_error_code_t deleteFile(const char *filePath);
