@@ -71,9 +71,7 @@ elseif(${CMAKE_BUILD_TYPE} MATCHES Examples)
     add_executable(${OUT_FILE_NAME} examples/test_app_rs/main.c)
   elseif(${EXAMPLE_TYPE} MATCHES CC1120_TEMP)
     add_executable(${OUT_FILE_NAME} examples/test_app_cc1120_temp/main.c)
-
-
-  # ADD MORE EXAMPLES ABOVE THIS COMMENT
+	# ADD MORE EXAMPLES ABOVE THIS COMMENT
 	else ()
 		message (FATAL_ERROR "Invalid example type: ${EXAMPLE_TYPE} ")
 	endif()
