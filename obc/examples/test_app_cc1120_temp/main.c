@@ -1,6 +1,7 @@
 #include "obc_logging.h"
 #include "obc_sci_io.h"
 #include "obc_spi_io.h"
+#include "obc_print.h"
 #include "cc1120.h"
 
 #include "FreeRTOS.h"
@@ -12,7 +13,6 @@
 #include <sci.h>
 #include <spi.h>
 #include <stdio.h>
-#include <string.h>
 
 static TaskHandle_t testTaskHandle = NULL;
 static StaticTask_t testTaskBuffer;
@@ -31,12 +31,11 @@ void initTestTask(void) {
 static void vTestTask(void* pvParameters) {
   float temperature;
   obc_error_code_t err;
-  char tempStr[32];
 
   // Initialize CC1120
   err = cc1120Init();
   if (err != OBC_ERR_CODE_SUCCESS) {
-    printTextSci(scilinREG, "cc1120Init failed\r\n", 20);
+    sciPrintf("cc1120Init failed\r\n");
     return;
   }
 
@@ -44,21 +43,20 @@ static void vTestTask(void* pvParameters) {
   while (1) {
     err = cc1120ReadTemp(&temperature);
     if (err == OBC_ERR_CODE_SUCCESS) {
-      snprintf(tempStr, sizeof(tempStr), "CC1120 temperature: %.2f C\r\n", temperature);
-      printTextSci(scilinREG, tempStr, strlen(tempStr));
+      sciPrintf("CC1120 temperature: %.2f C\r\n", temperature);
     } else {
-      printTextSci(scilinREG, "Failed to read temperature\r\n", 29);
+      sciPrintf("Failed to read temperature\r\n");
     }
     vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 
 int main(void) {
-  initSciMutex();
   gioInit();
   sciInit();
   spiInit();
   adcInit();
+  initSciPrint();
 
   // Initialize logger
   // initLogger();
