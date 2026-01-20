@@ -12,6 +12,7 @@
 #include <sci.h>
 #include <spi.h>
 #include <stdio.h>
+#include <string.h>
 
 static TaskHandle_t testTaskHandle = NULL;
 static StaticTask_t testTaskBuffer;
@@ -35,8 +36,7 @@ static void vTestTask(void* pvParameters) {
   // Initialize CC1120
   err = cc1120Init();
   if (err != OBC_ERR_CODE_SUCCESS) {
-    sciPrintText("cc1120Init failed");
-    sciPrintText(err);
+    printTextSci(scilinREG, "cc1120Init failed\r\n", 20);
     return;
   }
 
@@ -44,10 +44,10 @@ static void vTestTask(void* pvParameters) {
   while (1) {
     err = cc1120ReadTemp(&temperature);
     if (err == OBC_ERR_CODE_SUCCESS) {
-      snprintf(tempStr, sizeof(tempStr), "CC1120 temperature: %.2f C", temperature);
-      sciPrintText(tempStr);
+      snprintf(tempStr, sizeof(tempStr), "CC1120 temperature: %.2f C\r\n", temperature);
+      printTextSci(scilinREG, tempStr, strlen(tempStr));
     } else {
-      sciPrintText("Failed to read temperature");
+      printTextSci(scilinREG, "Failed to read temperature\r\n", 29);
     }
     vTaskDelay(pdMS_TO_TICKS(5000));
   }
