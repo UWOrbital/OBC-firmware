@@ -54,6 +54,7 @@ static void vTestTask(void* pvParameters) {
 }
 
 int main(void) {
+  initSciMutex();
   gioInit();
   sciInit();
   spiInit();
