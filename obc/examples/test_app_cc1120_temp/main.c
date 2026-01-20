@@ -57,6 +57,7 @@ int main(void) {
   gioInit();
   sciInit();
   spiInit();
+  adcInit();
 
   // Initialize logger
   // initLogger();
