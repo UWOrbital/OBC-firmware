@@ -497,43 +497,53 @@ obc_error_code_t cc1120ReadTemp(float *temperature) {
   RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SIDLE));
   vTaskDelay(pdMS_TO_TICKS(1));
 
-  // change to output analog voltage
+  // change GPIO1 to output analog voltage
   temp_val = 0x80U;
   RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG1, &temp_val, 1));
 
-  // internal signals now are output
+  // enable analog test output
   temp_val = 0x2AU;
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST, &temp_val, 1));
 
-  // changes mode to temperature mode
+  // set to temperature mode
   temp_val = 0x0CU;
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST_MODE, &temp_val, 1));
 
-  // set bias of transmitter to analog circuits
+  // set bias current for analog circuits
   temp_val = 0x07U;
   RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_GBIAS1, &temp_val, 1));
 
   // wait for analog signal to stabilize
   vTaskDelay(pdMS_TO_TICKS(2));
 
-
-  float temperature_cc1120 = 0.0f;
-
+  float voltage_sum = 0.0f;
   uint16_t adcReading = 0;
 
   for (int i = 0; i < 16; i++) {
     RETURN_IF_ERROR_CODE(adcGetSingleData(ADC_MODULE_1, ADC_CHANNEL_1, ADC_GROUP_1, &adcReading, pdMS_TO_TICKS(10)));
-    temperature_cc1120 += (adcReading * 3.0f) / 4095.0f; // <- assuming 3V
+    voltage_sum += (adcReading * 3.0f) / 4095.0f;  // TODO: verify 3.0V is your actual ADC reference
   }
 
-  temperature_cc1120 /= 16.0f;
+  float avg_voltage = voltage_sum / 16.0f;
   
-  // temp = 25.0C + (pin_voltage - V_at_25C) / temperature_coefficient <- assuming 3V
-  *temperature = 25.0f + (temperature_cc1120 - 0.79478f) / 0.0026733f;
+  // T = 25 + (V_measured - V_at_25C) / temp_coefficient
+  // Values from SWRA415D Table 2 for VDD = 3.0V
+  *temperature = 25.0f + (avg_voltage - 0.79478f) / 0.0026733f;
 
-  // restore MISO mode
+  // restore GPIO1 to HighZ (matches your cc1120SettingsStd init value)
   temp_val = 0x30U;
   RETURN_IF_ERROR_CODE(cc1120WriteSpi(CC1120_REGS_IOCFG1, &temp_val, 1));
+
+  // restore ATEST registers to defaults (0x00)
+  temp_val = 0x00U;
+  RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST, &temp_val, 1));
+  RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_ATEST_MODE, &temp_val, 1));
+  
+  // restore GBIAS1 to default (0x00)
+  RETURN_IF_ERROR_CODE(cc1120WriteExtAddrSpi(CC1120_REGS_EXT_GBIAS1, &temp_val, 1));
+
+  // return to FSTXON state (matches end of cc1120Init)
+  RETURN_IF_ERROR_CODE(cc1120StrobeSpi(CC1120_STROBE_SFSTXON));
 
   return OBC_ERR_CODE_SUCCESS;
 }
