@@ -18,6 +18,9 @@
 #include <redposix.h>
 #include <string.h>
 
+static StaticTask_t taskBuffer;
+static StackType_t taskStack[1024];
+
 void vTask1(void *pvParameter) {
   obc_error_code_t errCode;
 
@@ -43,4 +46,19 @@ void vTask1(void *pvParameter) {
   RETURN_IF_ERROR_CODE(writeTelemetryToFile((int32_t)telemFileId, telemData));
 }
 
-int main(void) {}
+int main(void) {
+  sciInit();
+  spiInit();
+
+  initSciPrint();
+  initSpiMutex();
+
+  sciPrintf("Starting Reliance Edge Demo\r\n");
+
+  xTaskCreateStatic(vTask1, "Delete Test", 1024, NULL, 1, taskStack, &taskBuffer);
+
+  vTaskStartScheduler();
+
+  while (1)
+    ;
+}
