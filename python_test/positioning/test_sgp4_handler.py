@@ -39,14 +39,6 @@ def test_get_sat_position(): #test that output has expected structure and data t
 
     )
     tle = parse_tle_data(tle_str)
-
-    """
-    sat = setup_sgp4(tle)
-    stdout.writelines(dump_satrec(sat))
-    assert 0.0 <= tle.eccentricity < 1.0, "parsed eccentricity out of range!" #attempt to test via direct check rather than built in error handling
-    """
-
-
     dt = datetime(2025, 11, 12, 12, 0, 0)
     data = get_sat_position(tle, dt)
     assert isinstance(data, SGP4Data) 
