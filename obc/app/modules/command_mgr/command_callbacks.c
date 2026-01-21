@@ -116,6 +116,100 @@ static obc_error_code_t I2CProbeCmdCallback(cmd_msg_t *cmd, uint8_t *responseDat
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t armCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+  if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+  // Parsing the cmdArm data into bytes (Little Endian)
+  uint8_t b0 = cmd->cmdArm.cmdArmData <<= 24;
+  b0 >>= 24;
+
+  uint8_t b1 = cmd->cmdArm.cmdArmData <<= 16;
+  b1 >>= 24;
+
+  uint8_t b2 = cmd->cmdArm.cmdArmData <<= 8;
+  b2 >>= 24;
+
+  uint8_t b3 = cmd->cmdArm.cmdArmData;
+  b3 >>= 24;
+
+  // Set the first four bytes to the command data
+  responseData[0] = b0;
+  responseData[1] = b1;
+  responseData[2] = b2;
+  responseData[3] = b3;
+
+  // Parse the armId data into bytes (Little Endian)
+  b0 = cmd->cmdArm.armIdData <<= 24;
+  b0 >>= 24;
+
+  b1 = cmd->cmdArm.armIdData <<= 16;
+  b1 >>= 24;
+
+  b2 = cmd->cmdArm.armIdData <<= 8;
+  b2 >>= 24;
+
+  b3 = cmd->cmdArm.armIdData;
+  b3 >>= 24;
+
+  // Parsing the armId data into bytes
+  responseData[4] = b0;
+  responseData[5] = b1;
+  responseData[6] = b2;
+  responseData[7] = b3;
+
+  *responseDataLen = 8;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t executeCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+  if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // Parsing the cmdExecute data into bytes (Little Endian)
+  uint8_t b0 = cmd->cmdExecute.cmdExecuteData <<= 24;
+  b0 >>= 24;
+
+  uint8_t b1 = cmd->cmdExecute.cmdExecuteData <<= 16;
+  b1 >>= 24;
+
+  uint8_t b2 = cmd->cmdExecute.cmdExecuteData <<= 8;
+  b2 >>= 24;
+
+  uint8_t b3 = cmd->cmdExecute.cmdExecuteData;
+  b3 >>= 24;
+
+  // First four bytes are the cmdExecute data
+  responseData[0] = b0;
+  responseData[1] = b1;
+  responseData[2] = b2;
+  responseData[3] = b3;
+
+  b0 = cmd->cmdExecute.execIdData <<= 24;
+  b0 >>= 24;
+
+  b1 = cmd->cmdExecute.execIdData <<= 16;
+  b1 >>= 24;
+
+  b2 = cmd->cmdExecute.execIdData <<= 8;
+  b2 >>= 24;
+
+  b3 = cmd->cmdExecute.execIdData;
+  b3 >>= 24;
+
+  // Last four bytes are the execId data
+  responseData[4] = b0;
+  responseData[5] = b1;
+  responseData[6] = b2;
+  responseData[7] = b3;
+
+  *responseDataLen = 8;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 const cmd_info_t cmdsConfig[] = {
     [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     // TODO: Change this to critial once critical commands are implemented
@@ -126,6 +220,8 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_I2C_PROBE] = {I2CProbeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_ARM] = {armCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_EXECUTE] = {executeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
 };
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the

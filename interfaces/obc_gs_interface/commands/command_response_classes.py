@@ -100,6 +100,44 @@ class CmdI2CProbeRes(CmdRes):
         return formatted_string
 
 
+@dataclass
+class CmdArmRes(CmdRes):
+    """
+    Class for storing the response to CMD_ARM
+    """
+
+    cmd_arm: int
+    cmd_arm_id: int
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        formatted_string += "Cmd Arm: " + str(self.cmd_arm) + "\n"
+        formatted_string += "Cmd Arm Id:" + str(self.cmd_arm_id) + "\n"
+        return formatted_string
+
+
+@dataclass
+class CmdExecuteRes(CmdRes):
+    """
+    Class for storing the response to CMD_EXECUTE
+    """
+
+    cmd_execute: int
+    cmd_exec_id: int
+
+    def __str__(self) -> str:
+        """
+        Overriding the str method for a better representation of what's happening
+        """
+        formatted_string = super().__str__()
+        formatted_string += "Cmd Execute: " + str(self.cmd_execute) + "\n"
+        formatted_string += "Cmd Execute Id:" + str(self.cmd_exec_id) + "\n"
+        return formatted_string
+
+
 if __name__ == "__main__":
     cmd = CmdVerifyCrcRes(CmdCallbackId.CMD_VERIFY_CRC, CmdResponseErrorCode.CMD_RESPONSE_ERROR, 4, 0x12345678)
     print(cmd)

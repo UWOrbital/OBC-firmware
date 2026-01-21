@@ -3,6 +3,8 @@ from collections.abc import Callable
 
 from interfaces.obc_gs_interface.commands import CmdCallbackId, unpack_command_response
 from interfaces.obc_gs_interface.commands.command_response_classes import (
+    CmdArmRes,
+    CmdExecuteRes,
     CmdI2CProbeRes,
     CmdRes,
     CmdRtcSyncRes,
@@ -73,12 +75,58 @@ def parse_cmd_i2c_probe(cmd_response: CmdRes, data: bytes) -> CmdI2CProbeRes:
     return CmdI2CProbeRes(cmd_response.cmd_id, cmd_response.error_code, cmd_response.response_length, valid_addresses)
 
 
+def parse_cmd_arm(cmd_response: CmdRes, data: bytes) -> CmdArmRes:
+    """
+    A function to parse the raw data from the response of CMD_ARM
+    :param cmd_response: Basic command response
+    :param data: The raw bytes containing the data that needs to be parsed
+    :return: CmdArmRes (i.e. A command response with no data for CMD_ARM)
+    """
+    if cmd_response.cmd_id != CmdCallbackId.CMD_ARM:
+        raise ValueError("Wrong command id for parsing the name command")
+
+    cmd_arm_data = int.from_bytes(data[:4], "little")
+    cmd_arm_id_data = int.from_bytes(data[4:9], "little")
+
+    return CmdArmRes(
+        cmd_response.cmd_id,
+        cmd_response.error_code,
+        cmd_response.response_length,
+        cmd_arm_data,
+        cmd_arm_id_data,
+    )
+
+
+def parse_cmd_execute(cmd_response: CmdRes, data: bytes) -> CmdExecuteRes:
+    """
+    A function to parse the raw data from the response of CMD_EXECUTE
+    :param cmd_response: Basic command response
+    :param data: The raw bytes containing the data that needs to be parsed
+    :return: CmdExecuteRes (i.e. A command response with no data for CMD_EXECUTE)
+    """
+    if cmd_response.cmd_id != CmdCallbackId.CMD_EXECUTE:
+        raise ValueError("Wrong command id for parsing the name command")
+
+    cmd_execute_data = int.from_bytes(data[:4], "little")
+    cmd_exec_id_data = int.from_bytes(data[4:9], "little")
+
+    return CmdExecuteRes(
+        cmd_response.cmd_id,
+        cmd_response.error_code,
+        cmd_response.response_length,
+        cmd_execute_data,
+        cmd_exec_id_data,
+    )
+
+
 # Function array where each index corresponds to the command enum value + 1
 
 parse_func_dict: dict[CmdCallbackId, Callable[..., CmdRes]] = defaultdict(lambda: parse_cmd_with_no_data)
 parse_func_dict[CmdCallbackId.CMD_VERIFY_CRC] = parse_cmd_verify_crc
 parse_func_dict[CmdCallbackId.CMD_RTC_SYNC] = parse_cmd_rtc_sync
 parse_func_dict[CmdCallbackId.CMD_I2C_PROBE] = parse_cmd_i2c_probe
+parse_func_dict[CmdCallbackId.CMD_ARM] = parse_cmd_arm
+parse_func_dict[CmdCallbackId.CMD_EXECUTE] = parse_cmd_execute
 
 
 def parse_command_response(data: bytes) -> CmdRes:
