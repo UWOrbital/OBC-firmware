@@ -9,16 +9,17 @@ from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.tables.transactional_tables import ARORequest
 
 
-def get_all_requests() -> list[ARORequest]:
+async def get_all_requests() -> list[ARORequest]:
     """
     Get all the requests from aro
     """
-    with get_db_session() as session:
-        requests = list(session.exec(select(ARORequest)).all())
+    async with get_db_session() as session:
+        result = await session.exec(select(ARORequest))
+        requests = list(result.all())
         return requests
 
 
-def add_request(
+async def add_request(
     aro_id: UUID,
     long: Decimal,
     lat: Decimal,
@@ -38,7 +39,7 @@ def add_request(
     :param taken_date: datetime object representing the date that this picture was trasmitted
     :param status: the status of the request, can only be from the requets in ARORequestStatus
     """
-    with get_db_session() as session:
+    async with get_db_session() as session:
         request = ARORequest(
             aro_id=aro_id,
             latitude=lat,
@@ -51,23 +52,23 @@ def add_request(
         )
 
         session.add(request)
-        session.commit()
-        session.refresh(request)
+        await session.commit()
+        await session.refresh(request)
         return request
 
 
-def delete_request_by_id(request_id: str) -> list[ARORequest]:
+async def delete_request_by_id(request_id: str) -> list[ARORequest]:
     """
     Delete a request based on id
 
     :param request_id: unique identifier of the request
     """
-    with get_db_session() as session:
-        request = session.get(ARORequest, request_id)
+    async with get_db_session() as session:
+        request = await session.get(ARORequest, request_id)
         if request:
             session.delete(request)
-            session.commit()
+            await session.commit()
         else:
             raise ValueError("Request not found, ID does not exist")
 
-        return get_all_requests()
+        return await get_all_requests()

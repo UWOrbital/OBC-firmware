@@ -8,16 +8,17 @@ from gs.backend.data.enums.aro_auth_token import AROAuthToken as AROEnums
 from gs.backend.data.tables.aro_user_tables import AROUserAuthToken
 
 
-def get_all_auth_tokens() -> list[AROUserAuthToken]:
+async def get_all_auth_tokens() -> list[AROUserAuthToken]:
     """
     Get all the auth tokens
     """
-    with get_db_session() as session:
-        auth_tokens = list(session.exec(select(AROUserAuthToken)).all())
+    async with get_db_session() as session:
+        result = await session.exec(select(AROUserAuthToken))
+        auth_tokens = list(result.all())
         return auth_tokens
 
 
-def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: AROEnums) -> AROUserAuthToken:
+async def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: AROEnums) -> AROUserAuthToken:
     """
     Add auth token to the db
 
@@ -26,29 +27,29 @@ def add_auth_token(token: str, user_data_id: UUID, expiry: datetime, auth_type: 
     :param expiry: the date in which this token expires
     :param auth_type: the type of auth token this is, can only be from AROAuthToken
     """
-    with get_db_session() as session:
+    async with get_db_session() as session:
         auth_token = AROUserAuthToken(token=token, user_data_id=user_data_id, expiry=expiry, auth_type=auth_type)
 
         session.add(auth_token)
-        session.commit()
-        session.refresh(auth_token)
+        await session.commit()
+        await session.refresh(auth_token)
         return auth_token
 
 
-def delete_auth_token_by_id(token_id: UUID) -> list[AROUserAuthToken]:
+async def delete_auth_token_by_id(token_id: UUID) -> list[AROUserAuthToken]:
     """
     Delete the auth token based on the token id
 
     :param token_id: the unique identifier for a particular auth token
     """
 
-    with get_db_session() as session:
-        auth_token = session.get(AROUserAuthToken, token_id)
+    async with get_db_session() as session:
+        auth_token = await session.get(AROUserAuthToken, token_id)
 
         if auth_token:
             session.delete(auth_token)
-            session.commit()
+            await session.commit()
         else:
             print("Token does not exist")
 
-        return get_all_auth_tokens()
+        return await get_all_auth_tokens()

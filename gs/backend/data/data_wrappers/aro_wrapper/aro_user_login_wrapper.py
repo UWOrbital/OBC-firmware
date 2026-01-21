@@ -6,16 +6,19 @@ from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.aro_user_tables import AROUserLogin
 
 
-def get_all_logins() -> list[AROUserLogin]:
+async def get_all_logins() -> list[AROUserLogin]:
     """
     Gets all the logins
     """
-    with get_db_session() as session:
-        user_logins = list(session.exec(select(AROUserLogin)).all())
+    async with get_db_session() as session:
+        result = await session.exec(select(AROUserLogin))
+        user_logins = list(result.all())
         return user_logins
 
 
-def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_verification_token: str) -> AROUserLogin:
+async def add_login(
+    email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_verification_token: str
+) -> AROUserLogin:
     """
     Add a new user login
 
@@ -25,9 +28,10 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_ve
     :user_data_id: the unique identifier which binds this login to the user which created it
     :email_verification_token: email verification token
     """
-    with get_db_session() as session:
+    async with get_db_session() as session:
         # check if the user exists already
-        existing_login = session.exec(select(AROUserLogin).where(AROUserLogin.email == email)).first()
+        result = await session.exec(select(AROUserLogin).where(AROUserLogin.email == email))
+        existing_login = result.first()
 
         if existing_login:
             raise ValueError("User login already exists based on email")
@@ -41,23 +45,23 @@ def add_login(email: str, pwd: str, hash_algo: str, user_data_id: UUID, email_ve
         )
 
         session.add(user_login)
-        session.commit()
-        session.refresh(user_login)
+        await session.commit()
+        await session.refresh(user_login)
         return user_login
 
 
-def delete_login_by_id(loginid: UUID) -> list[AROUserLogin]:
+async def delete_login_by_id(loginid: UUID) -> list[AROUserLogin]:
     """
     Use the .id to delete a user from table
 
     :param loginid: unique identifier of the target login
     """
-    with get_db_session() as session:
-        user_login = session.get(AROUserLogin, loginid)
+    async with get_db_session() as session:
+        user_login = await session.get(AROUserLogin, loginid)
         if user_login:
             session.delete(user_login)
-            session.commit()
+            await session.commit()
         else:
             raise ValueError("Login ID does not exist")
 
-        return get_all_logins()
+        return await get_all_logins()

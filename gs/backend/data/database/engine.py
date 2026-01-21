@@ -1,3 +1,6 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
@@ -16,7 +19,8 @@ def get_db_engine() -> AsyncEngine:
     return create_async_engine(DATABASE_CONNECTION_STRING)
 
 
-async def get_db_session() -> AsyncSession:
+@asynccontextmanager
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     Creates the database session.
 

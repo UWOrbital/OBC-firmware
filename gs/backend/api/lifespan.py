@@ -16,5 +16,6 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
 
     # Must all the get_db_session each time when pass it into a separate function.
     # Otherwise, will get transaction is inactive error
-    setup_database(get_db_session())
+    async with get_db_session() as session:
+        await setup_database(session)
     yield

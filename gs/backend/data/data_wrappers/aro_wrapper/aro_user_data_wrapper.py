@@ -7,18 +7,19 @@ from gs.backend.data.tables.aro_user_tables import AROUsers
 
 
 # selects all objects of type AROUser from db and returns them in list
-def get_all_users() -> list[AROUsers]:
+async def get_all_users() -> list[AROUsers]:
     """
     Gets all user
     """
-    with get_db_session() as session:
-        users = list(session.exec(select(AROUsers)).all())
+    async with get_db_session() as session:
+        result = await session.exec(select(AROUsers))
+        users = list(result.all())
         return users
 
 
 # adds user to database of type AROUser then fetches the user from database
 # so that the user now has an assigned ID
-def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number: str) -> AROUsers:
+async def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number: str) -> AROUsers:
     """
     Add a new user to the AROUser table in database
 
@@ -28,9 +29,10 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
     :param l_name: last name of user
     :param phone_numer: phone number of user
     """
-    with get_db_session() as session:
+    async with get_db_session() as session:
         # check if the user already exists with email as it is unique
-        existing_user = session.exec(select(AROUsers).where(AROUsers.email == email)).first()
+        result = await session.exec(select(AROUsers).where(AROUsers.email == email))
+        existing_user = result.first()
 
         if existing_user:
             raise ValueError("User already exsits based on email")
@@ -40,13 +42,13 @@ def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_number:
         )
 
         session.add(user)
-        session.commit()
-        session.refresh(user)
+        await session.commit()
+        await session.refresh(user)
         return user
 
 
 # updates user into database of type AROUser then fetches the user from database
-def update_user_by_id(
+async def update_user_by_id(
     userid: UUID, call_sign: str, email: str, f_name: str, l_name: str, phone_number: str
 ) -> AROUsers:
     """
@@ -59,9 +61,10 @@ def update_user_by_id(
     :param l_name: last name of user
     :param phone_numer: phone number of user
     """
-    with get_db_session() as session:
+    async with get_db_session() as session:
         # check if the user already exists with email as it is unique
-        user = session.exec(select(AROUsers).where(AROUsers.id == userid)).first()
+        result = await session.exec(select(AROUsers).where(AROUsers.id == userid))
+        user = result.first()
 
         if not user:
             raise ValueError("User does not exist based on user ID")
@@ -73,25 +76,25 @@ def update_user_by_id(
         user.phone_number = phone_number
 
         session.add(user)
-        session.commit()
-        session.refresh(user)
+        await session.commit()
+        await session.refresh(user)
         return user
 
 
 # deletes the user with given id and returns the remaining users
-def delete_user_by_id(userid: UUID) -> list[AROUsers]:
+async def delete_user_by_id(userid: UUID) -> list[AROUsers]:
     """
     Use the user.id to delete a user from table
 
     :param userid: identifier unique to the user
     """
-    with get_db_session() as session:
-        user = session.get(AROUsers, userid)
+    async with get_db_session() as session:
+        user = await session.get(AROUsers, userid)
 
         if user:
             session.delete(user)
-            session.commit()
+            await session.commit()
         else:
             raise ValueError("User ID does not exist")
 
-        return get_all_users()
+        return await get_all_users()

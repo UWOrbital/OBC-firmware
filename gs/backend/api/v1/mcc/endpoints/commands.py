@@ -20,7 +20,7 @@ async def create_command(payload: dict[str, Any]) -> Commands:
     :param payload: The data used to create a command
     :return: returns the created command object
     """
-    return create_commands(payload)
+    return await create_commands(payload)
 
 
 @commands_router.delete("/delete/{command_id}")
@@ -31,5 +31,5 @@ async def delete_command(command_id: UUID) -> dict[str, Any]:
     :param command_id: The id which is to be deleted.
     :return: returns a dict giving confirmation that command with id of command_id has been deleted.
     """
-    delete_commands_by_id(command_id)
+    await delete_commands_by_id(command_id)
     return {"message": f"Command with id {command_id} deleted successfully"}
