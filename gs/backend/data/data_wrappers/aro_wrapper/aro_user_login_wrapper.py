@@ -11,8 +11,8 @@ async def get_all_logins() -> list[AROUserLogin]:
     Gets all the logins
     """
     async with get_db_session() as session:
-        result = await session.exec(select(AROUserLogin))
-        user_logins = list(result.all())
+        result = await session.execute(select(AROUserLogin))
+        user_logins = list(result.scalars().all())
         return user_logins
 
 
@@ -30,8 +30,8 @@ async def add_login(
     """
     async with get_db_session() as session:
         # check if the user exists already
-        result = await session.exec(select(AROUserLogin).where(AROUserLogin.email == email))
-        existing_login = result.first()
+        result = await session.execute(select(AROUserLogin).where(AROUserLogin.email == email))
+        existing_login = result.scalars().first()
 
         if existing_login:
             raise ValueError("User login already exists based on email")

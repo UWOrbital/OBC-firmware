@@ -12,8 +12,8 @@ async def get_all_users() -> list[AROUsers]:
     Gets all user
     """
     async with get_db_session() as session:
-        result = await session.exec(select(AROUsers))
-        users = list(result.all())
+        result = await session.execute(select(AROUsers))
+        users = list(result.scalars().all())
         return users
 
 
@@ -31,8 +31,8 @@ async def add_user(call_sign: str, email: str, f_name: str, l_name: str, phone_n
     """
     async with get_db_session() as session:
         # check if the user already exists with email as it is unique
-        result = await session.exec(select(AROUsers).where(AROUsers.email == email))
-        existing_user = result.first()
+        result = await session.execute(select(AROUsers).where(AROUsers.email == email))
+        existing_user = result.scalars().first()
 
         if existing_user:
             raise ValueError("User already exsits based on email")
@@ -63,8 +63,8 @@ async def update_user_by_id(
     """
     async with get_db_session() as session:
         # check if the user already exists with email as it is unique
-        result = await session.exec(select(AROUsers).where(AROUsers.id == userid))
-        user = result.first()
+        result = await session.execute(select(AROUsers).where(AROUsers.id == userid))
+        user = result.scalars().first()
 
         if not user:
             raise ValueError("User does not exist based on user ID")

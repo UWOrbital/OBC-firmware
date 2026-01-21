@@ -14,8 +14,8 @@ async def get_all_requests() -> list[ARORequest]:
     Get all the requests from aro
     """
     async with get_db_session() as session:
-        result = await session.exec(select(ARORequest))
-        requests = list(result.all())
+        result = await session.execute(select(ARORequest))
+        requests = list(result.scalars().all())
         return requests
 
 

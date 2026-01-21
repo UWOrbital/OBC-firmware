@@ -13,8 +13,8 @@ async def get_all_auth_tokens() -> list[AROUserAuthToken]:
     Get all the auth tokens
     """
     async with get_db_session() as session:
-        result = await session.exec(select(AROUserAuthToken))
-        auth_tokens = list(result.all())
+        result = await session.execute(select(AROUserAuthToken))
+        auth_tokens = list(result.scalars().all())
         return auth_tokens
 
 

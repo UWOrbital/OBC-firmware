@@ -11,9 +11,11 @@ def client():
 # Test data for user 1
 @pytest.fixture
 def user1_data():
+    from uuid import uuid4
+
     return {
         "call_sign": "ABCDEF",
-        "email": "bob@test.com",
+        "email": f"bob-{uuid4().hex[:8]}@test.com",
         "first_name": "Bob",
         "last_name": "Smith",
         "phone_number": "123456789",
@@ -23,9 +25,11 @@ def user1_data():
 # Test data for user 2
 @pytest.fixture
 def user2_data():
+    from uuid import uuid4
+
     return {
         "call_sign": "KEVWAN",
-        "email": "kevian@gmail.com",
+        "email": f"kevian-{uuid4().hex[:8]}@gmail.com",
         "first_name": "kevin",
         "last_name": "wan",
         "phone_number": "8888888888",
@@ -89,7 +93,11 @@ def test_get_all_users(client, test_user1_creation, test_user2_creation):
     res = client.get("/api/v1/aro/user/get_all_users")
     assert res.status_code == 200
     all_users = res.json()["data"]
-    assert len(all_users) == 2
+
+    # Check that at least our 2 users exist (there may be others from other tests)
+    user_ids = {user["id"] for user in all_users}
+    assert test_user1_creation["id"] in user_ids
+    assert test_user2_creation["id"] in user_ids
 
     # Check user1
     user1_id = test_user1_creation["id"]

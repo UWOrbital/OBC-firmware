@@ -14,8 +14,8 @@ async def get_all_comms_sessions() -> list[CommsSession]:
     :return: a list of all sessions
     """
     async with get_db_session() as session:
-        result = await session.exec(select(CommsSession))
-        sessions = list(result.all())
+        result = await session.execute(select(CommsSession))
+        sessions = list(result.scalars().all())
         return sessions
 
 

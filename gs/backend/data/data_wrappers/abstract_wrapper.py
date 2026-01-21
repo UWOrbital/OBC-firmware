@@ -25,8 +25,8 @@ class AbstractWrapper(ABC, Generic[T, PK]):
         :return: a list of all model instances
         """
         async with get_db_session() as session:
-            result = await session.exec(select(self.model))
-            return list(result.all())
+            result = await session.execute(select(self.model))
+            return list(result.scalars().all())
 
     async def get_by_id(self, obj_id: PK) -> T:
         """
@@ -66,6 +66,8 @@ class AbstractWrapper(ABC, Generic[T, PK]):
             obj = await session.get(self.model, obj_id)
             if not obj:
                 raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            # Preserve object state before deleting
+            obj_copy = self.model(**{c.name: getattr(obj, c.name) for c in obj.__table__.columns})
             session.delete(obj)
             await session.commit()
-            return obj
+            return obj_copy

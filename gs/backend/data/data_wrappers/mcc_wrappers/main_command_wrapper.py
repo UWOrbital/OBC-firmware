@@ -13,8 +13,8 @@ async def get_all_main_commands() -> list[MainCommand]:
     :return: a list of all main_commands
     """
     async with get_db_session() as session:
-        result = await session.exec(select(MainCommand))
-        commands = list(result.all())
+        result = await session.execute(select(MainCommand))
+        commands = list(result.scalars().all())
         return commands
 
 

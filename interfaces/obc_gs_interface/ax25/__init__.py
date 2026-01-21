@@ -124,9 +124,12 @@ class AX25:
         # There is a small chance that the last fcs byte is 0 so we check if the data size is bigger than it's supposed
         # to be
         # We also check if the frame is a U frame in which case it has to be less than RS_ENCODED_DATA_SIZE
-        if (data[-1] == 0 and len(data) > RS_ENCODED_DATA_SIZE + AX25_NON_INFO_BYTES) or (
-            data[-1] == 0 and len(data) < RS_ENCODED_DATA_SIZE
-        ):
+        # Only remove the byte if we're certain it's padding (exactly 1 byte more than expected for I frames)
+        if data[-1] == 0 and len(data) == RS_ENCODED_DATA_SIZE + AX25_NON_INFO_BYTES + 1:
+            # I frame with exactly 1 byte of padding from bit-to-byte conversion
+            data = data[:-1]
+        elif data[-1] == 0 and len(data) < RS_ENCODED_DATA_SIZE:
+            # U frame - maintain existing behavior for backward compatibility
             data = data[:-1]
 
         data_bytes = bytearray(data)

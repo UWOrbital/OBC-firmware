@@ -13,8 +13,8 @@ async def get_all_main_telemetries() -> list[MainTelemetry]:
     :return: a list of all main_telemetries
     """
     async with get_db_session() as session:
-        result = await session.exec(select(MainTelemetry))
-        telemetries = list(result.all())
+        result = await session.execute(select(MainTelemetry))
+        telemetries = list(result.scalars().all())
         return telemetries
 
 

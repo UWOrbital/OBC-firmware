@@ -14,8 +14,8 @@ async def get_all_packet_commands() -> list[PacketCommands]:
     :return: a list of all packet_commands
     """
     async with get_db_session() as session:
-        result = await session.exec(select(PacketCommands))
-        commands = list(result.all())
+        result = await session.execute(select(PacketCommands))
+        commands = list(result.scalars().all())
         return commands
 
 

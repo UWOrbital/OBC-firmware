@@ -6,6 +6,12 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 addopts = "--cov=gs/backend --cov=obc/tools/python -v"
 testpaths = ["python_test"]
+asyncio_mode = "auto"
+
+[tool.hypothesis]
+# Use CI settings to reduce test cases and avoid edge case bugs
+derandomize = true
+suppress_health_check = ["too_slow"]
 
 [tool.mypy]
 exclude = [

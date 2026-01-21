@@ -14,8 +14,8 @@ async def get_all_commands() -> list[Commands]:
     :return: a list of all commands
     """
     async with get_db_session() as session:
-        result = await session.exec(select(Commands))
-        commands = list(result.all())
+        result = await session.execute(select(Commands))
+        commands = list(result.scalars().all())
         return commands
 
 

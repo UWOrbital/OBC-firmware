@@ -14,8 +14,8 @@ async def get_all_packet_telemetries() -> list[PacketTelemetry]:
     :return: a list of all packet_telemetries
     """
     async with get_db_session() as session:
-        result = await session.exec(select(PacketTelemetry))
-        telemetries = list(result.all())
+        result = await session.execute(select(PacketTelemetry))
+        telemetries = list(result.scalars().all())
         return telemetries
 
 
