@@ -7,43 +7,44 @@ from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.transactional_tables import PacketTelemetry
 
 
-def get_all_packet_telemetries() -> list[PacketTelemetry]:
+async def get_all_packet_telemetries() -> list[PacketTelemetry]:
     """
     Get all data wrapper for PacketTelemetry
 
     :return: a list of all packet_telemetries
     """
-    with get_db_session() as session:
-        telemetries = list(session.exec(select(PacketTelemetry)).all())
+    async with get_db_session() as session:
+        result = await session.execute(select(PacketTelemetry))
+        telemetries = list(result.scalars().all())
         return telemetries
 
 
-def create_packet_telemetry(telemetry_data: dict[str, Any]) -> PacketTelemetry:
+async def create_packet_telemetry(telemetry_data: dict[str, Any]) -> PacketTelemetry:
     """
     Post data wrapper for PacketTelemetry
 
     :param command_data: the JSON object of the packet_telemetry to be created
     :return: the newly created packet_telemetry
     """
-    with get_db_session() as session:
+    async with get_db_session() as session:
         telemetry = PacketTelemetry(**telemetry_data)
         session.add(telemetry)
-        session.commit()
-        session.refresh(telemetry)
+        await session.commit()
+        await session.refresh(telemetry)
         return telemetry
 
 
-def delete_packet_telemetry_by_id(telemetry_id: UUID) -> PacketTelemetry:
+async def delete_packet_telemetry_by_id(telemetry_id: UUID) -> PacketTelemetry:
     """
     Delete data wrapper for PacketTelemetry
 
     :param command_id: UUID of packet_telemetry to be deleted
     :return: the deleted packet_telemetry
     """
-    with get_db_session() as session:
-        telemetry = session.get(PacketTelemetry, telemetry_id)
+    async with get_db_session() as session:
+        telemetry = await session.get(PacketTelemetry, telemetry_id)
         if not telemetry:
             raise ValueError("Packet telemetry not found.")
-        session.delete(telemetry)
-        session.commit()
+        session.delete(telemetry)  # type: ignore[unused-coroutine]
+        await session.commit()
         return telemetry

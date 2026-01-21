@@ -15,5 +15,5 @@ async def get_main_commands() -> MainCommandsResponse:
 
     :return: list of all commands
     """
-    items = get_all_main_commands()
+    items = await get_all_main_commands()
     return MainCommandsResponse(data=items)

@@ -101,17 +101,17 @@ class CommandsWrapper(AbstractWrapper[Commands, UUID]):
 
     model = Commands
 
-    def retrieve_floating_commands(self) -> list[Commands]:
+    async def retrieve_floating_commands(self) -> list[Commands]:
         """
         Retrieves all commands which do not have a valid entry in
         the packet_commands table.
         A command which is not valid is considered as any command whose ID
         does not match with any command_id in the packet_commands table
         """
-        packet_commands = PacketCommandsWrapper().get_all()
+        packet_commands = await PacketCommandsWrapper().get_all()
         packet_ids = {packet_command.command_id for packet_command in packet_commands}
 
-        commands = self.get_all()
+        commands = await self.get_all()
         floating_commands = [fc for fc in commands if fc.id not in packet_ids]
 
         return floating_commands

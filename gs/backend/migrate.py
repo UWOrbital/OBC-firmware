@@ -1,3 +1,4 @@
+import asyncio
 import sys
 
 from gs.backend.data.database.engine import get_db_session
@@ -13,26 +14,36 @@ as command arguments to migrate those respective datasets
 individually.
 """
 
-if __name__ == "__main__":
+
+async def main() -> None:
+    """Main async function to run migrations"""
     if len(sys.argv) > 2:
         raise ValueError(f"Invalid input. Expected at most 1 argument, received {len(sys.argv)}")
     elif len(sys.argv[1:]) == 0:
-        print("Migrating callsign data...")
-        add_callsigns(get_db_session())
-        print("Migrating main command data...")
-        add_main_commands(get_db_session())
-        print("Migrating telemetry data...")
-        add_telemetry(get_db_session())
+        async with get_db_session() as session:
+            print("Migrating callsign data...")
+            await add_callsigns(session)
+            print("Migrating main command data...")
+            await add_main_commands(session)
+            print("Migrating telemetry data...")
+            await add_telemetry(session)
     else:
         match sys.argv[1]:
             case "callsigns":
-                print("Migrating callsign data...")
-                add_callsigns(get_db_session())
+                async with get_db_session() as session:
+                    print("Migrating callsign data...")
+                    await add_callsigns(session)
             case "commands":
-                print("Migrating main command data...")
-                add_main_commands(get_db_session())
+                async with get_db_session() as session:
+                    print("Migrating main command data...")
+                    await add_main_commands(session)
             case "telemetries":
-                print("Migrating telemetry data...")
-                add_telemetry(get_db_session())
+                async with get_db_session() as session:
+                    print("Migrating telemetry data...")
+                    await add_telemetry(session)
             case _:
                 raise ValueError("Invalid input. Optional arguments include 'callsigns', 'commands', or 'telemetries'.")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

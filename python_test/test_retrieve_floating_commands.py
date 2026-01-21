@@ -11,25 +11,25 @@ from gs.backend.data.data_wrappers.wrappers import (
 from gs.backend.data.enums.transactional import MainPacketType
 
 
-def test_retrieve_floating_commands_filters():
+async def test_retrieve_floating_commands_filters(db_session):
+    from gs.backend.data.tables.main_tables import MainCommand
+
     pcw = PacketCommandsWrapper()
     cw = CommandsWrapper()
     mc = MainCommandWrapper()
     pw = PacketWrapper()
     csw = CommsSessionWrapper()
 
-    packet_id = uuid4()
-    cmd_type = mc.create(
-        dict(
-            id=1,
-            name="test",
-            data_size=1,
-            total_size=1,
-        )
-    ).id
+    # Create main command directly to avoid ID conflicts
+    main_cmd = MainCommand(id=101, name="test", data_size=1, total_size=1)
+    db_session.add(main_cmd)
+    db_session.flush()
+    cmd_type = main_cmd.id
 
-    comms_session = csw.create({"id": uuid4(), "start_time": datetime.now()})
-    packet = pw.create(
+    packet_id = uuid4()
+
+    comms_session = await csw.create({"id": uuid4(), "start_time": datetime.now()})
+    packet = await pw.create(
         dict(
             id=packet_id,
             session_id=comms_session.id,
@@ -40,32 +40,32 @@ def test_retrieve_floating_commands_filters():
         )
     )
 
-    cmd_in_packet = cw.create(dict(id=uuid4(), type_=cmd_type))
-    cmd_free = cw.create(dict(id=uuid4(), type_=cmd_type))
-    cmd_free2 = cw.create(dict(id=uuid4(), type_=cmd_type))
+    cmd_in_packet = await cw.create(dict(id=uuid4(), type_=cmd_type))
+    cmd_free = await cw.create(dict(id=uuid4(), type_=cmd_type))
+    cmd_free2 = await cw.create(dict(id=uuid4(), type_=cmd_type))
 
-    pcw.create(dict(packet_id=packet.id, command_id=cmd_in_packet.id))
+    await pcw.create(dict(packet_id=packet.id, command_id=cmd_in_packet.id))
 
-    result = cw.retrieve_floating_commands()
+    result = await cw.retrieve_floating_commands()
     for command in result:
         assert command.id in [cmd_free.id, cmd_free2.id]
 
 
-def test_retrieve_floating_commands_no_packet_commands():
+async def test_retrieve_floating_commands_no_packet_commands(db_session):
+    from gs.backend.data.tables.main_tables import MainCommand
+
     cw = CommandsWrapper()
     mc = MainCommandWrapper()
-    cmd_type = mc.create(
-        dict(
-            id=2,
-            name="test",
-            data_size=1,
-            total_size=1,
-        )
-    ).id
 
-    cw.create(dict(id=uuid4(), type_=cmd_type))
-    cw.create(dict(id=uuid4(), type_=cmd_type))
+    # Create main command directly to avoid ID conflicts
+    main_cmd = MainCommand(id=102, name="test", data_size=1, total_size=1)
+    db_session.add(main_cmd)
+    db_session.flush()
+    cmd_type = main_cmd.id
 
-    result = cw.retrieve_floating_commands()
-    expected = cw.get_all()
+    await cw.create(dict(id=uuid4(), type_=cmd_type))
+    await cw.create(dict(id=uuid4(), type_=cmd_type))
+
+    result = await cw.retrieve_floating_commands()
+    expected = await cw.get_all()
     assert {c.id for c in result} == {c.id for c in expected}
