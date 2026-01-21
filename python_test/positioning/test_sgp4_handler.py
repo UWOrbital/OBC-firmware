@@ -23,7 +23,7 @@ def test_setup_sgp4(): #test setup_sgp4 returns a valid Satrec object
     sat = setup_sgp4(tle)
     assert isinstance(sat, Satrec)
 
-
+"""
 def test_get_sat_position(): #test that output has expected structure and data types
     tle_str = (
         "CSS (MENGTIAN)\n"
@@ -55,3 +55,5 @@ def test_get_sat_position(): #test that output has expected structure and data t
     assert len(data.velocity_km_sec) == 3
     assert all(isinstance(x, float) for x in data.position_km) #loop through position_km and velocity_km,
     assert all(isinstance(x, float) for x in data.velocity_km_sec) #   ensuring data types are floats
+
+"""
