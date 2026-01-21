@@ -63,20 +63,16 @@ class TLEData:
         )
         first_line += str(calculate_checksum(first_line))
         second_line += str(calculate_checksum(second_line))
-        #print("hi!")
-        #print(f"{first_line}\n{second_line}")
         return f"{first_line}\n{second_line}"
 
     def format_epoch_to_date(self, epoch_year: int, epoch_day: float) -> str:
         """
-            Convert epoch year and day-of-year to a calendar date (YYYY-MM-DD).
+        Convert epoch year and day-of-year to a calendar date (YYYY-MM-DD).
 
-        Arguments:
-            epoch_year (int): Last two digits of the epoch year.
-            epoch_day (float): Day of the year, including fraction.
+        :param epoch_year (int): Last two digits of the epoch year.
+        :param epoch_day (float): Day of the year, including fraction.
 
-        Returns:
-            str: Formatted date string in YYYY-MM-DD format.
+        :return: Returns formatted date string in YYYY-MM-DD format as a string.
         """
         full_year = 2000 + epoch_year if epoch_year < 57 else 1900 + epoch_year
         base_date = datetime(full_year, 1, 1) + timedelta(days=epoch_day - 1)
@@ -90,7 +86,13 @@ class TLEData:
 
 
 def calculate_checksum(line: str) -> int:
-    """Calculate the checksum for a line of TLE data."""
+    """
+    Calculate the checksum for a line of TLE data.
+    
+    :param line(str): The single line of TLE data to calculate the checksum for
+    :return: Returns the checksum integer
+
+    """
     output = 0
     for i in line[:68]:
         if i.isdigit():
@@ -101,7 +103,12 @@ def calculate_checksum(line: str) -> int:
 
 
 def convert_decimal_point_assumed(value: str) -> float:
-    """Convert a string to a float, assuming a decimal point before the last digit."""
+    """
+    Convert a string to a float, assuming a decimal point before the last digit.
+
+    :param value(str): the string to convert
+    :returns: data from string converted into float
+    """
     return float(f"{value[0]}.{value[1:6]}e{value[6:]}")
 
 

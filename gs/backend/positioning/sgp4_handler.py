@@ -21,7 +21,13 @@ else:
 
 @dataclass
 class SGP4Data:
-    """Data structure representing the satellite's position and velocity."""
+    """
+    Data structure representing the satellite's position and velocity.
+    :param position_km: tuple representing the position of the satellite in km
+    :param velocity_km_sec: tuple representing velocity of the satellite in km/second
+    
+
+    """
 
     position_km: tuple[float, float, float]
     velocity_km_sec: tuple[float, float, float]
@@ -31,6 +37,10 @@ def setup_sgp4(tle: TLEData) -> Satrec:
     """
     Initialize the SGP4 satellite model using TLE data.  Formatting and SGP4 initialization pulled from link below
         https://pypi.org/project/sgp4/
+
+            :warning: currently broken for TLEs where eccentricity is low relative to drag term
+    :param tle(TLEData): The TLE string used to initialize Satrec
+    :return: Returns initialized Satrec
     """
 
     
@@ -94,17 +104,16 @@ def get_sat_position(tle: TLEData, dt: datetime) -> SGP4Data:
     """
     Compute the satellite's position and velocity at a given time.
 
-        Arguments are
-        tle(TLEData): Two-line element set representing the satellite.
-        dt(datetime): The timestamp for which to calculate the position.
-
+        :warning: currently broken for TLEs where eccentricity is low relative to drag term
+        
+    :param tle(TLEData): Two-line element set representing the satellite.
+    :param dt(datetime): The timestamp for which to calculate the position.
+    :return: Returns location data with custom SGP4Data object
     """
+
     sat = setup_sgp4(tle)
     jd, fr = jday(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
     error_code, position, velocity = sat.sgp4(jd, fr)
-
-    #print("eccentricity (parsed):", tle.eccentricity)
-
 
     if 0.0 <= tle.eccentricity and tle.eccentricity <= 1.0:
         print("tle.eccentricity within expected bounds")
