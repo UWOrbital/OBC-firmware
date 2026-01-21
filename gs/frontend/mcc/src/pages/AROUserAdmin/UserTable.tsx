@@ -59,7 +59,7 @@ export default function UserTable({ data }: { data: User[] }) {
     pageIndex: 0,
     pageSize: 10,
   })
-  // use only for state
+
   const table = useReactTable({
     data,
     columns,
@@ -74,7 +74,6 @@ export default function UserTable({ data }: { data: User[] }) {
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
 
-    // handled inside Table compomnent
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -93,9 +92,7 @@ export default function UserTable({ data }: { data: User[] }) {
   return (
     <div className="flex flex-col items-center px-16 pt-16 pb-16">
 
-      {/* Controls */}
       <div className="flex justify-between mb-4 gap-4">
-        {/* Search */}
         <input
           className="px-4 py-2 bg-white/10 rounded-lg w-64"
           placeholder="Search"
@@ -119,16 +116,15 @@ export default function UserTable({ data }: { data: User[] }) {
         <Button >Add User</Button>
       </div>
 
-      {/* MAIN TABLE RENDER (using reusable component) */}
-    <AroAdminTable<User>
+    <div className="w-full max-h-[600px] overflow-y-auto rounded-lg">
+      <AroAdminTable<User>
       data={table.getRowModel().rows.map((r) => r.original)}
       columns={columns}
       showFilters={false}
       containerClassName="w-full"
     />
+    </div>
 
-
-      {/* PAGINATION */}
       <div className="flex justify-center gap-2 mt-4">
 
         {/* Numbered pagination */}
