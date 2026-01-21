@@ -17,7 +17,7 @@ SET(INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/ina230
     ${CMAKE_CURRENT_SOURCE_DIR}/tca6424
 )
-       
+
 SET(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_adc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/rm46/obc_digital_watchdog.c

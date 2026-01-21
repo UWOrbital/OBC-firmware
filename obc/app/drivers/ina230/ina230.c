@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-
 // ------------------  TCA6424 IC Related Pins ------------- //
 
 // enable pins for device one
@@ -49,36 +48,37 @@ typedef struct {
   uint16_t alertRegister;
 } ina230_config_t;
 
-static const ina230_config_t ina230Devices[] = {[INA230_DEVICE_ONE] = {.i2cDeviceAddress = INA230_I2C_ADDRESS_ONE,
-                                                                       .tcaAlertPort = INA230_ONE_ALERT_PIN,
-                                                                       .tcaEnablePort = INA230_ONE_ENABLE_PIN,
-                                                                       .configurationMode = INA230_DEFAULT_MODE,
-                                                                       .configurationShunt = INA230_DEFAULT_SHUNT_CONV_TIME,
-                                                                       .configurationBus = INA230_DEFAULT_BUS_CONV_TIME,
-                                                                       .configurationAvg = INA230_DEFAULT_AVERAGING, 
-                                                                       .calibrationRegister = INA230_CALIBRATION_VALUE,
-                                                                      .maskEnableRegister = INA230_MASK_ENABLE_NONE,
-                                                                      .alertRegister = INA230_ALERT_LIMIT_NONE},
-                                                [INA230_DEVICE_TWO] = {.i2cDeviceAddress = INA230_I2C_ADDRESS_TWO,
-                                                                       .tcaAlertPort = INA230_TWO_ALERT_PIN,
-                                                                       .tcaEnablePort = INA230_TWO_ENABLE_PIN,
-                                                                       .configurationMode = INA230_DEFAULT_MODE,
-                                                                       .configurationShunt = INA230_DEFAULT_SHUNT_CONV_TIME,
-                                                                       .configurationBus = INA230_DEFAULT_BUS_CONV_TIME,
-                                                                       .configurationAvg = INA230_DEFAULT_AVERAGING, .calibrationRegister = INA230_CALIBRATION_VALUE,
-                                                                      .maskEnableRegister = INA230_MASK_ENABLE_NONE,
-                                                                      .alertRegister = INA230_ALERT_LIMIT_NONE},
-                                                                      // initialized only 2 devices for now; initialize the rest if used
-                                                [INA230_DEVICE_THREE]  = {0}, 
-                                                [INA230_DEVICE_FOUR]   = {0},
-                                                [INA230_DEVICE_FIVE]   = {0},
-                                                [INA230_DEVICE_SIX]    = {0},
-                                                [INA230_DEVICE_SEVEN]  = {0},
-                                                [INA230_DEVICE_EIGHT]  = {0},
-                                                [INA230_DEVICE_NINE]   = {0},
-                                                [INA230_DEVICE_TEN]    = {0},
-                                                [INA230_DEVICE_ELEVEN] = {0}
-                                                                                                                  };
+static const ina230_config_t ina230Devices[] = {
+    [INA230_DEVICE_ONE] = {.i2cDeviceAddress = INA230_I2C_ADDRESS_ONE,
+                           .tcaAlertPort = INA230_ONE_ALERT_PIN,
+                           .tcaEnablePort = INA230_ONE_ENABLE_PIN,
+                           .configurationMode = INA230_DEFAULT_MODE,
+                           .configurationShunt = INA230_DEFAULT_SHUNT_CONV_TIME,
+                           .configurationBus = INA230_DEFAULT_BUS_CONV_TIME,
+                           .configurationAvg = INA230_DEFAULT_AVERAGING,
+                           .calibrationRegister = INA230_CALIBRATION_VALUE,
+                           .maskEnableRegister = INA230_MASK_ENABLE_NONE,
+                           .alertRegister = INA230_ALERT_LIMIT_NONE},
+    [INA230_DEVICE_TWO] = {.i2cDeviceAddress = INA230_I2C_ADDRESS_TWO,
+                           .tcaAlertPort = INA230_TWO_ALERT_PIN,
+                           .tcaEnablePort = INA230_TWO_ENABLE_PIN,
+                           .configurationMode = INA230_DEFAULT_MODE,
+                           .configurationShunt = INA230_DEFAULT_SHUNT_CONV_TIME,
+                           .configurationBus = INA230_DEFAULT_BUS_CONV_TIME,
+                           .configurationAvg = INA230_DEFAULT_AVERAGING,
+                           .calibrationRegister = INA230_CALIBRATION_VALUE,
+                           .maskEnableRegister = INA230_MASK_ENABLE_NONE,
+                           .alertRegister = INA230_ALERT_LIMIT_NONE},
+    // initialized only 2 devices for now; initialize the rest if used
+    [INA230_DEVICE_THREE] = {0},
+    [INA230_DEVICE_FOUR] = {0},
+    [INA230_DEVICE_FIVE] = {0},
+    [INA230_DEVICE_SIX] = {0},
+    [INA230_DEVICE_SEVEN] = {0},
+    [INA230_DEVICE_EIGHT] = {0},
+    [INA230_DEVICE_NINE] = {0},
+    [INA230_DEVICE_TEN] = {0},
+    [INA230_DEVICE_ELEVEN] = {0}};
 
 static obc_error_code_t writeINA230Register(uint8_t regAddress, uint8_t* data, uint8_t size, ina230_device_t device);
 static obc_error_code_t initTca6424PinState();
@@ -112,17 +112,14 @@ obc_error_code_t initINA230() {
 
     uint8_t deviceAddress = device.i2cDeviceAddress;
     RETURN_IF_ERROR_CODE(writeINA230Register(INA230_CONFIG_REGISTER_ADDR, configRegisterUnpacked,
-                                             sizeof(configRegisterUnpacked) / sizeof(configRegisterUnpacked[0]),
-                                             i));
+                                             sizeof(configRegisterUnpacked) / sizeof(configRegisterUnpacked[0]), i));
     RETURN_IF_ERROR_CODE(writeINA230Register(INA230_MASK_ENABLE_REGISTER_ADDR, maskEnRegisterUnpacked,
-                                             sizeof(maskEnRegisterUnpacked) / sizeof(maskEnRegisterUnpacked[0]),
-                                             i));
+                                             sizeof(maskEnRegisterUnpacked) / sizeof(maskEnRegisterUnpacked[0]), i));
     RETURN_IF_ERROR_CODE(writeINA230Register(INA230_ALERT_LIMIT_REGISTER_ADDR, alertRegisterUnpacked,
-                                             sizeof(alertRegisterUnpacked) / sizeof(alertRegisterUnpacked[0]),
-                                             i));
-    RETURN_IF_ERROR_CODE(writeINA230Register(
-        INA230_CALIBRATION_REGISTER_ADDR, calibrationRegisterUnpacked,
-        sizeof(calibrationRegisterUnpacked) / sizeof(calibrationRegisterUnpacked[0]), i));
+                                             sizeof(alertRegisterUnpacked) / sizeof(alertRegisterUnpacked[0]), i));
+    RETURN_IF_ERROR_CODE(
+        writeINA230Register(INA230_CALIBRATION_REGISTER_ADDR, calibrationRegisterUnpacked,
+                            sizeof(calibrationRegisterUnpacked) / sizeof(calibrationRegisterUnpacked[0]), i));
   }
 
   RETURN_IF_ERROR_CODE(initTca6424PinState());
@@ -197,7 +194,7 @@ static obc_error_code_t initTca6424PinState() {
 
 /**
  * @brief Gets INA230 shunt voltage
- * 
+ *
  * Reads the 16-bit shunt voltage register (MSB first) from the specified INA230 device.
  * Converts the raw register value to a signed voltage in volts (LSB = 2.5μV).
  *
@@ -207,7 +204,6 @@ static obc_error_code_t initTca6424PinState() {
  *         otherwise returns an appropriate error code
  */
 obc_error_code_t getINA230ShuntVoltage(ina230_device_t device, float* shuntVoltage) {
-
   if (shuntVoltage == NULL || device >= INA230_DEVICE_COUNT) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
@@ -216,8 +212,9 @@ obc_error_code_t getINA230ShuntVoltage(ina230_device_t device, float* shuntVolta
   obc_error_code_t errCode;
 
   // Read the 16-bit shunt voltage register
-  errCode = i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2,
-                              I2C_TRANSFER_TIMEOUT_TICKS);  // last param not sure
+  errCode =
+      i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2,
+                        I2C_TRANSFER_TIMEOUT_TICKS);  // last param not sure
   if (errCode != OBC_ERR_CODE_SUCCESS) return errCode;
 
   // Combine the two bytes into a 16-bit value
@@ -228,8 +225,6 @@ obc_error_code_t getINA230ShuntVoltage(ina230_device_t device, float* shuntVolta
 
   return OBC_ERR_CODE_SUCCESS;
 }
-   
-
 
 // general disable function for ina230 device
 
@@ -238,7 +233,7 @@ obc_error_code_t disableNoAlert(ina230_device_t device) {
   obc_error_code_t errCode;
 
   for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
-    uint8_t pinLocation = 
+    uint8_t pinLocation =
         ina230Devices[i].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
     uint8_t index = ((pinLocation & 0x0F) +
                      ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
@@ -251,7 +246,7 @@ obc_error_code_t disableNoAlert(ina230_device_t device) {
 
 /**
  * @brief Gets INA230 bus voltage
- * 
+ *
  * Reads the 16-bit bus voltage register (MSB first) from the specified INA230 device.
  * Converts the raw register value to a signed voltage in volts (LSB = 1.25mV).
  *
@@ -266,18 +261,17 @@ obc_error_code_t getINA230BusVoltage(ina230_device_t device, float* busVoltage) 
   }
   obc_error_code_t errCode;
   uint8_t busVoltageRaw[2] = {};
-  RETURN_IF_ERROR_CODE(
-      i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR, busVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
+  RETURN_IF_ERROR_CODE(i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR,
+                                         busVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t busVoltageValue = (busVoltageRaw[0] << 8) | busVoltageRaw[1];
   *busVoltage = busVoltageValue * INA230_BUS_VOLTAGE_LSB;
 
   return OBC_ERR_CODE_SUCCESS;
 }
 
-
 /**
  * @brief Gets INA230 power
- * 
+ *
  * Reads the 16-bit power register (MSB first) from the specified INA230 device.
  * Converts the raw register value to an unsigned power in watts (LSB = 25mW).
  *
@@ -292,8 +286,8 @@ obc_error_code_t getINA230Power(ina230_device_t device, float* power) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   uint8_t powerRaw[INA_REG_CONF_BUFF_SIZE] = {};
-  RETURN_IF_ERROR_CODE(
-      i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_POWER_REGISTER_ADDR, powerRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
+  RETURN_IF_ERROR_CODE(i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_POWER_REGISTER_ADDR, powerRaw,
+                                         2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t powerValue = (powerRaw[0] << 8) | powerRaw[1];
   *power = powerValue * (INA230_CURRENT_LSB * INA230_POWER_LSB_MULTIPLIER);
   return OBC_ERR_CODE_SUCCESS;
@@ -301,7 +295,7 @@ obc_error_code_t getINA230Power(ina230_device_t device, float* power) {
 
 /**
  * @brief Gets INA230 current
- * 
+ *
  * Reads the 16-bit current register (MSB first) from the specified INA230 device.
  * Converts the raw register value to a signed current in watts (LSB = 1mA).
  *
@@ -317,8 +311,8 @@ obc_error_code_t getINA230Current(ina230_device_t device, float* current) {
   }
 
   uint8_t currentRaw[INA_REG_CONF_BUFF_SIZE] = {};
-  RETURN_IF_ERROR_CODE(
-      i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_CURRENT_REGISTER_ADDR, currentRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
+  RETURN_IF_ERROR_CODE(i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_CURRENT_REGISTER_ADDR,
+                                         currentRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   int16_t currentValue = (currentRaw[0] << 8) | currentRaw[1];
   *current = currentValue * INA230_CURRENT_LSB;
   return OBC_ERR_CODE_SUCCESS;
