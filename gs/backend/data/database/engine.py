@@ -1,5 +1,5 @@
-from sqlalchemy import Engine
-from sqlmodel import Session, create_engine, text
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
 from gs.backend.config.config import DATABASE_CONNECTION_STRING
 from gs.backend.data.tables.aro_user_tables import ARO_USER_SCHEMA_NAME
@@ -7,16 +7,16 @@ from gs.backend.data.tables.main_tables import MAIN_SCHEMA_NAME
 from gs.backend.data.tables.transactional_tables import TRANSACTIONAL_SCHEMA_NAME
 
 
-def get_db_engine() -> Engine:
+def get_db_engine() -> AsyncEngine:
     """
     Creates the database engine
 
     :return: engine
     """
-    return create_engine(DATABASE_CONNECTION_STRING)
+    return create_async_engine(DATABASE_CONNECTION_STRING)
 
 
-def get_db_session() -> Session:
+async def get_db_session() -> AsyncSession:
     """
     Creates the database session.
 
@@ -25,22 +25,22 @@ def get_db_session() -> Session:
     :return: session
     """
     engine = get_db_engine()
-    with Session(engine) as session:
-        return session
+    async with AsyncSession(engine) as session:
+        yield session
 
 
-def _create_schemas(session: Session) -> None:
+async def _create_schemas(session: AsyncSession) -> None:
     """
     Creates the schemas in the database.
 
     :param session: The session for which to create the schemas
     """
-    connection = session.connection()
+    connection = await session.connection()
     schemas = [MAIN_SCHEMA_NAME, TRANSACTIONAL_SCHEMA_NAME, ARO_USER_SCHEMA_NAME]
     for schema in schemas:
         # sqlalchemy doesn't check if the schema exists before attempting to create one
-        connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
-    connection.commit()
+        await connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
+    await connection.commit()
 
 
 '''Deprecated method to create tables, now handled by Alembic migrations
@@ -58,11 +58,11 @@ def _create_tables(session: Session) -> None:
 '''
 
 
-def setup_database(session: Session) -> None:
+async def setup_database(session: AsyncSession) -> None:
     """
     Creates the schemas for the session.
     Table creation is now handled by Alembic migrations
 
     :param session: The session for which to create the schemas
     """
-    _create_schemas(session)
+    await _create_schemas(session)

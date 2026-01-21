@@ -18,53 +18,54 @@ class AbstractWrapper(ABC, Generic[T, PK]):
 
     model: type[T]
 
-    def get_all(self) -> list[T]:
+    async def get_all(self) -> list[T]:
         """
         Get all data wrapper for the unspecified model
 
         :return: a list of all model instances
         """
-        with get_db_session() as session:
-            return list(session.exec(select(self.model)).all())
+        async with get_db_session() as session:
+            result = await session.exec(select(self.model))
+            return list(result.all())
 
-    def get_by_id(self, obj_id: PK) -> T:
+    async def get_by_id(self, obj_id: PK) -> T:
         """
         Retrieve data wrapper for the unspecified model
 
         :param obj_id: PK of the model instance to be retrieved
         :return: the retrieved instance
         """
-        with get_db_session() as session:
-            obj = session.get(self.model, obj_id)
+        async with get_db_session() as session:
+            obj = await session.get(self.model, obj_id)
             if not obj:
                 raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
             return obj
 
-    def create(self, data: dict[str, Any]) -> T:
+    async def create(self, data: dict[str, Any]) -> T:
         """
         Post data wrapper for the unspecified model
 
         :param data: the JSON object of the model instance to be created
         :return: the newly created instance
         """
-        with get_db_session() as session:
+        async with get_db_session() as session:
             obj = self.model(**data)
             session.add(obj)
-            session.commit()
-            session.refresh(obj)
+            await session.commit()
+            await session.refresh(obj)
             return obj
 
-    def delete_by_id(self, obj_id: PK) -> T:
+    async def delete_by_id(self, obj_id: PK) -> T:
         """
         Delete data wrapper for the unspecified model
 
         :param obj_id: PK of the model instance to be deleted
         :return: the deleted instance
         """
-        with get_db_session() as session:
-            obj = session.get(self.model, obj_id)
+        async with get_db_session() as session:
+            obj = await session.get(self.model, obj_id)
             if not obj:
                 raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
             session.delete(obj)
-            session.commit()
+            await session.commit()
             return obj
