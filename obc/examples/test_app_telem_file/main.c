@@ -37,11 +37,11 @@ void vTask1(void *pvParameter) {
 
   // Init File System:
   RETURN_IF_ERROR_CODE(setupFileSystem());
-  sciPrint("Initialized File System");
+  // sciPrint("Initialized File System");
 
   // Creating, Writing, and Reading from example file:
   RETURN_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemBatchId, p_telemFileId));
-  sciPrint("Successfully created and opened telemetry file!");
+  // sciPrint("Successfully created and opened telemetry file!");
 
   RETURN_IF_ERROR_CODE(writeTelemetryToFile((int32_t)telemFileId, telemData));
 }
