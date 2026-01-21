@@ -67,7 +67,7 @@ class AbstractWrapper(ABC, Generic[T, PK]):
             if not obj:
                 raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
             # Preserve object state before deleting
-            obj_copy = self.model(**{c.name: getattr(obj, c.name) for c in obj.__table__.columns})
-            session.delete(obj)
+            obj_copy = self.model(**{c.name: getattr(obj, c.name) for c in obj.__table__.columns})  # type: ignore[attr-defined]
+            session.delete(obj)  # type: ignore[unused-coroutine]
             await session.commit()
             return obj_copy

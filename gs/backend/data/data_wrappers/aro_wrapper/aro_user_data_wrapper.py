@@ -92,7 +92,7 @@ async def delete_user_by_id(userid: UUID) -> list[AROUsers]:
         user = await session.get(AROUsers, userid)
 
         if user:
-            session.delete(user)
+            session.delete(user)  # type: ignore[unused-coroutine]
             await session.commit()
         else:
             raise ValueError("User ID does not exist")

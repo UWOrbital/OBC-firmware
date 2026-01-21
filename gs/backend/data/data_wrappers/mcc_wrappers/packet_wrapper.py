@@ -45,6 +45,6 @@ async def delete_packet_by_id(packet_id: UUID) -> Packet:
         packet = await session.get(Packet, packet_id)
         if not packet:
             raise ValueError("Packet not found.")
-        session.delete(packet)
+        session.delete(packet)  # type: ignore[unused-coroutine]
         await session.commit()
         return packet

@@ -45,6 +45,6 @@ async def delete_packet_telemetry_by_id(telemetry_id: UUID) -> PacketTelemetry:
         telemetry = await session.get(PacketTelemetry, telemetry_id)
         if not telemetry:
             raise ValueError("Packet telemetry not found.")
-        session.delete(telemetry)
+        session.delete(telemetry)  # type: ignore[unused-coroutine]
         await session.commit()
         return telemetry

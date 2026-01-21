@@ -45,6 +45,6 @@ async def delete_packet_command_by_id(command_id: UUID) -> PacketCommands:
         command = await session.get(PacketCommands, command_id)
         if not command:
             raise ValueError("Packet command not found.")
-        session.delete(command)
+        session.delete(command)  # type: ignore[unused-coroutine]
         await session.commit()
         return command

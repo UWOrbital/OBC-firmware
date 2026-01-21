@@ -47,7 +47,7 @@ async def delete_auth_token_by_id(token_id: UUID) -> list[AROUserAuthToken]:
         auth_token = await session.get(AROUserAuthToken, token_id)
 
         if auth_token:
-            session.delete(auth_token)
+            session.delete(auth_token)  # type: ignore[unused-coroutine]
             await session.commit()
         else:
             print("Token does not exist")

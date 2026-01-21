@@ -59,7 +59,7 @@ async def delete_login_by_id(loginid: UUID) -> list[AROUserLogin]:
     async with get_db_session() as session:
         user_login = await session.get(AROUserLogin, loginid)
         if user_login:
-            session.delete(user_login)
+            session.delete(user_login)  # type: ignore[unused-coroutine]
             await session.commit()
         else:
             raise ValueError("Login ID does not exist")

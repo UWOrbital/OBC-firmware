@@ -66,7 +66,7 @@ async def delete_request_by_id(request_id: str) -> list[ARORequest]:
     async with get_db_session() as session:
         request = await session.get(ARORequest, request_id)
         if request:
-            session.delete(request)
+            session.delete(request)  # type: ignore[unused-coroutine]
             await session.commit()
         else:
             raise ValueError("Request not found, ID does not exist")

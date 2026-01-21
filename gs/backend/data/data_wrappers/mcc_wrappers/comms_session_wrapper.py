@@ -45,6 +45,6 @@ async def delete_telemetry_by_id(session_id: UUID) -> CommsSession:
         comms_session = await session.get(CommsSession, session_id)
         if not comms_session:
             raise ValueError("Comms session not found.")
-        session.delete(comms_session)
+        session.delete(comms_session)  # type: ignore[unused-coroutine]
         await session.commit()
         return comms_session

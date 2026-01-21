@@ -44,6 +44,6 @@ async def delete_main_command_by_id(command_id: int) -> MainCommand:
         command = await session.get(MainCommand, command_id)
         if not command:
             raise ValueError("Main command not found.")
-        session.delete(command)
+        session.delete(command)  # type: ignore[unused-coroutine]
         await session.commit()
         return command
