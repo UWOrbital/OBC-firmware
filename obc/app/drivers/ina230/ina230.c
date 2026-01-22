@@ -19,14 +19,8 @@
 #define INA230_DISABLE_LOAD TCA6424A_GPIO_LOW
 #define INA230_ALERT_HIGH TCA6424A_GPIO_HIGH
 
-// buffer sizes
 #define INA_REG_CONF_BUFF_SIZE 2
-
 #define I2C_TRANSFER_TIMEOUT_TICKS pdMS_TO_TICKS(100)  // 100 ms in RTOS ticks
-
-// function pointers to switch between mock and real data
-obc_error_code_t (*i2cReadRegFuncPtr)(uint8_t, uint8_t, uint8_t*, uint16_t, TickType_t) = NULL;
-obc_error_code_t (*i2cWriteRegFuncPtr)(uint8_t, uint8_t, uint8_t*, uint16_t) = NULL;
 
 // ------------------  INA230 Device Configuration ------------- //
 typedef struct {
@@ -93,10 +87,6 @@ static obc_error_code_t initTca6424PinState();
  *         otherwise returns an appropriate error code
  */
 obc_error_code_t initINA230() {
-#ifndef USE_MOCK_I2C
-  i2cReadRegFuncPtr = i2cReadReg;
-  i2cWriteRegFuncPtr = i2cWriteReg;
-#endif
   obc_error_code_t errCode;
   for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
     const ina230_config_t device = ina230Devices[i];
@@ -166,7 +156,7 @@ static obc_error_code_t writeINA230Register(uint8_t regAddress, uint8_t* data, u
     return OBC_ERR_CODE_INVALID_ARG;
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(i2cWriteRegFuncPtr(ina230Devices[device].i2cDeviceAddress, regAddress, data, size));
+  RETURN_IF_ERROR_CODE(i2cWriteReg(ina230Devices[device].i2cDeviceAddress, regAddress, data, size));
   return OBC_ERR_CODE_SUCCESS;
 }
 /**
@@ -212,9 +202,8 @@ obc_error_code_t getINA230ShuntVoltage(ina230_device_t device, float* shuntVolta
   obc_error_code_t errCode;
 
   // Read the 16-bit shunt voltage register
-  errCode =
-      i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, shuntVoltageRaw, 2,
-                        I2C_TRANSFER_TIMEOUT_TICKS);  // last param not sure
+  errCode = i2cReadReg(ina230Devices[device].i2cDeviceAddress, INA230_SHUNT_VOLTAGE_REGISTER_ADDR, 
+                        shuntVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS);
   if (errCode != OBC_ERR_CODE_SUCCESS) return errCode;
 
   // Combine the two bytes into a 16-bit value
@@ -231,16 +220,13 @@ obc_error_code_t getINA230ShuntVoltage(ina230_device_t device, float* shuntVolta
 obc_error_code_t disableNoAlert(ina230_device_t device) {
   uint32_t IOPortValue = 0;
   obc_error_code_t errCode;
-
-  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
-    uint8_t pinLocation =
-        ina230Devices[i].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
-    uint8_t index = ((pinLocation & 0x0F) +
-                     ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
-    // disbale
-    uint8_t drivePort = INA230_DISABLE_LOAD;
-    RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
-  }
+  uint8_t pinLocation =
+      ina230Devices[device].tcaEnablePort;  // specific pin on TCA that this ina230 controls, should this be alertPort?
+  uint8_t index = ((pinLocation & 0x0F) +
+                    ((pinLocation >> 1) & 0x18));  // converts the pinLocation to an index in the 24 bit IOPortValue
+  // disbale
+  uint8_t drivePort = INA230_DISABLE_LOAD;
+  RETURN_IF_ERROR_CODE(driveTCA6424APinOutput(pinLocation, drivePort));
   return OBC_ERR_CODE_SUCCESS;
 }
 
@@ -261,7 +247,7 @@ obc_error_code_t getINA230BusVoltage(ina230_device_t device, float* busVoltage) 
   }
   obc_error_code_t errCode;
   uint8_t busVoltageRaw[2] = {};
-  RETURN_IF_ERROR_CODE(i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR,
+  RETURN_IF_ERROR_CODE(i2cReadReg(ina230Devices[device].i2cDeviceAddress, INA230_BUS_VOLTAGE_REGISTER_ADDR,
                                          busVoltageRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t busVoltageValue = (busVoltageRaw[0] << 8) | busVoltageRaw[1];
   *busVoltage = busVoltageValue * INA230_BUS_VOLTAGE_LSB;
@@ -286,7 +272,7 @@ obc_error_code_t getINA230Power(ina230_device_t device, float* power) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
   uint8_t powerRaw[INA_REG_CONF_BUFF_SIZE] = {};
-  RETURN_IF_ERROR_CODE(i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_POWER_REGISTER_ADDR, powerRaw,
+  RETURN_IF_ERROR_CODE(i2cReadReg(ina230Devices[device].i2cDeviceAddress, INA230_POWER_REGISTER_ADDR, powerRaw,
                                          2, I2C_TRANSFER_TIMEOUT_TICKS));
   uint16_t powerValue = (powerRaw[0] << 8) | powerRaw[1];
   *power = powerValue * (INA230_CURRENT_LSB * INA230_POWER_LSB_MULTIPLIER);
@@ -311,7 +297,7 @@ obc_error_code_t getINA230Current(ina230_device_t device, float* current) {
   }
 
   uint8_t currentRaw[INA_REG_CONF_BUFF_SIZE] = {};
-  RETURN_IF_ERROR_CODE(i2cReadRegFuncPtr(ina230Devices[device].i2cDeviceAddress, INA230_CURRENT_REGISTER_ADDR,
+  RETURN_IF_ERROR_CODE(i2cReadReg(ina230Devices[device].i2cDeviceAddress, INA230_CURRENT_REGISTER_ADDR,
                                          currentRaw, 2, I2C_TRANSFER_TIMEOUT_TICKS));
   int16_t currentValue = (currentRaw[0] << 8) | currentRaw[1];
   *current = currentValue * INA230_CURRENT_LSB;

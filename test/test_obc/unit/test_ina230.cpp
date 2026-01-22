@@ -6,23 +6,6 @@
 #include <assert.h>
 #include <gtest/gtest.h>
 
-// include C functions in C++ file
-extern "C" {
-obc_error_code_t i2cReadReg(uint8_t, uint8_t, uint8_t*, uint16_t, TickType_t);
-obc_error_code_t i2cWriteReg(uint8_t, uint8_t, uint8_t*, uint16_t);
-}
-
-// Google Test test environment class configuration
-class INA230TestEnvironment : public ::testing::Environment {
- public:
-  void SetUp() override {
-    i2cReadRegFuncPtr = i2cReadReg;
-    i2cWriteRegFuncPtr = i2cWriteReg;
-  }
-};
-
-static ::testing::Environment* const ina230_env = ::testing::AddGlobalTestEnvironment(new INA230TestEnvironment());
-
 #define INA230_TEST_FLOAT_TOLERANCE 0.01f
 
 // for reference:
