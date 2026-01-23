@@ -2,13 +2,15 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
+from pathlib import Path
 from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 from gs.backend.data.tables import aro_user_tables, main_tables, transactional_tables  # noqa: F401
 
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parents[1] / "gs" / "backend"
+load_dotenv(PROJECT_ROOT / ".env")
 
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
 if not SQLALCHEMY_DATABASE_URL:
@@ -19,6 +21,7 @@ if not SQLALCHEMY_DATABASE_URL:
     GS_DATABASE_NAME = os.getenv("GS_DATABASE_NAME")
 
     SQLALCHEMY_DATABASE_URL = f"postgresql://{GS_DATABASE_USER}:{GS_DATABASE_PASSWORD}@{GS_DATABASE_LOCATION}:{GS_DATABASE_PORT}/{GS_DATABASE_NAME}"
+    print("ALEMBIC DATABASE URL:", SQLALCHEMY_DATABASE_URL)
 
 config = context.config
 

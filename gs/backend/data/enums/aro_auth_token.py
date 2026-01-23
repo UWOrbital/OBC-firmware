@@ -3,11 +3,15 @@ from enum import StrEnum, auto
 
 class AROAuthToken(StrEnum):
     """
-    The possible states that an AROAuthToken can be
-    CURRENTLY DUMMY STATES
+    The possible states that an AROAuthToken can be.
+    eg. types of authentication types.
+    
+    GOOGLE_OAUTH: Token issued after Google OAuth authentication
+    EMAIL_PASSWORD: Token issued after email/password authentication
+    REFRESH: Refresh token for extending sessions (future use)
     """
 
-    # TODO Implmement proper states
-    DUMMY = auto()  # Command was created in the db but not yet sent to the OBC
-    ANOTHERDUMMY = auto()  # Command was sent to OBC
-    TEST = auto()  # Command is executing on OBC
+    # TODO Implmement proper states (in progress)
+    GOOGLE_OAUTH = auto()
+    EMAIL_PASSWORD = auto()
+    REFRESH = auto()
