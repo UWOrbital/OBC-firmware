@@ -9,17 +9,15 @@ Supports two authentication methods.
 After initial authentication, the user will need to additionally verify with their callsign.
 """
 
-from datetime import datetime, timedelta
-from hashlib import pbkdf2_hmac
+from datetime import datetime
 from os import urandom
-from typing import Optional
 from uuid import UUID, uuid4
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from starlette.requests import Request
 from starlette.config import Config
 from fastapi.responses import RedirectResponse
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlmodel import select
 
@@ -204,7 +202,7 @@ async def google_callback(request: Request) -> TokenResponse:
     user = get_user_by_google_id(google_id=google_id)
     if not user:
         # Does the user email already exist?
-        existing_user = get_user_by_email(user)
+        existing_user = get_user_by_email(email)
         if existing_user:
             # Link Google Account to existing email
             with get_db_session() as session:
@@ -247,9 +245,8 @@ async def register(request: RegisterRequest) -> TokenResponse:
     existing_user = get_user_by_email(request.email)
     if existing_user:
         raise HTTPException(
-            
             status_code=status.HTTP_409_CONFLICT,
-            details="Email has already been taken.",
+            detail="Email has already been taken.",
         )
     
     # Create all user data
@@ -274,7 +271,7 @@ async def register(request: RegisterRequest) -> TokenResponse:
         login = AROUserLogin(
             email=user.email,
             password=hashed_password,
-            password_salt=salt,
+            password_salt=salt.hex(),
             hashing_algorithm_name=HASH_ALGORITHM,
             user_data_id=user.id,
             email_verification_token=verification_token,
@@ -286,7 +283,7 @@ async def register(request: RegisterRequest) -> TokenResponse:
         auth_token = create_auth_token(user.id, AROAuthToken.EMAIL_PASSWORD)
 
         return TokenResponse(
-            token=auth_token,
+            token=auth_token.token,
             user_id=user.id,
             expires_at=auth_token.expiry,
         )
@@ -312,7 +309,7 @@ async def login(request: LoginRequest) -> TokenResponse:
         if not verify_password(request.password, login_record.password_salt, login_record.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                details="Incorrect email or password.",
+                detail="Incorrect email or password.",
             )
         
         # Get the user data
@@ -327,7 +324,7 @@ async def login(request: LoginRequest) -> TokenResponse:
     auth_token = create_auth_token(user.id, AROAuthToken.EMAIL_PASSWORD)
 
     return TokenResponse(
-        token=auth_token,
+        token=auth_token.token,
         user_id=user.id,
         expires_at=auth_token.expiry,
     )
@@ -349,10 +346,10 @@ async def logout(token: str) -> dict:
             select(AROUserAuthToken).where(AROUserAuthToken.token == token)
         ).first()
 
-        if not auth_token():
+        if not auth_token:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                details="Couldn't find your login credentials. How did you even log in?",
+                detail="Couldn't find your login credentials. How did you even log in?",
             )
         
         session.delete(auth_token)
@@ -378,7 +375,7 @@ async def get_current_user(token: str) -> UserResponse:
         if not auth_token():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                details="Couldn't find your login credentials. How did you even log in?",
+                detail="Couldn't find your login credentials. How did you even log in?",
             )
         
         # Check for expiracy

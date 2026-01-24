@@ -48,7 +48,7 @@ class AROUsers(BaseSQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)
     
-    call_sign: str = Field(
+    call_sign: str | None = Field(
         min_length=CALL_SIGN_MIN_LENGTH, 
         max_length=CALL_SIGN_MAX_LENGTH,
         default=None,
@@ -117,8 +117,8 @@ class AROUserLogin(BaseSQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True)  # unique id for logins
     email: EmailStr = Field(min_length=EMAIL_MIN_LENGTH, max_length=DEFAULT_MAX_LENGTH, unique=True)
-    password: str = Field(max_length=20)
-    password_salt: bytes = urandom(16)
+    password: str = Field(max_length=128)
+    password_salt: str = Field(max_length=32)
     created_on: datetime = Field(default_factory=datetime.now)
     hashing_algorithm_name: str = Field(min_length=1, max_length=20)
     user_data_id: UUID = Column(DB_UUID, ForeignKey(AROUsers.id))  # type: ignore
@@ -126,7 +126,6 @@ class AROUserLogin(BaseSQLModel, table=True):
 
     __tablename__ = ARO_USER_LOGIN
     __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}
-
 
 class AROUserAuthToken(BaseSQLModel, table=True):
     """
