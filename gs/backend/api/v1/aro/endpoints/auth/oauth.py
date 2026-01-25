@@ -296,7 +296,9 @@ async def login(request: LoginRequest) -> TokenResponse:
     If unsuccessful, gives appropriate errors.
     """
     with get_db_session() as session:
-        login_record = session.exec(select(AROUserLogin).where(AROUserLogin.email == request.email)).first()
+        login_record = session.exec(
+            select(AROUserLogin).where(AROUserLogin.email == request.email)
+        ).first()
 
         if not login_record:
             raise HTTPException(
