@@ -11,6 +11,7 @@ After initial authentication, the user will need to additionally verify with the
 
 from datetime import datetime
 from os import urandom
+from typing import Any, cast
 from uuid import UUID, uuid4
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
@@ -61,7 +62,7 @@ oauth.register(
     client_id=GOOGLE_CLIENT_ID,
     client_secret=GOOGLE_CLIENT_SECRET,
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-    client_kwargs={"scope": "openid email profile"},
+    client_kwargs={ "scope": "openid email profile" },
 )
 
 # -----------------------------------------------------------------------
@@ -138,10 +139,8 @@ class UserResponse(BaseModel):
 # Google OAuth Endpoints
 # -----------------------------------------------------------------------
 
-google_client = OAuth(oauth.create_client("google"))
-
 @router.get('/google/login')
-async def google_login(request: Request) -> RedirectResponse:
+async def google_login(request: Request) -> Any:
     """
     google_login 的 Docstring
     
@@ -155,7 +154,7 @@ async def google_login(request: Request) -> RedirectResponse:
     """
     # The callback URL must match what's configured on Google Cloud Console
     redirect_uri = request.url_for("google_callback")
-    return await google_client.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/google/callback")
 async def google_callback(request: Request) -> TokenResponse:
@@ -168,7 +167,7 @@ async def google_callback(request: Request) -> TokenResponse:
     Returns an auth token for the session.
     """
     try:
-       token = await google_client.authorize_access_token(request)
+       token = await oauth.google.authorize_access_token(request)
     except OAuthError as e:
         raise HTTPException (
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -334,7 +333,7 @@ async def login(request: LoginRequest) -> TokenResponse:
 # -----------------------------------------------------------------------
 
 @router.post("/logout")
-async def logout(token: str) -> dict:
+async def logout(token: str) -> dict[str, str]:
     """
     logout
 
@@ -372,7 +371,7 @@ async def get_current_user(token: str) -> UserResponse:
             select(AROUserAuthToken).where(AROUserAuthToken.token == token)
         ).first()
 
-        if not auth_token():
+        if not auth_token:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Couldn't find your login credentials. How did you even log in?",

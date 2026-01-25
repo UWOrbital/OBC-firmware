@@ -1,4 +1,4 @@
-# TODO:(335) Improve loading the configuration
+# TODO: (335) Improve loading the configuration
 from os import environ, getenv
 from typing import Final
 
@@ -22,7 +22,7 @@ class BackendConfiguration:
 backend_config = BackendConfiguration()
 
 
-def getenv(config: str) -> str:
+def get_reqired_env(config: str) -> str:
     """
     Validates whether or not database env values exist in .env. If not, throws a value error.
 
