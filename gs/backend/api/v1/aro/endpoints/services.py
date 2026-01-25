@@ -17,6 +17,7 @@ from gs.backend.data.tables.aro_user_tables import (
     AROUsers,
 )
 from gs.backend.data.database.engine import get_db_session
+from gs.backend.data.enums.aro_auth_token import AROAuthToken
 
 TOKEN_EXPIRY_HOURS = 6.7
 HASH_ALGORITHM = "sha256"
@@ -27,12 +28,12 @@ def hash_password(password: str, salt: bytes) -> str:
     hashed = pbkdf2_hmac(HASH_ALGORITHM, password.encode(), salt, HASH_ITERATIONS)
     return hashed.hex()
 
-def verify_password(password: str, salt_hex: bytes, hashed: str) -> bool:
+def verify_password(password: str, salt_hex: str, hashed: str) -> bool:
     # Verify a hashed password against its hash
     salt = bytes.fromhex(salt_hex)
     return hash_password(password, salt) == hashed
 
-def create_auth_token(user_id: UUID, auth_type: AROUserAuthToken) -> AROUserAuthToken:
+def create_auth_token(user_id: UUID, auth_type: AROAuthToken) -> AROUserAuthToken:
     # Create and persist an authentication token for a user.
     created_time = datetime.now()
     expiry = created_time + timedelta(hours=TOKEN_EXPIRY_HOURS)
