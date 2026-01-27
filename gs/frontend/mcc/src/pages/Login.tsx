@@ -4,8 +4,8 @@
  */
 function Login() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
-      <div className="w-full max-w-md bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-700/50">
+    <div className="flex flex-col items-center min-h-screen overflow-y-auto px-4 py-8">
+      <div className="w-full max-w-md bg-gray-900/50 backdrop-blur-sm rounded-lg p-8 border border-gray-700/50 my-8">
         {/* Rocket Icon */}
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
@@ -114,7 +114,7 @@ function Login() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors mt-6 font-medium"
+            className="w-full cursor-pointer bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors mt-6 font-medium"
           >
             Access Mission Control
           </button>
