@@ -1,6 +1,10 @@
 name: OBC Build
 on: [push, pull_request]
 
+concurrency:
+  group: rm46-hil
+  cancel-in-progress: false
+
 jobs:
   OBC_BUILD:
     runs-on: ubuntu-latest
@@ -96,3 +100,43 @@ jobs:
       run: |
         echo "CRC checksum:"
         cksum OBC-firmware.bin
+
+  HARDWARE-IN-LOOP:
+    needs: OBC_BUILD
+    runs-on: [self-hosted, hil, rm46]
+
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Dependencies
+      run: |
+        sudo apt install -y build-essential gcc-multilib g++-multilib cmake curl
+        python3 -m venv venv/
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+
+    - name: Create Ground Station Binary Directory
+      run: |
+        mkdir build_gs
+        cd build_gs
+        cmake .. -DCMAKE_BUILD_TYPE=GS
+
+    - name: Build
+      run: |
+        cd build_gs
+        cmake --build .
+
+    - name: Download binary with CRC
+      uses: actions/download-artifact@v4
+      with:
+        name: launchpad-bin
+        path: .
+
+    - name: Run HIL
+      run: |
+          source venv/bin/activate
+          python3 hil/hil_main.py /dev/ttyACM0 OBC-firmware-crc.bin

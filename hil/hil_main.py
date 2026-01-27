@@ -19,7 +19,7 @@ EXIT_SERIAL_NO_PERMISSION = 5
 # Helper logger function for this
 def error_log(msg: str, code: int) -> None:
     """
-    Print an error message and terminate execution with a specific exit code.
+    Print an error message and terminate execution with a specific exit code
 
     Args:
         msg: Human-readable error message.
@@ -31,7 +31,7 @@ def error_log(msg: str, code: int) -> None:
 
 def main() -> int:
     """
-    Validate inputs and flash firmware onto the target hardware.
+    Validate inputs and flash firmware onto the target hardware
 
     Returns:
         Exit status code.
