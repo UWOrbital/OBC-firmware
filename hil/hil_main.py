@@ -69,7 +69,7 @@ def main() -> int:
     # Flashing (any failure aborts process)
     send_bin(str(firmware_path), serial_dev)
 
-    print("[1] Flashing Completed Successfully")
+    print("[2] Flashing Completed Successfully")
     return EXIT_OK
 
 

@@ -1,7 +1,7 @@
 name: HIL Build
 on:
   workflow_run:
-    workflows: ["OBC Build"]
+    workflows: [" OBC Build"]
     types:
       - completed
 
