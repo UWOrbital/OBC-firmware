@@ -17,7 +17,7 @@ from uuid import UUID, uuid4
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from starlette.requests import Request
 from starlette.config import Config
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, EmailStr
 from sqlmodel import select
 
@@ -28,17 +28,25 @@ from gs.backend.api.v1.aro.endpoints.services import (
     get_user_by_email,
     get_user_by_google_id,
     create_oauth_user,
+    verify_callsign,
 )
-
+from gs.backend.data.data_wrappers.wrappers import (
+    AROUserAuthTokenWrapper,
+    AROUserLoginWrapper,
+    ARORequestWrapper,
+    AROUsersWrapper,
+)
 from gs.backend.config.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
 )
 from gs.backend.data.tables.aro_user_tables import (
     AROUserAuthToken,
+    AROUserCallsigns,
     AROUserLogin,
     AROUsers,
 )
+
 from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.enums.aro_auth_token import AROAuthToken
 
@@ -132,6 +140,9 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CallsignVerificationRequest(BaseModel):
+    call_sign: str
 
 # -----------------------------------------------------------------------
 # Google OAuth Endpoints
@@ -400,3 +411,47 @@ async def get_current_user(token: str) -> UserResponse:
             last_name=user.last_name,
             is_callsign_verified=user.is_callsign_verified,
         )
+
+# -----------------------------------------------------------------------
+# Callsign Verification / Admin Endpoints
+# -----------------------------------------------------------------------
+
+@router.post("/verify-callsign", response_model=UserResponse)
+async def verify_user_callsign(request: CallsignVerificationRequest, users: AROUsers = Depends(get_current_user)) -> UserResponse:
+    """
+    verify_user_callsign 的 Docstring
+    
+    :param request: 说明
+    :type request: CallsignVerificationRequest
+    :param users: 说明
+    :type users: AROUsers
+    :return: 说明
+    :rtype: UserResponse
+
+    with get_db_session() as session:
+        if not verify_callsign(request.call_sign):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Callsign unable to be verified.",
+            )
+        
+        # TH
+        users = AROUsers(
+            call_sign=request.call_sign,
+            is_callsign_verified=True,
+        )
+        session.add(users)
+        session.commit()
+        session.refresh(users)
+    """
+    # The above code is almost certainly wrong
+    pass
+
+@router.post("/is-verified")
+def require_verified_user(user: AROUsers = Depends(get_current_user)) -> AROUsers:
+    if not user.is_callsign_verified:
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Callsign verification required"
+        )
+    return user

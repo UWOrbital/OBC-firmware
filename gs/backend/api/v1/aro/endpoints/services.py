@@ -11,9 +11,11 @@ from datetime import datetime, timedelta
 from hashlib import pbkdf2_hmac
 from uuid import UUID, uuid4
 from sqlmodel import select
+from fastapi import Depends, HTTPException, status
 
 from gs.backend.data.tables.aro_user_tables import (
     AROUserAuthToken,
+    AROUserCallsigns,
     AROUsers,
 )
 from gs.backend.data.database.engine import get_db_session
@@ -55,13 +57,17 @@ def create_auth_token(user_id: UUID, auth_type: AROAuthToken) -> AROUserAuthToke
 def get_user_by_email(email: str) -> AROUsers | None:
     # Find a user by their email address.
     with get_db_session() as session:
-        found_user = session.exec(select(AROUsers).where(AROUsers.email == email)).first()
+        found_user = session.exec(
+            select(AROUsers).where(AROUsers.email == email)
+        ).first()
     return found_user
 
 def get_user_by_google_id(google_id: str) -> AROUsers | None:
     # Find a user from their Google ID.
     with get_db_session() as session:
-        found_user = session.exec(select(AROUsers).where(AROUsers.google_id == google_id)).first()
+        found_user = session.exec(
+            select(AROUsers).where(AROUsers.google_id == google_id)
+        ).first()
     return found_user
 
 def create_oauth_user(google_id: str, email: str, first_name: str, last_name: str | None) -> AROUsers:
@@ -79,3 +85,12 @@ def create_oauth_user(google_id: str, email: str, first_name: str, last_name: st
         session.commit()
         session.refresh(user)
         return user
+
+def verify_callsign(call_sign: str) -> bool:
+    """
+    verify_callsign 的 Docstring
+    
+    TODO: Checks call_sign against the government CSV file.
+    """
+    # Future: Query against AROUserCallsigns
+    pass
