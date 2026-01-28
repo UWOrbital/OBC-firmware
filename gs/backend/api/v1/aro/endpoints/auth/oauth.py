@@ -17,7 +17,6 @@ from uuid import UUID, uuid4
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from starlette.requests import Request
 from starlette.config import Config
-from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlmodel import select
@@ -34,7 +33,6 @@ from gs.backend.api.v1.aro.endpoints.services import (
 from gs.backend.config.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    JWT_SECRET_KEY,
 )
 from gs.backend.data.tables.aro_user_tables import (
     AROUserAuthToken,
