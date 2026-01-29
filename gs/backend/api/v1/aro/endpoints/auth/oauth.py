@@ -12,7 +12,7 @@ After initial authentication, the user will need to additionally verify with the
 from datetime import datetime
 from os import urandom
 from typing import Any, cast
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from starlette.requests import Request
@@ -21,15 +21,27 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, EmailStr
 from sqlmodel import select
 
-from gs.backend.api.v1.aro.endpoints.services import (
-    hash_password,
-    verify_password,
-    create_auth_token,
+from gs.backend.api.v1.aro.endpoints.auth.services.services import (
     get_user_by_email,
     get_user_by_google_id,
+)
+from gs.backend.api.v1.aro.endpoints.auth.services.password import (
+    hash_password,
+    verify_password,
+)
+from gs.backend.api.v1.aro.endpoints.auth.services.tokens import (
+    create_auth_token,
     create_oauth_user,
+)
+from gs.backend.api.v1.aro.endpoints.auth.services.callsigns import (
     verify_callsign,
 )
+
+from gs.backend.api.v1.aro.endpoints.auth.dependencies import (
+    get_current_user,
+    require_verified_user,
+)
+
 from gs.backend.data.data_wrappers.wrappers import (
     AROUserAuthTokenWrapper,
     AROUserLoginWrapper,
@@ -75,74 +87,13 @@ oauth.register(
 # Request & Responses
 # -----------------------------------------------------------------------
 
-class RegisterRequest(BaseModel):
-    """
-    RegisterRequest
-
-    Request body for email/password registration.
-
-    :param email Emailstr
-    :param password str
-    :param first_name str
-    :param last_name str
-    :param phone_number str
-    """
-
-    email: EmailStr
-    password: str
-    first_name: str
-    last_name: str | None = None
-    phone_number: str | None = None
-
-class LoginRequest(BaseModel):
-    """
-    LoginRequest
-
-    Request body for email/password login.
-
-    :param email EmailStr
-    :param password str
-    """
-    email: EmailStr
-    password: str
-
-class TokenResponse(BaseModel):
-    """
-    TokenResponse
-
-    Request body for the authentication token.
-
-    :param token str
-    :param user_id UUID
-    :param expires_at datetime
-    """
-    token: str
-    user_id: UUID
-    expires_at: datetime
-
-class UserResponse(BaseModel):
-    """
-    UserResponse
-
-    Response containing the user data.
-
-    :param id UUID
-    :param email str
-    :param first_name str
-    :param last_name str
-    :param is_callsigned-
-    """
-    id: UUID
-    email: str
-    first_name: str
-    last_name: str | None
-    is_callsign_verified: bool
-
-    class Config:
-        from_attributes = True
-
-class CallsignVerificationRequest(BaseModel):
-    call_sign: str
+from auth_schemas import (
+    RegisterRequest,
+    LoginRequest,
+    TokenResponse,
+    UserResponse,
+    CallsignRequest,
+)
 
 # -----------------------------------------------------------------------
 # Google OAuth Endpoints
@@ -339,10 +290,6 @@ async def login(request: LoginRequest) -> TokenResponse:
         expires_at=auth_token.expiry,
     )
 
-# -----------------------------------------------------------------------
-# Email / Password Endpoints
-# -----------------------------------------------------------------------
-
 @router.post("/logout")
 async def logout(token: str) -> dict[str, str]:
     """
@@ -368,90 +315,3 @@ async def logout(token: str) -> dict[str, str]:
     return {
         "message" : "Logged out successfully."
     }
-
-
-@router.get("/currentuser")
-async def get_current_user(token: str) -> UserResponse:
-    """
-    get_current_user
-
-    Get the current user's information from their auth token.
-    """
-    with get_db_session() as session:
-        auth_token = session.exec(
-            select(AROUserAuthToken).where(AROUserAuthToken.token == token)
-        ).first()
-
-        if not auth_token:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Couldn't find your login credentials. How did you even log in?",
-            )
-        
-        # Check for expiracy
-        if (auth_token.expiry < datetime.now()):
-            session.delete(auth_token)
-            session.commit()
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Your login expired.",
-            )
-
-        user = session.get(AROUsers, auth_token.user_data_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found.",
-            )
-
-        return UserResponse(
-            id=user.id,
-            email=user.email,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            is_callsign_verified=user.is_callsign_verified,
-        )
-
-# -----------------------------------------------------------------------
-# Callsign Verification / Admin Endpoints
-# -----------------------------------------------------------------------
-
-@router.post("/verify-callsign", response_model=UserResponse)
-async def verify_user_callsign(request: CallsignVerificationRequest, users: AROUsers = Depends(get_current_user)) -> UserResponse:
-    """
-    verify_user_callsign 的 Docstring
-    
-    :param request: 说明
-    :type request: CallsignVerificationRequest
-    :param users: 说明
-    :type users: AROUsers
-    :return: 说明
-    :rtype: UserResponse
-
-    with get_db_session() as session:
-        if not verify_callsign(request.call_sign):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Callsign unable to be verified.",
-            )
-        
-        # TH
-        users = AROUsers(
-            call_sign=request.call_sign,
-            is_callsign_verified=True,
-        )
-        session.add(users)
-        session.commit()
-        session.refresh(users)
-    """
-    # The above code is almost certainly wrong
-    pass
-
-@router.post("/is-verified")
-def require_verified_user(user: AROUsers = Depends(get_current_user)) -> AROUsers:
-    if not user.is_callsign_verified:
-        return HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Callsign verification required"
-        )
-    return user
