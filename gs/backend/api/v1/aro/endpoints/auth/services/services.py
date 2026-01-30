@@ -5,23 +5,12 @@ Helper functions for our endpoints.
 
 1. Authentication
 """
-
-from datetime import datetime, timedelta
-
-from hashlib import pbkdf2_hmac
-from uuid import UUID, uuid4
 from sqlmodel import select
-from fastapi import Depends, HTTPException, status
-
-from gs.backend.data.tables.aro_user_tables import (
-    AROUserAuthToken,
-    AROUserCallsigns,
-    AROUsers,
-)
 from gs.backend.data.database.engine import get_db_session
-from gs.backend.data.enums.aro_auth_token import AROAuthToken
+from gs.backend.data.tables.aro_user_tables import AROUsers
+from pydantic import EmailStr
 
-def get_user_by_email(email: str) -> AROUsers | None:
+def get_user_by_email(email: EmailStr) -> AROUsers | None:
     # Find a user by their email address.
     with get_db_session() as session:
         found_user = session.exec(

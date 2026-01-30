@@ -9,58 +9,23 @@ Supports two authentication methods.
 After initial authentication, the user will need to additionally verify with their callsign.
 """
 
-from datetime import datetime
-from os import urandom
-from typing import Any, cast
-from uuid import uuid4
-
-from authlib.integrations.starlette_client import OAuth, OAuthError
-from starlette.requests import Request
+from typing import Any
 from starlette.config import Config
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr
-from sqlmodel import select
+from starlette.requests import Request
+from authlib.integrations.starlette_client import OAuth, OAuthError
 
-from gs.backend.api.v1.aro.endpoints.auth.services.services import (
-    get_user_by_email,
-    get_user_by_google_id,
-)
-from gs.backend.api.v1.aro.endpoints.auth.services.password import (
-    hash_password,
-    verify_password,
-)
-from gs.backend.api.v1.aro.endpoints.auth.services.tokens import (
-    create_auth_token,
-    create_oauth_user,
-)
-from gs.backend.api.v1.aro.endpoints.auth.services.callsigns import (
-    verify_callsign,
+from fastapi import APIRouter, HTTPException, status
+from gs.backend.api.v1.aro.endpoints.auth.services.google import google_auth
+from gs.backend.api.v1.aro.endpoints.auth.services.register import (
+    register_user,
+    login_user,
+    logout_user,
 )
 
-from gs.backend.api.v1.aro.endpoints.auth.dependencies import (
-    get_current_user,
-    require_verified_user,
-)
-
-from gs.backend.data.data_wrappers.wrappers import (
-    AROUserAuthTokenWrapper,
-    AROUserLoginWrapper,
-    ARORequestWrapper,
-    AROUsersWrapper,
-)
 from gs.backend.config.config import (
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
 )
-from gs.backend.data.tables.aro_user_tables import (
-    AROUserAuthToken,
-    AROUserCallsigns,
-    AROUserLogin,
-    AROUsers,
-)
-
-from gs.backend.data.database.engine import get_db_session
-from gs.backend.data.enums.aro_auth_token import AROAuthToken
 
 # -----------------------------------------------------------------------
 # CONFIG
@@ -87,12 +52,10 @@ oauth.register(
 # Request & Responses
 # -----------------------------------------------------------------------
 
-from auth_schemas import (
+from gs.backend.api.v1.aro.endpoints.auth.auth_schemas import (
     RegisterRequest,
     LoginRequest,
     TokenResponse,
-    UserResponse,
-    CallsignRequest,
 )
 
 # -----------------------------------------------------------------------
@@ -133,9 +96,6 @@ async def google_callback(request: Request) -> TokenResponse:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"OAuth authentication failed: {e.error}",
         )
-    
-    ### DEBUG
-    print(token.keys())
 
     # Extract user info from the ID token
     user_info = token.get("userinfo")
@@ -146,45 +106,18 @@ async def google_callback(request: Request) -> TokenResponse:
         )
     
     # Extract the rest of the data
-    google_id = user_info.get("sub")
-    email = user_info.get("email")
-    first_name = user_info.get("given_name", "")
-    last_name = user_info.get("family_name")
-
-    if not (google_id and email):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Missing required user information from Google.",
-        )
-    
-    # Create new user
-    user = get_user_by_google_id(google_id=google_id)
-    if not user:
-        # Does the user email already exist?
-        existing_user = get_user_by_email(email)
-        if existing_user:
-            # Link Google Account to existing email
-            with get_db_session() as session:
-                existing_user.google_id = google_id
-                session.add(existing_user)
-                session.commit()
-                session.refresh(existing_user)
-                user = existing_user
-        else:
-            # Create a new user
-            user = create_oauth_user(google_id, email, first_name, last_name)
-
-    # Create session token (auth_token)
-    auth_token = create_auth_token(user.id, AROAuthToken.GOOGLE_OAUTH)
+    auth_token, user = google_auth(
+        google_id=user_info.get("sub"),
+        email=user_info.get("email"),
+        first_name=user_info.get("given_name", ""),
+        last_name=user_info.get("family_name")
+    )
 
     return TokenResponse(
         token=auth_token.token,
         user_id=user.id,
         expires_at=auth_token.expiry,
     )
-
-#print(type(oauth.google))
-#print("authorize_redirect" in dir(oauth.google))
 
 # -----------------------------------------------------------------------
 # Email / Password Endpoints
@@ -201,51 +134,19 @@ async def register(request: RegisterRequest) -> TokenResponse:
     Returns an auth token for immediate login.
     """
     # Check if email exists
-    existing_user = get_user_by_email(request.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email has already been taken.",
-        )
-    
-    # Create all user data
-    with get_db_session() as session:
-        user = AROUsers(
-            call_sign=None,
-            is_callsign_verified=False,
-            email=request.email,
-            first_name=request.first_name,
-            last_name=request.last_name,
-            phone_number=request.phone_number,
-        )
-        session.add(user)
-        session.commit()
-        session.refresh(user)
+    auth_token, user = register_user(
+        email=request.email,
+        password=request.password,
+        first_name=request.first_name,
+        last_name=request.last_name,
+        phone_number=request.phone_number,
+    )
 
-        # We now create the login credentials
-        salt = urandom(16)
-        hashed_password = hash_password(request.password, salt)
-        verification_token = str(uuid4())
-
-        login = AROUserLogin(
-            email=user.email,
-            password=hashed_password,
-            password_salt=salt.hex(),
-            hashing_algorithm_name=HASH_ALGORITHM,
-            user_data_id=user.id,
-            email_verification_token=verification_token,
-        )
-        session.add(login)
-        session.commit()
-
-        # Create our session token
-        auth_token = create_auth_token(user.id, AROAuthToken.EMAIL_PASSWORD)
-
-        return TokenResponse(
-            token=auth_token.token,
-            user_id=user.id,
-            expires_at=auth_token.expiry,
-        )
+    return TokenResponse(
+        token=auth_token.token,
+        user_id=user.id,
+        expires_at=auth_token.expiry,
+    )
 
 @router.post("/login", response_model=TokenResponse)
 async def login(request: LoginRequest) -> TokenResponse:
@@ -255,34 +156,8 @@ async def login(request: LoginRequest) -> TokenResponse:
     Validates credentials and returns an auth token.
     If unsuccessful, gives appropriate errors.
     """
-    with get_db_session() as session:
-        login_record = session.exec(
-            select(AROUserLogin).where(AROUserLogin.email == request.email)
-        ).first()
-
-        if not login_record:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Login credentials invalid.",
-            )
-        
-        # Verify password
-        if not verify_password(request.password, login_record.password_salt, login_record.password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password.",
-            )
-        
-        # Get the user data
-        user = session.get(AROUsers, login_record.user_data_id)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="User data not found.",
-            )
-
-    # Create our session auth token
-    auth_token = create_auth_token(user.id, AROAuthToken.EMAIL_PASSWORD)
+    
+    auth_token, user = login_user(request.email, request.password)
 
     return TokenResponse(
         token=auth_token.token,
@@ -298,20 +173,8 @@ async def logout(token: str) -> dict[str, str]:
     Invalidate an auth token (logout).
     Deletes the token from the database.
     """
-    with get_db_session() as session:
-        auth_token = session.exec(
-            select(AROUserAuthToken).where(AROUserAuthToken.token == token)
-        ).first()
+    logout_user(token)
 
-        if not auth_token:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Couldn't find your login credentials. How did you even log in?",
-            )
-        
-        session.delete(auth_token)
-        session.commit()
-    
     return {
         "message" : "Logged out successfully."
     }

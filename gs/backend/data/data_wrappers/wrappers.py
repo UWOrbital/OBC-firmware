@@ -3,6 +3,8 @@ from uuid import UUID
 from gs.backend.data.data_wrappers.abstract_wrapper import AbstractWrapper  # SEE abstract_wrapper.py FOR LOGIC
 from gs.backend.data.tables.aro_user_tables import AROUserAuthToken, AROUserLogin, AROUsers
 from gs.backend.data.tables.main_tables import MainCommand, MainTelemetry
+from sqlmodel import select
+from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.tables.transactional_tables import (
     ARORequest,
     Commands,
@@ -28,6 +30,12 @@ class AROUserAuthTokenWrapper(AbstractWrapper[AROUserAuthToken, UUID]):
     """
 
     model = AROUserAuthToken
+
+    def get_by_token(self, token: str) -> AROUserAuthToken | None:
+        with get_db_session() as session:
+            return session.exec(
+                select(self.model).where(self.model.token == token)
+            ).first()
 
 
 class AROUserLoginWrapper(AbstractWrapper[AROUserLogin, UUID]):

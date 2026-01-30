@@ -64,7 +64,7 @@ class UserResponse(BaseModel):
     :param is_callsigned-
     """
     id: UUID
-    email: str
+    email: EmailStr
     first_name: str
     last_name: str | None
     is_callsign_verified: bool

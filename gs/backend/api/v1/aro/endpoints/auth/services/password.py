@@ -1,6 +1,5 @@
 from hashlib import pbkdf2_hmac
 
-TOKEN_EXPIRY_HOURS = 6.7
 HASH_ALGORITHM = "sha256"
 HASH_ITERATIONS = 100_000
 
@@ -13,3 +12,4 @@ def verify_password(password: str, salt_hex: str, hashed: str) -> bool:
     # Verify a hashed password against its hash
     salt = bytes.fromhex(salt_hex)
     return hash_password(password, salt) == hashed
+

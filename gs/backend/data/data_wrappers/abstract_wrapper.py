@@ -53,6 +53,21 @@ class AbstractWrapper(ABC, Generic[T, PK]):
             session.commit()
             session.refresh(obj)
             return obj
+    
+    def update(self, obj_id: PK, data: dict[str, Any]) -> T:
+        with get_db_session() as session:
+            obj = session.get(self.model, obj_id)
+            if not obj:
+                raise ValueError(f"{self.model.__name__} with ID {obj_id} not found.")
+            
+            for key, value in data.items():
+                setattr(obj, key, value)
+            
+            session.add(obj)
+            session.commit()
+            session.refresh(obj)
+            
+            return obj
 
     def delete_by_id(self, obj_id: PK) -> T:
         """

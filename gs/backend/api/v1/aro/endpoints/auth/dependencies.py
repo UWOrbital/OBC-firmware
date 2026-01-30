@@ -1,34 +1,9 @@
-
 from datetime import datetime
-from os import urandom
-from typing import Any, cast
-from uuid import uuid4
-
-from authlib.integrations.starlette_client import OAuth, OAuthError
-from starlette.requests import Request
-from starlette.config import Config
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr
-from sqlmodel import select
 
-from gs.backend.api.v1.aro.endpoints.auth.services.services import (
-    hash_password,
-    verify_password,
-    create_auth_token,
-    get_user_by_email,
-    get_user_by_google_id,
-    create_oauth_user,
-    verify_callsign,
-)
 from gs.backend.data.data_wrappers.wrappers import (
     AROUserAuthTokenWrapper,
-    AROUserLoginWrapper,
-    ARORequestWrapper,
     AROUsersWrapper,
-)
-from gs.backend.config.config import (
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
 )
 from gs.backend.data.tables.aro_user_tables import (
     AROUserAuthToken,
@@ -36,14 +11,13 @@ from gs.backend.data.tables.aro_user_tables import (
     AROUserLogin,
     AROUsers,
 )
-
-from gs.backend.data.database.engine import get_db_session
 from gs.backend.data.enums.aro_auth_token import AROAuthToken
+from gs.backend.api.v1.aro.endpoints.auth.auth_schemas import UserResponse
 
 router = APIRouter(prefix='/auth', tags=['authentication'])
 
 @router.get("/currentuser")
-async def get_current_user(token: str) -> AROUsers:
+async def get_current_user(token: str) -> UserResponse:
     """
     get_current_user
 
@@ -71,11 +45,24 @@ async def get_current_user(token: str) -> AROUsers:
             detail="Your login expired.",
         )
     
-    return user_wrapper.get_by_id(auth_token.user_data_id)
+    user = user_wrapper.get_by_id(auth_token.user_data_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Couldn't find the user from ID."
+        )
 
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        is_callsign_verified=user.is_callsign_verified,
+    )
 
-@router.post("/is-verified")
+@router.post("/isverified")
 def require_verified_user(user: AROUsers = Depends(get_current_user)) -> AROUsers:
+
     if not user.is_callsign_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
