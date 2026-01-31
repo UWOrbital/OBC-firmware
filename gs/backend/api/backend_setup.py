@@ -12,7 +12,7 @@ from gs.backend.api.v1.mcc.endpoints.aro_requests import aro_requests_router
 from gs.backend.api.v1.mcc.endpoints.commands import commands_router
 from gs.backend.api.v1.mcc.endpoints.main_commands import main_commands_router
 from gs.backend.api.v1.mcc.endpoints.telemetry import telemetry_router
-from gs.backend.config.config import backend_config
+from gs.backend.config.config import settings
 
 
 def setup_routes(app: FastAPI) -> None:
@@ -38,7 +38,7 @@ def setup_middlewares(app: FastAPI) -> None:
     app.add_middleware(AuthMiddleware)
     app.add_middleware(
         LoggerMiddleware,
-        excluded_endpoints=backend_config.logger_config.excluded_endpoints,
+        excluded_endpoints=settings.logger.excluded_endpoints,
     )
 
 
