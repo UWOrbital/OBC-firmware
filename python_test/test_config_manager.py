@@ -25,10 +25,17 @@ def test_cors_config_default():
 
 def test_backend_configuration_from_env(monkeypatch):
     monkeypatch.setenv("LOGGER_EXCLUDED_ENDPOINTS", '["/test"]')
+
     monkeypatch.setenv("CORS_ALLOW_ORIGINS", '["http://localhost:5173"]')
     monkeypatch.setenv("CORS_ALLOW_CREDENTIALS", "True")
     monkeypatch.setenv("CORS_ALLOW_METHODS", '["*"]')
     monkeypatch.setenv("CORS_ALLOW_HEADERS", '["*"]')
+
+    monkeypatch.setenv("GS_DATABASE_USER", "testuser")
+    monkeypatch.setenv("GS_DATABASE_PASSWORD", "testpassword")
+    monkeypatch.setenv("GS_DATABASE_LOCATION", "localhost")
+    monkeypatch.setenv("GS_DATABASE_PORT", "5432")
+    monkeypatch.setenv("GS_DATABASE_NAME", "testdb")
 
     importlib.reload(config)
     cfg = config.settings
@@ -51,6 +58,12 @@ def test_database_connection_string():
 
 
 def test_database_missing_env(monkeypatch):
+    monkeypatch.setenv("GS_DATABASE_USER", "testuser")
+    monkeypatch.setenv("GS_DATABASE_PASSWORD", "testpassword")
+    monkeypatch.setenv("GS_DATABASE_LOCATION", "localhost")
+    monkeypatch.setenv("GS_DATABASE_PORT", "5432")
+    monkeypatch.setenv("GS_DATABASE_NAME", "testdb")
+
     monkeypatch.delenv("GS_DATABASE_PASSWORD")
 
     with pytest.raises(ValidationError):
