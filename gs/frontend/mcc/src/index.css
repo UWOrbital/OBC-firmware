@@ -9,7 +9,7 @@
     border-color: var(--border);
   }
   body {
-    overflow: hidden;
+    overflow-y: auto;
     display: flex;
     background-color: var(--background);
     font-family: var(--font-default);
@@ -20,7 +20,7 @@
     height: 100%;
     width: 100%;
     margin: 10px;
-    overflow: hidden;
+    overflow: visible;
   }
 }
 
