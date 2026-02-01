@@ -54,7 +54,7 @@ def test_database_connection_string():
 
     assert db.password.get_secret_value() == "testpassword"
     expected_url = "postgresql://testuser:testpassword@localhost:5432/testdb"
-    assert db.connection_string() == expected_url
+    assert db.connection_string == expected_url
 
 
 def test_database_missing_env(monkeypatch):

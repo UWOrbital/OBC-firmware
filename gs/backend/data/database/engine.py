@@ -13,7 +13,7 @@ def get_db_engine() -> Engine:
 
     :return: engine
     """
-    return create_engine(settings.db.connection_string())
+    return create_engine(settings.db.connection_string)
 
 
 def get_db_session() -> Session:

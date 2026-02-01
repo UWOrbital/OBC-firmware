@@ -15,6 +15,7 @@ class DatabaseConfig(BaseSettings):
     port: int
     name: str
 
+    @property
     def connection_string(self) -> str:
         """
         Returns the database connection string
