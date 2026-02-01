@@ -12,10 +12,13 @@ After initial authentication, the user will need to additionally verify with the
 from typing import Any
 from starlette.config import Config
 from starlette.requests import Request
+from fastapi import APIRouter, HTTPException, status, Depends
 from authlib.integrations.starlette_client import OAuth, OAuthError
 
-from fastapi import APIRouter, HTTPException, status
+from gs.backend.api.v1.aro.endpoints.auth.services.cs_2fa import verify_user_callsign
+from gs.backend.api.v1.aro.endpoints.auth.dependencies import get_current_user
 from gs.backend.api.v1.aro.endpoints.auth.services.google import google_auth
+from gs.backend.data.tables.aro_user_tables import AROUsers
 from gs.backend.api.v1.aro.endpoints.auth.services.register import (
     register_user,
     login_user,
@@ -56,6 +59,8 @@ from gs.backend.api.v1.aro.endpoints.auth.auth_schemas import (
     RegisterRequest,
     LoginRequest,
     TokenResponse,
+    UserResponse,
+    CallsignRequest,
 )
 
 # -----------------------------------------------------------------------
@@ -178,3 +183,15 @@ async def logout(token: str) -> dict[str, str]:
     return {
         "message" : "Logged out successfully."
     }
+
+@router.post("/verifycs", response_model=UserResponse)
+async def verify_callsign(request: CallsignRequest, user: AROUsers = Depends(get_current_user)) -> UserResponse:
+    user = verify_user_callsign(request.call_sign, user)
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        is_callsign_verified=user.is_callsign_verified,
+    )
+    

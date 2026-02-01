@@ -36,6 +36,8 @@ class AROUsers(BaseSQLModel, table=True):
     :type id: UUID
     :param call_sign: ARO User's call sign that we will use to communicate with them
     :type call_sign: str
+    :param is_callsign_verified: ARO User's callsign verification status
+    :type is_callsign_verified: bool
     :param email: Valid email
     :type email: EmailStr
     :param first_name: First name of ARO user
