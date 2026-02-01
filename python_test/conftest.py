@@ -2,6 +2,12 @@ import os
 import subprocess
 from datetime import datetime
 
+os.environ.setdefault("GS_DATABASE_USER", "testuser")
+os.environ.setdefault("GS_DATABASE_PASSWORD", "testpassword")
+os.environ.setdefault("GS_DATABASE_LOCATION", "localhost")
+os.environ.setdefault("GS_DATABASE_PORT", "5432")
+os.environ.setdefault("GS_DATABASE_NAME", "testdb")
+
 import pytest
 from gs.backend.data.database.engine import setup_database
 from gs.backend.data.tables.transactional_tables import CommsSession
