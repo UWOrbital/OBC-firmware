@@ -1,7 +1,7 @@
 import importlib
 
 import pytest
-from gs.backend.config import config
+from gs.backend.config.config import BackendConfiguration, settings
 from gs.backend.config.cors_config import CORSConfig
 from gs.backend.config.database_config import DatabaseConfig
 from gs.backend.config.logger_config import LoggerConfig
@@ -37,8 +37,7 @@ def test_backend_configuration_from_env(monkeypatch):
     monkeypatch.setenv("GS_DATABASE_PORT", "5432")
     monkeypatch.setenv("GS_DATABASE_NAME", "testdb")
 
-    importlib.reload(config)
-    cfg = config.settings
+    cfg = BackendConfiguration()
 
     assert "/test" in cfg.logger.excluded_endpoints
     assert "http://localhost:5173" in cfg.cors.allow_origins
@@ -50,7 +49,7 @@ def test_backend_configuration_from_env(monkeypatch):
 
 
 def test_database_connection_string():
-    db = config.settings.db
+    db = settings.db
 
     assert db.password.get_secret_value() == "testpassword"
     expected_url = "postgresql://testuser:testpassword@localhost:5432/testdb"
