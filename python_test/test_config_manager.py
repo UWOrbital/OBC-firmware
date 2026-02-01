@@ -48,8 +48,15 @@ def test_backend_configuration_from_env(monkeypatch):
     assert cfg.db.name == "testdb"
 
 
-def test_database_connection_string():
-    db = settings.db
+def test_database_connection_string(monkeypatch):
+    monkeypatch.setenv("GS_DATABASE_USER", "testuser")
+    monkeypatch.setenv("GS_DATABASE_PASSWORD", "testpassword")
+    monkeypatch.setenv("GS_DATABASE_LOCATION", "localhost")
+    monkeypatch.setenv("GS_DATABASE_PORT", "5432")
+    monkeypatch.setenv("GS_DATABASE_NAME", "testdb")
+
+    cfg = BackendConfiguration()
+    db = cfg.db
 
     assert db.password.get_secret_value() == "testpassword"
     expected_url = "postgresql://testuser:testpassword@localhost:5432/testdb"
