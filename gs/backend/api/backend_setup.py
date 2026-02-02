@@ -52,6 +52,6 @@ def setup_logging() -> None:
             logger.log("VERBOSE", record.getMessage())
 
     sqlalchemy_logger = logging.getLogger("sqlalchemy.engine")
-    sqlalchemy_logger.setLevel(logging.INFO)
+    sqlalchemy_logger.setLevel(verbose_level)
     sqlalchemy_logger.addHandler(SQLAlchemyHandler())
     sqlalchemy_logger.propagate = False
