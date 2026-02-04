@@ -67,7 +67,13 @@ int main(void) {
   // Initialize bus mutexes
   initSciPrint();
   initI2CMutex();
-  initINA230();
+
+  obc_error_code_t errCode;
+  errCode = initINA230();
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    sciPrintf("Error Initializing - %d\r\n", (int)errCode);
+    return 0;
+  }
 
   // Assume all tasks are created correctly
   xTaskCreateStatic(vTaskCode, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);
