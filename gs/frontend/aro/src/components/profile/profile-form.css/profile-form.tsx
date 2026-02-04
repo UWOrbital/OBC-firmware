@@ -2,17 +2,18 @@ import { useRef, useState, type FormEventHandler } from "react";
 import "./profile-form.css"
 
 export default function ProfileForm() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [fileName, setFileName] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false); // state of form being editable or not
+  const [fileName, setFileName] = useState(""); // state of file name of file uploaded
+  const fileInputRef = useRef<HTMLInputElement>(null); // ref to more easily access file input element
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
+    // TODO: handle submit, if we implement pfps
     console.log(e.currentTarget.callsign.value);
   }
 
   const handleUpload = () => {
-    const fileInput = fileInputRef.current;
+    const fileInput = fileInputRef.current; // get file input element
       if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
         console.log("Please select a file to upload");
         return;
@@ -29,7 +30,7 @@ export default function ProfileForm() {
         console.log("Invalid image format");
         return;
       }
-      console.log(`${file.name} can be uploaded! (success message TODO)`);
+      console.log(`${file.name} can be uploaded! (success message)`);
   }
 
   return (
@@ -38,14 +39,18 @@ export default function ProfileForm() {
 
         {/* profile picture left bar */}
         <div className="flex flex-col w-60 max-w-full items-center h-fit max-h-full gap-2">
+
+          {/* profile image container */}
           <div className="flex w-full max-w-full aspect-square items-center justify-center rounded-lg bg-indigo-950">
             <img src="/vite.svg" alt="profile image" className="size-full object-cover"/>
           </div>
+
+          {/* pfp edit buttons */}
           <label htmlFor="pfp-upload" className="w-full max-w-full p-1 transition-colors hover:bg-gray-200 text-gray-900 border-black border rounded-lg text-center cursor-pointer shadow">
             Edit profile image
           </label>
           <input id="pfp-upload" type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => setFileName(e.currentTarget.files?.item(0)?.name ?? "")}/>
-          {fileName &&
+          {fileName && /* only load file name and upload button once file is received */
             <div className="flex flex-wrap items-center justify-center h-fit w-full gap-2">
               <p className="text-gray-900 max-w-full wrap-break-word">{fileName}</p>
               <button onClick={handleUpload} className="size-fit px-2 py-1 rounded-lg transition-colors bg-gray-900 hover:bg-gray-700 shadow">Upload</button>
@@ -96,6 +101,8 @@ export default function ProfileForm() {
             </div>
 
           </div>
+
+          {/* form buttons */}
           <div className="flex flex-wrap size-fit gap-x-3 gap-y-1">
             <button type="submit" className="form-buttons transition-colors bg-gray-900 hover:bg-gray-700 shadow"
             onClick={() => (setIsEditing(prev => !prev))} hidden={!isEditing}>
