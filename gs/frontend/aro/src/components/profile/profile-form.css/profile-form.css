@@ -1,0 +1,29 @@
+.form-buttons {
+    width: fit-content;
+    padding-inline: calc(var(--spacing) * 2);
+    padding-block: var(--spacing);
+    border-radius: calc(var(--radius) - 2px);
+}
+
+.field-label-container {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    max-width: 100%;
+    row-gap: calc(var(--spacing) * 1);
+    color: var(--color-gray-900);
+}
+
+.form-field {
+    width: 100%;
+    padding: var(--spacing);
+    border-radius: var(--radius);
+    outline: 2px solid var(--color-gray-200);
+}
+.form-field:disabled {
+    background-color: var(--color-gray-200);
+    cursor: not-allowed;
+}
+.form-field:focus {
+    background-color: var(--color-slate-100);
+}
