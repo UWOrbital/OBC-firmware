@@ -37,8 +37,8 @@ export default function ProfileForm() {
       <div className="flex flex-wrap items-center justify-evenly max-w-full max-h-full min-h-fit rounded-2xl bg-white gap-4 p-6">
 
         {/* profile picture left bar */}
-        <div className="flex flex-col max-w-full items-center h-fit max-h-full gap-2">
-          <div className="flex w-60 max-w-full aspect-square items-center justify-center rounded-lg bg-indigo-950">
+        <div className="flex flex-col w-60 max-w-full items-center h-fit max-h-full gap-2">
+          <div className="flex w-full max-w-full aspect-square items-center justify-center rounded-lg bg-indigo-950">
             <img src="/vite.svg" alt="profile image" className="size-full object-cover"/>
           </div>
           <label htmlFor="pfp-upload" className="w-full max-w-full p-1 transition-colors hover:bg-gray-200 text-gray-900 border-black border rounded-lg text-center cursor-pointer shadow">
@@ -47,14 +47,14 @@ export default function ProfileForm() {
           <input id="pfp-upload" type="file" hidden ref={fileInputRef} accept="image/*" onChange={(e) => setFileName(e.currentTarget.files?.item(0)?.name ?? "")}/>
           {fileName &&
             <div className="flex flex-wrap items-center justify-center h-fit w-full gap-2">
-              <p className="text-gray-900 wrap-break-word">{fileName}</p>
+              <p className="text-gray-900 max-w-full wrap-break-word">{fileName}</p>
               <button onClick={handleUpload} className="size-fit px-2 py-1 rounded-lg transition-colors bg-gray-900 hover:bg-gray-700 shadow">Upload</button>
             </div>
           }
         </div>
 
         {/* edit form right bar */}
-        <form id="edit-form" onSubmit={handleSubmit} className="flex flex-col items-end w-xl h-fit max-h-full gap-4 ">
+        <form id="edit-form" onSubmit={handleSubmit} className="flex flex-col items-end w-xl h-fit p-1 gap-4 overflow-x-auto">
           <label className="w-full text-2xl font-medium text-black wrap-break-word">Edit Information</label>
 
           {/* form text fields */}

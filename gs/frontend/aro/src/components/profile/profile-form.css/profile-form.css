@@ -17,7 +17,7 @@
 .form-field {
     width: 100%;
     padding: var(--spacing);
-    border-radius: var(--radius);
+    border-radius: calc(var(--radius) - 2px);
     outline: 2px solid var(--color-gray-200);
 }
 .form-field:disabled {
