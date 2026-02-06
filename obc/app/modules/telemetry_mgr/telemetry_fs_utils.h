@@ -95,3 +95,12 @@ obc_error_code_t readNextTelemetryFromFile(int32_t telemFileId, telemetry_data_t
  * @return obc_error_code_t
  */
 obc_error_code_t createAndOpenTelemetryFileRW(uint32_t telemBatchId, int32_t *telemFileId);
+
+/**
+ * @brief Deletes a telemetry file based on a specific file path
+ *
+ * @param filePath Path to the File
+ * @return obc_error_code_t
+ * @note Telemetry file must exist first
+ */
+obc_error_code_t deleteSelectedTelemetryFile(const char *filePath);
