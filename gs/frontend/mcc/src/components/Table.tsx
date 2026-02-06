@@ -56,21 +56,21 @@ function Table<T>({
             placeholder="Search..."
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="flex-1 bg-gray-800/50 text-white px-4 py-2 rounded-lg border border-gray-600/50 focus:outline-none focus:border-gray-500"
+            className="flex-1 bg-input text-foreground px-4 py-2 rounded-lg border border-border focus:outline-none focus:border-ring"
           />
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-gray-900/30 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-700/50">
-        <table className="w-full text-white">
+      <div className="bg-card backdrop-blur-sm rounded-lg overflow-hidden border border-border">
+        <table className="w-full text-foreground">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-gray-700/50">
+              <tr key={headerGroup.id} className="border-b border-border">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="text-left px-6 py-4 font-normal text-gray-300"
+                    className="text-left px-6 py-4 font-normal text-muted-foreground"
                   >
                     {header.isPlaceholder
                       ? null
@@ -87,13 +87,13 @@ function Table<T>({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={`border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors ${
+                className={`border-b border-border hover:bg-accent transition-colors ${
                   onRowClick ? "cursor-pointer" : ""
                 }`}
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4 text-gray-200">
+                  <td key={cell.id} className="px-6 py-4 text-foreground">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import AROAdmin from "./pages/AROAdmin";
 import LiveSession from "./pages/LiveSession";
 import Login from "./pages/Login";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import PageNotFound from "./components/PageNotFound";
 
 /**
@@ -16,19 +17,21 @@ import PageNotFound from "./components/PageNotFound";
  */
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <Nav />
       <Background />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/commands" element={<Commands />} />
-        <Route path="/telemetry-data" element={<AROAdmin />} />
-        <Route path="/aro-requests" element={<LiveSession />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
+      <div className="pt-16">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/commands" element={<Commands />} />
+          <Route path="/telemetry-data" element={<AROAdmin />} />
+          <Route path="/aro-requests" element={<LiveSession />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </div>
       <ToastContainer />
-    </>
+    </ThemeProvider>
   );
 }
 
