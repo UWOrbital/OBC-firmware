@@ -16,14 +16,13 @@
 
 .form-field {
     width: 100%;
-    padding: var(--spacing);
+    padding-inline: calc(var(--spacing) * 2);
+    padding-block: var(--spacing);
     border-radius: calc(var(--radius) - 2px);
-    outline: 2px solid var(--color-gray-200);
+    outline: 1px solid var(--color-gray-200);
 }
-.form-field:disabled {
-    background-color: var(--color-gray-200);
-    cursor: not-allowed;
-}
+/*
 .form-field:focus {
     background-color: var(--color-slate-100);
 }
+    */
