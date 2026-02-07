@@ -21,8 +21,3 @@
     border-radius: calc(var(--radius) - 2px);
     outline: 1px solid var(--color-gray-200);
 }
-/*
-.form-field:focus {
-    background-color: var(--color-slate-100);
-}
-    */
