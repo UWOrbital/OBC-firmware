@@ -1,28 +1,30 @@
 from typing import Final
 
-from skyfield.api import EarthSatellite, Topos, load
+from skyfield.api import EarthSatellite, Topos, load, Timescale, Time
 
 SPEED_OF_LIGHT_METERS_PER_SECOND: Final[int] = 299_792_458
+TRANSMISSION_FREQUENCY_HZ: Final[float] = 433_920_000  # Default frequency, UW-Orbital's 433.920 MHz band
 
 """
 @brief Holds logic for calculating doppler shift from TLS and ground station coordinates
 @details Since we're not actually getting TLE or interfacing with HackRF it's not hooked up to anything yet
 """
 
-
-def load_satellite(tle_line1: str, tle_line2: str, name: str = "UW_SAT") -> EarthSatellite:
+# Change: made function take in time as a parameter instead
+def load_satellite(tle_line1: str, tle_line2: str, timescale: Timescale, name: str = "UW_SAT") -> EarthSatellite:
     """
     @brief Loads satellite from TLE lines
     @param tle_line1: First line of TLE
     @param tle_line2: Second line of TLE
+    @param timescale: Time for which satellite position is being calculated
     @param name: Optional satellite name
     @returns EarthSatellite object
     """
-    return EarthSatellite(tle_line1, tle_line2, name, load.timescale())
+    return EarthSatellite(tle_line1, tle_line2, name, timescale)
 
-
+# Change: made function take in time as a parameter
 def calculate_relative_velocity(
-    satellite: EarthSatellite, observer_latitude_deg: float, observer_longitude_deg: float, observer_altitude_m: float
+    satellite: EarthSatellite, observer_latitude_deg: float, observer_longitude_deg: float, observer_altitude_m: float, time_current: Time
 ) -> float:
     """
     @brief Computes relative velocity between satellite and observer
@@ -30,9 +32,9 @@ def calculate_relative_velocity(
     @param observer_latitude_degree: Latitude of observer in degrees
     @param observer_longitude_deg: Longitude of observer in degrees
     @param observer_altitude_m: Altitude of observer in meters
+    @param time_current: Time for which relative velocity is being calculated
     @returns Relative radial velocity in m/s (positive is moving away)
     """
-    time_current = load.timescale().now()
 
     observer = Topos(
         latitude_degrees=observer_latitude_deg,
@@ -71,22 +73,27 @@ def compute_doppler_shift(frequency_hz: float, relative_velocity_m_s: float) -> 
     )
 
 
+# Change: made trans freq a constant in the file that is passed instead of a parameter to the function
 def calculate_doppler(
     tle_line1: str,
     tle_line2: str,
     observer_latitude_deg: float,
     observer_longitude_deg: float,
     observer_altitude_m: float,
-    transmission_frequency_hz: float = 433_920_000,  # Default frequency, UW-Orbital's 433.920 MHz band
+    timescale: Timescale,
+    time_current: Time
 ) -> float:
     """
     @brief High-level function to compute Doppler shift
     @param tle_line1: First line of TLE data
     @param tle_line2: Second line of TLE data
-    @param observer_coords: Tuple of (latitude_deg, longitude_deg, altitude_m)
-    @param transmission_frequency_hz: Frequency of the satellite transmission in Hz
+    @param observer_latitude_deg: Latitude of observer in degrees
+    @param observer_longitude_deg: Longitude of observer in degrees
+    @param observer_altitude_m: Altitude of observer in meters
+    @param timescale: Time for which satellite position is being calculated
+    @param time_current: Time for which Doppler shift is being calculated
     @returns Doppler-shifted frequency in Hz
     """
-    sat = load_satellite(tle_line1, tle_line2)
-    rv = calculate_relative_velocity(sat, observer_latitude_deg, observer_longitude_deg, observer_altitude_m)
-    return compute_doppler_shift(transmission_frequency_hz, rv)
+    sat = load_satellite(tle_line1, tle_line2, timescale)
+    rv = calculate_relative_velocity(sat, observer_latitude_deg, observer_longitude_deg, observer_altitude_m, time_current)
+    return compute_doppler_shift(TRANSMISSION_FREQUENCY_HZ, rv)
