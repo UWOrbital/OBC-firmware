@@ -1,6 +1,6 @@
 from typing import Final
 
-from skyfield.api import EarthSatellite, Topos, load, Timescale, Time
+from skyfield.api import EarthSatellite, Time, Timescale, Topos
 
 SPEED_OF_LIGHT_METERS_PER_SECOND: Final[int] = 299_792_458
 TRANSMISSION_FREQUENCY_HZ: Final[float] = 433_920_000  # Default frequency, UW-Orbital's 433.920 MHz band
@@ -9,6 +9,7 @@ TRANSMISSION_FREQUENCY_HZ: Final[float] = 433_920_000  # Default frequency, UW-O
 @brief Holds logic for calculating doppler shift from TLS and ground station coordinates
 @details Since we're not actually getting TLE or interfacing with HackRF it's not hooked up to anything yet
 """
+
 
 # Change: made function take in time as a parameter instead
 def load_satellite(tle_line1: str, tle_line2: str, timescale: Timescale, name: str = "UW_SAT") -> EarthSatellite:
@@ -22,9 +23,14 @@ def load_satellite(tle_line1: str, tle_line2: str, timescale: Timescale, name: s
     """
     return EarthSatellite(tle_line1, tle_line2, name, timescale)
 
+
 # Change: made function take in time as a parameter
 def calculate_relative_velocity(
-    satellite: EarthSatellite, observer_latitude_deg: float, observer_longitude_deg: float, observer_altitude_m: float, time_current: Time
+    satellite: EarthSatellite,
+    observer_latitude_deg: float,
+    observer_longitude_deg: float,
+    observer_altitude_m: float,
+    time_current: Time,
 ) -> float:
     """
     @brief Computes relative velocity between satellite and observer
@@ -81,7 +87,7 @@ def calculate_doppler(
     observer_longitude_deg: float,
     observer_altitude_m: float,
     timescale: Timescale,
-    time_current: Time
+    time_current: Time,
 ) -> float:
     """
     @brief High-level function to compute Doppler shift
@@ -95,5 +101,7 @@ def calculate_doppler(
     @returns Doppler-shifted frequency in Hz
     """
     sat = load_satellite(tle_line1, tle_line2, timescale)
-    rv = calculate_relative_velocity(sat, observer_latitude_deg, observer_longitude_deg, observer_altitude_m, time_current)
+    rv = calculate_relative_velocity(
+        sat, observer_latitude_deg, observer_longitude_deg, observer_altitude_m, time_current
+    )
     return compute_doppler_shift(TRANSMISSION_FREQUENCY_HZ, rv)
