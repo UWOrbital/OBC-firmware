@@ -44,7 +44,7 @@ def setup_middlewares(app: FastAPI) -> None:
 
 def setup_logging() -> None:
     """Sets all logs from SQLAlchemy to the custom logger level VERBOSE"""
-    verbose_level = 15  # DEBUG=10, INFO=20
+    verbose_level = 15  # DEBUG=10,  INFO=20
     logger.level("VERBOSE", no=verbose_level, color="<blue>")
 
     class SQLAlchemyHandler(logging.Handler):
@@ -52,6 +52,6 @@ def setup_logging() -> None:
             logger.log("VERBOSE", record.getMessage())
 
     sqlalchemy_logger = logging.getLogger("sqlalchemy.engine")
-    sqlalchemy_logger.setLevel(logging.INFO)
+    sqlalchemy_logger.setLevel(verbose_level)
     sqlalchemy_logger.addHandler(SQLAlchemyHandler())
     sqlalchemy_logger.propagate = False
