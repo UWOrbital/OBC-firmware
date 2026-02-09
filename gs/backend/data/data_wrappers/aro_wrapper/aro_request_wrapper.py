@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
+from sqlalchemy import desc
 from sqlmodel import select
 
 from gs.backend.data.database.engine import get_db_session
@@ -9,12 +10,32 @@ from gs.backend.data.enums.aro_requests import ARORequestStatus
 from gs.backend.data.tables.transactional_tables import ARORequest
 
 
-def get_all_requests() -> list[ARORequest]:
+def get_all_requests(
+    count: int = 100, offset: int = 0, filters: list[ARORequestStatus] | None = None
+) -> list[ARORequest]:
     """
     Get all the requests from aro
+
+    :param count: Number of most recent requests to return. If ≤ 0, returns all data
+    :param offset: Starting point for paging
+    :param filters: List of request statuses to filter by. If empty, no filtering is applied
     """
+
+    if filters is None:
+        filters = []
+
     with get_db_session() as session:
-        requests = list(session.exec(select(ARORequest)).all())
+        query = select(ARORequest).order_by(desc(ARORequest.created_on))  # type: ignore
+
+        if filters:
+            query = query.where(ARORequest.status.in_(filters))  # type: ignore
+        if offset > 0:
+            query = query.offset(offset)
+        if count > 0:
+            query = query.limit(count)
+
+        requests = list(session.exec(query).all())
+
         return requests
 
 
@@ -34,8 +55,9 @@ def add_request(
     :param long: the longitude represented as a decimal of max 3 decimal places
     :param lat: the latitude represented as a decimal of max 3 decimal places
     :param created_on: datetime object representing the date this request was made. defaults to now
+    :param request_sent_obc: datetime object representing when the request was sent to OBC
     :param taken_date: datetime object representing the date that this picture was taken on
-    :param taken_date: datetime object representing the date that this picture was trasmitted
+    :param transmission: datetime object representing the date that this picture was transmitted
     :param status: the status of the request, can only be from the requets in ARORequestStatus
     """
     with get_db_session() as session:
@@ -45,8 +67,8 @@ def add_request(
             longitude=long,
             created_on=created_on,
             request_sent_to_obc_on=request_sent_obc,
-            taken_date=taken_date,
-            transmission=transmission,
+            pic_taken_on=taken_date,
+            pic_transmitted_on=transmission,
             status=status,
         )
 
