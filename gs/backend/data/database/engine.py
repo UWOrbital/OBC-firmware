@@ -1,7 +1,7 @@
 from sqlalchemy import Engine
 from sqlmodel import Session, create_engine, text
 
-from gs.backend.config.config import DATABASE_CONNECTION_STRING
+from gs.backend.config.config import settings
 from gs.backend.data.tables.aro_user_tables import ARO_USER_SCHEMA_NAME
 from gs.backend.data.tables.main_tables import MAIN_SCHEMA_NAME
 from gs.backend.data.tables.transactional_tables import TRANSACTIONAL_SCHEMA_NAME
@@ -13,7 +13,7 @@ def get_db_engine() -> Engine:
 
     :return: engine
     """
-    return create_engine(DATABASE_CONNECTION_STRING)
+    return create_engine(settings.db.connection_string)
 
 
 def get_db_session() -> Session:

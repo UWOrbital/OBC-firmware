@@ -67,6 +67,23 @@ class AROUserCallsigns(BaseSQLModel, table=True):
     """
 
     call_sign: str = Field(primary_key=True, min_length=CALL_SIGN_MIN_LENGTH, max_length=CALL_SIGN_MAX_LENGTH)
+    first_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    last_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    personal_address: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    personal_city: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    personal_province: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    personal_postal_code: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    qual_level_a: bool = Field()
+    qual_level_b: bool = Field()
+    qual_level_c: bool = Field()
+    qual_level_d: bool = Field()
+    qual_level_e: bool = Field()
+    club_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    second_club_name: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    club_address: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    club_city: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    club_province: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
+    club_postal_code: str | None = Field(max_length=DEFAULT_MAX_LENGTH, nullable=True, default=None)
 
     __tablename__ = ARO_USER_CALLSIGNS
     __table_args__ = {"schema": ARO_USER_SCHEMA_NAME}

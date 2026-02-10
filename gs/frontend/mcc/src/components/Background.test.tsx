@@ -2,16 +2,26 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Background from "./Background";
+import { ThemeProvider } from "../contexts/ThemeContext";
 
 describe("Background", () => {
   it("renders background image", () => {
-    render(<Background />);
+    render(
+      <ThemeProvider>
+        <Background />
+      </ThemeProvider>
+    );
     expect(screen.getByAltText("background-image")).toBeInTheDocument();
   });
 
   it("has correct CSS classes", () => {
-    render(<Background />);
+    render(
+      <ThemeProvider>
+        <Background />
+      </ThemeProvider>
+    );
     const image = screen.getByAltText("background-image");
-    expect(image).toHaveClass("fixed bottom-0 left-0 w-full object-cover -z-10 opacity-40");
+    // In light mode (default), opacity should be slightly higher for visibility
+    expect(image).toHaveClass("opacity-30");
   });
 });

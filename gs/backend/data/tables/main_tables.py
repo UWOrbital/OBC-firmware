@@ -31,7 +31,7 @@ class MainCommand(BaseSQLModel, table=True):
     name: str
     params: str | None = None  # None if no params needed
     format: str | None = None  # None if no format needed
-    data_size: int = Field(gt=0)
+    data_size: int = Field(ge=0)
     total_size: int = Field(gt=0)
 
     # table information
