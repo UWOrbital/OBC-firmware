@@ -107,6 +107,7 @@ void obcTaskFunctionStateMgr(void *pvParameters) {
 #endif
 
   // TODO add other peripherals
+  // - Add Init for camera
 
   lm75bd_config_t config = {
       .devAddr = LM75BD_OBC_I2C_ADDR,
