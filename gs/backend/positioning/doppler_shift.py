@@ -35,7 +35,7 @@ def calculate_relative_velocity(
     """
     @brief Computes relative velocity between satellite and observer
     @param satellite: EarthSatellite object
-    @param observer_latitude_degree: Latitude of observer in degrees
+    @param observer_latitude_deg: Latitude of observer in degrees
     @param observer_longitude_deg: Longitude of observer in degrees
     @param observer_altitude_m: Altitude of observer in meters
     @param time_current: Time for which relative velocity is being calculated
@@ -75,7 +75,7 @@ def compute_doppler_shift(frequency_hz: float, relative_velocity_m_s: float) -> 
     @returns Doppler-shift frequency in Hz
     """
     return frequency_hz * (
-        ((SPEED_OF_LIGHT_METERS_PER_SECOND + relative_velocity_m_s) / SPEED_OF_LIGHT_METERS_PER_SECOND) - 1
+        SPEED_OF_LIGHT_METERS_PER_SECOND / (SPEED_OF_LIGHT_METERS_PER_SECOND + relative_velocity_m_s)
     )
 
 
