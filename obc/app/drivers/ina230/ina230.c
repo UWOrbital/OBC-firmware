@@ -2,6 +2,8 @@
 #include "obc_i2c_io.h"
 #include "tca6424.h"
 #include "obc_logging.h"
+#include <gio.h>
+#include "obc_board_config.h"
 #include <stdio.h>
 #include <assert.h>
 
@@ -88,28 +90,48 @@ static obc_error_code_t initTca6424PinState();
  */
 obc_error_code_t initINA230() {
   obc_error_code_t errCode;
-  for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
-    const ina230_config_t device = ina230Devices[i];
-    const uint16_t configurationRegister = (device.configurationMode << INA230_CONFIG_MODE_SHIFT) |
-                                           (device.configurationShunt << INA230_CONFIG_SHU_SHIFT) |
-                                           (device.configurationAvg << INA230_CONFIG_AVG_SHIFT) |
-                                           (device.configurationBus << INA230_CONFIG_BUS_SHIFT);
+  // for (uint8_t i = 0; i < INA230_DEVICE_COUNT; ++i) {
+  //   const ina230_config_t device = ina230Devices[i];
+  //   const uint16_t configurationRegister = (device.configurationMode << INA230_CONFIG_MODE_SHIFT) |
+  //                                          (device.configurationShunt << INA230_CONFIG_SHU_SHIFT) |
+  //                                          (device.configurationAvg << INA230_CONFIG_AVG_SHIFT) |
+  //                                          (device.configurationBus << INA230_CONFIG_BUS_SHIFT);
+  //
+  //   uint8_t configRegisterUnpacked[] = {configurationRegister >> 8, configurationRegister & 0xFF};
+  //   uint8_t maskEnRegisterUnpacked[] = {device.maskEnableRegister >> 8, device.maskEnableRegister & 0xFF};
+  //   uint8_t alertRegisterUnpacked[] = {device.alertRegister >> 8, device.alertRegister & 0xFF};
+  //   uint8_t calibrationRegisterUnpacked[] = {device.calibrationRegister >> 8, device.calibrationRegister & 0xFF};
+  //
+  //   RETURN_IF_ERROR_CODE(writeINA230Register(INA230_CONFIG_REGISTER_ADDR, configRegisterUnpacked,
+  //                                            sizeof(configRegisterUnpacked) / sizeof(configRegisterUnpacked[0]), i));
+  //   RETURN_IF_ERROR_CODE(writeINA230Register(INA230_MASK_ENABLE_REGISTER_ADDR, maskEnRegisterUnpacked,
+  //                                            sizeof(maskEnRegisterUnpacked) / sizeof(maskEnRegisterUnpacked[0]), i));
+  //   RETURN_IF_ERROR_CODE(writeINA230Register(INA230_ALERT_LIMIT_REGISTER_ADDR, alertRegisterUnpacked,
+  //                                            sizeof(alertRegisterUnpacked) / sizeof(alertRegisterUnpacked[0]), i));
+  //   RETURN_IF_ERROR_CODE(
+  //       writeINA230Register(INA230_CALIBRATION_REGISTER_ADDR, calibrationRegisterUnpacked,
+  //                           sizeof(calibrationRegisterUnpacked) / sizeof(calibrationRegisterUnpacked[0]), i));
+  // }
+  const ina230_config_t device = ina230Devices[0];
+  const uint16_t configurationRegister = (device.configurationMode << INA230_CONFIG_MODE_SHIFT) |
+                                         (device.configurationShunt << INA230_CONFIG_SHU_SHIFT) |
+                                         (device.configurationAvg << INA230_CONFIG_AVG_SHIFT) |
+                                         (device.configurationBus << INA230_CONFIG_BUS_SHIFT);
 
-    uint8_t configRegisterUnpacked[] = {configurationRegister >> 8, configurationRegister & 0xFF};
-    uint8_t maskEnRegisterUnpacked[] = {device.maskEnableRegister >> 8, device.maskEnableRegister & 0xFF};
-    uint8_t alertRegisterUnpacked[] = {device.alertRegister >> 8, device.alertRegister & 0xFF};
-    uint8_t calibrationRegisterUnpacked[] = {device.calibrationRegister >> 8, device.calibrationRegister & 0xFF};
+  uint8_t configRegisterUnpacked[] = {configurationRegister >> 8, configurationRegister & 0xFF};
+  uint8_t maskEnRegisterUnpacked[] = {device.maskEnableRegister >> 8, device.maskEnableRegister & 0xFF};
+  uint8_t alertRegisterUnpacked[] = {device.alertRegister >> 8, device.alertRegister & 0xFF};
+  uint8_t calibrationRegisterUnpacked[] = {device.calibrationRegister >> 8, device.calibrationRegister & 0xFF};
 
-    RETURN_IF_ERROR_CODE(writeINA230Register(INA230_CONFIG_REGISTER_ADDR, configRegisterUnpacked,
-                                             sizeof(configRegisterUnpacked) / sizeof(configRegisterUnpacked[0]), i));
-    RETURN_IF_ERROR_CODE(writeINA230Register(INA230_MASK_ENABLE_REGISTER_ADDR, maskEnRegisterUnpacked,
-                                             sizeof(maskEnRegisterUnpacked) / sizeof(maskEnRegisterUnpacked[0]), i));
-    RETURN_IF_ERROR_CODE(writeINA230Register(INA230_ALERT_LIMIT_REGISTER_ADDR, alertRegisterUnpacked,
-                                             sizeof(alertRegisterUnpacked) / sizeof(alertRegisterUnpacked[0]), i));
-    RETURN_IF_ERROR_CODE(
-        writeINA230Register(INA230_CALIBRATION_REGISTER_ADDR, calibrationRegisterUnpacked,
-                            sizeof(calibrationRegisterUnpacked) / sizeof(calibrationRegisterUnpacked[0]), i));
-  }
+  RETURN_IF_ERROR_CODE(writeINA230Register(INA230_CONFIG_REGISTER_ADDR, configRegisterUnpacked,
+                                           sizeof(configRegisterUnpacked) / sizeof(configRegisterUnpacked[0]), 0));
+  RETURN_IF_ERROR_CODE(writeINA230Register(INA230_MASK_ENABLE_REGISTER_ADDR, maskEnRegisterUnpacked,
+                                           sizeof(maskEnRegisterUnpacked) / sizeof(maskEnRegisterUnpacked[0]), 0));
+  RETURN_IF_ERROR_CODE(writeINA230Register(INA230_ALERT_LIMIT_REGISTER_ADDR, alertRegisterUnpacked,
+                                           sizeof(alertRegisterUnpacked) / sizeof(alertRegisterUnpacked[0]), 0));
+  RETURN_IF_ERROR_CODE(
+      writeINA230Register(INA230_CALIBRATION_REGISTER_ADDR, calibrationRegisterUnpacked,
+                          sizeof(calibrationRegisterUnpacked) / sizeof(calibrationRegisterUnpacked[0]), 0));
 
   RETURN_IF_ERROR_CODE(initTca6424PinState());
   return OBC_ERR_CODE_SUCCESS;
@@ -155,7 +177,9 @@ static obc_error_code_t writeINA230Register(uint8_t regAddress, uint8_t* data, u
     return OBC_ERR_CODE_INVALID_ARG;
   }
   obc_error_code_t errCode;
-  RETURN_IF_ERROR_CODE(i2cWriteReg(ina230Devices[device].i2cDeviceAddress, regAddress, data, size));
+  uint8_t dataSize[1] = {0};
+  RETURN_IF_ERROR_CODE(i2cWriteReg(INA230_I2C_ADDRESS_ONE, 0x00, dataSize, 1));
+  gioSetBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT, 1);
   return OBC_ERR_CODE_SUCCESS;
 }
 /**

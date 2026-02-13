@@ -3,6 +3,7 @@
 #include "obc_i2c_io.h"
 #include "obc_print.h"
 #include "obc_board_config.h"
+#include "tca6424.h"
 
 #include <sci.h>
 #include <stdio.h>
@@ -17,40 +18,26 @@ static StaticTask_t taskBuffer;
 static StackType_t taskStack[1024];
 
 void vTaskCode(void* pvParameters) {
-  float num = 100;
   obc_error_code_t errCode = 0;
+  bool isToggled = true;
   while (1) {
-    errCode = getINA230ShuntVoltage(INA230_DEVICE_ONE, &num);
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error Reading Shunt Voltage - %d\r\n", (int)errCode);
+    if (isToggled) {
+      errCode = configureTCA6424APin(0x02, TCA6424A_GPIO_HIGH);
+      sciPrintf("Toggled High\r\n");
+      isToggled = false;
     } else {
-      sciPrintf("Shunt Voltage - %f\r\n", num);
+      errCode = configureTCA6424APin(0x02, TCA6424A_GPIO_LOW);
+      sciPrintf("Toggled Low\r\n");
+      isToggled = true;
     }
-
-    errCode = getINA230Current(INA230_DEVICE_ONE, &num);
     if (errCode != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error Reading Current - %d\r\n", (int)errCode);
-    } else {
-      sciPrintf("Current - %f\r\n", num);
+      sciPrintf("Error Initializing - %d\r\n", (int)errCode);
     }
-
-    errCode = getINA230BusVoltage(INA230_DEVICE_ONE, &num);
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error Reading Bus Voltage - %d\r\n", (int)errCode);
-    } else {
-      sciPrintf("Bus Voltage - %f\r\n", num);
-    }
-
-    errCode = getINA230Power(INA230_DEVICE_ONE, &num);
-    if (errCode != OBC_ERR_CODE_SUCCESS) {
-      sciPrintf("Error Reading Power - %d\r\n", (int)errCode);
-    } else {
-      sciPrintf("Power - %f\r\n", num);
-    }
+    sciPrintf("Success - %d\r\n", (int)errCode);
     gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
 
     // Simple delay.
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(2000));
   }
 }
 
@@ -68,12 +55,6 @@ int main(void) {
   initSciPrint();
   initI2CMutex();
 
-  obc_error_code_t errCode;
-  errCode = initINA230();
-  if (errCode != OBC_ERR_CODE_SUCCESS) {
-    sciPrintf("Error Initializing - %d\r\n", (int)errCode);
-    return 0;
-  }
 
   // Assume all tasks are created correctly
   xTaskCreateStatic(vTaskCode, "Demo", 1024, NULL, 1, taskStack, &taskBuffer);
