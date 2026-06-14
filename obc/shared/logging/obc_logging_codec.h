@@ -27,6 +27,8 @@ extern "C" {
  * A typical error-code record is 14 bytes vs ~60+ bytes of formatted text.
  * The ground station decodes records back into the standard text log format
  * using the same file ID mapping (log_file_ids.json).
+ *
+ * Documentation: https://uworbital.github.io/docs/tasks/logger/
  */
 
 #define BINARY_LOG_SYNC_BYTE 0xA8U
