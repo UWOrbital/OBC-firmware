@@ -42,7 +42,20 @@ void shiftRows() { return; }
 
 void mixColumns() { return; }
 
-void addRoundKey() { return; }
+void addRoundKey(uint8_t state[4][4], const uint32_t rk[4]) {
+  for (size_t c = 0; c < 4; ++c) {
+    uint32_t col =
+        (uint32_t)state[0][c] << 24 | (uint32_t)state[1][c] << 16 | (uint32_t)state[2][c] << 8 | (uint32_t)state[3][c];
+
+    col ^= rk[c];
+    state[0][c] = (uint8_t)(col >> 24);
+    state[1][c] = (uint8_t)(col >> 16);
+    state[2][c] = (uint8_t)(col >> 8);
+    state[3][c] = (uint8_t)(col & 0xFF);
+  }
+
+  return;
+}
 
 void invShiftRows() { return; }
 
@@ -65,7 +78,7 @@ void sanitizeKey(const char* input, unsigned char out[KEY_LEN]) {
 uint32_t RotWord(const uint32_t word) { return (word << 8) | (word >> 24); }
 
 uint32_t SubWord(const uint32_t word) {
-  uint8_t sub[4] = {(word >> 24), (word >> 16) & 0xFF, (word >> 8) & 0xFF, word & 0xFF};
+  uint8_t sub[4] = {(uint8_t)(word >> 24), (uint8_t)(word >> 16), (uint8_t)(word >> 8), (uint8_t)word};
   sub[0] = sbox[sub[0] >> 4][sub[0] & 0x0F];
   sub[1] = sbox[sub[1] >> 4][sub[1] & 0x0F];
   sub[2] = sbox[sub[2] >> 4][sub[2] & 0x0F];
@@ -74,8 +87,7 @@ uint32_t SubWord(const uint32_t word) {
   return ((uint32_t)sub[0] << 24) | ((uint32_t)sub[1] << 16) | ((uint32_t)sub[2] << 8) | (uint32_t)sub[3];
 }
 
-uint32_t* keyExpansion(const unsigned char* key) {
-  uint32_t w[44];
+void keyExpansion(const unsigned char* key, uint32_t w[44]) {
   for (size_t i = 0; i < (4 * Nr) + 4; ++i) {
     if (i < Nk) {
       w[i] = (uint32_t)key[4 * i] << 24 | (uint32_t)key[4 * i + 1] << 16 | (uint32_t)key[4 * i + 2] << 8 |
@@ -89,23 +101,38 @@ uint32_t* keyExpansion(const unsigned char* key) {
     }
   }
 
-  return w;
+  return;
 }
 
 // ─── User function ──────────────────────────────────────────────
 void encrypt(const char input[], const unsigned char* key) {
   printf("Plaintext: %s\n", input);
 
-  // Array we do our operations on
-  unsigned char state[16];
+  // Array we do our operations on. Map flat array into 2D array
+  // State is now state[row][col]
+  uint8_t state[4][4];
   printf("State: ");
-  for (size_t i = 0; i < 16; ++i) {
-    state[i] = (unsigned char)input[i];
-    printf("%02X ", state[i]);
+  for (size_t col = 0; col < 4; ++col) {
+    for (size_t row = 0; row < 4; ++row) {
+      state[row][col] = (uint8_t)input[row + 4 * col];
+      printf("%02X\n", state[row][col]);
+    }
   }
   printf("\n");
 
-    return;
+  // Generate the round keys
+  uint32_t w[44];
+  keyExpansion(key, w);
+
+  // Round 0:
+  uint32_t rk[4] = {w[0], w[1], w[2], w[3]};
+  addRoundKey(state, rk);
+
+  for (size_t round = 1; round < (Nr - 1); ++round) {
+    // subBytes(state);
+  }
+
+  return;
 }
 
 void decrypt() { return; }
@@ -119,6 +146,28 @@ static void check_word(const char* name, uint32_t got, uint32_t expected) {
     printf("[PASS] %-28s = 0x%08X\n", name, (unsigned)got);
   } else {
     printf("[FAIL] %-28s : got 0x%08X, expected 0x%08X\n", name, (unsigned)got, (unsigned)expected);
+  }
+}
+
+static void check_state(const char* name, const uint8_t in[16], const uint32_t rk[4], const uint8_t expected[16]) {
+  g_run++;
+  uint8_t state[4][4];
+  for (size_t i = 0; i < 16; ++i) state[i % 4][i / 4] = in[i];  // column-major load: state[row][col]=in[row+4col]
+  addRoundKey(state, rk);
+  uint8_t out[16];
+  for (size_t i = 0; i < 16; ++i) out[i] = state[i % 4][i / 4];  // inverse serialize
+  int ok = 1;
+  for (size_t i = 0; i < 16; ++i)
+    if (out[i] != expected[i]) ok = 0;
+  if (ok) {
+    g_pass++;
+    printf("[PASS] %-34s\n", name);
+  } else {
+    printf("[FAIL] %-34s\n       got     :", name);
+    for (size_t i = 0; i < 16; ++i) printf(" %02X", out[i]);
+    printf("\n       expected:");
+    for (size_t i = 0; i < 16; ++i) printf(" %02X", expected[i]);
+    printf("\n");
   }
 }
 
@@ -150,6 +199,35 @@ int main() {
 
   // ── Composition: matches the w[4] derivation for the FIPS test key ──
   check_word("SubWord(RotWord(0x09cf4f3c))", SubWord(RotWord(0x09cf4f3c)), 0x8a84eb01);
+  // ── addRoundKey ──
+  {
+    // A: all-zero round key leaves the state unchanged  (b ^ 0 = b)
+    uint8_t in_a[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    uint32_t rk_a[4] = {0, 0, 0, 0};
+    uint8_t exp_a[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                         0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    check_state("addRoundKey zero key = identity", in_a, rk_a, exp_a);
+
+    // B: XOR a state with its own column words zeroes it  (b ^ b = 0)
+    uint8_t in_b[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    uint32_t rk_b[4] = {0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f};
+    uint8_t exp_b[16] = {0};  // all zero
+    check_state("addRoundKey self-cancel = zero", in_b, rk_b, exp_b);
+
+    // C: FIPS-197 AES-128 example, initial AddRoundKey (round 0)
+    uint8_t in_c[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    uint32_t rk_c[4] = {0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f};
+    uint8_t exp_c[16] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
+                         0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0};
+    check_state("addRoundKey FIPS round-0 vector", in_c, rk_c, exp_c);
+
+    // D: zero state -> output is the round-key bytes, placed column-by-column
+    uint8_t in_d[16] = {0};
+    uint32_t rk_d[4] = {0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff};
+    uint8_t exp_d[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                         0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    check_state("addRoundKey places rk[c] in column c", in_d, rk_d, exp_d);
+  }
 
   printf("\n%d/%d tests passed\n", g_pass, g_run);
 
