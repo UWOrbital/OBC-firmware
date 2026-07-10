@@ -1,19 +1,44 @@
-// ─── Imports ────────────────────────────────────────────────────
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+/*
+ * AES-128 (FIPS 197) - reference implementation
+ *
+ * A from-scratch, table-driven implementation of the AES-128 block cipher and
+ * its inverse, written for learning. Structure follows NIST FIPS 197:
+ *   https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf
+ *
+ * State convention: the 16-byte block is held as state[row][col] and is loaded
+ * and stored column-major, i.e. state[r][c] = in[r + 4*c]  (FIPS 197 Sec. 3.4).
+ *
+ * NOTE: This is an educational implementation. It is faithful to FIPS 197 but is
+ * NOT hardened against timing/cache side-channel attacks and should not be used
+ * to protect real secrets. Use a vetted library or hardware AES for production.
+ */
+
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
-#define KEY_LEN 16  // 16 bytes -> 128 bits (1 byte => 8 bits)
-#define Nb 4
-#define Nk 4
-#define Nr 10
+/* ============================================================================
+ * Algorithm parameters (FIPS 197, Sec. 5, Table 3)
+ * ==========================================================================*/
 
-const uint32_t Rcon[Nr] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
-                           0x20000000, 0x40000000, 0x80000000, 0x1B000000, 0x36000000};
+#define KEY_LEN 16         /* key size in bytes (128 bits)                */
+#define Nb 4               /* columns in the state                        */
+#define Nk 4               /* 32-bit words in the key                     */
+#define Nr 10              /* number of rounds for AES-128                */
+#define NW (Nb * (Nr + 1)) /* key-schedule length in words (= 44)   */
 
+/* ============================================================================
+ * Lookup tables
+ * ==========================================================================*/
+
+/* Round constants for the key schedule (FIPS 197, Table 5). Leading byte only;
+ * the low three bytes of each Rcon word are zero. */
+static const uint32_t Rcon[Nr] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
+                                  0x20000000, 0x40000000, 0x80000000, 0x1B000000, 0x36000000};
+
+/* Forward S-box (FIPS 197, Table 4), indexed sbox[high nibble][low nibble]. */
 static const uint8_t sbox[16][16] = {
-    /*         y=0    1     2     3     4     5     6     7     8     9     a     b     c     d     e     f  */
+    /*        y=0   1     2     3     4     5     6     7     8     9     a     b     c     d     e     f  */
     /* x=0 */ {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76},
     /* x=1 */ {0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0},
     /* x=2 */ {0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15},
@@ -31,178 +56,263 @@ static const uint8_t sbox[16][16] = {
     /* x=e */ {0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf},
     /* x=f */ {0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16}};
 
-/**
- * Reference for AES-128: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf
- */
-// ─── Transformations/Operations ─────────────────────────────────
+/* Inverse S-box (FIPS 197, Table 6). Verified at startup against sbox via
+ * verify_sbox_inverse(): InvS(S(b)) == b for all 256 bytes. */
+static const uint8_t invSbox[16][16] = {
+    /*        y=0   1     2     3     4     5     6     7     8     9     a     b     c     d     e     f  */
+    /* x=0 */ {0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb},
+    /* x=1 */ {0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb},
+    /* x=2 */ {0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e},
+    /* x=3 */ {0x08, 0x2e, 0xa1, 0x66, 0x28, 0xd9, 0x24, 0xb2, 0x76, 0x5b, 0xa2, 0x49, 0x6d, 0x8b, 0xd1, 0x25},
+    /* x=4 */ {0x72, 0xf8, 0xf6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xd4, 0xa4, 0x5c, 0xcc, 0x5d, 0x65, 0xb6, 0x92},
+    /* x=5 */ {0x6c, 0x70, 0x48, 0x50, 0xfd, 0xed, 0xb9, 0xda, 0x5e, 0x15, 0x46, 0x57, 0xa7, 0x8d, 0x9d, 0x84},
+    /* x=6 */ {0x90, 0xd8, 0xab, 0x00, 0x8c, 0xbc, 0xd3, 0x0a, 0xf7, 0xe4, 0x58, 0x05, 0xb8, 0xb3, 0x45, 0x06},
+    /* x=7 */ {0xd0, 0x2c, 0x1e, 0x8f, 0xca, 0x3f, 0x0f, 0x02, 0xc1, 0xaf, 0xbd, 0x03, 0x01, 0x13, 0x8a, 0x6b},
+    /* x=8 */ {0x3a, 0x91, 0x11, 0x41, 0x4f, 0x67, 0xdc, 0xea, 0x97, 0xf2, 0xcf, 0xce, 0xf0, 0xb4, 0xe6, 0x73},
+    /* x=9 */ {0x96, 0xac, 0x74, 0x22, 0xe7, 0xad, 0x35, 0x85, 0xe2, 0xf9, 0x37, 0xe8, 0x1c, 0x75, 0xdf, 0x6e},
+    /* x=a */ {0x47, 0xf1, 0x1a, 0x71, 0x1d, 0x29, 0xc5, 0x89, 0x6f, 0xb7, 0x62, 0x0e, 0xaa, 0x18, 0xbe, 0x1b},
+    /* x=b */ {0xfc, 0x56, 0x3e, 0x4b, 0xc6, 0xd2, 0x79, 0x20, 0x9a, 0xdb, 0xc0, 0xfe, 0x78, 0xcd, 0x5a, 0xf4},
+    /* x=c */ {0x1f, 0xdd, 0xa8, 0x33, 0x88, 0x07, 0xc7, 0x31, 0xb1, 0x12, 0x10, 0x59, 0x27, 0x80, 0xec, 0x5f},
+    /* x=d */ {0x60, 0x51, 0x7f, 0xa9, 0x19, 0xb5, 0x4a, 0x0d, 0x2d, 0xe5, 0x7a, 0x9f, 0x93, 0xc9, 0x9c, 0xef},
+    /* x=e */ {0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61},
+    /* x=f */ {0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d}};
 
-void subBytes(uint8_t state[4][4]) {
-  for (size_t row = 0; row < 4; ++row) {
-    for (size_t col = 0; col < 4; ++col) {
-      state[row][col] = sbox[state[row][col] >> 4][state[row][col] & 0x0F];
-    }
-  }
+/* ============================================================================
+ * GF(2^8) arithmetic (FIPS 197, Sec. 4.2)
+ * ==========================================================================*/
 
-  return;
+/* Multiply a byte by {02} in GF(2^8): left shift, reducing modulo
+ * m(x) = x^8 + x^4 + x^3 + x + 1 (constant 0x1B) when the high bit was set. */
+static uint8_t xtimes(uint8_t b) {
+  if (b & 0x80) return (uint8_t)((b << 1) ^ 0x1B);
+  return (uint8_t)(b << 1);
 }
 
-void shiftRows(uint8_t state[4][4]) {
-  for (size_t row = 0; row < 4; ++row) {
-    // Cyclic rotations
-    if (row == 0) {
-      continue;
-    }
+/* General GF(2^8) multiply. Decomposes `mult` bitwise: for each set bit k, XOR
+ * in {2^k} * s, accumulated by repeated xtimes(). */
+static uint8_t gmul(uint8_t s, uint8_t mult) {
+  uint8_t result = 0;
+  uint8_t term = s; /* {01}*s, then {02}*s, {04}*s, ... */
+  for (int i = 0; i < 8; ++i) {
+    if (mult & (1u << i)) result ^= term;
+    term = xtimes(term);
+  }
+  return result;
+}
 
+/* ============================================================================
+ * State load / store (column-major, FIPS 197 Sec. 3.4)
+ * ==========================================================================*/
+
+static void load_state(uint8_t state[4][4], const uint8_t in[16]) {
+  for (size_t col = 0; col < 4; ++col)
+    for (size_t row = 0; row < 4; ++row) state[row][col] = in[row + 4 * col];
+}
+
+static void store_state(const uint8_t state[4][4], uint8_t out[16]) {
+  for (size_t col = 0; col < 4; ++col)
+    for (size_t row = 0; row < 4; ++row) out[row + 4 * col] = state[row][col];
+}
+
+/* ============================================================================
+ * Forward round transformations (FIPS 197, Sec. 5.1)
+ * ==========================================================================*/
+
+/* SubBytes (Sec. 5.1.1): substitute each byte through the S-box. */
+static void subBytes(uint8_t state[4][4]) {
+  for (size_t row = 0; row < 4; ++row)
+    for (size_t col = 0; col < 4; ++col) state[row][col] = sbox[state[row][col] >> 4][state[row][col] & 0x0F];
+}
+
+/* ShiftRows (Sec. 5.1.2): cyclically shift row r left by r bytes. */
+static void shiftRows(uint8_t state[4][4]) {
+  for (size_t row = 1; row < 4; ++row) { /* row 0 is unchanged */
     uint32_t buf = (uint32_t)state[row][0] << 24 | (uint32_t)state[row][1] << 16 | (uint32_t)state[row][2] << 8 |
                    (uint32_t)state[row][3];
-    buf = buf << 8 * row | buf >> (32 - (8 * row));
-
-    // Update state
+    buf = buf << (8 * row) | buf >> (32 - 8 * row); /* rotate left by `row` bytes */
     state[row][0] = (uint8_t)(buf >> 24);
     state[row][1] = (uint8_t)(buf >> 16);
     state[row][2] = (uint8_t)(buf >> 8);
     state[row][3] = (uint8_t)(buf & 0xFF);
   }
-
-  return;
 }
 
-uint8_t xtimes(uint16_t b) {
-  if (b & 0x80) {
-    return (uint8_t)((b << 1) ^ 0x1B);
-  }
-
-  return (uint8_t)(b << 1);
-}
-
-void mixColumns(uint8_t state[4][4]) {
+/* MixColumns (Sec. 5.1.3): multiply each column by the fixed matrix
+ * [02 03 01 01 / 01 02 03 01 / 01 01 02 03 / 03 01 01 02]. */
+static void mixColumns(uint8_t state[4][4]) {
   for (size_t col = 0; col < 4; ++col) {
-    uint8_t s0 = xtimes(state[0][col]) ^ (xtimes(state[1][col]) ^ state[1][col]) ^ state[2][col] ^ state[3][col];
-    uint8_t s1 = state[0][col] ^ xtimes(state[1][col]) ^ (xtimes(state[2][col]) ^ state[2][col]) ^ state[3][col];
-    uint8_t s2 = state[0][col] ^ state[1][col] ^ xtimes(state[2][col]) ^ (xtimes(state[3][col]) ^ state[3][col]);
-    uint8_t s3 = (xtimes(state[0][col]) ^ state[0][col]) ^ state[1][col] ^ state[2][col] ^ xtimes(state[3][col]);
-
-    state[0][col] = s0;
-    state[1][col] = s1;
-    state[2][col] = s2;
-    state[3][col] = s3;
+    uint8_t s0 = state[0][col], s1 = state[1][col], s2 = state[2][col], s3 = state[3][col];
+    state[0][col] = gmul(s0, 0x02) ^ gmul(s1, 0x03) ^ gmul(s2, 0x01) ^ gmul(s3, 0x01);
+    state[1][col] = gmul(s0, 0x01) ^ gmul(s1, 0x02) ^ gmul(s2, 0x03) ^ gmul(s3, 0x01);
+    state[2][col] = gmul(s0, 0x01) ^ gmul(s1, 0x01) ^ gmul(s2, 0x02) ^ gmul(s3, 0x03);
+    state[3][col] = gmul(s0, 0x03) ^ gmul(s1, 0x01) ^ gmul(s2, 0x01) ^ gmul(s3, 0x02);
   }
-
-  return;
 }
 
-void addRoundKey(uint8_t state[4][4], const uint32_t rk[4]) {
+/* AddRoundKey (Sec. 5.1.4): XOR each column with a key-schedule word. */
+static void addRoundKey(uint8_t state[4][4], const uint32_t rk[4]) {
   for (size_t c = 0; c < 4; ++c) {
     uint32_t col =
         (uint32_t)state[0][c] << 24 | (uint32_t)state[1][c] << 16 | (uint32_t)state[2][c] << 8 | (uint32_t)state[3][c];
-
     col ^= rk[c];
     state[0][c] = (uint8_t)(col >> 24);
     state[1][c] = (uint8_t)(col >> 16);
     state[2][c] = (uint8_t)(col >> 8);
     state[3][c] = (uint8_t)(col & 0xFF);
   }
-
-  return;
 }
 
-void invShiftRows() { return; }
+/* ============================================================================
+ * Inverse round transformations (FIPS 197, Sec. 5.3)
+ * AddRoundKey is its own inverse and is reused above.
+ * ==========================================================================*/
 
-void invSubBytes() { return; }
-
-void invMixColumns() { return; }
-
-// Either truncates or pads a string to match 128 bits/16 bytes
-void sanitizeKey(const char* input, unsigned char out[KEY_LEN]) {
-  size_t len = strlen(input);
-  for (int i = 0; i < KEY_LEN; ++i) {
-    if (i < (int)len) {
-      out[i] = (unsigned char)input[i];
-    } else {
-      out[i] = 0x00;
-    }
+/* InvShiftRows (Sec. 5.3.1): cyclically shift row r right by r bytes. */
+static void invShiftRows(uint8_t state[4][4]) {
+  for (size_t row = 1; row < 4; ++row) { /* row 0 is unchanged */
+    uint32_t buf = (uint32_t)state[row][0] << 24 | (uint32_t)state[row][1] << 16 | (uint32_t)state[row][2] << 8 |
+                   (uint32_t)state[row][3];
+    buf = buf >> (8 * row) | buf << (32 - 8 * row); /* rotate right by `row` bytes */
+    state[row][0] = (uint8_t)(buf >> 24);
+    state[row][1] = (uint8_t)(buf >> 16);
+    state[row][2] = (uint8_t)(buf >> 8);
+    state[row][3] = (uint8_t)(buf & 0xFF);
   }
 }
 
-uint32_t RotWord(const uint32_t word) { return (word << 8) | (word >> 24); }
-
-uint32_t SubWord(const uint32_t word) {
-  uint8_t sub[4] = {(uint8_t)(word >> 24), (uint8_t)(word >> 16), (uint8_t)(word >> 8), (uint8_t)word};
-  sub[0] = sbox[sub[0] >> 4][sub[0] & 0x0F];
-  sub[1] = sbox[sub[1] >> 4][sub[1] & 0x0F];
-  sub[2] = sbox[sub[2] >> 4][sub[2] & 0x0F];
-  sub[3] = sbox[sub[3] >> 4][sub[3] & 0x0F];
-
-  return ((uint32_t)sub[0] << 24) | ((uint32_t)sub[1] << 16) | ((uint32_t)sub[2] << 8) | (uint32_t)sub[3];
+/* InvSubBytes (Sec. 5.3.2): substitute each byte through the inverse S-box. */
+static void invSubBytes(uint8_t state[4][4]) {
+  for (size_t row = 0; row < 4; ++row)
+    for (size_t col = 0; col < 4; ++col) state[row][col] = invSbox[state[row][col] >> 4][state[row][col] & 0x0F];
 }
 
-void keyExpansion(const unsigned char* key, uint32_t w[44]) {
-  for (size_t i = 0; i < (4 * Nr) + 4; ++i) {
+/* InvMixColumns (Sec. 5.3.3): multiply each column by the inverse matrix
+ * [0e 0b 0d 09 / 09 0e 0b 0d / 0d 09 0e 0b / 0b 0d 09 0e]. */
+static void invMixColumns(uint8_t state[4][4]) {
+  for (size_t col = 0; col < 4; ++col) {
+    uint8_t s0 = state[0][col], s1 = state[1][col], s2 = state[2][col], s3 = state[3][col];
+    state[0][col] = gmul(s0, 0x0e) ^ gmul(s1, 0x0b) ^ gmul(s2, 0x0d) ^ gmul(s3, 0x09);
+    state[1][col] = gmul(s0, 0x09) ^ gmul(s1, 0x0e) ^ gmul(s2, 0x0b) ^ gmul(s3, 0x0d);
+    state[2][col] = gmul(s0, 0x0d) ^ gmul(s1, 0x09) ^ gmul(s2, 0x0e) ^ gmul(s3, 0x0b);
+    state[3][col] = gmul(s0, 0x0b) ^ gmul(s1, 0x0d) ^ gmul(s2, 0x09) ^ gmul(s3, 0x0e);
+  }
+}
+
+/* ============================================================================
+ * Key expansion (FIPS 197, Sec. 5.2)
+ * ==========================================================================*/
+
+/* Rotate a word left by one byte: [a0,a1,a2,a3] -> [a1,a2,a3,a0]. */
+static uint32_t RotWord(uint32_t word) { return (word << 8) | (word >> 24); }
+
+/* Apply the S-box to each of the four bytes of a word. */
+static uint32_t SubWord(uint32_t word) {
+  uint8_t b0 = sbox[(word >> 28) & 0x0F][(word >> 24) & 0x0F];
+  uint8_t b1 = sbox[(word >> 20) & 0x0F][(word >> 16) & 0x0F];
+  uint8_t b2 = sbox[(word >> 12) & 0x0F][(word >> 8) & 0x0F];
+  uint8_t b3 = sbox[(word >> 4) & 0x0F][word & 0x0F];
+  return ((uint32_t)b0 << 24) | ((uint32_t)b1 << 16) | ((uint32_t)b2 << 8) | b3;
+}
+
+/* Expand the 16-byte key into NW = 44 round-key words. */
+static void keyExpansion(const uint8_t *key, uint32_t w[NW]) {
+  for (size_t i = 0; i < NW; ++i) {
     if (i < Nk) {
       w[i] = (uint32_t)key[4 * i] << 24 | (uint32_t)key[4 * i + 1] << 16 | (uint32_t)key[4 * i + 2] << 8 |
              (uint32_t)key[4 * i + 3];
     } else {
       uint32_t temp = w[i - 1];
-      if (i % Nk == 0) {
-        temp = SubWord(RotWord(temp)) ^ Rcon[(i / Nk) - 1];
-      }
+      if (i % Nk == 0) temp = SubWord(RotWord(temp)) ^ Rcon[(i / Nk) - 1];
       w[i] = w[i - Nk] ^ temp;
     }
   }
-
-  return;
 }
 
-// ─── User function ──────────────────────────────────────────────
-void encrypt(const char input[], const unsigned char* key, uint8_t out[16]) {
-  printf("Plaintext: %s\n", input);
+/* ============================================================================
+ * Cipher and inverse cipher (FIPS 197, Alg. 1 and Alg. 3)
+ * Round-key words for round r are w[4*r .. 4*r+3], passed as (w + 4*r).
+ * ==========================================================================*/
 
-  // Array we do our operations on. Map flat array into 2D array
-  // State is now state[row][col]
+void aes128_encrypt(const uint8_t in[16], const uint8_t key[16], uint8_t out[16]) {
   uint8_t state[4][4];
-  printf("State: ");
-  for (size_t col = 0; col < 4; ++col) {
-    for (size_t row = 0; row < 4; ++row) {
-      state[row][col] = (uint8_t)input[row + 4 * col];
-      printf("%02X\n", state[row][col]);
-    }
-  }
-  printf("\n");
-
-  // Generate the round keys
-  uint32_t w[44];
+  uint32_t w[NW];
+  load_state(state, in);
   keyExpansion(key, w);
 
-  // Round 0:
-  uint32_t rk[4] = {w[0], w[1], w[2], w[3]};
-  addRoundKey(state, rk);
+  addRoundKey(state, w); /* initial round key w[0..3] */
 
   for (size_t round = 1; round < Nr; ++round) {
     subBytes(state);
     shiftRows(state);
     mixColumns(state);
-    uint32_t new_rk[4] = {w[4 * round], w[(4 * round) + 1], w[(4 * round) + 2], w[(4 * round) + 3]};
-    addRoundKey(state, new_rk);
+    addRoundKey(state, w + 4 * round);
   }
 
+  /* Final round: no MixColumns. */
   subBytes(state);
   shiftRows(state);
+  addRoundKey(state, w + 4 * Nr);
 
-  uint32_t final_rk[4] = {w[4 * Nr], w[(4 * Nr) + 1], w[(4 * Nr) + 2], w[(4 * Nr) + 3]};
-  addRoundKey(state, final_rk);
-
-  for (size_t col = 0; col < 4; ++col) {
-    for (size_t row = 0; row < 4; ++row) {
-      out[row + 4 * col] = state[row][col];
-    }
-  }
+  store_state(state, out);
 }
 
-void decrypt() { return; }
+void aes128_decrypt(const uint8_t in[16], const uint8_t key[16], uint8_t out[16]) {
+  uint8_t state[4][4];
+  uint32_t w[NW];
+  load_state(state, in);
+  keyExpansion(key, w);
+
+  addRoundKey(state, w + 4 * Nr); /* initial round key w[40..43] */
+
+  for (size_t round = Nr - 1; round >= 1; --round) {
+    invShiftRows(state);
+    invSubBytes(state);
+    addRoundKey(state, w + 4 * round);
+    invMixColumns(state);
+  }
+
+  /* Final round: no InvMixColumns. */
+  invShiftRows(state);
+  invSubBytes(state);
+  addRoundKey(state, w); /* final round key w[0..3] */
+
+  store_state(state, out);
+}
+
+/* ============================================================================
+ * Utilities
+ * ==========================================================================*/
+
+/* Coerce a NUL-terminated string into exactly 16 key bytes, truncating or
+ * zero-padding as needed. Convenience for string keys; not used by the tests. */
+void sanitizeKey(const char *input, uint8_t out[KEY_LEN]) {
+  size_t len = strlen(input);
+  for (size_t i = 0; i < KEY_LEN; ++i) out[i] = (i < len) ? (uint8_t)input[i] : 0x00;
+}
+
+/* ============================================================================
+ * Test harness
+ * ==========================================================================*/
 
 static int g_run = 0, g_pass = 0;
 
-static void check_word(const char* name, uint32_t got, uint32_t expected) {
+static void report(const char *name, int ok, const uint8_t *got, const uint8_t *exp) {
+  g_run++;
+  if (ok) {
+    g_pass++;
+    printf("[PASS] %-34s\n", name);
+    return;
+  }
+  printf("[FAIL] %-34s\n       got     :", name);
+  for (size_t i = 0; i < 16; ++i) printf(" %02X", got[i]);
+  printf("\n       expected:");
+  for (size_t i = 0; i < 16; ++i) printf(" %02X", exp[i]);
+  printf("\n");
+}
+
+static int bytes_equal(const uint8_t *a, const uint8_t *b) { return memcmp(a, b, 16) == 0; }
+
+static void check_word(const char *name, uint32_t got, uint32_t expected) {
   g_run++;
   if (got == expected) {
     g_pass++;
@@ -212,98 +322,161 @@ static void check_word(const char* name, uint32_t got, uint32_t expected) {
   }
 }
 
-static void check_state(const char* name, const uint8_t in[16], const uint32_t rk[4], const uint8_t expected[16]) {
-  g_run++;
-  uint8_t state[4][4];
-  for (size_t i = 0; i < 16; ++i) state[i % 4][i / 4] = in[i];  // column-major load: state[row][col]=in[row+4col]
+/* Apply addRoundKey to a state built from `in` and compare to `expected`. */
+static void check_addRoundKey(const char *name, const uint8_t in[16], const uint32_t rk[4],
+                              const uint8_t expected[16]) {
+  uint8_t state[4][4], out[16];
+  load_state(state, in);
   addRoundKey(state, rk);
-  uint8_t out[16];
-  for (size_t i = 0; i < 16; ++i) out[i] = state[i % 4][i / 4];  // inverse serialize
-  int ok = 1;
-  for (size_t i = 0; i < 16; ++i)
-    if (out[i] != expected[i]) ok = 0;
-  if (ok) {
-    g_pass++;
-    printf("[PASS] %-34s\n", name);
-  } else {
-    printf("[FAIL] %-34s\n       got     :", name);
-    for (size_t i = 0; i < 16; ++i) printf(" %02X", out[i]);
-    printf("\n       expected:");
-    for (size_t i = 0; i < 16; ++i) printf(" %02X", expected[i]);
-    printf("\n");
-  }
+  store_state(state, out);
+  report(name, bytes_equal(out, expected), out, expected);
 }
 
-static void check_encrypt(const char* name, const unsigned char pt[16], const unsigned char key[16],
-                          const uint8_t expected[16]) {
+/* Apply a single state transform to `in` and compare to `expected`. */
+static void check_transform(const char *name, void (*fn)(uint8_t[4][4]), const uint8_t in[16],
+                            const uint8_t expected[16]) {
+  uint8_t state[4][4], out[16];
+  load_state(state, in);
+  fn(state);
+  store_state(state, out);
+  report(name, bytes_equal(out, expected), out, expected);
+}
+
+/* Confirm fwd then inv restores an arbitrary state (needs no external vector). */
+static void check_transform_roundtrip(const char *name, void (*fwd)(uint8_t[4][4]), void (*inv)(uint8_t[4][4])) {
+  uint8_t in[16], out[16], state[4][4];
+  for (size_t i = 0; i < 16; ++i) in[i] = (uint8_t)(0x10 + i);
+  load_state(state, in);
+  fwd(state);
+  inv(state);
+  store_state(state, out);
+  report(name, bytes_equal(out, in), out, in);
+}
+
+static void check_encrypt(const char *name, const uint8_t pt[16], const uint8_t key[16], const uint8_t expected[16]) {
+  uint8_t out[16];
+  aes128_encrypt(pt, key, out);
+  report(name, bytes_equal(out, expected), out, expected);
+}
+
+static void check_decrypt(const char *name, const uint8_t ct[16], const uint8_t key[16], const uint8_t expected[16]) {
+  uint8_t out[16];
+  aes128_decrypt(ct, key, out);
+  report(name, bytes_equal(out, expected), out, expected);
+}
+
+/* Confirm decrypt inverts encrypt for a given block/key. */
+static void check_cipher_roundtrip(const char *name, const uint8_t pt[16], const uint8_t key[16]) {
+  uint8_t ct[16], rt[16];
+  aes128_encrypt(pt, key, ct);
+  aes128_decrypt(ct, key, rt);
+  report(name, bytes_equal(rt, pt), rt, pt);
+}
+
+/* Check invSbox is the exact inverse of sbox across all 256 bytes. */
+static void verify_sbox_inverse(void) {
+  int ok = 1;
+  for (size_t x = 0; x < 16; ++x)
+    for (size_t y = 0; y < 16; ++y) {
+      uint8_t b = (uint8_t)((x << 4) | y);
+      uint8_t fwd = sbox[b >> 4][b & 0x0F];
+      if (invSbox[fwd >> 4][fwd & 0x0F] != b) ok = 0;
+    }
   g_run++;
-  uint8_t out[16];
-  encrypt((const char*)pt, key, out);  // pt passed as raw bytes, not a C string
-  int ok = 1;
-  for (size_t i = 0; i < 16; ++i)
-    if (out[i] != expected[i]) ok = 0;
-  if (ok) {
-    g_pass++;
-    printf("[PASS] %-34s\n", name);
-  } else {
-    printf("[FAIL] %-34s\n       got     :", name);
-    for (size_t i = 0; i < 16; ++i) printf(" %02X", out[i]);
-    printf("\n       expected:");
-    for (size_t i = 0; i < 16; ++i) printf(" %02X", expected[i]);
-    printf("\n");
-  }
+  if (ok) g_pass++;
+  printf(ok ? "[PASS] sbox/invSbox inverse check\n" : "[FAIL] sbox/invSbox inverse check\n");
 }
 
-// Used for testing during development
-int main() {
-  // ── RotWord: [a0,a1,a2,a3] -> [a1,a2,a3,a0] ──
+/* ============================================================================
+ * main: run the full test suite
+ * ==========================================================================*/
+
+int main(void) {
+  /* Common FIPS-197 AES-128 example vectors. */
+  static const uint8_t fips_key[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                       0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+  static const uint8_t fips_pt[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                                      0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+  static const uint8_t fips_ct[16] = {0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30,
+                                      0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a};
+
+  /* -- RotWord -- */
   check_word("RotWord(0x09cf4f3c)", RotWord(0x09cf4f3c), 0xcf4f3c09);
   check_word("RotWord(0x01020304)", RotWord(0x01020304), 0x02030401);
   check_word("RotWord(0x00000000)", RotWord(0x00000000), 0x00000000);
   check_word("RotWord(0xff000000)", RotWord(0xff000000), 0x000000ff);
 
-  // ── SubWord: S-box applied to each of the 4 bytes ──
+  /* -- SubWord -- */
   check_word("SubWord(0x00000000)", SubWord(0x00000000), 0x63636363);
   check_word("SubWord(0xffffffff)", SubWord(0xffffffff), 0x16161616);
   check_word("SubWord(0x01234567)", SubWord(0x01234567), 0x7c266e85);
   check_word("SubWord(0xcf4f3c09)", SubWord(0xcf4f3c09), 0x8a84eb01);
+  check_word("SubWord(RotWord(...))", SubWord(RotWord(0x09cf4f3c)), 0x8a84eb01);
 
-  // ── Composition: matches the w[4] derivation for the FIPS test key ──
-  check_word("SubWord(RotWord(0x09cf4f3c))", SubWord(RotWord(0x09cf4f3c)), 0x8a84eb01);
-  // ── addRoundKey ──
-  // A: all-zero round key leaves the state unchanged  (b ^ 0 = b)
-  uint8_t in_a[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-  uint32_t rk_a[4] = {0, 0, 0, 0};
-  uint8_t exp_a[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-  check_state("addRoundKey zero key = identity", in_a, rk_a, exp_a);
+  /* -- gmul (FIPS 197 Sec. 4.2 example: {57}*{13} = {fe}) -- */
+  check_word("gmul(0x57,0x13)", gmul(0x57, 0x13), 0x00fe);
 
-  // B: XOR a state with its own column words zeroes it  (b ^ b = 0)
-  uint8_t in_b[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-  uint32_t rk_b[4] = {0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f};
-  uint8_t exp_b[16] = {0};  // all zero
-  check_state("addRoundKey self-cancel = zero", in_b, rk_b, exp_b);
+  /* -- addRoundKey -- */
+  {
+    static const uint8_t data[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                                     0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+    static const uint32_t seq_rk[4] = {0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f};
+    static const uint32_t zero_rk[4] = {0, 0, 0, 0};
+    static const uint8_t zeros[16] = {0};
+    static const uint8_t seq[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    static const uint8_t round0[16] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70,
+                                       0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0};
+    static const uint32_t rk_col[4] = {0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff};
 
-  // C: FIPS-197 AES-128 example, initial AddRoundKey (round 0)
-  uint8_t in_c[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-  uint32_t rk_c[4] = {0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f};
-  uint8_t exp_c[16] = {0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0};
-  check_state("addRoundKey FIPS round-0 vector", in_c, rk_c, exp_c);
+    check_addRoundKey("addRoundKey zero key = identity", data, zero_rk, data);
+    check_addRoundKey("addRoundKey self-cancel = zero", seq, seq_rk, zeros);
+    check_addRoundKey("addRoundKey FIPS round-0 vector", data, seq_rk, round0);
+    check_addRoundKey("addRoundKey places rk[c] in col", zeros, rk_col, data);
+  }
 
-  // D: zero state -> output is the round-key bytes, placed column-by-column
-  uint8_t in_d[16] = {0};
-  uint32_t rk_d[4] = {0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff};
-  uint8_t exp_d[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-  check_state("addRoundKey places rk[c] in column c", in_d, rk_d, exp_d);
+  /* -- Full-cipher KAT (FIPS-197 AES-128 example) -- */
+  check_encrypt("AES-128 encrypt KAT", fips_pt, fips_key, fips_ct);
+  check_decrypt("AES-128 decrypt KAT", fips_ct, fips_key, fips_pt);
 
-  unsigned char pt[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-                          0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-  unsigned char k[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                         0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-  uint8_t expected[16] = {0x69, 0xc4, 0xe0, 0xd8, 0x6a, 0x7b, 0x04, 0x30,
-                          0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a};
-  check_encrypt("AES-128 KAT (FIPS example)", pt, k, expected);
+  /* -- invShiftRows direct checks -- */
+  {
+    static const uint8_t in[16] = {0x00, 0x10, 0x20, 0x30, 0x01, 0x11, 0x21, 0x31,
+                                   0x02, 0x12, 0x22, 0x32, 0x03, 0x13, 0x23, 0x33};
+    static const uint8_t exp[16] = {0x00, 0x13, 0x22, 0x31, 0x01, 0x10, 0x23, 0x32,
+                                    0x02, 0x11, 0x20, 0x33, 0x03, 0x12, 0x21, 0x30};
+    static const uint8_t only0[16] = {0xAA, 0, 0, 0, 0xBB, 0, 0, 0, 0xCC, 0, 0, 0, 0xDD, 0, 0, 0};
+    check_transform("invShiftRows right-shift by row", invShiftRows, in, exp);
+    check_transform("invShiftRows leaves row 0", invShiftRows, only0, only0);
+  }
+
+  /* -- invMixColumns direct check: 8e 4d a1 bc -> db 13 53 45 per column -- */
+  {
+    static const uint8_t in[16] = {0x8e, 0x4d, 0xa1, 0xbc, 0x8e, 0x4d, 0xa1, 0xbc,
+                                   0x8e, 0x4d, 0xa1, 0xbc, 0x8e, 0x4d, 0xa1, 0xbc};
+    static const uint8_t exp[16] = {0xdb, 0x13, 0x53, 0x45, 0xdb, 0x13, 0x53, 0x45,
+                                    0xdb, 0x13, 0x53, 0x45, 0xdb, 0x13, 0x53, 0x45};
+    check_transform("invMixColumns known column", invMixColumns, in, exp);
+  }
+
+  /* -- Table integrity and transform round-trips -- */
+  verify_sbox_inverse();
+  check_transform_roundtrip("shiftRows/invShiftRows round-trip", shiftRows, invShiftRows);
+  check_transform_roundtrip("subBytes/invSubBytes round-trip", subBytes, invSubBytes);
+  check_transform_roundtrip("mixColumns/invMixColumns round-trip", mixColumns, invMixColumns);
+
+  /* -- Full encrypt/decrypt round-trips -- */
+  {
+    static const uint8_t zpt[16] = {0}, zk[16] = {0};
+    static const uint8_t rpt[16] = {0xde, 0xad, 0xbe, 0xef, 0x01, 0x23, 0x45, 0x67,
+                                    0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98};
+    static const uint8_t rk[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+                                   0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
+    check_cipher_roundtrip("encrypt/decrypt FIPS block", fips_pt, fips_key);
+    check_cipher_roundtrip("encrypt/decrypt all-zero", zpt, zk);
+    check_cipher_roundtrip("encrypt/decrypt arbitrary", rpt, rk);
+  }
 
   printf("\n%d/%d tests passed\n", g_pass, g_run);
-
-  return 0;
+  return g_pass == g_run ? 0 : 1;
 }
