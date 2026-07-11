@@ -7,10 +7,6 @@
  *
  * State convention: the 16-byte block is held as state[row][col] and is loaded
  * and stored column-major, i.e. state[r][c] = in[r + 4*c]  (FIPS 197 Sec. 3.4).
- *
- * NOTE: This is an educational implementation. It is faithful to FIPS 197 but is
- * NOT hardened against timing/cache side-channel attacks and should not be used
- * to protect real secrets. Use a vetted library or hardware AES for production.
  */
 
 #include <stdint.h>
@@ -229,6 +225,28 @@ static void keyExpansion(const uint8_t *key, uint32_t w[NW]) {
 }
 
 /* ============================================================================
+ * Utilities
+ * ==========================================================================*/
+
+/* Coerce a NUL-terminated string into exactly 16 key bytes, truncating or
+ * zero-padding as needed. Convenience for string keys; not used by the tests. */
+void sanitizeKey(const char *input, uint8_t out[KEY_LEN]) {
+  size_t len = strlen(input);
+  for (size_t i = 0; i < KEY_LEN; ++i) out[i] = (i < len) ? (uint8_t)input[i] : 0x00;
+}
+
+void inc32(uint8_t counter[16]) {
+  for (int i = 15; i >= 12; --i) {
+    counter[i] = (counter[i] + 1) % 256;
+    if (counter[i] != 0) {
+      break;
+    } else {
+      counter[i] = 0;
+    }
+  }
+}
+
+/* ============================================================================
  * Cipher and inverse cipher (FIPS 197, Alg. 1 and Alg. 3)
  * Round-key words for round r are w[4*r .. 4*r+3], passed as (w + 4*r).
  * ==========================================================================*/
@@ -279,16 +297,30 @@ void aes128_decrypt(const uint8_t in[16], const uint8_t key[16], uint8_t out[16]
   store_state(state, out);
 }
 
-/* ============================================================================
- * Utilities
- * ==========================================================================*/
+void aes128_ctr(const uint8_t in[], size_t len, const uint8_t key[16], const uint8_t icb[16], uint8_t *out) {
+  uint8_t ctr[16], keystream[16];
 
-/* Coerce a NUL-terminated string into exactly 16 key bytes, truncating or
- * zero-padding as needed. Convenience for string keys; not used by the tests. */
-void sanitizeKey(const char *input, uint8_t out[KEY_LEN]) {
-  size_t len = strlen(input);
-  for (size_t i = 0; i < KEY_LEN; ++i) out[i] = (i < len) ? (uint8_t)input[i] : 0x00;
-}
+  // Copy ICB into counter blocks
+  memcpy(ctr, icb, 16);
+
+  size_t offset = 0;
+  while (offset < len) {
+    aes128_encrypt(ctr, key, keystream);
+    size_t n;
+    if (len - offset < 16) {
+      n = len - offset;
+    } else {
+      n = 16;
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+      out[offset + i] = in[offset + i] ^ keystream[i];
+    }
+
+    inc32(ctr);
+    offset += 16;
+  }
+};
 
 /* ============================================================================
  * Test harness
@@ -387,6 +419,115 @@ static void verify_sbox_inverse(void) {
   printf(ok ? "[PASS] sbox/invSbox inverse check\n" : "[FAIL] sbox/invSbox inverse check\n");
 }
 
+/* inc32: apply to a copy of `in`, compare all 16 bytes to `expected`. */
+static void check_inc32(const char *name, const uint8_t in[16], const uint8_t expected[16]) {
+  uint8_t c[16];
+  memcpy(c, in, 16);
+  inc32(c);
+  report(name, bytes_equal(c, expected), c, expected);
+}
+
+/* CTR round-trip: encrypt then decrypt (same icb) must restore the input, for
+ * any length. Also confirms the ciphertext actually differs from the plaintext,
+ * so an all-zero-keystream no-op would fail rather than silently round-trip. */
+static void check_ctr_roundtrip(const char *name, size_t len) {
+  uint8_t key[16], icb[16], pt[128], ct[128], rt[128];
+  for (size_t i = 0; i < 16; ++i) {
+    key[i] = (uint8_t)(0x2b + i);
+    icb[i] = (uint8_t)(0xf0 + i);
+  }
+  for (size_t i = 0; i < len; ++i) pt[i] = (uint8_t)(i * 7 + 1);
+
+  aes128_ctr(pt, len, key, icb, ct); /* encrypt          */
+  aes128_ctr(ct, len, key, icb, rt); /* decrypt (same icb) */
+
+  int restored = (memcmp(rt, pt, len) == 0);
+  int changed = (len == 0) || (memcmp(ct, pt, len) != 0); /* keystream was applied */
+
+  g_run++;
+  if (restored && changed) {
+    g_pass++;
+    printf("[PASS] %-28s (len=%3zu)\n", name, len);
+  } else {
+    printf("[FAIL] %-28s (len=%3zu) restored=%d changed=%d\n", name, len, restored, changed);
+  }
+}
+
+/* Block 0 keystream: ctr(P) over one block == P XOR aes128_encrypt(icb). */
+static void check_ctr_keystream_block0(void) {
+  uint8_t key[16], icb[16], pt[16], ct[16], ks[16], expect[16];
+  for (size_t i = 0; i < 16; ++i) {
+    key[i] = (uint8_t)(0x00 + i); /* FIPS key 000102..0f */
+    icb[i] = (uint8_t)(0xf0 + i);
+    pt[i] = (uint8_t)(0x10 + i);
+  }
+  aes128_encrypt(icb, key, ks);
+  for (size_t i = 0; i < 16; ++i) expect[i] = pt[i] ^ ks[i];
+
+  aes128_ctr(pt, 16, key, icb, ct);
+  report("ctr block0 = P XOR E(icb)", bytes_equal(ct, expect), ct, expect);
+}
+
+/* Block 1 keystream: second block of a 2-block ctr == P1 XOR E(inc32(icb)).
+ * A broken inc32 would pass block0 but fail here. */
+static void check_ctr_keystream_block1(void) {
+  uint8_t key[16], icb[16], ctr2[16], pt[32], ct[32], ks2[16], expect2[16];
+  for (size_t i = 0; i < 16; ++i) {
+    key[i] = (uint8_t)(0x00 + i);
+    icb[i] = (uint8_t)(0xf0 + i);
+  }
+  for (size_t i = 0; i < 32; ++i) pt[i] = (uint8_t)(0x10 + i);
+
+  memcpy(ctr2, icb, 16);
+  inc32(ctr2);
+  aes128_encrypt(ctr2, key, ks2);
+  for (size_t i = 0; i < 16; ++i) expect2[i] = pt[16 + i] ^ ks2[i];
+
+  aes128_ctr(pt, 32, key, icb, ct);
+  report("ctr block1 uses inc32(icb)", bytes_equal(ct + 16, expect2), ct + 16, expect2);
+}
+
+static void check_ctr_nist_f51(void) {
+  static const uint8_t key[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
+                                  0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
+  static const uint8_t icb[16] = {0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+                                  0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff};
+  static const uint8_t pt[64] = {0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73,
+                                 0x93, 0x17, 0x2a, 0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7,
+                                 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51, 0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4,
+                                 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef, 0xf6, 0x9f, 0x24, 0x45,
+                                 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10};
+  static const uint8_t ct[64] = {0x87, 0x4d, 0x61, 0x91, 0xb6, 0x20, 0xe3, 0x26, 0x1b, 0xef, 0x68, 0x64, 0x99,
+                                 0x0d, 0xb6, 0xce, 0x98, 0x06, 0xf6, 0x6b, 0x79, 0x70, 0xfd, 0xff, 0x86, 0x17,
+                                 0x18, 0x7b, 0xb9, 0xff, 0xfd, 0xff, 0x5a, 0xe4, 0xdf, 0x3e, 0xdb, 0xd5, 0xd3,
+                                 0x5e, 0x5b, 0x4f, 0x09, 0x02, 0x0d, 0xb0, 0x3e, 0xab, 0x1e, 0x03, 0x1d, 0xda,
+                                 0x2f, 0xbe, 0x03, 0xd1, 0x79, 0x21, 0x70, 0xa0, 0xf3, 0x00, 0x9c, 0xee};
+
+  uint8_t out[64];
+
+  /* Encrypt: plaintext -> ciphertext */
+  aes128_ctr(pt, 64, key, icb, out);
+  int enc_ok = (memcmp(out, ct, 64) == 0);
+  g_run++;
+  if (enc_ok) {
+    g_pass++;
+    printf("[PASS] CTR NIST F.5.1 encrypt\n");
+  } else {
+    printf("[FAIL] CTR NIST F.5.1 encrypt\n");
+  }
+
+  /* Decrypt: same function on ciphertext -> plaintext */
+  aes128_ctr(ct, 64, key, icb, out);
+  int dec_ok = (memcmp(out, pt, 64) == 0);
+  g_run++;
+  if (dec_ok) {
+    g_pass++;
+    printf("[PASS] CTR NIST F.5.1 decrypt\n");
+  } else {
+    printf("[FAIL] CTR NIST F.5.1 decrypt\n");
+  }
+}
+
 /* ============================================================================
  * main: run the full test suite
  * ==========================================================================*/
@@ -476,6 +617,42 @@ int main(void) {
     check_cipher_roundtrip("encrypt/decrypt all-zero", zpt, zk);
     check_cipher_roundtrip("encrypt/decrypt arbitrary", rpt, rk);
   }
+
+  /* -- inc32 -- */
+  {
+    /* nonce = bytes 00..0b (must stay fixed); counter = trailing 4 bytes */
+    static const uint8_t base[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x00, 0x00, 0x00};
+    static const uint8_t inc1[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x00, 0x00, 0x01};
+    check_inc32("inc32 basic +1", base, inc1);
+
+    static const uint8_t byteff[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x00, 0x00, 0xff};
+    static const uint8_t carry1[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x00, 0x01, 0x00};
+    check_inc32("inc32 carry one byte", byteff, carry1);
+
+    static const uint8_t twoff[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x00, 0xff, 0xff};
+    static const uint8_t carry2[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x01, 0x00, 0x00};
+    check_inc32("inc32 carry two bytes", twoff, carry2);
+
+    /* full 32-bit wrap: counter ffffffff -> 00000000, nonce untouched */
+    static const uint8_t allff[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0xff, 0xff, 0xff, 0xff};
+    static const uint8_t wrap[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0x00, 0x00, 0x00, 0x00};
+    check_inc32("inc32 wraps, nonce fixed", allff, wrap);
+  }
+
+  /* -- CTR keystream vs aes128_encrypt -- */
+  check_ctr_keystream_block0();
+  check_ctr_keystream_block1();
+
+  /* -- CTR round-trip across block boundaries and partial blocks -- */
+  check_ctr_roundtrip("ctr round-trip", 1);
+  check_ctr_roundtrip("ctr round-trip", 15);
+  check_ctr_roundtrip("ctr round-trip", 16);
+  check_ctr_roundtrip("ctr round-trip", 17);
+  check_ctr_roundtrip("ctr round-trip", 31);
+  check_ctr_roundtrip("ctr round-trip", 32);
+  check_ctr_roundtrip("ctr round-trip", 63);
+
+  check_ctr_nist_f51();
 
   printf("\n%d/%d tests passed\n", g_pass, g_run);
   return g_pass == g_run ? 0 : 1;
