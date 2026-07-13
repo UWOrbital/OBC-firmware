@@ -96,6 +96,35 @@ static uint8_t gmul(uint8_t s, uint8_t mult) {
   return result;
 }
 
+void gf128_mul(const uint8_t x[16], const uint8_t y[16], uint8_t out[16]) {
+  uint8_t accumulator[16] = {0};
+  uint8_t copy[16];
+  memcpy(copy, y, 16);
+
+  for (size_t i = 0; i < 128; ++i) {
+    // extracting bit:
+    int bit = (x[i / 8] >> (7 - (i % 8))) & 1;
+    if (bit) {
+      for (size_t b = 0; b < 16; ++b) {
+        accumulator[b] ^= copy[b];
+      }
+    }
+
+    uint8_t carry = 0;
+    for (size_t b = 0; b < 16; ++b) {
+      uint8_t new_carry = copy[b] & 1;
+      copy[b] = (uint8_t)((copy[b] >> 1) | (carry << 7));
+      carry = new_carry;
+    }
+
+    if (carry) {
+      copy[0] ^= 0xE1;
+    }
+  }
+
+  memcpy(out, accumulator, 16);
+}
+
 /* ============================================================================
  * State load / store (column-major, FIPS 197 Sec. 3.4)
  * ==========================================================================*/
@@ -322,6 +351,18 @@ void aes128_ctr(const uint8_t in[], size_t len, const uint8_t key[16], const uin
   }
 };
 
+void ghash(const uint8_t data[16], const uint8_t H[16], const size_t num_blocks, uint8_t out[16]) {
+  uint8_t buf[16] = {0};
+  for (size_t i = 0; i < num_blocks; ++i) {
+    const uint8_t *block = data + 16 * i;
+    for (size_t b = 0; b < 16; ++b) {
+      buf[b] ^= block[b];
+    }
+    gf128_mul(buf, H, buf);
+  }
+  memcpy(out, buf, 16);
+}
+
 /* ============================================================================
  * Test harness
  * ==========================================================================*/
@@ -528,6 +569,114 @@ static void check_ctr_nist_f51(void) {
   }
 }
 
+/* Compare two 16-byte blocks, report pass/fail with hex diff. */
+static void check_block(const char *name, const uint8_t got[16], const uint8_t expected[16]) {
+  report(name, bytes_equal(got, expected), got, expected);
+}
+
+static void test_gf128_mul(void) {
+  /* The multiplicative identity in GCM's little-endian field is bit 0 set:
+     0x80 followed by fifteen 0x00 (the constant term "1"). */
+  static const uint8_t one[16] = {0x80};
+  static const uint8_t zero[16] = {0};
+
+  /* A couple of arbitrary field elements. */
+  static const uint8_t a[16] = {0x03, 0x88, 0xda, 0xce, 0x60, 0xb6, 0xa3, 0x92,
+                                0xf3, 0x28, 0xc2, 0xb9, 0x71, 0xb2, 0xfe, 0x78};
+  static const uint8_t b[16] = {0x66, 0xe9, 0x4b, 0xd4, 0xef, 0x8a, 0x2c, 0x3b,
+                                0x88, 0x4c, 0xfa, 0x59, 0xca, 0x34, 0x2b, 0x2e};
+
+  uint8_t r1[16], r2[16];
+
+  /* 1. Identity: X * 1 == X */
+  gf128_mul(a, one, r1);
+  check_block("gf128 a*1 == a", r1, a);
+
+  /* 2. Identity is commutative: 1 * X == X */
+  gf128_mul(one, a, r1);
+  check_block("gf128 1*a == a", r1, a);
+
+  /* 3. Zero: X * 0 == 0 */
+  gf128_mul(a, zero, r1);
+  check_block("gf128 a*0 == 0", r1, zero);
+
+  /* 4. Commutativity: a*b == b*a */
+  gf128_mul(a, b, r1);
+  gf128_mul(b, a, r2);
+  check_block("gf128 a*b == b*a", r1, r2);
+
+  /* 5. Aliasing safety: output into an input buffer must still be correct.
+        Compute a*b normally, then a*b with out==first arg, compare. */
+  gf128_mul(a, b, r1);
+  uint8_t alias[16];
+  memcpy(alias, a, 16);
+  gf128_mul(alias, b, alias); /* out aliases x */
+  check_block("gf128 a*b aliased out==x", alias, r1);
+
+  /* 6. Distributivity: a*(b^c) == (a*b) ^ (a*c) */
+  static const uint8_t c[16] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+                                0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00};
+  uint8_t bc[16], abc[16], ab[16], ac[16], sum[16];
+  for (size_t i = 0; i < 16; ++i) bc[i] = b[i] ^ c[i];
+  gf128_mul(a, bc, abc);
+  gf128_mul(a, b, ab);
+  gf128_mul(a, c, ac);
+  for (size_t i = 0; i < 16; ++i) sum[i] = ab[i] ^ ac[i];
+  check_block("gf128 distributive", abc, sum);
+}
+
+static void test_ghash(void) {
+  /* H and some field elements (reuse the multiply test values). */
+  static const uint8_t H[16] = {0x66, 0xe9, 0x4b, 0xd4, 0xef, 0x8a, 0x2c, 0x3b,
+                                0x88, 0x4c, 0xfa, 0x59, 0xca, 0x34, 0x2b, 0x2e};
+  static const uint8_t x1[16] = {0x03, 0x88, 0xda, 0xce, 0x60, 0xb6, 0xa3, 0x92,
+                                 0xf3, 0x28, 0xc2, 0xb9, 0x71, 0xb2, 0xfe, 0x78};
+  static const uint8_t x2[16] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+                                 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00};
+
+  uint8_t g[16], m[16], tmp[16];
+
+  /* 1. Empty input: no blocks -> Y stays Y0 = 0. */
+  static const uint8_t zero[16] = {0};
+  ghash(NULL, H, 0, g); /* data unused when num_blocks==0 */
+  check_block("ghash empty == 0", g, zero);
+
+  /* 2. Single block: GHASH(X1) = (0 ^ X1) * H = X1 * H. */
+  ghash(x1, H, 1, g);
+  gf128_mul(x1, H, m);
+  check_block("ghash 1 block == X1*H", g, m);
+
+  /* 3. Two blocks, computed by hand from the recurrence:
+        Y1 = X1 * H
+        Y2 = (Y1 ^ X2) * H
+     Build the reference with gf128_mul directly, then compare. */
+  {
+    uint8_t data[32];
+    memcpy(data, x1, 16);
+    memcpy(data + 16, x2, 16);
+
+    gf128_mul(x1, H, tmp);                           /* Y1 = X1 * H            */
+    for (size_t b = 0; b < 16; ++b) tmp[b] ^= x2[b]; /* Y1 ^ X2 */
+    gf128_mul(tmp, H, m);                            /* Y2 = (Y1 ^ X2) * H     */
+
+    ghash(data, H, 2, g);
+    check_block("ghash 2 blocks == recurrence", g, m);
+  }
+
+  /* 4. Linearity in the first block: GHASH is built from XOR + multiply, both
+        of which distribute over XOR. For a single block,
+        GHASH(A ^ B) == GHASH(A) ^ GHASH(B), since (A^B)*H = A*H ^ B*H. */
+  {
+    uint8_t axb[16], ga[16], gb[16], gaxb[16], gsum[16];
+    for (size_t b = 0; b < 16; ++b) axb[b] = x1[b] ^ x2[b];
+    ghash(x1, H, 1, ga);
+    ghash(x2, H, 1, gb);
+    ghash(axb, H, 1, gaxb);
+    for (size_t b = 0; b < 16; ++b) gsum[b] = ga[b] ^ gb[b];
+    check_block("ghash single-block linear", gaxb, gsum);
+  }
+}
+
 /* ============================================================================
  * main: run the full test suite
  * ==========================================================================*/
@@ -653,6 +802,12 @@ int main(void) {
   check_ctr_roundtrip("ctr round-trip", 63);
 
   check_ctr_nist_f51();
+
+  /* -- GF(2^128) multiply -- */
+  test_gf128_mul();
+
+  /* -- GHASH -- */
+  test_ghash();
 
   printf("\n%d/%d tests passed\n", g_pass, g_run);
   return g_pass == g_run ? 0 : 1;
