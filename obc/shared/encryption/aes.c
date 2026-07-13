@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* ============================================================================
  * Algorithm parameters (FIPS 197, Sec. 5, Table 3)
@@ -364,6 +365,103 @@ void ghash(const uint8_t data[16], const uint8_t H[16], const size_t num_blocks,
 }
 
 /* ============================================================================
+ * AES-128-GCM (NIST SP 800-38D / McGrew-Viega)
+ * Restricted to 96-bit (12-byte) IVs, the recommended and common case.
+ * ==========================================================================*/
+
+/* Encode a 64-bit value big-endian into 8 bytes. */
+static void put_be64(uint8_t out[8], uint64_t v) {
+  for (int i = 0; i < 8; ++i) out[7 - i] = (uint8_t)(v >> (8 * i));
+}
+
+/* Build GHASH input  A || 0^v || C || 0^u || [len(A)]64 || [len(C)]64  and hash
+ * it (Algorithm 4, Steps 4-5). aad_len and ct_len are BYTE lengths; the length
+ * block encodes BIT lengths. Result (the block S) goes in `S`. */
+static void gcm_ghash_lengths(const uint8_t H[16], const uint8_t *aad, size_t aad_len, const uint8_t *ct, size_t ct_len,
+                              uint8_t S[16]) {
+  size_t a_blk = (aad_len + 15) / 16; /* AAD blocks, zero-padded up   */
+  size_t c_blk = (ct_len + 15) / 16;  /* ciphertext blocks, padded up */
+  size_t nblk = a_blk + c_blk + 1;    /* + 1 for the length block     */
+
+  uint8_t *buf = calloc(nblk, 16);                                /* zeroed: gives the 0^v / 0^u padding */
+  memcpy(buf, aad, aad_len);                                      /* AAD, remainder of its blocks stays 0 */
+  memcpy(buf + a_blk * 16, ct, ct_len);                           /* ciphertext, likewise zero-padded     */
+  put_be64(buf + (a_blk + c_blk) * 16, (uint64_t)aad_len * 8);    /* [len(A)]64 */
+  put_be64(buf + (a_blk + c_blk) * 16 + 8, (uint64_t)ct_len * 8); /* [len(C)]64 */
+
+  ghash(buf, H, nblk, S);
+  free(buf);
+}
+
+/* Authenticated encryption. Produces ciphertext `ct` (same length as `pt`) and a
+ * 128-bit tag. `iv` is 12 bytes. `aad` may be NULL if aad_len == 0. */
+void gcm_encrypt(const uint8_t key[16], const uint8_t iv[12], const uint8_t *pt, size_t pt_len, const uint8_t *aad,
+                 size_t aad_len, uint8_t *ct, uint8_t tag[16]) {
+  uint8_t H[16], J0[16], icb[16], S[16], EJ0[16];
+  static const uint8_t zero[16] = {0};
+
+  aes128_encrypt(zero, key, H); /* Step 1: H = E(K, 0^128)           */
+
+  memcpy(J0, iv, 12); /* Step 2: J0 = IV || 0^31 || 1      */
+  J0[12] = 0;
+  J0[13] = 0;
+  J0[14] = 0;
+  J0[15] = 1;
+
+  memcpy(icb, J0, 16); /* Step 3: C = GCTR(inc32(J0), P)    */
+  inc32(icb);
+  aes128_ctr(pt, pt_len, key, icb, ct);
+
+  gcm_ghash_lengths(H, aad, aad_len, ct, pt_len, S); /* Steps 4-5: S = GHASH(...) */
+
+  aes128_encrypt(J0, key, EJ0); /* Step 6: T = MSB_t(GCTR(J0, S))     */
+  for (int i = 0; i < 16; ++i)  /* single block => S XOR E(K, J0)     */
+    tag[i] = S[i] ^ EJ0[i];
+}
+
+/* Constant-time 16-byte compare: returns 1 if equal, 0 otherwise. No early exit,
+ * so it doesn't leak via timing where two tags first differ. */
+static int ct_equal16(const uint8_t a[16], const uint8_t b[16]) {
+  uint8_t diff = 0;
+  for (int i = 0; i < 16; ++i) diff |= (uint8_t)(a[i] ^ b[i]);
+  return diff == 0;
+}
+
+/* Authenticated decryption (SP 800-38D Algorithm 5). Verifies the tag BEFORE
+ * releasing plaintext. Returns 0 on success (pt filled), -1 on auth failure
+ * (pt zeroed, nothing trustworthy emitted). iv is 12 bytes; aad may be NULL if
+ * aad_len == 0. pt must have room for ct_len bytes. */
+int gcm_decrypt(const uint8_t key[16], const uint8_t iv[12], const uint8_t *ct, size_t ct_len, const uint8_t *aad,
+                size_t aad_len, const uint8_t tag[16], uint8_t *pt) {
+  uint8_t H[16], J0[16], icb[16], S[16], EJ0[16], Tprime[16];
+  static const uint8_t zero[16] = {0};
+
+  aes128_encrypt(zero, key, H); /* H = E(K, 0^128) */
+  memcpy(J0, iv, 12);           /* J0 = IV || 0^31 || 1 */
+  J0[12] = 0;
+  J0[13] = 0;
+  J0[14] = 0;
+  J0[15] = 1;
+
+  /* Recompute the tag from the RECEIVED ciphertext and AAD. */
+  gcm_ghash_lengths(H, aad, aad_len, ct, ct_len, S);
+  aes128_encrypt(J0, key, EJ0);
+  for (int i = 0; i < 16; ++i) Tprime[i] = S[i] ^ EJ0[i];
+
+  /* Verify FIRST. On mismatch, release nothing. */
+  if (!ct_equal16(Tprime, tag)) {
+    if (ct_len) memset(pt, 0, ct_len);
+    return -1;
+  }
+
+  /* Authentic: decrypt. CTR is symmetric, so this is the same call as encrypt. */
+  memcpy(icb, J0, 16);
+  inc32(icb);
+  aes128_ctr(ct, ct_len, key, icb, pt);
+  return 0;
+}
+
+/* ============================================================================
  * Test harness
  * ==========================================================================*/
 
@@ -677,6 +775,144 @@ static void test_ghash(void) {
   }
 }
 
+/* Compare `n` bytes; report pass/fail. For GCM buffers of arbitrary length. */
+static void check_bytes(const char *name, const uint8_t *got, const uint8_t *exp, size_t n) {
+  g_run++;
+  if (memcmp(got, exp, n) == 0) {
+    g_pass++;
+    printf("[PASS] %-34s\n", name);
+  } else {
+    printf("[FAIL] %-34s\n       got     :", name);
+    for (size_t i = 0; i < n; ++i) printf(" %02X", got[i]);
+    printf("\n       expected:");
+    for (size_t i = 0; i < n; ++i) printf(" %02X", exp[i]);
+    printf("\n");
+  }
+}
+
+/* Report a boolean condition (for return-code / rejection checks). */
+static void check_cond(const char *name, int ok) {
+  g_run++;
+  if (ok) {
+    g_pass++;
+    printf("[PASS] %-34s\n", name);
+  } else {
+    printf("[FAIL] %-34s\n", name);
+  }
+}
+
+static void test_gcm(void) {
+  uint8_t ct[64], pt[64], tag[16], rec[64];
+  int rc;
+
+  /* ---- Test Case 1: empty plaintext, empty AAD ---- */
+  {
+    static const uint8_t key[16] = {0};
+    static const uint8_t iv[12] = {0};
+    static const uint8_t exp_tag[16] = {0x58, 0xe2, 0xfc, 0xce, 0xfa, 0x7e, 0x30, 0x61,
+                                        0x36, 0x7f, 0x1d, 0x57, 0xa4, 0xe7, 0x45, 0x5a};
+
+    gcm_encrypt(key, iv, NULL, 0, NULL, 0, ct, tag);
+    check_bytes("GCM TC1 tag", tag, exp_tag, 16);
+
+    rc = gcm_decrypt(key, iv, NULL, 0, NULL, 0, exp_tag, rec);
+    check_cond("GCM TC1 decrypt authentic", rc == 0);
+  }
+
+  /* ---- Test Case 2: one zero block, empty AAD ---- */
+  {
+    static const uint8_t key[16] = {0};
+    static const uint8_t iv[12] = {0};
+    static const uint8_t p[16] = {0};
+    static const uint8_t exp_ct[16] = {0x03, 0x88, 0xda, 0xce, 0x60, 0xb6, 0xa3, 0x92,
+                                       0xf3, 0x28, 0xc2, 0xb9, 0x71, 0xb2, 0xfe, 0x78};
+    static const uint8_t exp_tag[16] = {0xab, 0x6e, 0x47, 0xd4, 0x2c, 0xec, 0x13, 0xbd,
+                                        0xf5, 0x3a, 0x67, 0xb2, 0x12, 0x57, 0xbd, 0xdf};
+
+    gcm_encrypt(key, iv, p, 16, NULL, 0, ct, tag);
+    check_bytes("GCM TC2 ciphertext", ct, exp_ct, 16);
+    check_bytes("GCM TC2 tag", tag, exp_tag, 16);
+
+    rc = gcm_decrypt(key, iv, exp_ct, 16, NULL, 0, exp_tag, rec);
+    check_cond("GCM TC2 decrypt authentic", rc == 0);
+    check_bytes("GCM TC2 recovered pt", rec, p, 16);
+  }
+
+  /* ---- Test Case 3: 64-byte plaintext, empty AAD, non-zero IV ---- */
+  {
+    static const uint8_t key[16] = {0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c,
+                                    0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08};
+    static const uint8_t iv[12] = {0xca, 0xfe, 0xba, 0xbe, 0xfa, 0xce, 0xdb, 0xad, 0xde, 0xca, 0xf8, 0x88};
+    static const uint8_t p[64] = {0xd9, 0x31, 0x32, 0x25, 0xf8, 0x84, 0x06, 0xe5, 0xa5, 0x59, 0x09, 0xc5, 0xaf,
+                                  0xf5, 0x26, 0x9a, 0x86, 0xa7, 0xa9, 0x53, 0x15, 0x34, 0xf7, 0xda, 0x2e, 0x4c,
+                                  0x30, 0x3d, 0x8a, 0x31, 0x8a, 0x72, 0x1c, 0x3c, 0x0c, 0x95, 0x95, 0x68, 0x09,
+                                  0x53, 0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25, 0xb1, 0x6a, 0xed, 0xf5,
+                                  0xaa, 0x0d, 0xe6, 0x57, 0xba, 0x63, 0x7b, 0x39, 0x1a, 0xaf, 0xd2, 0x55};
+    static const uint8_t exp_ct[64] = {0x42, 0x83, 0x1e, 0xc2, 0x21, 0x77, 0x74, 0x24, 0x4b, 0x72, 0x21, 0xb7, 0x84,
+                                       0xd0, 0xd4, 0x9c, 0xe3, 0xaa, 0x21, 0x2f, 0x2c, 0x02, 0xa4, 0xe0, 0x35, 0xc1,
+                                       0x7e, 0x23, 0x29, 0xac, 0xa1, 0x2e, 0x21, 0xd5, 0x14, 0xb2, 0x54, 0x66, 0x93,
+                                       0x1c, 0x7d, 0x8f, 0x6a, 0x5a, 0xac, 0x84, 0xaa, 0x05, 0x1b, 0xa3, 0x0b, 0x39,
+                                       0x6a, 0x0a, 0xac, 0x97, 0x3d, 0x58, 0xe0, 0x91, 0x47, 0x3f, 0x59, 0x85};
+    static const uint8_t exp_tag[16] = {0x4d, 0x5c, 0x2a, 0xf3, 0x27, 0xcd, 0x64, 0xa6,
+                                        0x2c, 0xf3, 0x5a, 0xbd, 0x2b, 0xa6, 0xfa, 0xb4};
+
+    gcm_encrypt(key, iv, p, 64, NULL, 0, ct, tag);
+    check_bytes("GCM TC3 ciphertext", ct, exp_ct, 64);
+    check_bytes("GCM TC3 tag", tag, exp_tag, 16);
+
+    rc = gcm_decrypt(key, iv, exp_ct, 64, NULL, 0, exp_tag, rec);
+    check_cond("GCM TC3 decrypt authentic", rc == 0);
+    check_bytes("GCM TC3 recovered pt", rec, p, 64);
+  }
+
+  /* ---- Test Case 4: 60-byte plaintext + 20-byte AAD (partial blocks both) ---- */
+  {
+    static const uint8_t key[16] = {0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c,
+                                    0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08};
+    static const uint8_t iv[12] = {0xca, 0xfe, 0xba, 0xbe, 0xfa, 0xce, 0xdb, 0xad, 0xde, 0xca, 0xf8, 0x88};
+    static const uint8_t p[60] = {0xd9, 0x31, 0x32, 0x25, 0xf8, 0x84, 0x06, 0xe5, 0xa5, 0x59, 0x09, 0xc5,
+                                  0xaf, 0xf5, 0x26, 0x9a, 0x86, 0xa7, 0xa9, 0x53, 0x15, 0x34, 0xf7, 0xda,
+                                  0x2e, 0x4c, 0x30, 0x3d, 0x8a, 0x31, 0x8a, 0x72, 0x1c, 0x3c, 0x0c, 0x95,
+                                  0x95, 0x68, 0x09, 0x53, 0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25,
+                                  0xb1, 0x6a, 0xed, 0xf5, 0xaa, 0x0d, 0xe6, 0x57, 0xba, 0x63, 0x7b, 0x39};
+    static const uint8_t aad[20] = {0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed,
+                                    0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef, 0xab, 0xad, 0xda, 0xd2};
+    static const uint8_t exp_ct[60] = {0x42, 0x83, 0x1e, 0xc2, 0x21, 0x77, 0x74, 0x24, 0x4b, 0x72, 0x21, 0xb7,
+                                       0x84, 0xd0, 0xd4, 0x9c, 0xe3, 0xaa, 0x21, 0x2f, 0x2c, 0x02, 0xa4, 0xe0,
+                                       0x35, 0xc1, 0x7e, 0x23, 0x29, 0xac, 0xa1, 0x2e, 0x21, 0xd5, 0x14, 0xb2,
+                                       0x54, 0x66, 0x93, 0x1c, 0x7d, 0x8f, 0x6a, 0x5a, 0xac, 0x84, 0xaa, 0x05,
+                                       0x1b, 0xa3, 0x0b, 0x39, 0x6a, 0x0a, 0xac, 0x97, 0x3d, 0x58, 0xe0, 0x91};
+    static const uint8_t exp_tag[16] = {0x5b, 0xc9, 0x4f, 0xbc, 0x32, 0x21, 0xa5, 0xdb,
+                                        0x94, 0xfa, 0xe9, 0x5a, 0xe7, 0x12, 0x1a, 0x47};
+
+    gcm_encrypt(key, iv, p, 60, aad, 20, ct, tag);
+    check_bytes("GCM TC4 ciphertext", ct, exp_ct, 60);
+    check_bytes("GCM TC4 tag", tag, exp_tag, 16);
+
+    rc = gcm_decrypt(key, iv, exp_ct, 60, aad, 20, exp_tag, rec);
+    check_cond("GCM TC4 decrypt authentic", rc == 0);
+    check_bytes("GCM TC4 recovered pt", rec, p, 60);
+
+    /* Tamper: flip one tag byte -> must be rejected. */
+    {
+      uint8_t bad_tag[16];
+      memcpy(bad_tag, exp_tag, 16);
+      bad_tag[0] ^= 0x01;
+      rc = gcm_decrypt(key, iv, exp_ct, 60, aad, 20, bad_tag, rec);
+      check_cond("GCM TC4 tampered tag rejected", rc == -1);
+    }
+
+    /* Tamper: flip one ciphertext byte -> must be rejected. */
+    {
+      uint8_t bad_ct[60];
+      memcpy(bad_ct, exp_ct, 60);
+      bad_ct[5] ^= 0x80;
+      rc = gcm_decrypt(key, iv, bad_ct, 60, aad, 20, exp_tag, rec);
+      check_cond("GCM TC4 tampered ct rejected", rc == -1);
+    }
+  }
+}
+
 /* ============================================================================
  * main: run the full test suite
  * ==========================================================================*/
@@ -808,6 +1044,9 @@ int main(void) {
 
   /* -- GHASH -- */
   test_ghash();
+
+  /* -- AES-128-GCM (McGrew-Viega Appendix B) -- */
+  test_gcm();
 
   printf("\n%d/%d tests passed\n", g_pass, g_run);
   return g_pass == g_run ? 0 : 1;
