@@ -1,12 +1,29 @@
 /*
- * AES-128 (FIPS 197) - reference implementation
+ * AES-128 and AES-128-GCM - reference implementation
  *
- * A from-scratch, table-driven implementation of the AES-128 block cipher and
- * its inverse, written for learning. Structure follows NIST FIPS 197:
- *   https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf
+ * A from-scratch, table-driven implementation written for learning, built up in
+ * layers from the primary standards:
+ *
+ *   - AES-128 block cipher and inverse ....... NIST FIPS 197
+ *       https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf
+ *   - CTR mode ............................... NIST SP 800-38A (Sec. 6.5, F.5)
+ *   - GHASH / GF(2^128) multiply ............. NIST SP 800-38D (Sec. 6.3-6.4)
+ *   - AES-128-GCM (authenticated encryption).. NIST SP 800-38D (Sec. 7)
+ *                                              McGrew-Viega (test vectors)
+ *
+ * The file is organized bottom-up: shared parameters and tables, then the two
+ * finite-field arithmetics (GF(2^8) for AES, GF(2^128) for GHASH), the AES state
+ * transforms and key schedule, the AES cipher, the CTR mode, GHASH, and finally
+ * the GCM layer that combines them. A self-contained test suite (validated
+ * against FIPS 197, SP 800-38A F.5.1, and McGrew-Viega vectors) follows in main.
  *
  * State convention: the 16-byte block is held as state[row][col] and is loaded
  * and stored column-major, i.e. state[r][c] = in[r + 4*c]  (FIPS 197 Sec. 3.4).
+ *
+ * NOTE: This is an educational implementation. It is faithful to the standards
+ * but is NOT hardened against timing/cache side-channel attacks and should not
+ * be used to protect real secrets. Use a vetted library or hardware AES-GCM for
+ * production.
  */
 
 #include <stdint.h>
@@ -18,10 +35,10 @@
  * Algorithm parameters (FIPS 197, Sec. 5, Table 3)
  * ==========================================================================*/
 
-#define KEY_LEN 16         /* key size in bytes (128 bits)                */
-#define Nb 4               /* columns in the state                        */
-#define Nk 4               /* 32-bit words in the key                     */
-#define Nr 10              /* number of rounds for AES-128                */
+#define KEY_LEN 16         /* key size in bytes (128 bits)          */
+#define Nb 4               /* columns in the state                  */
+#define Nk 4               /* 32-bit words in the key               */
+#define Nr 10              /* number of rounds for AES-128          */
 #define NW (Nb * (Nr + 1)) /* key-schedule length in words (= 44)   */
 
 /* ============================================================================
@@ -76,6 +93,7 @@ static const uint8_t invSbox[16][16] = {
 
 /* ============================================================================
  * GF(2^8) arithmetic (FIPS 197, Sec. 4.2)
+ * Used by MixColumns / InvMixColumns.
  * ==========================================================================*/
 
 /* Multiply a byte by {02} in GF(2^8): left shift, reducing modulo
@@ -97,13 +115,24 @@ static uint8_t gmul(uint8_t s, uint8_t mult) {
   return result;
 }
 
+/* ============================================================================
+ * GF(2^128) arithmetic (SP 800-38D, Sec. 6.3)
+ * Used by GHASH. Note this is a DIFFERENT field from the GF(2^8) above, with a
+ * "little endian" bit convention: bit 0 is the leftmost bit of the block and the
+ * lowest-order polynomial coefficient, so the multiply shifts RIGHT and reduces
+ * with R = 0xE1 in byte 0 when the bit shifted off the right end is set.
+ * ==========================================================================*/
+
+/* Multiply two 128-bit blocks in GF(2^128): out = x * y. Aliasing-safe (out may
+ * be the same buffer as x or y) since the product is accumulated in a local and
+ * copied out only at the end. */
 void gf128_mul(const uint8_t x[16], const uint8_t y[16], uint8_t out[16]) {
-  uint8_t accumulator[16] = {0};
+  uint8_t accumulator[16] = {0}; /* Z = 0^128 */
   uint8_t copy[16];
-  memcpy(copy, y, 16);
+  memcpy(copy, y, 16); /* V = Y */
 
   for (size_t i = 0; i < 128; ++i) {
-    // extracting bit:
+    /* If bit i of X (bit 0 = leftmost) is set, accumulate the current V. */
     int bit = (x[i / 8] >> (7 - (i % 8))) & 1;
     if (bit) {
       for (size_t b = 0; b < 16; ++b) {
@@ -111,6 +140,7 @@ void gf128_mul(const uint8_t x[16], const uint8_t y[16], uint8_t out[16]) {
       }
     }
 
+    /* V = V >> 1 across all 16 bytes, carrying each byte's LSB into the next. */
     uint8_t carry = 0;
     for (size_t b = 0; b < 16; ++b) {
       uint8_t new_carry = copy[b] & 1;
@@ -118,6 +148,7 @@ void gf128_mul(const uint8_t x[16], const uint8_t y[16], uint8_t out[16]) {
       carry = new_carry;
     }
 
+    /* If the bit that fell off the right end was set, reduce by R (0xE1||0^120). */
     if (carry) {
       copy[0] ^= 0xE1;
     }
@@ -127,7 +158,7 @@ void gf128_mul(const uint8_t x[16], const uint8_t y[16], uint8_t out[16]) {
 }
 
 /* ============================================================================
- * State load / store (column-major, FIPS 197 Sec. 3.4)
+ * AES state load / store (column-major, FIPS 197 Sec. 3.4)
  * ==========================================================================*/
 
 static void load_state(uint8_t state[4][4], const uint8_t in[16]) {
@@ -175,7 +206,8 @@ static void mixColumns(uint8_t state[4][4]) {
   }
 }
 
-/* AddRoundKey (Sec. 5.1.4): XOR each column with a key-schedule word. */
+/* AddRoundKey (Sec. 5.1.4): XOR each column with a key-schedule word.
+ * This transformation is its own inverse and is reused by the inverse cipher. */
 static void addRoundKey(uint8_t state[4][4], const uint32_t rk[4]) {
   for (size_t c = 0; c < 4; ++c) {
     uint32_t col =
@@ -190,7 +222,7 @@ static void addRoundKey(uint8_t state[4][4], const uint32_t rk[4]) {
 
 /* ============================================================================
  * Inverse round transformations (FIPS 197, Sec. 5.3)
- * AddRoundKey is its own inverse and is reused above.
+ * AddRoundKey is its own inverse and is reused from the forward section above.
  * ==========================================================================*/
 
 /* InvShiftRows (Sec. 5.3.1): cyclically shift row r right by r bytes. */
@@ -255,29 +287,7 @@ static void keyExpansion(const uint8_t *key, uint32_t w[NW]) {
 }
 
 /* ============================================================================
- * Utilities
- * ==========================================================================*/
-
-/* Coerce a NUL-terminated string into exactly 16 key bytes, truncating or
- * zero-padding as needed. Convenience for string keys; not used by the tests. */
-void sanitizeKey(const char *input, uint8_t out[KEY_LEN]) {
-  size_t len = strlen(input);
-  for (size_t i = 0; i < KEY_LEN; ++i) out[i] = (i < len) ? (uint8_t)input[i] : 0x00;
-}
-
-void inc32(uint8_t counter[16]) {
-  for (int i = 15; i >= 12; --i) {
-    counter[i] = (counter[i] + 1) % 256;
-    if (counter[i] != 0) {
-      break;
-    } else {
-      counter[i] = 0;
-    }
-  }
-}
-
-/* ============================================================================
- * Cipher and inverse cipher (FIPS 197, Alg. 1 and Alg. 3)
+ * AES-128 cipher and inverse cipher (FIPS 197, Alg. 1 and Alg. 3)
  * Round-key words for round r are w[4*r .. 4*r+3], passed as (w + 4*r).
  * ==========================================================================*/
 
@@ -327,6 +337,29 @@ void aes128_decrypt(const uint8_t in[16], const uint8_t key[16], uint8_t out[16]
   store_state(state, out);
 }
 
+/* ============================================================================
+ * CTR mode (SP 800-38A, Sec. 6.5 / the GCTR function of SP 800-38D)
+ * Encryption and decryption are the same operation (XOR with the keystream), so
+ * only the forward cipher is ever used. GCM's inc32 convention is used: the
+ * counter is the rightmost 32 bits, incremented per block; bytes 0-11 are fixed.
+ * ==========================================================================*/
+
+/* Increment the trailing 32-bit counter of a 16-byte block, big-endian, wrapping
+ * modulo 2^32. Only bytes 12-15 change; the leading 12 bytes (nonce) are fixed. */
+void inc32(uint8_t counter[16]) {
+  for (int i = 15; i >= 12; --i) {
+    counter[i] = (counter[i] + 1) % 256;
+    if (counter[i] != 0) {
+      break;
+    } else {
+      counter[i] = 0;
+    }
+  }
+}
+
+/* CTR encrypt/decrypt `len` bytes of `in` into `out` using initial counter block
+ * `icb`. The final block may be partial (only `len % 16` bytes XORed), so no
+ * padding is required. The caller's `icb` is not modified. */
 void aes128_ctr(const uint8_t in[], size_t len, const uint8_t key[16], const uint8_t icb[16], uint8_t *out) {
   uint8_t ctr[16], keystream[16];
 
@@ -352,6 +385,13 @@ void aes128_ctr(const uint8_t in[], size_t len, const uint8_t key[16], const uin
   }
 };
 
+/* ============================================================================
+ * GHASH (SP 800-38D, Sec. 6.4)
+ * ==========================================================================*/
+
+/* GHASH over `num_blocks` 16-byte blocks with hash subkey H:
+ * Y0 = 0; Yi = (Yi-1 XOR Xi) * H. `data` must already be block-aligned (any
+ * zero-padding is the GCM layer's responsibility). */
 void ghash(const uint8_t data[16], const uint8_t H[16], const size_t num_blocks, uint8_t out[16]) {
   uint8_t buf[16] = {0};
   for (size_t i = 0; i < num_blocks; ++i) {
@@ -365,8 +405,9 @@ void ghash(const uint8_t data[16], const uint8_t H[16], const size_t num_blocks,
 }
 
 /* ============================================================================
- * AES-128-GCM (NIST SP 800-38D / McGrew-Viega)
- * Restricted to 96-bit (12-byte) IVs, the recommended and common case.
+ * AES-128-GCM (NIST SP 800-38D, Sec. 7 / McGrew-Viega)
+ * Combines CTR-mode encryption with GHASH authentication. Restricted to 96-bit
+ * (12-byte) IVs, the recommended and common case.
  * ==========================================================================*/
 
 /* Encode a 64-bit value big-endian into 8 bytes. */
@@ -462,6 +503,17 @@ int gcm_decrypt(const uint8_t key[16], const uint8_t iv[12], const uint8_t *ct, 
 }
 
 /* ============================================================================
+ * Utilities
+ * ==========================================================================*/
+
+/* Coerce a NUL-terminated string into exactly 16 key bytes, truncating or
+ * zero-padding as needed. Convenience for string keys; not used by the tests. */
+void sanitizeKey(const char *input, uint8_t out[KEY_LEN]) {
+  size_t len = strlen(input);
+  for (size_t i = 0; i < KEY_LEN; ++i) out[i] = (i < len) ? (uint8_t)input[i] : 0x00;
+}
+
+/* ============================================================================
  * Test harness
  * ==========================================================================*/
 
@@ -490,6 +542,37 @@ static void check_word(const char *name, uint32_t got, uint32_t expected) {
     printf("[PASS] %-28s = 0x%08X\n", name, (unsigned)got);
   } else {
     printf("[FAIL] %-28s : got 0x%08X, expected 0x%08X\n", name, (unsigned)got, (unsigned)expected);
+  }
+}
+
+/* Compare two 16-byte blocks, report pass/fail with hex diff. */
+static void check_block(const char *name, const uint8_t got[16], const uint8_t expected[16]) {
+  report(name, bytes_equal(got, expected), got, expected);
+}
+
+/* Compare `n` bytes; report pass/fail. For GCM buffers of arbitrary length. */
+static void check_bytes(const char *name, const uint8_t *got, const uint8_t *exp, size_t n) {
+  g_run++;
+  if (memcmp(got, exp, n) == 0) {
+    g_pass++;
+    printf("[PASS] %-34s\n", name);
+  } else {
+    printf("[FAIL] %-34s\n       got     :", name);
+    for (size_t i = 0; i < n; ++i) printf(" %02X", got[i]);
+    printf("\n       expected:");
+    for (size_t i = 0; i < n; ++i) printf(" %02X", exp[i]);
+    printf("\n");
+  }
+}
+
+/* Report a boolean condition (for return-code / rejection checks). */
+static void check_cond(const char *name, int ok) {
+  g_run++;
+  if (ok) {
+    g_pass++;
+    printf("[PASS] %-34s\n", name);
+  } else {
+    printf("[FAIL] %-34s\n", name);
   }
 }
 
@@ -626,6 +709,7 @@ static void check_ctr_keystream_block1(void) {
   report("ctr block1 uses inc32(icb)", bytes_equal(ct + 16, expect2), ct + 16, expect2);
 }
 
+/* CTR against the NIST SP 800-38A F.5.1 CTR-AES128 known-answer vector. */
 static void check_ctr_nist_f51(void) {
   static const uint8_t key[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
                                   0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
@@ -665,11 +749,6 @@ static void check_ctr_nist_f51(void) {
   } else {
     printf("[FAIL] CTR NIST F.5.1 decrypt\n");
   }
-}
-
-/* Compare two 16-byte blocks, report pass/fail with hex diff. */
-static void check_block(const char *name, const uint8_t got[16], const uint8_t expected[16]) {
-  report(name, bytes_equal(got, expected), got, expected);
 }
 
 static void test_gf128_mul(void) {
@@ -775,34 +854,8 @@ static void test_ghash(void) {
   }
 }
 
-/* Compare `n` bytes; report pass/fail. For GCM buffers of arbitrary length. */
-static void check_bytes(const char *name, const uint8_t *got, const uint8_t *exp, size_t n) {
-  g_run++;
-  if (memcmp(got, exp, n) == 0) {
-    g_pass++;
-    printf("[PASS] %-34s\n", name);
-  } else {
-    printf("[FAIL] %-34s\n       got     :", name);
-    for (size_t i = 0; i < n; ++i) printf(" %02X", got[i]);
-    printf("\n       expected:");
-    for (size_t i = 0; i < n; ++i) printf(" %02X", exp[i]);
-    printf("\n");
-  }
-}
-
-/* Report a boolean condition (for return-code / rejection checks). */
-static void check_cond(const char *name, int ok) {
-  g_run++;
-  if (ok) {
-    g_pass++;
-    printf("[PASS] %-34s\n", name);
-  } else {
-    printf("[FAIL] %-34s\n", name);
-  }
-}
-
 static void test_gcm(void) {
-  uint8_t ct[64], pt[64], tag[16], rec[64];
+  uint8_t ct[64], tag[16], rec[64];
   int rc;
 
   /* ---- Test Case 1: empty plaintext, empty AAD ---- */
