@@ -88,7 +88,7 @@ void vTask2(void *pvParameters) {
 
   // Corrupt all of the alarm's unixTimes
   for (unsigned int i = 0; i < OBC_PERSISTENT_MAX_SUBINDEX_ALARM; ++i) {
-    uint32_t corrupt = 0xFFFF;
+    uint8_t corrupt = 0xFF;
     // unixTimeAddr is calculated the same way as in the set/get persistent by sub index
     //  but outside of testing SHOULD NOT BE USED, use the provided functions
     uint32_t unixTimeAddr = OBC_PERSIST_ADDR_OF(alarmMgr[0].data) + sizeof(alarm_mgr_persist_t) * i;

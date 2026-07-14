@@ -73,7 +73,7 @@ int main(void) {
   initSciMutex();
   initI2CMutex();
 
-  initLogger();
+  // initLogger();
 
   LOG_INFO("Starting RTC Demo");
 
