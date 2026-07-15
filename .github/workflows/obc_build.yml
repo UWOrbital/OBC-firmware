@@ -94,3 +94,41 @@ jobs:
       run: |
         echo "CRC checksum:"
         cksum OBC-firmware.bin
+
+  release:
+    needs: crc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Firmware
+        uses: actions/download-artifact@v4
+        with:
+          name: bin-file
+          path: release_input
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate Release Package
+        run: |
+          python scripts/package_release.py \
+            --binary release_input/OBC-firmware.bin \
+            --board OBC_REVISION_2 \
+            --build-type Release
+
+      - name: Verify Release Package
+        run: |
+          python scripts/verify_release.py
+
+      - name: Display Release Contents
+        run: |
+          ls -la release
+
+      - name: Upload Release Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-release
+          path: release/
