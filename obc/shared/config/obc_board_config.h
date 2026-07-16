@@ -175,11 +175,11 @@
 #define SDC_SPI_DATA_FORMAT SPI_FMT_1
 
 // Camera SPI configs (this SPI interferes with SD card spi, is this expected?)
-#define CAM_SPI_PORT spiPORT3
-#define CAM_SPI_REG spiREG3
+#define CAM_SPI_PORT spiPORT1
+#define CAM_SPI_REG spiREG1
 #define CAM_SPI_DATA_FORMAT SPI_FMT_2
-#define CAM_CS_1 1UL
-#define CAM_CS_2 2UL
+#define CAM_CS_1 0UL
+#define CAM_CS_2 1UL
 
 // State Manager DEBUG LED
 #define STATE_MGR_DEBUG_LED_GIO_PORT gioPORTA
