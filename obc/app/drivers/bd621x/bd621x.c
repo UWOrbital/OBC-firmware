@@ -74,7 +74,8 @@ obc_error_code_t setMotorSpeed(const DC_motor_t* motor, float speed, float64 per
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  float64 frequency = 1 / period;
+  // period is in us (same unit as hetSIGNAL_t.period), so convert to Hz with 1e6/period
+  float64 frequency = 1000000.0 / period;
   if ((frequency < MOTOR_MIN_FREQUENCY) || (frequency > MOTOR_MAX_FREQUENCY)) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
