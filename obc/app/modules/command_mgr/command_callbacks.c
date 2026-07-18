@@ -1,5 +1,3 @@
-#include "arducam.h"
-#include "camera_control.h"
 #include "hal_stdtypes.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
@@ -9,8 +7,8 @@
 #include "obc_logging.h"
 #include "obc_time.h"
 #include "obc_time_utils.h"
-#include "downlink_encoder.h"
 #include "os_portmacro.h"
+#include "payload_manager.h"
 #include "os_projdefs.h"
 #include "telemetry_manager.h"
 #include "command.h"
@@ -125,32 +123,13 @@ static obc_error_code_t captureImageCmdCallback(cmd_msg_t *cmd, uint8_t *respons
   if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  // setup and configure camera
-  LOG_DEBUG("Starting Arducam\r\n");
-  camera_id_t selectedCamera = PRIMARY;
-  LOG_IF_ERROR_CODE(initCamera(selectedCamera));
-  LOG_DEBUG("Configuring Camera\r\n");
-  LOG_IF_ERROR_CODE(camConfigureSensor());
 
-  // capture one image
-  LOG_IF_ERROR_CODE(startImageCapture(selectedCamera));
-  while (isCaptureDone(selectedCamera) == OBC_ERR_CODE_CAMERA_CAPTURE_INCOMPLETE)
-    ;
+  // The capture is handled asynchronously by the payload manager, which writes
+  // the image to the SD card; a successful response only means the capture
+  // request was queued
+  payload_event_t event = {.eventID = PAYLOAD_CAPTURE_IMAGE_EVENT_ID};
+  RETURN_IF_ERROR_CODE(sendToPayloadQueue(&event));
 
-  // read and downlink image in 64-byte chunks
-  uint8_t imgBuffer[64U];
-  size_t bytesRead = 0;
-  obc_error_code_t ret;
-  do {
-    ret = readImage(selectedCamera, imgBuffer, 64U, &bytesRead);
-    for (size_t i = 0; i < bytesRead; i++) {
-      encode_event_t event = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = imgBuffer[i]};
-      RETURN_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&event));
-    }
-  } while (ret == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
-
-  // finished, put camera on standby
-  LOG_IF_ERROR_CODE(standbyCamera(selectedCamera));
   *responseDataLen = 0;
 
   return OBC_ERR_CODE_SUCCESS;

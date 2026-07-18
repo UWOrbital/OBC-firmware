@@ -1,8 +1,11 @@
 #include "downlink_encoder.h"
+#include "camera_fs_utils.h"
 #include "cc1120_txrx.h"
 #include "obc_board_config.h"
 #include "obc_gs_ax25.h"
+#include "obc_gs_command_id.h"
 #include "obc_gs_commands_response.h"
+#include "obc_gs_commands_response_pack.h"
 #include "obc_gs_fec.h"
 
 #include "obc_gs_telemetry_pack.h"
@@ -71,6 +74,16 @@ static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd
 static obc_error_code_t sendPacket(uint8_t *sendBuffer);
 
 /**
+ * @brief Reads the image file off the SD card and sends it into the CC1120
+ * transmit queue as a series of cmd-response-format packets. The first packet
+ * carries the total image size (4 bytes, little-endian); each following packet
+ * carries up to CMD_RESPONSE_DATA_MAX_SIZE (220) bytes of image data.
+ *
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if the whole image was sent
+ */
+static obc_error_code_t sendImageFile(void);
+
+/**
  * @brief Either sends a single piece of telemetry or packs it into the current
  * telemetry packet
  *
@@ -133,6 +146,12 @@ void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
         setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
         LOG_IF_ERROR_CODE(
             sendTelemetryBuffer(queueMsg.telemetryDataBuffer.telemData, queueMsg.telemetryDataBuffer.bufferSize));
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
+        break;
+      case DOWNLINK_IMAGE_FILE:
+        setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
+        LOG_IF_ERROR_CODE(sendImageFile());
         transmitEvent.eventID = END_DOWNLINK;
         LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
@@ -332,6 +351,78 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
   // Copy the telemetry data into the packedTelem struct
   memcpy(telemPacket->data + (*telemPacketOffset), packedSingleTelem, packedSingleTelemSize);
   *telemPacketOffset += packedSingleTelemSize;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t sendImageFile(void) {
+  obc_error_code_t errCode;
+
+  // Taking the image file mutex (inside openImageFileRO) guarantees the payload
+  // manager is not still writing this image, and blocks any new capture from
+  // truncating the file until we close it
+  int32_t imageFileId = -1;
+  RETURN_IF_ERROR_CODE(openImageFileRO(&imageFileId));
+
+  size_t fileSize = 0;
+  errCode = getImageFileSize(imageFileId, &fileSize);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    closeImageFile(imageFileId);
+    return errCode;
+  }
+
+  uint8_t packetBuffer[RS_DECODED_SIZE] = {0};
+  // packCmdResponse always copies CMD_RESPONSE_DATA_MAX_SIZE bytes from responseData,
+  // so it must be a full-size, zeroed buffer even when dataLen is smaller
+  uint8_t responseData[CMD_RESPONSE_DATA_MAX_SIZE] = {0};
+
+  // First packet: total image size, so the ground station knows how many data bytes to expect
+  uint32_t imageSize = (uint32_t)fileSize;
+  memcpy(responseData, &imageSize, sizeof(imageSize));
+  cmd_response_header_t resHeader = {
+      .cmdId = CMD_CAPTURE_IMAGE, .errCode = CMD_RESPONSE_SUCCESS, .dataLen = sizeof(imageSize)};
+  if (packCmdResponse(&resHeader, packetBuffer, responseData) != OBC_GS_ERR_CODE_SUCCESS) {
+    closeImageFile(imageFileId);
+    return OBC_ERR_CODE_FAILED_PACK;
+  }
+  errCode = sendPacket(packetBuffer);
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    closeImageFile(imageFileId);
+    return errCode;
+  }
+
+  // Data packets: up to 220 bytes of raw image data each; the last one may be short
+  while (1) {
+    size_t bytesRead = 0;
+    memset(responseData, 0, sizeof(responseData));
+    errCode = readNextImageChunkFromFile(imageFileId, responseData, CMD_RESPONSE_DATA_MAX_SIZE, &bytesRead);
+    if (errCode == OBC_ERR_CODE_REACHED_EOF) {
+      errCode = OBC_ERR_CODE_SUCCESS;
+      break;
+    }
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      break;
+    }
+
+    resHeader.dataLen = (uint8_t)bytesRead;
+    if (packCmdResponse(&resHeader, packetBuffer, responseData) != OBC_GS_ERR_CODE_SUCCESS) {
+      errCode = OBC_ERR_CODE_FAILED_PACK;
+      break;
+    }
+
+    errCode = sendPacket(packetBuffer);
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      break;
+    }
+  }
+
+  if (errCode != OBC_ERR_CODE_SUCCESS) {
+    LOG_ERROR_CODE(errCode);
+    closeImageFile(imageFileId);
+    return errCode;
+  }
+
+  RETURN_IF_ERROR_CODE(closeImageFile(imageFileId));
 
   return OBC_ERR_CODE_SUCCESS;
 }

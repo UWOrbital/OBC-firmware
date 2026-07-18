@@ -10,7 +10,11 @@
  *
  * Enum containing all possible event IDs passed to the payload event queue.
  */
-typedef enum { PAYLOAD_MANAGER_NULL_EVENT_ID, SECONDARY_PAYLOAD_MANAGER_EVENT_ID } payload_event_id_t;
+typedef enum {
+  PAYLOAD_MANAGER_NULL_EVENT_ID,
+  PAYLOAD_CAPTURE_IMAGE_EVENT_ID,
+  SECONDARY_PAYLOAD_MANAGER_EVENT_ID
+} payload_event_id_t;
 
 /**
  * @union	payload_event_data_t

@@ -34,7 +34,7 @@ config_id_stem = "COMMS_MGR"
 
 [[tasks]]
 task_name = "comms_encoder"
-stack_size = 512
+stack_size = 1024
 priority = "TASK_COMMS_PRIORITY"
 function_stem = "CommsDownlinkEncoder"
 config_id_stem = "COMMS_DOWNLINK_ENCODER"
