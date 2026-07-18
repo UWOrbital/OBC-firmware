@@ -368,7 +368,7 @@ typedef struct system_config_reg
 
 #define SYS_CLKCNTL_CONFIGVALUE     ( 0x00000100U \
                                     | (uint32)((uint32)2U << 16U) \
-                                    | (uint32)((uint32)1U << 24U) ) 
+                                    | (uint32)((uint32)2U << 24U) )
                                     
 #define SYS_ECPCNTL_CONFIGVALUE     ( (uint32)((uint32)0U << 24U)\
                                     | (uint32)((uint32)0U << 23U)\

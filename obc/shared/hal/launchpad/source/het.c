@@ -1581,7 +1581,7 @@ void pwmSetSignal(hetRAMBASE_t * hetRAM, uint32 pwm, hetSIGNAL_t signal)
 
     if(hetRAM == hetRAM1)
     {
-        pwmPeriod = (signal.period * 1000.0F) / 1163.636F;
+        pwmPeriod = (signal.period * 1000.0F) / 1745.455F;
         pwmPolarity = s_het1pwmPolarity[pwm];
     }
     else
@@ -1639,11 +1639,11 @@ void pwmGetSignal(hetRAMBASE_t * hetRAM, uint32 pwm, hetSIGNAL_t* signal)
 
     if(hetRAM == hetRAM1)
     {
-        signal->period = ((float64)pwmPeriod * 1163.636F) / 1000.0F;
+        signal->period = ((float64)pwmPeriod * 1745.455F) / 1000.0F;
     }
     else
     {
-        signal->period = ((float64)pwmPeriod * 1163.636F) / 1000.0F;
+        signal->period = ((float64)pwmPeriod * 1745.455F) / 1000.0F;
     }
 }
 
@@ -1837,11 +1837,11 @@ void capGetSignal(hetRAMBASE_t * hetRAM, uint32 cap, hetSIGNAL_t *signal)
 
     if( hetRAM == hetRAM1)
     {
-        signal->period = ((float64)pwmPeriod * 1163.636F) / 1000.0F;
+        signal->period = ((float64)pwmPeriod * 1745.455F) / 1000.0F;
     }
     else
     {
-        signal->period = ((float64)pwmPeriod * 1163.636F) / 1000.0F;
+        signal->period = ((float64)pwmPeriod * 1745.455F) / 1000.0F;
     }
 }
 

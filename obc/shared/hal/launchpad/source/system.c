@@ -308,10 +308,38 @@ void mapClocks(void)
                          | (uint32)((uint32)SYS_VCLK << 0U);
 
     /** - Setup synchronous peripheral clock dividers for VCLK1, VCLK2, VCLK3 */
+    /* VCLK2 must be an integer multiple of VCLK (VCLK = HCLK/3). The generated
+       value of 1 (VCLK2 = HCLK/2) gave an out-of-spec 1.5x ratio; use 2 so
+       VCLK2 = VCLK = HCLK/3. The HET us<->tick constants in het.c (1745.455ns)
+       assume this VCLK2 frequency. */
     systemREG1->CLKCNTL  = (systemREG1->CLKCNTL & 0xF0FFFFFFU)
-                         | (uint32)((uint32)1U << 24U);
+                         | (uint32)((uint32)2U << 24U);
     systemREG1->CLKCNTL  = (systemREG1->CLKCNTL & 0xFFF0FFFFU)
                          | (uint32)((uint32)2U << 16U);
+
+    /* Re-latch the VCLK2 divider. The VCLK2 domain (N2HET1/2, HTU1/2) comes up
+       wedged after the divider writes above: every register in the domain reads
+       0 and drops writes, with no ESM error. Parking the divider at /16 and
+       rewriting the final value restarts the domain. This re-latch alone is
+       sufficient (verified with the original 1.5x VCLK2/VCLK ratio as well as
+       a 1:1 ratio). Found empirically on two LAUNCHXL2-RM46 boards; see
+       test_app_bd621x and the MTQ PWM bring-up report. */
+    systemREG1->CLKCNTL  = (systemREG1->CLKCNTL & 0xF0FFFFFFU)
+                         | (uint32)((uint32)0xFU << 24U);
+    {
+        volatile uint32 relatchDelay;
+        for (relatchDelay = 0U; relatchDelay < 1000U; relatchDelay++)
+        {
+        }
+    }
+    systemREG1->CLKCNTL  = (systemREG1->CLKCNTL & 0xF0FFFFFFU)
+                         | (uint32)((uint32)2U << 24U);
+    {
+        volatile uint32 relatchDelay;
+        for (relatchDelay = 0U; relatchDelay < 1000U; relatchDelay++)
+        {
+        }
+    }
 
     systemREG2->CLK2CNTL = (systemREG2->CLK2CNTL & 0xFFFFF0F0U)
                          | (uint32)((uint32)1U << 8U)
