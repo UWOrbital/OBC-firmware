@@ -1,9 +1,5 @@
-from struct import unpack
-
 from interfaces import RS_DECODED_DATA_SIZE
-from interfaces.obc_gs_interface.commands.python import (
-    unpack_telem
-)
+from interfaces.obc_gs_interface.commands.python import unpack_telem
 from interfaces.utils.encode_decode import CommsPipeline
 
 if __name__ == "__main__":
@@ -11,7 +7,7 @@ if __name__ == "__main__":
     comms = CommsPipeline()
 
     frame = comms.decode_frame(bytes_from_board)
-    
+
     telem, data = unpack_telem(frame.data[:RS_DECODED_DATA_SIZE])
 
     for telemetry in telem:
@@ -20,4 +16,3 @@ if __name__ == "__main__":
             print(telemetry.obcTemp)
         else:
             print(f"Frame data is none {telemetry.obcState}")
-

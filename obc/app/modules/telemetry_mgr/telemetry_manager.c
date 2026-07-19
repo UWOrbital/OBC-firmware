@@ -98,11 +98,11 @@ void obcTaskFunctionTelemetryMgr(void *pvParameters) {
 
     // The lifetime of the CubeSat should not allow for this to overflow.
     // However, if it does, we can wrap around to 0 and start overwriting old files.
-    //telemetryBatchId++;
+    // telemetryBatchId++;
 
     // TODO: Save batch ID to FRAM
 
-    //LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
+    // LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       // TODO: Deal with errors
     }
