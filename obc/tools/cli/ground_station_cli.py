@@ -90,9 +90,9 @@ class GroundStationShell(Cmd):
         Sends a command to the ground station
         """
         # Preliminary checks for the function to run
-        if not self._conn_request_sent:
-            print("Connection Request needs to be sent first. Aborting...")
-            return
+        # if not self._conn_request_sent:
+        #     print("Connection Request needs to be sent first. Aborting...")
+        #     return
 
         if self.background_logging is not None:
             self.background_logging.kill()
