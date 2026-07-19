@@ -68,15 +68,15 @@ void obcTaskFunctionTelemetryMgr(void *pvParameters) {
   LOG_IF_ERROR_CODE(mkTelemetryDir());
 
   // TODO: Deal with errors
-  LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
+  LOG_IF_ERROR_CODE(createTelemetryFile(telemetryBatchId, &telemetryFileId));
 
   while (1) {
     telemetry_data_t telemData;
     if (xQueueReceive(telemetryDataQueueHandle, &telemData, TELEMETRY_DATA_QUEUE_WAIT_PERIOD) == pdPASS) {
       // TODO: Deal with errors
+      LOG_IF_ERROR_CODE(openTelemetryFileRW(telemetryBatchId, &telemetryFileId));
       LOG_IF_ERROR_CODE(writeTelemetryToFile(telemetryFileId, telemData));
     }
-
     // Check if we need to downlink telemetry
     if (!checkDownlinkAlarm()) {
       continue;
@@ -98,11 +98,11 @@ void obcTaskFunctionTelemetryMgr(void *pvParameters) {
 
     // The lifetime of the CubeSat should not allow for this to overflow.
     // However, if it does, we can wrap around to 0 and start overwriting old files.
-    telemetryBatchId++;
+    //telemetryBatchId++;
 
     // TODO: Save batch ID to FRAM
 
-    LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
+    //LOG_IF_ERROR_CODE(createAndOpenTelemetryFileRW(telemetryBatchId, &telemetryFileId));
     if (errCode != OBC_ERR_CODE_SUCCESS) {
       // TODO: Deal with errors
     }
