@@ -1,3 +1,4 @@
+#include "gnc_manager.h"
 #include "obc_gs_command_data.h"
 #include "obc_gs_command_id.h"
 #include "obc_i2c_io.h"
@@ -116,6 +117,37 @@ static obc_error_code_t I2CProbeCmdCallback(cmd_msg_t *cmd, uint8_t *responseDat
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t gncMtqTestStartCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+  obc_error_code_t errCode;
+
+  if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // The test itself runs in the GNC manager task (see startGncMtqTest); a
+  // successful response only means the test was requested
+  LOG_DEBUG("Starting GNC MTQ test");
+  RETURN_IF_ERROR_CODE(startGncMtqTest());
+
+  *responseDataLen = 0;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+static obc_error_code_t gncMtqTestStopCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+  obc_error_code_t errCode;
+
+  if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // The GNC manager task puts the MTQ into standby on its next cycle
+  LOG_DEBUG("Stopping GNC MTQ test");
+  RETURN_IF_ERROR_CODE(stopGncMtqTest());
+
+  *responseDataLen = 0;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 const cmd_info_t cmdsConfig[] = {
     [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     // TODO: Change this to critial once critical commands are implemented
@@ -126,6 +158,8 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_I2C_PROBE] = {I2CProbeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_GNC_MTQ_TEST_START] = {gncMtqTestStartCmdCallback, CMD_POLICY_RND, CMD_TYPE_NORMAL},
+    [CMD_GNC_MTQ_TEST_STOP] = {gncMtqTestStopCmdCallback, CMD_POLICY_RND, CMD_TYPE_NORMAL},
 };
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the

@@ -24,6 +24,35 @@
 #define MAX_GNC_TASK_PERIOD_MS 100
 #define DEGREES_TO_RADIANS(theta) (theta * M_PI / 180)
 
+/* MTQ commanding test config (see startGncMtqTest in gnc_manager.h).
+ * The duty ramps in MTQ_TEST_DUTY_STEP_PERCENT increments, one step per GNC
+ * task cycle, between 0 and MTQ_TEST_MAX_DUTY_PERCENT. The peak is held for
+ * MTQ_TEST_HOLD_MS before the polarity flips. */
+#define MTQ_TEST_MAX_DUTY_PERCENT 75
+#define MTQ_TEST_DUTY_STEP_PERCENT 5
+#define MTQ_TEST_HOLD_MS 10000U
+
+/* Same X-axis wiring as the test_app_bd621x bench example:
+ * FIN on pwm2/N2HET1[12] (J4-6), RIN on pwm3/N2HET1[14] (J4-5) */
+static const mtq_t gncMtqX = {
+    .hetRam = hetRAM1, .hetReg = hetREG1, .finPwm = pwm2, .rinPwm = pwm3, .finPin = 12U, .rinPin = 14U};
+
+typedef enum {
+  MTQ_TEST_STATE_RAMP_UP,           /* forward polarity, ramping 0 -> +75 % */
+  MTQ_TEST_STATE_HOLD,              /* holding +75 % for MTQ_TEST_HOLD_MS */
+  MTQ_TEST_STATE_RAMP_DOWN_REVERSE, /* reverse polarity, ramping -75 % -> 0 */
+} mtq_test_state_t;
+
+/* Written by the command callbacks (command manager task), read by the GNC
+ * task; single bool so the cross-task access is atomic */
+static volatile bool mtqTestRequested = false;
+
+/* GNC-task-private test state */
+static bool mtqTestRunning = false;
+static mtq_test_state_t mtqTestState = MTQ_TEST_STATE_RAMP_UP;
+static int32_t mtqTestDuty = 0;
+static TickType_t mtqTestHoldStartTicks = 0;
+
 uint32_t cycleNum = 1;
 uint32_t taskRateDivisor = 1;
 
@@ -32,6 +61,7 @@ vn100_binary_packet_t vn100LastValidPacket;
 static void rtOnboardModelStep(void);
 static void rtAttitudeDeterminationModelStep(void);
 static void rtAttitudeControlModelStep(void);
+static bool stepMtqTest(void);
 
 static void rtOnboardModelStep(void) {
   /* Set model inputs here | Currently setting mock values for inputs */
@@ -176,6 +206,79 @@ static void rtAttitudeControlModelStep(void) {
   UNUSED(commandedWheelTorqueZ);
 }
 
+obc_error_code_t startGncMtqTest(void) {
+  mtqTestRequested = true;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+obc_error_code_t stopGncMtqTest(void) {
+  mtqTestRequested = false;
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Run one step of the MTQ commanding test. Called once per GNC task
+ * cycle; all mtqSetOutput calls happen here so the driver is only ever touched
+ * from the GNC task.
+ *
+ * @return true if the test currently owns the actuators (the normal GNC
+ * pipeline should be skipped this cycle), false otherwise
+ */
+static bool stepMtqTest(void) {
+  obc_error_code_t errCode;
+
+  if (!mtqTestRequested) {
+    if (mtqTestRunning) {
+      /* Stop command received: leave the MTQ off (standby, both inputs low) */
+      LOG_IF_ERROR_CODE(mtqStop(&gncMtqX));
+      mtqTestRunning = false;
+    }
+    return false;
+  }
+
+  if (!mtqTestRunning) {
+    /* Start command received: begin a fresh cycle from 0 %, forward polarity */
+    mtqTestRunning = true;
+    mtqTestState = MTQ_TEST_STATE_RAMP_UP;
+    mtqTestDuty = 0;
+  }
+
+  switch (mtqTestState) {
+    case MTQ_TEST_STATE_RAMP_UP:
+      mtqTestDuty += MTQ_TEST_DUTY_STEP_PERCENT;
+      if (mtqTestDuty >= MTQ_TEST_MAX_DUTY_PERCENT) {
+        mtqTestDuty = MTQ_TEST_MAX_DUTY_PERCENT;
+        mtqTestState = MTQ_TEST_STATE_HOLD;
+        mtqTestHoldStartTicks = xTaskGetTickCount();
+      }
+      LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, mtqTestDuty));
+      break;
+
+    case MTQ_TEST_STATE_HOLD:
+      /* Output is already at +75 %; once the hold expires, flip instantly to
+       * reverse polarity at 75 % and start ramping down */
+      if ((xTaskGetTickCount() - mtqTestHoldStartTicks) >= pdMS_TO_TICKS(MTQ_TEST_HOLD_MS)) {
+        mtqTestState = MTQ_TEST_STATE_RAMP_DOWN_REVERSE;
+        mtqTestDuty = MTQ_TEST_MAX_DUTY_PERCENT;
+        LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, -mtqTestDuty));
+      }
+      break;
+
+    case MTQ_TEST_STATE_RAMP_DOWN_REVERSE:
+      mtqTestDuty -= MTQ_TEST_DUTY_STEP_PERCENT;
+      if (mtqTestDuty <= 0) {
+        /* Reached 0: switch instantly back to forward polarity; the next cycle
+         * re-enters RAMP_UP and the whole pattern repeats indefinitely */
+        mtqTestDuty = 0;
+        mtqTestState = MTQ_TEST_STATE_RAMP_UP;
+      }
+      LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, -mtqTestDuty));
+      break;
+  }
+
+  return true;
+}
+
 obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
   /* If the period exceeds 50ms, set to block for another interval (e.g 100ms is one blocked cycle for 50ms and then
    * running the full GNC code for the other 50ms)*/
@@ -188,6 +291,8 @@ obc_error_code_t setGncTaskPeriod(uint16_t periodMs) {
 }
 
 void obcTaskInitGncMgr(void) {
+  obc_error_code_t errCode;
+
   /* Initialize the onboard modelling environment */
   onboard_env_modelling_initialize();
 
@@ -196,6 +301,10 @@ void obcTaskInitGncMgr(void) {
 
   /* Initialize the attitude control algorithms */
   attitude_control_initialize();
+
+  /* Initialize the magnetorquer channel used by the MTQ commanding test
+   * (starts with both bridge inputs low / 0 % output) */
+  LOG_IF_ERROR_CODE(mtqInit(&gncMtqX));
 }
 
 void obcTaskFunctionGncMgr(void *pvParameters) {
@@ -220,6 +329,14 @@ void obcTaskFunctionGncMgr(void *pvParameters) {
 
     /* Place GNC Tasks here */
     obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
+
+    /* MTQ commanding test: while it is running it owns the actuators, so the
+     * normal GNC pipeline (sensor reads + model steps) is skipped until the
+     * stop command is received */
+    if (stepMtqTest()) {
+      vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(DEFAULT_GNC_TASK_PERIOD_MS));
+      continue;
+    }
 
     /* Read from sensors */
     vn100_binary_packet_t vn100CurrentPacket = {0};
