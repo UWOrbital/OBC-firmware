@@ -67,9 +67,9 @@ class GroundStationShell(Cmd):
     def do_send_conn_request(self, line: str) -> None:
         "Sends the initial connection request"
         # Preliminary checks for the function to run
-        if self._conn_request_sent:
-            print("Connection Request has already been sent. Aborting...")
-            return
+        # if self._conn_request_sent:
+        #     print("Connection Request has already been sent. Aborting...")
+        #     return
 
         # We try to send a connection request and if no response is recieved we catch the indexError and handle it
         try:
