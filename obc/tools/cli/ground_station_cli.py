@@ -67,9 +67,9 @@ class GroundStationShell(Cmd):
     def do_send_conn_request(self, line: str) -> None:
         "Sends the initial connection request"
         # Preliminary checks for the function to run
-        if self._conn_request_sent:
-            print("Connection Request has already been sent. Aborting...")
-            return
+        # if self._conn_request_sent:
+        #     print("Connection Request has already been sent. Aborting...")
+        #     return
 
         # We try to send a connection request and if no response is recieved we catch the indexError and handle it
         try:
@@ -90,9 +90,9 @@ class GroundStationShell(Cmd):
         Sends a command to the ground station
         """
         # Preliminary checks for the function to run
-        if not self._conn_request_sent:
-            print("Connection Request needs to be sent first. Aborting...")
-            return
+        # if not self._conn_request_sent:
+        #     print("Connection Request needs to be sent first. Aborting...")
+        #     return
 
         if self.background_logging is not None:
             self.background_logging.kill()

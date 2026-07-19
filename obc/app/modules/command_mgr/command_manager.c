@@ -4,6 +4,7 @@
 #include "downlink_encoder.h"
 #include "obc_gs_command_data.h"
 #include "obc_errors.h"
+#include "obc_gs_command_id.h"
 #include "obc_gs_commands_response.h"
 #include "obc_gs_commands_response_pack.h"
 #include "obc_gs_errors.h"
@@ -94,8 +95,10 @@ obc_error_code_t downlinkCmdResponse(cmd_response_header_t *cmdResHeader, cmd_ms
     return OBC_ERR_CODE_FAILED_PACK;
   } else {
     for (uint8_t i = 0; i < RS_DECODED_SIZE; i++) {
-      encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
-      LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
+      if (cmd->id != CMD_DOWNLINK_TELEM) {
+        encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
+        LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
+      }
     }
   }
 

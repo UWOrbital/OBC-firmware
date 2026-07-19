@@ -17,6 +17,7 @@ dependencies = [
     "textual>=8.2.6",
     "tinyaes>=1.1.2",
     "toml>=0.10.2",
+    "tqdm>=4.69.0",
 ]
 
 [tool.setuptools]
