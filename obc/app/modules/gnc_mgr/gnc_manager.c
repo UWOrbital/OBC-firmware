@@ -25,12 +25,14 @@
 #define DEGREES_TO_RADIANS(theta) (theta * M_PI / 180)
 
 /* MTQ commanding test config (see startGncMtqTest in gnc_manager.h).
- * The duty ramps in MTQ_TEST_DUTY_STEP_PERCENT increments, one step per GNC
- * task cycle, between 0 and MTQ_TEST_MAX_DUTY_PERCENT. The peak is held for
- * MTQ_TEST_HOLD_MS before the polarity flips. */
+ * Each polarity ramps its magnitude 0 -> MTQ_TEST_MAX_DUTY_PERCENT in
+ * MTQ_TEST_DUTY_STEP_PERCENT increments with MTQ_TEST_STEP_DELAY_MS between
+ * steps, then the peak is held for MTQ_TEST_HOLD_MS:
+ *   0 -> +75 %, hold, 0 -> -75 %, hold, repeat */
 #define MTQ_TEST_MAX_DUTY_PERCENT 75
 #define MTQ_TEST_DUTY_STEP_PERCENT 5
-#define MTQ_TEST_HOLD_MS 10000U
+#define MTQ_TEST_HOLD_MS 5000U
+#define MTQ_TEST_STEP_DELAY_MS 100U
 
 /* Same X-axis wiring as the test_app_bd621x bench example:
  * FIN on pwm2/N2HET1[12] (J4-6), RIN on pwm3/N2HET1[14] (J4-5) */
@@ -38,9 +40,10 @@ static const mtq_t gncMtqX = {
     .hetRam = hetRAM1, .hetReg = hetREG1, .finPwm = pwm2, .rinPwm = pwm3, .finPin = 12U, .rinPin = 14U};
 
 typedef enum {
-  MTQ_TEST_STATE_RAMP_UP,           /* forward polarity, ramping 0 -> +75 % */
-  MTQ_TEST_STATE_HOLD,              /* holding +75 % for MTQ_TEST_HOLD_MS */
-  MTQ_TEST_STATE_RAMP_DOWN_REVERSE, /* reverse polarity, ramping -75 % -> 0 */
+  MTQ_TEST_STATE_RAMP_UP_FORWARD, /* forward polarity, ramping 0 -> +75 % */
+  MTQ_TEST_STATE_HOLD_FORWARD,    /* holding +75 % for MTQ_TEST_HOLD_MS */
+  MTQ_TEST_STATE_RAMP_UP_REVERSE, /* reverse polarity, ramping 0 -> -75 % */
+  MTQ_TEST_STATE_HOLD_REVERSE,    /* holding -75 % for MTQ_TEST_HOLD_MS */
 } mtq_test_state_t;
 
 /* Written by the command callbacks (command manager task), read by the GNC
@@ -49,7 +52,7 @@ static volatile bool mtqTestRequested = false;
 
 /* GNC-task-private test state */
 static bool mtqTestRunning = false;
-static mtq_test_state_t mtqTestState = MTQ_TEST_STATE_RAMP_UP;
+static mtq_test_state_t mtqTestState = MTQ_TEST_STATE_RAMP_UP_FORWARD;
 static int32_t mtqTestDuty = 0;
 static TickType_t mtqTestHoldStartTicks = 0;
 
@@ -239,40 +242,51 @@ static bool stepMtqTest(void) {
   if (!mtqTestRunning) {
     /* Start command received: begin a fresh cycle from 0 %, forward polarity */
     mtqTestRunning = true;
-    mtqTestState = MTQ_TEST_STATE_RAMP_UP;
+    mtqTestState = MTQ_TEST_STATE_RAMP_UP_FORWARD;
     mtqTestDuty = 0;
   }
 
   switch (mtqTestState) {
-    case MTQ_TEST_STATE_RAMP_UP:
+    case MTQ_TEST_STATE_RAMP_UP_FORWARD:
+      vTaskDelay(pdMS_TO_TICKS(MTQ_TEST_STEP_DELAY_MS));
       mtqTestDuty += MTQ_TEST_DUTY_STEP_PERCENT;
       if (mtqTestDuty >= MTQ_TEST_MAX_DUTY_PERCENT) {
         mtqTestDuty = MTQ_TEST_MAX_DUTY_PERCENT;
-        mtqTestState = MTQ_TEST_STATE_HOLD;
+        mtqTestState = MTQ_TEST_STATE_HOLD_FORWARD;
         mtqTestHoldStartTicks = xTaskGetTickCount();
       }
       LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, mtqTestDuty));
       break;
 
-    case MTQ_TEST_STATE_HOLD:
-      /* Output is already at +75 %; once the hold expires, flip instantly to
-       * reverse polarity at 75 % and start ramping down */
+    case MTQ_TEST_STATE_HOLD_FORWARD:
+      /* Output is already at +75 %; once the hold expires, drop to 0 and start
+       * ramping up in reverse polarity */
       if ((xTaskGetTickCount() - mtqTestHoldStartTicks) >= pdMS_TO_TICKS(MTQ_TEST_HOLD_MS)) {
-        mtqTestState = MTQ_TEST_STATE_RAMP_DOWN_REVERSE;
-        mtqTestDuty = MTQ_TEST_MAX_DUTY_PERCENT;
-        LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, -mtqTestDuty));
+        mtqTestState = MTQ_TEST_STATE_RAMP_UP_REVERSE;
+        mtqTestDuty = 0;
+        LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, 0));
       }
       break;
 
-    case MTQ_TEST_STATE_RAMP_DOWN_REVERSE:
-      mtqTestDuty -= MTQ_TEST_DUTY_STEP_PERCENT;
-      if (mtqTestDuty <= 0) {
-        /* Reached 0: switch instantly back to forward polarity; the next cycle
-         * re-enters RAMP_UP and the whole pattern repeats indefinitely */
-        mtqTestDuty = 0;
-        mtqTestState = MTQ_TEST_STATE_RAMP_UP;
+    case MTQ_TEST_STATE_RAMP_UP_REVERSE:
+      vTaskDelay(pdMS_TO_TICKS(MTQ_TEST_STEP_DELAY_MS));
+      mtqTestDuty += MTQ_TEST_DUTY_STEP_PERCENT;
+      if (mtqTestDuty >= MTQ_TEST_MAX_DUTY_PERCENT) {
+        mtqTestDuty = MTQ_TEST_MAX_DUTY_PERCENT;
+        mtqTestState = MTQ_TEST_STATE_HOLD_REVERSE;
+        mtqTestHoldStartTicks = xTaskGetTickCount();
       }
       LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, -mtqTestDuty));
+      break;
+
+    case MTQ_TEST_STATE_HOLD_REVERSE:
+      /* Output is already at -75 %; once the hold expires, drop to 0 and the
+       * whole pattern repeats from the forward ramp */
+      if ((xTaskGetTickCount() - mtqTestHoldStartTicks) >= pdMS_TO_TICKS(MTQ_TEST_HOLD_MS)) {
+        mtqTestState = MTQ_TEST_STATE_RAMP_UP_FORWARD;
+        mtqTestDuty = 0;
+        LOG_IF_ERROR_CODE(mtqSetOutput(&gncMtqX, 0));
+      }
       break;
   }
 
