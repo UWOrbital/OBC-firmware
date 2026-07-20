@@ -28,8 +28,8 @@
  * Each polarity ramps its magnitude 0 -> MTQ_TEST_MAX_DUTY_PERCENT in
  * MTQ_TEST_DUTY_STEP_PERCENT increments with MTQ_TEST_STEP_DELAY_MS between
  * steps, then the peak is held for MTQ_TEST_HOLD_MS:
- *   0 -> +75 %, hold, 0 -> -75 %, hold, repeat */
-#define MTQ_TEST_MAX_DUTY_PERCENT 75
+ *   0 -> +50 %, hold, 0 -> -50 %, hold, repeat */
+#define MTQ_TEST_MAX_DUTY_PERCENT 50
 #define MTQ_TEST_DUTY_STEP_PERCENT 5
 #define MTQ_TEST_HOLD_MS 5000U
 #define MTQ_TEST_STEP_DELAY_MS 100U
@@ -40,10 +40,10 @@ static const mtq_t gncMtqX = {
     .hetRam = hetRAM1, .hetReg = hetREG1, .finPwm = pwm2, .rinPwm = pwm3, .finPin = 12U, .rinPin = 14U};
 
 typedef enum {
-  MTQ_TEST_STATE_RAMP_UP_FORWARD, /* forward polarity, ramping 0 -> +75 % */
-  MTQ_TEST_STATE_HOLD_FORWARD,    /* holding +75 % for MTQ_TEST_HOLD_MS */
-  MTQ_TEST_STATE_RAMP_UP_REVERSE, /* reverse polarity, ramping 0 -> -75 % */
-  MTQ_TEST_STATE_HOLD_REVERSE,    /* holding -75 % for MTQ_TEST_HOLD_MS */
+  MTQ_TEST_STATE_RAMP_UP_FORWARD, /* forward polarity, ramping 0 -> +50 % */
+  MTQ_TEST_STATE_HOLD_FORWARD,    /* holding +50 % for MTQ_TEST_HOLD_MS */
+  MTQ_TEST_STATE_RAMP_UP_REVERSE, /* reverse polarity, ramping 0 -> -50 % */
+  MTQ_TEST_STATE_HOLD_REVERSE,    /* holding -50 % for MTQ_TEST_HOLD_MS */
 } mtq_test_state_t;
 
 /* Written by the command callbacks (command manager task), read by the GNC
@@ -259,7 +259,7 @@ static bool stepMtqTest(void) {
       break;
 
     case MTQ_TEST_STATE_HOLD_FORWARD:
-      /* Output is already at +75 %; once the hold expires, drop to 0 and start
+      /* Output is already at +50 %; once the hold expires, drop to 0 and start
        * ramping up in reverse polarity */
       if ((xTaskGetTickCount() - mtqTestHoldStartTicks) >= pdMS_TO_TICKS(MTQ_TEST_HOLD_MS)) {
         mtqTestState = MTQ_TEST_STATE_RAMP_UP_REVERSE;
@@ -280,7 +280,7 @@ static bool stepMtqTest(void) {
       break;
 
     case MTQ_TEST_STATE_HOLD_REVERSE:
-      /* Output is already at -75 %; once the hold expires, drop to 0 and the
+      /* Output is already at -50 %; once the hold expires, drop to 0 and the
        * whole pattern repeats from the forward ramp */
       if ((xTaskGetTickCount() - mtqTestHoldStartTicks) >= pdMS_TO_TICKS(MTQ_TEST_HOLD_MS)) {
         mtqTestState = MTQ_TEST_STATE_RAMP_UP_FORWARD;
