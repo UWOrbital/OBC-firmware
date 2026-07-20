@@ -2,12 +2,14 @@
 #include "cc1120_txrx.h"
 #include "obc_board_config.h"
 #include "obc_gs_ax25.h"
+#include "obc_gs_command_id.h"
 #include "obc_gs_commands_response.h"
 #include "obc_gs_fec.h"
 
 #include "obc_gs_telemetry_pack.h"
 #include "obc_sci_io.h"
 #include "telemetry_fs_utils.h"
+#include "camera_fs_utils.h"
 #include "telemetry_manager.h"
 
 #include "comms_manager.h"
@@ -22,6 +24,7 @@
 #include <os_task.h>
 
 #include <gio.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <sys_common.h>
 
@@ -61,6 +64,16 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId);
  * @return obc_error_code_t
  */
 static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd);
+
+/**
+ * @brief Reads chunks of payload image out of a file and sends it into the CC1120
+ * transmit queue
+ *
+ * @param payloadbatchId - ID of the payload batch to send
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all payload data was
+ * sent successfully
+ */
+static obc_error_code_t sendPayloadFile(int32_t payloadBatchId);
 
 /**
  * @brief Sends a byte array, applying FEC and AX.25 framing
@@ -151,6 +164,12 @@ void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
           cmdResBytesRecieved = 0;
           memset(cmdResBuffer, 0, RS_DECODED_SIZE);  // Not required, but done to avoid any edge cases
         }
+        break;
+      case DOWNLINK_PAYLOAD_DATA:
+        setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
+        LOG_IF_ERROR_CODE(sendPayloadFile(queueMsg.payloadBatchId));
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -332,6 +351,52 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
   // Copy the telemetry data into the packedTelem struct
   memcpy(telemPacket->data + (*telemPacketOffset), packedSingleTelem, packedSingleTelemSize);
   *telemPacketOffset += packedSingleTelemSize;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+/**
+ * @brief Reads chunks of payload out of a file and sends it into the CC1120
+ * transmit queue
+ *
+ * @param telemetryBatchId - ID of the payload batch to send
+ * @return obc_error_code_t - OBC_ERR_CODE_SUCCESS if all payload data was
+ * sent successfully
+ */
+static obc_error_code_t sendPayloadFile(int32_t payloadBatchId) {
+  obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS; 
+
+  uint8_t tempBuffer[RS_DECODED_SIZE] = {0};
+  size_t bytesRead = 0;
+
+  RETURN_IF_ERROR_CODE(openImageFileRO(&payloadBatchId));
+  
+  while ((errCode = readNextImageChunkFromFile(payloadBatchId, &tempBuffer[1], RS_DECODED_SIZE, &bytesRead)) == OBC_ERR_CODE_SUCCESS) {
+    // First index indicates bytes read
+    tempBuffer[0] = bytesRead;
+    sendPacket(tempBuffer);
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      LOG_ERROR_CODE(errCode);
+      RETURN_IF_ERROR_CODE(closeImageFile(payloadBatchId));
+      return errCode;
+    }
+    memset(tempBuffer, 0, RS_DECODED_SIZE);  // Not required, but done to avoid any edge cases
+  }
+
+  if (errCode == OBC_ERR_CODE_REACHED_EOF) {
+    LOG_DEBUG("Reached end of image downlink");
+    // We send bytes here to indicate to the ground station that the last frame has been sent
+    tempBuffer[0] = 0xF;
+    tempBuffer[1] = 0xF;
+    tempBuffer[2] = 0xF;
+    tempBuffer[3] = 0xF;
+    sendPacket(tempBuffer);
+    errCode = OBC_ERR_CODE_SUCCESS;
+  } else {
+    LOG_ERROR_CODE(errCode);  // If the error wasn't an EOF error, return
+    RETURN_IF_ERROR_CODE(closeImageFile(payloadBatchId));
+    return errCode;
+  }
 
   return OBC_ERR_CODE_SUCCESS;
 }

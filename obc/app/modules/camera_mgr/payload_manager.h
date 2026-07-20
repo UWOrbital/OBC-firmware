@@ -44,3 +44,5 @@ typedef struct {
  * @return The error code
  */
 obc_error_code_t sendToPayloadQueue(payload_event_t *event);
+
+obc_error_code_t setPayloadManagerDownlinkReady(void);

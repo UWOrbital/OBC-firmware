@@ -95,7 +95,7 @@ obc_error_code_t downlinkCmdResponse(cmd_response_header_t *cmdResHeader, cmd_ms
     return OBC_ERR_CODE_FAILED_PACK;
   } else {
     for (uint8_t i = 0; i < RS_DECODED_SIZE; i++) {
-      if (cmd->id != CMD_DOWNLINK_TELEM) {
+      if (cmd->id != CMD_DOWNLINK_TELEM && cmd->id != CMD_DOWNLINK_IMAGE) {
         encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
         LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
       }

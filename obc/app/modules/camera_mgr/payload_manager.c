@@ -1,18 +1,32 @@
 #include "payload_manager.h"
 #include "obc_errors.h"
 #include "obc_scheduler_config.h"
+#include "comms_manager.h"
+#include "downlink_encoder.h"
 
 #include <FreeRTOS.h>
 #include <os_portmacro.h>
 #include <os_queue.h>
+#include <os_semphr.h>
 #include <os_task.h>
 
 #include <sys_common.h>
 #include <gio.h>
 
+#ifdef CONFIG_SDCARD
+/**
+ * @brief Check if it's time to downlink the payload.
+ * @return bool True if it's time to downlink the payload, false otherwise
+ */
+static bool checkPayloadDownlink(void);
+#endif  // CONFIG_SDCARD
+
 static QueueHandle_t payloadQueueHandle = NULL;
 static StaticQueue_t payloadQueue;
 static uint8_t payloadQueueStack[PAYLOAD_MANAGER_QUEUE_LENGTH * PAYLOAD_MANAGER_QUEUE_ITEM_SIZE];
+
+static SemaphoreHandle_t payloadDownlinkReady = NULL;
+static StaticSemaphore_t payloadDownlinkReadyBuffer;
 
 void obcTaskInitPayloadMgr(void) {
   ASSERT((payloadQueueStack != NULL) && (&payloadQueue != NULL));
@@ -20,6 +34,9 @@ void obcTaskInitPayloadMgr(void) {
     payloadQueueHandle = xQueueCreateStatic(PAYLOAD_MANAGER_QUEUE_LENGTH, PAYLOAD_MANAGER_QUEUE_ITEM_SIZE,
                                             payloadQueueStack, &payloadQueue);
   }
+
+  ASSERT(&payloadDownlinkReadyBuffer != NULL);
+  payloadDownlinkReady = xSemaphoreCreateBinaryStatic(&payloadDownlinkReadyBuffer);
 }
 
 obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
@@ -34,6 +51,8 @@ obc_error_code_t sendToPayloadQueue(payload_event_t *event) {
 }
 
 void obcTaskFunctionPayloadMgr(void *pvParameters) {
+#ifdef CONFIG_SDCARD
+  obc_error_code_t errCode;
   ASSERT(payloadQueueHandle != NULL);
 
   while (1) {
@@ -48,5 +67,36 @@ void obcTaskFunctionPayloadMgr(void *pvParameters) {
           break;
       }
     }
+
+    if (!checkPayloadDownlink()) {
+      continue;
+    }
+
+    // Close whatever file your writing to 
+    encode_event_t encodeEvent = {.eventID = DOWNLINK_TELEMETRY_FILE, .telemetryBatchId = telemetryBatchId};
+
+    LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&encodeEvent));
+    if (errCode != OBC_ERR_CODE_SUCCESS) {
+      // TODO: Handle errors 
+    }
+
+    // Open new file if necessary for image tho, that logic should probably be elsewhere
+
   }
+#else
+  vTaskSuspend(NULL);
+#endif  // CONFIG_SDCARD
+}
+
+
+#ifdef CONFIG_SDCARD
+static bool checkPayloadDownlink(void) { return xSemaphoreTake(payloadDownlinkReady, 0) == pdPASS; }
+#endif  // CONFIG_SDCARD
+
+obc_error_code_t setPayloadManagerDownlinkReady(void) {
+  if (xSemaphoreGive(payloadDownlinkReady) != pdPASS) {
+    return OBC_ERR_CODE_SEMAPHORE_FULL;
+  }
+
+  return OBC_ERR_CODE_SUCCESS;
 }
