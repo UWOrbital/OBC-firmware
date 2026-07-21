@@ -6,7 +6,7 @@
 #include "obc_errors.h"
 #include "comms_manager.h"
 
-typedef enum { DOWNLINK_TELEMETRY_FILE, DOWNLINK_DATA_BUFFER, DOWNLINK_CMD_RESPONSE } encode_event_id_t;
+typedef enum { DOWNLINK_TELEMETRY_FILE, DOWNLINK_DATA_BUFFER, DOWNLINK_CMD_RESPONSE, DOWNLINK_IMAGE } encode_event_id_t;
 
 typedef struct {
   telemetry_data_t telemData[MAX_DOWNLINK_TELEM_BUFFER_SIZE];
@@ -19,6 +19,7 @@ typedef struct {
     uint32_t telemetryBatchId;
     telemetry_data_buffer_t telemetryDataBuffer;
     uint8_t cmdResponseByte;
+    uint8_t cameraId;  // DOWNLINK_IMAGE: which camera's FIFO to stream (camera_id_t)
   };
 } encode_event_t;
 

@@ -9,6 +9,7 @@
 #include "obc_sci_io.h"
 #include "telemetry_fs_utils.h"
 #include "telemetry_manager.h"
+#include "camera_control.h"
 
 #include "comms_manager.h"
 #include "obc_errors.h"
@@ -61,6 +62,20 @@ static obc_error_code_t sendTelemetryFile(uint32_t telemetryBatchId);
  * @return obc_error_code_t
  */
 static obc_error_code_t getFileDescriptor(uint32_t telemetryBatchId, int32_t *fd);
+
+/**
+ * @brief Streams a captured image out of the camera's on-board FIFO, packing each
+ *        chunk into an RS/AX.25 frame via sendPacket().
+ *
+ * The image must already be captured (sitting in the Arducam FIFO) before this is
+ * called - the payload manager does that and then posts a DOWNLINK_IMAGE event.
+ * Each frame's first data byte is the number of image bytes in that frame (1..222);
+ * a frame whose first byte is 0 marks the end of the image for the ground station.
+ *
+ * @param cameraID - Camera whose FIFO to read from
+ * @return obc_error_code_t
+ */
+static obc_error_code_t sendImage(camera_id_t cameraID);
 
 /**
  * @brief Sends a byte array, applying FEC and AX.25 framing
@@ -151,6 +166,12 @@ void obcTaskFunctionCommsDownlinkEncoder(void *pvParameters) {
           cmdResBytesRecieved = 0;
           memset(cmdResBuffer, 0, RS_DECODED_SIZE);  // Not required, but done to avoid any edge cases
         }
+        break;
+      case DOWNLINK_IMAGE:
+        setCurrentLinkDestCallSign(GROUND_STATION_CALLSIGN, CALLSIGN_LENGTH, DEFAULT_SSID);
+        LOG_IF_ERROR_CODE(sendImage((camera_id_t)queueMsg.cameraId));
+        transmitEvent.eventID = END_DOWNLINK;
+        LOG_IF_ERROR_CODE(sendToCC1120TransmitQueue(&transmitEvent));
         break;
       default:
         LOG_ERROR_CODE(OBC_ERR_CODE_INVALID_ARG);
@@ -332,6 +353,43 @@ static obc_error_code_t sendOrPackNextTelemetry(telemetry_data_t *singleTelem, p
   // Copy the telemetry data into the packedTelem struct
   memcpy(telemPacket->data + (*telemPacketOffset), packedSingleTelem, packedSingleTelemSize);
   *telemPacketOffset += packedSingleTelemSize;
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
+// Each frame carries 1 length byte + up to (RS_DECODED_SIZE - 1) image bytes.
+#define IMAGE_FRAME_DATA_SIZE (RS_DECODED_SIZE - 1U)
+// A frame whose length byte is 0 tells the ground station the image is complete.
+#define IMAGE_END_MARKER 0x00U
+
+static obc_error_code_t sendImage(camera_id_t cameraID) {
+  obc_error_code_t errCode;
+
+  // 223B RS block: [0] = # image bytes in this frame, [1..] = image bytes.
+  uint8_t frame[RS_DECODED_SIZE] = {0};
+  size_t bytesRead = 0;
+
+  // readImage() returns OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE while more of the
+  // FIFO remains and OBC_ERR_CODE_SUCCESS on the final chunk.
+  obc_error_code_t readStatus;
+  do {
+    readStatus = readImage(cameraID, &frame[1], IMAGE_FRAME_DATA_SIZE, &bytesRead);
+    if (readStatus != OBC_ERR_CODE_SUCCESS && readStatus != OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE) {
+      LOG_ERROR_CODE(readStatus);
+      return readStatus;
+    }
+
+    if (bytesRead > 0) {
+      frame[0] = (uint8_t)bytesRead;
+      RETURN_IF_ERROR_CODE(sendPacket(frame));
+      memset(frame, 0, RS_DECODED_SIZE);
+    }
+  } while (readStatus == OBC_ERR_CODE_CAMERA_IMAGE_READ_INCOMPLETE);
+
+  // Send the end-of-image sentinel frame (length byte 0).
+  memset(frame, 0, RS_DECODED_SIZE);
+  frame[0] = IMAGE_END_MARKER;
+  RETURN_IF_ERROR_CODE(sendPacket(frame));
 
   return OBC_ERR_CODE_SUCCESS;
 }

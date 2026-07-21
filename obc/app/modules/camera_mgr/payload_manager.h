@@ -44,3 +44,14 @@ typedef struct {
  * @return The error code
  */
 obc_error_code_t sendToPayloadQueue(payload_event_t *event);
+
+/**
+ * @brief	Request the payload manager to capture an image and downlink it.
+ *
+ * Called from the CMD_CAPTURE_IMAGE command callback. Records which camera to use and
+ * signals the payload manager task; the actual capture + downlink happens in that task.
+ *
+ * @param	cameraId	Camera to capture with (camera_id_t: 0 = PRIMARY, 1 = SECONDARY).
+ * @return	OBC_ERR_CODE_SUCCESS if the request was queued, error code otherwise.
+ */
+obc_error_code_t setPayloadManagerDownlinkReady(uint8_t cameraId);

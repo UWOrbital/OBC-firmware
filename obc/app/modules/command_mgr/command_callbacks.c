@@ -10,6 +10,7 @@
 #include "os_portmacro.h"
 #include "os_projdefs.h"
 #include "telemetry_manager.h"
+#include "payload_manager.h"
 #include "command.h"
 #include "obc_general_util.h"
 
@@ -116,6 +117,21 @@ static obc_error_code_t I2CProbeCmdCallback(cmd_msg_t *cmd, uint8_t *responseDat
   return OBC_ERR_CODE_SUCCESS;
 }
 
+static obc_error_code_t captureImageCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+  obc_error_code_t errCode;
+
+  if (cmd == NULL || responseData == NULL || responseDataLen == NULL) {
+    return OBC_ERR_CODE_INVALID_ARG;
+  }
+
+  // Trigger the payload manager to capture and downlink an image. The image itself is
+  // downlinked as its own stream of frames, so this command sends no response data
+  // (see the CMD_CAPTURE_IMAGE exclusion in command_manager.c's downlinkCmdResponse()).
+  RETURN_IF_ERROR_CODE(setPayloadManagerDownlinkReady(cmd->captureImage.cameraId));
+
+  return OBC_ERR_CODE_SUCCESS;
+}
+
 const cmd_info_t cmdsConfig[] = {
     [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     // TODO: Change this to critial once critical commands are implemented
@@ -126,6 +142,7 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLINK_TELEM] = {downlinkTelemCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_I2C_PROBE] = {I2CProbeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
+    [CMD_CAPTURE_IMAGE] = {captureImageCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
 };
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the

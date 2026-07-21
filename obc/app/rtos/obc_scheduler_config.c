@@ -73,13 +73,13 @@ static StackType_t obcTaskStackCommandMgr[1024U];
 static StaticTask_t obcTaskBufferCommandMgr;
 static StackType_t obcTaskStackCommsMgr[1024U];
 static StaticTask_t obcTaskBufferCommsMgr;
-static StackType_t obcTaskStackCommsDownlinkEncoder[512U];
+static StackType_t obcTaskStackCommsDownlinkEncoder[1024U];
 static StaticTask_t obcTaskBufferCommsDownlinkEncoder;
 static StackType_t obcTaskStackCommsUplinkDecoder[1024U];
 static StaticTask_t obcTaskBufferCommsUplinkDecoder;
 static StackType_t obcTaskStackEpsMgr[1024U];
 static StaticTask_t obcTaskBufferEpsMgr;
-static StackType_t obcTaskStackPayloadMgr[1024U];
+static StackType_t obcTaskStackPayloadMgr[2048U];
 static StaticTask_t obcTaskBufferPayloadMgr;
 static StackType_t obcTaskStackTimekeeper[1024U];
 static StaticTask_t obcTaskBufferTimekeeper;
@@ -144,7 +144,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskName = "comms_encoder",
             .taskStack = obcTaskStackCommsDownlinkEncoder,
             .taskBuffer = &obcTaskBufferCommsDownlinkEncoder,
-            .stackSize = 512U,
+            .stackSize = 1024U,
             .priority = TASK_COMMS_PRIORITY,
             .taskFunc = obcTaskFunctionCommsDownlinkEncoder,
             .taskInit = obcTaskInitCommsDownlinkEncoder,
@@ -174,7 +174,7 @@ static obc_scheduler_config_t obcSchedulerConfig[] = {
             .taskName = "payload_mgr",
             .taskStack = obcTaskStackPayloadMgr,
             .taskBuffer = &obcTaskBufferPayloadMgr,
-            .stackSize = 1024U,
+            .stackSize = 2048U,
             .priority = 1U,
             .taskFunc = obcTaskFunctionPayloadMgr,
             .taskInit = obcTaskInitPayloadMgr,

@@ -20,7 +20,7 @@
 // BUFFER_SIZE must be a multiple of 3 for base64 conversion
 #define BUFFER_SIZE 4095U
 
-#define TASK_STACK_SIZE 2048U
+#define TASK_STACK_SIZE 8192U
 static StaticTask_t taskBuffer;
 static StackType_t taskStack[TASK_STACK_SIZE];
 

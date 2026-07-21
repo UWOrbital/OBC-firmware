@@ -95,7 +95,10 @@ obc_error_code_t downlinkCmdResponse(cmd_response_header_t *cmdResHeader, cmd_ms
     return OBC_ERR_CODE_FAILED_PACK;
   } else {
     for (uint8_t i = 0; i < RS_DECODED_SIZE; i++) {
-      if (cmd->id != CMD_DOWNLINK_TELEM) {
+      // CMD_CAPTURE_IMAGE downlinks the image as its own frame stream terminated by an
+      // END_DOWNLINK; sending a command response here would inject a premature
+      // END_DOWNLINK and cut the image off, so skip it (same as CMD_DOWNLINK_TELEM).
+      if (cmd->id != CMD_DOWNLINK_TELEM && cmd->id != CMD_CAPTURE_IMAGE) {
         encode_event_t queueMsg = {.eventID = DOWNLINK_CMD_RESPONSE, .cmdResponseByte = sendBuffer[i]};
         LOG_IF_ERROR_CODE(sendToDownlinkEncodeQueue(&queueMsg));
       }

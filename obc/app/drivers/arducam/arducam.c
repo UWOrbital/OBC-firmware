@@ -267,7 +267,9 @@ obc_error_code_t readImage(camera_id_t cameraID, uint8_t *buffer, size_t bufferL
   if (buffer == NULL || bytesRead == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
   }
-  obc_error_code_t errCode;
+  // Defaults to SUCCESS; only overridden below once the last chunk of the image is read.
+  // Must be initialized since the FIFO-empty branch (final chunk) never assigns it otherwise.
+  obc_error_code_t errCode = OBC_ERR_CODE_SUCCESS;
   // Start of a new image, get image length
   if (totalBytesToRead[cameraID] == 0) {
     RETURN_IF_ERROR_CODE(arducamReadFIFOSize(cameraID, &totalBytesToRead[cameraID]));
