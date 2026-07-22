@@ -32,8 +32,8 @@
 #include <stdio.h>
 #endif
 
-#include <redstat.h>
 #include <redformat.h>
+#include <redstat.h>
 
 REDSTATUS RedCoreInit(void);
 REDSTATUS RedCoreUninit(void);

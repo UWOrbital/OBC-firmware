@@ -31,12 +31,11 @@
 
 #if (REDCONF_IMAGE_BUILDER == 1) && (REDCONF_API_POSIX == 1)
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <errno.h>
-
 #include <redposix.h>
 #include <redtools.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int IbApiInit(void) {
   int ret = 0;

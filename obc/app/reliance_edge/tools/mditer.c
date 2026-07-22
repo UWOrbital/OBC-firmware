@@ -43,15 +43,14 @@
     This utility is used with the endian-swapping tests, and thus it must be
     endian agnostic.
 */
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <redfs.h>
 #include <redbdev.h>
-#include <redvolume.h>
-#include <redcoreapi.h>
 #include <redcore.h>
+#include <redcoreapi.h>
+#include <redfs.h>
 #include <redmditer.h>
+#include <redvolume.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define SWAP16(val) ((((val) & 0xFF00U) >> 8U) | (((val) & 0x00FFU) << 8U))
 #define SWAP32(val)                                                                                 \

@@ -23,9 +23,9 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
-#include <stdexcept>
-
 #include "rbtnsetting.h"
+
+#include <stdexcept>
 
 RbtnSetting::RbtnSetting(QString macroName, bool defaultValue, std::function<Validity(bool, QString &)> validator,
                          QRadioButton *rbtn, WarningBtn *btnWarn)

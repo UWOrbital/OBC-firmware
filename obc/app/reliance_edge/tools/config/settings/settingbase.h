@@ -28,8 +28,8 @@
 
 #include <QList>
 
-#include "validity.h"
 #include "notifiable.h"
+#include "validity.h"
 
 ///
 /// \brief  The SettingBase class is a base class for Setting<T>, allowing

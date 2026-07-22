@@ -23,10 +23,11 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
+#include "limitreporter.h"
+
 #include "allsettings.h"
 #include "validators.h"
 #include "volumesettings.h"
-#include "limitreporter.h"
 
 LimitReporter::LimitReporter(QLabel *fsizeMaxLabel, QLabel *vsizeMaxLabel)
     : labelMaxFsize(fsizeMaxLabel), labelMaxVsize(vsizeMaxLabel) {

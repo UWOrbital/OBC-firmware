@@ -26,8 +26,9 @@
 /** @file
     @brief Common (shared) buffer module functions.
 */
-#include <redfs.h>
 #include <redcore.h>
+#include <redfs.h>
+
 #include "redbufferpriv.h"
 
 #ifdef REDCONF_ENDIAN_SWAP

@@ -30,8 +30,8 @@
  * INCLUDES
  *********************************************************************************************************************/
 /*LDRA_NOANALYSIS*/
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 /*LDRA_ANALYSIS*/
 
 #if defined(__TI_COMPILER_VERSION__) /* TI CCS Compiler */

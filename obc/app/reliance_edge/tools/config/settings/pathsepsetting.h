@@ -26,12 +26,12 @@
 #ifndef PATHSEPSETTING_H
 #define PATHSEPSETTING_H
 
-#include <QString>
 #include <QComboBox>
 #include <QLineEdit>
+#include <QString>
 
-#include "ui/warningbtn.h"
 #include "strsetting.h"
+#include "ui/warningbtn.h"
 
 ///
 /// \brief  The PathSepSetting class is a special case class that manages the

@@ -1,22 +1,23 @@
-#include "bl_uart.h"
-#include "bl_flash.h"
-#include "obc_gs_commands_response.h"
-#include "obc_gs_commands_response_pack.h"
-#include "obc_gs_errors.h"
-#include "obc_gs_crc.h"
-#include "obc_errors.h"
-#include "obc_gs_command_data.h"
-#include "obc_gs_command_unpack.h"
 #include <metadata_struct.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include "command.h"
-#include "obc_logging.h"
+
 #include "bl_config.h"
 #include "bl_errors.h"
+#include "bl_flash.h"
 #include "bl_time.h"
+#include "bl_uart.h"
+#include "command.h"
+#include "obc_errors.h"
+#include "obc_gs_command_data.h"
+#include "obc_gs_command_unpack.h"
+#include "obc_gs_commands_response.h"
+#include "obc_gs_commands_response_pack.h"
+#include "obc_gs_crc.h"
+#include "obc_gs_errors.h"
+#include "obc_logging.h"
 #include "obc_metadata.h"
 #if defined(DEBUG) && !defined(OBC_REVISION_2)
 #include <gio.h>

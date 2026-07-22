@@ -35,27 +35,26 @@
     This version of SGI fsstress has been modified to be single-threaded and to
     work with the Reliance Edge POSIX-like API.
 */
-#include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
-#include <string.h>
-#include <stdarg.h>
-#include <time.h>
-
 #include <redposix.h>
 #include <redtests.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #if FSSTRESS_SUPPORTED
 
-#include "redposixcompat.h"
-
-#include <redosserv.h>
-#include <redmisc.h>
-#include <redutils.h>
-#include <redmacs.h>
-#include <redvolume.h>
 #include <redgetopt.h>
+#include <redmacs.h>
+#include <redmisc.h>
+#include <redosserv.h>
 #include <redtoolcmn.h>
+#include <redutils.h>
+#include <redvolume.h>
+
+#include "redposixcompat.h"
 
 #if REDCONF_CHECKER == 1
 #include <redcoreapi.h>

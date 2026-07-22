@@ -23,10 +23,11 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
+#include "warningbtn.h"
+
 #include <QToolTip>
 
 #include "configwindow.h"
-#include "warningbtn.h"
 #include "ui_warningbtn.h"
 
 // The icons used. These are set the first time the

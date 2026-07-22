@@ -23,11 +23,12 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
+#include "volumesettings.h"
+
 #include <stdexcept>
 
-#include "validators.h"
 #include "allsettings.h"
-#include "volumesettings.h"
+#include "validators.h"
 
 extern const char *const gpszSupported = "Supported";
 extern const char *const gpszUnsupported = "Unsupported";

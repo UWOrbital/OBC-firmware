@@ -31,7 +31,6 @@
 */
 #include <FreeRTOS.h>
 #include <os_task.h>
-
 #include <redfs.h>
 
 /*  configTICK_RATE_HZ is almost always 100, 250, 500, or 1000.  If
