@@ -31,14 +31,13 @@
 
 #if (REDCONF_IMAGE_BUILDER == 1) && (REDCONF_API_FSE == 1)
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
-
 #include <redfse.h>
-#include <redtools.h>
 #include <redtoolcmn.h>
+#include <redtools.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef struct sSTRLISTENTRY STRLISTENTRY;
 struct sSTRLISTENTRY {

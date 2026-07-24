@@ -26,17 +26,16 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <functional>
+#include <QList>
+#include <QString>
 #include <exception>
+#include <functional>
 #include <stdexcept>
 
-#include <QString>
-#include <QList>
-
-#include "ui/warningbtn.h"
 #include "debug.h"
-#include "validity.h"
 #include "settingbase.h"
+#include "ui/warningbtn.h"
+#include "validity.h"
 
 ///
 /// \brief  The Setting class is used to represent settings displayed by the UI.

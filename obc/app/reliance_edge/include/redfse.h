@@ -51,6 +51,7 @@ extern "C" {
 #if REDCONF_API_FSE == 1
 
 #include <redtypes.h>
+
 #include "redapimacs.h"
 #include "rederrno.h"
 

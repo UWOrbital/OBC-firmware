@@ -30,9 +30,10 @@
 #define REDTESTS_H
 
 #include <redtypes.h>
+
+#include "redformat.h"
 #include "redtestutils.h"
 #include "redver.h"
-#include "redformat.h"
 
 /*  This macro is only defined by the error injection project.
  */

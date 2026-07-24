@@ -26,8 +26,8 @@
 /** @file
     @brief Implements inode I/O functions.
 */
-#include <redfs.h>
 #include <redcore.h>
+#include <redfs.h>
 
 /*  Get the buffer flag for an inode's data block.
  */

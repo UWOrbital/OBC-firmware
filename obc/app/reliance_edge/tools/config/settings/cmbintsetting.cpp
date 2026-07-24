@@ -23,9 +23,9 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
-#include <stdexcept>
-
 #include "cmbintsetting.h"
+
+#include <stdexcept>
 
 CmbIntSetting::CmbIntSetting(QString macroName, unsigned long defaultValue,
                              std::function<Validity(unsigned long, QString &)> validator, QComboBox *cmb,

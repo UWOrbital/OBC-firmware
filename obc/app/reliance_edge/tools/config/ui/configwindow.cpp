@@ -23,15 +23,16 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
-#include <QMessageBox>
-#include <QDesktopWidget>
-
-#include "control/output.h"
-#include "version.h"
-#include "allsettings.h"
-#include "validators.h"
 #include "configwindow.h"
+
+#include <QDesktopWidget>
+#include <QMessageBox>
+
+#include "allsettings.h"
+#include "control/output.h"
 #include "ui_configwindow.h"
+#include "validators.h"
+#include "version.h"
 
 ConfigWindow::ConfigWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::ConfigWindow) {
   ui->setupUi(this);

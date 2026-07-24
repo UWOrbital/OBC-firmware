@@ -28,8 +28,8 @@
 
 #include <QString>
 
-#include "ui/warningbtn.h"
 #include "setting.h"
+#include "ui/warningbtn.h"
 
 ///
 /// \brief  Class for settings that may be represented using a string type.

@@ -23,9 +23,10 @@
 
     Visit https://www.tuxera.com/products/reliance-edge/ for more information.
 */
-#include "volumesettings.h"
 #include "allsettings.h"
+
 #include "version.h"
+#include "volumesettings.h"
 
 // Private helpers
 static QString outputLine(const QString &macroName, const QString &value, const QString &comment = QString());

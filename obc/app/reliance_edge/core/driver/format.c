@@ -26,10 +26,10 @@
 /** @file
     @brief Implements the Reliance Edge file system formatter.
 */
-#include <redfs.h>
-#include <redcoreapi.h>
-#include <redcore.h>
 #include <redbdev.h>
+#include <redcore.h>
+#include <redcoreapi.h>
+#include <redfs.h>
 
 #if FORMAT_SUPPORTED
 
