@@ -7,11 +7,11 @@ each one a stable ID (its index in the alphabetically sorted path list).
 Outputs (all checked into the repo):
   - obc/shared/logging/obc_log_file_ids.h   (C declarations)
   - obc/shared/logging/obc_log_file_ids.c   (C path table)
-  - obc/shared/logging/log_file_ids.json    (mapping for the ground station)
+    - obc/shared/logging/log_file_ids.json    (mapping for the shared interfaces package)
 
-The JSON file must be copied to the ground-station repo
-(backend/obc_utils/log_file_ids.json) whenever it changes, so the ground
-station can decode file IDs back into file paths.
+The JSON file must be copied to the interfaces repo
+(obc_gs_interface/logging/log_file_ids.json) whenever it changes, so ground
+station consumers can decode file IDs back into file paths.
 
 Usage:
   python3 scripts/gen_log_file_ids.py           # regenerate the tables
@@ -157,7 +157,7 @@ def main() -> int:
         print(f"Wrote {path.relative_to(REPO_ROOT)}")
     print(f"{len(paths)} files in the log file ID table.")
     print(
-        "Remember to copy log_file_ids.json to ground-station/backend/obc_utils/ if it changed."
+        "Remember to copy log_file_ids.json to interfaces/obc_gs_interface/logging/ if it changed."
     )
     return 0
 
