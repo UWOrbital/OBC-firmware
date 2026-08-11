@@ -115,3 +115,4 @@ release/
 *.hex
 *.map
 *.sha256
+actions-runner/

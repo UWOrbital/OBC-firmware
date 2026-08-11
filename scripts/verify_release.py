@@ -2,40 +2,71 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import pathlib
 import sys
 
-release = pathlib.Path("release")
 
-manifest = release / "manifest.json"
+def sha256(path: pathlib.Path) -> str:
 
-sha = release / "firmware.sha256"
+    h = hashlib.sha256()
 
-if not manifest.exists():
-    sys.exit("manifest.json missing")
+    with open(path, "rb") as f:
+        while chunk := f.read(8192):
+            h.update(chunk)
 
-if not sha.exists():
-    sys.exit("firmware.sha256 missing")
+    return h.hexdigest()
 
-firmware = next(release.glob("*.bin"), None)
 
-if firmware is None:
-    sys.exit("Firmware binary missing")
+def main():
 
-with open(manifest) as f:
-    data = json.load(f)
+    parser = argparse.ArgumentParser()
 
-digest = hashlib.sha256(firmware.read_bytes()).hexdigest()
+    parser.add_argument(
+        "--release",
+        required=True,
+        help="Release directory (example: release/260700)",
+    )
 
-if digest != data["sha256"]:
-    sys.exit("Manifest SHA mismatch")
+    args = parser.parse_args()
 
-with open(sha) as f:
-    expected = f.read().split()[0]
+    release = pathlib.Path(args.release)
 
-if expected != digest:
-    sys.exit("SHA256 file mismatch")
+    if not release.exists():
+        sys.exit("Release directory not found")
 
-print("Release package verified successfully.")
+    manifest = release / "manifest.json"
+
+    sha = release / "firmware.sha256"
+
+    if not manifest.exists():
+        sys.exit("manifest.json missing")
+
+    if not sha.exists():
+        sys.exit("firmware.sha256 missing")
+
+    firmware = next(release.glob("*.bin"), None)
+
+    if firmware is None:
+        sys.exit("Firmware binary missing")
+
+    with open(manifest) as f:
+        data = json.load(f)
+
+    digest = sha256(firmware)
+
+    if digest != data["sha256"]:
+        sys.exit("Manifest SHA mismatch")
+
+    expected = sha.read_text().split()[0]
+
+    if digest != expected:
+        sys.exit("SHA256 mismatch")
+
+    print("Release package verified successfully.")
+
+
+if __name__ == "__main__":
+    main()

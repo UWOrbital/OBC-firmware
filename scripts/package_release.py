@@ -8,6 +8,7 @@ import json
 import pathlib
 import shutil
 import subprocess
+import os
 from datetime import datetime, UTC
 
 from version import generate_version
@@ -38,7 +39,9 @@ def git_commit():
 
 def main():
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Create a versioned firmware release package."
+    )
 
     parser.add_argument("--binary", required=True)
     parser.add_argument("--board", required=True)
@@ -49,12 +52,33 @@ def main():
     firmware = pathlib.Path(args.binary)
 
     if not firmware.exists():
-        raise FileNotFoundError(firmware)
+        raise FileNotFoundError(f"Firmware binary not found: {firmware}")
+
+    # -------------------------------------------------------
+    # Generate firmware version
+    # -------------------------------------------------------
 
     version = generate_version()
 
-    release = pathlib.Path("release")
-    release.mkdir(exist_ok=True)
+    # -------------------------------------------------------
+    # Create release directory
+    # release/
+    #    260700/
+    # -------------------------------------------------------
+
+    root_release = pathlib.Path("release")
+    release = root_release / version
+    release.mkdir(parents=True, exist_ok=True)
+
+    # -------------------------------------------------------
+    # Store version for CI/CD
+    # -------------------------------------------------------
+
+    (release / "version.txt").write_text(version)
+
+    # -------------------------------------------------------
+    # Copy firmware
+    # -------------------------------------------------------
 
     firmware_name = f"OBC-firmware-{version}.bin"
 
@@ -62,12 +86,22 @@ def main():
 
     shutil.copy2(firmware, destination)
 
+    # -------------------------------------------------------
+    # SHA256
+    # -------------------------------------------------------
+
     digest = sha256(destination)
 
     with open(release / "firmware.sha256", "w") as f:
         f.write(f"{digest}  {firmware_name}\n")
 
+    # -------------------------------------------------------
+    # Manifest
+    # -------------------------------------------------------
+
     manifest = {
+        "schema_version": 1,
+        "artifact_type": "firmware",
         "version": version,
         "board": args.board,
         "build_type": args.build_type,
@@ -76,13 +110,19 @@ def main():
         "timestamp_utc": datetime.now(UTC).isoformat(),
         "sha256": digest,
         "size_bytes": destination.stat().st_size,
+        "generated_by": "package_release.py",
     }
 
     with open(release / "manifest.json", "w") as f:
         json.dump(manifest, f, indent=4)
 
-    print("Release package created.")
-    print(release.resolve())
+    print(f"Release package created: {release.resolve()}")
+
+    github_output = os.getenv("GITHUB_OUTPUT")
+
+    if github_output:
+        with open(github_output, "a") as f:
+            f.write(f"version={version}\n")
 
 
 if __name__ == "__main__":

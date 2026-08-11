@@ -97,7 +97,7 @@ jobs:
 
   release:
     needs: crc
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 
@@ -119,16 +119,38 @@ jobs:
             --board OBC_REVISION_2 \
             --build-type Release
 
-      - name: Verify Release Package
-        run: |
-          python scripts/verify_release.py
-
       - name: Display Release Contents
+        shell: bash
         run: |
-          ls -la release
+          echo "Release directory:"
+          find release -maxdepth 3 -type f -print
 
-      - name: Upload Release Package
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware-release
-          path: release/
+      - name: Verify Release Package
+        shell: bash
+        run: |
+          VERSION=$(find release -mindepth 1 -maxdepth 1 -type d | head -n 1 | xargs basename)
+          echo "Verifying release version: $VERSION"
+          python scripts/verify_release.py \
+            --release "release/$VERSION"
+
+      - name: Upload Release to Nexus
+        shell: bash
+        env:
+          NEXUS_URL: ${{ secrets.NEXUS_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+        run: |
+          VERSION=$(find release -mindepth 1 -maxdepth 1 -type d | head -n 1 | xargs basename)
+          echo "Uploading release version: $VERSION"
+
+          for file in release/$VERSION/*; do
+              filename=$(basename "$file")
+              echo "Uploading $filename"
+              curl --fail \
+                  -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" \
+                  --upload-file "$file" \
+                  "$NEXUS_URL/repository/firmware-releases/$VERSION/$filename"
+          done
+
+          echo "Nexus upload completed successfully."
