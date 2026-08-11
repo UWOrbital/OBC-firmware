@@ -92,6 +92,36 @@ set(OBC_REV2_NO_OPTIMIZE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/source/sys_startup.c
 )
 
+set(OBC_REV4_HAL_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/common/rti_weak.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/adc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/can.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/dabort.s
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/errata_SSWF021_45.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/esm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/gio.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/het.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/i2c.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/notification.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/pinmux.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sci.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/spi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_core.s
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_dma.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_mpu.s
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_pcr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_phantom.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_pmm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_pmu.s
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_vim.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/system.c
+)
+
+set(OBC_REV4_NO_OPTIMIZE_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_selftest.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev4/source/sys_startup.c
+)
+
 set(FREERTOS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/common/os_required_fns.c
     ${CMAKE_CURRENT_SOURCE_DIR}/freertos/source/os_assert.c
@@ -124,6 +154,10 @@ elseif(${BOARD_TYPE} MATCHES OBC_REVISION_2)
     set(HAL_SOURCES ${OBC_REV2_HAL_SOURCES})
     set(HAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev2/include)
     set(NO_OPTIMIZE_SOURCES ${OBC_REV2_NO_OPTIMIZE_SOURCES})
+elseif(${BOARD_TYPE} MATCHES OBC_REVISION_4)
+    set(HAL_SOURCES ${OBC_REV4_HAL_SOURCES})
+    set(HAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/obc_rev1/include)
+    set(NO_OPTIMIZE_SOURCES ${OBC_REV1_NO_OPTIMIZE_SOURCES})
 else()
     message(FATAL_ERROR "Invalid board type: ${BOARD_TYPE}")
 endif()
