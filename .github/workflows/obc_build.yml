@@ -96,6 +96,7 @@ jobs:
         cksum OBC-firmware.bin
 
   release:
+    if: github.event_name == 'push'
     needs: crc
     runs-on: self-hosted
     steps:
