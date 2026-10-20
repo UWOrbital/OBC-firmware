@@ -233,6 +233,7 @@ add_custom_command(
     COMMAND toolchain/bin/arm-none-eabi-objcopy -O binary --only-section=.metadata
                                                                      --only-section=.intvecs
                                                                      --only-section=.kernelTEXT
+                                                                     --only-section=.ramFuncs
                                                                      --only-section=.text
                                                                      --only-section=.rodata
                                                                      --only-section=.ARM

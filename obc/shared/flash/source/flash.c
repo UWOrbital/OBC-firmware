@@ -1,6 +1,10 @@
 #include "flash.h"
 #include "flash_config.h"
 #include "flash_errors.h"
+#include "gio.h"
+#include "obc_board_config.h"
+
+#include "reg_rti.h"
 
 #include "F021.h"
 #include "reg_flash.h"
@@ -159,6 +163,8 @@ bool flashIsStartAddrValid(uint32_t addr, uint32_t binSize) {
 void flashWaitFsmReady(void) {
   while (FAPI_CHECK_FSM_READY_BUSY != Fapi_Status_FsmReady) {
     asm(" NOP");
+    rtiREG1->WDKEY = 0xE51AU;
+    rtiREG1->WDKEY = 0xA35CU;
   }
 }
 

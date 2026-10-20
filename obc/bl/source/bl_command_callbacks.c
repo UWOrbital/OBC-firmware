@@ -21,7 +21,7 @@
 #define MAX_PACKET_SIZE 223
 #define RESET_SYSTEM_MASK (1 << 15)
 
-programming_session_t programmingSession = APPLICATION;
+programming_session_t programmingSession = APP_SLOT_B;
 extern uint32_t __APP_IMAGE_TOTAL_SECTION_SIZE;
 
 static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
@@ -37,8 +37,8 @@ static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd, uint8_t
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  if (cmd->setProgrammingSession.programmingSession == APPLICATION) {
-    programmingSession = APPLICATION;
+  if (cmd->setProgrammingSession.programmingSession == APP_SLOT_B) {
+    programmingSession = APP_SLOT_B;
   } else {
     return OBC_ERR_CODE_CORRUPTED_MSG;
   }

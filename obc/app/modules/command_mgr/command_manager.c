@@ -3,6 +3,7 @@
 #include "command_manager.h"
 #include "downlink_encoder.h"
 #include "obc_gs_command_data.h"
+#include "obc_board_config.h"  //DELETE Temporary for testing.
 #include "obc_errors.h"
 #include "obc_gs_command_id.h"
 #include "obc_gs_commands_response.h"

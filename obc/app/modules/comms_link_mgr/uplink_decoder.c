@@ -79,7 +79,12 @@ obc_error_code_t handleCommands(uint8_t *cmdBytes) {
       return OBC_ERR_CODE_FAILED_UNPACK;
     }
 
-    RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
+    if (command.id == CMD_OBC_WRITE_APP) {
+      RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
+      bytesUnpacked += command.downloadData.length;
+    } else {
+      RETURN_IF_ERROR_CODE(sendToCommandQueue(&command));
+    }
   }
   return OBC_ERR_CODE_SUCCESS;
 }
@@ -220,7 +225,7 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   memcpy(aesData->ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
   aesData->ciphertextLen = RS_DECODED_SIZE;
 
-  uint8_t decryptedCmdData[RS_DECODED_SIZE];
+  static uint8_t decryptedCmdData[RS_DECODED_SIZE];
   interfaceErr = aes128Decrypt(aesData, decryptedCmdData, RS_DECODED_SIZE);
 
   if (interfaceErr != OBC_GS_ERR_CODE_SUCCESS) {

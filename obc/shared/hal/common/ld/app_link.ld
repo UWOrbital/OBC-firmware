@@ -25,6 +25,20 @@ SECTIONS
     KEEP(*(.metadata))
     . = ALIGN(32);
   } >APP_METADATA
+  
+  /* Flash API */
+  .ramFuncs : ALIGN(8)
+  {
+    __ramFuncsRunStart__ = .;
+    *(.ramFuncs)
+    *(.ramFuncs*)
+    *F021_API_CortexR4_LE.lib:*(.text .text*)
+    __ramFuncsRunEnd__ = .;
+  } >RAM AT> APP_FLASH
+
+    /* used by app to copy F021 API to RAM */
+  __ramFuncsLoadStart__ = LOADADDR(.ramFuncs);
+  __ramFuncsSize__ = SIZEOF(.ramFuncs);
 
    /* FreeRTOS Kernel in protected region of Flash */
   .kernelTEXT :

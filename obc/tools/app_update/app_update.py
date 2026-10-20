@@ -12,6 +12,8 @@ from interfaces.obc_gs_interface.commands.python import (
     CmdCallbackId,
     CmdResponseErrorCode,
     ProgrammingSession,
+    APP_SLOT_A,
+    APP_SLOT_B,
     pack_command,
 )
 
@@ -21,9 +23,6 @@ from interfaces.obc_gs_interface.commands.python.command_factories import (
     create_cmd_verify_crc,
     create_cmd_enable_boot_app_a,
     create_cmd_enable_boot_app_b,
-    create_cmd_enable_write_app_a,
-    create_cmd_enable_write_app_b,
-    create_cmd_erase_adjacent_app,
 )
 
 from interfaces.obc_gs_interface.commands.python.command_response_callbacks import (
@@ -80,7 +79,7 @@ def write_command(
     ser: Serial,
     command: CmdCallbackId,
     app_data: bytes | None = None,
-    app_starting_address: int = DEFAULT_APP_STARTING_ADDRESS,
+    programming_session: ProgrammingSession | None = None,
     iteration: int | None = None,
     is_last_packet: bool | None = None,
 ) -> bool:
@@ -92,6 +91,16 @@ def write_command(
     :param app_data: The app binary in bytes for the CMD_DOWNLOAD_DATA
     :param iteration: The packet of app being written for CMD_DOWNLOAD_DATA
     """
+
+    # TODO edit to reflect cmake values
+    if programming_session == APP_SLOT_A:
+        app_starting_address = 0x00040000
+    elif programming_session == APP_SLOT_B:
+        app_starting_address = 0x000A0000
+    else:
+        print("Invalid app slot")
+        return
+
     packed_command = b""
     cmd_print_response = False
 
@@ -101,9 +110,9 @@ def write_command(
 
     match command:
         case CmdCallbackId.CMD_ERASE_APP:
-            packed_command = pack_command(create_cmd_erase_app()).ljust(
-                RS_DECODED_DATA_SIZE, b"\x00"
-            )
+            packed_command = pack_command(
+                create_cmd_erase_app(programming_session)
+            ).ljust(RS_DECODED_DATA_SIZE, b"\x00")
         case CmdCallbackId.CMD_DOWNLOAD_DATA:
             if (
                 app_data is not None
@@ -119,25 +128,6 @@ def write_command(
                 raise ValueError(
                     "Data and iteration need to be specified for the write command"
                 )
-        case CmdCallbackId.CMD_DOWNLOAD_ADJACENT_DATA:
-            if (
-                app_data is not None
-                and iteration is not None
-                and is_last_packet is not None
-            ):
-                packed_command = create_app_packet(
-                    iteration, app_data, app_starting_address, is_last_packet
-                )
-                bytes_to_read = RS_DECODED_DATA_SIZE + 1
-                cmd_res_cutoff = 1
-            else:
-                raise ValueError(
-                    "Data and iteration need to be specified for the write command"
-                )
-        case CmdCallbackId.CMD_ERASE_ADJACENT_APP:
-            packed_command = pack_command(create_cmd_erase_adjacent_app()).ljust(
-                RS_DECODED_DATA_SIZE, b"\x00"
-            )
         case CmdCallbackId.CMD_VERIFY_CRC:
             packed_command = pack_command(create_cmd_verify_crc()).ljust(
                 RS_DECODED_DATA_SIZE, b"\x00"
@@ -149,14 +139,6 @@ def write_command(
             )
         case CmdCallbackId.CMD_ENABLE_BOOT_APP_B:
             packed_command = pack_command(create_cmd_enable_boot_app_b()).ljust(
-                RS_DECODED_DATA_SIZE, b"\x00"
-            )
-        case CmdCallbackId.CMD_ENABLE_WRITE_APP_A:
-            packed_command = pack_command(create_cmd_enable_write_app_a()).ljust(
-                RS_DECODED_DATA_SIZE, b"\x00"
-            )
-        case CmdCallbackId.CMD_ENABLE_WRITE_APP_B:
-            packed_command = pack_command(create_cmd_enable_write_app_b()).ljust(
                 RS_DECODED_DATA_SIZE, b"\x00"
             )
         case _:
@@ -245,7 +227,7 @@ def main() -> None:
 
     if len(argv) != 4:
         print(
-            "Three arguments needed: Com Port, Application File Path, and active app slot (A/B)"
+            "Three arguments needed: Com Port, Application File Path, flash app slot (A/B), and active app slot (A/B)"
         )
         return
 
