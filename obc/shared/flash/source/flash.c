@@ -1,8 +1,6 @@
 #include "flash.h"
 #include "flash_config.h"
 #include "flash_errors.h"
-#include "gio.h"
-#include "obc_board_config.h"
 
 #include "reg_rti.h"
 
@@ -162,6 +160,7 @@ bool flashIsStartAddrValid(uint32_t addr, uint32_t binSize) {
 
 void flashWaitFsmReady(void) {
   while (FAPI_CHECK_FSM_READY_BUSY != Fapi_Status_FsmReady) {
+    // TODO: implement an iteration limit so this doesn't hang if the FSM is borked, ie make it safer
     asm(" NOP");
     rtiREG1->WDKEY = 0xE51AU;
     rtiREG1->WDKEY = 0xA35CU;

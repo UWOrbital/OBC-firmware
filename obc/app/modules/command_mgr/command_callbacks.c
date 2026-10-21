@@ -140,12 +140,6 @@ static obc_error_code_t I2CProbeCmdCallback(cmd_msg_t *cmd, uint8_t *responseDat
 static obc_error_code_t obcEraseApp(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   BaseType_t xRunningPrivileged = prvRaisePrivilege();
 
-  memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
-
-  _disable_interrupt_();
-  flashFapiInitBank(RM46_FLASH_BANK);
-  _enable_interrupt_();
-
   if (cmd == NULL || (cmd->downloadData.programmingSession != 0 &&
                       cmd->downloadData.programmingSession != SHORT_ENABLE_APP_MAGIC_NUMBER)) {
     portRESET_PRIVILEGE(xRunningPrivileged);
@@ -173,7 +167,7 @@ static obc_error_code_t obcEraseApp(cmd_msg_t *cmd, uint8_t *responseData, uint8
   if (errCode != FLASH_ERR_CODE_SUCCESS) {
     char obcUartWriteBuffer[OBC_MAX_MSG_SIZE] = {0};
     int32_t obcUartWriteBufferLen =
-        snprintf(obcUartWriteBuffer, OBC_MAX_MSG_SIZE, "Failed to erase, BL error code: %d\r\n", errCode);
+        snprintf(obcUartWriteBuffer, OBC_MAX_MSG_SIZE, "Failed to erase, OBC error code: %d\r\n", errCode);
     if (obcUartWriteBufferLen < 0) {
       uint8_t msgSize = sizeof("Error with processing message buffer length\r\n");
       memcpy(responseData, "Error with processing message buffer length\r\n", msgSize);
@@ -193,12 +187,6 @@ static obc_error_code_t obcEraseApp(cmd_msg_t *cmd, uint8_t *responseData, uint8
 
 static obc_error_code_t obcWriteApp(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   BaseType_t xRunningPrivileged = prvRaisePrivilege();
-
-  memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
-
-  _disable_interrupt_();
-  flashFapiInitBank(RM46_FLASH_BANK);
-  _enable_interrupt_();
 
   if (cmd == NULL || (cmd->downloadData.programmingSession != 0 &&
                       cmd->downloadData.programmingSession != SHORT_ENABLE_APP_MAGIC_NUMBER)) {
@@ -225,7 +213,8 @@ static obc_error_code_t obcWriteApp(cmd_msg_t *cmd, uint8_t *responseData, uint8
     flashHighLim = flashLowLim + APP_SIZE - 0x00000001;
   }
 
-  if (cmd->downloadData.address < flashLowLim || cmd->downloadData.address + cmd->downloadData.length > flashHighLim) {
+  if (cmd->downloadData.address < flashLowLim ||
+      cmd->downloadData.address + cmd->downloadData.length - 1 > flashHighLim) {
     portRESET_PRIVILEGE(xRunningPrivileged);
     return OBC_ERR_CODE_RED_EACCES;
   }
@@ -248,19 +237,15 @@ static obc_error_code_t obcWriteApp(cmd_msg_t *cmd, uint8_t *responseData, uint8
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  // TODO: Figure out why you need to write a byte here before writing
-  sciSend(UART_BL_REG, 1, (uint8_t *)"W");
-
   _disable_interrupt_();
   flash_error_code_t errCode =
       flashFapiBlockWrite(cmd->downloadData.address, (uint32_t)cmd->downloadData.data, cmd->downloadData.length);
   _enable_interrupt_();
 
   if (errCode != FLASH_ERR_CODE_SUCCESS) {
-    gioToggleBit(STATE_MGR_DEBUG_LED_GIO_PORT, STATE_MGR_DEBUG_LED_GIO_BIT);
     char obcUartWriteBuffer[OBC_MAX_MSG_SIZE] = {0};
     int32_t obcUartWriteBufferLen =
-        snprintf(obcUartWriteBuffer, OBC_MAX_MSG_SIZE, "Failed to write, BL error code: %d\r\n", errCode);
+        snprintf(obcUartWriteBuffer, OBC_MAX_MSG_SIZE, "Failed to write, OBC error code: %d\r\n", errCode);
     if (obcUartWriteBufferLen < 0) {
       uint8_t msgSize = sizeof("Error with processing message buffer length\r\n");
       memcpy(responseData, "Error with processing message buffer length\r\n", msgSize);
@@ -277,19 +262,13 @@ static obc_error_code_t obcWriteApp(cmd_msg_t *cmd, uint8_t *responseData, uint8
   return OBC_ERR_CODE_SUCCESS;
 }
 
-// static obc_err_code_t downlinkChallenge(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
+// static obc_error_code_t downlinkChallenge(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
 //   if (cmd == NULL) {
 //     return OBC_ERR_CODE_INVALID_ARG;
 //   }
 
-//   if (app_metadata.enabled_app != SHORT_ENABLE_APP_MAGIC_NUM) {
-//     return OBC_ERR_CODE_RED_EACCES;
-//   }
-
 //   return OBC_ERR_CODE_SUCCESS;
 // }
-
-// static obc_err_code_t uplinkChallenge(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {}
 
 const cmd_info_t cmdsConfig[] = {
     [CMD_END_OF_FRAME] = {NULL, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
@@ -303,7 +282,6 @@ const cmd_info_t cmdsConfig[] = {
     [CMD_I2C_PROBE] = {I2CProbeCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_OBC_ERASE_APP] = {obcEraseApp, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_OBC_WRITE_APP] = {obcWriteApp, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    // [CMD_SET_PROGRAMMING_SESSION] = {obcWriteApp, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
 };
 
 // This function is purely to trick the compiler into thinking we are using the cmdsConfig variable so we avoid the

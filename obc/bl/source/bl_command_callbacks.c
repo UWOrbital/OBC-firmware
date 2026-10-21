@@ -31,20 +31,6 @@ static obc_error_code_t pingCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, u
   return OBC_ERR_CODE_SUCCESS;
 }
 
-static obc_error_code_t setProgrammingSessionCmdCallback(cmd_msg_t *cmd, uint8_t *responseData,
-                                                         uint8_t *responseDataLen) {
-  if (cmd == NULL) {
-    return OBC_ERR_CODE_INVALID_ARG;
-  }
-
-  if (cmd->setProgrammingSession.programmingSession == APP_SLOT_B) {
-    programmingSession = APP_SLOT_B;
-  } else {
-    return OBC_ERR_CODE_CORRUPTED_MSG;
-  }
-  return OBC_ERR_CODE_SUCCESS;
-}
-
 static obc_error_code_t eraseAppCmdCallback(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
   if (cmd == NULL) {
     return OBC_ERR_CODE_INVALID_ARG;
@@ -184,9 +170,7 @@ static obc_error_code_t enableBootAppA(cmd_msg_t *cmd, uint8_t *responseData, ui
 
   replacement_app_flag.app_b_flag = 0;
 
-  blEditAppFlag(replacement_app_flag);
-
-  return OBC_ERR_CODE_SUCCESS;
+  return blEditAppFlag(replacement_app_flag);
 }
 
 static obc_error_code_t enableBootAppB(cmd_msg_t *cmd, uint8_t *responseData, uint8_t *responseDataLen) {
@@ -194,39 +178,16 @@ static obc_error_code_t enableBootAppB(cmd_msg_t *cmd, uint8_t *responseData, ui
     return OBC_ERR_CODE_INVALID_ARG;
   }
 
-  volatile app_flag_t *app_flag_pointer = (app_flag_t *)(APP_FLAG_START_ADDRESS);
-
-  app_flag_t replacement_app_flag = *app_flag_pointer;
+  app_flag_t replacement_app_flag = (app_flag_t) * (app_flag_t *)(APP_FLAG_START_ADDRESS);
 
   replacement_app_flag.app_b_flag = ENABLE_APP_MAGIC_NUM;
 
-  uint32_t length = sizeof(replacement_app_flag);
-
-  flash_error_code_t errCode = flashFapiBlockErase(APP_FLAG_START_ADDRESS, (uint32_t)APP_FLAG_SECTION_SIZE);
-
-  if (errCode != FLASH_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_UNKNOWN;
-  };
-
-  errCode = flashFapiBlockWrite(APP_FLAG_START_ADDRESS, (uint32_t)&replacement_app_flag, length);
-
-  if (errCode != FLASH_ERR_CODE_SUCCESS) {
-    return OBC_ERR_CODE_UNKNOWN;
-  };
-
-  app_flag_t readback = *app_flag_pointer;
-
-  if (memcmp(&readback, &replacement_app_flag, length)) {
-    return OBC_ERR_CODE_UNKNOWN;
-  }
-
-  return OBC_ERR_CODE_SUCCESS;
+  return blEditAppFlag(replacement_app_flag);
 }
 
 const cmd_info_t cmdsConfig[] = {
     [CMD_EXEC_OBC_RESET] = {execObcResetCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_PING] = {pingCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
-    [CMD_SET_PROGRAMMING_SESSION] = {setProgrammingSessionCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_ERASE_APP] = {eraseAppCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_DOWNLOAD_DATA] = {downloadDataCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},
     [CMD_VERIFY_CRC] = {verifyCrcCmdCallback, CMD_POLICY_PROD, CMD_TYPE_NORMAL},

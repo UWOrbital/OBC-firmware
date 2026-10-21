@@ -7,6 +7,7 @@
 #include "state_mgr.h"
 #include "flash.h"
 #include "bl_config.h"
+#include "obc_privilege.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -45,11 +46,18 @@ int main(void) {
   hetInit();
   _enable_interrupt_();
 
+  BaseType_t xRunningPrivileged = prvRaisePrivilege();
+
   // Initialize flash
   memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
-  if (flashFapiInitBank(RM46_FLASH_BANK) != FLASH_ERR_CODE_SUCCESS) {
-    return -1;
-  }
+
+  _disable_interrupt_();
+  flashFapiInitBank(RM46_FLASH_BANK);
+  _enable_interrupt_();
+
+  portRESET_PRIVILEGE(xRunningPrivileged);
+
+  // TODO implement error handling for if the flash init doesn't work.
 
   // Initialize bus mutexes
   initSciMutex();

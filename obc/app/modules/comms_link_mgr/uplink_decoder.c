@@ -225,6 +225,8 @@ static obc_error_code_t decodePacket(packed_ax25_i_frame_t *ax25Data, packed_rs_
   memcpy(aesData->ciphertext, unstuffedPacket.data + AX25_INFO_FIELD_POSITION, RS_DECODED_SIZE);
   aesData->ciphertextLen = RS_DECODED_SIZE;
 
+  // This assumes that the ground waits for a response before continuing, or else overwriting this buffer while
+  // a current write command is being executed can cause corruption.
   static uint8_t decryptedCmdData[RS_DECODED_SIZE];
   interfaceErr = aes128Decrypt(aesData, decryptedCmdData, RS_DECODED_SIZE);
 

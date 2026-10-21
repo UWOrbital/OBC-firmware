@@ -12,8 +12,6 @@ from interfaces.obc_gs_interface.commands.python import (
     CmdCallbackId,
     CmdResponseErrorCode,
     ProgrammingSession,
-    APP_SLOT_A,
-    APP_SLOT_B,
     pack_command,
 )
 
@@ -40,6 +38,7 @@ def create_app_packet(
     packet_number: int,
     app_bin: bytes,
     app_starting_address: int,
+    programming_session: ProgrammingSession,
     is_last_packet: bool = False,
 ) -> bytes:
     """
@@ -54,7 +53,7 @@ def create_app_packet(
     if is_last_packet:
         command_bytes = pack_command(
             create_cmd_download_data(
-                ProgrammingSession.APPLICATION,
+                programming_session,
                 len(app_bin[packet_number * COMMAND_DATA_SIZE :]),
                 app_starting_address + packet_number * COMMAND_DATA_SIZE,
             )
@@ -65,7 +64,7 @@ def create_app_packet(
     else:
         command_bytes = pack_command(
             create_cmd_download_data(
-                ProgrammingSession.APPLICATION,
+                programming_session,
                 COMMAND_DATA_SIZE,
                 app_starting_address + packet_number * COMMAND_DATA_SIZE,
             )
@@ -93,9 +92,9 @@ def write_command(
     """
 
     # TODO edit to reflect cmake values
-    if programming_session == APP_SLOT_A:
+    if programming_session == ProgrammingSession.APP_SLOT_A:
         app_starting_address = 0x00040000
-    elif programming_session == APP_SLOT_B:
+    elif programming_session == ProgrammingSession.APP_SLOT_B:
         app_starting_address = 0x000A0000
     else:
         print("Invalid app slot")
@@ -157,7 +156,9 @@ def write_command(
     return True
 
 
-def send_bin(file_path: str, com_port: str, app_starting_address: int) -> None:
+def send_bin(
+    file_path: str, com_port: str, programming_session: ProgrammingSession
+) -> None:
     """
     Sends .bin file over UART serial port
 
@@ -178,7 +179,9 @@ def send_bin(file_path: str, com_port: str, app_starting_address: int) -> None:
         stopbits=STOPBITS_TWO,
         timeout=15,
     ) as ser:
-        if write_command(ser, CmdCallbackId.CMD_ERASE_APP):
+        if write_command(
+            ser, CmdCallbackId.CMD_ERASE_APP, programming_session=programming_session
+        ):
             print("Erased App")
         else:
             return
@@ -193,7 +196,7 @@ def send_bin(file_path: str, com_port: str, app_starting_address: int) -> None:
                 ser,
                 CmdCallbackId.CMD_DOWNLOAD_DATA,
                 app_bin,
-                app_starting_address,
+                programming_session,
                 i,
                 False,
             ):
@@ -207,7 +210,7 @@ def send_bin(file_path: str, com_port: str, app_starting_address: int) -> None:
             ser,
             CmdCallbackId.CMD_DOWNLOAD_DATA,
             app_bin,
-            app_starting_address,
+            programming_session,
             commands_needed - 1,
             True,
         ):
@@ -225,9 +228,9 @@ def main() -> None:
     A function that initializes the com port and path to update the app
     """
 
-    if len(argv) != 4:
+    if len(argv) != 5:
         print(
-            "Three arguments needed: Com Port, Application File Path, flash app slot (A/B), and active app slot (A/B)"
+            "Four arguments needed: Com Port, Application File Path, active app slot (A/B), and active app slot (A/B)"
         )
         return
 
@@ -249,31 +252,36 @@ def main() -> None:
             timeout=15,
         ) as ser:
             if argv[3] == "A":
-                if not write_command(ser, CmdCallbackId.CMD_ENABLE_BOOT_APP_A):
+                programming_session = ProgrammingSession.APP_SLOT_A
+            elif argv[3] == "B":
+                programming_session = ProgrammingSession.APP_SLOT_B
+            elif argv[3] != "NC":
+                print("Expected A/B/NC for activate app slot, recieved " + argv[3])
+
+            if not argv[3] == "NC":
+                if not write_command(
+                    ser,
+                    CmdCallbackId.CMD_ENABLE_BOOT_APP_A,
+                    programming_session=programming_session,
+                ):
                     print("Failed to activate App A for boot")
                     return
-                print("Successfully set active slot to A")
-            elif argv[3] == "B":
-                if not write_command(ser, CmdCallbackId.CMD_ENABLE_BOOT_APP_B):
-                    print("Failed to activate App B for boot")
-                    return
-                print("Successfully set active slot to B")
-            elif argv[3] != "NC":
-                print(
-                    "Invalid active app slot (Expected A/B/NC, recieved "
-                    + argv[3]
-                    + ")"
-                )
 
-            # Full app update functionality is yet to be implemented
+        if argv[4] == "A":
+            programming_session = ProgrammingSession.APP_SLOT_A
+        elif argv[4] == "B":
+            programming_session = ProgrammingSession.APP_SLOT_B
+        elif argv[4] != "NC":
+            print("Expected A/B/NC for activate app slot, recieved " + argv[3])
 
-            send_bin(str(path), com_port, 0x000A0000)
-
+        if not argv[4] == "NC":
+            if not send_bin(str(path), com_port, programming_session):
+                print("Failed to write app")
+                return
             sleep(5)
 
     except SerialException:
         print("Invalid port entered")
-        return
 
 
 if __name__ == "__main__":

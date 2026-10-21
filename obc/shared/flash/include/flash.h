@@ -20,7 +20,7 @@ flash_error_code_t flashFapiInitBank(uint32_t bankNum) FLASH_ATTR_RAMFUNC_SECTIO
  *
  * @param startAddr Start address of the flash to erase
  * @param size Size of the flash to erase
- * @return error_code_t Error code
+ * @return flash_error_code_t Error code
  * @note Must initialize the bank first
  * @note All sectors with addresses in [startAddr, startAddr + size) will be erased
  */
