@@ -5,6 +5,9 @@
 #include "obc_reset.h"
 #include "obc_scheduler_config.h"
 #include "state_mgr.h"
+#include "flash.h"
+#include "bl_config.h"
+#include "obc_privilege.h"
 
 #include <FreeRTOS.h>
 #include <os_task.h>
@@ -17,6 +20,13 @@
 #include <spi.h>
 #include <can.h>
 #include <het.h>
+
+/* LINKER EXPORTED SYMBOLS */
+extern uint32_t __ramFuncsLoadStart__;
+extern uint32_t __ramFuncsSize__;
+
+extern uint32_t __ramFuncsRunStart__;
+extern uint32_t __ramFuncsRunEnd__;
 
 // This is the stack canary. It should never be overwritten.
 
@@ -35,6 +45,19 @@ int main(void) {
   canInit();
   hetInit();
   _enable_interrupt_();
+
+  BaseType_t xRunningPrivileged = prvRaisePrivilege();
+
+  // Initialize flash
+  memcpy(&__ramFuncsRunStart__, &__ramFuncsLoadStart__, (uint32_t)&__ramFuncsSize__);
+
+  _disable_interrupt_();
+  flashFapiInitBank(RM46_FLASH_BANK);
+  _enable_interrupt_();
+
+  portRESET_PRIVILEGE(xRunningPrivileged);
+
+  // TODO implement error handling for if the flash init doesn't work.
 
   // Initialize bus mutexes
   initSciMutex();
